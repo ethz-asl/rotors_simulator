@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+
+<robot
+  name="pelican"
+  xmlns:xacro="http://ros.org/wiki/xacro"
+>
+  <!-- Properties -->
+  <xacro:property name="pi" value="3.1415926535897931" />
+  <xacro:property name="mass" value="1.477" />
+  <xacro:property name="body_width" value="0.1" />
+  <xacro:property name="body_height" value="0.2" />
+  <xacro:property name="mass_rotor" value="0.01" />
+  <xacro:property name="rotor_offset_side" value="0.15" />
+  <xacro:property name="rotor_offset_top" value="0.05" />
+  <xacro:property name="radius_rotor" value="0.08" />
+  <!-- Property Blocks -->
+  <xacro:property name="body_inertia">
+    <inertia ixx="0.01152" ixy="0.0" ixz="0.0" iyy="0.01152" iyz="0.0" izz="0.0218" />
+  </xacro:property>
+  <xacro:property name="rotor_inertia">
+    <inertia ixx="0.01152" ixy="0.0" ixz="0.0" iyy="0.01152" iyz="0.0" izz="0.0218" />
+  </xacro:property>
+
+  <!-- Included URDF Files -->
+  <xacro:include filename="$(find mav_description)/urdf/multirotor_base.urdf.xacro" />
+
+  <!-- Instantiate multirotor_base_macro once -->
+  <xacro:multirotor_base_macro mass="${mass}" body_width="${body_width}" body_height="${body_height}">
+    <xacro:insert_block name="body_inertia" />
+  </xacro:multirotor_base_macro>
+
+  <!-- Instantiate 4 rotors -->
+  <xacro:rotor suffix="front" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}">
+    <origin xyz="${rotor_offset_side} 0 ${rotor_offset_top}" rpy="0 0 0" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:rotor>
+  <xacro:rotor suffix="left" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}">
+    <origin xyz="0 ${rotor_offset_side} ${rotor_offset_top}" rpy="0 0 0" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:rotor>
+  <xacro:rotor suffix="back" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}">
+    <origin xyz="-${rotor_offset_side} 0 ${rotor_offset_top}" rpy="0 0 0" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:rotor>
+  <xacro:rotor suffix="right" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}">
+    <origin xyz="0 -${rotor_offset_side} ${rotor_offset_top}" rpy="0 0 0" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:rotor>
+
+</robot>

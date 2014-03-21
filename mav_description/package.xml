@@ -1,0 +1,26 @@
+<package>
+
+  <name>mav_description</name>
+  <version>0.0.0</version>
+  <description>The mav_description package provides URDF models of the AscTec multicopters.</description>
+
+  <maintainer email="ffurrer@gmail.com">Fadri Furrer</maintainer>
+  <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
+  <maintainer email="michael.burri@mavt.ethz.ch">Michael Burri</maintainer>
+
+  <license>ASL 2.0</license>
+
+  <!-- <url type="website">http://wiki.ros.org/mav_description</url> -->
+
+  <author email="ffurrer@gmail.com">Fadri Furrer</author>
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Dependencies needed to compile this package. -->
+
+  <!-- Dependencies needed after this package is compiled. -->
+
+  <!-- Dependencies needed only for running tests. -->
+
+</package>
