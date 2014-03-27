@@ -10,17 +10,10 @@
 
   <license>ASL 2.0</license>
 
-  <!-- <url type="website">http://wiki.ros.org/mav_description</url> -->
+  <url type="website">https://github.com/ethz-asl/euroc_simulator/wiki</url>
 
   <author email="ffurrer@gmail.com">Fadri Furrer</author>
 
-  <!-- Dependencies which this package needs to build itself. -->
   <buildtool_depend>catkin</buildtool_depend>
-
-  <!-- Dependencies needed to compile this package. -->
-
-  <!-- Dependencies needed after this package is compiled. -->
-
-  <!-- Dependencies needed only for running tests. -->
 
 </package>
