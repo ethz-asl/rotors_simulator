@@ -51,5 +51,17 @@
         </geometry>
       </collision>
     </link>
+    <gazebo>
+      <plugin name="${suffix}_motor_model" filename="libmav_gazebo_motor_model.so">
+        <jointName>rotor_${suffix}_joint</jointName>
+        <linkName>rotor_${suffix}</linkName>
+        <turningDirection>${direction}</turningDirection>
+        <maxForce>${max_force}</maxForce>
+        <motorConstant>${motor_constant}</motorConstant>
+        <momentConstant>${moment_constant}</momentConstant>
+        <commandTopic>cmd_${suffix}_motor_vel</commandTopic>
+        <motorVelocityTopic>${suffix}_motor_vel</motorVelocityTopic>
+      </plugin>
+    </gazebo>
   </xacro:macro>
 </robot>
