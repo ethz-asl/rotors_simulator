@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<robot name="pelican" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:include filename="$(find mav_description)/urdf/pelican.urdf.xacro" />
+    <!-- <xacro:include filename="$(find mav_gazebo)/urdf/quadrotor_plugins.gazebo.xacro" /> -->
+</robot>
+

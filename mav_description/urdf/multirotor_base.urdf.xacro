@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Main multirotor link -->
+  <xacro:macro name="multirotor_base_macro" params="mass body_width body_height *inertia">
+    <link name="base_link">
+      <inertial>
+        <mass value="${mass}" />  <!-- [kg] -->
+        <origin xyz="0 0 0" />
+        <xacro:insert_block name="inertia" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="${body_width} ${body_width} ${body_height}"/> <!-- [m] [m] [m] -->
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="${body_width} ${body_width} ${body_height}"/> <!-- [m] [m] [m] -->
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <!-- Rotor joint and link -->
+  <xacro:macro name="vertical_rotor" params="suffix direction motor_constant moment_constant parent mass_rotor radius_rotor max_force *origin *inertia">
+    <joint name="rotor_${suffix}_joint" type="continuous">
+      <xacro:insert_block name="origin" />
+      <axis xyz="0 0 1" />
+      <parent link="${parent}"/>
+      <child link="rotor_${suffix}"/>
+    </joint>
+    <link name="rotor_${suffix}">
+      <inertial>
+        <mass value="${mass_rotor}" /> <!-- [kg] -->
+        <xacro:insert_block name="inertia" />
+      </inertial>
+      <visual>
+        <geometry>
+          <cylinder length="0.005" radius="${radius_rotor}"/> <!-- [m] -->
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder length="0.005" radius="${radius_rotor}"/> <!-- [m] -->
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+</robot>

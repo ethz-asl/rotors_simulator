@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+
+<robot
+  name="pelican"
+  xmlns:xacro="http://ros.org/wiki/xacro"
+>
+  <!-- Properties -->
+  <xacro:property name="mass" value="1.477" /> <!-- [kg] -->
+  <xacro:property name="body_width" value="0.1" /> <!-- [m] -->
+  <xacro:property name="body_height" value="0.2" /> <!-- [m] -->
+  <xacro:property name="mass_rotor" value="0.01" /> <!-- [kg] -->
+  <xacro:property name="arm_length" value="0.17" /> <!-- [m] -->
+  <xacro:property name="rotor_offset_top" value="0.05" /> <!-- [m] -->
+  <xacro:property name="radius_rotor" value="0.08" /> <!-- [m] -->
+  <xacro:property name="motor_constant" value="9.9865e-06" /> <!-- [kg·m/s^2] -->
+  <xacro:property name="moment_constant" value="0.016" /> <!-- [m] -->
+  <!-- Property Blocks -->
+  <xacro:property name="body_inertia">
+    <inertia ixx="0.01152" ixy="0.0" ixz="0.0" iyy="0.01152" iyz="0.0" izz="0.0218" /> <!-- [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] -->
+  </xacro:property>
+  <xacro:property name="rotor_inertia">
+    <inertia ixx="0.01152" ixy="0.0" ixz="0.0" iyy="0.01152" iyz="0.0" izz="0.0218" /> <!-- [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] -->
+  </xacro:property>
+
+  <!-- Included URDF Files -->
+  <xacro:include filename="$(find mav_description)/urdf/multirotor_base.urdf.xacro" />
+
+  <!-- Instantiate multirotor_base_macro once -->
+  <xacro:multirotor_base_macro mass="${mass}" body_width="${body_width}" body_height="${body_height}">
+    <xacro:insert_block name="body_inertia" />
+  </xacro:multirotor_base_macro>
+
+  <!-- Instantiate rotors -->
+  <xacro:vertical_rotor suffix="front" direction="ccw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" max_force="1">
+    <origin xyz="${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:vertical_rotor>
+  <xacro:vertical_rotor suffix="left" direction="cw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" max_force="1">
+    <origin xyz="0 ${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:vertical_rotor>
+  <xacro:vertical_rotor suffix="back" direction="ccw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" max_force="1">
+    <origin xyz="-${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:vertical_rotor>
+  <xacro:vertical_rotor suffix="right" direction="cw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" max_force="1">
+    <origin xyz="0 -${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:vertical_rotor>
+
+</robot>
