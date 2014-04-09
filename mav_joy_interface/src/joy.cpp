@@ -1,0 +1,82 @@
+//==============================================================================
+// Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>
+// All rights reserved.
+//
+// TODO(ff): Enter some license
+//==============================================================================
+#include <mav_joy_interface/joy.h>
+
+Joy::Joy() {
+  ros::NodeHandle nh;
+  ros::NodeHandle pnh("~");
+  ctrl_pub_ = nh_.advertise<mav_msgs::ControlAttitudeThrust> ("mav_cmd", 10);
+
+  control_msg_.roll = 0;
+  control_msg_.pitch = 0;
+  control_msg_.yaw_rate = 0;
+  control_msg_.thrust = 0;
+  current_yaw_vel_ = 0;
+
+  pnh.param("axis_roll_", axes_.roll, 0);
+  pnh.param("axis_pitch_", axes_.pitch, 1);
+  pnh.param("axis_thrust_", axes_.thrust, 2);
+
+  pnh.param("axis_direction_roll", axes_.roll_direction, 1);
+  pnh.param("axis_direction_pitch", axes_.pitch_direction, 1);
+  pnh.param("axis_direction_thrust", axes_.thrust_direction, 1);
+
+  pnh.param("max_v_xy", max_.v_xy, 1.0);  // [m/s]
+  pnh.param("max_v_z", max_.v_z, 1.0);  // [m/s]
+  pnh.param("max_roll", max_.roll, 45.0 * M_PI / 180.0);  // [rad]
+  pnh.param("max_pitch", max_.pitch, 45.0 * M_PI / 180.0);  // [rad]
+  pnh.param("max_yaw_rate", max_.rate_yaw, 45.0 * M_PI / 180.0);  // [rad/s]
+
+  pnh.param("v_yaw_step", v_yaw_step_, 0.05);
+
+  pnh.param("button_yaw_left_", buttons_.yaw_left, 3);
+  pnh.param("button_yaw_right_", buttons_.yaw_right, 4);
+  pnh.param("button_ctrl_enable_", buttons_.ctrl_enable, 5);
+  pnh.param("button_ctrl_mode_", buttons_.ctrl_mode, 10);
+  pnh.param("button_takeoff_", buttons_.takeoff, 7);
+  pnh.param("button_land_", buttons_.land, 8);
+
+  namespace_ = nh_.getNamespace();
+  joy_sub_ = nh_.subscribe("joy", 10, &Joy::joyCallback, this);
+}
+bool Joy::setDynParam(const std::string & param_string){}
+
+bool Joy::sendMavCommand(const sensor_msgs::JoyConstPtr & msg){}
+void Joy::stopMav(){
+  control_msg_.roll = 0;
+  control_msg_.pitch = 0;
+  control_msg_.yaw_rate = 0;
+  control_msg_.thrust = 0;
+}
+
+void Joy::joyCallback(const sensor_msgs::JoyConstPtr & msg){
+  current_joy_ = *msg;
+  control_msg_.roll = msg->axes[axes_.roll] * max_.roll * axes_.roll_direction;
+  control_msg_.pitch = msg->axes[axes_.pitch] * max_.pitch * axes_.pitch_direction;
+  if (msg->buttons[buttons_.yaw_left]
+    && current_yaw_vel_ + v_yaw_step_ < max_.rate_yaw)
+    current_yaw_vel_ += v_yaw_step_;
+  else if (msg->buttons[buttons_.yaw_right]
+    && current_yaw_vel_ - v_yaw_step_ > -max_.rate_yaw)
+    current_yaw_vel_ -= v_yaw_step_;
+  control_msg_.yaw_rate = current_yaw_vel_;
+  control_msg_.thrust = msg->axes[axes_.thrust] * max_.v_z * axes_.thrust_direction;
+  publish();
+}
+void Joy::publish(){
+  ctrl_pub_.publish(control_msg_);
+}
+
+int main(int argc, char** argv)
+{
+  ros::init(argc, argv, "mav_joy");
+  Joy joy;
+
+  ros::spin();
+
+  return 0;
+}
