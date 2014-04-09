@@ -25,6 +25,11 @@
         </geometry>
       </collision>
     </link>
+    <gazebo>
+      <plugin name="controller_interface"
+        filename="libmav_gazebo_controller_interface.so">
+      </plugin>
+    </gazebo>
   </xacro:macro>
 
   <!-- Rotor joint and link -->
