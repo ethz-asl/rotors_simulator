@@ -4,10 +4,10 @@
 //
 // TODO(ff): Enter some license
 //==============================================================================
-#ifndef MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
-#define MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
+#ifndef MAV_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H
+#define MAV_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H
 
-#include <mav_model/motor_model.hpp>
+#include <mav_control/controller_factory.h>
 #include <Eigen/Eigen>
 
 #include <ros/ros.h>
@@ -19,55 +19,54 @@
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
 #include <stdio.h>
-#include <std_msgs/Float32.h>
+#include <sensor_msgs/Imu.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <mav_msgs/ControlAttitudeThrust.h>
 
 
 namespace gazebo
 {
-  class GazeboMotorModel : public MotorModel, public ModelPlugin
+  class GazeboControllerInterface : public ModelPlugin
   {
     public:
-      GazeboMotorModel();
-      ~GazeboMotorModel();
+      GazeboControllerInterface();
+      ~GazeboControllerInterface();
 
       void initializeParams();
       void publish();
 
     protected:
-      void calculateMotorVelocity();
       void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
       void OnUpdate(const common::UpdateInfo & /*_info*/);
 
     private:
+      mav_controller_factory::ControllerFactory factory_;
+      std::shared_ptr<ControllerBase> controller_;
       std::string namespace_;
-      std::string joint_name_;
-      std::string link_name_;
       std::string command_topic_;
+      std::string imu_topic_;
+      std::string pose_topic_;
       std::string motor_velocity_topic_;
 
-      int turning_direction_;  // 1: counter clockwise, -1: clockwise
-      double max_force_;
-      double motor_constant_;
-      double moment_constant_;
-
       ros::NodeHandle* node_handle_;
-      ros::Publisher motor_vel_pub_;
+      ros::Publisher motor_cmd_pub_;
       ros::Subscriber cmd_sub_;
+      ros::Subscriber imu_sub_;
+      ros::Subscriber pose_sub_;
 
       // Pointer to the model
       physics::ModelPtr model_;
-      // Pointer to the joint
-      physics::JointPtr joint_;
-      // Pointer to the link
-      physics::LinkPtr link_;
       // Pointer to the update event connection
       event::ConnectionPtr updateConnection_;
 
+      sensor_msgs::Imu imu_;
+
       boost::thread callback_queue_thread_;
       void QueueThread();
-      std_msgs::Float32 turning_velocity_msg_;
-      void velocityCallback(const std_msgs::Float32Ptr& velocity);
+      void ControlCommandCallback(const mav_msgs::ControlAttitudeThrustPtr& input_reference);
+      void ImuCallback(const sensor_msgs::ImuPtr& imu);
+      void PoseCallback(const geometry_msgs::PoseStampedPtr& pose);
   };
 }
 
-#endif // MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
+#endif // MAV_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H

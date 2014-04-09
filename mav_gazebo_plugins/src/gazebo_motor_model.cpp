@@ -94,7 +94,7 @@ namespace gazebo
         boost::bind(&GazeboMotorModel::OnUpdate, this, _1));
 
     cmd_sub_ = node_handle_->subscribe(command_topic_, 1000, &GazeboMotorModel::velocityCallback, this);
-    test_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_topic_, 10);
+    motor_vel_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_topic_, 10);
   }
   
   // Called by the world update start event
@@ -111,7 +111,7 @@ namespace gazebo
   void GazeboMotorModel::calculateMotorVelocity() {
     motor_rot_vel_ = this->joint_->GetVelocity(0);
     turning_velocity_msg_.data = motor_rot_vel_;
-    test_pub_.publish(turning_velocity_msg_);
+    motor_vel_pub_.publish(turning_velocity_msg_);
 
     // Apply a force to the link
     this->link_->AddRelativeForce(
