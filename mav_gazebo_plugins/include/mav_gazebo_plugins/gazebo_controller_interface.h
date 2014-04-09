@@ -22,6 +22,7 @@
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <mav_msgs/ControlAttitudeThrust.h>
+#include <std_msgs/Float32MultiArray.h>
 
 
 namespace gazebo
@@ -37,7 +38,7 @@ namespace gazebo
 
     protected:
       void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
-      void OnUpdate(const common::UpdateInfo & /*_info*/);
+      void OnUpdate(const common::UpdateInfo& /*_info*/);
 
     private:
       mav_controller_factory::ControllerFactory factory_;
@@ -60,6 +61,8 @@ namespace gazebo
       event::ConnectionPtr updateConnection_;
 
       sensor_msgs::Imu imu_;
+
+      std_msgs::Float32MultiArray turning_velocities_msg_;
 
       boost::thread callback_queue_thread_;
       void QueueThread();

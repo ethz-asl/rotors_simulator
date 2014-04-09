@@ -20,6 +20,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <stdio.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/Float32MultiArray.h>
 
 
 namespace gazebo
@@ -44,6 +45,7 @@ namespace gazebo
       std::string link_name_;
       std::string command_topic_;
       std::string motor_velocity_topic_;
+      int motor_number_;
 
       int turning_direction_;  // 1: counter clockwise, -1: clockwise
       double max_force_;
@@ -66,7 +68,7 @@ namespace gazebo
       boost::thread callback_queue_thread_;
       void QueueThread();
       std_msgs::Float32 turning_velocity_msg_;
-      void velocityCallback(const std_msgs::Float32Ptr& velocity);
+      void velocityCallback(const std_msgs::Float32MultiArrayPtr& velocities);
   };
 }
 

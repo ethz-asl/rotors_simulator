@@ -47,11 +47,19 @@ namespace gazebo
     //   gzerr << "[gazebo_motor_model] Please specify a robotNamespace.\n";
     // node_handle_ = new ros::NodeHandle(namespace_);
 
-    // if (_sdf->HasElement("commandTopic")) 
-    //   command_topic_ = _sdf->GetElement("commandTopic")->Get<std::string>();
+    if (_sdf->HasElement("commandTopic"))
+      command_topic_ = _sdf->GetElement("commandTopic")->Get<std::string>();
 
-    // if (_sdf->HasElement("motorVelocityTopic")) 
-    //   motor_velocity_topic_ = _sdf->GetElement("motorVelocityTopic")->Get<std::string>();
+    if (_sdf->HasElement("imuTopic"))
+      imu_topic_ = _sdf->GetElement("imuTopic")->Get<std::string>();
+
+    if (_sdf->HasElement("poseTopic"))
+      pose_topic_ = _sdf->GetElement("poseTopic")->Get<std::string>();
+
+    if (_sdf->HasElement("motorVelocityReferenceTopic")) {
+      motor_velocity_topic_ = _sdf->GetElement(
+        "motorVelocityReferenceTopic")->Get<std::string>();
+    }
 
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
@@ -64,13 +72,19 @@ namespace gazebo
       1000, &GazeboControllerInterface::ImuCallback, this);
     pose_sub_ = node_handle_->subscribe(pose_topic_,
       1000, &GazeboControllerInterface::PoseCallback, this);
-    // motor_cmd_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_topic_, 10);
+    motor_cmd_pub_ = node_handle_->advertise<std_msgs::Float32MultiArray>(
+      motor_velocity_topic_, 10);
   }
-  
+
   // Called by the world update start event
-  void GazeboControllerInterface::OnUpdate(const common::UpdateInfo & /*_info*/)
+  void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/)
   {
     Eigen::VectorXd ref_motor_velocities = controller_->GetMotorVelocities();
+    turning_velocities_msg_.data.clear();
+    for (int i = 0; i < ref_motor_velocities.size(); i++)
+      turning_velocities_msg_.data.push_back(ref_motor_velocities[i]);
+
+    motor_cmd_pub_.publish(turning_velocities_msg_);
   }
 
   void GazeboControllerInterface::ControlCommandCallback(

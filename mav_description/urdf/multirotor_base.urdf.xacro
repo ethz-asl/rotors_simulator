@@ -28,12 +28,16 @@
     <gazebo>
       <plugin name="controller_interface"
         filename="libmav_gazebo_controller_interface.so">
+        <commandTopic>mav_cmd</commandTopic>
+        <imuTopic>imu</imuTopic>
+        <poseTopic>pose</poseTopic>
+        <motorVelocityReferenceTopic>motor_vel_ref</motorVelocityReferenceTopic>
       </plugin>
     </gazebo>
   </xacro:macro>
 
   <!-- Rotor joint and link -->
-  <xacro:macro name="vertical_rotor" params="suffix direction motor_constant moment_constant parent mass_rotor radius_rotor max_force *origin *inertia">
+  <xacro:macro name="vertical_rotor" params="suffix direction motor_constant moment_constant parent mass_rotor radius_rotor max_force motor_number *origin *inertia">
     <joint name="rotor_${suffix}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
@@ -64,7 +68,8 @@
         <maxForce>${max_force}</maxForce>
         <motorConstant>${motor_constant}</motorConstant>
         <momentConstant>${moment_constant}</momentConstant>
-        <commandTopic>cmd_${suffix}_motor_vel</commandTopic>
+        <commandTopic>motor_vel_ref</commandTopic>
+        <motorNumber>${motor_number}</motorNumber>
         <motorVelocityTopic>${suffix}_motor_vel</motorVelocityTopic>
       </plugin>
     </gazebo>

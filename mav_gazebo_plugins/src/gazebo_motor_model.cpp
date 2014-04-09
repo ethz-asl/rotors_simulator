@@ -58,6 +58,11 @@ namespace gazebo
     // Get the pointer to the link
     this->link_ = this->model_->GetLink(link_name_);
 
+    if (_sdf->HasElement("motorNumber")) 
+      motor_number_ = _sdf->GetElement("motorNumber")->Get<int>();
+    else
+      gzerr << "[gazebo_motor_model] Please specify a motorNumber.\n";
+
     if (_sdf->HasElement("turningDirection")) {
       std::string turning_direction = _sdf->GetElement("turningDirection")->Get<std::string>();
       if(turning_direction == "cw")
@@ -103,9 +108,10 @@ namespace gazebo
     calculateMotorVelocity();
   }
 
-  void GazeboMotorModel::velocityCallback(const std_msgs::Float32Ptr& velocity)
+  void GazeboMotorModel::velocityCallback(
+    const std_msgs::Float32MultiArrayPtr& velocities)
   {
-    ref_motor_rot_vel_ = velocity->data;
+    ref_motor_rot_vel_ = velocities->data[motor_number_];
   }
 
   void GazeboMotorModel::calculateMotorVelocity() {
