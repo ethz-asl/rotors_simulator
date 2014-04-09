@@ -8,7 +8,7 @@
 
 namespace gazebo
 {
-  GazeboMotorModel::GazeboMotorModel() : 
+  GazeboMotorModel::GazeboMotorModel() :
     ModelPlugin(), MotorModel(), node_handle_(0) {}
 
   GazeboMotorModel::~GazeboMotorModel() {
@@ -38,20 +38,20 @@ namespace gazebo
       gzerr << "[gazebo_motor_model] Please specify a robotNamespace.\n";
     node_handle_ = new ros::NodeHandle(namespace_);
 
-    if (_sdf->HasElement("commandTopic")) 
+    if (_sdf->HasElement("commandTopic"))
       command_topic_ = _sdf->GetElement("commandTopic")->Get<std::string>();
 
-    if (_sdf->HasElement("motorVelocityTopic")) 
+    if (_sdf->HasElement("motorVelocityTopic"))
       motor_velocity_topic_ = _sdf->GetElement("motorVelocityTopic")->Get<std::string>();
 
-    if (_sdf->HasElement("jointName")) 
+    if (_sdf->HasElement("jointName"))
       joint_name_ = _sdf->GetElement("jointName")->Get<std::string>();
     else
       gzerr << "[gazebo_motor_model] Please specify a jointName.\n";
     // Get the pointer to the joint
     this->joint_ = this->model_->GetJoint(joint_name_);
 
-    if (_sdf->HasElement("linkName")) 
+    if (_sdf->HasElement("linkName"))
       link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
     else
       gzerr << "[gazebo_motor_model] Please specify a linkName.\n";
@@ -68,22 +68,22 @@ namespace gazebo
         gzerr << "[gazebo_motor_model] Please only use 'cw' or 'ccw' as turningDirection.\n";
     }
     else
-      gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'acw').\n";
+      gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'ccw').\n";
     printf("turning direction set to %d\n", turning_direction_);
 
-    if (_sdf->HasElement("maxForce")) 
+    if (_sdf->HasElement("maxForce"))
       max_force_ = _sdf->GetElement("maxForce")->Get<double>();
     else
       gzerr << "[gazebo_motor_model] Please specify a maxForce for the joint.\n";
     // Set the maximumForce on the joint
     this->joint_->SetMaxForce(0, max_force_);
 
-    if (_sdf->HasElement("motorConstant")) 
+    if (_sdf->HasElement("motorConstant"))
       motor_constant_ = _sdf->GetElement("motorConstant")->Get<double>();
     else
       gzerr << "[gazebo_motor_model] Please specify a motorConstant for the motor.\n";
 
-    if (_sdf->HasElement("momentConstant")) 
+    if (_sdf->HasElement("momentConstant"))
       moment_constant_ = _sdf->GetElement("momentConstant")->Get<double>();
     else
       gzerr << "[gazebo_motor_model] Please specify a momentConstant for the motor.\n";
