@@ -21,6 +21,10 @@
 #include <stdio.h>
 #include <std_msgs/Float32.h>
 
+namespace turning_direction {
+  const static int CCW = 1;
+  const static int CW = -1;
+};
 
 namespace gazebo
 {
@@ -36,7 +40,7 @@ namespace gazebo
     protected:
       void calculateMotorVelocity();
       void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
-      void OnUpdate(const common::UpdateInfo & /*_info*/);
+      void OnUpdate(const common::UpdateInfo& /*_info*/);
 
     private:
       std::string namespace_;

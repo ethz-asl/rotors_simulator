@@ -96,9 +96,9 @@ namespace gazebo
     cmd_sub_ = node_handle_->subscribe(command_topic_, 1000, &GazeboMotorModel::velocityCallback, this);
     test_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_topic_, 10);
   }
-  
+
   // Called by the world update start event
-  void GazeboMotorModel::OnUpdate(const common::UpdateInfo & /*_info*/)
+  void GazeboMotorModel::OnUpdate(const common::UpdateInfo& /*_info*/)
   {
     calculateMotorVelocity();
   }
@@ -115,12 +115,12 @@ namespace gazebo
 
     // Apply a force to the link
     this->link_->AddRelativeForce(
-      math::Vector3(0, 0, motor_rot_vel_*motor_rot_vel_*motor_constant_));
-    
+      math::Vector3(0, 0, motor_rot_vel_ * motor_rot_vel_ * motor_constant_));
+
     // Moments
-    this->link_->AddRelativeTorque(math::Vector3(
-      0, 0, turning_direction_*motor_rot_vel_*motor_rot_vel_*motor_constant_*moment_constant_));
-    this->joint_->SetVelocity(0, turning_direction_*ref_motor_rot_vel_);
+    this->link_->AddRelativeTorque(math::Vector3(0, 0, turning_direction_ * 
+      motor_rot_vel_ * motor_rot_vel_ * motor_constant_ * moment_constant_));
+    this->joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_);
   };
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboMotorModel);
