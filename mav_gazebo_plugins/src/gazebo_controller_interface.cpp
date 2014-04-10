@@ -70,7 +70,8 @@ namespace gazebo
   // Called by the world update start event
   void GazeboControllerInterface::OnUpdate(const common::UpdateInfo & /*_info*/)
   {
-    Eigen::VectorXd ref_motor_velocities = controller_->GetMotorVelocities();
+    Eigen::VectorXd ref_rotor_velocities;
+    controller_->CalculateRotorVelocities(&ref_rotor_velocities);
   }
 
   void GazeboControllerInterface::ControlCommandCallback(

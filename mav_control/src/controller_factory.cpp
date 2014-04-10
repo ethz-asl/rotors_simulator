@@ -12,7 +12,7 @@ namespace mav_controller_factory {
         << " requested. Register all controllers before calling this method.";
       return std::shared_ptr<ControllerBase>();
     }
-    return std::shared_ptr<ControllerBase>(it->second->New());
+    return std::shared_ptr<ControllerBase>(it->second->Clone());
   }
 
   bool ControllerFactory::RegisterControllerTypeImpl(std::string& controller_name, 

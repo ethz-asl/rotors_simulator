@@ -1,11 +1,5 @@
 #include <mav_control/controller_base.h>
 
-Eigen::VectorXd ControllerBase::GetMotorVelocities() {
-  UpdateStates();
-  CalculateRefMotorVelocities();
-  return ref_rotor_rot_vels_;
-}
-
 void ControllerBase::SetPosition(Eigen::Vector3d position) {
   position_ = position;
 }
