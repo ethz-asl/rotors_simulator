@@ -84,7 +84,7 @@ void AttitudeController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocit
 
 // Implementation from the T. Lee et al. paper
 // Control of complex maneuvers for a quadrotor UAV using geometric methods on SE(3)
-void AttitudeController::ComputeDesiredAngularAcc(Eigen::Vector3d * angular_acceleration) const {
+void AttitudeController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_acceleration) const {
   assert(angular_acceleration);
 
   Eigen::Matrix3d R = attitude_.toRotationMatrix();
@@ -108,9 +108,10 @@ void AttitudeController::ComputeDesiredAngularAcc(Eigen::Vector3d * angular_acce
 
   Eigen::Vector3d angular_rate_error = angular_rate_ - R_des.transpose() * R * angular_rate_des;
 
-  angular_acceleration = - angle_error.dot(gain_attitude_)
-                         - angular_rate_error.dot(gain_angular_rate_)
-                         + angular_rate_.cross(angular_rate_); // we don't need the inertia matrix here
+
+  *angular_acceleration = -1 * angle_error.cwiseProduct(gain_attitude_)
+                           - angular_rate_error.cwiseProduct(gain_angular_rate_)
+                           + angular_rate_.cross(angular_rate_); // we don't need the inertia matrix here
 
 }
 
