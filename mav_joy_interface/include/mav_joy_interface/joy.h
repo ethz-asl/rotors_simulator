@@ -15,8 +15,7 @@
 #include <geometry_msgs/PoseStamped.h>
 
 
-struct Axes
-{
+struct Axes {
   int roll;
   int pitch;
   int thrust;
@@ -25,8 +24,7 @@ struct Axes
   int thrust_direction;
 };
 
-struct Buttons
-{
+struct Buttons {
   int takeoff;
   int land;
   int ctrl_enable;
@@ -35,49 +33,43 @@ struct Buttons
   int yaw_right;
 };
 
-struct Max
-{
+struct Max {
   double v_xy;
-  double v_z;
   double roll;
   double pitch;
   double rate_yaw;
+  double thrust;
 };
 
-class Joy
-{
+class Joy {
   typedef sensor_msgs::Joy::_buttons_type ButtonType;
 
-private:
-  ros::NodeHandle nh_;
-  ros::Publisher ctrl_pub_;
-  ros::Subscriber joy_sub_;
+  private:
+    ros::NodeHandle nh_;
+    ros::Publisher ctrl_pub_;
+    ros::Subscriber joy_sub_;
 
-  std::string namespace_;
+    std::string namespace_;
 
-  Axes axes_;
-  Buttons buttons_;
+    Axes axes_;
+    Buttons buttons_;
 
-  mav_msgs::ControlAttitudeThrust control_msg_;
-  geometry_msgs::PoseStamped pose_;
-  sensor_msgs::Joy current_joy_;
+    mav_msgs::ControlAttitudeThrust control_msg_;
+    geometry_msgs::PoseStamped pose_;
+    sensor_msgs::Joy current_joy_;
 
-  Max max_;
+    Max max_;
 
-  double current_yaw_vel_;
-  double v_yaw_step_;
+    double current_yaw_vel_;
+    double v_yaw_step_;
 
-  bool setDynParam(const std::string & param_string);
+    void stopMav();
 
-  bool sendMavCommand(const sensor_msgs::JoyConstPtr & msg);
-  void stopMav();
+    void joyCallback(const sensor_msgs::JoyConstPtr& msg);
+    void publish();
 
-  void joyCallback(const sensor_msgs::JoyConstPtr & msg);
-  void publish();
-
-
-public:
-  Joy();
+  public:
+    Joy();
 };
 
 #endif /* MAV_JOY_INTERFACE_JOY_H_ */

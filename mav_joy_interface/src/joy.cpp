@@ -26,12 +26,12 @@ Joy::Joy() {
   pnh.param("axis_direction_thrust", axes_.thrust_direction, 1);
 
   pnh.param("max_v_xy", max_.v_xy, 1.0);  // [m/s]
-  pnh.param("max_v_z", max_.v_z, 1.0);  // [m/s]
   pnh.param("max_roll", max_.roll, 45.0 * M_PI / 180.0);  // [rad]
   pnh.param("max_pitch", max_.pitch, 45.0 * M_PI / 180.0);  // [rad]
   pnh.param("max_yaw_rate", max_.rate_yaw, 45.0 * M_PI / 180.0);  // [rad/s]
+  pnh.param("max_thrust", max_.thrust, 30);  // [N]
 
-  pnh.param("v_yaw_step", v_yaw_step_, 0.05);
+  pnh.param("v_yaw_step", v_yaw_step_, 0.05);  // [rad/s]
 
   pnh.param("button_yaw_left_", buttons_.yaw_left, 3);
   pnh.param("button_yaw_right_", buttons_.yaw_right, 4);
@@ -43,17 +43,15 @@ Joy::Joy() {
   namespace_ = nh_.getNamespace();
   joy_sub_ = nh_.subscribe("joy", 10, &Joy::joyCallback, this);
 }
-bool Joy::setDynParam(const std::string & param_string){}
 
-bool Joy::sendMavCommand(const sensor_msgs::JoyConstPtr & msg){}
-void Joy::stopMav(){
+void Joy::stopMav() {
   control_msg_.roll = 0;
   control_msg_.pitch = 0;
   control_msg_.yaw_rate = 0;
   control_msg_.thrust = 0;
 }
 
-void Joy::joyCallback(const sensor_msgs::JoyConstPtr & msg){
+void Joy::joyCallback(const sensor_msgs::JoyConstPtr& msg) {
   current_joy_ = *msg;
   control_msg_.roll = msg->axes[axes_.roll] * max_.roll * axes_.roll_direction;
   control_msg_.pitch = msg->axes[axes_.pitch] * max_.pitch * axes_.pitch_direction;
@@ -64,15 +62,15 @@ void Joy::joyCallback(const sensor_msgs::JoyConstPtr & msg){
     && current_yaw_vel_ - v_yaw_step_ > -max_.rate_yaw)
     current_yaw_vel_ -= v_yaw_step_;
   control_msg_.yaw_rate = current_yaw_vel_;
-  control_msg_.thrust = msg->axes[axes_.thrust] * max_.v_z * axes_.thrust_direction;
+  control_msg_.thrust = msg->axes[axes_.thrust] * max_.thrust * axes_.thrust_direction;
   publish();
 }
-void Joy::publish(){
+
+void Joy::publish() {
   ctrl_pub_.publish(control_msg_);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   ros::init(argc, argv, "mav_joy");
   Joy joy;
 
