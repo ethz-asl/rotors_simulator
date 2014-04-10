@@ -29,7 +29,7 @@ Joy::Joy() {
   pnh.param("max_roll", max_.roll, 45.0 * M_PI / 180.0);  // [rad]
   pnh.param("max_pitch", max_.pitch, 45.0 * M_PI / 180.0);  // [rad]
   pnh.param("max_yaw_rate", max_.rate_yaw, 45.0 * M_PI / 180.0);  // [rad/s]
-  pnh.param("max_thrust", max_.thrust, 30);  // [N]
+  pnh.param("max_thrust", max_.thrust, 30.0);  // [N]
 
   pnh.param("v_yaw_step", v_yaw_step_, 0.05);  // [rad/s]
 
@@ -62,7 +62,8 @@ void Joy::joyCallback(const sensor_msgs::JoyConstPtr& msg) {
     && current_yaw_vel_ - v_yaw_step_ > -max_.rate_yaw)
     current_yaw_vel_ -= v_yaw_step_;
   control_msg_.yaw_rate = current_yaw_vel_;
-  control_msg_.thrust = msg->axes[axes_.thrust] * max_.thrust * axes_.thrust_direction;
+  control_msg_.thrust = (msg->axes[axes_.thrust] + 1) * max_.thrust/2.0
+    * axes_.thrust_direction;
   publish();
 }
 
