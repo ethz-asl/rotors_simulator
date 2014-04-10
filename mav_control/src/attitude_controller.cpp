@@ -4,6 +4,8 @@
 
 AttitudeController::AttitudeController() {}
 
+AttitudeController::~AttitudeController() {}
+
 std::shared_ptr<ControllerBase> AttitudeController::Clone() {
   std::shared_ptr<ControllerBase> controller = std::make_shared<AttitudeController>();
   return controller;
@@ -116,4 +118,4 @@ void AttitudeController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_accel
 }
 
 
-MAV_CONTROL_REGISTER_CONTROLLER(attitude_controller, AttitudeController);
+MAV_CONTROL_REGISTER_CONTROLLER(AttitudeController);

@@ -1,5 +1,7 @@
 #include <mav_control/controller_base.h>
 
+ControllerBase::~ControllerBase() { }
+
 void ControllerBase::SetPosition(Eigen::Vector3d position) {
   position_ = position;
 }

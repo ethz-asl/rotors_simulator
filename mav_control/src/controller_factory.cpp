@@ -25,19 +25,4 @@ namespace mav_controller_factory {
   bool ControllerFactory::UnregisterControllerTypeImpl(std::string& controller_name) {
     return name_to_controller_.erase(controller_name) == 1;
   }
-  std::shared_ptr<ControllerBase> ControllerFactory::GetNewInstance(
-    std::string controller_name) {
-    return Instance().CreateController(controller_name);
-  }
-  ControllerFactory& ControllerFactory::Instance() {
-    static ControllerFactory factory;
-    return factory;
-  }
-  template<typename ControllerType>
-  bool ControllerFactory::RegisterControllerType(std::string name) {
-    return Instance().RegisterControllerTypeImpl(name,
-      std::make_shared<ControllerType>());
-  }
 }
-
-

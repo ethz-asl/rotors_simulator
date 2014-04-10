@@ -41,7 +41,6 @@ namespace gazebo
       void OnUpdate(const common::UpdateInfo& /*_info*/);
 
     private:
-      mav_controller_factory::ControllerFactory factory_;
       std::shared_ptr<ControllerBase> controller_;
       std::string namespace_;
       std::string command_topic_;
@@ -66,7 +65,7 @@ namespace gazebo
 
       boost::thread callback_queue_thread_;
       void QueueThread();
-      void ControlCommandCallback(const mav_msgs::ControlAttitudeThrustPtr& input_reference);
+      void ControlCommandCallback(const mav_msgs::ControlAttitudeThrustPtr& input_reference_msg);
       void ImuCallback(const sensor_msgs::ImuPtr& imu);
       void PoseCallback(const geometry_msgs::PoseStampedPtr& pose);
   };

@@ -37,15 +37,16 @@ namespace gazebo
     // default params
     namespace_.clear();
     command_topic_ = "command/motor";
+    namespace_ = "todo_ff_";
 
     // get Controller
-    controller_ = factory_.GetNewInstance("attitude_controller");
+    controller_ = mav_controller_factory::ControllerFactory::Instance().CreateController("AttitudeController");
 
     // if (_sdf->HasElement("robotNamespace"))
     //   namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
     // else
     //   gzerr << "[gazebo_motor_model] Please specify a robotNamespace.\n";
-    // node_handle_ = new ros::NodeHandle(namespace_);
+    node_handle_ = new ros::NodeHandle(namespace_);
 
     if (_sdf->HasElement("commandTopic"))
       command_topic_ = _sdf->GetElement("commandTopic")->Get<std::string>();
@@ -74,6 +75,8 @@ namespace gazebo
       1000, &GazeboControllerInterface::PoseCallback, this);
     motor_cmd_pub_ = node_handle_->advertise<std_msgs::Float32MultiArray>(
       motor_velocity_topic_, 10);
+
+    controller_->InitializeParams();
   }
 
   // Called by the world update start event

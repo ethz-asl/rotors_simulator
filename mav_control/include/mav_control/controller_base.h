@@ -13,7 +13,6 @@
 
 class ControllerBase {
   public:
-    // ControllerBase();
     virtual ~ControllerBase();
 
     virtual void InitializeParams() = 0;
