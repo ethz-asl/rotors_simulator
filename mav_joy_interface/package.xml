@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package>
+  <name>mav_joy_interface</name>
+  <version>0.0.0</version>
+  <description>The mav_joy_interface package to control MAVs with a joystick</description>
+
+  <maintainer email="ffurrer@gmail.com">Fadri Furrer</maintainer>
+  <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
+  <maintainer email="michael.burri@mavt.ethz.ch">Michael Burri</maintainer>
+
+  <license>ASL 2.0</license>
+
+  <url type="website">https://github.com/ethz-asl/euroc_simulator/wiki</url>
+
+  <author email="ffurrer@gmail.com">Fadri Furrer</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <!-- Dependencies needed to compile this package. -->
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>mav_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+
+  <!-- Dependencies needed after this package is compiled. -->
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>mav_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+
+</package>
