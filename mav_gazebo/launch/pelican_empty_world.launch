@@ -1,0 +1,6 @@
+<launch>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find mav_gazebo)/worlds/pelican.world"/>
+  </include>
+  <include file="$(find mav_gazebo)/launch/spawn_pelican.launch" />
+</launch>

@@ -1,0 +1,20 @@
+<package>
+
+  <name>mav_model</name>
+  <version>0.0.0</version>
+  <description>The mav_model package provides simple models of the AscTec multicopters and its controllers.</description>
+
+  <maintainer email="ffurrer@gmail.com">Fadri Furrer</maintainer>
+  <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
+  <maintainer email="michael.burri@mavt.ethz.ch">Michael Burri</maintainer>
+
+  <license>ASL 2.0</license>
+
+  <url type="website">https://github.com/ethz-asl/euroc_simulator/wiki</url>
+
+  <author email="ffurrer@gmail.com">Fadri Furrer</author>
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
