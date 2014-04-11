@@ -2,7 +2,7 @@
 
   <name>mav_model</name>
   <version>0.0.0</version>
-  <description>The mav_model package provides simpel models of the AscTec multicopters and its controllers.</description>
+  <description>The mav_model package provides simple models of the AscTec multicopters and its controllers.</description>
 
   <maintainer email="ffurrer@gmail.com">Fadri Furrer</maintainer>
   <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>

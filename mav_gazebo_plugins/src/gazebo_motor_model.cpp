@@ -70,7 +70,7 @@ namespace gazebo
         gzerr << "[gazebo_motor_model] Please only use 'cw' or 'ccw' as turningDirection.\n";
     }
     else
-      gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'acw').\n";
+      gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'ccw').\n";
     printf("turning direction set to %d\n", turning_direction_);
 
     if (_sdf->HasElement("maxRotVelocity"))
