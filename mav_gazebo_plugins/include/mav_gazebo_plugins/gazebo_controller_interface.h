@@ -33,8 +33,8 @@ namespace gazebo
       GazeboControllerInterface();
       ~GazeboControllerInterface();
 
-      void initializeParams();
-      void publish();
+      void InitializeParams();
+      void Publish();
 
     protected:
       void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);

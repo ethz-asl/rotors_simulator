@@ -15,6 +15,9 @@
   <xacro:property name="radius_rotor" value="0.08" /> <!-- [m] -->
   <xacro:property name="motor_constant" value="9.9865e-06" /> <!-- [kg·m/s^2] -->
   <xacro:property name="moment_constant" value="0.016" /> <!-- [m] -->
+  <xacro:property name="time_constant" value="0.0125" /> <!-- [s] -->
+  <xacro:property name="max_rot_velocity" value="838" /> <!-- [rad/s] -->
+
   <!-- Property Blocks -->
   <xacro:property name="body_inertia">
     <inertia ixx="0.01152" ixy="0.0" ixz="0.0" iyy="0.01152" iyz="0.0" izz="0.0218" /> <!-- [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] -->
@@ -32,19 +35,19 @@
   </xacro:multirotor_base_macro>
 
   <!-- Instantiate rotors -->
-  <xacro:vertical_rotor suffix="front" direction="ccw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" max_force="1" motor_number="0">
+  <xacro:vertical_rotor suffix="front" direction="ccw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" time_constant="${time_constant}" max_rot_velocity="${max_rot_velocity}" motor_number="0">
     <origin xyz="${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
-  <xacro:vertical_rotor suffix="left" direction="cw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" max_force="1" motor_number="1">
+  <xacro:vertical_rotor suffix="left" direction="cw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" time_constant="${time_constant}" max_rot_velocity="${max_rot_velocity}" motor_number="1">
     <origin xyz="0 ${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
-  <xacro:vertical_rotor suffix="back" direction="ccw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" max_force="1" motor_number="2">
+  <xacro:vertical_rotor suffix="back" direction="ccw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" time_constant="${time_constant}" max_rot_velocity="${max_rot_velocity}" motor_number="2">
     <origin xyz="-${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
-  <xacro:vertical_rotor suffix="right" direction="cw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" max_force="1" motor_number="3">
+  <xacro:vertical_rotor suffix="right" direction="cw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" time_constant="${time_constant}" max_rot_velocity="${max_rot_velocity}" motor_number="3">
     <origin xyz="0 -${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>

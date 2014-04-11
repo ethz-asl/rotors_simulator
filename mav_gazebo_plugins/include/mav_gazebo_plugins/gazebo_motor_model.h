@@ -22,6 +22,10 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
 
+namespace turning_direction {
+  const static int CCW = 1;
+  const static int CW = -1;
+};
 
 namespace gazebo
 {
@@ -29,13 +33,13 @@ namespace gazebo
   {
     public:
       GazeboMotorModel();
-      ~GazeboMotorModel();
+      virtual ~GazeboMotorModel();
 
-      virtual void initializeParams();
-      virtual void publish();
+      virtual void InitializeParams();
+      virtual void Publish();
 
     protected:
-      void calculateMotorVelocity();
+      virtual void UpdateForcesAndMoments();
       virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
       virtual void OnUpdate(const common::UpdateInfo & /*_info*/);
 
@@ -47,10 +51,14 @@ namespace gazebo
       std::string motor_velocity_topic_;
       int motor_number_;
 
-      int turning_direction_;  // 1: counter clockwise, -1: clockwise
+      int turning_direction_;
       double max_force_;
       double motor_constant_;
       double moment_constant_;
+      double time_constant_;
+      double max_rot_velocity_;
+      double viscous_friction_coefficient_;
+      double inertia_;
 
       ros::NodeHandle* node_handle_;
       ros::Publisher motor_vel_pub_;
@@ -68,7 +76,7 @@ namespace gazebo
       boost::thread callback_queue_thread_;
       void QueueThread();
       std_msgs::Float32 turning_velocity_msg_;
-      void velocityCallback(const std_msgs::Float32MultiArrayPtr& velocities);
+      void VelocityCallback(const std_msgs::Float32MultiArrayPtr& velocities);
   };
 }
 

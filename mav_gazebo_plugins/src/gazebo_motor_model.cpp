@@ -19,11 +19,13 @@ namespace gazebo
     }
   };
 
-  void GazeboMotorModel::initializeParams() {};
-  void GazeboMotorModel::publish() {};
+  void GazeboMotorModel::InitializeParams() {};
+  void GazeboMotorModel::Publish() {
+    turning_velocity_msg_.data = this->joint_->GetVelocity(0);
+    motor_vel_pub_.publish(turning_velocity_msg_);
+  };
 
-  void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
-  {
+  void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     // Store the pointer to the model
     this->model_ = _model;
 
@@ -38,20 +40,20 @@ namespace gazebo
       gzerr << "[gazebo_motor_model] Please specify a robotNamespace.\n";
     node_handle_ = new ros::NodeHandle(namespace_);
 
-    if (_sdf->HasElement("commandTopic")) 
+    if (_sdf->HasElement("commandTopic"))
       command_topic_ = _sdf->GetElement("commandTopic")->Get<std::string>();
 
-    if (_sdf->HasElement("motorVelocityTopic")) 
+    if (_sdf->HasElement("motorVelocityTopic"))
       motor_velocity_topic_ = _sdf->GetElement("motorVelocityTopic")->Get<std::string>();
 
-    if (_sdf->HasElement("jointName")) 
+    if (_sdf->HasElement("jointName"))
       joint_name_ = _sdf->GetElement("jointName")->Get<std::string>();
     else
       gzerr << "[gazebo_motor_model] Please specify a jointName.\n";
     // Get the pointer to the joint
     this->joint_ = this->model_->GetJoint(joint_name_);
 
-    if (_sdf->HasElement("linkName")) 
+    if (_sdf->HasElement("linkName"))
       link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
     else
       gzerr << "[gazebo_motor_model] Please specify a linkName.\n";
@@ -66,29 +68,38 @@ namespace gazebo
     if (_sdf->HasElement("turningDirection")) {
       std::string turning_direction = _sdf->GetElement("turningDirection")->Get<std::string>();
       if(turning_direction == "cw")
-        turning_direction_ = -1;
+        turning_direction_ = turning_direction::CW;
       else if(turning_direction == "ccw")
-        turning_direction_ = 1;
+        turning_direction_ = turning_direction::CCW;
       else
         gzerr << "[gazebo_motor_model] Please only use 'cw' or 'ccw' as turningDirection.\n";
     }
     else
-      gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'acw').\n";
-    printf("turning direction set to %d\n", turning_direction_);
+      gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'ccw').\n";
 
-    if (_sdf->HasElement("maxForce")) 
-      max_force_ = _sdf->GetElement("maxForce")->Get<double>();
+    if (_sdf->HasElement("maxRotVelocity"))
+      max_rot_velocity_ = _sdf->GetElement("maxRotVelocity")->Get<double>();
     else
-      gzerr << "[gazebo_motor_model] Please specify a maxForce for the joint.\n";
+      gzerr << "[gazebo_motor_model] Please specify a maxRotVelocity for the joint.\n";
+
+    if (_sdf->HasElement("timeConstant"))
+      time_constant_ = _sdf->GetElement("timeConstant")->Get<double>();
+    else
+      gzerr << "[gazebo_motor_model] Please specify a timeConstant for the joint.\n";
+
+    inertia_ = link_->GetInertial()->GetIZZ();
+    viscous_friction_coefficient_ = inertia_ / time_constant_;
+    max_force_ = max_rot_velocity_ * viscous_friction_coefficient_;
+
     // Set the maximumForce on the joint
     this->joint_->SetMaxForce(0, max_force_);
 
-    if (_sdf->HasElement("motorConstant")) 
+    if (_sdf->HasElement("motorConstant"))
       motor_constant_ = _sdf->GetElement("motorConstant")->Get<double>();
     else
       gzerr << "[gazebo_motor_model] Please specify a motorConstant for the motor.\n";
 
-    if (_sdf->HasElement("momentConstant")) 
+    if (_sdf->HasElement("momentConstant"))
       moment_constant_ = _sdf->GetElement("momentConstant")->Get<double>();
     else
       gzerr << "[gazebo_motor_model] Please specify a momentConstant for the motor.\n";
@@ -98,35 +109,33 @@ namespace gazebo
     this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(
         boost::bind(&GazeboMotorModel::OnUpdate, this, _1));
 
-    cmd_sub_ = node_handle_->subscribe(command_topic_, 1000, &GazeboMotorModel::velocityCallback, this);
+    cmd_sub_ = node_handle_->subscribe(command_topic_, 1000, &GazeboMotorModel::VelocityCallback, this);
     motor_vel_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_topic_, 10);
   }
-  
+
   // Called by the world update start event
-  void GazeboMotorModel::OnUpdate(const common::UpdateInfo & /*_info*/)
-  {
-    calculateMotorVelocity();
+  void GazeboMotorModel::OnUpdate(const common::UpdateInfo& /*_info*/) {
+    UpdateForcesAndMoments();
+    Publish();
   }
 
-  void GazeboMotorModel::velocityCallback(
+  void GazeboMotorModel::VelocityCallback(
     const std_msgs::Float32MultiArrayPtr& velocities)
   {
     ref_motor_rot_vel_ = velocities->data[motor_number_];
   }
 
-  void GazeboMotorModel::calculateMotorVelocity() {
+  void GazeboMotorModel::UpdateForcesAndMoments() {
     motor_rot_vel_ = this->joint_->GetVelocity(0);
-    turning_velocity_msg_.data = motor_rot_vel_;
-    motor_vel_pub_.publish(turning_velocity_msg_);
 
     // Apply a force to the link
     this->link_->AddRelativeForce(
-      math::Vector3(0, 0, motor_rot_vel_*motor_rot_vel_*motor_constant_));
-    
+      math::Vector3(0, 0, motor_rot_vel_ * motor_rot_vel_ * motor_constant_));
+
     // Moments
-    this->link_->AddRelativeTorque(math::Vector3(
-      0, 0, turning_direction_*motor_rot_vel_*motor_rot_vel_*motor_constant_*moment_constant_));
-    this->joint_->SetVelocity(0, turning_direction_*ref_motor_rot_vel_);
+    this->link_->AddRelativeTorque(math::Vector3(0, 0, turning_direction_ *
+      motor_rot_vel_ * motor_rot_vel_ * motor_constant_ * moment_constant_));
+    this->joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_);
   };
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboMotorModel);
