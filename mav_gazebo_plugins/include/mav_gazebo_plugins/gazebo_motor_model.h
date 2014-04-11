@@ -20,6 +20,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <stdio.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/Float32MultiArray.h>
 
 namespace turning_direction {
   const static int CCW = 1;
@@ -32,15 +33,15 @@ namespace gazebo
   {
     public:
       GazeboMotorModel();
-      ~GazeboMotorModel();
+      virtual ~GazeboMotorModel();
 
-      void initializeParams();
-      void publish();
+      virtual void initializeParams();
+      virtual void publish();
 
     protected:
-      void calculateMotorVelocity();
+      virtual void updateForcesAndMoments();
       void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
-      void OnUpdate(const common::UpdateInfo& /*_info*/);
+      void OnUpdate(const common::UpdateInfo & /*_info*/);
 
     private:
       std::string namespace_;
@@ -48,14 +49,19 @@ namespace gazebo
       std::string link_name_;
       std::string command_topic_;
       std::string motor_velocity_topic_;
+      int motor_number_;
 
-      int turning_direction_;  // 1: counter clockwise, -1: clockwise
+      int turning_direction_;
       double max_force_;
       double motor_constant_;
       double moment_constant_;
+      double time_constant_;
+      double max_rot_velocity_;
+      double viscous_friction_coefficient_;
+      double inertia_;
 
       ros::NodeHandle* node_handle_;
-      ros::Publisher test_pub_;
+      ros::Publisher motor_vel_pub_;
       ros::Subscriber cmd_sub_;
 
       // Pointer to the model

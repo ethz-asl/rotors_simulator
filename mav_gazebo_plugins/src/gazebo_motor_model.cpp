@@ -8,7 +8,7 @@
 
 namespace gazebo
 {
-  GazeboMotorModel::GazeboMotorModel() :
+  GazeboMotorModel::GazeboMotorModel() : 
     ModelPlugin(), MotorModel(), node_handle_(0) {}
 
   GazeboMotorModel::~GazeboMotorModel() {
@@ -20,10 +20,12 @@ namespace gazebo
   };
 
   void GazeboMotorModel::initializeParams() {};
-  void GazeboMotorModel::publish() {};
+  void GazeboMotorModel::publish() {
+    turning_velocity_msg_.data = this->joint_->GetVelocity(0);
+    motor_vel_pub_.publish(turning_velocity_msg_);
+  };
 
-  void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
-  {
+  void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     // Store the pointer to the model
     this->model_ = _model;
 
@@ -61,20 +63,30 @@ namespace gazebo
     if (_sdf->HasElement("turningDirection")) {
       std::string turning_direction = _sdf->GetElement("turningDirection")->Get<std::string>();
       if(turning_direction == "cw")
-        turning_direction_ = -1;
+        turning_direction_ = turning_direction::CW;
       else if(turning_direction == "ccw")
-        turning_direction_ = 1;
+        turning_direction_ = turning_direction::CCW;
       else
         gzerr << "[gazebo_motor_model] Please only use 'cw' or 'ccw' as turningDirection.\n";
     }
     else
-      gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'ccw').\n";
+      gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'acw').\n";
     printf("turning direction set to %d\n", turning_direction_);
 
-    if (_sdf->HasElement("maxForce"))
-      max_force_ = _sdf->GetElement("maxForce")->Get<double>();
+    if (_sdf->HasElement("maxRotVelocity"))
+      max_rot_velocity_ = _sdf->GetElement("maxRotVelocity")->Get<double>();
     else
-      gzerr << "[gazebo_motor_model] Please specify a maxForce for the joint.\n";
+      gzerr << "[gazebo_motor_model] Please specify a maxRotVelocity for the joint.\n";
+
+    if (_sdf->HasElement("timeConstant"))
+      time_constant_ = _sdf->GetElement("timeConstant")->Get<double>();
+    else
+      gzerr << "[gazebo_motor_model] Please specify a timeConstant for the joint.\n";
+
+    inertia_ = link_->GetInertial()->GetIZZ();
+    viscous_friction_coefficient_ = inertia_ / time_constant_;
+    max_force_ = max_rot_velocity_ * viscous_friction_coefficient_;
+
     // Set the maximumForce on the joint
     this->joint_->SetMaxForce(0, max_force_);
 
@@ -94,13 +106,13 @@ namespace gazebo
         boost::bind(&GazeboMotorModel::OnUpdate, this, _1));
 
     cmd_sub_ = node_handle_->subscribe(command_topic_, 1000, &GazeboMotorModel::velocityCallback, this);
-    test_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_topic_, 10);
+    motor_vel_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_topic_, 10);
   }
 
   // Called by the world update start event
-  void GazeboMotorModel::OnUpdate(const common::UpdateInfo& /*_info*/)
-  {
-    calculateMotorVelocity();
+  void GazeboMotorModel::OnUpdate(const common::UpdateInfo& /*_info*/) {
+    updateForcesAndMoments();
+    publish();
   }
 
   void GazeboMotorModel::velocityCallback(const std_msgs::Float32Ptr& velocity)
@@ -108,17 +120,15 @@ namespace gazebo
     ref_motor_rot_vel_ = velocity->data;
   }
 
-  void GazeboMotorModel::calculateMotorVelocity() {
+  void GazeboMotorModel::updateForcesAndMoments() {
     motor_rot_vel_ = this->joint_->GetVelocity(0);
-    turning_velocity_msg_.data = motor_rot_vel_;
-    test_pub_.publish(turning_velocity_msg_);
 
     // Apply a force to the link
     this->link_->AddRelativeForce(
       math::Vector3(0, 0, motor_rot_vel_ * motor_rot_vel_ * motor_constant_));
 
     // Moments
-    this->link_->AddRelativeTorque(math::Vector3(0, 0, turning_direction_ * 
+    this->link_->AddRelativeTorque(math::Vector3(0, 0, turning_direction_ *
       motor_rot_vel_ * motor_rot_vel_ * motor_constant_ * moment_constant_));
     this->joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_);
   };

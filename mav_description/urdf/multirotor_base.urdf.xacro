@@ -28,7 +28,7 @@
   </xacro:macro>
 
   <!-- Rotor joint and link -->
-  <xacro:macro name="vertical_rotor" params="suffix direction motor_constant moment_constant parent mass_rotor radius_rotor max_force *origin *inertia">
+  <xacro:macro name="vertical_rotor" params="suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant max_rot_velocity *origin *inertia">
     <joint name="rotor_${suffix}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
@@ -56,7 +56,8 @@
         <jointName>rotor_${suffix}_joint</jointName>
         <linkName>rotor_${suffix}</linkName>
         <turningDirection>${direction}</turningDirection>
-        <maxForce>${max_force}</maxForce>
+        <timeConstant>${time_constant}</timeConstant>
+        <maxRotVelocity>${max_rot_velocity}</maxRotVelocity>
         <motorConstant>${motor_constant}</motorConstant>
         <momentConstant>${moment_constant}</momentConstant>
         <commandTopic>cmd_${suffix}_motor_vel</commandTopic>
