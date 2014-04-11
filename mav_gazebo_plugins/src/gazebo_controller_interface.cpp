@@ -66,20 +66,19 @@ namespace gazebo
       10, &GazeboControllerInterface::ImuCallback, this);
     pose_sub_ = node_handle_->subscribe(pose_topic_,
       10, &GazeboControllerInterface::PoseCallback, this);
-    motor_cmd_pub_ = node_handle_->advertise<std_msgs::Float32MultiArray>(
+    motor_cmd_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(
       motor_velocity_topic_, 10);
   }
 
   // Called by the world update start event
   void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/)
   {
-
     Eigen::VectorXd ref_rotor_velocities;
     controller_->CalculateRotorVelocities(&ref_rotor_velocities);
 
-    turning_velocities_msg_.data.clear();
+    turning_velocities_msg_.motor_speed.clear();
     for (int i = 0; i < ref_rotor_velocities.size(); i++)
-      turning_velocities_msg_.data.push_back(ref_rotor_velocities[i]);
+      turning_velocities_msg_.motor_speed.push_back(ref_rotor_velocities[i]);
 
     motor_cmd_pub_.publish(turning_velocities_msg_);
   }
@@ -99,7 +98,7 @@ namespace gazebo
     const sensor_msgs::ImuPtr& imu_msg)
   {
     Eigen::Vector3d angular_rate (
-      imu_msg->angular_velocity.x,
+      -imu_msg->angular_velocity.x,
       imu_msg->angular_velocity.y,
       imu_msg->angular_velocity.z);
     controller_->SetAngularRate(angular_rate);

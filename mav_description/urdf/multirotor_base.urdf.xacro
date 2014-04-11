@@ -47,9 +47,23 @@
     <joint name="rotor_${suffix}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
+      <!-- TODO(ff): not currently set -->
+      <!-- <limit effort="2000" velocity="${max_rot_velocity}" /> -->
       <parent link="${parent}"/>
       <child link="rotor_${suffix}"/>
+
     </joint>
+    <!-- TODO(ff): not currently set -->
+    <!-- <gazebo reference="rotor_${suffix}_joint">
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <velocity>
+            ${max_rot_velocity}
+          </velocity>
+        </limit>
+      </axis>
+    </gazebo> -->
     <link name="rotor_${suffix}">
       <inertial>
         <mass value="${mass_rotor}" /> <!-- [kg] -->
@@ -75,7 +89,7 @@
         <maxRotVelocity>${max_rot_velocity}</maxRotVelocity>
         <motorConstant>${motor_constant}</motorConstant>
         <momentConstant>${moment_constant}</momentConstant>
-        <commandTopic>motor_vel_ref</commandTopic>
+        <commandTopic>pelican/motor_vel_ref</commandTopic>
         <motorNumber>${motor_number}</motorNumber>
         <motorVelocityTopic>${suffix}_motor_vel</motorVelocityTopic>
       </plugin>

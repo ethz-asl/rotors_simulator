@@ -20,7 +20,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <stdio.h>
 #include <std_msgs/Float32.h>
-#include <std_msgs/Float32MultiArray.h>
+#include <mav_msgs/MotorSpeed.h>
 
 namespace turning_direction {
   const static int CCW = 1;
@@ -76,7 +76,7 @@ namespace gazebo
       boost::thread callback_queue_thread_;
       void QueueThread();
       std_msgs::Float32 turning_velocity_msg_;
-      void VelocityCallback(const std_msgs::Float32MultiArrayPtr& velocities);
+      void VelocityCallback(const mav_msgs::MotorSpeedPtr& rot_velocities);
   };
 }
 

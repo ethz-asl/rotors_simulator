@@ -28,7 +28,6 @@ class ControllerBase {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   protected:
-//    virtual void UpdateStates() = 0;
     Eigen::Vector3d position_;
     Eigen::Vector3d velocity_;
     Eigen::Quaternion<double> attitude_;

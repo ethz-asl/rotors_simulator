@@ -29,19 +29,19 @@ void AttitudeController::InitializeParams() {
   // to make the tuning independent of the inertia matrix we divide here
   gain_attitude_ = gain_attitude_.transpose() * inertia_matrix_.inverse();
 
-  gain_angular_rate_(0) = 0.1;
-  gain_angular_rate_(1) = 0.1;
+  gain_angular_rate_(0) = 0.01;
+  gain_angular_rate_(1) = 0.01;
   gain_angular_rate_(2) = 0.025;
   // to make the tuning independent of the inertia matrix we divide here
   gain_angular_rate_ = gain_angular_rate_.transpose() * inertia_matrix_.inverse();
 
   const double mass = 0.6;
-  const double motor_force_constant = 9.98e-6; //F_i = k_n * rotor_velocity_i^2
+  const double motor_force_constant = 9.9865e-6; //F_i = k_n * rotor_velocity_i^2
   const double motor_moment_constant = 0.016; // M_i = k_m * F_i
 
   angular_acc_to_rotor_velocities_.resize(4, amount_rotors_);
 
-  const double arm_length = 0.3;
+  const double arm_length = 0.17;
 
   Eigen::Matrix4d K;
   K.setZero();
@@ -56,7 +56,7 @@ void AttitudeController::InitializeParams() {
   I(3,3) = mass;
 
   angular_acc_to_rotor_velocities_ = allocation_matrix_.inverse() * K.inverse() * I;
-
+  std::cout<<"angular_acc_to_rotor_velocities_\n"<<angular_acc_to_rotor_velocities_<<std::endl;
   initialized_params_ = true;
 }
 
@@ -74,6 +74,8 @@ void AttitudeController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocit
   angular_acceleration_thrust(3) = control_attitude_thrust_reference_(3);
 
   *rotor_velocities = angular_acc_to_rotor_velocities_ * angular_acceleration_thrust;
+  *rotor_velocities = rotor_velocities->cwiseMax(1);
+  *rotor_velocities = rotor_velocities->cwiseSqrt();
 }
 
 // Implementation from the T. Lee et al. paper
@@ -99,6 +101,7 @@ void AttitudeController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_accel
 
   // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
+  angular_rate_des[2] = control_attitude_thrust_reference_(2);
 
   Eigen::Vector3d angular_rate_error = angular_rate_ - R_des.transpose() * R * angular_rate_des;
 

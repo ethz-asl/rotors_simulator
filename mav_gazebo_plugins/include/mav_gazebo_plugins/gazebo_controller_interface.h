@@ -22,7 +22,7 @@
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <mav_msgs/ControlAttitudeThrust.h>
-#include <std_msgs/Float32MultiArray.h>
+#include <mav_msgs/MotorSpeed.h>
 
 
 namespace gazebo
@@ -61,7 +61,7 @@ namespace gazebo
 
       sensor_msgs::Imu imu_;
 
-      std_msgs::Float32MultiArray turning_velocities_msg_;
+      mav_msgs::MotorSpeed turning_velocities_msg_;
 
       boost::thread callback_queue_thread_;
       void QueueThread();
