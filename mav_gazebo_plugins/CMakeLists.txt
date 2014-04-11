@@ -29,3 +29,5 @@ add_library(mav_gazebo_motor_model src/gazebo_motor_model.cpp)
 
 add_library(mav_gazebo_controller_interface src/gazebo_controller_interface.cpp)
 target_link_libraries(mav_gazebo_controller_interface ${catkin_LIBRARIES})
+add_dependencies(
+  mav_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})

@@ -10,9 +10,6 @@ class AttitudeController : public ControllerBase {
     virtual std::shared_ptr<ControllerBase> Clone();
     virtual void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const;
 
-  protected:
-    virtual void UpdateStates();
-
   private:
     Eigen::Matrix4Xd allocation_matrix_;
     Eigen::Matrix4Xd angular_acc_to_rotor_velocities_;

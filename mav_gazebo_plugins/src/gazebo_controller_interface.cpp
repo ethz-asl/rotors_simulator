@@ -19,13 +19,6 @@ namespace gazebo
     }
   };
 
-  // void GazeboControllerInterface::UpdateStates() {
-  //   position_ = control_input_.position;
-  //   velocity_ = control_input_.velocity;
-  //   omega_ = control_input_.omega;
-  //   attitude_ = control_input_.attitude;
-  // }
-
   // void GazeboControllerInterface::InitializeParams() {};
   // void GazeboControllerInterface::Publish() {};
 
@@ -37,15 +30,11 @@ namespace gazebo
     // default params
     namespace_.clear();
     command_topic_ = "command/motor";
-    namespace_ = "todo_ff_";
 
-    // get Controller
-    controller_ = mav_controller_factory::ControllerFactory::Instance().CreateController("AttitudeController");
-
-    // if (_sdf->HasElement("robotNamespace"))
-    //   namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
-    // else
-    //   gzerr << "[gazebo_motor_model] Please specify a robotNamespace.\n";
+    if (_sdf->HasElement("robotNamespace"))
+      namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
+    else
+      gzerr << "[gazebo_motor_model] Please specify a robotNamespace.\n";
     node_handle_ = new ros::NodeHandle(namespace_);
 
     if (_sdf->HasElement("commandTopic"))
@@ -62,21 +51,23 @@ namespace gazebo
         "motorVelocityReferenceTopic")->Get<std::string>();
     }
 
+    // Get the controller and initialize its parameters.
+    controller_ = mav_controller_factory::ControllerFactory::Instance().CreateController("AttitudeController");
+    controller_->InitializeParams();
+
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
     this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(
         boost::bind(&GazeboControllerInterface::OnUpdate, this, _1));
 
     cmd_sub_ = node_handle_->subscribe(command_topic_,
-      1000, &GazeboControllerInterface::ControlCommandCallback, this);
+      10, &GazeboControllerInterface::ControlCommandCallback, this);
     imu_sub_ = node_handle_->subscribe(imu_topic_,
-      1000, &GazeboControllerInterface::ImuCallback, this);
+      10, &GazeboControllerInterface::ImuCallback, this);
     pose_sub_ = node_handle_->subscribe(pose_topic_,
-      1000, &GazeboControllerInterface::PoseCallback, this);
+      10, &GazeboControllerInterface::PoseCallback, this);
     motor_cmd_pub_ = node_handle_->advertise<std_msgs::Float32MultiArray>(
       motor_velocity_topic_, 10);
-
-    controller_->InitializeParams();
   }
 
   // Called by the world update start event
@@ -107,11 +98,11 @@ namespace gazebo
   void GazeboControllerInterface::ImuCallback(
     const sensor_msgs::ImuPtr& imu_msg)
   {
-    Eigen::Vector3d velocity (
+    Eigen::Vector3d angular_rate (
       imu_msg->angular_velocity.x,
       imu_msg->angular_velocity.y,
       imu_msg->angular_velocity.z);
-    controller_->SetVelocity(velocity);
+    controller_->SetAngularRate(angular_rate);
     // imu->linear_acceleration;
   }
 

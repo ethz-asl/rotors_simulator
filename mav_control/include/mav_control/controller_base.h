@@ -13,6 +13,7 @@
 
 class ControllerBase {
   public:
+    ControllerBase();
     virtual ~ControllerBase();
 
     virtual void InitializeParams() = 0;
@@ -32,10 +33,9 @@ class ControllerBase {
     Eigen::Vector3d velocity_;
     Eigen::Quaternion<double> attitude_;
     Eigen::Vector3d angular_rate_;
-    Eigen::VectorXd ref_rotor_rot_vels_;
-    // Eigen::VectorXd control_input_;
     Eigen::Vector4d control_attitude_thrust_reference_;
     int amount_rotors_;
+    bool initialized_params_;
 };
 
 

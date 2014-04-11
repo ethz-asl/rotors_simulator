@@ -12,7 +12,6 @@ std::shared_ptr<ControllerBase> AttitudeController::Clone() {
 }
 
 void AttitudeController::InitializeParams() {
-  std::cout<<"initializing\n";
   amount_rotors_ = 4;
   allocation_matrix_.resize(4,amount_rotors_);
   allocation_matrix_ << 0,  1,  0, -1,
@@ -58,18 +57,12 @@ void AttitudeController::InitializeParams() {
 
   angular_acc_to_rotor_velocities_ = allocation_matrix_.inverse() * K.inverse() * I;
 
-}
-
-void AttitudeController::UpdateStates() {
-  // request updated states from system
-  // position_ = ;
-  // velocity_ = ;
-  // attitude_ = ;
-  // omega_ = ;
+  initialized_params_ = true;
 }
 
 void AttitudeController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const {
   assert(rotor_velocities);
+  assert(initialized_params_);
 
   rotor_velocities->resize(amount_rotors_);
 
@@ -81,7 +74,6 @@ void AttitudeController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocit
   angular_acceleration_thrust(3) = control_attitude_thrust_reference_(3);
 
   *rotor_velocities = angular_acc_to_rotor_velocities_ * angular_acceleration_thrust;
-
 }
 
 // Implementation from the T. Lee et al. paper
@@ -99,7 +91,7 @@ void AttitudeController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_accel
     * Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ());
 
   // angle error according to lee et al.
-  Eigen::Matrix3d angle_error_matrix = 0.5*(R_des.transpose() * R + R.transpose() * R_des);
+  Eigen::Matrix3d angle_error_matrix = 0.5*(R_des.transpose() * R - R.transpose() * R_des);
   Eigen::Vector3d angle_error;
   angle_error << angle_error_matrix(2,1), // inverse skew operator
                  angle_error_matrix(0,2),
@@ -110,11 +102,9 @@ void AttitudeController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_accel
 
   Eigen::Vector3d angular_rate_error = angular_rate_ - R_des.transpose() * R * angular_rate_des;
 
-
   *angular_acceleration = -1 * angle_error.cwiseProduct(gain_attitude_)
                            - angular_rate_error.cwiseProduct(gain_angular_rate_)
                            + angular_rate_.cross(angular_rate_); // we don't need the inertia matrix here
-
 }
 
 

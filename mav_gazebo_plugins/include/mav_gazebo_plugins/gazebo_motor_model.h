@@ -31,13 +31,13 @@ namespace gazebo
       GazeboMotorModel();
       ~GazeboMotorModel();
 
-      void initializeParams();
-      void publish();
+      virtual void initializeParams();
+      virtual void publish();
 
     protected:
       void calculateMotorVelocity();
-      void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
-      void OnUpdate(const common::UpdateInfo & /*_info*/);
+      virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+      virtual void OnUpdate(const common::UpdateInfo & /*_info*/);
 
     private:
       std::string namespace_;
