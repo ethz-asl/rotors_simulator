@@ -5,6 +5,7 @@
   xmlns:xacro="http://ros.org/wiki/xacro"
 >
   <!-- Properties -->
+  <xacro:property name="namespace" value="pelican" />
   <xacro:property name="mass" value="1.477" /> <!-- [kg] -->
   <xacro:property name="body_width" value="0.1" /> <!-- [m] -->
   <xacro:property name="body_height" value="0.2" /> <!-- [m] -->
@@ -26,7 +27,7 @@
   <xacro:include filename="$(find mav_description)/urdf/multirotor_base.urdf.xacro" />
 
   <!-- Instantiate multirotor_base_macro once -->
-  <xacro:multirotor_base_macro mass="${mass}" body_width="${body_width}" body_height="${body_height}">
+  <xacro:multirotor_base_macro robot_namespace="${namespace}" mass="${mass}" body_width="${body_width}" body_height="${body_height}">
     <xacro:insert_block name="body_inertia" />
   </xacro:multirotor_base_macro>
 

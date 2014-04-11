@@ -3,7 +3,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- Main multirotor link -->
-  <xacro:macro name="multirotor_base_macro" params="mass body_width body_height *inertia">
+  <xacro:macro name="multirotor_base_macro" params="robot_namespace mass body_width body_height *inertia">
     <link name="base_link">
       <inertial>
         <mass value="${mass}" />  <!-- [kg] -->
@@ -28,10 +28,16 @@
     <gazebo>
       <plugin name="controller_interface"
         filename="libmav_gazebo_controller_interface.so">
+        <robotNamespace>${robot_namespace}</robotNamespace>
         <commandTopic>mav_cmd</commandTopic>
         <imuTopic>imu</imuTopic>
         <poseTopic>pose</poseTopic>
         <motorVelocityReferenceTopic>motor_vel_ref</motorVelocityReferenceTopic>
+      </plugin>
+      <plugin filename="libgazebo_ros_imu.so" name="imu_ros">
+        <bodyName>base_link</bodyName>
+        <robotNamespace>${robot_namespace}</robotNamespace>
+        <topicName>imu</topicName>
       </plugin>
     </gazebo>
   </xacro:macro>
