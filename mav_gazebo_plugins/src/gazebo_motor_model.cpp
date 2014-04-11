@@ -71,7 +71,6 @@ namespace gazebo
     }
     else
       gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'ccw').\n";
-    printf("turning direction set to %d\n", turning_direction_);
 
     if (_sdf->HasElement("maxRotVelocity"))
       max_rot_velocity_ = _sdf->GetElement("maxRotVelocity")->Get<double>();
