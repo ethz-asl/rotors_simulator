@@ -43,17 +43,17 @@
   </xacro:macro>
 
   <!-- Rotor joint and link -->
-  <xacro:macro name="vertical_rotor" params="suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant max_rot_velocity motor_number *origin *inertia">
+  <xacro:macro name="vertical_rotor" params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant max_rot_velocity motor_number *origin *inertia">
     <joint name="rotor_${suffix}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
-      <!-- TODO(ff): not currently set -->
+      <!-- TODO(ff): not currently set because it's not yet supported -->
       <!-- <limit effort="2000" velocity="${max_rot_velocity}" /> -->
       <parent link="${parent}"/>
       <child link="rotor_${suffix}"/>
 
     </joint>
-    <!-- TODO(ff): not currently set -->
+    <!-- TODO(ff): not currently set because it's not yet supported -->
     <!-- <gazebo reference="rotor_${suffix}_joint">
       <axis>
         <xyz>0 0 1</xyz>
@@ -89,9 +89,9 @@
         <maxRotVelocity>${max_rot_velocity}</maxRotVelocity>
         <motorConstant>${motor_constant}</motorConstant>
         <momentConstant>${moment_constant}</momentConstant>
-        <commandTopic>pelican/motor_vel_ref</commandTopic>
+        <commandTopic>${robot_namespace}/motor_vel_ref</commandTopic>
         <motorNumber>${motor_number}</motorNumber>
-        <motorVelocityTopic>${suffix}_motor_vel</motorVelocityTopic>
+        <motorVelocityTopic>${robot_namespace}/${suffix}_motor_vel</motorVelocityTopic>
       </plugin>
     </gazebo>
   </xacro:macro>

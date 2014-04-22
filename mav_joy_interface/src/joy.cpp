@@ -9,7 +9,7 @@
 Joy::Joy() {
   ros::NodeHandle nh;
   ros::NodeHandle pnh("~");
-  ctrl_pub_ = nh_.advertise<mav_msgs::ControlAttitudeThrust> ("/pelican/mav_cmd", 10);
+  ctrl_pub_ = nh_.advertise<mav_msgs::ControlAttitudeThrust> ("mav_cmd", 10);
 
   control_msg_.roll = 0;
   control_msg_.pitch = 0;
@@ -26,9 +26,9 @@ Joy::Joy() {
   pnh.param("axis_direction_thrust", axes_.thrust_direction, 1);
 
   pnh.param("max_v_xy", max_.v_xy, 1.0);  // [m/s]
-  pnh.param("max_roll", max_.roll, 45.0 * M_PI / 180.0);  // [rad]
-  pnh.param("max_pitch", max_.pitch, 45.0 * M_PI / 180.0);  // [rad]
-  pnh.param("max_yaw_rate", max_.rate_yaw, 45.0 * M_PI / 180.0);  // [rad/s]
+  pnh.param("max_roll", max_.roll, 10.0 * M_PI / 180.0);  // [rad]
+  pnh.param("max_pitch", max_.pitch, 10.0 * M_PI / 180.0);  // [rad]
+  pnh.param("max_yaw_rate", max_.rate_yaw, 10.0 * M_PI / 180.0);  // [rad/s]
   pnh.param("max_thrust", max_.thrust, 30.0);  // [N]
 
   pnh.param("v_yaw_step", v_yaw_step_, 0.05);  // [rad/s]

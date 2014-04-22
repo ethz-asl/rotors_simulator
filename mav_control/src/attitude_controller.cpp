@@ -56,7 +56,6 @@ void AttitudeController::InitializeParams() {
   I(3,3) = mass;
 
   angular_acc_to_rotor_velocities_ = allocation_matrix_.inverse() * K.inverse() * I;
-  std::cout<<"angular_acc_to_rotor_velocities_\n"<<angular_acc_to_rotor_velocities_<<std::endl;
   initialized_params_ = true;
 }
 
