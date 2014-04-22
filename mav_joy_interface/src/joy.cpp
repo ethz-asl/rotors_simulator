@@ -21,7 +21,7 @@ Joy::Joy() {
   pnh.param("axis_pitch_", axes_.pitch, 1);
   pnh.param("axis_thrust_", axes_.thrust, 2);
 
-  pnh.param("axis_direction_roll", axes_.roll_direction, 1);
+  pnh.param("axis_direction_roll", axes_.roll_direction, -1);
   pnh.param("axis_direction_pitch", axes_.pitch_direction, 1);
   pnh.param("axis_direction_thrust", axes_.thrust_direction, 1);
 
@@ -64,6 +64,9 @@ void Joy::JoyCallback(const sensor_msgs::JoyConstPtr& msg) {
   control_msg_.yaw_rate = current_yaw_vel_;
   control_msg_.thrust = (msg->axes[axes_.thrust] + 1) * max_.thrust/2.0
     * axes_.thrust_direction;
+  ros::Time update_time = ros::Time::now();
+  control_msg_.header.stamp = update_time;
+  control_msg_.header.frame_id = "mav_joy_frame";
   Publish();
 }
 

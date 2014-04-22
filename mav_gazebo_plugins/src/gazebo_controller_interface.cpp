@@ -98,7 +98,7 @@ namespace gazebo
     const sensor_msgs::ImuPtr& imu_msg)
   {
     Eigen::Vector3d angular_rate (
-      -imu_msg->angular_velocity.x,
+      imu_msg->angular_velocity.x,
       imu_msg->angular_velocity.y,
       imu_msg->angular_velocity.z);
     controller_->SetAngularRate(angular_rate);

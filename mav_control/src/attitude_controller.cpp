@@ -29,8 +29,8 @@ void AttitudeController::InitializeParams() {
   // to make the tuning independent of the inertia matrix we divide here
   gain_attitude_ = gain_attitude_.transpose() * inertia_matrix_.inverse();
 
-  gain_angular_rate_(0) = 0.01;
-  gain_angular_rate_(1) = 0.01;
+  gain_angular_rate_(0) = 0.1;
+  gain_angular_rate_(1) = 0.1;
   gain_angular_rate_(2) = 0.025;
   // to make the tuning independent of the inertia matrix we divide here
   gain_angular_rate_ = gain_angular_rate_.transpose() * inertia_matrix_.inverse();
@@ -53,7 +53,7 @@ void AttitudeController::InitializeParams() {
   Eigen::Matrix4d I;
   I.setZero();
   I.block<3,3>(0, 0) = inertia_matrix_;
-  I(3,3) = mass;
+  I(3,3) = 1;
 
   angular_acc_to_rotor_velocities_ = allocation_matrix_.inverse() * K.inverse() * I;
   initialized_params_ = true;

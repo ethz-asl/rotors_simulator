@@ -1,11 +1,16 @@
 <?xml version="1.0" ?>
 <sdf version="1.4">
-    <world name="default">
-        <include>
-            <uri>model://ground_plane</uri>
-        </include>
-        <include>
-            <uri>model://sun</uri>
-        </include>
-    </world>
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <physics update_rate="-1" type="ode">
+      <ode>
+        <solver type="quick" dt="0.01" />
+      </ode>
+    </physics>
+  </world>
 </sdf>
