@@ -52,7 +52,8 @@ namespace gazebo
     }
 
     // Get the controller and initialize its parameters.
-    controller_ = mav_controller_factory::ControllerFactory::Instance().CreateController("AttitudeController");
+    controller_ = mav_controller_factory::ControllerFactory::Instance()
+      .CreateController("AttitudeController");
     controller_->InitializeParams();
 
     // Listen to the update event. This event is broadcast every

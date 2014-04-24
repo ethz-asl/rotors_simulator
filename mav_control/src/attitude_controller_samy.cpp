@@ -1,17 +1,17 @@
-#include <mav_control/attitude_controller.h>
+#include <mav_control/attitude_controller_samy.h>
 #include <iostream>
 
 
-AttitudeController::AttitudeController() {}
+AttitudeControllerSamy::AttitudeControllerSamy() {}
 
-AttitudeController::~AttitudeController() {}
+AttitudeControllerSamy::~AttitudeControllerSamy() {}
 
-std::shared_ptr<ControllerBase> AttitudeController::Clone() {
-  std::shared_ptr<ControllerBase> controller = std::make_shared<AttitudeController>();
+std::shared_ptr<ControllerBase> AttitudeControllerSamy::Clone() {
+  std::shared_ptr<ControllerBase> controller = std::make_shared<AttitudeControllerSamy>();
   return controller;
 }
 
-void AttitudeController::InitializeParams() {
+void AttitudeControllerSamy::InitializeParams() {
   amount_rotors_ = 4;
   allocation_matrix_.resize(4,amount_rotors_);
   allocation_matrix_ << 0,  1,  0, -1,
@@ -59,7 +59,7 @@ void AttitudeController::InitializeParams() {
   initialized_params_ = true;
 }
 
-void AttitudeController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const {
+void AttitudeControllerSamy::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const {
   assert(rotor_velocities);
   assert(initialized_params_);
 
@@ -79,24 +79,23 @@ void AttitudeController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocit
 
 // Implementation from the T. Lee et al. paper
 // Control of complex maneuvers for a quadrotor UAV using geometric methods on SE(3)
-void AttitudeController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_acceleration) const {
+void AttitudeControllerSamy::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_acceleration) const {
   assert(angular_acceleration);
 
   Eigen::Matrix3d R = attitude_.toRotationMatrix();
 
   // get desired rotation matrix
   Eigen::Matrix3d R_des;
-  double yaw = atan2(R(1,0), R(0,0));
+  double yaw = atan2(R(1,0), R(0,0)); // TODO(burrimi): Switch to roll pitch yaw (NOT yaw rate) thrust reference.
   R_des = Eigen::AngleAxisd(control_attitude_thrust_reference_(0), Eigen::Vector3d::UnitX()) // roll
     * Eigen::AngleAxisd(control_attitude_thrust_reference_(1), Eigen::Vector3d::UnitY()) // pitch
-    * Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()); // yaw
+    * Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ());
 
-  // angle error according to lee et al.
-  Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
-  Eigen::Vector3d angle_error;
-  angle_error << angle_error_matrix(2,1), // inverse skew operator
-                 angle_error_matrix(0,2),
-                 0; // angle_error_matrix(1,0); TODO(burrimi): Switch to yaw reference.
+  // std::cout<<"R\n"<<R<<"\n";
+  // std::cout<<"yaw: "<<yaw*180/M_PI<<"\n";
+  Eigen::AngleAxisd AA_yaw = Eigen::AngleAxisd(-yaw, Eigen::Vector3d::UnitZ());
+  Eigen::Vector3d b3_des= AA_yaw * R.transpose() * R_des.col(2);
+  Eigen::Vector3d angle_error = b3_des.cross(Eigen::Vector3d::UnitZ());
 
   // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
@@ -110,4 +109,4 @@ void AttitudeController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_accel
 }
 
 
-MAV_CONTROL_REGISTER_CONTROLLER(AttitudeController);
+MAV_CONTROL_REGISTER_CONTROLLER(AttitudeControllerSamy);

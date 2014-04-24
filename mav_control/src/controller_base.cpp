@@ -1,4 +1,6 @@
 #include <mav_control/controller_base.h>
+#include <math.h>
+#define _USE_MATH_DEFINES
 
 ControllerBase::ControllerBase() {
   initialized_params_ = false;

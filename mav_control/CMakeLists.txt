@@ -29,7 +29,10 @@ include_directories(
 )
 
 add_library(mav_control
-  src/controller_factory.cpp src/controller_base.cpp src/attitude_controller.cpp
+  src/controller_factory.cpp
+  src/controller_base.cpp
+  src/attitude_controller.cpp
+  src/attitude_controller_samy.cpp
 )
 
 target_link_libraries(mav_control ${catkin_LIBRARIES})

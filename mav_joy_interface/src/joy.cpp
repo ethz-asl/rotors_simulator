@@ -55,12 +55,16 @@ void Joy::JoyCallback(const sensor_msgs::JoyConstPtr& msg) {
   current_joy_ = *msg;
   control_msg_.roll = msg->axes[axes_.roll] * max_.roll * axes_.roll_direction;
   control_msg_.pitch = msg->axes[axes_.pitch] * max_.pitch * axes_.pitch_direction;
-  if (msg->buttons[buttons_.yaw_left]
-    && current_yaw_vel_ + v_yaw_step_ < max_.rate_yaw)
-    current_yaw_vel_ += v_yaw_step_;
-  else if (msg->buttons[buttons_.yaw_right]
-    && current_yaw_vel_ - v_yaw_step_ > -max_.rate_yaw)
-    current_yaw_vel_ -= v_yaw_step_;
+
+  if (msg->buttons[buttons_.yaw_left]) {
+    current_yaw_vel_ = max_.rate_yaw;
+  }
+  else if (msg->buttons[buttons_.yaw_right]) {
+    current_yaw_vel_ = -max_.rate_yaw;
+  }
+  else {
+    current_yaw_vel_ = 0;
+  }
   control_msg_.yaw_rate = current_yaw_vel_;
   control_msg_.thrust = (msg->axes[axes_.thrust] + 1) * max_.thrust/2.0
     * axes_.thrust_direction;
