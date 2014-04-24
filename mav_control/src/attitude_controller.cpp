@@ -55,7 +55,8 @@ void AttitudeController::InitializeParams() {
   I.block<3,3>(0, 0) = inertia_matrix_;
   I(3,3) = 1;
 
-  angular_acc_to_rotor_velocities_ = allocation_matrix_.inverse() * K.inverse() * I;
+  angular_acc_to_rotor_velocities_ = allocation_matrix_.transpose()
+    * (allocation_matrix_ * allocation_matrix_.transpose()).inverse() * K.inverse() * I;
   initialized_params_ = true;
 }
 
