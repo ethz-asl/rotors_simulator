@@ -87,9 +87,9 @@ void AttitudeController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_accel
   // get desired rotation matrix
   Eigen::Matrix3d R_des;
   double yaw = atan2(R(1,0), R(0,0));
-  R_des = Eigen::AngleAxisd(control_attitude_thrust_reference_(0), Eigen::Vector3d::UnitX()) // roll
-    * Eigen::AngleAxisd(control_attitude_thrust_reference_(1), Eigen::Vector3d::UnitY()) // pitch
-    * Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()); // yaw
+  R_des = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()) // yaw
+    * Eigen::AngleAxisd(control_attitude_thrust_reference_(0), Eigen::Vector3d::UnitX()) // roll
+    * Eigen::AngleAxisd(control_attitude_thrust_reference_(1), Eigen::Vector3d::UnitY()); // pitch
 
   // angle error according to lee et al.
   Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);

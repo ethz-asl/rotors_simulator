@@ -77,7 +77,6 @@ void AttitudeControllerSamy::CalculateRotorVelocities(Eigen::VectorXd* rotor_vel
   *rotor_velocities = rotor_velocities->cwiseSqrt();
 }
 
-// Implementation from the T. Lee et al. paper
 // Control of complex maneuvers for a quadrotor UAV using geometric methods on SE(3)
 void AttitudeControllerSamy::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_acceleration) const {
   assert(angular_acceleration);
@@ -86,18 +85,14 @@ void AttitudeControllerSamy::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_a
 
   // get desired rotation matrix
   Eigen::Matrix3d R_des;
-  double yaw = atan2(R(1,0), R(0,0)); // TODO(burrimi): Switch to roll pitch yaw (NOT yaw rate) thrust reference.
-  R_des = Eigen::AngleAxisd(control_attitude_thrust_reference_(0), Eigen::Vector3d::UnitX()) // roll
-    * Eigen::AngleAxisd(control_attitude_thrust_reference_(1), Eigen::Vector3d::UnitY()) // pitch
-    * Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ());
+  double yaw = atan2(R(1,0), R(0,0));
+  R_des = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()) // yaw
+    * Eigen::AngleAxisd(control_attitude_thrust_reference_(0), Eigen::Vector3d::UnitX()) // roll
+    * Eigen::AngleAxisd(control_attitude_thrust_reference_(1), Eigen::Vector3d::UnitY()); // pitch
 
-  // std::cout<<"R\n"<<R<<"\n";
-  // std::cout<<"yaw: "<<yaw*180/M_PI<<"\n";
-  Eigen::AngleAxisd AA_yaw = Eigen::AngleAxisd(-yaw, Eigen::Vector3d::UnitZ());
-  Eigen::Vector3d b3_des= AA_yaw * R.transpose() * R_des.col(2);
+  Eigen::Vector3d b3_des= R.transpose() * R_des.col(2);
   Eigen::Vector3d angle_error = b3_des.cross(Eigen::Vector3d::UnitZ());
 
-  // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
   angular_rate_des[2] = control_attitude_thrust_reference_(2);
 
