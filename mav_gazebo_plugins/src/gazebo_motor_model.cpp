@@ -137,7 +137,7 @@ namespace gazebo
       math::Vector3(0, 0, force));
 
     // Moments
-    this->link_->AddRelativeTorque(math::Vector3(0, 0, turning_direction_ *
+    this->link_->AddRelativeTorque(math::Vector3(0, 0, -turning_direction_ *
       force * moment_constant_));
     this->joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / 100);
   };

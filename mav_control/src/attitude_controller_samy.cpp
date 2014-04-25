@@ -39,7 +39,7 @@ void AttitudeControllerSamy::InitializeParams() {
   const double motor_force_constant = 9.9865e-6; //F_i = k_n * rotor_velocity_i^2
   const double motor_moment_constant = 0.016; // M_i = k_m * F_i
 
-  angular_acc_to_rotor_velocities_.resize(4, amount_rotors_);
+  angular_acc_to_rotor_velocities_.resize(amount_rotors_, 4);
 
   const double arm_length = 0.17;
 
