@@ -3,7 +3,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- Main multirotor link -->
-  <xacro:macro name="multirotor_base_macro" params="robot_namespace mass body_width body_height *inertia">
+  <xacro:macro name="multirotor_base_macro" params="robot_namespace mass body_width body_height mesh_file *inertia">
     <link name="base_link">
       <inertial>
         <mass value="${mass}" />  <!-- [kg] -->
@@ -14,6 +14,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
+          <!-- <mesh filename="package://mav_description/meshes/${mesh_file}" scale="0.001 0.001 0.001"/> -->
           <box size="${body_width} ${body_width} ${body_height}"/> <!-- [m] [m] [m] -->
         </geometry>
       </visual>
