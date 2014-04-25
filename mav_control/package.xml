@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>mav_gazebo</name>
+  <name>mav_control</name>
   <version>0.0.0</version>
-  <description>The mav_gazebo package</description>
+  <description>The mav_control package</description>
 
   <maintainer email="ffurrer@gmail.com">Fadri Furrer</maintainer>
   <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
@@ -13,19 +13,19 @@
   <url type="website">https://github.com/ethz-asl/euroc_simulator/wiki</url>
 
   <author email="ffurrer@gmail.com">Fadri Furrer</author>
+  <author email="michael.burri@mavt.ethz.ch">Michael Burri</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-  
-  <!-- Dependencies needed to compile this package. -->
-  <build_depend>gazebo_plugins</build_depend>
-  <build_depend>mav_gazebo_plugins</build_depend>
-  <build_depend>gazebo_msgs</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>mav_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
 
-  <!-- Dependencies needed after this package is compiled. -->
-  <run_depend>gazebo_plugins</run_depend>
-  <run_depend>mav_gazebo_plugins</run_depend>
-  <run_depend>gazebo_msgs</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <run_depend>mav_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
 
 </package>

@@ -19,8 +19,8 @@ namespace gazebo
     }
   };
 
-  void GazeboMotorModel::initializeParams() {};
-  void GazeboMotorModel::publish() {
+  void GazeboMotorModel::InitializeParams() {};
+  void GazeboMotorModel::Publish() {
     turning_velocity_msg_.data = this->joint_->GetVelocity(0);
     motor_vel_pub_.publish(turning_velocity_msg_);
   };
@@ -60,6 +60,11 @@ namespace gazebo
     // Get the pointer to the link
     this->link_ = this->model_->GetLink(link_name_);
 
+    if (_sdf->HasElement("motorNumber")) 
+      motor_number_ = _sdf->GetElement("motorNumber")->Get<int>();
+    else
+      gzerr << "[gazebo_motor_model] Please specify a motorNumber.\n";
+
     if (_sdf->HasElement("turningDirection")) {
       std::string turning_direction = _sdf->GetElement("turningDirection")->Get<std::string>();
       if(turning_direction == "cw")
@@ -89,6 +94,9 @@ namespace gazebo
     // Set the maximumForce on the joint
     this->joint_->SetMaxForce(0, max_force_);
 
+    // TODO(ff): This doesn't work but we should make sure that this works soon
+    // this->joint_->velocityLimit[0] = max_rot_velocity_;
+
     if (_sdf->HasElement("motorConstant"))
       motor_constant_ = _sdf->GetElement("motorConstant")->Get<double>();
     else
@@ -104,32 +112,34 @@ namespace gazebo
     this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(
         boost::bind(&GazeboMotorModel::OnUpdate, this, _1));
 
-    cmd_sub_ = node_handle_->subscribe(command_topic_, 1000, &GazeboMotorModel::velocityCallback, this);
+    cmd_sub_ = node_handle_->subscribe(command_topic_, 1000, &GazeboMotorModel::VelocityCallback, this);
     motor_vel_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_topic_, 10);
   }
 
   // Called by the world update start event
   void GazeboMotorModel::OnUpdate(const common::UpdateInfo& /*_info*/) {
-    updateForcesAndMoments();
-    publish();
+    UpdateForcesAndMoments();
+    Publish();
   }
 
-  void GazeboMotorModel::velocityCallback(const std_msgs::Float32Ptr& velocity)
-  {
-    ref_motor_rot_vel_ = velocity->data;
+  void GazeboMotorModel::VelocityCallback(
+    const mav_msgs::MotorSpeedPtr& rot_velocities) {
+    ref_motor_rot_vel_ = rot_velocities->motor_speed[motor_number_];
   }
 
-  void GazeboMotorModel::updateForcesAndMoments() {
+  void GazeboMotorModel::UpdateForcesAndMoments() {
     motor_rot_vel_ = this->joint_->GetVelocity(0);
-
+    // TODO(ff): I had to add a factor of 100 here and one in the SetVelocity, 
+    // because currently I can't set the velocity to a higher value than 100.
+    double force = motor_rot_vel_* 100 * motor_rot_vel_* 100 * motor_constant_;
     // Apply a force to the link
     this->link_->AddRelativeForce(
-      math::Vector3(0, 0, motor_rot_vel_ * motor_rot_vel_ * motor_constant_));
+      math::Vector3(0, 0, force));
 
     // Moments
     this->link_->AddRelativeTorque(math::Vector3(0, 0, turning_direction_ *
-      motor_rot_vel_ * motor_rot_vel_ * motor_constant_ * moment_constant_));
-    this->joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_);
+      force * moment_constant_));
+    this->joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / 100);
   };
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboMotorModel);

@@ -16,21 +16,21 @@ class MotorModel
       motor_rot_vel_(0),
       ref_motor_rot_vel_(0) {}
     virtual ~MotorModel() {}
-    void getMotorVelocity(double &result) const {
+    void GetMotorVelocity(double &result) const {
       result = motor_rot_vel_;
     }
-    void setReferenceMotorVelocity(double ref_motor_rot_vel) {
+    void SetReferenceMotorVelocity(double ref_motor_rot_vel) {
       ref_motor_rot_vel_ = ref_motor_rot_vel;
     }
 
-    virtual void initializeParams() = 0;
-    virtual void publish() = 0;
+    virtual void InitializeParams() = 0;
+    virtual void Publish() = 0;
 
   protected:
     double motor_rot_vel_;
     double ref_motor_rot_vel_;
 
-    virtual void updateForcesAndMoments() = 0;
+    virtual void UpdateForcesAndMoments() = 0;
 };
 
 #endif // MAV_MODEL_MOTOR_MODEL_H

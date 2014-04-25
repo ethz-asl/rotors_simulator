@@ -63,10 +63,10 @@ class Joy {
     double current_yaw_vel_;
     double v_yaw_step_;
 
-    void stopMav();
+    void StopMav();
 
-    void joyCallback(const sensor_msgs::JoyConstPtr& msg);
-    void publish();
+    void JoyCallback(const sensor_msgs::JoyConstPtr& msg);
+    void Publish();
 
   public:
     Joy();
