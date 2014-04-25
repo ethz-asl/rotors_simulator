@@ -136,7 +136,7 @@
   </xacro:macro>
 
   <!-- Rotor joint and link -->
-  <xacro:macro name="vertical_rotor" params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant max_rot_velocity motor_number color *origin *inertia">
+  <xacro:macro name="vertical_rotor" params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant max_rot_velocity motor_number lambda1 color *origin *inertia">
     <joint name="rotor_${suffix}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
@@ -185,6 +185,7 @@
         <momentConstant>${moment_constant}</momentConstant>
         <commandTopic>${robot_namespace}/motor_vel_ref</commandTopic>
         <motorNumber>${motor_number}</motorNumber>
+        <lambda1>${lambda1}</lambda1>
         <motorVelocityTopic>${robot_namespace}/${suffix}_motor_vel</motorVelocityTopic>
       </plugin>
     </gazebo>

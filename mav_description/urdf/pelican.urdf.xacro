@@ -18,6 +18,7 @@
   <xacro:property name="moment_constant" value="0.016" /> <!-- [m] -->
   <xacro:property name="time_constant" value="0.0125" /> <!-- [s] -->
   <xacro:property name="max_rot_velocity" value="838" /> <!-- [rad/s] -->
+  <xacro:property name="lambda1" value="0.0001" />
 
   <!-- Property Blocks -->
   <xacro:property name="body_inertia">
@@ -36,19 +37,19 @@
   </xacro:multirotor_base_macro>
 
   <!-- Instantiate rotors -->
-  <xacro:vertical_rotor robot_namespace="${namespace}" suffix="front" direction="cw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" time_constant="${time_constant}" max_rot_velocity="${max_rot_velocity}" motor_number="0" color="Red">
+  <xacro:vertical_rotor robot_namespace="${namespace}" suffix="front" direction="cw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" time_constant="${time_constant}" max_rot_velocity="${max_rot_velocity}" motor_number="0" lambda1="${lambda1}" color="Red">
     <origin xyz="${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
-  <xacro:vertical_rotor robot_namespace="${namespace}" suffix="left" direction="ccw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" time_constant="${time_constant}" max_rot_velocity="${max_rot_velocity}" motor_number="1" color="Blue">
+  <xacro:vertical_rotor robot_namespace="${namespace}" suffix="left" direction="ccw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" time_constant="${time_constant}" max_rot_velocity="${max_rot_velocity}" motor_number="1" lambda1="${lambda1}" color="Blue">
     <origin xyz="0 ${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
-  <xacro:vertical_rotor robot_namespace="${namespace}" suffix="back" direction="cw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" time_constant="${time_constant}" max_rot_velocity="${max_rot_velocity}" motor_number="2" color="Blue">
+  <xacro:vertical_rotor robot_namespace="${namespace}" suffix="back" direction="cw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" time_constant="${time_constant}" max_rot_velocity="${max_rot_velocity}" motor_number="2" lambda1="${lambda1}" color="Blue">
     <origin xyz="-${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
-  <xacro:vertical_rotor robot_namespace="${namespace}" suffix="right" direction="ccw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" time_constant="${time_constant}" max_rot_velocity="${max_rot_velocity}" motor_number="3" color="Blue">
+  <xacro:vertical_rotor robot_namespace="${namespace}" suffix="right" direction="ccw" motor_constant="${motor_constant}" moment_constant="${moment_constant}" parent="base_link" mass_rotor="${mass_rotor}" radius_rotor="${radius_rotor}" time_constant="${time_constant}" max_rot_velocity="${max_rot_velocity}" motor_number="3" lambda1="${lambda1}" color="Blue">
     <origin xyz="0 -${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
