@@ -59,6 +59,7 @@ namespace gazebo
       double max_rot_velocity_;
       double viscous_friction_coefficient_;
       double inertia_;
+      double rotor_drag_coefficient_;
 
       ros::NodeHandle* node_handle_;
       ros::Publisher motor_vel_pub_;

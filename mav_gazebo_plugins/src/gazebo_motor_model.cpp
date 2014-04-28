@@ -33,6 +33,7 @@ namespace gazebo
     namespace_.clear();
     command_topic_ = "command/motor";
     motor_velocity_topic_ = "turning_vel";
+    rotor_drag_coefficient_ = 0.0001;  //TODO(ff): find a more accurate parameter value
 
     if (_sdf->HasElement("robotNamespace"))
       namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
@@ -64,6 +65,12 @@ namespace gazebo
       motor_number_ = _sdf->GetElement("motorNumber")->Get<int>();
     else
       gzerr << "[gazebo_motor_model] Please specify a motorNumber.\n";
+
+    if (_sdf->HasElement("rotorDragCoefficient")) 
+      rotor_drag_coefficient_ = _sdf->GetElement("rotorDragCoefficient")->Get<double>();
+    else
+      gzwarn << "[gazebo_motor_model] No rotorDragCoefficient value specified for motor "
+        << motor_number_ << " using default value " << rotor_drag_coefficient_ << ".\n";
 
     if (_sdf->HasElement("turningDirection")) {
       std::string turning_direction = _sdf->GetElement("turningDirection")->Get<std::string>();
@@ -128,14 +135,28 @@ namespace gazebo
   }
 
   void GazeboMotorModel::UpdateForcesAndMoments() {
+
     motor_rot_vel_ = this->joint_->GetVelocity(0);
-    // TODO(ff): I had to add a factor of 100 here and one in the SetVelocity, 
+    // TODO(ff): I had to add a factor of 100 here and one in the SetVelocity,
     // because currently I can't set the velocity to a higher value than 100.
-    double force = motor_rot_vel_* 100 * motor_rot_vel_* 100 * motor_constant_;
+    double real_motor_velocity = motor_rot_vel_ * 100;
+    double force = real_motor_velocity * real_motor_velocity * motor_constant_;
     // Apply a force to the link
     this->link_->AddRelativeForce(
       math::Vector3(0, 0, force));
 
+    // Forces from Philppe Martin's and Erwan Salaün's 
+    // 2010 IEEE Conference on Robotics and Automation paper
+    // The True Role of Accelerometer Feedback in Quadrotor Control
+    // \omega * \lambda_1 * V_A^{\perp}
+    math::Vector3 joint_axis = joint_->GetGlobalAxis(0);
+    math::Vector3 body_velocity = link_->GetWorldLinearVel();
+    math::Vector3 body_velocity_perpendicular = body_velocity
+      - (body_velocity * joint_axis) * joint_axis;
+    math::Vector3 air_drag = - turning_direction_ * real_motor_velocity * rotor_drag_coefficient_
+      * body_velocity_perpendicular;
+    // Apply air_drag to link
+    this->link_->AddForce(air_drag);
     // Moments
     this->link_->AddRelativeTorque(math::Vector3(0, 0, -turning_direction_ *
       force * moment_constant_));
