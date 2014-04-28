@@ -9,10 +9,10 @@
   <xacro:property name="mesh_file" value="firefly.dae" />
   <xacro:property name="mass" value="1.5" /> <!-- [kg] -->
   <xacro:property name="body_width" value="0.1" /> <!-- [m] -->
-  <xacro:property name="body_height" value="0.2" /> <!-- [m] -->
+  <xacro:property name="body_height" value="0.16" /> <!-- [m] -->
   <xacro:property name="mass_rotor" value="0.01" /> <!-- [kg] -->
   <xacro:property name="arm_length" value="0.215" /> <!-- [m] -->
-  <xacro:property name="rotor_offset_top" value="0.02" /> <!-- [m] -->
+  <xacro:property name="rotor_offset_top" value="0.037" /> <!-- [m] -->
   <xacro:property name="radius_rotor" value="0.08" /> <!-- [m] -->
   <xacro:property name="motor_constant" value="9.9865e-06" /> <!-- [kg·m/s^2] -->
   <xacro:property name="moment_constant" value="0.016" /> <!-- [m] -->
