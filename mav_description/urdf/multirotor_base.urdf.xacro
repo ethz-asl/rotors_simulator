@@ -14,7 +14,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="package://mav_description/meshes/${mesh_file}" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://mav_description/meshes/${mesh_file}" scale="1 1 1"/>
           <!-- <box size="${body_width} ${body_width} ${body_height}"/> --> <!-- [m] [m] [m] -->
         </geometry>
       </visual>
