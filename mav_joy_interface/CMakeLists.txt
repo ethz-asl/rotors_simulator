@@ -16,6 +16,6 @@ catkin_package(
   LIBRARIES
 )
 
-add_executable(mav_joy src/joy.cpp)
-add_dependencies(mav_joy ${catkin_EXPORTED_TARGETS})
-target_link_libraries(mav_joy ${catkin_LIBRARIES})
+add_executable(mav_joy_interface src/joy.cpp)
+add_dependencies(mav_joy_interface ${catkin_EXPORTED_TARGETS})
+target_link_libraries(mav_joy_interface ${catkin_LIBRARIES})

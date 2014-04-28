@@ -1,5 +1,5 @@
 <launch>
   <include file="$(find mav_gazebo)/launch/pelican_empty_world.launch" />
   <node ns="pelican" name="joy_node" pkg="joy" type="joy_node" />
-  <node ns="pelican" name="mav_joy" pkg="mav_joy_interface" type="mav_joy" />
+  <node ns="pelican" name="mav_joy_interface" pkg="mav_joy_interface" type="mav_joy_interface" />
 </launch>
