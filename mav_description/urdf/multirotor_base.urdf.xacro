@@ -165,7 +165,8 @@
       <visual>
         <geometry>
           <!-- <cylinder length="0.005" radius="${radius_rotor}"/> --> <!-- [m] -->
-          <box size="${2*radius_rotor} 0.01 0.005"/>
+          <mesh filename="package://mav_description/meshes/propeller_${direction}.dae" scale="0.001 0.001 0.001"/>
+          <!-- <box size="${2*radius_rotor} 0.01 0.005"/> -->
         </geometry>
       </visual>
       <collision>
