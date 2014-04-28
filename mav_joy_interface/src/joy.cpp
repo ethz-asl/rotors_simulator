@@ -28,7 +28,7 @@ Joy::Joy() {
   pnh.param("max_v_xy", max_.v_xy, 1.0);  // [m/s]
   pnh.param("max_roll", max_.roll, 10.0 * M_PI / 180.0);  // [rad]
   pnh.param("max_pitch", max_.pitch, 10.0 * M_PI / 180.0);  // [rad]
-  pnh.param("max_yaw_rate", max_.rate_yaw, 10.0 * M_PI / 180.0);  // [rad/s]
+  pnh.param("max_yaw_rate", max_.rate_yaw, 45.0 * M_PI / 180.0);  // [rad/s]
   pnh.param("max_thrust", max_.thrust, 30.0);  // [N]
 
   pnh.param("v_yaw_step", v_yaw_step_, 0.05);  // [rad/s]
@@ -79,7 +79,7 @@ void Joy::Publish() {
 }
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "mav_joy");
+  ros::init(argc, argv, "mav_joy_interface");
   Joy joy;
 
   ros::spin();
