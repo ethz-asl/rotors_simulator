@@ -20,7 +20,7 @@
   <xacro:property name="max_rot_velocity" value="838" /> <!-- [rad/s] -->
   <xacro:property name="sin30" value="0.5" />
   <xacro:property name="cos30" value="0.866025403784" />
-  <xacro:property name="lambda1" value="0.0001" />
+  <xacro:property name="rotor_drag_coefficient" value="0.0001" />
 
   <!-- Property Blocks -->
   <xacro:property name="body_inertia">
@@ -51,7 +51,7 @@
     time_constant="${time_constant}"
     max_rot_velocity="${max_rot_velocity}"
     motor_number="0"
-    lambda1="${lambda1}"
+    rotor_drag_coefficient="${rotor_drag_coefficient}"
     color="Red">
     <origin xyz="${cos30*arm_length} ${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -69,7 +69,7 @@
     time_constant="${time_constant}"
     max_rot_velocity="${max_rot_velocity}"
     motor_number="1"
-    lambda1="${lambda1}"
+    rotor_drag_coefficient="${rotor_drag_coefficient}"
     color="Blue">
     <origin xyz="0 ${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -86,7 +86,7 @@
     time_constant="${time_constant}"
     max_rot_velocity="${max_rot_velocity}"
     motor_number="2"
-    lambda1="${lambda1}"
+    rotor_drag_coefficient="${rotor_drag_coefficient}"
     color="Blue">
     <origin xyz="-${cos30*arm_length} ${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -103,7 +103,7 @@
     time_constant="${time_constant}"
     max_rot_velocity="${max_rot_velocity}"
     motor_number="3"
-    lambda1="${lambda1}"
+    rotor_drag_coefficient="${rotor_drag_coefficient}"
     color="Blue">
     <origin xyz="-${cos30*arm_length} -${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -121,7 +121,7 @@
     time_constant="${time_constant}"
     max_rot_velocity="${max_rot_velocity}"
     motor_number="4"
-    lambda1="${lambda1}"
+    rotor_drag_coefficient="${rotor_drag_coefficient}"
     color="Blue">
     <origin xyz="0 -${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -139,7 +139,7 @@
     time_constant="${time_constant}"
     max_rot_velocity="${max_rot_velocity}"
     motor_number="5"
-    lambda1="${lambda1}"
+    rotor_drag_coefficient="${rotor_drag_coefficient}"
     color="Red">
     <origin xyz="${cos30*arm_length} -${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
