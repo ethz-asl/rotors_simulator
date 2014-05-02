@@ -52,6 +52,7 @@
         <poseTopic>pose</poseTopic>
         <motorVelocityReferenceTopic>motor_vel_ref</motorVelocityReferenceTopic>
       </plugin>
+
       <!-- IMU -->
       <plugin filename="libhector_gazebo_ros_imu.so" name="imu_ros">
         <bodyName>base_link</bodyName>
@@ -60,8 +61,16 @@
         <updateRate>100.0</updateRate>
         <gaussianNoise>0.0</gaussianNoise>
       </plugin>
+
+      <!-- ROS Bag Plugin -->
+      <plugin filename="libmav_gazebo_bag_plugin.so" name="rosbag">
+        <robotNamespace>${robot_namespace}</robotNamespace>
+        <bagFileName>test.bag</bagFileName>
+        <linkName>base_link</linkName>
+        <frameId>base_link</frameId>
+      </plugin>
     </gazebo>
-    
+
   </xacro:macro>
 
   <!-- camera -->
