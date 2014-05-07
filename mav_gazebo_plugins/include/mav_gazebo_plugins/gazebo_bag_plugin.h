@@ -28,11 +28,10 @@ namespace gazebo
       /// \brief Destructor
       virtual ~GazeboBagPlugin();
 
-      
     protected:
       /// \brief Load the plugin.
-      /// \param[in] _model Number of command line arguments.
-      /// \param[in] _sdf Array of command line arguments.
+      /// \param[in] _model Pointer to the model that loaded this plugin.
+      /// \param[in] _sdf SDF element that describes the plugin.
       void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
       /// \brief Called when the world is updated.

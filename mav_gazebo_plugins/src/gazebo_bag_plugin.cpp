@@ -89,9 +89,11 @@ namespace gazebo
   // Called by the world update start event
   void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info)
   {
+    common::Time now = world_->GetSimTime();
+    ros::Time ros_now = ros::Time(now.sec, now.nsec);
     pose_ = link_->GetWorldCoGPose();
-    pose_msg_.header.stamp.sec  = (world_->GetSimTime()).sec;
-    pose_msg_.header.stamp.nsec = (world_->GetSimTime()).nsec;
+    pose_msg_.header.stamp.sec  = now.sec;
+    pose_msg_.header.stamp.nsec = now.nsec;
     pose_msg_.pose.position.x = pose_.pos.x;
     pose_msg_.pose.position.y = pose_.pos.y;
     pose_msg_.pose.position.z = pose_.pos.z;
@@ -99,8 +101,7 @@ namespace gazebo
     pose_msg_.pose.orientation.x = pose_.rot.x;
     pose_msg_.pose.orientation.y = pose_.rot.y;
     pose_msg_.pose.orientation.z = pose_.rot.z;
-
-    bag_.write("ground_truth_pose", ros::Time::now(), pose_msg_);
+    bag_.write("ground_truth/pose", ros_now, pose_msg_);
   }
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboBagPlugin);
