@@ -65,7 +65,7 @@
       <!-- ROS Bag Plugin -->
       <plugin filename="libmav_gazebo_bag_plugin.so" name="rosbag">
         <robotNamespace>${robot_namespace}</robotNamespace>
-        <bagFileName>test.bag</bagFileName>
+        <bagFileName>firefly.bag</bagFileName>
         <linkName>base_link</linkName>
         <frameId>base_link</frameId>
       </plugin>
@@ -146,17 +146,17 @@
 
   <!-- Rotor joint and link -->
   <xacro:macro name="vertical_rotor" params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant max_rot_velocity motor_number rotor_drag_coefficient color *origin *inertia">
-    <joint name="rotor_${suffix}_joint" type="continuous">
+    <joint name="rotor_${motor_number}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
       <!-- TODO(ff): not currently set because it's not yet supported -->
       <!-- <limit effort="2000" velocity="${max_rot_velocity}" /> -->
       <parent link="${parent}"/>
-      <child link="rotor_${suffix}"/>
+      <child link="rotor_${motor_number}"/>
 
     </joint>
     <!-- TODO(ff): not currently set because it's not yet supported -->
-    <!-- <gazebo reference="rotor_${suffix}_joint">
+    <!-- <gazebo reference="rotor_${motor_number}_joint">
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
@@ -166,7 +166,7 @@
         </limit>
       </axis>
     </gazebo> -->
-    <link name="rotor_${suffix}">
+    <link name="rotor_${motor_number}">
       <inertial>
         <mass value="${mass_rotor}" /> <!-- [kg] -->
         <xacro:insert_block name="inertia" />
@@ -186,8 +186,8 @@
     </link>
     <gazebo>
       <plugin name="${suffix}_motor_model" filename="libmav_gazebo_motor_model.so">
-        <jointName>rotor_${suffix}_joint</jointName>
-        <linkName>rotor_${suffix}</linkName>
+        <jointName>rotor_${motor_number}_joint</jointName>
+        <linkName>rotor_${motor_number}</linkName>
         <turningDirection>${direction}</turningDirection>
         <timeConstant>${time_constant}</timeConstant>
         <maxRotVelocity>${max_rot_velocity}</maxRotVelocity>
@@ -196,10 +196,10 @@
         <commandTopic>${robot_namespace}/motor_vel_ref</commandTopic>
         <motorNumber>${motor_number}</motorNumber>
         <rotorDragCoefficient>${rotor_drag_coefficient}</rotorDragCoefficient>
-        <motorVelocityTopic>${robot_namespace}/${suffix}_motor_vel</motorVelocityTopic>
+        <motorVelocityTopic>${robot_namespace}/motor_vel/${motor_number}</motorVelocityTopic>
       </plugin>
     </gazebo>
-    <gazebo reference="rotor_${suffix}">
+    <gazebo reference="rotor_${motor_number}">
       <material>Gazebo/${color}</material>
     </gazebo>
   </xacro:macro>

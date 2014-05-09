@@ -6,6 +6,7 @@
 //==============================================================================
 #include <mav_gazebo_plugins/gazebo_bag_plugin.h>
 #include <ctime>
+#include <mav_msgs/MotorSpeed.h>
 
 
 namespace gazebo
@@ -30,18 +31,22 @@ namespace gazebo
     model_ = _model;
     // world_ = physics::get_world(model_->world.name);
     world_ = model_->GetWorld();
-
-    // default params
     namespace_.clear();
-    pose_topic_ = "ground_truth";
-    frame_id_ = "/ground_truth_pose";
-    link_name_ = "base_link";
 
     if (_sdf->HasElement("robotNamespace"))
       namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
     else
       gzerr << "[gazebo_bag_plugin] Please specify a robotNamespace.\n";
     node_handle_ = new ros::NodeHandle(namespace_);
+
+    // default params
+    ground_truth_pose_pub_topic_ = "/" + namespace_ + "/ground_truth/pose";
+    ground_truth_twist_pub_topic_ = "/" + namespace_ + "/ground_truth/twist";
+    imu_pub_topic_ = "/" + namespace_ + "/imu";
+    imu_sub_topic_ = "/" + namespace_ + "/imu";
+    motor_pub_topic_ = "/" + namespace_ + "/motor_vel";
+    frame_id_ = "ground_truth_pose";
+    link_name_ = "base_link";
 
     if (_sdf->HasElement("bagFileName"))
       bag_filename_ = _sdf->GetElement("bagFileName")->Get<std::string>();
@@ -59,17 +64,26 @@ namespace gazebo
     // Get the pointer to the link
     link_ = this->model_->GetLink(link_name_);
 
+    if (_sdf->HasElement("imuSubTopic"))
+      imu_sub_topic_ = _sdf->GetElement("imuSubTopic")->Get<std::string>();
+
+    if (_sdf->HasElement("imuPubTopic"))
+      imu_pub_topic_ = _sdf->GetElement("imuPubTopic")->Get<std::string>();
+
+    if (_sdf->HasElement("motorPubTopic"))
+      motor_pub_topic_ = _sdf->GetElement("motorPubTopic")->Get<std::string>();
+
     if (_sdf->HasElement("poseTopic"))
-      pose_topic_ = _sdf->GetElement("poseTopic")->Get<std::string>();
+      ground_truth_pose_pub_topic_ =
+        _sdf->GetElement("poseTopic")->Get<std::string>();
 
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
     this->update_connection_ = event::Events::ConnectWorldUpdateBegin(
         boost::bind(&GazeboBagPlugin::OnUpdate, this, _1));
 
-    ground_truth_pose_pub_ = node_handle_->advertise<geometry_msgs::PoseStamped>(
-      pose_topic_, 10);
-    pose_msg_.header.frame_id = frame_id_;
+    // ground_truth_pose_pub_ = node_handle_->advertise<geometry_msgs::PoseStamped>(
+    //   ground_truth_pose_topic_, 10);
     time_t rawtime;
     struct tm *timeinfo;
     char buffer[80];
@@ -84,24 +98,139 @@ namespace gazebo
 
     // Open a bag file and store it in ~/.ros/<bag_filename_>
     bag_.open(bag_filename_, rosbag::bagmode::Write);
+
+
+    // // Get the contact manager.
+    // contact_mgr_ = world_->GetPhysicsEngine()->GetContactManager();
+
+    // for (unsigned int j = 0; j < link_->GetChildCount(); ++j)
+    // {
+    //   physics::CollisionPtr collision = link_->GetCollision(j);
+    //   std::map<std::string, physics::CollisionPtr>::iterator coll_iter
+    //     = this->collisions.find(collision->GetScopedName());
+    //   if (coll_iter != this->collisions.end())
+    //     continue;
+
+    //   this->collisions[collision->GetScopedName()] = collision;
+    // }
+
+    // if (!this->collisions.empty())
+    // {
+    //   // request the contact manager to publish messages to a custom topic for
+    //   // this sensor
+    //   physics::ContactManager *mgr =
+    //       this->world->GetPhysicsEngine()->GetContactManager();
+    //   std::string topic = mgr->CreateFilter(this->GetName(), this->collisions);
+    //   if (!this->contactSub)
+    //   {
+    //     this->contactSub = this->node->Subscribe(topic,
+    //         &Gripper::OnContacts, this);
+    //   }
+    // }
+
+    child_links_ = link_->GetChildJointsLinks();
+    for (unsigned int i = 0; i < child_links_.size(); i++) {
+      std::string link_name = child_links_[i]->GetScopedName();
+
+      // Check if link contains rotor_ in its name
+      unsigned int pos = link_name.find("rotor_");
+      if (pos != link_name.npos) {
+        std::string motor_number_str = link_name.substr(pos + 6);
+        unsigned int motor_number = std::stoi(motor_number_str);
+        physics::JointPtr joint = (child_links_[i]->GetParentJoints())[0];
+        motor_joints_.insert(MotorNumberToJointPair(motor_number, joint));
+      }
+    }
+
+    // Subscriber to IMU Sensor
+    imu_sub_ = node_handle_->subscribe(imu_sub_topic_, 10, 
+      &GazeboBagPlugin::ImuCallback, this);
   }
 
   // Called by the world update start event
   void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info)
   {
+    // Get the current simulation time.
     common::Time now = world_->GetSimTime();
+
+    // TODO(ff): Make this work, currently it gives the wrong contacts and 
+    //           collisions, there is always only one collision
+
+    // unsigned int contact_count = contact_mgr_->GetContactCount();
+    // std::cout << "contact_count: " << contact_count << "\n";
+    // physics::Collision_V collisions = link_->GetCollisions();
+    // for (int i = 0; i < collisions.size(); i++) {
+    //   std::cout<<"link_collision[" << i << "]: "
+    //     <<collisions[i]->GetScopedName()<<"\n";
+    // }
+    
+    this->LogGroundTruth(now);
+    this->LogMotorVelocities(now);
+  }
+
+  void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuPtr& imu_msg) {
+    boost::mutex::scoped_lock lock(mtx_);
+    bag_.write(imu_pub_topic_, imu_msg->header.stamp, imu_msg);
+  }
+
+  void GazeboBagPlugin::LogMotorVelocities(const common::Time now) {
     ros::Time ros_now = ros::Time(now.sec, now.nsec);
-    pose_ = link_->GetWorldCoGPose();
-    pose_msg_.header.stamp.sec  = now.sec;
-    pose_msg_.header.stamp.nsec = now.nsec;
-    pose_msg_.pose.position.x = pose_.pos.x;
-    pose_msg_.pose.position.y = pose_.pos.y;
-    pose_msg_.pose.position.z = pose_.pos.z;
-    pose_msg_.pose.orientation.w = pose_.rot.w;
-    pose_msg_.pose.orientation.x = pose_.rot.x;
-    pose_msg_.pose.orientation.y = pose_.rot.y;
-    pose_msg_.pose.orientation.z = pose_.rot.z;
-    bag_.write("ground_truth/pose", ros_now, pose_msg_);
+
+    mav_msgs::MotorSpeed rot_velocities_msg;
+    rot_velocities_msg.motor_speed.resize(motor_joints_.size());
+
+    MotorNumberToJointMap::iterator m;
+    for (m = motor_joints_.begin(); m != motor_joints_.end(); ++m) {
+      double motor_rot_vel = m->second->GetVelocity(0) * 100;
+      rot_velocities_msg.motor_speed[m->first] = motor_rot_vel;
+    }
+    rot_velocities_msg.header.stamp.sec  = now.sec;
+    rot_velocities_msg.header.stamp.nsec = now.nsec;
+    {
+      boost::mutex::scoped_lock lock(mtx_);
+      bag_.write(motor_pub_topic_, ros_now, rot_velocities_msg);
+    }
+  }
+
+  void GazeboBagPlugin::LogGroundTruth(const common::Time now) {
+    ros::Time ros_now = ros::Time(now.sec, now.nsec);
+
+    geometry_msgs::PoseStamped pose_msg;
+    geometry_msgs::TwistStamped twist_msg;
+
+    // Get pose and update the message.
+    pose_ = link_->GetWorldPose();
+    pose_msg.header.frame_id = frame_id_;
+    pose_msg.header.stamp.sec  = now.sec;
+    pose_msg.header.stamp.nsec = now.nsec;
+    pose_msg.pose.position.x = pose_.pos.x;
+    pose_msg.pose.position.y = pose_.pos.y;
+    pose_msg.pose.position.z = pose_.pos.z;
+    pose_msg.pose.orientation.w = pose_.rot.w;
+    pose_msg.pose.orientation.x = pose_.rot.x;
+    pose_msg.pose.orientation.y = pose_.rot.y;
+    pose_msg.pose.orientation.z = pose_.rot.z;
+    {
+      boost::mutex::scoped_lock lock(mtx_);
+      bag_.write(ground_truth_pose_pub_topic_, ros_now, pose_msg);
+    }
+
+    // Get twist and update the message.
+    math::Vector3 linear_veloctiy = link_->GetWorldLinearVel();
+    math::Vector3 angular_veloctiy = link_->GetWorldAngularVel();
+    twist_msg.header.frame_id = frame_id_;
+    twist_msg.header.stamp.sec  = now.sec;
+    twist_msg.header.stamp.nsec = now.nsec;
+    twist_msg.twist.linear.x = linear_veloctiy.x;
+    twist_msg.twist.linear.y = linear_veloctiy.y;
+    twist_msg.twist.linear.z = linear_veloctiy.z;
+    twist_msg.twist.angular.x = angular_veloctiy.x;
+    twist_msg.twist.angular.y = angular_veloctiy.y;
+    twist_msg.twist.angular.z = angular_veloctiy.z;
+    {
+      boost::mutex::scoped_lock lock(mtx_);
+      bag_.write(ground_truth_twist_pub_topic_, ros_now, twist_msg);
+    }
   }
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboBagPlugin);

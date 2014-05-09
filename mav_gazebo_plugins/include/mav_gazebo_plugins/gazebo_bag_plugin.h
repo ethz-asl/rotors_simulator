@@ -11,17 +11,22 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/Point.h>
+#include <sensor_msgs/Imu.h>
+#include <std_msgs/Float32.h>
 
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
 
+
 namespace gazebo
 {
   /// \brief This plugin is used to create rosbag files in within gazebo.
   class GazeboBagPlugin : public ModelPlugin
   {
+    typedef std::map<const unsigned int, const physics::JointPtr> MotorNumberToJointMap;
+    typedef std::pair<const unsigned int, const physics::JointPtr> MotorNumberToJointPair;
     public:
       /// \brief Constructor
       GazeboBagPlugin();
@@ -37,6 +42,19 @@ namespace gazebo
       /// \brief Called when the world is updated.
       /// \param[in] _info Update timing information.
       void OnUpdate(const common::UpdateInfo& /*_info*/);
+
+      /// \brief Called when an IMU message is received.
+      /// \param[in] imu_msg A IMU message from sensor_msgs.
+      void ImuCallback(const sensor_msgs::ImuPtr& imu_msg);
+
+      /// \brief Log the ground truth pose and twist.
+      /// \param[in] now The current gazebo common::Time
+      void LogGroundTruth(const common::Time now);
+
+      /// \brief Log all the motor velocities.
+      /// \param[in] now The current gazebo common::Time
+      void LogMotorVelocities(const common::Time now);
+
     private:
       /// \brief The connections.
       event::ConnectionPtr update_connection_;
@@ -50,26 +68,45 @@ namespace gazebo
       /// \brief Pointer to the link.
       physics::LinkPtr link_;
 
+      physics::Link_V child_links_;
+
+      MotorNumberToJointMap motor_joints_;
+
       /// \brief The pose of the model.
       math::Pose pose_;
 
+      // /// \brief Pointer to the ContactManager to get all collisions of this 
+      // /// link and its children
+      // physics::ContactManager *contact_mgr_;
+
+      // /// \brief The collisions for the link and its children in the model.
+      // std::map<std::string, physics::CollisionPtr> collisions;
+
       std::string namespace_;
-      std::string pose_topic_;
+      std::string ground_truth_pose_pub_topic_;
+      std::string ground_truth_twist_pub_topic_;
+      std::string imu_pub_topic_;
+      std::string imu_sub_topic_;
+      std::string motor_pub_topic_;
       std::string frame_id_;
       std::string link_name_;
       std::string bag_filename_;
 
+      /// \brief Mutex lock for thread safty of writing bag files
+      boost::mutex mtx_;
+
       rosbag::Bag bag_;
       ros::NodeHandle *node_handle_;
 
+      // Ros publishers
       ros::Publisher ground_truth_pose_pub_;
       ros::Publisher ground_truth_twist_pub_;
       // ros::Publisher collision_positions_pub_;
-
       ros::Publisher time_pub_;
+      ros::Publisher imu_pub_;
 
-      geometry_msgs::PoseStamped pose_msg_;
-      geometry_msgs::TwistStamped twist_msg_;
+      // Ros subscribers
+      ros::Subscriber imu_sub_;
 
       std::ofstream csvOut;
   };
