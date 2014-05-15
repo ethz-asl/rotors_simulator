@@ -13,6 +13,9 @@
 #include <geometry_msgs/Point.h>
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/Float32.h>
+#include <mav_msgs/ControlAttitudeThrust.h>
+#include <mav_msgs/ControlMotorSpeed.h>
+#include <mav_msgs/ControlRateThrust.h>
 
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
@@ -46,6 +49,21 @@ namespace gazebo
       /// \brief Called when an IMU message is received.
       /// \param[in] imu_msg A IMU message from sensor_msgs.
       void ImuCallback(const sensor_msgs::ImuPtr& imu_msg);
+
+      /// \brief Called when a ControlAttitudeThrust message is received.
+      /// \param[in] control_msg A ControlAttitudeThrust message from mav_msgs.
+      void ControlAttitudeThrustCallback(
+        const mav_msgs::ControlAttitudeThrustPtr& control_msg);
+
+      /// \brief Called when a ControlMotorSpeed message is received.
+      /// \param[in] control_msg A ControlMotorSpeed message from mav_msgs.
+      void ControlMotorSpeedCallback(
+        const mav_msgs::ControlMotorSpeedPtr& control_msg);
+
+      /// \brief Called when a ControlRateThrust message is received.
+      /// \param[in] control_msg A ControlRateThrust message from mav_msgs.
+      void ControlRateThrustCallback(
+        const mav_msgs::ControlRateThrustPtr& control_msg);
 
       /// \brief Log the ground truth pose and twist.
       /// \param[in] now The current gazebo common::Time
@@ -87,6 +105,12 @@ namespace gazebo
       std::string ground_truth_twist_pub_topic_;
       std::string imu_pub_topic_;
       std::string imu_sub_topic_;
+      std::string control_attitude_thrust_pub_topic_;
+      std::string control_attitude_thrust_sub_topic_;
+      std::string control_motor_speed_pub_topic_;
+      std::string control_motor_speed_sub_topic_;
+      std::string control_rate_thrust_pub_topic_;
+      std::string control_rate_thrust_sub_topic_;
       std::string motor_pub_topic_;
       std::string frame_id_;
       std::string link_name_;
@@ -98,15 +122,11 @@ namespace gazebo
       rosbag::Bag bag_;
       ros::NodeHandle *node_handle_;
 
-      // Ros publishers
-      ros::Publisher ground_truth_pose_pub_;
-      ros::Publisher ground_truth_twist_pub_;
-      // ros::Publisher collision_positions_pub_;
-      ros::Publisher time_pub_;
-      ros::Publisher imu_pub_;
-
       // Ros subscribers
       ros::Subscriber imu_sub_;
+      ros::Subscriber control_attitude_thrust_sub_;
+      ros::Subscriber control_motor_speed_sub_;
+      ros::Subscriber control_rate_thrust_sub_;
 
       std::ofstream csvOut;
   };

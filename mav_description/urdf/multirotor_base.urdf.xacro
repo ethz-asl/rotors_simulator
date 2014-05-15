@@ -68,6 +68,8 @@
         <bagFileName>firefly.bag</bagFileName>
         <linkName>base_link</linkName>
         <frameId>base_link</frameId>
+        <controlAttitudeThrustSubTopic>mav_cmd</controlAttitudeThrustSubTopic>
+        <controlAttitudeThrustPubTopic>mav_cmd</controlAttitudeThrustPubTopic>
       </plugin>
     </gazebo>
 

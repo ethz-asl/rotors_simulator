@@ -44,6 +44,12 @@ namespace gazebo
     ground_truth_twist_pub_topic_ = "/" + namespace_ + "/ground_truth/twist";
     imu_pub_topic_ = "/" + namespace_ + "/imu";
     imu_sub_topic_ = "/" + namespace_ + "/imu";
+    control_attitude_thrust_sub_topic_ = "/" + namespace_ + "/mav_attitude_cmd";
+    control_attitude_thrust_pub_topic_ = "/" + namespace_ + "/mav_attitude_cmd";
+    control_motor_speed_sub_topic_ = "/" + namespace_ + "/mav_motor_cmd";
+    control_motor_speed_pub_topic_ = "/" + namespace_ + "/mav_motor_cmd";
+    control_rate_thrust_sub_topic_ = "/" + namespace_ + "/mav_rate_cmd";
+    control_rate_thrust_pub_topic_ = "/" + namespace_ + "/mav_rate_cmd";
     motor_pub_topic_ = "/" + namespace_ + "/motor_vel";
     frame_id_ = "ground_truth_pose";
     link_name_ = "base_link";
@@ -70,6 +76,30 @@ namespace gazebo
     if (_sdf->HasElement("imuPubTopic"))
       imu_pub_topic_ = _sdf->GetElement("imuPubTopic")->Get<std::string>();
 
+    if (_sdf->HasElement("controlAttitudeThrustSubTopic"))
+      control_attitude_thrust_sub_topic_ = _sdf->GetElement(
+        "controlAttitudeThrustSubTopic")->Get<std::string>();
+
+    if (_sdf->HasElement("controlAttitudeThrustPubTopic"))
+      control_attitude_thrust_pub_topic_ = _sdf->GetElement(
+        "controlAttitudeThrustPubTopic")->Get<std::string>();
+
+    if (_sdf->HasElement("controlMotorSpeedSubTopic"))
+      control_motor_speed_sub_topic_ = _sdf->GetElement(
+        "controlMotorSpeedSubTopic")->Get<std::string>();
+
+    if (_sdf->HasElement("controlMotorSpeedPubTopic"))
+      control_motor_speed_pub_topic_ = _sdf->GetElement(
+        "controlMotorSpeedPubTopic")->Get<std::string>();
+
+    if (_sdf->HasElement("controlRateThrustSubTopic"))
+      control_rate_thrust_sub_topic_ = _sdf->GetElement(
+        "controlRateThrustSubTopic")->Get<std::string>();
+
+    if (_sdf->HasElement("controlRateThrustPubTopic"))
+      control_rate_thrust_pub_topic_ = _sdf->GetElement(
+        "controlRateThrustPubTopic")->Get<std::string>();
+
     if (_sdf->HasElement("motorPubTopic"))
       motor_pub_topic_ = _sdf->GetElement("motorPubTopic")->Get<std::string>();
 
@@ -82,8 +112,6 @@ namespace gazebo
     this->update_connection_ = event::Events::ConnectWorldUpdateBegin(
         boost::bind(&GazeboBagPlugin::OnUpdate, this, _1));
 
-    // ground_truth_pose_pub_ = node_handle_->advertise<geometry_msgs::PoseStamped>(
-    //   ground_truth_pose_topic_, 10);
     time_t rawtime;
     struct tm *timeinfo;
     char buffer[80];
@@ -124,7 +152,7 @@ namespace gazebo
     //   if (!this->contactSub)
     //   {
     //     this->contactSub = this->node->Subscribe(topic,
-    //         &Gripper::OnContacts, this);
+    //         &GazeboBagPlugin::OnContacts, this);
     //   }
     // }
 
@@ -143,8 +171,23 @@ namespace gazebo
     }
 
     // Subscriber to IMU Sensor
-    imu_sub_ = node_handle_->subscribe(imu_sub_topic_, 10, 
+    imu_sub_ = node_handle_->subscribe(imu_sub_topic_, 10,
       &GazeboBagPlugin::ImuCallback, this);
+
+    // Subscriber to Control Attitude Thrust Message
+    control_attitude_thrust_sub_ = node_handle_->subscribe(
+      control_attitude_thrust_sub_topic_, 10,
+      &GazeboBagPlugin::ControlAttitudeThrustCallback, this);
+
+    // Subscriber to Control Motor Speed Message
+    control_motor_speed_sub_ = node_handle_->subscribe(
+      control_motor_speed_sub_topic_, 10,
+      &GazeboBagPlugin::ControlMotorSpeedCallback, this);
+
+    // Subscriber to Control Rate Thrust Message
+    control_rate_thrust_sub_ = node_handle_->subscribe(
+      control_rate_thrust_sub_topic_, 10,
+      &GazeboBagPlugin::ControlRateThrustCallback, this);
   }
 
   // Called by the world update start event
@@ -153,8 +196,8 @@ namespace gazebo
     // Get the current simulation time.
     common::Time now = world_->GetSimTime();
 
-    // TODO(ff): Make this work, currently it gives the wrong contacts and 
-    //           collisions, there is always only one collision
+    // TODO(ff): Make this work, currently it gives the wrong contacts and
+    //           collisions, there is always only one collision.
 
     // unsigned int contact_count = contact_mgr_->GetContactCount();
     // std::cout << "contact_count: " << contact_count << "\n";
@@ -171,6 +214,27 @@ namespace gazebo
   void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuPtr& imu_msg) {
     boost::mutex::scoped_lock lock(mtx_);
     bag_.write(imu_pub_topic_, imu_msg->header.stamp, imu_msg);
+  }
+
+  void GazeboBagPlugin::ControlAttitudeThrustCallback(
+        const mav_msgs::ControlAttitudeThrustPtr& control_msg) {
+    boost::mutex::scoped_lock lock(mtx_);
+    bag_.write(control_attitude_thrust_pub_topic_,
+      control_msg->header.stamp, control_msg);
+  }
+
+  void GazeboBagPlugin::ControlMotorSpeedCallback(
+        const mav_msgs::ControlMotorSpeedPtr& control_msg) {
+    boost::mutex::scoped_lock lock(mtx_);
+    bag_.write(control_motor_speed_pub_topic_,
+      control_msg->header.stamp, control_msg);
+  }
+
+  void GazeboBagPlugin::ControlRateThrustCallback(
+        const mav_msgs::ControlRateThrustPtr& control_msg) {
+    boost::mutex::scoped_lock lock(mtx_);
+    bag_.write(control_rate_thrust_pub_topic_,
+      control_msg->header.stamp, control_msg);
   }
 
   void GazeboBagPlugin::LogMotorVelocities(const common::Time now) {
