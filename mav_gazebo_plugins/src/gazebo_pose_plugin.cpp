@@ -6,8 +6,15 @@
 //==============================================================================
 #include <mav_gazebo_plugins/gazebo_pose_plugin.h>
 
-namespace gazebo
-{
+namespace gazebo{
+
+  template<class In, class Out>
+  void copyPosition(const In& in, Out& out) {
+    out.x = in.x;
+    out.y = in.y;
+    out.z = in.z;
+  }
+
   GazeboPosePlugin::GazeboPosePlugin() : 
     ModelPlugin(), node_handle_(0) {}
 
@@ -34,6 +41,9 @@ namespace gazebo
     pose_topic_ = "pose";
     frame_id_ = "/pose_sensor";
 
+    gazebo_seq_ = 0;
+    pose_seq_ = 0;
+
     if (_sdf->HasElement("robotNamespace"))
       namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
     else
@@ -58,6 +68,11 @@ namespace gazebo
 
     if (_sdf->HasElement("measurementDelay"))
       measurement_delay_ = _sdf->GetElement("measurementDelay")->Get<double>();
+
+    if (_sdf->HasElement("measurementDivisor"))
+      measurement_divisor_ = _sdf->GetElement("measurementDivisor")->Get<double>();
+    else
+      measurement_divisor_ = 1;
 
     if (_sdf->HasElement("noiseNormalQ")) {
       noise_normal_q_ = _sdf->GetElement(
@@ -84,22 +99,39 @@ namespace gazebo
     this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(
         boost::bind(&GazeboPosePlugin::OnUpdate, this, _1));
 
-    pose_pub_ = node_handle_->advertise<geometry_msgs::PoseStamped>(
+    pose_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(
       pose_topic_, 10);
-    pose_msg_.header.frame_id = frame_id_;
   }
 
   // Called by the world update start event
   void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info)
   {
-    pose_ = link_->GetWorldCoGPose();
-    pose_msg_.header.stamp.sec  = (world_->GetSimTime()).sec;
-    pose_msg_.header.stamp.nsec = (world_->GetSimTime()).nsec;
-    // Do here, what ever you want to do, every simulation iteration.
-    // You could for example check if the sensor should publish data according
-    // to the last_time_published
+    if(gazebo_seq_++ % measurement_divisor_ != 0)
+      return;
 
-    // We could also use an UpdateTimer from hector_gazebo_plugins
+    geometry_msgs::PoseWithCovarianceStamped pose_msg;
+
+    math::Pose pose = link_->GetWorldCoGPose();
+    pose_msg.header.frame_id = frame_id_;
+    pose_msg.header.seq = pose_seq_++;
+    pose_msg.header.stamp.sec  = (world_->GetSimTime()).sec;
+    pose_msg.header.stamp.nsec = (world_->GetSimTime()).nsec;
+
+    double np = noise_normal_p_ * noise_normal_p_;
+    double nq = noise_normal_q_ * noise_normal_q_;
+
+    copyPosition(pose.pos, pose_msg.pose.pose.position);
+    pose_msg.pose.pose.orientation.w = pose.rot.w;
+    pose_msg.pose.pose.orientation.x = pose.rot.x;
+    pose_msg.pose.pose.orientation.y = pose.rot.y;
+    pose_msg.pose.pose.orientation.z = pose.rot.z;
+
+    Eigen::Map<Eigen::Matrix<double, 6, 6>> cov(pose_msg.pose.covariance.data());
+    Eigen::Matrix<double, 6, 1> covd;
+    covd << np, np, np, nq, nq, nq;
+    cov = covd.asDiagonal();
+
+    pose_pub_.publish(pose_msg);
   }
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboPosePlugin);
