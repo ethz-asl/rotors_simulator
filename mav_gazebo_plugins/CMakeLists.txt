@@ -28,7 +28,10 @@ include_directories(${Eigen_INCLUDE_DIRS})
 add_library(mav_gazebo_motor_model src/gazebo_motor_model.cpp)
 target_link_libraries(mav_gazebo_motor_model ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
+add_library(mav_gazebo_pose_plugin src/gazebo_pose_plugin.cpp)
+target_link_libraries(mav_gazebo_pose_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(mav_gazebo_pose_plugin ${catkin_EXPORTED_TARGETS})
+
 add_library(mav_gazebo_controller_interface src/gazebo_controller_interface.cpp)
 target_link_libraries(mav_gazebo_controller_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-add_dependencies(
-  mav_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})
+add_dependencies(mav_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})

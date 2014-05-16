@@ -60,8 +60,15 @@
         <updateRate>100.0</updateRate>
         <gaussianNoise>0.0</gaussianNoise>
       </plugin>
+      <!-- Pose Plugin -->
+      <plugin filename="libmav_gazebo_pose_plugin.so" name="pose_plugin">
+        <frameId>base_link</frameId>
+        <linkName>base_link</linkName>
+        <robotNamespace>${robot_namespace}</robotNamespace>
+        <poseTopic>sensor_pose</poseTopic>
+        <measurementDivisor>10</measurementDivisor>
+      </plugin>
     </gazebo>
-    
   </xacro:macro>
 
   <!-- camera -->
