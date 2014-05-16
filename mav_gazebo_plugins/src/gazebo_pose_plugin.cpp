@@ -6,7 +6,7 @@
 //==============================================================================
 #include <mav_gazebo_plugins/gazebo_pose_plugin.h>
 
-namespace gazebo{
+namespace gazebo {
 
   template<class In, class Out>
   void copyPosition(const In& in, Out& out) {
@@ -29,8 +29,7 @@ namespace gazebo{
   // void GazeboPosePlugin::InitializeParams() {};
   // void GazeboPosePlugin::Publish() {};
 
-  void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
-  {
+  void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     // Store the pointer to the model
     model_ = _model;
     // world_ = physics::get_world(model_->world.name);
@@ -40,6 +39,7 @@ namespace gazebo{
     namespace_.clear();
     pose_topic_ = "pose";
     frame_id_ = "/pose_sensor";
+    measurement_divisor_ = 1;
 
     gazebo_seq_ = 0;
     pose_seq_ = 0;
@@ -70,9 +70,8 @@ namespace gazebo{
       measurement_delay_ = _sdf->GetElement("measurementDelay")->Get<double>();
 
     if (_sdf->HasElement("measurementDivisor"))
-      measurement_divisor_ = _sdf->GetElement("measurementDivisor")->Get<double>();
-    else
-      measurement_divisor_ = 1;
+      measurement_divisor_ = _sdf->GetElement(
+        "measurementDivisor")->Get<double>();
 
     if (_sdf->HasElement("noiseNormalQ")) {
       noise_normal_q_ = _sdf->GetElement(
@@ -104,8 +103,7 @@ namespace gazebo{
   }
 
   // Called by the world update start event
-  void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info)
-  {
+  void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
     if(gazebo_seq_++ % measurement_divisor_ != 0)
       return;
 
