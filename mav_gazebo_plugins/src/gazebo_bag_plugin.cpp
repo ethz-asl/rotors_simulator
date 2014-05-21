@@ -11,7 +11,7 @@
 
 namespace gazebo
 {
-  GazeboBagPlugin::GazeboBagPlugin() : 
+  GazeboBagPlugin::GazeboBagPlugin() :
     ModelPlugin(), node_handle_(0) {}
 
   GazeboBagPlugin::~GazeboBagPlugin() {
@@ -206,7 +206,7 @@ namespace gazebo
     //   std::cout<<"link_collision[" << i << "]: "
     //     <<collisions[i]->GetScopedName()<<"\n";
     // }
-    
+
     this->LogGroundTruth(now);
     this->LogMotorVelocities(now);
   }
