@@ -90,10 +90,7 @@ namespace gazebo
 
       MotorNumberToJointMap motor_joints_;
 
-      /// \brief The pose of the model.
-      math::Pose pose_;
-
-      // /// \brief Pointer to the ContactManager to get all collisions of this 
+      // /// \brief Pointer to the ContactManager to get all collisions of this
       // /// link and its children
       // physics::ContactManager *contact_mgr_;
 

@@ -263,17 +263,17 @@ namespace gazebo
     geometry_msgs::TwistStamped twist_msg;
 
     // Get pose and update the message.
-    pose_ = link_->GetWorldPose();
+    math::Pose pose = link_->GetWorldPose();
     pose_msg.header.frame_id = frame_id_;
     pose_msg.header.stamp.sec  = now.sec;
     pose_msg.header.stamp.nsec = now.nsec;
-    pose_msg.pose.position.x = pose_.pos.x;
-    pose_msg.pose.position.y = pose_.pos.y;
-    pose_msg.pose.position.z = pose_.pos.z;
-    pose_msg.pose.orientation.w = pose_.rot.w;
-    pose_msg.pose.orientation.x = pose_.rot.x;
-    pose_msg.pose.orientation.y = pose_.rot.y;
-    pose_msg.pose.orientation.z = pose_.rot.z;
+    pose_msg.pose.position.x = pose.pos.x;
+    pose_msg.pose.position.y = pose.pos.y;
+    pose_msg.pose.position.z = pose.pos.z;
+    pose_msg.pose.orientation.w = pose.rot.w;
+    pose_msg.pose.orientation.x = pose.rot.x;
+    pose_msg.pose.orientation.y = pose.rot.y;
+    pose_msg.pose.orientation.z = pose.rot.z;
     {
       boost::mutex::scoped_lock lock(mtx_);
       bag_.write(ground_truth_pose_pub_topic_, ros_now, pose_msg);
