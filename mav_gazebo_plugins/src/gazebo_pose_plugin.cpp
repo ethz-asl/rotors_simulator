@@ -40,6 +40,8 @@ namespace gazebo {
     pose_topic_ = "pose";
     frame_id_ = "/pose_sensor";
     measurement_divisor_ = 1;
+    noise_normal_p_ = 0.01;
+    noise_normal_q_ = 0.02;
 
     gazebo_seq_ = 0;
     pose_seq_ = 0;
