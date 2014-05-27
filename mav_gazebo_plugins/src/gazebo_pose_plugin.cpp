@@ -61,6 +61,8 @@ Eigen::Quaternion<typename Derived::Scalar> QuaternionFromSmallAngle(const Eigen
     measurement_delay_ = 0;
     noise_normal_p_ = 0.01;
     noise_normal_q_ = 0.02;
+    noise_uniform_p_ = 0;
+    noise_uniform_q_ = 0;
 
     gazebo_seq_ = 0;
     pose_seq_ = 0;
@@ -117,7 +119,7 @@ Eigen::Quaternion<typename Derived::Scalar> QuaternionFromSmallAngle(const Eigen
     }
 
     for (int i = 0; i < 3; ++i) {
-      pos_n_[i] = NormalDistribution(0, noise_uniform_p_);
+      pos_n_[i] = NormalDistribution(0, noise_normal_p_);
       att_n_[i] = NormalDistribution(0, noise_normal_q_);
       pos_u_[i] = UniformDistribution(-noise_uniform_p_, noise_uniform_p_);
       att_u_[i] = UniformDistribution(-noise_uniform_q_, noise_uniform_q_);
