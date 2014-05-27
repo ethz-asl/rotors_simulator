@@ -20,6 +20,7 @@ namespace gazebo
       node_handle_->shutdown();
       delete node_handle_;
     }
+    bag_.close();
   };
 
   // void GazeboBagPlugin::InitializeParams() {};
@@ -161,7 +162,7 @@ namespace gazebo
       std::string link_name = child_links_[i]->GetScopedName();
 
       // Check if link contains rotor_ in its name
-      unsigned int pos = link_name.find("rotor_");
+      int pos = link_name.find("rotor_");
       if (pos != link_name.npos) {
         std::string motor_number_str = link_name.substr(pos + 6);
         unsigned int motor_number = std::stoi(motor_number_str);

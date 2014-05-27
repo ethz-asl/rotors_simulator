@@ -55,7 +55,7 @@
 
       <!-- IMU -->
       <plugin filename="libhector_gazebo_ros_imu.so" name="imu_ros">
-        <bodyName>base_link</bodyName>
+        <bodyName>imu_link</bodyName>
         <robotNamespace>${robot_namespace}</robotNamespace>
         <topicName>imu</topicName>
         <updateRate>100.0</updateRate>
