@@ -50,7 +50,6 @@ namespace gazebo
 
       std::string namespace_;
 
-
       std::string frame_id_;
       std::string link_name_;
 
