@@ -189,8 +189,8 @@ Eigen::Quaternion<typename Derived::Scalar> QuaternionFromSmallAngle(const Eigen
       cov = covd.asDiagonal();
 
     pose_pub_.publish(pose);
-    std::cout << "published pose with timestamp " << pose->header.stamp << "at time t" << world_->GetSimTime().Double()
-        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
+//    std::cout << "published pose with timestamp " << pose->header.stamp << "at time t" << world_->GetSimTime().Double()
+//        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
     }
 
     gazebo_seq_ ++;

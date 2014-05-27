@@ -28,29 +28,6 @@
 
 namespace gazebo {
 
-//class Pose {
-// public:
-//  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-//  typedef std::deque<Pose, Eigen::aligned_allocator<Pose> > Queue;
-//
-//  Pose()
-//      : timestamp(0),
-//        time_to_publish(0) {
-//  }
-//
-//  Pose(double _timestamp, int _time_to_publish, const Eigen::Vector3d& _pos, const Eigen::Quaterniond& _att)
-//      : timestamp(_timestamp),
-//        time_to_publish(_time_to_publish),
-//        pos(_pos),
-//        att(_att) {
-//  }
-//
-//  double timestamp;
-//  int time_to_publish;
-//  Eigen::Vector3d pos;
-//  Eigen::Quaterniond att;
-//};
-
 class GazeboPosePlugin : public ModelPlugin {
  public:
   typedef std::normal_distribution<> NormalDistribution;
