@@ -78,8 +78,12 @@
         <linkName>base_link</linkName>
         <robotNamespace>${robot_namespace}</robotNamespace>
         <poseTopic>sensor_pose</poseTopic>
-        <measurementDivisor>10</measurementDivisor>
-        <measurementDelay>2</measurementDelay>
+        <measurementDivisor>1</measurementDivisor>
+        <measurementDelay>0</measurementDelay>
+        <noiseNormalP>0.0</noiseNormalP>
+        <noiseNormalQ>0.0</noiseNormalQ>
+        <noiseUniformP>0.0</noiseUniformP>
+        <noiseUniformQ>0.0</noiseUniformQ>
       </plugin>
       <!-- Wind Plugin -->
       <plugin filename="libmav_gazebo_wind_plugin.so" name="wind_plugin">
