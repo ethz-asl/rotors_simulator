@@ -62,7 +62,6 @@ class GazeboPosePlugin : public ModelPlugin {
   UniformDistribution pos_u_[3];
   UniformDistribution att_u_[3];
 
-  double measurement_rate_;
   int measurement_delay_;
   int measurement_divisor_;
   double noise_normal_q_;

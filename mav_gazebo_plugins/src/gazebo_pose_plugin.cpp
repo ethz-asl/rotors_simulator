@@ -33,8 +33,19 @@ Eigen::Quaternion<typename Derived::Scalar> QuaternionFromSmallAngle(const Eigen
     out.z = in.z;
   }
 
-  GazeboPosePlugin::GazeboPosePlugin() : 
-    ModelPlugin(), node_handle_(0), gen_(rd_()) {}
+  GazeboPosePlugin::GazeboPosePlugin()
+      : ModelPlugin(),
+        node_handle_(0),
+        gen_(rd_()),
+        measurement_delay_(0),
+        measurement_divisor_(1),
+        noise_normal_q_(0),
+        noise_normal_p_(0),
+        noise_uniform_q_(0),
+        noise_uniform_p_(0),
+        gazebo_seq_(0),
+        pose_seq_(0) {
+  }
 
   GazeboPosePlugin::~GazeboPosePlugin() {
     event::Events::DisconnectWorldUpdateBegin(updateConnection_);
@@ -87,9 +98,6 @@ Eigen::Quaternion<typename Derived::Scalar> QuaternionFromSmallAngle(const Eigen
 
     if (_sdf->HasElement("poseTopic"))
       pose_topic_ = _sdf->GetElement("poseTopic")->Get<std::string>();
-
-    if (_sdf->HasElement("measurementRate"))
-      measurement_rate_ = _sdf->GetElement("measurementRate")->Get<double>();
 
     if (_sdf->HasElement("measurementDelay"))
       measurement_delay_ = _sdf->GetElement("measurementDelay")->Get<int>();
