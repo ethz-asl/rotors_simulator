@@ -47,7 +47,7 @@
       <plugin name="controller_interface"
         filename="libmav_gazebo_controller_interface.so">
         <robotNamespace>${robot_namespace}</robotNamespace>
-        <commandTopicAttitude>mav_cmd</commandTopicAttitude>
+        <commandTopicAttitude>mav_cmd_attitude</commandTopicAttitude>
         <commandTopicRate>mav_cmd_rate</commandTopicRate>
         <commandTopicMotor>mav_cmd_motor</commandTopicMotor>
         <imuTopic>imu</imuTopic>
