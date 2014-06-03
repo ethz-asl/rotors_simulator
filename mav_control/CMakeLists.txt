@@ -33,6 +33,7 @@ add_library(mav_control
   src/controller_base.cpp
   src/attitude_controller.cpp
   src/attitude_controller_samy.cpp
+  src/motor_controller.cpp
 )
 
 target_link_libraries(mav_control ${catkin_LIBRARIES})
