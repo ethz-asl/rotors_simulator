@@ -12,10 +12,23 @@ RosControllerInterface::RosControllerInterface()
     : node_handle_(0),
       controller_created_(false) {
 
-  std::string command_topic_attitude = "command/attitude";
-  std::string command_topic_rate = "command/rate";
-  std::string command_topic_motor = "command/motor";
-  std::string ekf_topic = "msf_core/state_out";
+  node_handle_ = new ros::NodeHandle("~");
+
+  std::string ekf_topic;
+  std::string command_topic_attitude;
+  std::string command_topic_rate;
+  std::string command_topic_motor;
+
+  node_handle_->param("ekf_topic", ekf_topic, "msf_core/state_out");
+  node_handle_->param("command_topic_attitude", command_topic_attitude,
+                      "command/attitude");
+  node_handle_->param("command_topic_rate", command_topic_rate, "command/rate");
+  node_handle_->param("command_topic_motor", command_topic_motor,
+                      "command/motor");
+  node_handle_->param("imu_topic", imu_topic_, "imu");
+  node_handle_->param("pose_topic", pose_topic_, "sensor_pose");
+  node_handle_->param("motor_velocity_topic", motor_velocity_topic_,
+                      "motor_velocity");
 
   cmd_attitude_sub_ = node_handle_->subscribe(
       command_topic_attitude, 10,
@@ -29,8 +42,9 @@ RosControllerInterface::RosControllerInterface()
   pose_sub_ = node_handle_->subscribe(pose_topic_, 10,
                                       &RosControllerInterface::PoseCallback,
                                       this);
-  ekf_sub_ = node_handle_->subscribe(ekf_topic, 10, &RosControllerInterface::ExtEkfCallback,
-                                      this);
+  ekf_sub_ = node_handle_->subscribe(ekf_topic, 10,
+                                     &RosControllerInterface::ExtEkfCallback,
+                                     this);
 
   motor_cmd_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(
       motor_velocity_topic_, 10);
@@ -67,10 +81,21 @@ void RosControllerInterface::CommandAttitudeCallback(
 }
 
 void RosControllerInterface::ExtEkfCallback(
-    const sensor_fusion_comm::ExtEkfConstPtr ekf_message) {
+    const sensor_fusion_comm::DoubleArrayStampedConstPtr ekf_state) {
   if (!controller_created_)
     return;
 
+  Eigen::Vector3d position(ekf_state->data[0], ekf_state->data[1],
+                           ekf_state->data[2]);
+  controller_->SetPosition(position);
+
+  Eigen::Vector3d velocity(ekf_state->data[3], ekf_state->data[4],
+                           ekf_state->data[5]);
+  controller_->SetVelocity(velocity);
+
+  Eigen::Quaternion<double> orientation(ekf_state->data[6], ekf_state->data[7],
+                                        ekf_state->data[8], ekf_state->data[9]);
+  controller_->SetAttitude(orientation);
 }
 
 void RosControllerInterface::CommandMotorCallback(

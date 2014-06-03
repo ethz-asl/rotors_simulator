@@ -22,7 +22,7 @@
 #include <mav_msgs/ControlMotorSpeed.h>
 #include <mav_msgs/MotorSpeed.h>
 
-#include <sensor_fusion_comm/ExtEkf.h>
+#include <sensor_fusion_comm/DoubleArrayStamped.h>
 
 namespace mav_control {
 
@@ -68,7 +68,7 @@ class RosControllerInterface {
       const mav_msgs::ControlAttitudeThrustPtr& input_reference_msg);
   void CommandMotorCallback(
       const mav_msgs::ControlMotorSpeedPtr& input_reference_msg);
-  void ExtEkfCallback(const sensor_fusion_comm::ExtEkfConstPtr ekf_message);
+  void ExtEkfCallback(const sensor_fusion_comm::DoubleArrayStampedConstPtr ekf_state);
   void ImuCallback(const sensor_msgs::ImuPtr& imu);
   void PoseCallback(const geometry_msgs::PoseStampedPtr& pose);
 };
