@@ -58,7 +58,6 @@ namespace gazebo
       ros::Subscriber imu_sub_;
       ros::Subscriber pose_sub_;
 
-
       // Pointer to the model
       physics::ModelPtr model_;
       // Pointer to the update event connection
