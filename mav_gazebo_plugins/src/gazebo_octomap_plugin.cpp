@@ -68,7 +68,6 @@ namespace gazebo
       return;
     }
 
-    std::string entityName;
     math::Vector3 start, end;
 
     gazebo::physics::PhysicsEnginePtr engine = world_->GetPhysicsEngine();
