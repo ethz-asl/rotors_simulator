@@ -203,7 +203,7 @@ Eigen::Quaternion<typename Derived::Scalar> QuaternionFromSmallAngle(const Eigen
 //        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
     }
 
-    gazebo_seq_ ++;
+    ++ gazebo_seq_;
   }
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboPosePlugin);
