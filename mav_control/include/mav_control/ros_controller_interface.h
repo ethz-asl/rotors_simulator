@@ -22,6 +22,8 @@
 #include <mav_msgs/ControlMotorSpeed.h>
 #include <mav_msgs/MotorSpeed.h>
 
+#include <sensor_fusion_comm/ExtEkf.h>
+
 namespace mav_control {
 
 
@@ -49,6 +51,7 @@ class RosControllerInterface {
   ros::Subscriber cmd_motor_sub_;
   ros::Subscriber imu_sub_;
   ros::Subscriber pose_sub_;
+  ros::Subscriber ekf_sub_;
 
   // Pointer to the model
 //      physics::ModelPtr model_;
@@ -65,6 +68,7 @@ class RosControllerInterface {
       const mav_msgs::ControlAttitudeThrustPtr& input_reference_msg);
   void CommandMotorCallback(
       const mav_msgs::ControlMotorSpeedPtr& input_reference_msg);
+  void ExtEkfCallback(const sensor_fusion_comm::ExtEkfConstPtr ekf_message);
   void ImuCallback(const sensor_msgs::ImuPtr& imu);
   void PoseCallback(const geometry_msgs::PoseStampedPtr& pose);
 };

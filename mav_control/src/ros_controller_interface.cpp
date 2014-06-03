@@ -15,6 +15,7 @@ RosControllerInterface::RosControllerInterface()
   std::string command_topic_attitude = "command/attitude";
   std::string command_topic_rate = "command/rate";
   std::string command_topic_motor = "command/motor";
+  std::string ekf_topic = "msf_core/state_out";
 
   cmd_attitude_sub_ = node_handle_->subscribe(
       command_topic_attitude, 10,
@@ -28,6 +29,9 @@ RosControllerInterface::RosControllerInterface()
   pose_sub_ = node_handle_->subscribe(pose_topic_, 10,
                                       &RosControllerInterface::PoseCallback,
                                       this);
+  ekf_sub_ = node_handle_->subscribe(ekf_topic, 10, &RosControllerInterface::ExtEkfCallback,
+                                      this);
+
   motor_cmd_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(
       motor_velocity_topic_, 10);
 }
@@ -60,6 +64,13 @@ void RosControllerInterface::CommandAttitudeCallback(
                                   input_reference_msg->yaw_rate,
                                   input_reference_msg->thrust);
   controller_->SetAttitudeThrustReference(input_reference);
+}
+
+void RosControllerInterface::ExtEkfCallback(
+    const sensor_fusion_comm::ExtEkfConstPtr ekf_message) {
+  if (!controller_created_)
+    return;
+
 }
 
 void RosControllerInterface::CommandMotorCallback(
