@@ -6,11 +6,13 @@
 //==============================================================================
 
 #include <mav_gazebo_plugins/gazebo_octomap_plugin.h>
+#include <gazebo/math/Vector3.hh>
+#include <gazebo/common/Time.hh>
 
 
 namespace gazebo
 {
-  OctomapCreator::OctomapCreator() : WorldPlugin(), node_handle_()  {}
+  OctomapCreator::OctomapCreator() : WorldPlugin(), node_handle_(), octomap_() {}
   OctomapCreator::~OctomapCreator() {
     // if (node_handle_) {
     //   node_handle_->shutdown();
@@ -25,42 +27,47 @@ namespace gazebo
       "/octomap/command", &OctomapCreator::ServiceCallback, this);
   }
 
-  bool OctomapCreator::ServiceCallback(std_srvs::Empty::Request& req,
-    std_srvs::Empty::Response& res) {
-    Create();
+  bool OctomapCreator::ServiceCallback(planning_msgs::Octomap::Request& req,
+      planning_msgs::Octomap::Response& res) {
+    std::cout << "Creating octomap with origin at ("
+      << req.bounding_box_origin.x << ", " << req.bounding_box_origin.y
+      << ", " << req.bounding_box_origin.z << "), and bounding box lengths ("
+      << req.bounding_box_lengths.x << ", " << req.bounding_box_lengths.y
+      << ", " << req.bounding_box_lengths.z << "), and leaf size: "
+      << req.leaf_size << ".\n";
+    Create(req);
+    if (req.filename != "") {
+      std::cout << "Storing Octomap as: " << req.filename << "\n";
+    }
+    req = octomap_;
     return true;
   }
 
-  void OctomapCreator::Create(/*CollisionMapRequestPtr &msg*/) {
-    gazebo::common::Time::Sleep(gazebo::common::Time(5));
+  void OctomapCreator::Create(const planning_msgs::Octomap::Request& msg) {
+    // gazebo::common::Time::Sleep(gazebo::common::Time(5));
     std::cout << "Received message" << std::endl;
 
-    // math::Vector3 point_origin = msg->point_origin();
-    // math::Vector3 bounding_box = msg->bounding_box();
+    math::Vector3 bounding_box_origin(
+      msg.bounding_box_origin.x,
+      msg.bounding_box_origin.y,
+      msg.bounding_box_origin.z);
+    math::Vector3 bounding_box_lengths(
+      msg.bounding_box_lengths.x,
+      msg.bounding_box_lengths.y,
+      msg.bounding_box_lengths.z
+    );
+    double leaf_size = msg.leaf_size;
 
-    double dZ_vertical = 20;
-    double mag_vertical = dZ_vertical;
-    dZ_vertical = 0.1 * dZ_vertical / mag_vertical;
-    double step_horizontal = 0.1;
+    int count_x = bounding_box_lengths.x / leaf_size;
+    int count_y = bounding_box_lengths.y / leaf_size;
+    int count_z = bounding_box_lengths.z / leaf_size;
 
-    double dX_horizontal = 20;
-    double dY_horizontal = 20;
-    double mag_horizontal = sqrt(dX_horizontal * dX_horizontal + dY_horizontal * dY_horizontal);
-    dX_horizontal = step_horizontal * dX_horizontal / mag_horizontal;
-    dY_horizontal = step_horizontal * dY_horizontal / mag_horizontal;
-
-    int count_vertical = mag_vertical / step_horizontal;
-    int count_horizontal = mag_horizontal / step_horizontal;
-
-    if (count_vertical == 0 || count_horizontal == 0)
+    if (count_z == 0 || count_x == 0 || count_z == 0)
     {
       std::cout << "Octomap has a zero dimension, check input msg." << std::endl;
       return;
     }
 
-    double x, y, z;
-
-    double dist;
     std::string entityName;
     math::Vector3 start, end;
 
@@ -71,24 +78,27 @@ namespace gazebo
 
     std::cout << "Rasterizing model and checking collisions" << std::endl;
 
-    for (int i = 0; i < count_horizontal; ++i) {
-      std::cout << "Percent complete: " << i * 100.0 / count_horizontal << std::endl;
-      x = i * dX_horizontal + (-10);
-
-      for (int j = 0; j < count_horizontal; ++j) {
-        y = j * dY_horizontal + (-10);
-        for (int k = 0; k < count_vertical; ++k) {
-          z = k * dZ_vertical + (-5);
+    for (int i = 0; i < count_x; ++i) {
+      std::cout << "Percent complete: " << i * 100.0 / count_x << std::endl;
+      double x = i * leaf_size + (bounding_box_origin.x - bounding_box_lengths.x / 2);
+      for (int j = 0; j < count_y; ++j) {
+        double y = j * leaf_size
+          + (bounding_box_origin.y - bounding_box_lengths.y / 2);
+        for (int k = 0; k < count_z; ++k) {
+          double z = k * leaf_size
+            + (bounding_box_origin.z - bounding_box_lengths.z / 2);
           start.x = x;
-          end.x = x + dX_horizontal;
+          end.x = x + leaf_size;
 
           start.y = end.y = y;
           start.z = end.z = z;
           ray->SetPoints(start, end);
-          ray->GetIntersection(dist, entityName);
+          double dist;
+          std::string entity_name;
+          ray->GetIntersection(dist, entity_name);
           // maybe use gazebo::physics::World::GetEntityBelowPoint(Vector3&)
-          if (!entityName.empty()) {
-            std::cout << "Found "<<entityName<<" at x="<<x<<" and y="<<y<<" and z="<<z<<" with dist="<<dist<<".\n";
+          if (!entity_name.empty()) {
+            std::cout << "Found "<<entity_name<<" at x="<<x<<" and y="<<y<<" and z="<<z<<" with dist="<<dist<<".\n";
           }
         }
       }
