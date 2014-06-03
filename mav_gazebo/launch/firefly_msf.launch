@@ -2,8 +2,6 @@
   <node name="msf" pkg="msf_updates" type="pose_sensor" clear_params="true" output="screen">
     <remap from="msf_updates/pose_with_covariance_input" to="/firefly/sensor_pose" />
     <remap from="msf_core/imu_state_input" to="/firefly/imu" />
-    <!-- <remap from="msf_core/hl_state_input" to="fcu/ekf_state_out" /> -->
-    <!-- <remap from="msf_core/correction" to="fcu/ekf_state_in"/> -->
     <rosparam file="$(find mav_params)/parameters/simulator_msf.yaml"/>
     <param name="capability_group" value="Core"></param>
   </node>
