@@ -7,7 +7,10 @@
 #ifndef MAV_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H
 #define MAV_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H
 
-#include <Eigen/Eigen>
+#include <Eigen/Dense>
+#include <random>
+#include <cmath>
+#include <deque>
 
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
@@ -18,13 +21,19 @@
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
 #include <stdio.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 
 //#include <mav_gazebo_plugins/pose_distorter.h>
 
 namespace gazebo {
+
 class GazeboPosePlugin : public ModelPlugin {
  public:
+  typedef std::normal_distribution<> NormalDistribution;
+  typedef std::uniform_real_distribution<> UniformDistribution;
+  typedef std::deque<std::pair<int, geometry_msgs::PoseStamped> > PoseQueue;
+
   GazeboPosePlugin();
   ~GazeboPosePlugin();
 
@@ -36,6 +45,8 @@ class GazeboPosePlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
+  PoseQueue pose_queue_;
+
   std::string namespace_;
   std::string pose_topic_;
   ros::NodeHandle* node_handle_;
@@ -43,8 +54,15 @@ class GazeboPosePlugin : public ModelPlugin {
   std::string frame_id_;
   std::string link_name_;
 
-  double measurement_rate_;
-  double measurement_delay_;
+  std::random_device rd_;
+  std::mt19937 gen_;
+
+  NormalDistribution pos_n_[3];
+  NormalDistribution att_n_[3];
+  UniformDistribution pos_u_[3];
+  UniformDistribution att_u_[3];
+
+  int measurement_delay_;
   int measurement_divisor_;
   double noise_normal_q_;
   double noise_normal_p_;
