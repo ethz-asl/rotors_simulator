@@ -28,3 +28,7 @@ void ControllerBase::SetAttitudeThrustReference(
   Eigen::Vector4d control_attitude_thrust_reference) {
   control_attitude_thrust_reference_ = control_attitude_thrust_reference;
 }
+
+void ControllerBase::SetMotorReference(Eigen::VectorXd motor_reference) {
+  motor_reference_ = motor_reference;
+}

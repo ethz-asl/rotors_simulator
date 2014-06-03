@@ -24,7 +24,9 @@ class ControllerBase {
     void SetAngularRate(Eigen::Vector3d angular_rate);
     void SetAttitudeThrustReference(
       Eigen::Vector4d control_attitude_thrust_reference);
+    void SetMotorReference(Eigen::VectorXd motor_reference);
     virtual void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const = 0;
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   protected:
@@ -33,6 +35,7 @@ class ControllerBase {
     Eigen::Quaternion<double> attitude_;
     Eigen::Vector3d angular_rate_;
     Eigen::Vector4d control_attitude_thrust_reference_;
+    Eigen::VectorXd motor_reference_;
     int amount_rotors_;
     bool initialized_params_;
 };

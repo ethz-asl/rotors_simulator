@@ -9,7 +9,7 @@
 namespace gazebo
 {
   GazeboControllerInterface::GazeboControllerInterface() : 
-    ModelPlugin(), node_handle_(0) {}
+    ModelPlugin(), node_handle_(0), controller_created_(false) {}
 
   GazeboControllerInterface::~GazeboControllerInterface() {
     event::Events::DisconnectWorldUpdateBegin(updateConnection_);
@@ -29,7 +29,9 @@ namespace gazebo
 
     // default params
     namespace_.clear();
-    command_topic_ = "command/motor";
+    std::string command_topic_attitude = "command/attitude";
+    std::string command_topic_rate = "command/rate";
+    std::string command_topic_motor = "command/motor";
 
     if (_sdf->HasElement("robotNamespace"))
       namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
@@ -37,8 +39,11 @@ namespace gazebo
       gzerr << "[gazebo_motor_model] Please specify a robotNamespace.\n";
     node_handle_ = new ros::NodeHandle(namespace_);
 
-    if (_sdf->HasElement("commandTopic"))
-      command_topic_ = _sdf->GetElement("commandTopic")->Get<std::string>();
+    if (_sdf->HasElement("commandTopicAttitude"))
+      command_topic_attitude = _sdf->GetElement("commandTopicAttitude")->Get<std::string>();
+
+    if (_sdf->HasElement("commandTopicMotor"))
+      command_topic_motor = _sdf->GetElement("commandTopicMotor")->Get<std::string>();
 
     if (_sdf->HasElement("imuTopic"))
       imu_topic_ = _sdf->GetElement("imuTopic")->Get<std::string>();
@@ -51,18 +56,16 @@ namespace gazebo
         "motorVelocityReferenceTopic")->Get<std::string>();
     }
 
-    // Get the controller and initialize its parameters.
-    controller_ = mav_controller_factory::ControllerFactory::Instance()
-      .CreateController("AttitudeController");
-    controller_->InitializeParams();
 
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
     this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(
         boost::bind(&GazeboControllerInterface::OnUpdate, this, _1));
 
-    cmd_sub_ = node_handle_->subscribe(command_topic_,
-      10, &GazeboControllerInterface::ControlCommandCallback, this);
+    cmd_attitude_sub_ = node_handle_->subscribe(command_topic_attitude,
+      10, &GazeboControllerInterface::CommandAttitudeCallback, this);
+    cmd_motor_sub_ = node_handle_->subscribe(command_topic_motor,
+      10, &GazeboControllerInterface::CommandMotorCallback, this);
     imu_sub_ = node_handle_->subscribe(imu_topic_,
       10, &GazeboControllerInterface::ImuCallback, this);
     pose_sub_ = node_handle_->subscribe(pose_topic_,
@@ -74,6 +77,8 @@ namespace gazebo
   // Called by the world update start event
   void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/)
   {
+    if(!controller_created_)
+      return;
     Eigen::VectorXd ref_rotor_velocities;
     controller_->CalculateRotorVelocities(&ref_rotor_velocities);
 
@@ -84,9 +89,17 @@ namespace gazebo
     motor_cmd_pub_.publish(turning_velocities_msg_);
   }
 
-  void GazeboControllerInterface::ControlCommandCallback(
+  void GazeboControllerInterface::CommandAttitudeCallback(
     const mav_msgs::ControlAttitudeThrustPtr& input_reference_msg)
   {
+    if(!controller_created_) {
+      // Get the controller and initialize its parameters.
+      controller_ = mav_controller_factory::ControllerFactory::Instance()
+        .CreateController("AttitudeController");
+      controller_->InitializeParams();
+      controller_created_ = true;
+      gzmsg << "started AttitudeController" << std::endl;
+    }
     Eigen::Vector4d input_reference (
       input_reference_msg->roll,
       input_reference_msg->pitch,
@@ -95,9 +108,31 @@ namespace gazebo
     controller_->SetAttitudeThrustReference(input_reference);
   }
 
+  void GazeboControllerInterface::CommandMotorCallback(
+    const mav_msgs::ControlMotorSpeedPtr& input_reference_msg)
+  {
+    if(!controller_created_) {
+      // Get the controller and initialize its parameters.
+      controller_ = mav_controller_factory::ControllerFactory::Instance()
+        .CreateController("MotorController");
+      controller_->InitializeParams();
+      controller_created_ = true;
+      gzmsg << "started MotorController" << std::endl;
+    }
+
+    Eigen::VectorXd input_reference;
+    input_reference.resize(input_reference_msg->motor_speed.size());
+    for(int i=0; i<input_reference_msg->motor_speed.size(); ++i) {
+      input_reference[i] = input_reference_msg->motor_speed[i];
+    }
+    controller_->SetMotorReference(input_reference);
+  }
+
   void GazeboControllerInterface::ImuCallback(
     const sensor_msgs::ImuPtr& imu_msg)
   {
+    if(!controller_created_)
+      return;
     Eigen::Vector3d angular_rate (
       imu_msg->angular_velocity.x,
       imu_msg->angular_velocity.y,
@@ -109,6 +144,8 @@ namespace gazebo
   void GazeboControllerInterface::PoseCallback(
     const geometry_msgs::PoseStampedPtr& pose_msg)
   {
+    if(!controller_created_)
+      return;
     Eigen::Quaternion<double> orientation (
       pose_msg->pose.orientation.w,
       pose_msg->pose.orientation.x,
