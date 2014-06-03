@@ -3,7 +3,7 @@
 
 
 class MotorController : public ControllerBase {
- public:
+  public:
     MotorController();
     virtual ~MotorController();
     virtual void InitializeParams();
@@ -16,6 +16,4 @@ class MotorController : public ControllerBase {
     Eigen::Vector3d gain_attitude_;
     Eigen::Vector3d gain_angular_rate_;
     Eigen::Matrix3d inertia_matrix_;
-
-
 };
