@@ -13,20 +13,20 @@
 
 namespace gazebo
 {
-  OctomapCreator::OctomapCreator() : WorldPlugin(), node_handle_(), octomap_(NULL) {}
-  OctomapCreator::~OctomapCreator() {
+  OctomapFromGazeboWorld::OctomapFromGazeboWorld() : WorldPlugin(), node_handle_(), octomap_(NULL) {}
+  OctomapFromGazeboWorld::~OctomapFromGazeboWorld() {
     delete octomap_;
     octomap_ = NULL;
   }
 
-  void OctomapCreator::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf) {
+  void OctomapFromGazeboWorld::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf) {
     world_ = _parent;
-    std::cout << "Subscribing to: " << "/octomap/command" << std::endl;
+    std::cout << "Subscribing to: " << "octomap/command" << std::endl;
     srv_ = node_handle_.advertiseService(
-      "/octomap/command", &OctomapCreator::ServiceCallback, this);
+      "octomap/command", &OctomapFromGazeboWorld::ServiceCallback, this);
   }
 
-  bool OctomapCreator::ServiceCallback(planning_msgs::Octomap::Request& req,
+  bool OctomapFromGazeboWorld::ServiceCallback(planning_msgs::Octomap::Request& req,
       planning_msgs::Octomap::Response& res) {
     std::cout << "Creating octomap with origin at ("
       << req.bounding_box_origin.x << ", " << req.bounding_box_origin.y
@@ -59,7 +59,7 @@ namespace gazebo
     return true;
   }
 
-  void OctomapCreator::Create(const planning_msgs::Octomap::Request& msg) {
+  void OctomapFromGazeboWorld::Create(const planning_msgs::Octomap::Request& msg) {
     double epsilon = 0.00001;
     int far_away = 100000;
     math::Vector3 bounding_box_origin(msg.bounding_box_origin.x,
@@ -184,5 +184,5 @@ namespace gazebo
   }
 
   // Register this plugin with the simulator
-  GZ_REGISTER_WORLD_PLUGIN(OctomapCreator)
+  GZ_REGISTER_WORLD_PLUGIN(OctomapFromGazeboWorld)
 }

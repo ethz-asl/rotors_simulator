@@ -20,12 +20,12 @@
 
 namespace gazebo
 {
-  class OctomapCreator : public WorldPlugin {
+  class OctomapFromGazeboWorld : public WorldPlugin {
    public:
     /// \brief Constructor
-    OctomapCreator();
+    OctomapFromGazeboWorld();
     /// \brief Destructor
-    virtual ~OctomapCreator();
+    virtual ~OctomapFromGazeboWorld();
 
    protected:
     /// \brief Load the plugin.
