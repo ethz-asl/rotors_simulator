@@ -15,6 +15,7 @@
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
 
+#include <octomap/octomap.h>
 #include <planning_msgs/Octomap.h>
 
 namespace gazebo
@@ -37,7 +38,7 @@ namespace gazebo
     physics::WorldPtr world_;
     ros::NodeHandle node_handle_;
     ros::ServiceServer srv_;
-    planning_msgs::Octomap::Request octomap_;
+    octomap::OcTree* octomap_;
     bool ServiceCallback(planning_msgs::Octomap::Request& req,
       planning_msgs::Octomap::Response& res);
   };
