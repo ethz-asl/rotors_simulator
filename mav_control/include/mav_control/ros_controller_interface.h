@@ -21,6 +21,7 @@
 #include <mav_msgs/ControlAttitudeThrust.h>
 #include <mav_msgs/ControlMotorSpeed.h>
 #include <mav_msgs/MotorSpeed.h>
+#include <mav_msgs/ControlTrajectory.h>
 
 #include <sensor_fusion_comm/DoubleArrayStamped.h>
 
@@ -49,6 +50,8 @@ class RosControllerInterface {
   ros::Publisher motor_cmd_pub_;
   ros::Subscriber cmd_attitude_sub_;
   ros::Subscriber cmd_motor_sub_;
+  ros::Subscriber cmd_trajectory_sub_;
+
   ros::Subscriber imu_sub_;
   ros::Subscriber pose_sub_;
   ros::Subscriber ekf_sub_;
@@ -65,12 +68,14 @@ class RosControllerInterface {
 //      boost::thread callback_queue_thread_;
 //      void QueueThread();
   void CommandAttitudeCallback(
-      const mav_msgs::ControlAttitudeThrustPtr& input_reference_msg);
+      const mav_msgs::ControlAttitudeThrustConstPtr& input_reference_msg);
+  void CommandTrajectoryCallback(
+      const mav_msgs::ControlTrajectoryConstPtr& trajectory_reference_msg);
   void CommandMotorCallback(
-      const mav_msgs::ControlMotorSpeedPtr& input_reference_msg);
+      const mav_msgs::ControlMotorSpeedConstPtr& input_reference_msg);
   void ExtEkfCallback(const sensor_fusion_comm::DoubleArrayStampedConstPtr ekf_state);
-  void ImuCallback(const sensor_msgs::ImuPtr& imu);
-  void PoseCallback(const geometry_msgs::PoseStampedPtr& pose);
+  void ImuCallback(const sensor_msgs::ImuConstPtr& imu);
+  void PoseCallback(const geometry_msgs::PoseStampedConstPtr& pose);
 };
 }
 
