@@ -1,5 +1,5 @@
 //==============================================================================
-// Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>
+// Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>, Michael Burri <burri210@gmail.com>
 // All rights reserved.
 //
 // TODO(ff): Enter some license
@@ -40,33 +40,30 @@ class RosControllerInterface {
   std::shared_ptr<ControllerBase> controller_;
   bool controller_created_;
 
+  ros::NodeHandle* node_handle_;
+
   std::string namespace_;
-  std::string command_topic_;
   std::string imu_topic_;
   std::string pose_topic_;
   std::string motor_velocity_topic_;
+  std::string ekf_topic_;
 
-  ros::NodeHandle* node_handle_;
+  // command topics
+  std::string command_topic_attitude_;
+  std::string command_topic_rate_;
+  std::string command_topic_motor_;
+  std::string command_topic_trajectory_;
+
   ros::Publisher motor_cmd_pub_;
+
+  // subscribers
   ros::Subscriber cmd_attitude_sub_;
   ros::Subscriber cmd_motor_sub_;
   ros::Subscriber cmd_trajectory_sub_;
-
   ros::Subscriber imu_sub_;
   ros::Subscriber pose_sub_;
   ros::Subscriber ekf_sub_;
 
-  // Pointer to the model
-//      physics::ModelPtr model_;
-  // Pointer to the update event connection
-//      event::ConnectionPtr updateConnection_;
-
-  sensor_msgs::Imu imu_;
-
-  mav_msgs::MotorSpeed turning_velocities_msg_;
-
-//      boost::thread callback_queue_thread_;
-//      void QueueThread();
   void CommandAttitudeCallback(
       const mav_msgs::ControlAttitudeThrustConstPtr& input_reference_msg);
   void CommandTrajectoryCallback(

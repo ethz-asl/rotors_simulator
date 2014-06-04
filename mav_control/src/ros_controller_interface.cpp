@@ -1,5 +1,5 @@
 //==============================================================================
-// Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>
+// Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>, Michael Burri <burri210@gmail.com>
 // All rights reserved.
 //
 // TODO(ff): Enter some license
@@ -14,34 +14,28 @@ RosControllerInterface::RosControllerInterface()
 
   node_handle_ = new ros::NodeHandle("~");
 
-  std::string ekf_topic;
-  std::string command_topic_attitude;
-  std::string command_topic_rate;
-  std::string command_topic_motor;
-  std::string command_topic_trajectory;
-
-  node_handle_->param<std::string>("ekf_topic", ekf_topic, "msf_core/state_out");
-  node_handle_->param<std::string>("command_topic_attitude", command_topic_attitude,
-                      "command/attitude");
-  node_handle_->param<std::string>("command_topic_rate", command_topic_rate, "command/rate");
-  node_handle_->param<std::string>("command_topic_motor", command_topic_motor,
-                      "command/motor");
-  node_handle_->param<std::string>("command_topic_trajectory", command_topic_trajectory,
-                      "control_new");
+  node_handle_->param<std::string>("ekf_topic", ekf_topic_, "msf_core/state_out");
+  node_handle_->param<std::string>("command_topic_attitude_", command_topic_attitude_,
+                                   "command/attitude");
+  node_handle_->param<std::string>("command_topic_rate_", command_topic_rate_, "command/rate");
+  node_handle_->param<std::string>("command_topic_motor_", command_topic_motor_,
+                                   "command/motor");
+  node_handle_->param<std::string>("command_topic_trajectory_", command_topic_trajectory_,
+                                   "control_new");
   node_handle_->param<std::string>("imu_topic", imu_topic_, "imu");
   node_handle_->param<std::string>("pose_topic", pose_topic_, "sensor_pose");
   node_handle_->param<std::string>("motor_velocity_topic", motor_velocity_topic_,
-                      "motor_velocity");
+                                   "motor_velocity");
 
-  cmd_attitude_sub_ = node_handle_->subscribe(command_topic_attitude, 10,
+  cmd_attitude_sub_ = node_handle_->subscribe(command_topic_attitude_, 10,
                                               &RosControllerInterface::CommandAttitudeCallback, this);
-  cmd_motor_sub_ = node_handle_->subscribe(command_topic_motor, 10,
+  cmd_motor_sub_ = node_handle_->subscribe(command_topic_motor_, 10,
                                            &RosControllerInterface::CommandMotorCallback, this);
-  cmd_trajectory_sub_ = node_handle_->subscribe(command_topic_trajectory, 10,
+  cmd_trajectory_sub_ = node_handle_->subscribe(command_topic_trajectory_, 10,
                                            &RosControllerInterface::CommandTrajectoryCallback, this);
   imu_sub_ = node_handle_->subscribe(imu_topic_, 10, &RosControllerInterface::ImuCallback, this);
   pose_sub_ = node_handle_->subscribe(pose_topic_, 10, &RosControllerInterface::PoseCallback, this);
-  ekf_sub_ = node_handle_->subscribe(ekf_topic, 10, &RosControllerInterface::ExtEkfCallback, this);
+  ekf_sub_ = node_handle_->subscribe(ekf_topic_, 10, &RosControllerInterface::ExtEkfCallback, this);
 
   motor_cmd_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_velocity_topic_, 10);
 }
@@ -63,26 +57,24 @@ void RosControllerInterface::CommandTrajectoryCallback(
     const mav_msgs::ControlTrajectoryConstPtr& trajectory_reference_msg) {
   if (!controller_created_) {
     return;
-//// Get the controller and initialize its parameters.
-//    controller_ = mav_controller_factory::ControllerFactory::Instance()
-//        .CreateController("AttitudeController");
-//    controller_->InitializeParams();
-//    controller_created_ = true;
-//    ROS_INFO_STREAM("started AttitudeController" << std::endl);
+    // TODO(burrimi): implement controller for trajectory following.
   }
 
   Eigen::Vector3d position_reference(trajectory_reference_msg->x[0],
                                      trajectory_reference_msg->y[0],
                                      trajectory_reference_msg->z[0]);
   controller_->SetPositionReference(position_reference);
+
   Eigen::Vector3d velocity_reference(trajectory_reference_msg->x[1],
                                      trajectory_reference_msg->y[1],
                                      trajectory_reference_msg->z[1]);
   controller_->SetVelocityReference(velocity_reference);
+
   Eigen::Vector3d acceleration_reference(trajectory_reference_msg->x[2],
                                      trajectory_reference_msg->y[2],
                                      trajectory_reference_msg->z[2]);
   controller_->SetAccelerationReference(acceleration_reference);
+
   Eigen::Vector3d jerk_reference(trajectory_reference_msg->x[3],
                                      trajectory_reference_msg->y[3],
                                      trajectory_reference_msg->z[3]);

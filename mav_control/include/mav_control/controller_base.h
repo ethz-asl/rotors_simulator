@@ -1,5 +1,5 @@
 //==============================================================================
-// Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>, Michael Burri <....>
+// Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>, Michael Burri <burri210@gmail.com>
 // All rights reserved.
 //
 // TODO(ff): Enter some license
