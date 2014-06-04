@@ -60,28 +60,29 @@ void RosControllerInterface::CommandTrajectoryCallback(
     // TODO(burrimi): implement controller for trajectory following.
   }
 
-  Eigen::Vector3d position_reference(trajectory_reference_msg->x[0],
-                                     trajectory_reference_msg->y[0],
-                                     trajectory_reference_msg->z[0]);
+  Eigen::Vector3d position_reference(trajectory_reference_msg->position[0],
+                                     trajectory_reference_msg->position[1],
+                                     trajectory_reference_msg->position[2]);
+
   controller_->SetPositionReference(position_reference);
 
-  Eigen::Vector3d velocity_reference(trajectory_reference_msg->x[1],
-                                     trajectory_reference_msg->y[1],
-                                     trajectory_reference_msg->z[1]);
+  Eigen::Vector3d velocity_reference(trajectory_reference_msg->velocity[0],
+                                     trajectory_reference_msg->velocity[1],
+                                     trajectory_reference_msg->velocity[2]);
   controller_->SetVelocityReference(velocity_reference);
 
-  Eigen::Vector3d acceleration_reference(trajectory_reference_msg->x[2],
-                                     trajectory_reference_msg->y[2],
-                                     trajectory_reference_msg->z[2]);
+  Eigen::Vector3d acceleration_reference(trajectory_reference_msg->acceleration[0],
+                                         trajectory_reference_msg->acceleration[1],
+                                         trajectory_reference_msg->acceleration[2]);
   controller_->SetAccelerationReference(acceleration_reference);
 
-  Eigen::Vector3d jerk_reference(trajectory_reference_msg->x[3],
-                                     trajectory_reference_msg->y[3],
-                                     trajectory_reference_msg->z[3]);
+  Eigen::Vector3d jerk_reference(trajectory_reference_msg->jerk[0],
+                                 trajectory_reference_msg->jerk[1],
+                                 trajectory_reference_msg->jerk[2]);
   controller_->SetJerkReference(jerk_reference);
 
-  controller_->SetYawReference(trajectory_reference_msg->yaw[0]);
-  controller_->SetYawRateReference(trajectory_reference_msg->yaw[1]);
+  controller_->SetYawReference(trajectory_reference_msg->yaw);
+  controller_->SetYawRateReference(trajectory_reference_msg->yaw_rate);
 }
 
 void RosControllerInterface::CommandAttitudeCallback(
