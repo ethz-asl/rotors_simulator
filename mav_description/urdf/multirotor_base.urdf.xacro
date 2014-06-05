@@ -4,7 +4,13 @@
 
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro" params="robot_namespace mass body_width body_height mesh_file *inertia">
-    <link name="base_link">
+    <link name="base_link"></link>
+    <joint name="base_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="base_link"/>
+      <child link="base_link_inertia"/>
+    </joint>
+    <link name="base_link_inertia">
       <inertial>
         <mass value="${mass}" />  <!-- [kg] -->
         <origin xyz="0 0 0" />
