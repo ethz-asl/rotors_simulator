@@ -34,7 +34,7 @@ namespace gazebo
       << req.bounding_box_lengths.x << ", " << req.bounding_box_lengths.y
       << ", " << req.bounding_box_lengths.z << "), and leaf size: "
       << req.leaf_size << ".\n";
-    Create(req);
+    CreateOctomap(req);
     if (req.filename != "") {
       if(octomap_) {
         std::string path = req.filename;
@@ -56,15 +56,18 @@ namespace gazebo
     else {
       ROS_ERROR("Error serializing OctoMap");
     }
+    std::cout << "Publishing Octomap." << std::endl;
     return true;
   }
 
-  void OctomapFromGazeboWorld::Create(const planning_msgs::Octomap::Request& msg) {
-    double epsilon = 0.00001;
-    int far_away = 100000;
+  void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request& msg) {
+    const double epsilon = 0.00001;
+    const int far_away = 100000;
     math::Vector3 bounding_box_origin(msg.bounding_box_origin.x,
                                       msg.bounding_box_origin.y,
                                       msg.bounding_box_origin.z);
+    // add epsilon to the box, because octomap has undefined behaviour if the
+    // point you want to insert is exactly between two leafs (doesn't look nice :).
     math::Vector3 bounding_box_lengths(msg.bounding_box_lengths.x + epsilon,
                                        msg.bounding_box_lengths.y + epsilon,
                                        msg.bounding_box_lengths.z + epsilon);
@@ -179,8 +182,6 @@ namespace gazebo
     }
     octomap_->prune();
     octomap_->updateInnerOccupancy();
-
-    std::cout << "Publishing Octomap." << std::endl;
   }
 
   // Register this plugin with the simulator

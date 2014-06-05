@@ -32,7 +32,7 @@ namespace gazebo
     /// \param[in] _parent Pointer to the world that loaded this plugin.
     /// \param[in] _sdf SDF element that describes the plugin.
     void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf);
-    void Create(const planning_msgs::Octomap::Request& msg);
+    void CreateOctomap(const planning_msgs::Octomap::Request& msg);
 
    private:
     physics::WorldPtr world_;
