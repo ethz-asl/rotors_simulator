@@ -11,8 +11,7 @@ namespace mav_control {
 RosControllerInterface::RosControllerInterface()
     : node_handle_(0),
       controller_created_(false) {
-
-  node_handle_ = new ros::NodeHandle("~");
+  node_handle_ = new ros::NodeHandle("/");
 
   InitializeParams();
 
@@ -25,6 +24,8 @@ RosControllerInterface::RosControllerInterface()
   imu_sub_ = node_handle_->subscribe(imu_topic_, 10, &RosControllerInterface::ImuCallback, this);
   pose_sub_ = node_handle_->subscribe(pose_topic_, 10, &RosControllerInterface::PoseCallback, this);
   ekf_sub_ = node_handle_->subscribe(ekf_topic_, 10, &RosControllerInterface::ExtEkfCallback, this);
+
+ROS_INFO_STREAM("subscribing to: "<< command_topic_trajectory_);
 
   motor_cmd_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_velocity_topic_, 10);
 }
@@ -42,7 +43,7 @@ void RosControllerInterface::InitializeParams() {
   node_handle_->param<std::string>("command_topic_attitude_", command_topic_attitude_, "command/attitude");
   node_handle_->param<std::string>("command_topic_rate_", command_topic_rate_, "command/rate");
   node_handle_->param<std::string>("command_topic_motor_", command_topic_motor_, "command/motor");
-  node_handle_->param<std::string>("command_topic_trajectory_", command_topic_trajectory_, "control_new");
+  node_handle_->param<std::string>("command_topic_trajectory_", command_topic_trajectory_, "/fcu/control_new");
   node_handle_->param<std::string>("imu_topic", imu_topic_, "imu");
   node_handle_->param<std::string>("pose_topic", pose_topic_, "sensor_pose");
   node_handle_->param<std::string>("motor_velocity_topic", motor_velocity_topic_, "motor_velocity");
@@ -54,8 +55,12 @@ void RosControllerInterface::Publish() {
 void RosControllerInterface::CommandTrajectoryCallback(
     const mav_msgs::ControlTrajectoryConstPtr& trajectory_reference_msg) {
   if (!controller_created_) {
-    return;
-    // TODO(burrimi): implement controller for trajectory following.
+    // Get the controller and initialize its parameters.
+    controller_ = mav_controller_factory::ControllerFactory::Instance()
+        .CreateController("LeePositionController");
+    controller_->InitializeParams();
+    controller_created_ = true;
+    ROS_INFO_STREAM("started LeePositionController" << std::endl);
   }
 
   Eigen::Vector3d position_reference(trajectory_reference_msg->position[0],
@@ -116,6 +121,19 @@ void RosControllerInterface::ExtEkfCallback(
   Eigen::Quaternion<double> orientation(ekf_state->data[6], ekf_state->data[7],
                                         ekf_state->data[8], ekf_state->data[9]);
   controller_->SetAttitude(orientation);
+
+  // TODO(burrimi): do the calculation at a better place.
+  Eigen::VectorXd ref_rotor_velocities;
+  controller_->CalculateRotorVelocities(&ref_rotor_velocities);
+
+  mav_msgs::MotorSpeed turning_velocities_msg;
+
+  turning_velocities_msg.motor_speed.clear();
+  for (int i = 0; i < ref_rotor_velocities.size(); i++)
+    turning_velocities_msg.motor_speed.push_back(ref_rotor_velocities[i]);
+
+  motor_cmd_pub_.publish(turning_velocities_msg);
+
 }
 
 void RosControllerInterface::CommandMotorCallback(
@@ -161,6 +179,8 @@ void RosControllerInterface::PoseCallback(
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "ros_controller_node");
+
+  mav_control::RosControllerInterface controller_interface;
 
   ros::spin();
 
