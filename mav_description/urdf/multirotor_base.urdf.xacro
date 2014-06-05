@@ -100,11 +100,11 @@
         <robotNamespace>${robot_namespace}</robotNamespace>
         <xyzOffset>0 0 0</xyzOffset> <!-- [m] [m] [m] -->
         <windDirection>1 0 0</windDirection>
-        <windForceMean>1</windForceMean> <!-- [N] -->
+        <windForceMean>0</windForceMean> <!-- [N] -->
         <windGustDirection>0 1 0</windGustDirection>
         <windGustDuration>2</windGustDuration> <!-- [s] -->
         <windGustStart>10</windGustStart> <!-- [s] -->
-        <windGustForceMean>3</windGustForceMean> <!-- [N] -->
+        <windGustForceMean>0</windGustForceMean> <!-- [N] -->
       </plugin>
     </gazebo>
   </xacro:macro>
