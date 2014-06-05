@@ -15,7 +15,7 @@
   <author email="ffurrer@gmail.com">Fadri Furrer</author>
 
   <buildtool_depend>catkin</buildtool_depend>>
-  
+
   <!-- Dependencies needed to compile this package. -->
   <build_depend>gazebo</build_depend>
   <build_depend>roscpp</build_depend>
@@ -23,6 +23,9 @@
   <build_depend>mav_model</build_depend>
   <build_depend>mav_control</build_depend>
   <build_depend>mav_msgs</build_depend>
+  <build_depend>octomap_ros</build_depend>
+  <build_depend>octomap</build_depend>
+  <build_depend>octomap_msgs</build_depend>
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>gazebo_ros</run_depend>
   <run_depend>roscpp</run_depend>
@@ -30,5 +33,8 @@
   <run_depend>mav_model</run_depend>
   <run_depend>mav_control</run_depend>
   <run_depend>mav_msgs</run_depend>
+  <run_depend>octomap_ros</run_depend>
+  <run_depend>octomap</run_depend>
+  <run_depend>octomap_msgs</run_depend>
 
 </package>

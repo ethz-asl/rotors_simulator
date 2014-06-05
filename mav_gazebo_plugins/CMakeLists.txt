@@ -9,9 +9,12 @@ find_package(catkin REQUIRED COMPONENTS
   mav_control
   mav_msgs
   rosbag
+  octomap_ros
+  octomap_msgs
 )
 
 find_package(Eigen REQUIRED)
+find_package(octomap REQUIRED)
 find_package(gazebo REQUIRED)
 link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(${GAZEBO_INCLUDE_DIRS})
@@ -19,8 +22,8 @@ include_directories(${GAZEBO_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES mav_gazebo_motor_model mav_gazebo_controller_interface
-  CATKIN_DEPENDS roscpp mav_model mav_control mav_msgs
-  DEPENDS eigen gazebo
+  CATKIN_DEPENDS roscpp mav_model mav_control mav_msgs octomap_ros octomap_msgs
+  DEPENDS eigen gazebo octomap
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})
@@ -48,3 +51,8 @@ add_library(mav_gazebo_wind_plugin src/gazebo_wind_plugin.cpp)
 target_link_libraries(mav_gazebo_wind_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(
   mav_gazebo_wind_plugin ${catkin_EXPORTED_TARGETS})
+
+add_library(mav_gazebo_octomap_plugin src/gazebo_octomap_plugin.cpp)
+target_link_libraries(mav_gazebo_octomap_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(
+  mav_gazebo_octomap_plugin ${catkin_EXPORTED_TARGETS})
