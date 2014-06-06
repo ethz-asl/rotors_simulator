@@ -84,8 +84,6 @@ void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velo
   Eigen::Vector3d e_3(0,0,1);
   double thrust =  - mass_ * acceleration.dot(attitude_.toRotationMatrix() * e_3);
 
-  std::cout << thrust << std::endl;
-
   Eigen::Vector4d angular_acceleration_thrust;
   angular_acceleration_thrust.block<3,1>(0,0) = angular_acceleration;
   angular_acceleration_thrust(3) = thrust;
