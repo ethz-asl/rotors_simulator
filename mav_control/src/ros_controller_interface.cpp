@@ -39,14 +39,14 @@ RosControllerInterface::~RosControllerInterface() {
 
 void RosControllerInterface::InitializeParams() {
   //TODO(burrimi): Read parameters from yaml.
-  node_handle_->param<std::string>("ekf_topic", ekf_topic_, "msf_core/state_out");
+  node_handle_->param<std::string>("ekf_topic", ekf_topic_, "/msf_core/state_out");
   node_handle_->param<std::string>("command_topic_attitude_", command_topic_attitude_, "command/attitude");
   node_handle_->param<std::string>("command_topic_rate_", command_topic_rate_, "command/rate");
   node_handle_->param<std::string>("command_topic_motor_", command_topic_motor_, "command/motor");
   node_handle_->param<std::string>("command_topic_trajectory_", command_topic_trajectory_, "/fcu/control_new");
-  node_handle_->param<std::string>("imu_topic", imu_topic_, "imu");
+  node_handle_->param<std::string>("imu_topic", imu_topic_, "/firefly/imu");
   node_handle_->param<std::string>("pose_topic", pose_topic_, "sensor_pose");
-  node_handle_->param<std::string>("motor_velocity_topic", motor_velocity_topic_, "motor_velocity");
+  node_handle_->param<std::string>("motor_velocity_topic", motor_velocity_topic_, "/firefly/mav_cmd_motor");
 
 }
 void RosControllerInterface::Publish() {
@@ -110,6 +110,12 @@ void RosControllerInterface::ExtEkfCallback(
   if (!controller_created_)
     return;
 
+  static bool test = true;
+  if(test) {
+    std::cout << "got first ekf message " << std::endl;
+    test=false;
+  }
+
   Eigen::Vector3d position(ekf_state->data[0], ekf_state->data[1],
                            ekf_state->data[2]);
   controller_->SetPosition(position);
@@ -158,6 +164,13 @@ void RosControllerInterface::CommandMotorCallback(
 void RosControllerInterface::ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg) {
   if (!controller_created_)
     return;
+
+  static bool test = true;
+  if(test) {
+    std::cout << "got first imu message " << std::endl;
+    test=false;
+  }
+
   Eigen::Vector3d angular_rate(imu_msg->angular_velocity.x,
                                imu_msg->angular_velocity.y,
                                imu_msg->angular_velocity.z);
