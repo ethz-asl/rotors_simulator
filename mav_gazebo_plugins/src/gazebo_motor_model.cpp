@@ -123,7 +123,7 @@ namespace gazebo
     else
       gzerr << "[gazebo_motor_model] Please specify a momentConstant for the motor.\n";
 
-    getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10, "default");
+    getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
 
     // Listen to the update event. This event is broadcast every
     // simulation iteration.

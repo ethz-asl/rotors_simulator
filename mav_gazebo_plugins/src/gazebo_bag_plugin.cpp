@@ -109,7 +109,7 @@ namespace gazebo
       ground_truth_pose_pub_topic_ =
         _sdf->GetElement("poseTopic")->Get<std::string>();
 
-    getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10, "default");
+    getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
 
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
