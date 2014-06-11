@@ -5,6 +5,7 @@
 // TODO(ff): Enter some license
 //==============================================================================
 #include <mav_gazebo_plugins/gazebo_motor_model.h>
+#include <mav_gazebo_plugins/common.h>
 
 namespace gazebo
 {
@@ -129,6 +130,8 @@ namespace gazebo
 
     cmd_sub_ = node_handle_->subscribe(command_topic_, 1000, &GazeboMotorModel::VelocityCallback, this);
     motor_vel_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_topic_, 10);
+
+    getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10, "default");
   }
 
   // Called by the world update start event
@@ -147,7 +150,7 @@ namespace gazebo
     motor_rot_vel_ = this->joint_->GetVelocity(0);
     // TODO(ff): I had to add a factor of 10 here and one in the SetVelocity,
     // because currently I can't set the velocity to a higher value than 100.
-    double real_motor_velocity = motor_rot_vel_ * 10;
+    double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
     double force = real_motor_velocity * real_motor_velocity * motor_constant_;
     // Apply a force to the link
     this->link_->AddRelativeForce(math::Vector3(0, 0, force));
@@ -158,19 +161,19 @@ namespace gazebo
     // - \omega * \lambda_1 * V_A^{\perp}
     math::Vector3 joint_axis = joint_->GetGlobalAxis(0);
     math::Vector3 body_velocity = link_->GetWorldLinearVel();
-    math::Vector3 body_velocity_perpendicular = body_velocity
-      - (body_velocity * joint_axis) * joint_axis;
-    math::Vector3 air_drag = - fabs(real_motor_velocity) * rotor_drag_coefficient_
-      * body_velocity_perpendicular;
+    math::Vector3 body_velocity_perpendicular = body_velocity - (body_velocity * joint_axis) * joint_axis;
+    math::Vector3 air_drag = - std::abs(real_motor_velocity) * rotor_drag_coefficient_ * body_velocity_perpendicular;
     // Apply air_drag to link
     this->link_->AddForce(air_drag);
     // Moments
     this->link_->AddRelativeTorque(math::Vector3(0, 0,
       - turning_direction_ * force * moment_constant_));
+
+    math::Vector3 rolling_moment;
     // - \omega * \mu_1 * V_A^{\perp}
-    this->link_->AddRelativeTorque(- fabs(real_motor_velocity)
-      * rolling_moment_coefficient_ * body_velocity_perpendicular);
-    this->joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / 10);
+    rolling_moment = - std::abs(real_motor_velocity) * rolling_moment_coefficient_ * body_velocity_perpendicular;
+    this->link_->AddRelativeTorque(rolling_moment);
+    this->joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
   };
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboMotorModel);

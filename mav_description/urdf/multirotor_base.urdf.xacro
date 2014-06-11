@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-
+  <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro" params="robot_namespace mass body_width body_height mesh_file *inertia">
     <link name="base_link"></link>
@@ -234,6 +234,7 @@
         <rotorDragCoefficient>${rotor_drag_coefficient}</rotorDragCoefficient>
         <rollingMomentCoefficient>${rolling_moment_coefficient}</rollingMomentCoefficient>
         <motorVelocityTopic>${robot_namespace}/motor_vel/${motor_number}</motorVelocityTopic>
+        <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
       </plugin>
     </gazebo>
     <gazebo reference="rotor_${motor_number}">

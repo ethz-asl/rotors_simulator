@@ -32,15 +32,21 @@ namespace gazebo{
  * \param[in] message If passed, then this error message will be passed to gzerror if the parameter is not available.
  */
 template<class T>
-bool getSdfParam(sdf::ElementPtr sdf, const std::string name, T& param, const T& default_value,
+bool getSdfParam(sdf::ElementPtr sdf, const std::string& name, T& param, const T& default_value,
                  const std::string& message = "") {
   if (sdf->HasElement(name)) {
     param = sdf->GetElement(name)->Get<T>();
     return true;
   } else {
     param = default_value;
-    if (!message.empty())
+    if (message.empty())
       gzerr << "[mav_gazebo_plugins] Please specify a value for parameter \"" << name << "\".\n";
+    else if (message == "default") {
+      gzwarn << "[mav_gazebo_plugins] No value specified in sdf for parameter \""
+         << name << "\", using default value " << default_value << ".\n";
+    }
+    else
+      gzerr << "[mav_gazebo_plugins] " << message <<".\n";
   }
   return false;
 }

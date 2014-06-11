@@ -61,6 +61,7 @@ namespace gazebo
       double inertia_;
       double rotor_drag_coefficient_;
       double rolling_moment_coefficient_;
+      double rotor_velocity_slowdown_sim_;
 
       ros::NodeHandle* node_handle_;
       ros::Publisher motor_vel_pub_;
