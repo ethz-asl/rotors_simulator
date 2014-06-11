@@ -166,7 +166,8 @@ namespace gazebo
       if (pos != link_name.npos) {
         std::string motor_number_str = link_name.substr(pos + 6);
         unsigned int motor_number = std::stoi(motor_number_str);
-        physics::JointPtr joint = (child_links_[i]->GetParentJoints())[0];
+        std::string joint_name = child_links_[i]->GetName() + "_joint";
+        physics::JointPtr joint = this->model_->GetJoint(joint_name);
         motor_joints_.insert(MotorNumberToJointPair(motor_number, joint));
       }
     }
