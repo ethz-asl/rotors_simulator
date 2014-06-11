@@ -123,6 +123,8 @@ namespace gazebo
     else
       gzerr << "[gazebo_motor_model] Please specify a momentConstant for the motor.\n";
 
+    getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10, "default");
+
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
     this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(
@@ -130,8 +132,6 @@ namespace gazebo
 
     cmd_sub_ = node_handle_->subscribe(command_topic_, 1000, &GazeboMotorModel::VelocityCallback, this);
     motor_vel_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_topic_, 10);
-
-    getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10, "default");
   }
 
   // Called by the world update start event
