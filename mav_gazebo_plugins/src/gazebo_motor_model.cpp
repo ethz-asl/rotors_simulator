@@ -153,7 +153,7 @@ namespace gazebo
     math::Vector3 body_velocity = link_->GetWorldLinearVel();
     math::Vector3 body_velocity_perpendicular = body_velocity
       - (body_velocity * joint_axis) * joint_axis;
-    math::Vector3 air_drag = - turning_direction_ * real_motor_velocity * rotor_drag_coefficient_
+    math::Vector3 air_drag = - fabs(real_motor_velocity) * rotor_drag_coefficient_
       * body_velocity_perpendicular;
     // Apply air_drag to link
     this->link_->AddForce(air_drag);
