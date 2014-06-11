@@ -246,7 +246,7 @@ namespace gazebo
 
     MotorNumberToJointMap::iterator m;
     for (m = motor_joints_.begin(); m != motor_joints_.end(); ++m) {
-      double motor_rot_vel = m->second->GetVelocity(0) * 100;
+      double motor_rot_vel = m->second->GetVelocity(0) * 10;
       rot_velocities_msg.motor_speed[m->first] = motor_rot_vel;
     }
     rot_velocities_msg.header.stamp.sec  = now.sec;

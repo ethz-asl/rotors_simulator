@@ -137,9 +137,9 @@ namespace gazebo
   void GazeboMotorModel::UpdateForcesAndMoments() {
 
     motor_rot_vel_ = this->joint_->GetVelocity(0);
-    // TODO(ff): I had to add a factor of 100 here and one in the SetVelocity,
+    // TODO(ff): I had to add a factor of 10 here and one in the SetVelocity,
     // because currently I can't set the velocity to a higher value than 100.
-    double real_motor_velocity = motor_rot_vel_ * 100;
+    double real_motor_velocity = motor_rot_vel_ * 10;
     double force = real_motor_velocity * real_motor_velocity * motor_constant_;
     // Apply a force to the link
     this->link_->AddRelativeForce(
@@ -160,7 +160,7 @@ namespace gazebo
     // Moments
     this->link_->AddRelativeTorque(math::Vector3(0, 0, -turning_direction_ *
       force * moment_constant_));
-    this->joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / 100);
+    this->joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / 10);
   };
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboMotorModel);
