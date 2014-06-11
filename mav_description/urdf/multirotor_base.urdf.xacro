@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-
+  <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro" params="robot_namespace mass body_width body_height mesh_file *inertia">
     <link name="base_link"></link>
@@ -78,6 +78,7 @@
         <frameId>base_link</frameId>
         <controlAttitudeThrustSubTopic>mav_cmd</controlAttitudeThrustSubTopic>
         <controlAttitudeThrustPubTopic>mav_cmd</controlAttitudeThrustPubTopic>
+        <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
       </plugin>
 
       <!-- Pose Plugin -->
@@ -181,7 +182,7 @@
   </xacro:macro>
 
   <!-- Rotor joint and link -->
-  <xacro:macro name="vertical_rotor" params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant max_rot_velocity motor_number rotor_drag_coefficient color *origin *inertia">
+  <xacro:macro name="vertical_rotor" params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant max_rot_velocity motor_number rotor_drag_coefficient rolling_moment_coefficient color *origin *inertia">
     <joint name="rotor_${motor_number}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
@@ -232,7 +233,9 @@
         <commandTopic>${robot_namespace}/motor_vel_ref</commandTopic>
         <motorNumber>${motor_number}</motorNumber>
         <rotorDragCoefficient>${rotor_drag_coefficient}</rotorDragCoefficient>
+        <rollingMomentCoefficient>${rolling_moment_coefficient}</rollingMomentCoefficient>
         <motorVelocityTopic>${robot_namespace}/motor_vel/${motor_number}</motorVelocityTopic>
+        <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
       </plugin>
     </gazebo>
     <gazebo reference="rotor_${motor_number}">

@@ -7,6 +7,7 @@
 #include <mav_gazebo_plugins/gazebo_bag_plugin.h>
 #include <ctime>
 #include <mav_msgs/MotorSpeed.h>
+#include <mav_gazebo_plugins/common.h>
 
 
 namespace gazebo
@@ -107,6 +108,8 @@ namespace gazebo
     if (_sdf->HasElement("poseTopic"))
       ground_truth_pose_pub_topic_ =
         _sdf->GetElement("poseTopic")->Get<std::string>();
+
+    getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
 
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
@@ -247,7 +250,7 @@ namespace gazebo
 
     MotorNumberToJointMap::iterator m;
     for (m = motor_joints_.begin(); m != motor_joints_.end(); ++m) {
-      double motor_rot_vel = m->second->GetVelocity(0) * 100;
+      double motor_rot_vel = m->second->GetVelocity(0) * rotor_velocity_slowdown_sim_;
       rot_velocities_msg.motor_speed[m->first] = motor_rot_vel;
     }
     rot_velocities_msg.header.stamp.sec  = now.sec;

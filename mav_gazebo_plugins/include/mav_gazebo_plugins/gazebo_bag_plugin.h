@@ -112,6 +112,7 @@ namespace gazebo
       std::string frame_id_;
       std::string link_name_;
       std::string bag_filename_;
+      double rotor_velocity_slowdown_sim_;
 
       /// \brief Mutex lock for thread safty of writing bag files
       boost::mutex mtx_;
