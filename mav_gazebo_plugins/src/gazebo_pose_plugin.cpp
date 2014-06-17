@@ -123,7 +123,7 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   att_u_[2] = UniformDistribution(-noise_uniform_q.z, noise_uniform_q.z);
 
   // Fill in covariance. We omit uniform noise here, to make it more exciting for the challengers :).
-  Eigen::Map<Eigen::Matrix<double, 6, 6>> cov(covariance_matrix_.data());
+  Eigen::Map<Eigen::Matrix<double, 6, 6> > cov(covariance_matrix_.data());
   Eigen::Matrix<double, 6, 1> covd;
 
   covd <<
