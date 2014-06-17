@@ -48,7 +48,6 @@ namespace gazebo
       std::string namespace_;
       std::string command_topic_;
       std::string imu_topic_;
-      std::string pose_topic_;
       std::string motor_velocity_topic_;
 
       ros::NodeHandle* node_handle_;
@@ -56,7 +55,6 @@ namespace gazebo
       ros::Subscriber cmd_attitude_sub_;
       ros::Subscriber cmd_motor_sub_;
       ros::Subscriber imu_sub_;
-      ros::Subscriber pose_sub_;
 
       // Pointer to the model
       physics::ModelPtr model_;
