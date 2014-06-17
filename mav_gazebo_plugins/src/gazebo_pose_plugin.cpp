@@ -104,7 +104,7 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam(_sdf, "noiseNormalP", noise_normal_p, zeros3);
   getSdfParam(_sdf, "noiseNormalQ", noise_normal_q, zeros3);
   getSdfParam(_sdf, "noiseUniformP", noise_uniform_p, zeros3);
-  getSdfParam(_sdf, "noiseUNiformQ", noise_uniform_q, zeros3);
+  getSdfParam(_sdf, "noiseUniformQ", noise_uniform_q, zeros3);
 
   pos_n_[0] = NormalDistribution(0, noise_normal_p.x);
   pos_n_[1] = NormalDistribution(0, noise_normal_p.y);
