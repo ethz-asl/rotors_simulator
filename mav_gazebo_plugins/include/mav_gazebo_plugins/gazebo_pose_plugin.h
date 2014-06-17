@@ -62,13 +62,10 @@ class GazeboPosePlugin : public ModelPlugin {
   UniformDistribution pos_u_[3];
   UniformDistribution att_u_[3];
 
+  geometry_msgs::PoseWithCovarianceStamped::_pose_type::_covariance_type covariance_matrix_;
+
   int measurement_delay_;
   int measurement_divisor_;
-  double noise_normal_q_;
-  double noise_normal_p_;
-  double noise_uniform_q_;
-  double noise_uniform_p_;
-
   int gazebo_seq_;
   int pose_seq_;
 
