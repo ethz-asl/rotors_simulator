@@ -48,7 +48,35 @@
       <child link="imu_link"/>
       <limit upper="0" lower="0" effort="0" velocity="0"/>
     </joint>
-
+    
+    <!-- pose sensor1 -->
+    <link name="pose_sensor1_link" >
+      <inertial>
+        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
+        <mass value="0.01" />  <!-- [kg] -->
+      </inertial>
+    </link>
+    <joint name="pose_sensor1_joint" type="revolute">
+    <parent link="base_link"/>
+      <origin xyz="0.05 0.1 0.15" rpy="0 ${3.14/4.0} 0" />
+      <child link="pose_sensor1_link"/>
+      <limit upper="0" lower="0" effort="0" velocity="0"/>
+    </joint>
+    
+     <!-- pose sensor2 -->
+    <link name="pose_sensor2_link" >
+      <inertial>
+        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
+        <mass value="0.01" />  <!-- [kg] -->
+      </inertial>
+    </link>
+    <joint name="pose_sensor2_joint" type="revolute">
+    <parent link="base_link"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <child link="pose_sensor2_link"/>
+      <limit upper="0" lower="0" effort="0" velocity="0"/>
+    </joint>   
+    
     <gazebo>
       <!-- Controller interface -->
       <plugin name="controller_interface"
@@ -93,20 +121,31 @@
         <controlAttitudeThrustPubTopic>mav_cmd</controlAttitudeThrustPubTopic>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
       </plugin>
-
-      <!-- Pose Plugin -->
-      <plugin filename="libmav_gazebo_pose_plugin.so" name="pose_plugin">
-        <frameId>base_link</frameId>
-        <linkName>base_link</linkName>
+      
+      <plugin filename="libmav_gazebo_pose_plugin.so" name="pose_sensor1">
+        <linkName>pose_sensor1_link</linkName>
         <robotNamespace>${robot_namespace}</robotNamespace>
-        <poseTopic>sensor_pose</poseTopic>
+        <poseTopic>sensors/pose1</poseTopic>
         <measurementDivisor>1</measurementDivisor>
         <measurementDelay>0</measurementDelay>
-        <noiseNormalP>0.0</noiseNormalP>
-        <noiseNormalQ>0.0</noiseNormalQ>
-        <noiseUniformP>0.0</noiseUniformP>
-        <noiseUniformQ>0.0</noiseUniformQ>
+        <noiseNormalP>0.01 0.01 0.01</noiseNormalP>
+        <noiseNormalQ>0.02 0.02 0.02</noiseNormalQ>
+        <noiseUniformP>0 0 0</noiseUniformP>
+        <noiseUniformQ>0 0 0</noiseUniformQ>
       </plugin>
+      
+      <plugin filename="libmav_gazebo_pose_plugin.so" name="pose_sensor2">
+        <linkName>pose_sensor2_link</linkName>
+        <robotNamespace>${robot_namespace}</robotNamespace>
+        <poseTopic>sensors/pose2</poseTopic>
+        <measurementDivisor>1</measurementDivisor>
+        <measurementDelay>0</measurementDelay>
+        <noiseNormalP>0.01 0.01 0.01</noiseNormalP>
+        <noiseNormalQ>0.02 0.02 0.02</noiseNormalQ>
+        <noiseUniformP>0 0 0</noiseUniformP>
+        <noiseUniformQ>0 0 0</noiseUniformQ>
+      </plugin>
+
       <!-- Wind Plugin -->
       <plugin filename="libmav_gazebo_wind_plugin.so" name="wind_plugin">
         <frameId>base_link</frameId>
