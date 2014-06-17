@@ -8,7 +8,7 @@
 
   <include file="$(find mav_gazebo)/launch/spawn_firefly.launch" />
 
-  <node name="gazebo_pose_publisher" pkg="mav_gazebo" type="gazebo_pose_publisher" args="firefly /fcu/current_pose"/>
+  <!--node name="gazebo_pose_publisher" pkg="mav_gazebo" type="gazebo_pose_publisher" args="firefly /fcu/current_pose"/-->
 
   <node name="polynomial_sampling_node_new" pkg="mav_planning_utils" type="polynomial_sampling_node_new"/>
 

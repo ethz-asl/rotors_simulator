@@ -4,5 +4,5 @@
     <!-- <arg name="debug" value="true" /> -->
   </include>
   <include file="$(find mav_gazebo)/launch/spawn_firefly.launch" />
-  <node name="gazebo_pose_publisher" pkg="mav_gazebo" type="gazebo_pose_publisher" args="firefly /firefly/pose"/>
+  <!--node name="gazebo_pose_publisher" pkg="mav_gazebo" type="gazebo_pose_publisher" args="firefly /firefly/pose"/-->
 </launch>

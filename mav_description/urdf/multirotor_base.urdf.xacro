@@ -110,6 +110,16 @@
         <headingGaussianNoise>0.0</headingGaussianNoise> <!-- (double): standard deviation of the heading additive Gaussian noise -->
         <rpyOffsets>0.0 0.0 0.0</rpyOffsets> <!-- (Vector3): if non-zero, used to calculate accelOffset and headingOffset so that resulting roll, pitch and yaw errors correspond to this values when the platform is leveled (for compatibility with gazebo_plugins) -->
       </plugin>
+      
+      <plugin filename="libhector_gazebo_ros_imu.so" name="imu_ros">
+        <robotNamespace>${robot_namespace}</robotNamespace>
+        <bodyName>imu_link</bodyName>
+        <topicName>ground_truth/imu</topicName>
+        <!-- everything defaults to zero, except drift frequency, let's do that for safety -->
+        <accelDriftFrequency>0.0 0.0 0.0</accelDriftFrequency>
+        <rateDriftFrequency>0.0 0.0 0.0</rateDriftFrequency>
+        <headingDriftFrequency>0.0</headingDriftFrequency>
+      </plugin>
 
       <!-- ROS Bag Plugin -->
       <plugin filename="libmav_gazebo_bag_plugin.so" name="rosbag">
@@ -120,6 +130,18 @@
         <controlAttitudeThrustSubTopic>mav_cmd</controlAttitudeThrustSubTopic>
         <controlAttitudeThrustPubTopic>mav_cmd</controlAttitudeThrustPubTopic>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+      </plugin>
+
+      <plugin filename="libmav_gazebo_pose_plugin.so" name="ground_truth_pose">
+        <linkName>base_link</linkName>
+        <robotNamespace>${robot_namespace}</robotNamespace>
+        <poseTopic>ground_truth/pose</poseTopic>
+        <measurementDivisor>1</measurementDivisor>
+        <measurementDelay>0</measurementDelay>
+        <noiseNormalP>0 0 0</noiseNormalP>
+        <noiseNormalQ>0 0 0</noiseNormalQ>
+        <noiseUniformP>0 0 0</noiseUniformP>
+        <noiseUniformQ>0 0 0</noiseUniformQ>
       </plugin>
       
       <plugin filename="libmav_gazebo_pose_plugin.so" name="pose_sensor1">

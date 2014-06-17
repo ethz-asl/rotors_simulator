@@ -48,9 +48,6 @@ namespace gazebo
     if (_sdf->HasElement("imuTopic"))
       imu_topic_ = _sdf->GetElement("imuTopic")->Get<std::string>();
 
-    if (_sdf->HasElement("poseTopic"))
-      pose_topic_ = _sdf->GetElement("poseTopic")->Get<std::string>();
-
     if (_sdf->HasElement("motorVelocityReferenceTopic")) {
       motor_velocity_topic_ = _sdf->GetElement(
         "motorVelocityReferenceTopic")->Get<std::string>();
@@ -68,8 +65,6 @@ namespace gazebo
       10, &GazeboControllerInterface::CommandMotorCallback, this);
     imu_sub_ = node_handle_->subscribe(imu_topic_,
       10, &GazeboControllerInterface::ImuCallback, this);
-    pose_sub_ = node_handle_->subscribe(pose_topic_,
-      10, &GazeboControllerInterface::PoseCallback, this);
     motor_cmd_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(
       motor_velocity_topic_, 10);
   }
@@ -138,20 +133,14 @@ namespace gazebo
       imu_msg->angular_velocity.y,
       imu_msg->angular_velocity.z);
     controller_->SetAngularRate(angular_rate);
-    // imu->linear_acceleration;
-  }
 
-  void GazeboControllerInterface::PoseCallback(
-    const geometry_msgs::PoseStampedPtr& pose_msg)
-  {
-    if(!controller_created_)
-      return;
     Eigen::Quaternion<double> orientation (
-      pose_msg->pose.orientation.w,
-      pose_msg->pose.orientation.x,
-      pose_msg->pose.orientation.y,
-      pose_msg->pose.orientation.z);
+      imu_msg->orientation.w,
+      imu_msg->orientation.x,
+      imu_msg->orientation.y,
+      imu_msg->orientation.z);
     controller_->SetAttitude(orientation);
+    // imu->linear_acceleration;
   }
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboControllerInterface);
