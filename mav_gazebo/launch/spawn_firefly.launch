@@ -6,7 +6,7 @@
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
-  <arg name="z" default="0.3"/>
+  <arg name="z" default="0.08"/>
 
   <!-- send the robot XML to param server -->
   <param name="robot_description" command="$(find xacro)/xacro.py '$(arg model)'" />
