@@ -40,6 +40,7 @@ GazeboPosePlugin::GazeboPosePlugin()
       gen_(rd_()),
       measurement_delay_(0),
       measurement_divisor_(1),
+      unknown_delay_(0),
       gazebo_seq_(0),
       pose_seq_(0) {
 }
@@ -67,6 +68,7 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   pose_topic_ = "pose";
   measurement_divisor_ = 1;
   measurement_delay_ = 0;
+  unknown_delay_ = 0;
 
   sdf::Vector3 noise_normal_p;
   sdf::Vector3 noise_normal_q;
@@ -105,6 +107,8 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam(_sdf, "noiseNormalQ", noise_normal_q, zeros3);
   getSdfParam(_sdf, "noiseUniformP", noise_uniform_p, zeros3);
   getSdfParam(_sdf, "noiseUniformQ", noise_uniform_q, zeros3);
+
+  getSdfParam(_sdf, "unknownDelay", unknown_delay_, 0.0);
 
   pos_n_[0] = NormalDistribution(0, noise_normal_p.x);
   pos_n_[1] = NormalDistribution(0, noise_normal_p.y);
@@ -151,8 +155,8 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
     math::Pose gazebo_pose = link_->GetWorldCoGPose();
     pose.header.frame_id = frame_id_;
     pose.header.seq = pose_seq_++;
-    pose.header.stamp.sec = (world_->GetSimTime()).sec;
-    pose.header.stamp.nsec = (world_->GetSimTime()).nsec;
+    pose.header.stamp.sec = (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec;
+    pose.header.stamp.nsec = (world_->GetSimTime()).nsec + ros::Duration(unknown_delay_).nsec;
 
     copyPosition(gazebo_pose.pos, pose.pose.position);
     pose.pose.orientation.w = gazebo_pose.rot.w;
