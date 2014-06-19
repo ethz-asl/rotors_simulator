@@ -58,7 +58,7 @@
     </link>
     <joint name="pose_sensor1_joint" type="revolute">
     <parent link="base_link"/>
-      <origin xyz="0.05 0.1 0.15" rpy="0 ${3.14/4.0} 0" />
+      <origin xyz="0.1 0 0" rpy="0 ${3.14/4.0} 0" />
       <child link="pose_sensor1_link"/>
       <limit upper="0" lower="0" effort="0" velocity="0"/>
     </joint>
@@ -72,7 +72,7 @@
     </link>
     <joint name="pose_sensor2_joint" type="revolute">
     <parent link="base_link"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <origin xyz="0.0 0.0 0.1" rpy="0.0 0.0 0.0" />
       <child link="pose_sensor2_link"/>
       <limit upper="0" lower="0" effort="0" velocity="0"/>
     </joint>   
@@ -148,20 +148,22 @@
         <linkName>pose_sensor1_link</linkName>
         <robotNamespace>${robot_namespace}</robotNamespace>
         <poseTopic>sensors/pose1</poseTopic>
-        <measurementDivisor>1</measurementDivisor>
-        <measurementDelay>0</measurementDelay>
-        <noiseNormalP>0.01 0.01 0.01</noiseNormalP>
-        <noiseNormalQ>0.02 0.02 0.02</noiseNormalQ>
-        <noiseUniformP>0 0 0</noiseUniformP>
-        <noiseUniformQ>0 0 0</noiseUniformQ>
+        <measurementDivisor>7</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int]-->
+        <measurementDelay>0</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
+        <unknownDelay>0.0</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
+        <noiseNormalP>0.01 0.01 0.01</noiseNormalP> <!-- standard deviation of additive white gaussian noise [m] -->
+        <noiseNormalQ>0.02 0.02 0.02</noiseNormalQ> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ)-->
+        <noiseUniformP>0 0 0</noiseUniformP> <!-- symmetric bounds of uniform noise [m] -->
+        <noiseUniformQ>0 0 0</noiseUniformQ> <!-- symmetric bounds of uniform noise [rad], computation see above -->
       </plugin>
       
       <plugin filename="libmav_gazebo_pose_plugin.so" name="pose_sensor2">
         <linkName>pose_sensor2_link</linkName>
         <robotNamespace>${robot_namespace}</robotNamespace>
         <poseTopic>sensors/pose2</poseTopic>
-        <measurementDivisor>1</measurementDivisor>
+        <measurementDivisor>5</measurementDivisor>
         <measurementDelay>0</measurementDelay>
+        <unknownDelay>0.001</unknownDelay>
         <noiseNormalP>0.01 0.01 0.01</noiseNormalP>
         <noiseNormalQ>0.02 0.02 0.02</noiseNormalQ>
         <noiseUniformP>0 0 0</noiseUniformP>
