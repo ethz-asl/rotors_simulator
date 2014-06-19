@@ -223,7 +223,7 @@ namespace gazebo
 
   void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuPtr& imu_msg) {
     ros::Time t(imu_msg->header.stamp.sec,imu_msg->header.stamp.nsec);
-    writeBag(imu_pub_topic_, imu_msg->header.stamp, imu_msg);
+    writeBag(imu_pub_topic_, t, imu_msg);
   }
 
   void GazeboBagPlugin::ControlAttitudeThrustCallback(const mav_msgs::ControlAttitudeThrustPtr& control_msg) {
