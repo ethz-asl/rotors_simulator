@@ -3,7 +3,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <!-- Main multirotor link -->
-  <xacro:macro name="multirotor_base_macro" params="robot_namespace mass body_width body_height mesh_file *inertia">
+  <xacro:macro name="multirotor_base_macro" params="robot_namespace mass body_width body_height mesh_file bag_file enable_bag_plugin *inertia">
     <link name="base_link"></link>
     <joint name="base_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -122,15 +122,17 @@
       </plugin>
 
       <!-- ROS Bag Plugin -->
+      <xacro:if value="${enable_bag_plugin}">
       <plugin filename="libmav_gazebo_bag_plugin.so" name="rosbag">
         <robotNamespace>${robot_namespace}</robotNamespace>
-        <bagFileName>firefly.bag</bagFileName>
+        <bagFileName>${bag_file}</bagFileName>
         <linkName>base_link</linkName>
         <frameId>base_link</frameId>
         <controlAttitudeThrustSubTopic>mav_cmd</controlAttitudeThrustSubTopic>
         <controlAttitudeThrustPubTopic>mav_cmd</controlAttitudeThrustPubTopic>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
       </plugin>
+      </xacro:if>
 
       <plugin filename="libmav_gazebo_pose_plugin.so" name="ground_truth_pose">
         <linkName>base_link</linkName>

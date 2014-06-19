@@ -126,7 +126,12 @@ namespace gazebo
     strftime(buffer,80,"%Y-%m-%d-%H-%M-%S",timeinfo);
     std::string date_time_str(buffer);
     // TODO(ff): use put_time here, once it's supported in gcc
-    bag_filename_ = date_time_str + std::string("_") + bag_filename_;
+
+    std::string key(".bag");
+    size_t pos = bag_filename_.rfind(key);
+    if (pos != std::string::npos)
+      bag_filename_.erase(pos, key.length());
+    bag_filename_ = bag_filename_ + "_" + date_time_str + ".bag";
 
     // Open a bag file and store it in ~/.ros/<bag_filename_>
     bag_.open(bag_filename_, rosbag::bagmode::Write);
