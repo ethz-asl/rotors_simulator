@@ -117,9 +117,9 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     std::string image_name = _sdf->GetElement("covarianceImage")->Get<std::string>();
     covariance_image_ = cv::imread(image_name, CV_LOAD_IMAGE_GRAYSCALE);
     if(covariance_image_.data == NULL)
-      gzerr << "loading covariance image " << image_name << "failed" <<std::endl;
+      gzerr << "loading covariance image " << image_name << " failed" <<std::endl;
     else
-      gzlog << "loading covariance image " << image_name << "successful" <<std::endl;
+      gzlog << "loading covariance image " << image_name << " successful" <<std::endl;
   }
 
   getSdfParam(_sdf, "covarianceImageScale", covariance_image_scale_, 1.0);
@@ -165,6 +165,7 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 // Called by the world update start event
 void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Pose gazebo_pose = link_->GetWorldCoGPose();
+  bool publish_pose = true;
 
   // first, determine whether we should publish a pose
   if (covariance_image_.data != NULL) {
@@ -179,7 +180,7 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
     if (x >= 0 && x < width && y >= 0 && y < height) {
       uint8_t val = covariance_image_.at<uint8_t>(y, x);
       if (val == 0)
-        return;
+        publish_pose = false;
       // TODO: covariance scaling, according to the intensity values could be implemented here.
     }
   }
@@ -197,7 +198,8 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
     pose.pose.orientation.y = gazebo_pose.rot.y;
     pose.pose.orientation.z = gazebo_pose.rot.z;
 
-    pose_queue_.push_back(std::make_pair(gazebo_seq_ + measurement_delay_, pose));
+    if(publish_pose)
+      pose_queue_.push_back(std::make_pair(gazebo_seq_ + measurement_delay_, pose));
   }
 
   // Is it time to publish the front element ?
