@@ -222,22 +222,22 @@ namespace gazebo
   }
 
   void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuPtr& imu_msg) {
-    ros::Time t(imu_msg->header.stamp.sec,imu_msg->header.stamp.nsec);
+    ros::Time t(imu_msg->header.stamp.sec, imu_msg->header.stamp.nsec);
     writeBag(imu_pub_topic_, t, imu_msg);
   }
 
   void GazeboBagPlugin::ControlAttitudeThrustCallback(const mav_msgs::ControlAttitudeThrustPtr& control_msg) {
-    ros::Time t(control_msg->header.stamp.sec,control_msg->header.stamp.nsec);
+    ros::Time t(control_msg->header.stamp.sec, control_msg->header.stamp.nsec);
     writeBag(control_attitude_thrust_pub_topic_, t, control_msg);
   }
 
   void GazeboBagPlugin::ControlMotorSpeedCallback(const mav_msgs::ControlMotorSpeedPtr& control_msg) {
-    ros::Time t(control_msg->header.stamp.sec,control_msg->header.stamp.nsec);
+    ros::Time t(control_msg->header.stamp.sec, control_msg->header.stamp.nsec);
     writeBag(control_motor_speed_pub_topic_, t, control_msg);
   }
 
   void GazeboBagPlugin::ControlRateThrustCallback(const mav_msgs::ControlRateThrustPtr& control_msg) {
-    ros::Time t(control_msg->header.stamp.sec,control_msg->header.stamp.nsec);
+    ros::Time t(control_msg->header.stamp.sec, control_msg->header.stamp.nsec);
     writeBag(control_rate_thrust_pub_topic_, t, control_msg);
   }
 

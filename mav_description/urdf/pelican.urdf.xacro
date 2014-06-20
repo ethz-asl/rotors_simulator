@@ -40,7 +40,7 @@
     body_height="${body_height}" 
     mesh_file="${mesh_file}"
     bag_file="pelican.bag"
-    enable_bag_plugin="true">
+    enable_bag_plugin="false">
     <xacro:insert_block name="body_inertia" />
   </xacro:multirotor_base_macro>
 
