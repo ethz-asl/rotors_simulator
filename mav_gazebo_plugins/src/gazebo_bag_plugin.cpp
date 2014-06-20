@@ -126,7 +126,12 @@ namespace gazebo
     strftime(buffer,80,"%Y-%m-%d-%H-%M-%S",timeinfo);
     std::string date_time_str(buffer);
     // TODO(ff): use put_time here, once it's supported in gcc
-    bag_filename_ = date_time_str + std::string("_") + bag_filename_;
+
+    std::string key(".bag");
+    size_t pos = bag_filename_.rfind(key);
+    if (pos != std::string::npos)
+      bag_filename_.erase(pos, key.length());
+    bag_filename_ = bag_filename_ + "_" + date_time_str + ".bag";
 
     // Open a bag file and store it in ~/.ros/<bag_filename_>
     bag_.open(bag_filename_, rosbag::bagmode::Write);
@@ -217,29 +222,23 @@ namespace gazebo
   }
 
   void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuPtr& imu_msg) {
-    boost::mutex::scoped_lock lock(mtx_);
-    bag_.write(imu_pub_topic_, imu_msg->header.stamp, imu_msg);
+    ros::Time t(imu_msg->header.stamp.sec, imu_msg->header.stamp.nsec);
+    writeBag(imu_pub_topic_, t, imu_msg);
   }
 
-  void GazeboBagPlugin::ControlAttitudeThrustCallback(
-        const mav_msgs::ControlAttitudeThrustPtr& control_msg) {
-    boost::mutex::scoped_lock lock(mtx_);
-    bag_.write(control_attitude_thrust_pub_topic_,
-      control_msg->header.stamp, control_msg);
+  void GazeboBagPlugin::ControlAttitudeThrustCallback(const mav_msgs::ControlAttitudeThrustPtr& control_msg) {
+    ros::Time t(control_msg->header.stamp.sec, control_msg->header.stamp.nsec);
+    writeBag(control_attitude_thrust_pub_topic_, t, control_msg);
   }
 
-  void GazeboBagPlugin::ControlMotorSpeedCallback(
-        const mav_msgs::ControlMotorSpeedPtr& control_msg) {
-    boost::mutex::scoped_lock lock(mtx_);
-    bag_.write(control_motor_speed_pub_topic_,
-      control_msg->header.stamp, control_msg);
+  void GazeboBagPlugin::ControlMotorSpeedCallback(const mav_msgs::ControlMotorSpeedPtr& control_msg) {
+    ros::Time t(control_msg->header.stamp.sec, control_msg->header.stamp.nsec);
+    writeBag(control_motor_speed_pub_topic_, t, control_msg);
   }
 
-  void GazeboBagPlugin::ControlRateThrustCallback(
-        const mav_msgs::ControlRateThrustPtr& control_msg) {
-    boost::mutex::scoped_lock lock(mtx_);
-    bag_.write(control_rate_thrust_pub_topic_,
-      control_msg->header.stamp, control_msg);
+  void GazeboBagPlugin::ControlRateThrustCallback(const mav_msgs::ControlRateThrustPtr& control_msg) {
+    ros::Time t(control_msg->header.stamp.sec, control_msg->header.stamp.nsec);
+    writeBag(control_rate_thrust_pub_topic_, t, control_msg);
   }
 
   void GazeboBagPlugin::LogMotorVelocities(const common::Time now) {
@@ -255,10 +254,8 @@ namespace gazebo
     }
     rot_velocities_msg.header.stamp.sec  = now.sec;
     rot_velocities_msg.header.stamp.nsec = now.nsec;
-    {
-      boost::mutex::scoped_lock lock(mtx_);
-      bag_.write(motor_pub_topic_, ros_now, rot_velocities_msg);
-    }
+
+    writeBag(motor_pub_topic_, ros_now, rot_velocities_msg);
   }
 
   void GazeboBagPlugin::LogGroundTruth(const common::Time now) {
@@ -279,10 +276,8 @@ namespace gazebo
     pose_msg.pose.orientation.x = pose.rot.x;
     pose_msg.pose.orientation.y = pose.rot.y;
     pose_msg.pose.orientation.z = pose.rot.z;
-    {
-      boost::mutex::scoped_lock lock(mtx_);
-      bag_.write(ground_truth_pose_pub_topic_, ros_now, pose_msg);
-    }
+
+    writeBag(ground_truth_pose_pub_topic_, ros_now, pose_msg);
 
     // Get twist and update the message.
     math::Vector3 linear_veloctiy = link_->GetWorldLinearVel();
@@ -296,10 +291,8 @@ namespace gazebo
     twist_msg.twist.angular.x = angular_veloctiy.x;
     twist_msg.twist.angular.y = angular_veloctiy.y;
     twist_msg.twist.angular.z = angular_veloctiy.z;
-    {
-      boost::mutex::scoped_lock lock(mtx_);
-      bag_.write(ground_truth_twist_pub_topic_, ros_now, twist_msg);
-    }
+
+    writeBag(ground_truth_twist_pub_topic_, ros_now, twist_msg);
   }
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboBagPlugin);

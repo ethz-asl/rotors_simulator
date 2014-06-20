@@ -127,5 +127,28 @@ namespace gazebo
       ros::Subscriber control_rate_thrust_sub_;
 
       std::ofstream csvOut;
+
+      template<class T>
+      void writeBag(const std::string& topic, const ros::Time& time, const T& msg){
+        boost::mutex::scoped_lock lock(mtx_);
+        try{
+          bag_.write(topic, time, msg);
+        }
+        catch(rosbag::BagIOException& e){
+          gzerr << "Error while writing to bag " << e.what();
+        }
+      }
+
+      template<class T>
+      void writeBag(const std::string& topic, const ros::Time& time, boost::shared_ptr<T const> const& msg){
+        boost::mutex::scoped_lock lock(mtx_);
+        try{
+          bag_.write(topic, time, msg);
+        }
+        catch(rosbag::BagIOException& e){
+          gzerr << "Error while writing to bag " << e.what();
+        }
+      }
+
   };
 }
