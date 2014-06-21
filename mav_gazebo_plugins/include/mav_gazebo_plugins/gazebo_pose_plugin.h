@@ -24,6 +24,8 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 
+#include <opencv2/core/core.hpp>
+
 //#include <mav_gazebo_plugins/pose_distorter.h>
 
 namespace gazebo {
@@ -70,6 +72,8 @@ class GazeboPosePlugin : public ModelPlugin {
   double unknown_delay_;
   int gazebo_seq_;
   int pose_seq_;
+  double covariance_image_scale_;
+  cv::Mat covariance_image_;
 
   // Pointer to the world
   physics::WorldPtr world_;

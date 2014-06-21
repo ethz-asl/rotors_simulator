@@ -7,6 +7,8 @@
 #include <mav_gazebo_plugins/gazebo_pose_plugin.h>
 #include <mav_gazebo_plugins/common.h>
 #include <iostream>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 namespace gazebo {
 
@@ -42,7 +44,8 @@ GazeboPosePlugin::GazeboPosePlugin()
       measurement_divisor_(1),
       unknown_delay_(0),
       gazebo_seq_(0),
-      pose_seq_(0) {
+      pose_seq_(0),
+      covariance_image_scale_(1){
 }
 
 GazeboPosePlugin::~GazeboPosePlugin() {
@@ -110,6 +113,17 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   getSdfParam(_sdf, "unknownDelay", unknown_delay_, 0.0);
 
+  if (_sdf->HasElement("covarianceImage")) {
+    std::string image_name = _sdf->GetElement("covarianceImage")->Get<std::string>();
+    covariance_image_ = cv::imread(image_name, CV_LOAD_IMAGE_GRAYSCALE);
+    if(covariance_image_.data == NULL)
+      gzerr << "loading covariance image " << image_name << " failed" <<std::endl;
+    else
+      gzlog << "loading covariance image " << image_name << " successful" <<std::endl;
+  }
+
+  getSdfParam(_sdf, "covarianceImageScale", covariance_image_scale_, 1.0);
+
   pos_n_[0] = NormalDistribution(0, noise_normal_p.x);
   pos_n_[1] = NormalDistribution(0, noise_normal_p.y);
   pos_n_[2] = NormalDistribution(0, noise_normal_p.z);
@@ -150,9 +164,29 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
 // Called by the world update start event
 void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
+  math::Pose gazebo_pose = link_->GetWorldCoGPose();
+  bool publish_pose = true;
+
+  // first, determine whether we should publish a pose
+  if (covariance_image_.data != NULL) {
+    // we have an image
+
+    // Image is always centered around the origin:
+    int width = covariance_image_.cols;
+    int height = covariance_image_.rows;
+    int x = static_cast<int>(std::floor(gazebo_pose.pos.x / covariance_image_scale_)) + width / 2;
+    int y = static_cast<int>(std::floor(gazebo_pose.pos.y / covariance_image_scale_)) + height / 2;
+
+    if (x >= 0 && x < width && y >= 0 && y < height) {
+      uint8_t val = covariance_image_.at<uint8_t>(y, x);
+      if (val == 0)
+        publish_pose = false;
+      // TODO: covariance scaling, according to the intensity values could be implemented here.
+    }
+  }
+
   if (gazebo_seq_ % measurement_divisor_ == 0) {
     geometry_msgs::PoseStamped pose;
-    math::Pose gazebo_pose = link_->GetWorldCoGPose();
     pose.header.frame_id = frame_id_;
     pose.header.seq = pose_seq_++;
     pose.header.stamp.sec = (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec;
@@ -164,7 +198,8 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
     pose.pose.orientation.y = gazebo_pose.rot.y;
     pose.pose.orientation.z = gazebo_pose.rot.z;
 
-    pose_queue_.push_back(std::make_pair(gazebo_seq_ + measurement_delay_, pose));
+    if(publish_pose)
+      pose_queue_.push_back(std::make_pair(gazebo_seq_ + measurement_delay_, pose));
   }
 
   // Is it time to publish the front element ?

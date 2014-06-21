@@ -26,6 +26,8 @@
   <build_depend>octomap_ros</build_depend>
   <build_depend>octomap</build_depend>
   <build_depend>octomap_msgs</build_depend>
+  <build_depend>opencv</build_depend>
+  
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>gazebo_ros</run_depend>
   <run_depend>roscpp</run_depend>
@@ -36,5 +38,6 @@
   <run_depend>octomap_ros</run_depend>
   <run_depend>octomap</run_depend>
   <run_depend>octomap_msgs</run_depend>
+  <run_depend>opencv</run_depend>
 
 </package>
