@@ -15,10 +15,12 @@
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>euroc_comm</build_depend>
+  <build_depend>rosbag</build_depend>
 
   <run_depend>geometry_msgs</run_depend>
   <run_depend>mav_msgs</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>euroc_comm</run_depend>
+  <run_depend>rosbag</run_depend>
 </package>

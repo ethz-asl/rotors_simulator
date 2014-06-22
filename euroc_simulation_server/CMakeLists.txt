@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   euroc_comm
   roscpp
   sensor_msgs
+  rosbag
 )
 
 include_directories(
@@ -23,6 +24,7 @@ catkin_package(
     euroc_comm
     roscpp 
     sensor_msgs 
+    rosbag
   DEPENDS Eigen
 )
   
