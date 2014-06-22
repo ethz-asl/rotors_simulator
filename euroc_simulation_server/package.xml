@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package>
+  <name>euroc_simulation_server</name>
+  <version>0.0.1</version>
+  <description>EuRoC simulation server utilities</description>
+  
+  <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
+
+  <license>ASL 2.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>mav_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>euroc_comm</build_depend>
+
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>mav_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>euroc_comm</run_depend>
+</package>
