@@ -2,7 +2,8 @@
 
 <robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:property name="namespace" value="firefly" />
-	<xacro:property name="enable_bag_plugin" value="false" />
+  <xacro:property name="enable_bag_plugin" value="false" />
+  <xacro:property name="bag_file" value="firefly.bag" />
 
 	<!-- Instantiate firefly "mechanics" -->
 	<xacro:include filename="$(find mav_description)/urdf/firefly.urdf.xacro" />
