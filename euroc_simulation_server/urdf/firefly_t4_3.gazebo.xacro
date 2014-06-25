@@ -2,11 +2,11 @@
 
 <robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:property name="namespace" value="firefly" />
-	<xacro:property name="enable_bag_plugin" value="true" />
+  <xacro:property name="enable_bag_plugin" value="true" />
   <xacro:property name="bag_file" value="firefly_t4_3.bag" />
 
-	<!-- Instantiate default firefly-->
-	<xacro:include filename="$(find euroc_simulation_server)/urdf/firefly_base.urdf.xacro" />
+  <!-- Instantiate default firefly-->
+  <xacro:include filename="$(find euroc_simulation_server)/urdf/firefly_base.urdf.xacro" />
   
   <!-- Mount Pose sensor at pose_sensor1_link -->
   <gazebo>
