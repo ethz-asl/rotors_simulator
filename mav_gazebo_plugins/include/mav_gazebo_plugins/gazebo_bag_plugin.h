@@ -73,6 +73,10 @@ namespace gazebo
       /// \param[in] now The current gazebo common::Time
       void LogMotorVelocities(const common::Time now);
 
+      /// \brief Log all the collisions.
+      /// \param[in] now The current gazebo common::Time
+      void LogCollisions(const common::Time now);
+
     private:
       /// \brief The connections.
       event::ConnectionPtr update_connection_;
@@ -92,10 +96,10 @@ namespace gazebo
 
       // /// \brief Pointer to the ContactManager to get all collisions of this
       // /// link and its children
-      // physics::ContactManager *contact_mgr_;
+      physics::ContactManager *contact_mgr_;
 
       // /// \brief The collisions for the link and its children in the model.
-      // std::map<std::string, physics::CollisionPtr> collisions;
+      std::map<std::string, physics::CollisionPtr> collisions_;
 
       std::string namespace_;
       std::string ground_truth_pose_pub_topic_;
@@ -108,11 +112,15 @@ namespace gazebo
       std::string control_motor_speed_sub_topic_;
       std::string control_rate_thrust_pub_topic_;
       std::string control_rate_thrust_sub_topic_;
+      std::string collisions_pub_topic_;
       std::string motor_pub_topic_;
       std::string frame_id_;
       std::string link_name_;
       std::string bag_filename_;
+      std::string exclude_from_collision_;
       double rotor_velocity_slowdown_sim_;
+      double mass_;
+      double gravity_;
 
       /// \brief Mutex lock for thread safty of writing bag files
       boost::mutex mtx_;

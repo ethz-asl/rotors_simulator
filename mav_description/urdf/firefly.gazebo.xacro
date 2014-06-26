@@ -60,7 +60,7 @@
       <motorVelocityReferenceTopic>motor_vel_ref</motorVelocityReferenceTopic>
     </plugin>
   </gazebo>
-  
+
   <!-- Mount a generic pose sensor at link sensor1 -->
   <gazebo>
     <!-- Generic 6D pose sensor plugin -->
