@@ -81,10 +81,10 @@
   <!-- Instantiate a logger -->
   <gazebo>
     <!-- ROS Bag Plugin -->
-    <xacro:if value="${enable_bag_plugin}">
+    <xacro:if value="$(arg enable_logging)">
       <plugin filename="libmav_gazebo_bag_plugin.so" name="rosbag">
         <robotNamespace>${namespace}</robotNamespace>
-        <bagFileName>${bag_file}</bagFileName>
+        <bagFileName>$(arg log_file)</bagFileName>
         <linkName>base_link</linkName>
         <frameId>base_link</frameId>
         <controlAttitudeThrustSubTopic>mav_cmd</controlAttitudeThrustSubTopic>
