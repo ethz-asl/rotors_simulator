@@ -1,17 +1,17 @@
 
 <!-- pose sensor2 -->
 <link name="pose_sensor2_link">
-	<inertial>
-		<inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0"
-			izz="0.001" />
-		<mass value="0.01" />  <!-- [kg] -->
-	</inertial>
+  <inertial>
+    <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0"
+      izz="0.001" />
+    <mass value="0.01" />  <!-- [kg] -->
+  </inertial>
 </link>
 <joint name="pose_sensor2_joint" type="revolute">
-	<parent link="base_link" />
-	<origin xyz="0.0 0.0 0.1" rpy="0.0 0.0 0.0" />
-	<child link="pose_sensor2_link" />
-	<limit upper="0" lower="0" effort="0" velocity="0" />
+  <parent link="base_link" />
+  <origin xyz="0.0 0.0 0.1" rpy="0.0 0.0 0.0" />
+  <child link="pose_sensor2_link" />
+  <limit upper="0" lower="0" effort="0" velocity="0" />
 </joint>
 
 <gazebo>
