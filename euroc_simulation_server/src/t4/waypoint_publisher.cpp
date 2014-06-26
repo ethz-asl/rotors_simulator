@@ -2,9 +2,12 @@
 #include <mav_msgs/ControlTrajectory.h>
 #include <sensor_msgs/Imu.h>
 
+#include <iostream>
+#include <fstream>
+
 bool sim_running = false;
 
-void poseCallback(const sensor_msgs::ImuPtr& /*msg*/) {
+void callback(const sensor_msgs::ImuPtr& /*msg*/) {
   sim_running = true;
 }
 
@@ -28,26 +31,50 @@ class WaypointWithTime {
 
 int main(int argc, char** argv) {
 
-  std::vector<WaypointWithTime> waypoints;
+  ros::init(argc, argv, "euroc_c3_t4_waypoint_publisher");
+  ros::NodeHandle nh;
 
+  ROS_INFO("running c3_t4_waypoint_publisher");
+
+  ros::V_string args;
+  ros::removeROSArgs(argc, argv, args);
+
+  if(args.size() != 2){
+    ROS_ERROR("Usage: waypoint_publisher <waypoint_file> (one per line, space separated: wait_time [s] x[m] y[m] z[m] yaw[deg])");
+    return -1;
+  }
+
+  std::vector<WaypointWithTime> waypoints;
   const float DEG_2_RAD = M_PI / 180.0;
 
-  waypoints.push_back(WaypointWithTime(20, 10, 10, 5, 22.5 * DEG_2_RAD));
-  waypoints.push_back(WaypointWithTime(15, 10,  0, 5, 45.0 * DEG_2_RAD));
-  waypoints.push_back(WaypointWithTime(15,  0, 10, 1, 67.5 * DEG_2_RAD));
-  waypoints.push_back(WaypointWithTime(15,  0,  0, 1, 90.0 * DEG_2_RAD));
+  std::ifstream wp_file(args.at(1).c_str());
+
+  if (wp_file.is_open()) {
+    double t, x, y, z, yaw;
+    // very safe ;), but actually only reads complete poses
+    while (wp_file >> t >> x >> y >> z >> yaw) {
+      waypoints.push_back(WaypointWithTime(t, x, y, z, yaw * DEG_2_RAD));
+    }
+    wp_file.close();
+    ROS_INFO("Read %d waypoints.", (int )waypoints.size());
+  }
+
+  else {
+    ROS_ERROR_STREAM("Unable to open poses file: " << args.at(1));
+    return -1;
+  }
+
+//  waypoints.push_back(WaypointWithTime(20, 10, 10, 5, 22.5 * DEG_2_RAD));
+//  waypoints.push_back(WaypointWithTime(15, 10,  0, 5, 45.0 * DEG_2_RAD));
+//  waypoints.push_back(WaypointWithTime(15,  0, 10, 1, 67.5 * DEG_2_RAD));
+//  waypoints.push_back(WaypointWithTime(15,  0,  0, 1, 90.0 * DEG_2_RAD));
 
 //  waypoints.push_back(WaypointWithTime(15, 2, 2, 1.5, 0 * DEG_2_RAD));
 //  waypoints.push_back(WaypointWithTime(15, 2, 0, 1.5, 0 * DEG_2_RAD));
 //  waypoints.push_back(WaypointWithTime(15, 0, 2, 1.0,   0 * DEG_2_RAD));
 //  waypoints.push_back(WaypointWithTime(15, 0, 0, 1.0,   0 * DEG_2_RAD));
 
-  ros::init(argc, argv, "euroc_c3_t4_waypoint_publisher");
-  ros::NodeHandle nh;
-
-  ROS_INFO("running c3_t4_waypoint_publisher");
-
-  ros::Subscriber pose_sub = nh.subscribe("imu", 10, &poseCallback);
+  ros::Subscriber sub = nh.subscribe("imu", 10, &callback);
 
   ros::Publisher wp_pub = nh.advertise<mav_msgs::ControlTrajectory>("waypoint", 10);
   mav_msgs::ControlTrajectory wp_msg;

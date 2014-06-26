@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="namespace" value="firefly" />
+  <xacro:property name="enable_bag_plugin" value="true" />
+  <xacro:property name="bag_file" value="firefly_t4_3.bag" />
+
+  <!-- Instantiate default firefly-->
+  <xacro:include filename="$(find euroc_simulation_server)/urdf/firefly_base.urdf.xacro" />
+  
+  <!-- Mount Pose sensor at pose_sensor1_link -->
+  <gazebo>
+    <!-- Generic 6D pose sensor plugin -->
+    <plugin filename="libmav_gazebo_pose_plugin.so" name="pose_sensor1">
+      <linkName>pose_sensor1_link</linkName>
+      <robotNamespace>${namespace}</robotNamespace>
+      <poseTopic>pose1</poseTopic>
+      <measurementDivisor>1</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
+      <measurementDelay>0</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
+      <unknownDelay>0.0</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
+      <noiseNormalP>0.005 0.005 0.005</noiseNormalP> <!-- standard deviation of additive white gaussian noise [m] -->
+      <noiseNormalQ>0.01 0.01 0.01</noiseNormalQ> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
+      <noiseUniformP>0 0 0</noiseUniformP> <!-- symmetric bounds of uniform noise [m] -->
+      <noiseUniformQ>0 0 0</noiseUniformQ> <!-- symmetric bounds of uniform noise [rad], computation see above -->
+    </plugin>
+  </gazebo>
+</robot>
+
