@@ -10,6 +10,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include <chrono>
+
 namespace gazebo {
 
 /// Computes a quaternion from the 3-element small angle approximation theta.
@@ -123,6 +125,13 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   }
 
   getSdfParam(_sdf, "covarianceImageScale", covariance_image_scale_, 1.0);
+
+  if (_sdf->HasElement("randomEngineSeed")) {
+    gen_.seed(_sdf->GetElement("randomEngineSeed")->Get<unsigned int>());
+  }
+  else {
+    gen_.seed(std::chrono::system_clock::now().time_since_epoch().count());
+  }
 
   pos_n_[0] = NormalDistribution(0, noise_normal_p.x);
   pos_n_[1] = NormalDistribution(0, noise_normal_p.y);
