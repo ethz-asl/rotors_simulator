@@ -2,12 +2,12 @@
 // Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>
 // All rights reserved.
 //
-// TODO(ff): Enter some license
+// ASL 2.0
 //==============================================================================
+
 #include <mav_gazebo_plugins/gazebo_bag_plugin.h>
 #include <ctime>
 #include <mav_msgs/MotorSpeed.h>
-#include <geometry_msgs/WrenchStamped.h>
 #include <mav_gazebo_plugins/common.h>
 
 
@@ -114,6 +114,8 @@ namespace gazebo
 
     getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
     getSdfParam<std::string>(_sdf, "collisionsPubTopic", collisions_pub_topic_, "/" + namespace_ + "/collisions");
+    getSdfParam<std::string>(_sdf, "windPubTopic", wind_pub_topic_, "/" + namespace_ + "/wind");
+    getSdfParam<std::string>(_sdf, "windSubTopic", wind_sub_topic_, "/" + namespace_ + "/wind");
     getSdfParam<std::string>(_sdf, "excludeFloorLinkFromCollisionCheck", exclude_floor_link_from_collision_check_, "ground_plane::link");
     getSdfParam<double>(_sdf, "gravitationalForceExclusionMultiplier", gravitational_force_exclusion_multiplier_, 1.1);
 
@@ -181,6 +183,10 @@ namespace gazebo
     imu_sub_ = node_handle_->subscribe(imu_sub_topic_, 10,
       &GazeboBagPlugin::ImuCallback, this);
 
+    // Subscriber to Wind WrenchStamped Message
+    wind_sub_ = node_handle_->subscribe(wind_sub_topic_, 10,
+      &GazeboBagPlugin::WindCallback, this);
+
     // Subscriber to Control Attitude Thrust Message
     control_attitude_thrust_sub_ = node_handle_->subscribe(
       control_attitude_thrust_sub_topic_, 10,
@@ -210,6 +216,11 @@ namespace gazebo
   void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuPtr& imu_msg) {
     ros::Time t(imu_msg->header.stamp.sec, imu_msg->header.stamp.nsec);
     writeBag(imu_pub_topic_, t, imu_msg);
+  }
+
+  void GazeboBagPlugin::WindCallback(const geometry_msgs::WrenchStampedPtr& wind_msg) {
+    ros::Time t(wind_msg->header.stamp.sec, wind_msg->header.stamp.nsec);
+    writeBag(wind_pub_topic_, t, wind_msg);
   }
 
   void GazeboBagPlugin::ControlAttitudeThrustCallback(const mav_msgs::ControlAttitudeThrustPtr& control_msg) {

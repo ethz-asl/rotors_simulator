@@ -2,7 +2,7 @@
 // Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>
 // All rights reserved.
 //
-// TODO(ff): Enter some license
+// ASL 2.0
 //==============================================================================
 
 #include <string>
@@ -11,6 +11,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/Point.h>
+#include <geometry_msgs/WrenchStamped.h>
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/Float32.h>
 #include <mav_msgs/ControlAttitudeThrust.h>
@@ -49,6 +50,10 @@ namespace gazebo
       /// \brief Called when an IMU message is received.
       /// \param[in] imu_msg A IMU message from sensor_msgs.
       void ImuCallback(const sensor_msgs::ImuPtr& imu_msg);
+
+      /// \brief Called when an Wind message is received.
+      /// \param[in] wind_msg A WrenchStamped message from geometry_msgs.
+      void WindCallback(const geometry_msgs::WrenchStampedPtr& wind_msg);
 
       /// \brief Called when a ControlAttitudeThrust message is received.
       /// \param[in] control_msg A ControlAttitudeThrust message from mav_msgs.
@@ -106,6 +111,8 @@ namespace gazebo
       std::string ground_truth_twist_pub_topic_;
       std::string imu_pub_topic_;
       std::string imu_sub_topic_;
+      std::string wind_pub_topic_;
+      std::string wind_sub_topic_;
       std::string control_attitude_thrust_pub_topic_;
       std::string control_attitude_thrust_sub_topic_;
       std::string control_motor_speed_pub_topic_;
@@ -131,6 +138,7 @@ namespace gazebo
 
       // Ros subscribers
       ros::Subscriber imu_sub_;
+      ros::Subscriber wind_sub_;
       ros::Subscriber control_attitude_thrust_sub_;
       ros::Subscriber control_motor_speed_sub_;
       ros::Subscriber control_rate_thrust_sub_;
