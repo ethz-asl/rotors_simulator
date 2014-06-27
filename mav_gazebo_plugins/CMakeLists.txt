@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   octomap_ros
   octomap_msgs
   planning_msgs
+  geometry_msgs
 )
 
 find_package(Eigen REQUIRED)
@@ -25,7 +26,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES mav_gazebo_motor_model mav_gazebo_controller_interface
-  CATKIN_DEPENDS roscpp mav_model mav_control mav_msgs octomap_ros octomap_msgs planning_msgs
+  CATKIN_DEPENDS roscpp mav_model mav_control mav_msgs octomap_ros octomap_msgs planning_msgs geometry_msgs
   DEPENDS eigen gazebo octomap opencv
 )
 

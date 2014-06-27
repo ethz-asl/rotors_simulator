@@ -7,6 +7,7 @@
 #include <mav_gazebo_plugins/gazebo_bag_plugin.h>
 #include <ctime>
 #include <mav_msgs/MotorSpeed.h>
+#include <geometry_msgs/WrenchStamped.h>
 #include <mav_gazebo_plugins/common.h>
 
 
@@ -71,6 +72,8 @@ namespace gazebo
         << link_name_ <<".\n";
     // Get the pointer to the link
     link_ = this->model_->GetLink(link_name_);
+    mass_ = link_->GetInertial()->GetMass();
+    gravity_ = world_->GetPhysicsEngine()->GetGravity().GetLength();
 
     if (_sdf->HasElement("imuSubTopic"))
       imu_sub_topic_ = _sdf->GetElement("imuSubTopic")->Get<std::string>();
@@ -110,6 +113,9 @@ namespace gazebo
         _sdf->GetElement("poseTopic")->Get<std::string>();
 
     getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
+    getSdfParam<std::string>(_sdf, "collisionsPubTopic", collisions_pub_topic_, "/" + namespace_ + "/collisions");
+    getSdfParam<std::string>(_sdf, "excludeFloorLinkFromCollisionCheck", exclude_floor_link_from_collision_check_, "ground_plane::link");
+    getSdfParam<double>(_sdf, "gravitationalForceExclusionMultiplier", gravitational_force_exclusion_multiplier_, 1.1);
 
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
@@ -136,35 +142,6 @@ namespace gazebo
     // Open a bag file and store it in ~/.ros/<bag_filename_>
     bag_.open(bag_filename_, rosbag::bagmode::Write);
 
-
-    // // Get the contact manager.
-    // contact_mgr_ = world_->GetPhysicsEngine()->GetContactManager();
-
-    // for (unsigned int j = 0; j < link_->GetChildCount(); ++j)
-    // {
-    //   physics::CollisionPtr collision = link_->GetCollision(j);
-    //   std::map<std::string, physics::CollisionPtr>::iterator coll_iter
-    //     = this->collisions.find(collision->GetScopedName());
-    //   if (coll_iter != this->collisions.end())
-    //     continue;
-
-    //   this->collisions[collision->GetScopedName()] = collision;
-    // }
-
-    // if (!this->collisions.empty())
-    // {
-    //   // request the contact manager to publish messages to a custom topic for
-    //   // this sensor
-    //   physics::ContactManager *mgr =
-    //       this->world->GetPhysicsEngine()->GetContactManager();
-    //   std::string topic = mgr->CreateFilter(this->GetName(), this->collisions);
-    //   if (!this->contactSub)
-    //   {
-    //     this->contactSub = this->node->Subscribe(topic,
-    //         &GazeboBagPlugin::OnContacts, this);
-    //   }
-    // }
-
     child_links_ = link_->GetChildJointsLinks();
     for (unsigned int i = 0; i < child_links_.size(); i++) {
       std::string link_name = child_links_[i]->GetScopedName();
@@ -178,6 +155,26 @@ namespace gazebo
         physics::JointPtr joint = this->model_->GetJoint(joint_name);
         motor_joints_.insert(MotorNumberToJointPair(motor_number, joint));
       }
+    }
+
+    // Get the contact manager.
+    contact_mgr_ = world_->GetPhysicsEngine()->GetContactManager();
+    for (unsigned int i = 0; i < link_->GetCollisions().size(); ++i) {
+      physics::CollisionPtr collision = link_->GetCollision(i);
+      this->collisions_[collision->GetScopedName()] = collision;
+    }
+    for (unsigned int j = 0; j < child_links_.size(); ++j)
+    {
+      unsigned int zero = 0;
+      for (unsigned int i = 0; i < child_links_[j]->GetCollisions().size(); ++i) {
+        physics::CollisionPtr collision = child_links_[j]->GetCollision(zero);
+        this->collisions_[child_links_[j]->GetScopedName()] = collision;
+      }
+    }
+
+    if (!this->collisions_.empty())
+    {
+      contact_mgr_->CreateFilter(this->link_->GetName(), this->collisions_);
     }
 
     // Subscriber to IMU Sensor
@@ -205,18 +202,7 @@ namespace gazebo
   {
     // Get the current simulation time.
     common::Time now = world_->GetSimTime();
-
-    // TODO(ff): Make this work, currently it gives the wrong contacts and
-    //           collisions, there is always only one collision.
-
-    // unsigned int contact_count = contact_mgr_->GetContactCount();
-    // std::cout << "contact_count: " << contact_count << "\n";
-    // physics::Collision_V collisions = link_->GetCollisions();
-    // for (int i = 0; i < collisions.size(); i++) {
-    //   std::cout<<"link_collision[" << i << "]: "
-    //     <<collisions[i]->GetScopedName()<<"\n";
-    // }
-
+    this->LogCollisions(now);
     this->LogGroundTruth(now);
     this->LogMotorVelocities(now);
   }
@@ -293,6 +279,34 @@ namespace gazebo
     twist_msg.twist.angular.z = angular_veloctiy.z;
 
     writeBag(ground_truth_twist_pub_topic_, ros_now, twist_msg);
+  }
+
+  void GazeboBagPlugin::LogCollisions(const common::Time now) {
+    ros::Time ros_now = ros::Time(now.sec, now.nsec);
+
+    geometry_msgs::WrenchStamped wrench_msg;
+    std::vector< physics::Contact * > contacts = contact_mgr_->GetContacts();
+    for (int i=0; i<contacts.size(); ++i) {
+      // Check if the collision is with exclude_floor_link_from_collision_check_
+      // and less than the links gravitational force multiplied by the
+      // gravitational_force_exclusion_multiplier_
+      std::string collision2_name = contacts[i]->collision2->GetLink()->GetScopedName();
+      double body1Force = contacts[i]->wrench->body1Force.GetLength();
+      if (collision2_name == exclude_floor_link_from_collision_check_ &&
+          body1Force < gravitational_force_exclusion_multiplier_ * mass_ * std::abs(gravity_))
+        continue;
+
+      wrench_msg.header.frame_id = contacts[i]->collision2->GetLink()->GetScopedName();
+      wrench_msg.header.stamp.sec  = now.sec;
+      wrench_msg.header.stamp.nsec = now.nsec;
+      wrench_msg.wrench.force.x = contacts[i]->wrench->body1Force.x;
+      wrench_msg.wrench.force.y = contacts[i]->wrench->body1Force.y;
+      wrench_msg.wrench.force.z = contacts[i]->wrench->body1Force.z;
+      wrench_msg.wrench.torque.x = contacts[i]->wrench->body1Torque.x;
+      wrench_msg.wrench.torque.y = contacts[i]->wrench->body1Torque.y;
+      wrench_msg.wrench.torque.z = contacts[i]->wrench->body1Torque.z;
+      writeBag(collisions_pub_topic_, ros_now, wrench_msg);
+    }
   }
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboBagPlugin);

@@ -60,7 +60,7 @@
       <motorVelocityReferenceTopic>motor_vel_ref</motorVelocityReferenceTopic>
     </plugin>
   </gazebo>
-  
+
   <!-- Mount a generic pose sensor at link sensor1 -->
   <gazebo>
     <!-- Generic 6D pose sensor plugin -->
@@ -90,6 +90,7 @@
         <controlAttitudeThrustSubTopic>mav_cmd</controlAttitudeThrustSubTopic>
         <controlAttitudeThrustPubTopic>mav_cmd</controlAttitudeThrustPubTopic>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+        <excludeFloorLinkFromCollisionCheck>$(arg exclude_floor_link_from_collision_check)</excludeFloorLinkFromCollisionCheck>
       </plugin>
     </xacro:if>
   </gazebo>
