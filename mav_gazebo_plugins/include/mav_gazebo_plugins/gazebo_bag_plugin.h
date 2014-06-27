@@ -17,6 +17,7 @@
 #include <mav_msgs/ControlAttitudeThrust.h>
 #include <mav_msgs/ControlMotorSpeed.h>
 #include <mav_msgs/ControlRateThrust.h>
+#include <mav_msgs/ControlTrajectory.h>
 
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
@@ -54,6 +55,10 @@ namespace gazebo
       /// \brief Called when an Wind message is received.
       /// \param[in] wind_msg A WrenchStamped message from geometry_msgs.
       void WindCallback(const geometry_msgs::WrenchStampedPtr& wind_msg);
+
+      /// \brief Called when an Trajectory message is received.
+      /// \param[in] trajectory_msg A ControlTrajectory message from mav_msgs.
+      void WaypointCallback(const mav_msgs::ControlTrajectoryPtr& trajectory_msg);
 
       /// \brief Called when a ControlAttitudeThrust message is received.
       /// \param[in] control_msg A ControlAttitudeThrust message from mav_msgs.
@@ -113,6 +118,8 @@ namespace gazebo
       std::string imu_sub_topic_;
       std::string wind_pub_topic_;
       std::string wind_sub_topic_;
+      std::string waypoint_pub_topic_;
+      std::string waypoint_sub_topic_;
       std::string control_attitude_thrust_pub_topic_;
       std::string control_attitude_thrust_sub_topic_;
       std::string control_motor_speed_pub_topic_;
@@ -139,6 +146,7 @@ namespace gazebo
       // Ros subscribers
       ros::Subscriber imu_sub_;
       ros::Subscriber wind_sub_;
+      ros::Subscriber waypoint_sub_;
       ros::Subscriber control_attitude_thrust_sub_;
       ros::Subscriber control_motor_speed_sub_;
       ros::Subscriber control_rate_thrust_sub_;
