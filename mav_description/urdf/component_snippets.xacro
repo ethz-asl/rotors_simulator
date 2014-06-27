@@ -55,7 +55,7 @@
      <robotNamespace>${namespace}</robotNamespace>
      <bodyName>imu_link</bodyName>
      <topicName>ground_truth/imu</topicName>
-     <!-- everything defaults to zero, except drift frequency, let's do that 
+     <!-- everything defaults to zero, except drift frequency, let's do that
       for safety -->
     <accelDriftFrequency>0.0 0.0 0.0</accelDriftFrequency>
     <rateDriftFrequency>0.0 0.0 0.0</rateDriftFrequency>
@@ -74,6 +74,7 @@
       <controlAttitudeThrustSubTopic>mav_cmd</controlAttitudeThrustSubTopic>
       <controlAttitudeThrustPubTopic>mav_cmd</controlAttitudeThrustPubTopic>
       <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+      <excludeFromCollision>${exclude_from_collision}</excludeFromCollision>
     </plugin>
   </xacro:if>
 </gazebo>

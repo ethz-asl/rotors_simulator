@@ -178,7 +178,6 @@ namespace gazebo
       physics::ContactManager *mgr =
           this->world_->GetPhysicsEngine()->GetContactManager();
       std::string topic = mgr->CreateFilter(this->link_->GetName(), this->collisions_);
-      std::cout<<topic<<std::endl;
     }
 
     // Subscriber to IMU Sensor

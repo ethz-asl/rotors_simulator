@@ -90,6 +90,7 @@
         <controlAttitudeThrustSubTopic>mav_cmd</controlAttitudeThrustSubTopic>
         <controlAttitudeThrustPubTopic>mav_cmd</controlAttitudeThrustPubTopic>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+        <excludeFromCollision>$(arg exclude_from_collision)</excludeFromCollision>
       </plugin>
     </xacro:if>
   </gazebo>

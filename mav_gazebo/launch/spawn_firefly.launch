@@ -10,12 +10,14 @@
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
   <arg name="log_file" default="firefly"/>
+  <arg name="exclude_from_collision" default="ground_plane::link"/>
 
   <!-- send the robot XML to param server -->
   <param name="robot_description" command="
-    $(find xacro)/xacro.py '$(arg model)' 
-    enable_logging:=$(arg enable_logging) 
+    $(find xacro)/xacro.py '$(arg model)'
+    enable_logging:=$(arg enable_logging)
     enable_ground_truth:=$(arg enable_ground_truth)
+    exclude_from_collision:=$(arg exclude_from_collision)
     log_file:=$(arg log_file)"
   />
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
