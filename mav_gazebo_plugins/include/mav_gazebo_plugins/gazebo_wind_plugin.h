@@ -2,7 +2,7 @@
 // Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>
 // All rights reserved.
 //
-// TODO(ff): Enter some license
+// ASL 2.0
 //==============================================================================
 
 #include <string>
@@ -52,6 +52,7 @@ namespace gazebo
 
       std::string frame_id_;
       std::string link_name_;
+      std::string wind_pub_topic_;
 
       math::Vector3 xyz_offset_;
 
@@ -64,6 +65,8 @@ namespace gazebo
       double wind_gust_force_mean_;
       double wind_gust_force_variance_;
       math::Vector3 wind_gust_direction_;
+
+      ros::Publisher wind_pub_;
 
       ros::NodeHandle *node_handle_;
   };

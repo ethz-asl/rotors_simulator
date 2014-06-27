@@ -2,9 +2,12 @@
 // Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>
 // All rights reserved.
 //
-// TODO(ff): Enter some license
+// ASL 2.0
 //==============================================================================
+
 #include <mav_gazebo_plugins/gazebo_wind_plugin.h>
+#include <mav_gazebo_plugins/common.h>
+#include <geometry_msgs/WrenchStamped.h>
 
 
 namespace gazebo
@@ -25,7 +28,7 @@ namespace gazebo
     // Store the pointer to the model
     model_ = _model;
     world_ = model_->GetWorld();
-    frame_id_ = "wind";
+    frame_id_ = "world";
     link_name_ = "base_link";
     wind_direction_ = math::Vector3(1, 0, 0);
     wind_gust_direction_ = math::Vector3(0, 1, 0);
@@ -93,10 +96,14 @@ namespace gazebo
         "windGustForceVariance")->Get<double>();
     }
 
+    getSdfParam<std::string>(_sdf, "windPubTopic", wind_pub_topic_, "/" + namespace_ + "/wind");
+
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
     this->update_connection_ = event::Events::ConnectWorldUpdateBegin(
         boost::bind(&GazeboWindPlugin::OnUpdate, this, _1));
+
+    wind_pub_ = node_handle_->advertise<geometry_msgs::WrenchStamped>(wind_pub_topic_, 10);
   }
 
   // Called by the world update start event
@@ -111,14 +118,28 @@ namespace gazebo
     // Apply a force from the constant wind to the link
     this->link_->AddForceAtRelativePosition(wind, xyz_offset_);
 
+    math::Vector3 wind_gust(0,0,0);
     // Wind Gusts
     if (now >= wind_gust_start_ && now < wind_gust_end_) {
       double wind_gust_strength = wind_gust_force_mean_;
-      math::Vector3 wind_gust = wind_gust_strength * wind_gust_direction_;
+      wind_gust = wind_gust_strength * wind_gust_direction_;
       // Apply a force from the wind gust to the link
       this->link_->AddForceAtRelativePosition(wind_gust, xyz_offset_);
     }
 
+    geometry_msgs::WrenchStamped wrench_msg;
+
+    wrench_msg.header.frame_id = frame_id_;
+    wrench_msg.header.stamp.sec  = now.sec;
+    wrench_msg.header.stamp.nsec = now.nsec;
+    wrench_msg.wrench.force.x = wind.x + wind_gust.x;
+    wrench_msg.wrench.force.y = wind.y + wind_gust.y;
+    wrench_msg.wrench.force.z = wind.z + wind_gust.z;
+    wrench_msg.wrench.torque.x = 0;
+    wrench_msg.wrench.torque.y = 0;
+    wrench_msg.wrench.torque.z = 0;
+
+    wind_pub_.publish(wrench_msg);
   }
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboWindPlugin);
