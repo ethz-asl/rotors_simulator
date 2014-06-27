@@ -114,7 +114,8 @@ namespace gazebo
 
     getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
     getSdfParam<std::string>(_sdf, "collisionsPubTopic", collisions_pub_topic_, "/" + namespace_ + "/collisions");
-    getSdfParam<std::string>(_sdf, "excludeFromCollision", exclude_from_collision_, "ground_plane::link");
+    getSdfParam<std::string>(_sdf, "excludeFloorLinkFromCollisionCheck", exclude_floor_link_from_collision_check_, "ground_plane::link");
+    getSdfParam<double>(_sdf, "gravitationalForceExclusionMultiplier", gravitational_force_exclusion_multiplier_, 1.1);
 
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
@@ -173,11 +174,7 @@ namespace gazebo
 
     if (!this->collisions_.empty())
     {
-      // request the contact manager to publish messages to a custom topic for
-      // this sensor
-      physics::ContactManager *mgr =
-          this->world_->GetPhysicsEngine()->GetContactManager();
-      std::string topic = mgr->CreateFilter(this->link_->GetName(), this->collisions_);
+      contact_mgr_->CreateFilter(this->link_->GetName(), this->collisions_);
     }
 
     // Subscriber to IMU Sensor
@@ -290,10 +287,13 @@ namespace gazebo
     geometry_msgs::WrenchStamped wrench_msg;
     std::vector< physics::Contact * > contacts = contact_mgr_->GetContacts();
     for (int i=0; i<contacts.size(); ++i) {
-      // Check if the collision is with Floor and less than the links gravitational force
+      // Check if the collision is with exclude_floor_link_from_collision_check_
+      // and less than the links gravitational force multiplied by the
+      // gravitational_force_exclusion_multiplier_
       std::string collision2_name = contacts[i]->collision2->GetLink()->GetScopedName();
-      if (collision2_name == exclude_from_collision_ &&
-          contacts[i]->wrench->body1Force.GetLength() < mass_ * std::abs(gravity_))
+      double body1Force = contacts[i]->wrench->body1Force.GetLength();
+      if (collision2_name == exclude_floor_link_from_collision_check_ &&
+          body1Force < gravitational_force_exclusion_multiplier_ * mass_ * std::abs(gravity_))
         continue;
 
       wrench_msg.header.frame_id = contacts[i]->collision2->GetLink()->GetScopedName();

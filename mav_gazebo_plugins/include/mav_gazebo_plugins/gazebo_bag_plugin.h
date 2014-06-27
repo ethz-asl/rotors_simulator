@@ -117,10 +117,11 @@ namespace gazebo
       std::string frame_id_;
       std::string link_name_;
       std::string bag_filename_;
-      std::string exclude_from_collision_;
+      std::string exclude_floor_link_from_collision_check_;
       double rotor_velocity_slowdown_sim_;
       double mass_;
       double gravity_;
+      double gravitational_force_exclusion_multiplier_;
 
       /// \brief Mutex lock for thread safty of writing bag files
       boost::mutex mtx_;

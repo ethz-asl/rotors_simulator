@@ -1,9 +1,9 @@
 <launch>
-  <arg name="exclude_from_collision" default="occupancy_grid::Floor"/>
+  <arg name="exclude_floor_link_from_collision_check" default="occupancy_grid::Floor"/>
   <arg name="enable_logging" default="false"/>
   <include file="$(find mav_gazebo)/launch/firefly_waypoint_world.launch">
     <arg name="enable_logging" value="$(arg enable_logging)" />
-    <arg name="exclude_from_collision" value="$(arg exclude_from_collision)" />
+    <arg name="exclude_floor_link_from_collision_check" value="$(arg exclude_floor_link_from_collision_check)" />
   </include>
   <node ns="firefly" name="joy_node" pkg="joy" type="joy_node" />
   <node ns="firefly" name="mav_joy_interface" pkg="mav_joy_interface" type="mav_joy_interface" />
