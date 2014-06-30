@@ -11,7 +11,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
-#include <mav_msgs/ControlAttitudeThrust.h>
+#include <mav_msgs/CommandAttitudeThrust.h>
 #include <geometry_msgs/PoseStamped.h>
 
 
@@ -54,7 +54,7 @@ class Joy {
     Axes axes_;
     Buttons buttons_;
 
-    mav_msgs::ControlAttitudeThrust control_msg_;
+    mav_msgs::CommandAttitudeThrust control_msg_;
     geometry_msgs::PoseStamped pose_;
     sensor_msgs::Joy current_joy_;
 
