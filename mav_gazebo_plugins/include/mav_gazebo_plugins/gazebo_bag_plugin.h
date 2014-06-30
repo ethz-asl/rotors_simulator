@@ -14,10 +14,10 @@
 #include <geometry_msgs/WrenchStamped.h>
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/Float32.h>
-#include <mav_msgs/ControlAttitudeThrust.h>
-#include <mav_msgs/ControlMotorSpeed.h>
-#include <mav_msgs/ControlRateThrust.h>
-#include <mav_msgs/ControlTrajectory.h>
+#include <mav_msgs/CommandAttitudeThrust.h>
+#include <mav_msgs/CommandMotorSpeed.h>
+#include <mav_msgs/CommandRateThrust.h>
+#include <mav_msgs/CommandTrajectory.h>
 
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
@@ -57,23 +57,23 @@ namespace gazebo
       void WindCallback(const geometry_msgs::WrenchStampedPtr& wind_msg);
 
       /// \brief Called when an Trajectory message is received.
-      /// \param[in] trajectory_msg A ControlTrajectory message from mav_msgs.
-      void WaypointCallback(const mav_msgs::ControlTrajectoryPtr& trajectory_msg);
+      /// \param[in] trajectory_msg A CommandTrajectory message from mav_msgs.
+      void WaypointCallback(const mav_msgs::CommandTrajectoryPtr& trajectory_msg);
 
-      /// \brief Called when a ControlAttitudeThrust message is received.
-      /// \param[in] control_msg A ControlAttitudeThrust message from mav_msgs.
-      void ControlAttitudeThrustCallback(
-        const mav_msgs::ControlAttitudeThrustPtr& control_msg);
+      /// \brief Called when a CommandAttitudeThrust message is received.
+      /// \param[in] control_msg A CommandAttitudeThrust message from mav_msgs.
+      void CommandAttitudeThrustCallback(
+        const mav_msgs::CommandAttitudeThrustPtr& control_msg);
 
-      /// \brief Called when a ControlMotorSpeed message is received.
-      /// \param[in] control_msg A ControlMotorSpeed message from mav_msgs.
-      void ControlMotorSpeedCallback(
-        const mav_msgs::ControlMotorSpeedPtr& control_msg);
+      /// \brief Called when a CommandMotorSpeed message is received.
+      /// \param[in] control_msg A CommandMotorSpeed message from mav_msgs.
+      void CommandMotorSpeedCallback(
+        const mav_msgs::CommandMotorSpeedPtr& control_msg);
 
-      /// \brief Called when a ControlRateThrust message is received.
-      /// \param[in] control_msg A ControlRateThrust message from mav_msgs.
-      void ControlRateThrustCallback(
-        const mav_msgs::ControlRateThrustPtr& control_msg);
+      /// \brief Called when a CommandRateThrust message is received.
+      /// \param[in] control_msg A CommandRateThrust message from mav_msgs.
+      void CommandRateThrustCallback(
+        const mav_msgs::CommandRateThrustPtr& control_msg);
 
       /// \brief Log the ground truth pose and twist.
       /// \param[in] now The current gazebo common::Time

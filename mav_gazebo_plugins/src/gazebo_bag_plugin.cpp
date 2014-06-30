@@ -81,29 +81,29 @@ namespace gazebo
     if (_sdf->HasElement("imuPubTopic"))
       imu_pub_topic_ = _sdf->GetElement("imuPubTopic")->Get<std::string>();
 
-    if (_sdf->HasElement("controlAttitudeThrustSubTopic"))
+    if (_sdf->HasElement("commandAttitudeThrustSubTopic"))
       control_attitude_thrust_sub_topic_ = _sdf->GetElement(
-        "controlAttitudeThrustSubTopic")->Get<std::string>();
+        "commandAttitudeThrustSubTopic")->Get<std::string>();
 
-    if (_sdf->HasElement("controlAttitudeThrustPubTopic"))
+    if (_sdf->HasElement("commandAttitudeThrustPubTopic"))
       control_attitude_thrust_pub_topic_ = _sdf->GetElement(
-        "controlAttitudeThrustPubTopic")->Get<std::string>();
+        "commandAttitudeThrustPubTopic")->Get<std::string>();
 
-    if (_sdf->HasElement("controlMotorSpeedSubTopic"))
+    if (_sdf->HasElement("commandMotorSpeedSubTopic"))
       control_motor_speed_sub_topic_ = _sdf->GetElement(
-        "controlMotorSpeedSubTopic")->Get<std::string>();
+        "commandMotorSpeedSubTopic")->Get<std::string>();
 
-    if (_sdf->HasElement("controlMotorSpeedPubTopic"))
+    if (_sdf->HasElement("commandMotorSpeedPubTopic"))
       control_motor_speed_pub_topic_ = _sdf->GetElement(
-        "controlMotorSpeedPubTopic")->Get<std::string>();
+        "commandMotorSpeedPubTopic")->Get<std::string>();
 
-    if (_sdf->HasElement("controlRateThrustSubTopic"))
+    if (_sdf->HasElement("commandRateThrustSubTopic"))
       control_rate_thrust_sub_topic_ = _sdf->GetElement(
-        "controlRateThrustSubTopic")->Get<std::string>();
+        "commandRateThrustSubTopic")->Get<std::string>();
 
-    if (_sdf->HasElement("controlRateThrustPubTopic"))
+    if (_sdf->HasElement("commandRateThrustPubTopic"))
       control_rate_thrust_pub_topic_ = _sdf->GetElement(
-        "controlRateThrustPubTopic")->Get<std::string>();
+        "commandRateThrustPubTopic")->Get<std::string>();
 
     if (_sdf->HasElement("motorPubTopic"))
       motor_pub_topic_ = _sdf->GetElement("motorPubTopic")->Get<std::string>();
@@ -189,24 +189,24 @@ namespace gazebo
     wind_sub_ = node_handle_->subscribe(wind_sub_topic_, 10,
       &GazeboBagPlugin::WindCallback, this);
 
-    // Subscriber to Waypoint ControlTrajectory Message
+    // Subscriber to Waypoint CommandTrajectory Message
     waypoint_sub_ = node_handle_->subscribe(waypoint_sub_topic_, 10,
       &GazeboBagPlugin::WaypointCallback, this);
 
     // Subscriber to Control Attitude Thrust Message
     control_attitude_thrust_sub_ = node_handle_->subscribe(
       control_attitude_thrust_sub_topic_, 10,
-      &GazeboBagPlugin::ControlAttitudeThrustCallback, this);
+      &GazeboBagPlugin::CommandAttitudeThrustCallback, this);
 
     // Subscriber to Control Motor Speed Message
     control_motor_speed_sub_ = node_handle_->subscribe(
       control_motor_speed_sub_topic_, 10,
-      &GazeboBagPlugin::ControlMotorSpeedCallback, this);
+      &GazeboBagPlugin::CommandMotorSpeedCallback, this);
 
     // Subscriber to Control Rate Thrust Message
     control_rate_thrust_sub_ = node_handle_->subscribe(
       control_rate_thrust_sub_topic_, 10,
-      &GazeboBagPlugin::ControlRateThrustCallback, this);
+      &GazeboBagPlugin::CommandRateThrustCallback, this);
   }
 
   // Called by the world update start event
@@ -229,23 +229,23 @@ namespace gazebo
     writeBag(wind_pub_topic_, t, wind_msg);
   }
 
-  void GazeboBagPlugin::WaypointCallback(const mav_msgs::ControlTrajectoryPtr& trajectory_msg) {
+  void GazeboBagPlugin::WaypointCallback(const mav_msgs::CommandTrajectoryPtr& trajectory_msg) {
     common::Time now = world_->GetSimTime();
     ros::Time ros_now = ros::Time(now.sec, now.nsec);
     writeBag(waypoint_pub_topic_, ros_now, trajectory_msg);
   }
 
-  void GazeboBagPlugin::ControlAttitudeThrustCallback(const mav_msgs::ControlAttitudeThrustPtr& control_msg) {
+  void GazeboBagPlugin::CommandAttitudeThrustCallback(const mav_msgs::CommandAttitudeThrustPtr& control_msg) {
     ros::Time t(control_msg->header.stamp.sec, control_msg->header.stamp.nsec);
     writeBag(control_attitude_thrust_pub_topic_, t, control_msg);
   }
 
-  void GazeboBagPlugin::ControlMotorSpeedCallback(const mav_msgs::ControlMotorSpeedPtr& control_msg) {
+  void GazeboBagPlugin::CommandMotorSpeedCallback(const mav_msgs::CommandMotorSpeedPtr& control_msg) {
     ros::Time t(control_msg->header.stamp.sec, control_msg->header.stamp.nsec);
     writeBag(control_motor_speed_pub_topic_, t, control_msg);
   }
 
-  void GazeboBagPlugin::ControlRateThrustCallback(const mav_msgs::ControlRateThrustPtr& control_msg) {
+  void GazeboBagPlugin::CommandRateThrustCallback(const mav_msgs::CommandRateThrustPtr& control_msg) {
     ros::Time t(control_msg->header.stamp.sec, control_msg->header.stamp.nsec);
     writeBag(control_rate_thrust_pub_topic_, t, control_msg);
   }

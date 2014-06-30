@@ -63,9 +63,9 @@
     <!-- Controller interface -->
     <plugin name="controller_interface" filename="libmav_gazebo_controller_interface.so">
       <robotNamespace>${namespace}</robotNamespace>
-      <commandTopicAttitude>mav_cmd_attitude</commandTopicAttitude>
-      <commandTopicRate>mav_cmd_rate</commandTopicRate>
-      <commandTopicMotor>mav_cmd_motor</commandTopicMotor>
+      <commandTopicAttitude>command/attitude</commandTopicAttitude>
+      <commandTopicRate>command/rate</commandTopicRate>
+      <commandTopicMotor>command/motor</commandTopicMotor>
       <imuTopic>imu</imuTopic>
       <poseTopic>pose</poseTopic>
       <motorVelocityReferenceTopic>motor_vel_ref</motorVelocityReferenceTopic>
@@ -100,8 +100,8 @@
         <bagFileName>$(arg log_file)</bagFileName>
         <linkName>base_link</linkName>
         <frameId>base_link</frameId>
-        <controlAttitudeThrustSubTopic>mav_cmd</controlAttitudeThrustSubTopic>
-        <controlAttitudeThrustPubTopic>mav_cmd</controlAttitudeThrustPubTopic>
+        <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
+        <commandAttitudeThrustPubTopic>command/attitude</commandAttitudeThrustPubTopic>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
         <excludeFloorLinkFromCollisionCheck>$(arg exclude_floor_link_from_collision_check)</excludeFloorLinkFromCollisionCheck>
       </plugin>

@@ -85,7 +85,7 @@ namespace gazebo
   }
 
   void GazeboControllerInterface::CommandAttitudeCallback(
-    const mav_msgs::ControlAttitudeThrustPtr& input_reference_msg)
+    const mav_msgs::CommandAttitudeThrustPtr& input_reference_msg)
   {
     if(!controller_created_) {
       // Get the controller and initialize its parameters.
@@ -104,7 +104,7 @@ namespace gazebo
   }
 
   void GazeboControllerInterface::CommandMotorCallback(
-    const mav_msgs::ControlMotorSpeedPtr& input_reference_msg)
+    const mav_msgs::CommandMotorSpeedPtr& input_reference_msg)
   {
     if(!controller_created_) {
       // Get the controller and initialize its parameters.
