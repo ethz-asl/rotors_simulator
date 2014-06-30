@@ -97,6 +97,7 @@ void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
   }
   msg->header.stamp.sec = now.sec;
   msg->header.stamp.nsec = now.nsec;
+  msg->header.frame_id = frame_id_;
 
   motor_pub_.publish(msg);
 }
