@@ -65,7 +65,7 @@
       <robotNamespace>${namespace}</robotNamespace>
       <commandTopicAttitude>command/attitude</commandTopicAttitude>
       <commandTopicRate>command/rate</commandTopicRate>
-      <commandTopicMotor>command/motor</commandTopicMotor>
+      <commandTopicMotor>command/motors</commandTopicMotor>
       <imuTopic>imu</imuTopic>
       <poseTopic>pose</poseTopic>
       <motorVelocityReferenceTopic>motor_vel_ref</motorVelocityReferenceTopic>

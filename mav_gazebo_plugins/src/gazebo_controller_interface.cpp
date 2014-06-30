@@ -31,7 +31,7 @@ namespace gazebo
     namespace_.clear();
     std::string command_topic_attitude = "command/attitude";
     std::string command_topic_rate = "command/rate";
-    std::string command_topic_motor = "command/motor";
+    std::string command_topic_motor = "command/motors";
 
     if (_sdf->HasElement("robotNamespace"))
       namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();

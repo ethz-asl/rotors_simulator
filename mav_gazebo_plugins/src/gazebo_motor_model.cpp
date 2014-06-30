@@ -32,7 +32,7 @@ namespace gazebo
 
     // default params
     namespace_.clear();
-    command_topic_ = "command/motor";
+    command_topic_ = "command/motors";
     motor_velocity_topic_ = "turning_vel";
     rotor_drag_coefficient_ = 0.0001;  //TODO(ff): find a more accurate parameter value
     rolling_moment_coefficient_ = 0.000001;  //TODO(ff): find a more accurate parameter value
