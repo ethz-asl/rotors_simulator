@@ -47,13 +47,13 @@ namespace gazebo
     ground_truth_twist_pub_topic_ = "/" + namespace_ + "/ground_truth/twist";
     imu_pub_topic_ = "/" + namespace_ + "/imu";
     imu_sub_topic_ = "/" + namespace_ + "/imu";
-    control_attitude_thrust_sub_topic_ = "/" + namespace_ + "/mav_attitude_cmd";
-    control_attitude_thrust_pub_topic_ = "/" + namespace_ + "/mav_attitude_cmd";
-    control_motor_speed_sub_topic_ = "/" + namespace_ + "/mav_motor_cmd";
-    control_motor_speed_pub_topic_ = "/" + namespace_ + "/mav_motor_cmd";
-    control_rate_thrust_sub_topic_ = "/" + namespace_ + "/mav_rate_cmd";
-    control_rate_thrust_pub_topic_ = "/" + namespace_ + "/mav_rate_cmd";
-    motor_pub_topic_ = "/" + namespace_ + "/motor_vel";
+    control_attitude_thrust_sub_topic_ = "/" + namespace_ + "/command/attitude";
+    control_attitude_thrust_pub_topic_ = "/" + namespace_ + "/command/attitude";
+    control_motor_speed_sub_topic_ = "/" + namespace_ + "/command/motors";
+    control_motor_speed_pub_topic_ = "/" + namespace_ + "/command/motors";
+    control_rate_thrust_sub_topic_ = "/" + namespace_ + "/command/rate";
+    control_rate_thrust_pub_topic_ = "/" + namespace_ + "/command/rate";
+    motor_pub_topic_ = "/" + namespace_ + "/motors";
     frame_id_ = "ground_truth_pose";
     link_name_ = "base_link";
 
@@ -72,6 +72,9 @@ namespace gazebo
         << link_name_ <<".\n";
     // Get the pointer to the link
     link_ = this->model_->GetLink(link_name_);
+    if (link_ == NULL)
+      gzthrow("[gazebo_bag_plugin] link \"" << link_name_ << "\" not found");
+
     mass_ = link_->GetInertial()->GetMass();
     gravity_ = world_->GetPhysicsEngine()->GetGravity().GetLength();
 
