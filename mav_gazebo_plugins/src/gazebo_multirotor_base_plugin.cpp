@@ -23,44 +23,26 @@ GazeboMultirotorBasePlugin::~GazeboMultirotorBasePlugin() {
     delete node_handle_;
   }
 }
-;
-
-// void GazeboMultirotorBasePlugin::InitializeParams() {};
-// void GazeboMultirotorBasePlugin::Publish() {};
 
 void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
-  // Store the pointer to the model
   model_ = _model;
-  // world_ = physics::get_world(model_->world.name);
   world_ = model_->GetWorld();
   namespace_.clear();
 
-  if (_sdf->HasElement("robotNamespace"))
-    namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
-  else
-    gzerr << "[gazebo_multirotor_base_plugin] Please specify a robotNamespace.\n";
+  getSdfParam<std::string>(_sdf, "robotNamespace", namespace_, "", true);
   node_handle_ = new ros::NodeHandle(namespace_);
 
-  // default params
-  motor_pub_topic_ = "motors";
-  link_name_ = "base_link";
+  getSdfParam<std::string>(_sdf, "linkName", link_name_, "base_link", true);
   frame_id_ = link_name_;
-
-  if (_sdf->HasElement("linkName"))
-    link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
-  else
-    gzwarn << "[gazebo_multirotor_base_plugin] No linkName specified, using default " << link_name_ << ".\n";
 
   // Get the pointer to the link
   link_ = this->model_->GetLink(link_name_);
   if(link_ == NULL)
     gzthrow("[gazebo_multirotor_base_plugin] link \"" << link_name_ << "\" not found");
 
-  if (_sdf->HasElement("motorPubTopic"))
-    motor_pub_topic_ = _sdf->GetElement("motorPubTopic")->Get<std::string>();
+  getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, "motors");
 
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
-
   motor_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_pub_topic_, 10);
 
   // Listen to the update event. This event is broadcast every
