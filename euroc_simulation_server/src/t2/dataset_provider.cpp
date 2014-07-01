@@ -17,8 +17,10 @@
 #include <std_msgs/Duration.h>
 #include <std_msgs/Float64.h>
 
+#include <chrono>
 
 void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out) {
+  using namespace std::chrono;
 
   ros::NodeHandle nh;
   // make sure this service is persistent, otherwise we're going to time ros xmlrpc calls
@@ -38,7 +40,7 @@ void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out) {
 
   int count = 0;
   bool map_received = false;
-  ros::WallTime task_start(ros::WallTime::now());
+  high_resolution_clock::time_point task_start = high_resolution_clock::now();
 
   for (rosbag::MessageInstance& m : view) {
 
@@ -56,11 +58,11 @@ void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out) {
       std_msgs::Float64 image_computation_time;
       std_msgs::Float64 total_computation_time;
 
-      ros::WallTime start(ros::WallTime::now());
+      high_resolution_clock::time_point start = high_resolution_clock::now();
       if (client.call(srv)) {
-        ros::WallTime now(ros::WallTime::now());
-        image_computation_time.data = (now - start).toSec();
-        total_computation_time.data = (now - task_start).toSec();
+        high_resolution_clock::time_point now = high_resolution_clock::now();
+        image_computation_time.data = duration_cast<duration<double> >(now - start).count();
+        total_computation_time.data = duration_cast<duration<double> >(now - task_start).count();
 
         if (!srv.response.map.data.empty()) {
           map_received = true;

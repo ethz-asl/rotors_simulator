@@ -17,8 +17,11 @@
 #include <std_msgs/Duration.h>
 #include <std_msgs/Float64.h>
 
+#include <chrono>
+
 
 void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out) {
+  using namespace std::chrono;
 
   ros::NodeHandle nh;
   // make sure this service is persistent, otherwise we're going to time ros xmlrpc calls
@@ -35,10 +38,12 @@ void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out) {
       srv.request.vi_data = *vi_msg;
 
       geometry_msgs::PoseStamped pose;
-      ros::WallTime start(ros::WallTime::now());
       std_msgs::Float64 computation_time;
+      high_resolution_clock::time_point start = high_resolution_clock::now();
+
       if (client.call(srv)) {
-        computation_time.data = (ros::WallTime::now() - start).toSec();
+        high_resolution_clock::time_point now = high_resolution_clock::now();
+        computation_time.data = duration_cast<duration<double> >(now - start).count();
         pose = srv.response.pose;
       }
       else{
