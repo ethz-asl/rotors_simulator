@@ -157,21 +157,22 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   }
 
   // Get the contact manager.
+  std::vector<std::string> collisions;
   contact_mgr_ = world_->GetPhysicsEngine()->GetContactManager();
   for (unsigned int i = 0; i < link_->GetCollisions().size(); ++i) {
     physics::CollisionPtr collision = link_->GetCollision(i);
-    this->collisions_[collision->GetScopedName()] = collision;
+    collisions.push_back(collision->GetScopedName());
   }
   for (unsigned int j = 0; j < child_links_.size(); ++j) {
     unsigned int zero = 0;
     for (unsigned int i = 0; i < child_links_[j]->GetCollisions().size(); ++i) {
-      physics::CollisionPtr collision = child_links_[j]->GetCollision(zero);
-      this->collisions_[child_links_[j]->GetScopedName()] = collision;
+//      physics::CollisionPtr collision = child_links_[j]->GetCollision(zero);
+      collisions.push_back(child_links_[j]->GetScopedName());
     }
   }
 
-  if (!this->collisions_.empty()) {
-    contact_mgr_->CreateFilter(this->link_->GetName(), this->collisions_);
+  if (!collisions.empty()) {
+    contact_mgr_->CreateFilter(this->link_->GetName(), collisions);
   }
 
   // Subscriber to IMU Sensor
