@@ -35,3 +35,4 @@ add_library(mav_control
 )
 
 target_link_libraries(mav_control ${catkin_LIBRARIES})
+add_dependencies(mav_control ${catkin_EXPORTED_TARGETS})
