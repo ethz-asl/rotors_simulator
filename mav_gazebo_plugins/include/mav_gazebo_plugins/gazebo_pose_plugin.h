@@ -64,7 +64,6 @@ class GazeboPosePlugin : public ModelPlugin {
   UniformDistribution pos_u_[3];
   UniformDistribution att_u_[3];
 
-
   geometry_msgs::PoseWithCovarianceStamped::_pose_type::_covariance_type covariance_matrix_;
 
   int measurement_delay_;

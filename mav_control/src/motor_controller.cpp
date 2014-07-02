@@ -1,10 +1,11 @@
 #include <mav_control/motor_controller.h>
 #include <iostream>
 
+MotorController::MotorController() {
+}
 
-MotorController::MotorController() {}
-
-MotorController::~MotorController() {}
+MotorController::~MotorController() {
+}
 
 std::shared_ptr<ControllerBase> MotorController::Clone() {
   std::shared_ptr<ControllerBase> controller = std::make_shared<MotorController>();

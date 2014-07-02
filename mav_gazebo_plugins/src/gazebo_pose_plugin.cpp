@@ -24,7 +24,8 @@ Eigen::Quaternion<typename Derived::Scalar> QuaternionFromSmallAngle(const Eigen
 
   if (q_squared < 1) {
     return Eigen::Quaternion<Scalar>(sqrt(1 - q_squared), theta[0] * 0.5, theta[1] * 0.5, theta[2] * 0.5);
-  } else {
+  }
+  else {
     const Scalar w = 1.0 / sqrt(1 + q_squared);
     const Scalar f = w * 0.5;
     return Eigen::Quaternion<Scalar>(w, theta[0] * f, theta[1] * f, theta[2] * f);
@@ -47,7 +48,7 @@ GazeboPosePlugin::GazeboPosePlugin()
       unknown_delay_(0),
       gazebo_seq_(0),
       pose_seq_(0),
-      covariance_image_scale_(1){
+      covariance_image_scale_(1) {
 }
 
 GazeboPosePlugin::~GazeboPosePlugin() {
@@ -118,10 +119,10 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   if (_sdf->HasElement("covarianceImage")) {
     std::string image_name = _sdf->GetElement("covarianceImage")->Get<std::string>();
     covariance_image_ = cv::imread(image_name, CV_LOAD_IMAGE_GRAYSCALE);
-    if(covariance_image_.data == NULL)
-      gzerr << "loading covariance image " << image_name << " failed" <<std::endl;
+    if (covariance_image_.data == NULL)
+      gzerr << "loading covariance image " << image_name << " failed" << std::endl;
     else
-      gzlog << "loading covariance image " << image_name << " successful" <<std::endl;
+      gzlog << "loading covariance image " << image_name << " successful" << std::endl;
   }
 
   getSdfParam(_sdf, "covarianceImageScale", covariance_image_scale_, 1.0);
@@ -153,13 +154,8 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   Eigen::Map<Eigen::Matrix<double, 6, 6> > cov(covariance_matrix_.data());
   Eigen::Matrix<double, 6, 1> covd;
 
-  covd <<
-      noise_normal_p.x * noise_normal_p.x,
-      noise_normal_p.y * noise_normal_p.y,
-      noise_normal_p.z * noise_normal_p.z,
-      noise_normal_q.x * noise_normal_q.x,
-      noise_normal_q.y * noise_normal_q.y,
-      noise_normal_q.z * noise_normal_q.z;
+  covd << noise_normal_p.x * noise_normal_p.x, noise_normal_p.y * noise_normal_p.y, noise_normal_p.z * noise_normal_p.z, noise_normal_q
+      .x * noise_normal_q.x, noise_normal_q.y * noise_normal_q.y, noise_normal_q.z * noise_normal_q.z;
   cov = covd.asDiagonal();
 
   frame_id_ = namespace_ + "/" + link_name_;
@@ -207,7 +203,7 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
     pose.pose.orientation.y = gazebo_pose.rot.y;
     pose.pose.orientation.z = gazebo_pose.rot.z;
 
-    if(publish_pose)
+    if (publish_pose)
       pose_queue_.push_back(std::make_pair(gazebo_seq_ + measurement_delay_, pose));
   }
 

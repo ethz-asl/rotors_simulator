@@ -5,7 +5,6 @@
 // TODO(ff): Enter some license
 //==============================================================================
 
-
 #ifndef MAV_JOY_INTERFACE_JOY_H_
 #define MAV_JOY_INTERFACE_JOY_H_
 
@@ -13,7 +12,6 @@
 #include <sensor_msgs/Joy.h>
 #include <mav_msgs/CommandAttitudeThrust.h>
 #include <geometry_msgs/PoseStamped.h>
-
 
 struct Axes {
   int roll;
@@ -44,32 +42,32 @@ struct Max {
 class Joy {
   typedef sensor_msgs::Joy::_buttons_type ButtonType;
 
-  private:
-    ros::NodeHandle nh_;
-    ros::Publisher ctrl_pub_;
-    ros::Subscriber joy_sub_;
+ private:
+  ros::NodeHandle nh_;
+  ros::Publisher ctrl_pub_;
+  ros::Subscriber joy_sub_;
 
-    std::string namespace_;
+  std::string namespace_;
 
-    Axes axes_;
-    Buttons buttons_;
+  Axes axes_;
+  Buttons buttons_;
 
-    mav_msgs::CommandAttitudeThrust control_msg_;
-    geometry_msgs::PoseStamped pose_;
-    sensor_msgs::Joy current_joy_;
+  mav_msgs::CommandAttitudeThrust control_msg_;
+  geometry_msgs::PoseStamped pose_;
+  sensor_msgs::Joy current_joy_;
 
-    Max max_;
+  Max max_;
 
-    double current_yaw_vel_;
-    double v_yaw_step_;
+  double current_yaw_vel_;
+  double v_yaw_step_;
 
-    void StopMav();
+  void StopMav();
 
-    void JoyCallback(const sensor_msgs::JoyConstPtr& msg);
-    void Publish();
+  void JoyCallback(const sensor_msgs::JoyConstPtr& msg);
+  void Publish();
 
-  public:
-    Joy();
+ public:
+  Joy();
 };
 
 #endif /* MAV_JOY_INTERFACE_JOY_H_ */

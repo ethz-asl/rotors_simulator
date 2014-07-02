@@ -9,7 +9,7 @@
 Joy::Joy() {
   ros::NodeHandle nh;
   ros::NodeHandle pnh("~");
-  ctrl_pub_ = nh_.advertise<mav_msgs::CommandAttitudeThrust> ("command/attitude", 10);
+  ctrl_pub_ = nh_.advertise < mav_msgs::CommandAttitudeThrust > ("command/attitude", 10);
 
   control_msg_.roll = 0;
   control_msg_.pitch = 0;
@@ -66,8 +66,7 @@ void Joy::JoyCallback(const sensor_msgs::JoyConstPtr& msg) {
     current_yaw_vel_ = 0;
   }
   control_msg_.yaw_rate = current_yaw_vel_;
-  control_msg_.thrust = (msg->axes[axes_.thrust] + 1) * max_.thrust/2.0
-    * axes_.thrust_direction;
+  control_msg_.thrust = (msg->axes[axes_.thrust] + 1) * max_.thrust / 2.0 * axes_.thrust_direction;
   ros::Time update_time = ros::Time::now();
   control_msg_.header.stamp = update_time;
   control_msg_.header.frame_id = "mav_joy_frame";

@@ -37,7 +37,7 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
 
   // Get the pointer to the link
   link_ = this->model_->GetLink(link_name_);
-  if(link_ == NULL)
+  if (link_ == NULL)
     gzthrow("[gazebo_multirotor_base_plugin] link \"" << link_name_ << "\" not found");
 
   getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, "motors");
