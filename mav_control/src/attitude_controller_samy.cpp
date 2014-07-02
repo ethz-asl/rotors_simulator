@@ -74,7 +74,7 @@ void AttitudeControllerSamy::CalculateRotorVelocities(Eigen::VectorXd* rotor_vel
   angular_acceleration_thrust(3) = control_attitude_thrust_reference_(3);
 
   *rotor_velocities = angular_acc_to_rotor_velocities_ * angular_acceleration_thrust;
-  *rotor_velocities = rotor_velocities->cwiseMax(1);
+  *rotor_velocities = rotor_velocities->cwiseMax(Eigen::VectorXd::Ones(rotor_velocities->rows()));
   *rotor_velocities = rotor_velocities->cwiseSqrt();
 }
 
