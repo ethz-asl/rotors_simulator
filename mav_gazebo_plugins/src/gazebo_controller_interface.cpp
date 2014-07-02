@@ -103,6 +103,26 @@ namespace gazebo
     controller_->SetAttitudeThrustReference(input_reference);
   }
 
+  void GazeboControllerInterface::CommandRateCallback(
+    const mav_msgs::CommandRateThrustPtr& input_reference_msg)
+  {
+    if(!controller_created_) {
+      // Get the controller and initialize its parameters.
+      controller_ = mav_controller_factory::ControllerFactory::Instance()
+        .CreateController("RateController");
+      controller_->InitializeParams();
+      controller_created_ = true;
+      gzmsg << "started RateController" << std::endl;
+    }
+
+    Eigen::Vector4d input_reference (
+      input_reference_msg->roll_rate,
+      input_reference_msg->pitch_rate,
+      input_reference_msg->yaw_rate,
+      input_reference_msg->thrust);
+    controller_->SetRateThrustReference(input_reference);
+  }
+
   void GazeboControllerInterface::CommandMotorCallback(
     const mav_msgs::CommandMotorSpeedPtr& input_reference_msg)
   {
