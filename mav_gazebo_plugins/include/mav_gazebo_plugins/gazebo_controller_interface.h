@@ -22,6 +22,7 @@
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <mav_msgs/CommandAttitudeThrust.h>
+#include <mav_msgs/CommandRateThrust.h>
 #include <mav_msgs/CommandMotorSpeed.h>
 #include <mav_msgs/MotorSpeed.h>
 
@@ -68,6 +69,7 @@ namespace gazebo
       boost::thread callback_queue_thread_;
       void QueueThread();
       void CommandAttitudeCallback(const mav_msgs::CommandAttitudeThrustPtr& input_reference_msg);
+      void CommandRateCallback(const mav_msgs::CommandRateThrustPtr& input_reference_msg);
       void CommandMotorCallback(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg);
       void ImuCallback(const sensor_msgs::ImuPtr& imu);
       void PoseCallback(const geometry_msgs::PoseStampedPtr& pose);
