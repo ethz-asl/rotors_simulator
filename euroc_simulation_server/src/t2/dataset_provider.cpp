@@ -17,8 +17,10 @@
 #include <std_msgs/Duration.h>
 #include <std_msgs/Float64.h>
 
+#include <octomap/octomap.h>
+#include <octomap_msgs/conversions.h>
 
-void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out) {
+void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out, const std::string& octomap_out_name) {
 
   ros::NodeHandle nh;
   // make sure this service is persistent, otherwise we're going to time ros xmlrpc calls
@@ -75,8 +77,22 @@ void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out) {
       ++count;
 
       if (map_received) {
+
+        octomap::OcTree* octree;
+        octomap::AbstractOcTree* tree = octomap_msgs::fullMsgToMap(srv.response.map);
+        octree = dynamic_cast<octomap::OcTree*>(tree);
+
+        if(octree) {
+          octree->writeBinary(octomap_out_name);
+          std::cout << std::endl << "Octree saved as " << octomap_out_name << std::endl;
+        }
+        else {
+          std::cout<<"The octree is NULL. Will not save that."<<std::endl;
+        }
+
         bag_out.write("map", m.getTime(), srv.response.map);
         ROS_INFO("Received map after %d images", count);
+        delete octree;
         break;
       }
     }
@@ -98,21 +114,22 @@ bool openBag(const std::string& filename, uint32_t mode, rosbag::Bag& bag) {
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "t2_dataset_provider");
-  if (argc != 3)
+  if (argc != 4)
   {
-    ROS_INFO("usage: t2_dataset_provider <bag_in_filename> <bag_out_filename>");
+    ROS_INFO("usage: t2_dataset_provider <bag_in_filename> <bag_out_filename> <octomap_out_name>");
     return 1;
   }
 
   std::string bag_in_name(argv[1]);
   std::string bag_out_name(argv[2]);
+  std::string octomap_out_name(argv[3]);
 
   rosbag::Bag bag_in, bag_out;
 
   openBag(bag_in_name, rosbag::bagmode::Read, bag_in);
   openBag(bag_out_name, rosbag::bagmode::Write, bag_out);
 
-  process(bag_in, bag_out);
+  process(bag_in, bag_out, octomap_out_name);
 
   bag_in.close();
   bag_out.close();

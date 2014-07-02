@@ -16,6 +16,9 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>euroc_comm</build_depend>
   <build_depend>rosbag</build_depend>
+  <build_depend>octomap_ros</build_depend>
+  <build_depend>octomap</build_depend>
+  <build_depend>octomap_msgs</build_depend>
 
   <run_depend>geometry_msgs</run_depend>
   <run_depend>mav_msgs</run_depend>
@@ -23,4 +26,7 @@
   <run_depend>sensor_msgs</run_depend>
   <run_depend>euroc_comm</run_depend>
   <run_depend>rosbag</run_depend>
+  <run_depend>octomap_ros</run_depend>
+  <run_depend>octomap</run_depend>
+  <run_depend>octomap_msgs</run_depend>
 </package>
