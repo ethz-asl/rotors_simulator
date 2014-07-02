@@ -21,9 +21,9 @@ namespace gazebo
 
   void OctomapFromGazeboWorld::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf) {
     world_ = _parent;
-    std::cout << "Subscribing to: " << "octomap/command" << std::endl;
-    srv_ = node_handle_.advertiseService(
-      "octomap/command", &OctomapFromGazeboWorld::ServiceCallback, this);
+    std::string service_name = "world/get_octomap";
+    gzlog << "Advertising service: " << service_name << std::endl;
+    srv_ = node_handle_.advertiseService(service_name, &OctomapFromGazeboWorld::ServiceCallback, this);
   }
 
   bool OctomapFromGazeboWorld::ServiceCallback(planning_msgs::Octomap::Request& req,
@@ -52,6 +52,7 @@ namespace gazebo
     if (octomap_msgs::binaryMapToMsgData(*octomap_, res.map.data)){
       res.map.id = "OcTree";
       res.map.binary = true;
+      res.map.resolution = octomap_->getResolution();
     }
     else {
       ROS_ERROR("Error serializing OctoMap");
