@@ -6,7 +6,8 @@ ControllerBase::ControllerBase() {
   initialized_params_ = false;
 }
 
-ControllerBase::~ControllerBase() { }
+ControllerBase::~ControllerBase() {
+}
 
 void ControllerBase::SetPosition(const Eigen::Vector3d& position) {
   position_ = position;
@@ -24,8 +25,7 @@ void ControllerBase::SetAngularRate(const Eigen::Vector3d& angular_rate) {
   angular_rate_ = angular_rate;
 }
 
-void ControllerBase::SetAttitudeThrustReference(
-  const Eigen::Vector4d& control_attitude_thrust_reference) {
+void ControllerBase::SetAttitudeThrustReference(const Eigen::Vector4d& control_attitude_thrust_reference) {
   control_attitude_thrust_reference_ = control_attitude_thrust_reference;
 }
 

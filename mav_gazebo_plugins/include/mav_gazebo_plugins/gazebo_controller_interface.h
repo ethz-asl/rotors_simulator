@@ -25,53 +25,50 @@
 #include <mav_msgs/CommandMotorSpeed.h>
 #include <mav_msgs/MotorSpeed.h>
 
+namespace gazebo {
+class GazeboControllerInterface : public ModelPlugin {
+ public:
+  GazeboControllerInterface();
+  ~GazeboControllerInterface();
 
-namespace gazebo
-{
-  class GazeboControllerInterface : public ModelPlugin
-  {
-    public:
-      GazeboControllerInterface();
-      ~GazeboControllerInterface();
+  void InitializeParams();
+  void Publish();
 
-      void InitializeParams();
-      void Publish();
+ protected:
+  void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+  void OnUpdate(const common::UpdateInfo& /*_info*/);
 
-    protected:
-      void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
-      void OnUpdate(const common::UpdateInfo& /*_info*/);
+ private:
+  std::shared_ptr<ControllerBase> controller_;
+  bool controller_created_;
 
-    private:
-      std::shared_ptr<ControllerBase> controller_;
-      bool controller_created_;
+  std::string namespace_;
+  std::string command_topic_;
+  std::string imu_topic_;
+  std::string motor_velocity_topic_;
 
-      std::string namespace_;
-      std::string command_topic_;
-      std::string imu_topic_;
-      std::string motor_velocity_topic_;
+  ros::NodeHandle* node_handle_;
+  ros::Publisher motor_cmd_pub_;
+  ros::Subscriber cmd_attitude_sub_;
+  ros::Subscriber cmd_motor_sub_;
+  ros::Subscriber imu_sub_;
 
-      ros::NodeHandle* node_handle_;
-      ros::Publisher motor_cmd_pub_;
-      ros::Subscriber cmd_attitude_sub_;
-      ros::Subscriber cmd_motor_sub_;
-      ros::Subscriber imu_sub_;
+  // Pointer to the model
+  physics::ModelPtr model_;
+  // Pointer to the update event connection
+  event::ConnectionPtr updateConnection_;
 
-      // Pointer to the model
-      physics::ModelPtr model_;
-      // Pointer to the update event connection
-      event::ConnectionPtr updateConnection_;
+  sensor_msgs::Imu imu_;
 
-      sensor_msgs::Imu imu_;
+  mav_msgs::MotorSpeed turning_velocities_msg_;
 
-      mav_msgs::MotorSpeed turning_velocities_msg_;
-
-      boost::thread callback_queue_thread_;
-      void QueueThread();
-      void CommandAttitudeCallback(const mav_msgs::CommandAttitudeThrustPtr& input_reference_msg);
-      void CommandMotorCallback(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg);
-      void ImuCallback(const sensor_msgs::ImuPtr& imu);
-      void PoseCallback(const geometry_msgs::PoseStampedPtr& pose);
-  };
+  boost::thread callback_queue_thread_;
+  void QueueThread();
+  void CommandAttitudeCallback(const mav_msgs::CommandAttitudeThrustPtr& input_reference_msg);
+  void CommandMotorCallback(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg);
+  void ImuCallback(const sensor_msgs::ImuPtr& imu);
+  void PoseCallback(const geometry_msgs::PoseStampedPtr& pose);
+};
 }
 
 #endif // MAV_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H

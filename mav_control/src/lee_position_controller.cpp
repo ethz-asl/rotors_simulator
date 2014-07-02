@@ -1,9 +1,13 @@
 #include <mav_control/lee_position_controller.h>
 #include <iostream>
 
-LeePositionController::LeePositionController(): gravity_(9.81),   mass_(1.56779) {}
+LeePositionController::LeePositionController()
+    : gravity_(9.81),
+      mass_(1.56779) {
+}
 
-LeePositionController::~LeePositionController() {}
+LeePositionController::~LeePositionController() {
+}
 
 std::shared_ptr<ControllerBase> LeePositionController::Clone() {
   std::shared_ptr<ControllerBase> controller = std::make_shared<LeePositionController>();
@@ -45,28 +49,27 @@ void LeePositionController::InitializeParams() {
   // to make the tuning independent of the inertia matrix we divide here
   gain_angular_rate_ = gain_angular_rate_.transpose() * inertia_matrix_.inverse();
 
-  const double rotor_force_constant = 0.0000099865; //F_i = k_n * rotor_velocity_i^2
-  const double rotor_moment_constant = 0.0243; // M_i = k_m * F_i
+  const double rotor_force_constant = 0.0000099865;  //F_i = k_n * rotor_velocity_i^2
+  const double rotor_moment_constant = 0.0243;  // M_i = k_m * F_i
 
   angular_acc_to_rotor_velocities_.resize(amount_rotors_, 4);
   const double arm_length = 0.215;
 
   Eigen::Matrix4d K;
   K.setZero();
-  K(0,0) = arm_length * rotor_force_constant;
-  K(1,1) = arm_length * rotor_force_constant;
-  K(2,2) = rotor_force_constant * rotor_moment_constant;
-  K(3,3) = rotor_force_constant;
+  K(0, 0) = arm_length * rotor_force_constant;
+  K(1, 1) = arm_length * rotor_force_constant;
+  K(2, 2) = rotor_force_constant * rotor_moment_constant;
+  K(3, 3) = rotor_force_constant;
 
   Eigen::Matrix4d I;
   I.setZero();
-  I.block<3,3>(0, 0) = inertia_matrix_;
-  I(3,3) = 1;
+  I.block<3, 3>(0, 0) = inertia_matrix_;
+  I(3, 3) = 1;
   angular_acc_to_rotor_velocities_ = allocation_matrix_.transpose()
-    * (allocation_matrix_ * allocation_matrix_.transpose()).inverse() * K.inverse() * I;
+      * (allocation_matrix_ * allocation_matrix_.transpose()).inverse() * K.inverse() * I;
   initialized_params_ = true;
 }
-
 
 void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const {
   assert(rotor_velocities);
@@ -81,11 +84,11 @@ void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velo
   ComputeDesiredAngularAcc(acceleration, &angular_acceleration);
 
   // project thrust to body z axis.
-  Eigen::Vector3d e_3(0,0,1);
-  double thrust =  - mass_ * acceleration.dot(attitude_.toRotationMatrix() * e_3);
+  Eigen::Vector3d e_3(0, 0, 1);
+  double thrust = -mass_ * acceleration.dot(attitude_.toRotationMatrix() * e_3);
 
   Eigen::Vector4d angular_acceleration_thrust;
-  angular_acceleration_thrust.block<3,1>(0,0) = angular_acceleration;
+  angular_acceleration_thrust.block<3, 1>(0, 0) = angular_acceleration;
   angular_acceleration_thrust(3) = thrust;
 
   *rotor_velocities = angular_acc_to_rotor_velocities_ * angular_acceleration_thrust;
@@ -104,9 +107,8 @@ void LeePositionController::ComputeDesiredAcceleration(Eigen::Vector3d* accelera
 
   Eigen::Vector3d e_3(0, 0, 1);
 
-  *acceleration =  position_error.cwiseProduct(gain_position_) / mass_
-                           + velocity_error.cwiseProduct(gain_velocity_) / mass_ - gravity_ * e_3
-                           - acceleration_reference_;
+  *acceleration = position_error.cwiseProduct(gain_position_) / mass_
+      + velocity_error.cwiseProduct(gain_velocity_) / mass_ - gravity_ * e_3 - acceleration_reference_;
 }
 
 // Implementation from the T. Lee et al. paper
@@ -122,7 +124,7 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
   b1_des << cos(yaw_reference_), sin(yaw_reference_), 0;
 
   Eigen::Vector3d b3_des;
-  b3_des = - acceleration / acceleration.norm();
+  b3_des = -acceleration / acceleration.norm();
 
   Eigen::Vector3d b2_des;
   b2_des = b3_des.cross(b1_des);
@@ -133,13 +135,11 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
   R_des.col(1) = b2_des;
   R_des.col(2) = b3_des;
 
-
   // angle error according to lee et al.
   Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
   Eigen::Vector3d angle_error;
-  angle_error << angle_error_matrix(2,1), // inverse skew operator
-                 angle_error_matrix(0,2),
-                 angle_error_matrix(1,0);
+  angle_error << angle_error_matrix(2, 1),  // inverse skew operator
+  angle_error_matrix(0, 2), angle_error_matrix(1, 0);
 
   // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());

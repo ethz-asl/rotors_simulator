@@ -19,7 +19,6 @@
 
 #include <chrono>
 
-
 void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out) {
   using namespace std::chrono;
 
@@ -46,14 +45,14 @@ void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out) {
         computation_time.data = duration_cast<duration<double> >(now - start).count();
         pose = srv.response.pose;
       }
-      else{
+      else {
         ROS_ERROR("could not contact challenger server");
         computation_time.data = -1;
       }
       bag_out.write("pose", m.getTime(), pose);
       bag_out.write("duration", m.getTime(), computation_time);
     }
-   }
+  }
 }
 
 bool openBag(const std::string& filename, uint32_t mode, rosbag::Bag& bag) {
@@ -70,8 +69,7 @@ bool openBag(const std::string& filename, uint32_t mode, rosbag::Bag& bag) {
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "t1_dataset_provider");
-  if (argc != 3)
-  {
+  if (argc != 3) {
     ROS_INFO("usage: t1_dataset_provider <bag_in_filename> <bag_out_filename>");
     return 1;
   }

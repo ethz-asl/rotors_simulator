@@ -18,29 +18,27 @@
 #include <octomap/octomap.h>
 #include <planning_msgs/Octomap.h>
 
-namespace gazebo
-{
-  class OctomapFromGazeboWorld : public WorldPlugin {
-   public:
-    /// \brief Constructor
-    OctomapFromGazeboWorld();
-    /// \brief Destructor
-    virtual ~OctomapFromGazeboWorld();
+namespace gazebo {
+class OctomapFromGazeboWorld : public WorldPlugin {
+ public:
+  /// \brief Constructor
+  OctomapFromGazeboWorld();
+  /// \brief Destructor
+  virtual ~OctomapFromGazeboWorld();
 
-   protected:
-    /// \brief Load the plugin.
-    /// \param[in] _parent Pointer to the world that loaded this plugin.
-    /// \param[in] _sdf SDF element that describes the plugin.
-    void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf);
-    void CreateOctomap(const planning_msgs::Octomap::Request& msg);
+ protected:
+  /// \brief Load the plugin.
+  /// \param[in] _parent Pointer to the world that loaded this plugin.
+  /// \param[in] _sdf SDF element that describes the plugin.
+  void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf);
+  void CreateOctomap(const planning_msgs::Octomap::Request& msg);
 
-   private:
-    physics::WorldPtr world_;
-    ros::NodeHandle node_handle_;
-    ros::ServiceServer srv_;
-    octomap::OcTree* octomap_;
-    bool ServiceCallback(planning_msgs::Octomap::Request& req,
-      planning_msgs::Octomap::Response& res);
-  };
+ private:
+  physics::WorldPtr world_;
+  ros::NodeHandle node_handle_;
+  ros::ServiceServer srv_;
+  octomap::OcTree* octomap_;
+  bool ServiceCallback(planning_msgs::Octomap::Request& req, planning_msgs::Octomap::Response& res);
+};
 
 }

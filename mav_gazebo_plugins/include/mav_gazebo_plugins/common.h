@@ -21,7 +21,7 @@
 
 #include <gazebo/gazebo.hh>
 
-namespace gazebo{
+namespace gazebo {
 
 /**
  * \brief Obtains a parameter from sdf.
@@ -32,12 +32,13 @@ namespace gazebo{
  * \param[in] verbose If true, gzerror if the parameter is not available.
  */
 template<class T>
-bool getSdfParam(sdf::ElementPtr sdf, const std::string& name, T& param, const T& default_value,
-                 const bool& verbose = false) {
+bool getSdfParam(sdf::ElementPtr sdf, const std::string& name, T& param, const T& default_value, const bool& verbose =
+                     false) {
   if (sdf->HasElement(name)) {
     param = sdf->GetElement(name)->Get<T>();
     return true;
-  } else {
+  }
+  else {
     param = default_value;
     if (verbose)
       gzerr << "[mav_gazebo_plugins] Please specify a value for parameter \"" << name << "\".\n";
@@ -46,7 +47,5 @@ bool getSdfParam(sdf::ElementPtr sdf, const std::string& name, T& param, const T
 }
 
 }
-
-
 
 #endif /* COMMON_H_ */

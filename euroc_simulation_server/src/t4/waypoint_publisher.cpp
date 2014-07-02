@@ -39,8 +39,9 @@ int main(int argc, char** argv) {
   ros::V_string args;
   ros::removeROSArgs(argc, argv, args);
 
-  if(args.size() != 2){
-    ROS_ERROR("Usage: waypoint_publisher <waypoint_file> (one per line, space separated: wait_time [s] x[m] y[m] z[m] yaw[deg])");
+  if (args.size() != 2) {
+    ROS_ERROR(
+        "Usage: waypoint_publisher <waypoint_file> (one per line, space separated: wait_time [s] x[m] y[m] z[m] yaw[deg])");
     return -1;
   }
 
@@ -81,7 +82,7 @@ int main(int argc, char** argv) {
 
   ROS_INFO("Wait for simulation to become ready...");
 
-  while (!sim_running && ros::ok()){
+  while (!sim_running && ros::ok()) {
     ros::spinOnce();
     ros::Duration(0.01).sleep();
   }

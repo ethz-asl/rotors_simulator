@@ -100,8 +100,7 @@ bool openBag(const std::string& filename, uint32_t mode, rosbag::Bag& bag) {
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "t2_dataset_provider");
-  if (argc != 3)
-  {
+  if (argc != 3) {
     ROS_INFO("usage: t2_dataset_provider <bag_in_filename> <bag_out_filename>");
     return 1;
   }
