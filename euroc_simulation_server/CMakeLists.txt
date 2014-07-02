@@ -10,7 +10,12 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   rosbag
+  octomap_ros
+  octomap_msgs
 )
+
+find_package(octomap REQUIRED)
+find_package(Eigen REQUIRED)
 
 include_directories(
   include
@@ -18,6 +23,7 @@ include_directories(
 )
 
 catkin_package(  
+  INCLUDE_DIRS ${Eigen_INCLUDE_DIRS}
   CATKIN_DEPENDS 
     geometry_msgs 
     mav_msgs 
@@ -25,7 +31,9 @@ catkin_package(
     roscpp 
     sensor_msgs 
     rosbag
-  DEPENDS Eigen
+    octomap_ros
+    octomap_msgs
+  DEPENDS Eigen octomap
 )
   
 add_subdirectory(src/t1)
