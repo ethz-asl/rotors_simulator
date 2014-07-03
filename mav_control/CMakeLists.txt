@@ -29,6 +29,7 @@ add_library(mav_control
   src/controller_factory.cpp
   src/controller_base.cpp
   src/attitude_controller.cpp
+  src/rate_controller.cpp
   src/attitude_controller_samy.cpp
   src/motor_controller.cpp
   src/lee_position_controller.cpp

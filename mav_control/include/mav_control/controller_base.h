@@ -23,7 +23,7 @@ class ControllerBase {
   void SetAttitude(const Eigen::Quaternion<double>& attitude);
   void SetAngularRate(const Eigen::Vector3d& angular_rate);
   void SetAttitudeThrustReference(const Eigen::Vector4d& control_attitude_thrust_reference);
-
+  void SetRateThrustReference(const Eigen::Vector4d& control_rate_thrust_reference);
   void SetPositionReference(const Eigen::Vector3d& position_reference);
   void SetVelocityReference(const Eigen::Vector3d& velocity_reference);
   void SetAccelerationReference(const Eigen::Vector3d& acceleration_reference);
@@ -50,6 +50,7 @@ class ControllerBase {
   double yaw_rate_reference_;
 
   Eigen::Vector4d control_attitude_thrust_reference_;
+  Eigen::Vector4d control_rate_thrust_reference_;
   Eigen::VectorXd motor_reference_;
   int amount_rotors_;
   bool initialized_params_;
