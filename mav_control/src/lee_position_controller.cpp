@@ -10,8 +10,7 @@ LeePositionController::~LeePositionController() {
 }
 
 std::shared_ptr<ControllerBase> LeePositionController::Clone() {
-  std::shared_ptr<ControllerBase> controller = std::allocate_shared<LeePositionController>
-  (Eigen::aligned_allocator<LeePositionController>());
+  std::shared_ptr<ControllerBase> controller(new LeePositionController);
   return controller;
 }
 

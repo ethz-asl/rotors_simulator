@@ -25,8 +25,7 @@ class ControllerFactory {
 
   template<typename ControllerType>
   static bool RegisterControllerType(const std::string& name) {
-    return Instance().RegisterControllerTypeImpl(name, std::allocate_shared<ControllerType>
-      (Eigen::aligned_allocator<ControllerType>()));
+    return Instance().RegisterControllerTypeImpl(name, std::shared_ptr<ControllerType>(new ControllerType));
   }
  private:
   typedef std::map<std::string, std::shared_ptr<ControllerBase> > ControllerMap;

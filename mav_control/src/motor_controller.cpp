@@ -8,8 +8,7 @@ MotorController::~MotorController() {
 }
 
 std::shared_ptr<ControllerBase> MotorController::Clone() {
-  std::shared_ptr<ControllerBase> controller = std::allocate_shared<MotorController>
-  (Eigen::aligned_allocator<MotorController>());
+  std::shared_ptr<ControllerBase> controller(new MotorController);
   return controller;
 }
 
