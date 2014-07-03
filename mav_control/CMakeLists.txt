@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(mav_control)
 
-add_definitions(-std=c++11)
+add_definitions(-std=c++0x)
 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
