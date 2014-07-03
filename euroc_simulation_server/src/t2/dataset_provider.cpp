@@ -27,7 +27,7 @@
 
 #include <chrono>
 
-void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out) {
+void process(const rosbag::Bag& bag_in, rosbag::Bag* bag_out) {
   using namespace std::chrono;
 
   ros::NodeHandle nh;
@@ -80,12 +80,16 @@ void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out) {
         ROS_ERROR("could not contact challenger server");
         image_computation_time.data = -1;
       }
-      bag_out.write("duration", m.getTime(), image_computation_time);
-      bag_out.write("total_duration", m.getTime(), total_computation_time);
+      if (bag_out != NULL) {
+        bag_out->write("duration", m.getTime(), image_computation_time);
+        bag_out->write("total_duration", m.getTime(), total_computation_time);
+      }
       ++count;
 
       if (map_received) {
-        bag_out.write("map", m.getTime(), srv.response.map);
+        if (bag_out != NULL) {
+          bag_out->write("map", m.getTime(), srv.response.map);
+        }
         ROS_INFO("Received map after %d images", count);
         break;
       }
@@ -99,7 +103,7 @@ bool openBag(const std::string& filename, uint32_t mode, rosbag::Bag& bag) {
     bag.open(filename, mode);
   }
   catch (rosbag::BagException& e) {
-    ROS_FATAL_STREAM("Could not open output bag: "<<filename<<" because of: "<<e.what());
+    ROS_FATAL_STREAM("Could not open bag: "<<filename<<" because of: "<<e.what());
     return false;
   }
 
@@ -108,23 +112,48 @@ bool openBag(const std::string& filename, uint32_t mode, rosbag::Bag& bag) {
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "t2_dataset_provider");
-  if (argc != 3) {
-    ROS_INFO("usage: t2_dataset_provider <bag_in_filename> <bag_out_filename>");
+
+  if (argc != 2 && argc != 3) {
+    ROS_INFO("usage: t2_dataset_provider <bag_in_filename> [bag_out_filename]");
     return 1;
   }
 
   std::string bag_in_name(argv[1]);
-  std::string bag_out_name(argv[2]);
-
-  rosbag::Bag bag_in, bag_out;
-
+  rosbag::Bag bag_in;
   openBag(bag_in_name, rosbag::bagmode::Read, bag_in);
-  openBag(bag_out_name, rosbag::bagmode::Write, bag_out);
 
-  process(bag_in, bag_out);
+  if (argc == 3) {
+    std::string bag_out_name(argv[2]);
+
+    time_t rawtime;
+    struct tm *timeinfo;
+    char buffer[80];
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    strftime(buffer, 80, "%Y-%m-%d-%H-%M-%S", timeinfo);
+    std::string date_time_str(buffer);
+
+    std::string key(".bag");
+    size_t pos = bag_out_name.rfind(key);
+    if (pos != std::string::npos)
+      bag_out_name.erase(pos, key.length());
+    bag_out_name = bag_out_name + "_" + date_time_str + ".bag";
+
+    rosbag::Bag bag_out;
+    openBag(bag_out_name, rosbag::bagmode::Write, bag_out);
+
+    process(bag_in, &bag_out);
+
+    bag_out.close();
+  }
+  else {
+    process(bag_in, NULL);
+  }
 
   bag_in.close();
-  bag_out.close();
 
   return 0;
 }
+
