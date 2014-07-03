@@ -242,25 +242,25 @@ void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request
           }
         }
 
-        // garbage collector
-        for(std::map<std::string,bool>::iterator it = objects_in_collision.begin(); it != objects_in_collision.end(); it++) {
-            if(!CheckIfInsideObject(it->first,start,ray)){
-              objects_in_collision.erase(it);
-            }
-        }
+//        // garbage collector
+//        for(std::map<std::string,bool>::iterator it = objects_in_collision.begin(); it != objects_in_collision.end(); it++) {
+//            if(!CheckIfInsideObject(it->first,start,ray)){
+//              objects_in_collision.erase(it);
+//            }
+//        }
         ray->SetPoints(start, end);
         ray->GetIntersection(dist, entity_name);
       }
 
-      math::Vector3 end_new = end;
-      end_new.x -= (leaf_size/2 + epsilon);
+//      math::Vector3 end_new = end;
+//      end_new.x -= (leaf_size/2 + epsilon);
 
-      // garbage collector
-      for(std::map<std::string,bool>::iterator it = objects_in_collision.begin(); it != objects_in_collision.end(); it++) {
-          if(!CheckIfInsideObject(it->first,end_new,ray)){
-            objects_in_collision.erase(it);
-          }
-      }
+//      // garbage collector
+//      for(std::map<std::string,bool>::iterator it = objects_in_collision.begin(); it != objects_in_collision.end(); it++) {
+//          if(!CheckIfInsideObject(it->first,end_new,ray)){
+//            objects_in_collision.erase(it);
+//          }
+//      }
 
       // Loop until the end of the bounding box and fill the leafs
       while (x < end.x - leaf_size / 2) {
