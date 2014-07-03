@@ -13,13 +13,13 @@ std::shared_ptr<ControllerBase> ControllerFactory::CreateController(const std::s
   return std::shared_ptr<ControllerBase>(it->second->Clone());
 }
 
-bool ControllerFactory::RegisterControllerTypeImpl(std::string& controller_name,
+bool ControllerFactory::RegisterControllerTypeImpl(const std::string& controller_name,
                                                    const std::shared_ptr<ControllerBase>& controller) {
   std::cout << "Registered controller: " << controller_name << " \n";
   return name_to_controller_.insert(ControllerMap::value_type(controller_name, controller)).second;
 }
 
-bool ControllerFactory::UnregisterControllerTypeImpl(std::string& controller_name) {
+bool ControllerFactory::UnregisterControllerTypeImpl(const std::string& controller_name) {
   return name_to_controller_.erase(controller_name) == 1;
 }
 }

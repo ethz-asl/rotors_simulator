@@ -8,7 +8,9 @@ AttitudeController::~AttitudeController() {
 }
 
 std::shared_ptr<ControllerBase> AttitudeController::Clone() {
-  std::shared_ptr<ControllerBase> controller = std::make_shared<AttitudeController>();
+  std::shared_ptr<ControllerBase> controller = std::allocate_shared<AttitudeController>
+  (Eigen::aligned_allocator<AttitudeController>());
+
   return controller;
 }
 

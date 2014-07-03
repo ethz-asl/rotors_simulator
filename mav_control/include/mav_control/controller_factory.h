@@ -24,7 +24,7 @@ class ControllerFactory {
   }
 
   template<typename ControllerType>
-  static bool RegisterControllerType(std::string name) {
+  static bool RegisterControllerType(const std::string& name) {
     return Instance().RegisterControllerTypeImpl(name, std::make_shared<ControllerType>());
   }
  private:
@@ -35,8 +35,8 @@ class ControllerFactory {
   ControllerFactory(const ControllerFactory&) = delete;
   ControllerFactory& operator=(const ControllerFactory&) = delete;
 
-  bool RegisterControllerTypeImpl(std::string& controller_name, const std::shared_ptr<ControllerBase>& controller);
-  bool UnregisterControllerTypeImpl(std::string& controller_name);
+  bool RegisterControllerTypeImpl(const std::string& controller_name, const std::shared_ptr<ControllerBase>& controller);
+  bool UnregisterControllerTypeImpl(const std::string& controller_name);
   // ControllerBase* getActiveController();
 };
 }
