@@ -53,14 +53,14 @@ class GazeboControllerInterface : public ModelPlugin {
   ros::Subscriber cmd_motor_sub_;
   ros::Subscriber imu_sub_;
 
-  // Pointer to the model
+  /// \brief Pointer to the model
   physics::ModelPtr model_;
-  // Pointer to the update event connection
+  /// \brief Pointer to the world.
+  physics::WorldPtr world_;
+  /// \brief Pointer to the update event connection
   event::ConnectionPtr updateConnection_;
 
   sensor_msgs::Imu imu_;
-
-  mav_msgs::MotorSpeed turning_velocities_msg_;
 
   boost::thread callback_queue_thread_;
   void QueueThread();

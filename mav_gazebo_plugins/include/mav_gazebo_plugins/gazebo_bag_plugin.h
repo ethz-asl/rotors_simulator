@@ -154,7 +154,15 @@ class GazeboBagPlugin : public ModelPlugin {
       bag_.write(topic, time, msg);
     }
     catch (rosbag::BagIOException& e) {
-      gzerr << "Error while writing to bag " << e.what();
+      gzerr << "Error while writing to bag " << e.what() << std::endl;
+    }
+    catch (rosbag::BagException& e) {
+      if (time < ros::TIME_MIN) {
+        gzerr<<"Header stamp not set for msg published on topic: "<< topic << ". " << e.what() << std::endl;
+      }
+      else {
+        gzerr << "Error while writing to bag " << e.what() << std::endl;
+      }
     }
   }
 
@@ -165,7 +173,15 @@ class GazeboBagPlugin : public ModelPlugin {
       bag_.write(topic, time, msg);
     }
     catch (rosbag::BagIOException& e) {
-      gzerr << "Error while writing to bag " << e.what();
+      gzerr << "Error while writing to bag " << e.what() << std::endl;
+    }
+    catch (rosbag::BagException& e) {
+      if (time < ros::TIME_MIN) {
+        gzerr<<"Header stamp not set for msg published on topic: "<< topic << ". " << e.what() << std::endl;
+      }
+      else {
+        gzerr << "Error while writing to bag " << e.what() << std::endl;
+      }
     }
   }
 

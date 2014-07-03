@@ -207,13 +207,15 @@ void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
 }
 
 void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuPtr& imu_msg) {
-  ros::Time t(imu_msg->header.stamp.sec, imu_msg->header.stamp.nsec);
-  writeBag(imu_pub_topic_, t, imu_msg);
+  common::Time now = world_->GetSimTime();
+  ros::Time ros_now = ros::Time(now.sec, now.nsec);
+  writeBag(imu_pub_topic_, ros_now, imu_msg);
 }
 
 void GazeboBagPlugin::WindCallback(const geometry_msgs::WrenchStampedPtr& wind_msg) {
-  ros::Time t(wind_msg->header.stamp.sec, wind_msg->header.stamp.nsec);
-  writeBag(wind_pub_topic_, t, wind_msg);
+  common::Time now = world_->GetSimTime();
+  ros::Time ros_now = ros::Time(now.sec, now.nsec);
+  writeBag(wind_pub_topic_, ros_now, wind_msg);
 }
 
 void GazeboBagPlugin::WaypointCallback(const mav_msgs::CommandTrajectoryPtr& trajectory_msg) {
@@ -223,18 +225,21 @@ void GazeboBagPlugin::WaypointCallback(const mav_msgs::CommandTrajectoryPtr& tra
 }
 
 void GazeboBagPlugin::CommandAttitudeThrustCallback(const mav_msgs::CommandAttitudeThrustPtr& control_msg) {
-  ros::Time t(control_msg->header.stamp.sec, control_msg->header.stamp.nsec);
-  writeBag(control_attitude_thrust_pub_topic_, t, control_msg);
+  common::Time now = world_->GetSimTime();
+  ros::Time ros_now = ros::Time(now.sec, now.nsec);
+  writeBag(control_attitude_thrust_pub_topic_, ros_now, control_msg);
 }
 
 void GazeboBagPlugin::CommandMotorSpeedCallback(const mav_msgs::CommandMotorSpeedPtr& control_msg) {
-  ros::Time t(control_msg->header.stamp.sec, control_msg->header.stamp.nsec);
-  writeBag(control_motor_speed_pub_topic_, t, control_msg);
+  common::Time now = world_->GetSimTime();
+  ros::Time ros_now = ros::Time(now.sec, now.nsec);
+  writeBag(control_motor_speed_pub_topic_, ros_now, control_msg);
 }
 
 void GazeboBagPlugin::CommandRateThrustCallback(const mav_msgs::CommandRateThrustPtr& control_msg) {
-  ros::Time t(control_msg->header.stamp.sec, control_msg->header.stamp.nsec);
-  writeBag(control_rate_thrust_pub_topic_, t, control_msg);
+  common::Time now = world_->GetSimTime();
+  ros::Time ros_now = ros::Time(now.sec, now.nsec);
+  writeBag(control_rate_thrust_pub_topic_, ros_now, control_msg);
 }
 
 void GazeboBagPlugin::LogMotorVelocities(const common::Time now) {
