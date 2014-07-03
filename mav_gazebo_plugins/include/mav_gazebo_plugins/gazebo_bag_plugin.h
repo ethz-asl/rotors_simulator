@@ -102,9 +102,6 @@ class GazeboBagPlugin : public ModelPlugin {
   // /// link and its children
   physics::ContactManager *contact_mgr_;
 
-  // /// \brief The collisions for the link and its children in the model.
-  std::map<std::string, physics::CollisionPtr> collisions_;
-
   std::string namespace_;
   std::string ground_truth_pose_pub_topic_;
   std::string ground_truth_twist_pub_topic_;

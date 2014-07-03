@@ -140,7 +140,6 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   // Open a bag file and store it in ~/.ros/<bag_filename_>
   bag_.open(bag_filename_, rosbag::bagmode::Write);
-
   child_links_ = link_->GetChildJointsLinks();
   for (unsigned int i = 0; i < child_links_.size(); i++) {
     std::string link_name = child_links_[i]->GetScopedName();
@@ -166,8 +165,7 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   for (unsigned int j = 0; j < child_links_.size(); ++j) {
     unsigned int zero = 0;
     for (unsigned int i = 0; i < child_links_[j]->GetCollisions().size(); ++i) {
-//      physics::CollisionPtr collision = child_links_[j]->GetCollision(zero);
-      collisions.push_back(child_links_[j]->GetScopedName());
+      collisions.push_back(child_links_[j]->GetCollision(i)->GetScopedName());
     }
   }
 
@@ -297,21 +295,21 @@ void GazeboBagPlugin::LogGroundTruth(const common::Time now) {
 }
 
 void GazeboBagPlugin::LogCollisions(const common::Time now) {
-  ros::Time ros_now = ros::Time(now.sec, now.nsec);
 
   geometry_msgs::WrenchStamped wrench_msg;
   std::vector<physics::Contact *> contacts = contact_mgr_->GetContacts();
-  for (int i = 0; i < contacts.size(); ++i) {
-    // Check if the collision is with exclude_floor_link_from_collision_check_
-    // and less than the links gravitational force multiplied by the
-    // gravitational_force_exclusion_multiplier_
-    std::string collision2_name = contacts[i]->collision2->GetLink()->GetScopedName();
-    double body1Force = contacts[i]->wrench->body1Force.GetLength();
-    if (collision2_name == exclude_floor_link_from_collision_check_
-        && body1Force < gravitational_force_exclusion_multiplier_ * mass_ * std::abs(gravity_))
-      continue;
 
-    wrench_msg.header.frame_id = contacts[i]->collision2->GetLink()->GetScopedName();
+  for (int i = 0; i < contact_mgr_->GetContactCount(); ++i) {
+    std::string collision2_name = contacts[i]->collision2->GetLink()->GetScopedName();
+    double body1_force = contacts[i]->wrench->body1Force.GetLength();
+
+    // Exclude extremely small forces
+    if (body1_force < 1e-10)
+      continue;
+    // Do this, such that all the contacts are logged (publishing on the same topic with the same stamp is impossible)
+    ros::Time ros_now = ros::Time(now.sec, now.nsec + i*1000);
+    std::string collision1_name = contacts[i]->collision1->GetLink()->GetScopedName();
+    wrench_msg.header.frame_id = collision1_name + "--" + collision2_name;
     wrench_msg.header.stamp.sec = now.sec;
     wrench_msg.header.stamp.nsec = now.nsec;
     wrench_msg.wrench.force.x = contacts[i]->wrench->body1Force.x;
@@ -320,6 +318,7 @@ void GazeboBagPlugin::LogCollisions(const common::Time now) {
     wrench_msg.wrench.torque.x = contacts[i]->wrench->body1Torque.x;
     wrench_msg.wrench.torque.y = contacts[i]->wrench->body1Torque.y;
     wrench_msg.wrench.torque.z = contacts[i]->wrench->body1Torque.z;
+
     writeBag(collisions_pub_topic_, ros_now, wrench_msg);
   }
 }
