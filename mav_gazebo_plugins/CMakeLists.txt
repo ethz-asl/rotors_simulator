@@ -56,7 +56,7 @@ add_dependencies(mav_gazebo_wind_plugin ${catkin_EXPORTED_TARGETS})
 add_library(mav_gazebo_octomap_plugin src/gazebo_octomap_plugin.cpp)
 target_link_libraries(mav_gazebo_octomap_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(mav_gazebo_octomap_plugin ${catkin_EXPORTED_TARGETS})
-  
+
 add_library(mav_gazebo_multirotor_base_plugin src/gazebo_multirotor_base_plugin.cpp)
 target_link_libraries(mav_gazebo_multirotor_base_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(mav_gazebo_multirotor_base_plugin ${catkin_EXPORTED_TARGETS})

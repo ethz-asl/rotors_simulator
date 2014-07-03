@@ -8,7 +8,8 @@ AttitudeController::~AttitudeController() {
 }
 
 std::shared_ptr<ControllerBase> AttitudeController::Clone() {
-  std::shared_ptr<ControllerBase> controller = std::make_shared<AttitudeController>();
+  std::shared_ptr<ControllerBase> controller(new AttitudeController);
+
   return controller;
 }
 
@@ -70,7 +71,7 @@ void AttitudeController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocit
   angular_acceleration_thrust(3) = control_attitude_thrust_reference_(3);
 
   *rotor_velocities = angular_acc_to_rotor_velocities_ * angular_acceleration_thrust;
-  *rotor_velocities = rotor_velocities->cwiseMax(0);
+  *rotor_velocities = rotor_velocities->cwiseMax(Eigen::VectorXd::Zero(rotor_velocities->rows()));
   *rotor_velocities = rotor_velocities->cwiseSqrt();
 }
 
