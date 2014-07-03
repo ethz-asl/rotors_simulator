@@ -24,8 +24,8 @@ class ControllerFactory {
   }
 
   template<typename ControllerType>
-  static bool RegisterControllerType(std::string name) {
-    return Instance().RegisterControllerTypeImpl(name, std::make_shared<ControllerType>());
+  static bool RegisterControllerType(const std::string& name) {
+    return Instance().RegisterControllerTypeImpl(name, std::shared_ptr<ControllerType>(new ControllerType));
   }
  private:
   typedef std::map<std::string, std::shared_ptr<ControllerBase> > ControllerMap;
@@ -35,8 +35,8 @@ class ControllerFactory {
   ControllerFactory(const ControllerFactory&) = delete;
   ControllerFactory& operator=(const ControllerFactory&) = delete;
 
-  bool RegisterControllerTypeImpl(std::string& controller_name, const std::shared_ptr<ControllerBase>& controller);
-  bool UnregisterControllerTypeImpl(std::string& controller_name);
+  bool RegisterControllerTypeImpl(const std::string& controller_name, const std::shared_ptr<ControllerBase>& controller);
+  bool UnregisterControllerTypeImpl(const std::string& controller_name);
   // ControllerBase* getActiveController();
 };
 }

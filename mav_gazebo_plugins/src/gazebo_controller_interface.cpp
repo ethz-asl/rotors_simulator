@@ -27,7 +27,9 @@ GazeboControllerInterface::~GazeboControllerInterface() {
 
 void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Store the pointer to the model
-  this->model_ = _model;
+  model_ = _model;
+
+  world_ = model_->GetWorld();
 
   // default params
   namespace_.clear();
@@ -71,14 +73,17 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   if (!controller_created_)
     return;
+  common::Time now = world_->GetSimTime();
   Eigen::VectorXd ref_rotor_velocities;
   controller_->CalculateRotorVelocities(&ref_rotor_velocities);
+  mav_msgs::MotorSpeed turning_velocities_msg;
 
-  turning_velocities_msg_.motor_speed.clear();
   for (int i = 0; i < ref_rotor_velocities.size(); i++)
-    turning_velocities_msg_.motor_speed.push_back(ref_rotor_velocities[i]);
+    turning_velocities_msg.motor_speed.push_back(ref_rotor_velocities[i]);
+  turning_velocities_msg.header.stamp.sec = now.sec;
+  turning_velocities_msg.header.stamp.nsec = now.nsec;
 
-  motor_cmd_pub_.publish(turning_velocities_msg_);
+  motor_cmd_pub_.publish(turning_velocities_msg);
 }
 
 void GazeboControllerInterface::CommandAttitudeCallback(const mav_msgs::CommandAttitudeThrustPtr& input_reference_msg) {

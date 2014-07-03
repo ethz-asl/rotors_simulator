@@ -102,9 +102,6 @@ class GazeboBagPlugin : public ModelPlugin {
   // /// link and its children
   physics::ContactManager *contact_mgr_;
 
-  // /// \brief The collisions for the link and its children in the model.
-  std::map<std::string, physics::CollisionPtr> collisions_;
-
   std::string namespace_;
   std::string ground_truth_pose_pub_topic_;
   std::string ground_truth_twist_pub_topic_;
@@ -154,7 +151,15 @@ class GazeboBagPlugin : public ModelPlugin {
       bag_.write(topic, time, msg);
     }
     catch (rosbag::BagIOException& e) {
-      gzerr << "Error while writing to bag " << e.what();
+      gzerr << "Error while writing to bag " << e.what() << std::endl;
+    }
+    catch (rosbag::BagException& e) {
+      if (time < ros::TIME_MIN) {
+        gzerr<<"Header stamp not set for msg published on topic: "<< topic << ". " << e.what() << std::endl;
+      }
+      else {
+        gzerr << "Error while writing to bag " << e.what() << std::endl;
+      }
     }
   }
 
@@ -165,7 +170,15 @@ class GazeboBagPlugin : public ModelPlugin {
       bag_.write(topic, time, msg);
     }
     catch (rosbag::BagIOException& e) {
-      gzerr << "Error while writing to bag " << e.what();
+      gzerr << "Error while writing to bag " << e.what() << std::endl;
+    }
+    catch (rosbag::BagException& e) {
+      if (time < ros::TIME_MIN) {
+        gzerr<<"Header stamp not set for msg published on topic: "<< topic << ". " << e.what() << std::endl;
+      }
+      else {
+        gzerr << "Error while writing to bag " << e.what() << std::endl;
+      }
     }
   }
 
