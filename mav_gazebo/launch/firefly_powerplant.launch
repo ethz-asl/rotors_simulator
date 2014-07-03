@@ -1,0 +1,19 @@
+<launch>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="firefly"/>
+  <arg name="exclude_floor_link_from_collision_check" default="occupancy_grid::Floor"/>
+
+  <env name="GAZEBO_MODEL_PATH" value="$(find mav_gazebo)/models"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find mav_gazebo)/worlds/powerplant.world"/>
+    <!-- <arg name="debug" value="true" /> -->
+  </include>
+  <include file="$(find mav_gazebo)/launch/spawn_firefly.launch">
+    <arg name="enable_logging" value="$(arg enable_logging)" />
+    <arg name="exclude_floor_link_from_collision_check" value="$(arg exclude_floor_link_from_collision_check)" />
+    <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+    <arg name="log_file" value="$(arg log_file)"/>
+  </include>
+  <!--node name="gazebo_pose_publisher" pkg="mav_gazebo" type="gazebo_pose_publisher" args="firefly /firefly/pose"/-->
+</launch>
