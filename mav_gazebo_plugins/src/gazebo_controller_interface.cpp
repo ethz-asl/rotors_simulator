@@ -46,6 +46,9 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
   if (_sdf->HasElement("commandTopicAttitude"))
     command_topic_attitude = _sdf->GetElement("commandTopicAttitude")->Get<std::string>();
 
+  if (_sdf->HasElement("commandTopicRate"))
+    command_topic_rate = _sdf->GetElement("commandTopicRate")->Get<std::string>();
+
   if (_sdf->HasElement("commandTopicMotor"))
     command_topic_motor = _sdf->GetElement("commandTopicMotor")->Get<std::string>();
 
@@ -63,6 +66,10 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 
   cmd_attitude_sub_ = node_handle_->subscribe(command_topic_attitude, 10,
                                               &GazeboControllerInterface::CommandAttitudeCallback, this);
+
+  cmd_rate_sub_ = node_handle_->subscribe(command_topic_rate, 10, &GazeboControllerInterface::CommandRateCallback,
+                                          this);
+
   cmd_motor_sub_ = node_handle_->subscribe(command_topic_motor, 10, &GazeboControllerInterface::CommandMotorCallback,
                                            this);
   imu_sub_ = node_handle_->subscribe(imu_topic_, 10, &GazeboControllerInterface::ImuCallback, this);
@@ -114,6 +121,20 @@ void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMoto
     input_reference[i] = input_reference_msg->motor_speed[i];
   }
   controller_->SetMotorReference(input_reference);
+}
+
+void GazeboControllerInterface::CommandRateCallback(const mav_msgs::CommandRateThrustPtr& input_reference_msg) {
+  if (!controller_created_) {
+    // Get the controller and initialize its parameters.
+    controller_ = mav_controller_factory::ControllerFactory::Instance().CreateController("RateController");
+    controller_->InitializeParams();
+    controller_created_ = true;
+    gzmsg << "started RateController" << std::endl;
+  }
+
+  Eigen::Vector4d input_reference(input_reference_msg->roll_rate, input_reference_msg->pitch_rate,
+                                  input_reference_msg->yaw_rate, input_reference_msg->thrust);
+  controller_->SetRateThrustReference(input_reference);
 }
 
 void GazeboControllerInterface::ImuCallback(const sensor_msgs::ImuPtr& imu_msg) {
