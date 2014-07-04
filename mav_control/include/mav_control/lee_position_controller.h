@@ -36,7 +36,6 @@ class LeePositionController : public ControllerBase {
   Eigen::Matrix3d inertia_matrix_;
 
   double mass_;
-
   const double gravity_;
 
   void ComputeDesiredAngularAcc(const Eigen::Vector3d& acceleration, Eigen::Vector3d* angular_acceleration) const;
