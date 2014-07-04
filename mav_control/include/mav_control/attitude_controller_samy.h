@@ -33,6 +33,9 @@ class AttitudeControllerSamy : public ControllerBase {
   Eigen::Vector3d gain_angular_rate_;
   Eigen::Matrix3d inertia_matrix_;
 
+  double mass_;
+  const double gravity_;
+
   void ComputeDesiredAngularAcc(Eigen::Vector3d * angular_acceleration) const;
 
 };
