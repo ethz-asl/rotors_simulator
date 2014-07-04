@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014 Fadri Furrer, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Michael Burri, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Pascal Gohl, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ *
+ * This software is released to the Contestants of the european 
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
+ * in parts or entirely, is NOT PERMITTED. 
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ */
+
 #include <mav_control/lee_position_controller.h>
 #include <iostream>
 
@@ -10,26 +26,26 @@ LeePositionController::~LeePositionController() {
 }
 
 std::shared_ptr<ControllerBase> LeePositionController::Clone() {
-  std::shared_ptr<ControllerBase> controller = std::make_shared<LeePositionController>();
+  std::shared_ptr<ControllerBase> controller(new LeePositionController);
   return controller;
 }
 
 void LeePositionController::InitializeParams() {
 
-  gain_position_(0) = 8;
-  gain_position_(1) = 8;
-  gain_position_(2) = 8;
+  gain_position_(0) = 6; //8;
+  gain_position_(1) = 6; //8
+  gain_position_(2) = 6; //8
 
-  gain_velocity_(0) = 5.3;
-  gain_velocity_(1) = 5.3;
-  gain_velocity_(2) = 5.3;
+  gain_velocity_(0) = 4.7; //5.3;
+  gain_velocity_(1) = 4.7; //5.3;
+  gain_velocity_(2) = 4.7; //5.3;
 
-  gain_attitude_(0) = 4;
-  gain_attitude_(1) = 4;
+  gain_attitude_(0) = 3; //4
+  gain_attitude_(1) = 3; //4
   gain_attitude_(2) = 0.035;
 
-  gain_angular_rate_(0) = 0.6;
-  gain_angular_rate_(1) = 0.6;
+  gain_angular_rate_(0) = 0.52;//0.6;
+  gain_angular_rate_(1) = 0.52;//0.6;
   gain_angular_rate_(2) = 0.025;
 
   amount_rotors_ = 6;
@@ -39,8 +55,8 @@ void LeePositionController::InitializeParams() {
                        -1,  1, -1,  1, -1, 1,
                         1,  1,  1,  1, 1, 1;
 
-  inertia_matrix_<< 0.0393,  0,  0,
-                    0,  0.048,  0,
+  inertia_matrix_<< 0.0347563,  0,  0,
+                    0,  0.0458929,  0,
                     0,  0, 0.0977;
 
   // to make the tuning independent of the inertia matrix we divide here
@@ -49,8 +65,8 @@ void LeePositionController::InitializeParams() {
   // to make the tuning independent of the inertia matrix we divide here
   gain_angular_rate_ = gain_angular_rate_.transpose() * inertia_matrix_.inverse();
 
-  const double rotor_force_constant = 0.0000099865;  //F_i = k_n * rotor_velocity_i^2
-  const double rotor_moment_constant = 0.0243;  // M_i = k_m * F_i
+  const double rotor_force_constant = 0.00000854858;  //F_i = k_n * rotor_velocity_i^2
+  const double rotor_moment_constant = 0.016;  // M_i = k_m * F_i
 
   angular_acc_to_rotor_velocities_.resize(amount_rotors_, 4);
   const double arm_length = 0.215;
@@ -92,7 +108,7 @@ void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velo
   angular_acceleration_thrust(3) = thrust;
 
   *rotor_velocities = angular_acc_to_rotor_velocities_ * angular_acceleration_thrust;
-  *rotor_velocities = rotor_velocities->cwiseMax(0);
+  *rotor_velocities = rotor_velocities->cwiseMax(Eigen::VectorXd::Zero(rotor_velocities->rows()));
   *rotor_velocities = rotor_velocities->cwiseSqrt();
 }
 

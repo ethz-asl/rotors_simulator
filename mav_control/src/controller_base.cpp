@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014 Fadri Furrer, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Michael Burri, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Pascal Gohl, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ *
+ * This software is released to the Contestants of the european 
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
+ * in parts or entirely, is NOT PERMITTED. 
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ */
+
 #include <mav_control/controller_base.h>
 #include <math.h>
 #define _USE_MATH_DEFINES
@@ -27,6 +43,10 @@ void ControllerBase::SetAngularRate(const Eigen::Vector3d& angular_rate) {
 
 void ControllerBase::SetAttitudeThrustReference(const Eigen::Vector4d& control_attitude_thrust_reference) {
   control_attitude_thrust_reference_ = control_attitude_thrust_reference;
+}
+
+void ControllerBase::SetRateThrustReference(const Eigen::Vector4d& control_rate_thrust_reference) {
+  control_rate_thrust_reference_ = control_rate_thrust_reference;
 }
 
 void ControllerBase::SetMotorReference(const Eigen::VectorXd& motor_reference) {

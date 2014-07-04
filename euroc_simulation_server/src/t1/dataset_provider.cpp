@@ -1,10 +1,18 @@
-//==============================================================================
-// Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>
-// Copyright (c) 2014, Markus Achtelik <markus.achtelik@mavt.ethz.ch>
-// All rights reserved.
-//
-// ASL 2.0
-//==============================================================================
+/*
+ * Copyright (C) 2014 Fadri Furrer, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Michael Burri, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Pascal Gohl, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ *
+ * This software is released to the Contestants of the european 
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
+ * in parts or entirely, is NOT PERMITTED. 
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ */
 
 #include <ros/ros.h>
 #include <rosbag/bag.h>
@@ -19,7 +27,7 @@
 
 #include <chrono>
 
-void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out) {
+void process(const rosbag::Bag& bag_in, rosbag::Bag* bag_out) {
   using namespace std::chrono;
 
   ros::NodeHandle nh;
@@ -49,8 +57,10 @@ void process(const rosbag::Bag& bag_in, rosbag::Bag& bag_out) {
         ROS_ERROR("could not contact challenger server");
         computation_time.data = -1;
       }
-      bag_out.write("pose", m.getTime(), pose);
-      bag_out.write("duration", m.getTime(), computation_time);
+      if (bag_out != NULL) {
+        bag_out->write("pose", m.getTime(), pose);
+        bag_out->write("duration", m.getTime(), computation_time);
+      }
     }
   }
 }
@@ -60,7 +70,7 @@ bool openBag(const std::string& filename, uint32_t mode, rosbag::Bag& bag) {
     bag.open(filename, mode);
   }
   catch (rosbag::BagException& e) {
-    ROS_FATAL_STREAM("Could not open output bag: "<<filename<<" because of: "<<e.what());
+    ROS_FATAL_STREAM("Could not open bag: "<<filename<<" because of: "<<e.what());
     return false;
   }
 
@@ -69,23 +79,47 @@ bool openBag(const std::string& filename, uint32_t mode, rosbag::Bag& bag) {
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "t1_dataset_provider");
-  if (argc != 3) {
-    ROS_INFO("usage: t1_dataset_provider <bag_in_filename> <bag_out_filename>");
+
+  if (argc != 2 && argc != 3) {
+    ROS_INFO("usage: t1_dataset_provider <bag_in_filename> [bag_out_filename]");
     return 1;
   }
 
   std::string bag_in_name(argv[1]);
-  std::string bag_out_name(argv[2]);
-
-  rosbag::Bag bag_in, bag_out;
-
+  rosbag::Bag bag_in;
   openBag(bag_in_name, rosbag::bagmode::Read, bag_in);
-  openBag(bag_out_name, rosbag::bagmode::Write, bag_out);
 
-  process(bag_in, bag_out);
+  if (argc == 3) {
+    std::string bag_out_name(argv[2]);
+
+    time_t rawtime;
+    struct tm *timeinfo;
+    char buffer[80];
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    strftime(buffer, 80, "%Y-%m-%d-%H-%M-%S", timeinfo);
+    std::string date_time_str(buffer);
+
+    std::string key(".bag");
+    size_t pos = bag_out_name.rfind(key);
+    if (pos != std::string::npos)
+      bag_out_name.erase(pos, key.length());
+    bag_out_name = bag_out_name + "_" + date_time_str + ".bag";
+
+    rosbag::Bag bag_out;
+    openBag(bag_out_name, rosbag::bagmode::Write, bag_out);
+
+    process(bag_in, &bag_out);
+
+    bag_out.close();
+  }
+  else {
+    process(bag_in, NULL);
+  }
 
   bag_in.close();
-  bag_out.close();
 
   return 0;
 }

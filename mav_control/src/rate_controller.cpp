@@ -14,26 +14,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
-#include <mav_control/attitude_controller_samy.h>
+#include <mav_control/rate_controller.h>
 #include <iostream>
 
-AttitudeControllerSamy::AttitudeControllerSamy()
+
+RateController::RateController()
     : gravity_(9.81),
       mass_(1.56779) {
 }
+RateController::~RateController() {}
 
-AttitudeControllerSamy::~AttitudeControllerSamy() {
-}
-
-std::shared_ptr<ControllerBase> AttitudeControllerSamy::Clone() {
-  std::shared_ptr<ControllerBase> controller(new AttitudeControllerSamy);
+std::shared_ptr<ControllerBase> RateController::Clone() {
+  std::shared_ptr<ControllerBase> controller(new RateController);
   return controller;
 }
 
-void AttitudeControllerSamy::InitializeParams() {
-  gain_attitude_(0) = 3; //4
-  gain_attitude_(1) = 3; //4
-  gain_attitude_(2) = 0.035;
+void RateController::InitializeParams() {
 
   gain_angular_rate_(0) = 0.52;//0.6;
   gain_angular_rate_(1) = 0.52;//0.6;
@@ -49,9 +45,6 @@ void AttitudeControllerSamy::InitializeParams() {
   inertia_matrix_<< 0.0347563,  0,  0,
                     0,  0.0458929,  0,
                     0,  0, 0.0977;
-
-  // to make the tuning independent of the inertia matrix we divide here
-  gain_attitude_ = gain_attitude_.transpose() * inertia_matrix_.inverse();
 
   // to make the tuning independent of the inertia matrix we divide here
   gain_angular_rate_ = gain_angular_rate_.transpose() * inertia_matrix_.inverse();
@@ -78,7 +71,7 @@ void AttitudeControllerSamy::InitializeParams() {
   initialized_params_ = true;
 }
 
-void AttitudeControllerSamy::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const {
+void RateController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const {
   assert(rotor_velocities);
   assert(initialized_params_);
 
@@ -88,38 +81,30 @@ void AttitudeControllerSamy::CalculateRotorVelocities(Eigen::VectorXd* rotor_vel
   ComputeDesiredAngularAcc(&angular_acceleration);
 
   Eigen::Vector4d angular_acceleration_thrust;
-  angular_acceleration_thrust.block<3, 1>(0, 0) = angular_acceleration;
-  angular_acceleration_thrust(3) = control_attitude_thrust_reference_(3);
+  angular_acceleration_thrust.block<3,1>(0,0) = angular_acceleration;
+  angular_acceleration_thrust(3) = control_rate_thrust_reference_(3);
 
   *rotor_velocities = angular_acc_to_rotor_velocities_ * angular_acceleration_thrust;
-  *rotor_velocities = rotor_velocities->cwiseMax(Eigen::VectorXd::Ones(rotor_velocities->rows()));
+  *rotor_velocities = rotor_velocities->cwiseMax(Eigen::VectorXd::Zero(rotor_velocities->rows()));
   *rotor_velocities = rotor_velocities->cwiseSqrt();
 }
 
+// Implementation from the T. Lee et al. paper
 // Control of complex maneuvers for a quadrotor UAV using geometric methods on SE(3)
-void AttitudeControllerSamy::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_acceleration) const {
+void RateController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_acceleration) const {
   assert(angular_acceleration);
 
-  Eigen::Matrix3d R = attitude_.toRotationMatrix();
-
-  // get desired rotation matrix
-  Eigen::Matrix3d R_des;
-  double yaw = atan2(R(1, 0), R(0, 0));
-  R_des = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()) // yaw
-        * Eigen::AngleAxisd(control_attitude_thrust_reference_(0), Eigen::Vector3d::UnitX()) // roll
-        * Eigen::AngleAxisd(control_attitude_thrust_reference_(1), Eigen::Vector3d::UnitY()); // pitch
-
-  Eigen::Vector3d b3_des = R.transpose() * R_des.col(2);
-  Eigen::Vector3d angle_error = b3_des.cross(Eigen::Vector3d::UnitZ());
-
+  // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
-  angular_rate_des[2] = control_attitude_thrust_reference_(2);
+  angular_rate_des[0] = control_rate_thrust_reference_(0);
+  angular_rate_des[1] = control_rate_thrust_reference_(1);
+  angular_rate_des[2] = control_rate_thrust_reference_(2);
 
-  Eigen::Vector3d angular_rate_error = angular_rate_ - R_des.transpose() * R * angular_rate_des;
+  Eigen::Vector3d angular_rate_error = angular_rate_ -  angular_rate_des;
 
-  *angular_acceleration = -1 * angle_error.cwiseProduct(gain_attitude_)
-                           - angular_rate_error.cwiseProduct(gain_angular_rate_)
+  *angular_acceleration =  - angular_rate_error.cwiseProduct(gain_angular_rate_)
                            + angular_rate_.cross(angular_rate_); // we don't need the inertia matrix here
 }
 
-MAV_CONTROL_REGISTER_CONTROLLER(AttitudeControllerSamy);
+
+MAV_CONTROL_REGISTER_CONTROLLER(RateController);

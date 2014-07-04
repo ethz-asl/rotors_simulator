@@ -28,11 +28,11 @@
       <linkName>pose_sensor1_link</linkName>
       <robotNamespace>${namespace}</robotNamespace>
       <poseTopic>pose1</poseTopic>
-      <measurementDivisor>5</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
-      <measurementDelay>2</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
+      <measurementDivisor>10</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
+      <measurementDelay>10</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
       <unknownDelay>0.0</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
-      <noiseNormalP>0.005 0.005 0.005</noiseNormalP> <!-- standard deviation of additive white gaussian noise [m] -->
-      <noiseNormalQ>0.01 0.01 0.01</noiseNormalQ> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
+      <noiseNormalP>0.01 0.01 0.01</noiseNormalP> <!-- standard deviation of additive white gaussian noise [m] -->
+      <noiseNormalQ>0.017 0.017 0.017</noiseNormalQ> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
       <noiseUniformP>0 0 0</noiseUniformP> <!-- symmetric bounds of uniform noise [m] -->
       <noiseUniformQ>0 0 0</noiseUniformQ> <!-- symmetric bounds of uniform noise [rad], computation see above -->
       <covarianceImage>package://mav_gazebo/worlds/poseplugin_map1.bmp</covarianceImage>
@@ -47,11 +47,11 @@
       <linkName>pose_sensor2_link</linkName>
       <robotNamespace>${namespace}</robotNamespace>
       <poseTopic>pose2</poseTopic>
-      <measurementDivisor>7</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
-      <measurementDelay>1</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
+      <measurementDivisor>5</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
+      <measurementDelay>8</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
       <unknownDelay>0.001</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
-      <noiseNormalP>0.005 0.005 0.005</noiseNormalP> <!-- standard deviation of additive white gaussian noise [m] -->
-      <noiseNormalQ>0.01 0.01 0.01</noiseNormalQ> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
+      <noiseNormalP>0.01 0.01 0.01</noiseNormalP> <!-- standard deviation of additive white gaussian noise [m] -->
+      <noiseNormalQ>0.017 0.017 0.017</noiseNormalQ> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
       <noiseUniformP>0 0 0</noiseUniformP> <!-- symmetric bounds of uniform noise [m] -->
       <noiseUniformQ>0 0 0</noiseUniformQ> <!-- symmetric bounds of uniform noise [rad], computation see above -->
       <covarianceImage>package://mav_gazebo/worlds/poseplugin_map2.bmp</covarianceImage>

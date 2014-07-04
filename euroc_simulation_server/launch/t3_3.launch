@@ -1,7 +1,7 @@
 <launch>
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
-  <arg name="log_file" default="euroc_c3_t3_3"/>
+  <arg name="log_file" default="euroc_t3_3_log"/>
   
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find mav_gazebo)/worlds/basic.world"/>

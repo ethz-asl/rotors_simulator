@@ -1,9 +1,18 @@
-//==============================================================================
-// Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>
-// All rights reserved.
-//
-// ASL 2.0
-//==============================================================================
+/*
+ * Copyright (C) 2014 Fadri Furrer, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Michael Burri, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Pascal Gohl, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ *
+ * This software is released to the Contestants of the european 
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
+ * in parts or entirely, is NOT PERMITTED. 
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ */
 
 #include <string>
 #include <ros/ros.h>
@@ -102,9 +111,6 @@ class GazeboBagPlugin : public ModelPlugin {
   // /// link and its children
   physics::ContactManager *contact_mgr_;
 
-  // /// \brief The collisions for the link and its children in the model.
-  std::map<std::string, physics::CollisionPtr> collisions_;
-
   std::string namespace_;
   std::string ground_truth_pose_pub_topic_;
   std::string ground_truth_twist_pub_topic_;
@@ -154,7 +160,15 @@ class GazeboBagPlugin : public ModelPlugin {
       bag_.write(topic, time, msg);
     }
     catch (rosbag::BagIOException& e) {
-      gzerr << "Error while writing to bag " << e.what();
+      gzerr << "Error while writing to bag " << e.what() << std::endl;
+    }
+    catch (rosbag::BagException& e) {
+      if (time < ros::TIME_MIN) {
+        gzerr<<"Header stamp not set for msg published on topic: "<< topic << ". " << e.what() << std::endl;
+      }
+      else {
+        gzerr << "Error while writing to bag " << e.what() << std::endl;
+      }
     }
   }
 
@@ -165,7 +179,15 @@ class GazeboBagPlugin : public ModelPlugin {
       bag_.write(topic, time, msg);
     }
     catch (rosbag::BagIOException& e) {
-      gzerr << "Error while writing to bag " << e.what();
+      gzerr << "Error while writing to bag " << e.what() << std::endl;
+    }
+    catch (rosbag::BagException& e) {
+      if (time < ros::TIME_MIN) {
+        gzerr<<"Header stamp not set for msg published on topic: "<< topic << ". " << e.what() << std::endl;
+      }
+      else {
+        gzerr << "Error while writing to bag " << e.what() << std::endl;
+      }
     }
   }
 

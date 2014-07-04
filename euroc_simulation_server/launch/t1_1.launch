@@ -1,0 +1,8 @@
+<launch>
+  <arg name="enable_logging" default="false"/>
+  <arg name="log_file" default="euroc_t1_1_log"/>
+  
+  <node if="$(arg enable_logging)" name="t1_1" args="euroc_t1_1_dataset.bag $(arg log_file)" type="t1_dataset_provider" pkg="euroc_simulation_server" output="screen"/>
+  <node unless="$(arg enable_logging)" name="t1_1" args="euroc_t1_1_dataset.bag" type="t1_dataset_provider" pkg="euroc_simulation_server" output="screen"/> 
+</launch>
+

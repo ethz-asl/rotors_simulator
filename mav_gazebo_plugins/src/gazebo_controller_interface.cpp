@@ -1,9 +1,20 @@
-//==============================================================================
-// Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>
-// All rights reserved.
-//
-// TODO(ff): Enter some license
-//==============================================================================
+/*
+ * Copyright (C) 2014 Fadri Furrer, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Michael Burri, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Pascal Gohl, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ *
+ * This software is released to the Contestants of the european 
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
+ * in parts or entirely, is NOT PERMITTED. 
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ */
+
+
 #include <mav_gazebo_plugins/gazebo_controller_interface.h>
 
 namespace gazebo {
@@ -27,7 +38,9 @@ GazeboControllerInterface::~GazeboControllerInterface() {
 
 void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Store the pointer to the model
-  this->model_ = _model;
+  model_ = _model;
+
+  world_ = model_->GetWorld();
 
   // default params
   namespace_.clear();
@@ -43,6 +56,9 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 
   if (_sdf->HasElement("commandTopicAttitude"))
     command_topic_attitude = _sdf->GetElement("commandTopicAttitude")->Get<std::string>();
+
+  if (_sdf->HasElement("commandTopicRate"))
+    command_topic_rate = _sdf->GetElement("commandTopicRate")->Get<std::string>();
 
   if (_sdf->HasElement("commandTopicMotor"))
     command_topic_motor = _sdf->GetElement("commandTopicMotor")->Get<std::string>();
@@ -61,6 +77,10 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 
   cmd_attitude_sub_ = node_handle_->subscribe(command_topic_attitude, 10,
                                               &GazeboControllerInterface::CommandAttitudeCallback, this);
+
+  cmd_rate_sub_ = node_handle_->subscribe(command_topic_rate, 10, &GazeboControllerInterface::CommandRateCallback,
+                                          this);
+
   cmd_motor_sub_ = node_handle_->subscribe(command_topic_motor, 10, &GazeboControllerInterface::CommandMotorCallback,
                                            this);
   imu_sub_ = node_handle_->subscribe(imu_topic_, 10, &GazeboControllerInterface::ImuCallback, this);
@@ -71,14 +91,17 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   if (!controller_created_)
     return;
+  common::Time now = world_->GetSimTime();
   Eigen::VectorXd ref_rotor_velocities;
   controller_->CalculateRotorVelocities(&ref_rotor_velocities);
+  mav_msgs::MotorSpeed turning_velocities_msg;
 
-  turning_velocities_msg_.motor_speed.clear();
   for (int i = 0; i < ref_rotor_velocities.size(); i++)
-    turning_velocities_msg_.motor_speed.push_back(ref_rotor_velocities[i]);
+    turning_velocities_msg.motor_speed.push_back(ref_rotor_velocities[i]);
+  turning_velocities_msg.header.stamp.sec = now.sec;
+  turning_velocities_msg.header.stamp.nsec = now.nsec;
 
-  motor_cmd_pub_.publish(turning_velocities_msg_);
+  motor_cmd_pub_.publish(turning_velocities_msg);
 }
 
 void GazeboControllerInterface::CommandAttitudeCallback(const mav_msgs::CommandAttitudeThrustPtr& input_reference_msg) {
@@ -109,6 +132,20 @@ void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMoto
     input_reference[i] = input_reference_msg->motor_speed[i];
   }
   controller_->SetMotorReference(input_reference);
+}
+
+void GazeboControllerInterface::CommandRateCallback(const mav_msgs::CommandRateThrustPtr& input_reference_msg) {
+  if (!controller_created_) {
+    // Get the controller and initialize its parameters.
+    controller_ = mav_controller_factory::ControllerFactory::Instance().CreateController("RateController");
+    controller_->InitializeParams();
+    controller_created_ = true;
+    gzmsg << "started RateController" << std::endl;
+  }
+
+  Eigen::Vector4d input_reference(input_reference_msg->roll_rate, input_reference_msg->pitch_rate,
+                                  input_reference_msg->yaw_rate, input_reference_msg->thrust);
+  controller_->SetRateThrustReference(input_reference);
 }
 
 void GazeboControllerInterface::ImuCallback(const sensor_msgs::ImuPtr& imu_msg) {
