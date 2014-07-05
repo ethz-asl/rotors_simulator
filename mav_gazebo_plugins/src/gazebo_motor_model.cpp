@@ -51,8 +51,8 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   namespace_.clear();
   command_topic_ = "command/motors";
   motor_velocity_topic_ = "turning_vel";
-  rotor_drag_coefficient_ = 0.0001;  //TODO(ff): find a more accurate parameter value
-  rolling_moment_coefficient_ = 0.000001;  //TODO(ff): find a more accurate parameter value
+  rotor_drag_coefficient_ = 0;
+  rolling_moment_coefficient_ = 0;
 
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
@@ -126,7 +126,7 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Set the maximumForce on the joint
   this->joint_->SetMaxForce(0, max_force_);
 
-  // TODO(ff): This doesn't work but we should make sure that this works soon
+  // TODO: This doesn't work at the moment.
   // this->joint_->velocityLimit[0] = max_rot_velocity_;
 
   if (_sdf->HasElement("motorConstant"))
@@ -162,8 +162,8 @@ void GazeboMotorModel::VelocityCallback(const mav_msgs::MotorSpeedPtr& rot_veloc
 void GazeboMotorModel::UpdateForcesAndMoments() {
 
   motor_rot_vel_ = this->joint_->GetVelocity(0);
-  // TODO(ff): I had to add a factor of 10 here and one in the SetVelocity,
-  // because currently I can't set the velocity to a higher value than 100.
+  // TODO: We had to add a factor of 10 here and one in the SetVelocity,
+  // because currently gazebo doesn't allow to set the velocity to a higher value than 100.
   double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
   double force = real_motor_velocity * real_motor_velocity * motor_constant_;
   // Apply a force to the link

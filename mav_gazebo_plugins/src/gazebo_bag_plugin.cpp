@@ -140,7 +140,6 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   strftime(buffer, 80, "%Y-%m-%d-%H-%M-%S", timeinfo);
   std::string date_time_str(buffer);
-  // TODO(ff): use put_time here, once it's supported in gcc
 
   std::string key(".bag");
   size_t pos = bag_filename_.rfind(key);
