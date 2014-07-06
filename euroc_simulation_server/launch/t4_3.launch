@@ -15,6 +15,7 @@
     <arg name="enable_logging" value="$(arg enable_logging)" />
     <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
     <arg name="log_file" value="$(arg log_file)"/>
+    <arg name="z" value="0.18"/>
   </include>
   
   <group ns="firefly">
