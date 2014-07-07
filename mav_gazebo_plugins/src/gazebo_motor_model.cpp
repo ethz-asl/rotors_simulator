@@ -126,9 +126,6 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Set the maximumForce on the joint
   this->joint_->SetMaxForce(0, max_force_);
 
-  // TODO: This doesn't work at the moment.
-  // this->joint_->velocityLimit[0] = max_rot_velocity_;
-
   if (_sdf->HasElement("motorConstant"))
     motor_constant_ = _sdf->GetElement("motorConstant")->Get<double>();
   else
@@ -156,7 +153,7 @@ void GazeboMotorModel::OnUpdate(const common::UpdateInfo& /*_info*/) {
 }
 
 void GazeboMotorModel::VelocityCallback(const mav_msgs::MotorSpeedPtr& rot_velocities) {
-  ref_motor_rot_vel_ = rot_velocities->motor_speed[motor_number_];
+  ref_motor_rot_vel_ = std::min(rot_velocities->motor_speed[motor_number_],max_rot_velocity_);
 }
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
