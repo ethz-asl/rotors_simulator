@@ -32,11 +32,11 @@
     <robotNamespace>${namespace}</robotNamespace>
     <xyzOffset>0 0 0</xyzOffset> <!-- [m] [m] [m] -->
     <windDirection>1 1 0</windDirection>
-    <windForceMean>2</windForceMean> <!-- [N] -->
-    <windGustDirection>0 1 0</windGustDirection>
-    <windGustDuration>2</windGustDuration> <!-- [s] -->
+    <windForceMean>0</windForceMean> <!-- [N] -->
+    <windGustDirection>1 1 -0.3</windGustDirection>
+    <windGustDuration>200</windGustDuration> <!-- [s] -->
     <windGustStart>40</windGustStart> <!-- [s] -->
-    <windGustForceMean>0</windGustForceMean> <!-- [N] -->
+    <windGustForceMean>2</windGustForceMean> <!-- [N] -->
   </plugin>
 </gazebo>
 </robot>
