@@ -115,9 +115,8 @@ void AttitudeController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_accel
   Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
   Eigen::Vector3d angle_error;
   angle_error << angle_error_matrix(2, 1),  // inverse skew operator
-  angle_error_matrix(0, 2), 0;  // angle_error_matrix(1,0); TODO(burrimi): Switch to yaw reference.
+  angle_error_matrix(0, 2), 0;  // angle_error_matrix(1,0);
 
-  // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
   angular_rate_des[2] = control_attitude_thrust_reference_(2);
 
