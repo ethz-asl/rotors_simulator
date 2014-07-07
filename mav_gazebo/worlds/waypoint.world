@@ -27,7 +27,5 @@
       <real_time_update_rate>100</real_time_update_rate>
       <gravity>0 0 -9.8</gravity>
     </physics>
-    <!-- Laser Scans -->
-    <plugin name="gazebo_octomap" filename="libmav_gazebo_octomap_plugin.so"/>
   </world>
 </sdf>

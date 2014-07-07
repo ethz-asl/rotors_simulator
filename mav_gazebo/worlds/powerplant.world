@@ -32,7 +32,6 @@
       <real_time_update_rate>100</real_time_update_rate>
       <gravity>0 0 -9.8</gravity>
     </physics>
-    <plugin name='gazebo_octomap' filename='libmav_gazebo_octomap_plugin.so'/>
     <scene>
       <ambient>0.4 0.4 0.4 1</ambient>
       <background>0.7 0.7 0.7 1</background>
