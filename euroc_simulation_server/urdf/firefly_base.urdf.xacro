@@ -14,7 +14,7 @@
   </link>
   <joint name="pose_sensor1_joint" type="revolute">
     <parent link="base_link" />
-    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="0.03 -0.07 0.1" rpy="0.2 -0.1 0.3" />
     <child link="pose_sensor1_link" />
     <limit upper="0" lower="0" effort="0" velocity="0" />
   </joint>
