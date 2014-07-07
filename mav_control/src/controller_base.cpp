@@ -20,6 +20,22 @@
 
 ControllerBase::ControllerBase() {
   initialized_params_ = false;
+
+  position_.setZero();
+  velocity_.setZero();
+  attitude_.setIdentity();
+  angular_rate_.setZero();
+
+  position_reference_.setZero();
+  velocity_reference_.setZero();
+  acceleration_reference_.setZero();
+  jerk_reference_.setZero();
+  yaw_reference_ = 0;
+  yaw_rate_reference_ = 0;
+
+  control_attitude_thrust_reference_.setZero();
+  control_rate_thrust_reference_.setZero();
+  amount_rotors_ = 0;
 }
 
 ControllerBase::~ControllerBase() {

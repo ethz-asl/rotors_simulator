@@ -94,7 +94,6 @@ void RateController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities)
 void RateController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_acceleration) const {
   assert(angular_acceleration);
 
-  // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
   angular_rate_des[0] = control_rate_thrust_reference_(0);
   angular_rate_des[1] = control_rate_thrust_reference_(1);
