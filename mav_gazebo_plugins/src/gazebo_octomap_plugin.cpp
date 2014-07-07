@@ -71,8 +71,7 @@ bool OctomapFromGazeboWorld::ServiceCallback(planning_msgs::Octomap::Request& re
   return true;
 }
 
-bool OctomapFromGazeboWorld::CheckIfInsideObject(const std::string& name,
-                                                 const math::Vector3& central_point,
+bool OctomapFromGazeboWorld::CheckIfInsideObject(const std::string& name, const math::Vector3& central_point,
                                                  gazebo::physics::RayShapePtr ray) {
   const double epsilon = 0.00001;
   const int far_away = 100000;
@@ -83,17 +82,16 @@ bool OctomapFromGazeboWorld::CheckIfInsideObject(const std::string& name,
   math::Vector3 start_point = central_point;
   math::Vector3 end_point = central_point;
 
-
-  end_point.x=far_away;
+  end_point.x = far_away;
 
   ray->SetPoints(start_point, end_point);
 
   // Check if there is an intersection in the front
   ray->GetIntersection(dist, entity_name);
 
-  int counter=0;
+  int counter = 0;
 
-  while(entity_name != name && start_point.x  < far_away && counter < 6){
+  while (entity_name != name && start_point.x < far_away && counter < 6) {
     start_point.x += dist + epsilon;
     ray->SetPoints(start_point, end_point);
     // Check if there is an intersection in the front
@@ -101,12 +99,12 @@ bool OctomapFromGazeboWorld::CheckIfInsideObject(const std::string& name,
     ++counter;
   }
 
-  counter=0;
+  counter = 0;
   start_point = central_point;
   end_point = central_point;
-  end_point.y=far_away;
+  end_point.y = far_away;
 
-  while(entity_name != name && start_point.y  < far_away && counter < 6){
+  while (entity_name != name && start_point.y < far_away && counter < 6) {
     start_point.y += dist + epsilon;
     ray->SetPoints(start_point, end_point);
     // Check if there is an intersection in the front
@@ -114,12 +112,12 @@ bool OctomapFromGazeboWorld::CheckIfInsideObject(const std::string& name,
     ++counter;
   }
 
-  counter=0;
+  counter = 0;
   start_point = central_point;
   end_point = central_point;
-  end_point.z=far_away;
+  end_point.z = far_away;
 
-  while(entity_name != name && start_point.z  < far_away && counter < 6){
+  while (entity_name != name && start_point.z < far_away && counter < 6) {
     start_point.z += dist + epsilon;
     ray->SetPoints(start_point, end_point);
     // Check if there is an intersection in the front
@@ -127,15 +125,14 @@ bool OctomapFromGazeboWorld::CheckIfInsideObject(const std::string& name,
     ++counter;
   }
 
-  if(entity_name == name)
+  if (entity_name == name)
     return true;
 
   return false;
 }
 
-bool OctomapFromGazeboWorld::CheckIfInsideObjectInX(const std::string& name,
-                                                 const math::Vector3& central_point,
-                                                 gazebo::physics::RayShapePtr ray) {
+bool OctomapFromGazeboWorld::CheckIfInsideObjectInX(const std::string& name, const math::Vector3& central_point,
+                                                    gazebo::physics::RayShapePtr ray) {
   const double epsilon = 0.00001;
   const int far_away = 100000;
   double dist;
@@ -145,17 +142,16 @@ bool OctomapFromGazeboWorld::CheckIfInsideObjectInX(const std::string& name,
   math::Vector3 start_point = central_point;
   math::Vector3 end_point = central_point;
 
-
-  end_point.x=far_away;
+  end_point.x = far_away;
 
   ray->SetPoints(start_point, end_point);
 
   // Check if there is an intersection in the front
   ray->GetIntersection(dist, entity_name);
 
-  int counter=0;
+  int counter = 0;
 
-  while(entity_name != name && start_point.x  < far_away && counter < 6){
+  while (entity_name != name && start_point.x < far_away && counter < 6) {
     start_point.x += dist + epsilon;
     ray->SetPoints(start_point, end_point);
     // Check if there is an intersection in the front
@@ -163,7 +159,7 @@ bool OctomapFromGazeboWorld::CheckIfInsideObjectInX(const std::string& name,
     ++counter;
   }
 
-  if(entity_name == name)
+  if (entity_name == name)
     return true;
 
   return false;
@@ -195,11 +191,10 @@ void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request
     return;
   }
 
-
   gazebo::physics::PhysicsEnginePtr engine = world_->GetPhysicsEngine();
   engine->InitForThread();
-  gazebo::physics::RayShapePtr ray = boost::dynamic_pointer_cast<gazebo::physics::RayShape>(
-      engine->CreateShape("ray", gazebo::physics::CollisionPtr()));
+  gazebo::physics::RayShapePtr ray = boost::dynamic_pointer_cast < gazebo::physics::RayShape
+      > (engine->CreateShape("ray", gazebo::physics::CollisionPtr()));
 
   std::cout << "Rasterizing world and checking collisions" << std::endl;
   bool in_object = false;
@@ -209,8 +204,7 @@ void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request
     for (int j = 0; j < count_y; ++j) {
       double y = j * leaf_size + (bounding_box_origin.y - bounding_box_lengths.y / 2);
 
-      std::map <std::string, bool> objects_in_collision;
-
+      std::map<std::string, bool> objects_in_collision;
 
       std::string entity_name, entity_name_backwards;
       double dist, x;
@@ -231,12 +225,11 @@ void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request
       // Check if there is an intersection in the back
       ray->GetIntersection(dist, entity_name_backwards);
 
-      bool inside_object = CheckIfInsideObject(entity_name_backwards,start,ray);
-
+      bool inside_object = CheckIfInsideObject(entity_name_backwards, start, ray);
 
       // Set in_object to true, if currently in an object
       if (!entity_name_backwards.empty() && inside_object) {
-        objects_in_collision.insert(std::pair<std::string,bool>(entity_name,true));
+        objects_in_collision.insert(std::pair<std::string, bool>(entity_name, true));
       }
 
       // Set the end of the ray to the end of the bounding box
@@ -249,22 +242,20 @@ void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request
 
       while (!entity_name.empty() && start.x < end.x) {
 
-
         while (x < start.x + dist && x < end.x - leaf_size / 2) {
           if (!objects_in_collision.empty()) {
             octomap_->setNodeValue(x, y, z, 1);
-          }
-          else {
+          } else {
             octomap_->setNodeValue(x, y, z, 0);
           }
           x += leaf_size;
         }
 
-        std::map<std::string,bool>::iterator it = objects_in_collision.find(entity_name);
-        if(it!=objects_in_collision.end()) {
+        std::map<std::string, bool>::iterator it = objects_in_collision.find(entity_name);
+        if (it != objects_in_collision.end()) {
           objects_in_collision.erase(it);
         } else {
-          objects_in_collision.insert(std::pair<std::string,bool>(entity_name,true));
+          objects_in_collision.insert(std::pair<std::string, bool>(entity_name, true));
         }
 
         start_prev = start;
@@ -272,21 +263,21 @@ void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request
         // Set the new starting point just after the last intersection
         start.x += dist + epsilon;
 
-        start_prev.x = start.x-epsilon;
+        start_prev.x = start.x - epsilon;
 
         // search back
         ray->SetPoints(start, start_prev);
         ray->GetIntersection(dist, entity_name_backwards);
-        if(!entity_name_backwards.empty() && entity_name!=entity_name_backwards) {
-          std::map<std::string,bool>::iterator it = objects_in_collision.find(entity_name_backwards);
-          if(it!=objects_in_collision.end()) {
-            std::cout << "NOT THE SAME ELEMENT ERASE" <<std::endl;
+        if (!entity_name_backwards.empty() && entity_name != entity_name_backwards) {
+          std::map<std::string, bool>::iterator it = objects_in_collision.find(entity_name_backwards);
+          if (it != objects_in_collision.end()) {
+            std::cout << "NOT THE SAME ELEMENT ERASE" << std::endl;
 
             objects_in_collision.erase(it);
-          }else {
-            std::cout << "NOT THE SAME ELEMENT ADD" <<std::endl;
+          } else {
+            std::cout << "NOT THE SAME ELEMENT ADD" << std::endl;
 
-           objects_in_collision.insert(std::pair<std::string,bool>(entity_name_backwards,true));
+            objects_in_collision.insert(std::pair<std::string, bool>(entity_name_backwards, true));
           }
         }
 
@@ -301,23 +292,23 @@ void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request
       }
 
       math::Vector3 end_new = end;
-      end_new.x -= (leaf_size/2 + epsilon);
+      end_new.x -= (leaf_size / 2 + epsilon);
 
       start.x = x;
 
       // garbage collector
-      for(std::map<std::string,bool>::iterator it = objects_in_collision.begin(); it != objects_in_collision.end(); it++) {
-          if(!CheckIfInsideObjectInX(it->first,start,ray)){
-            objects_in_collision.erase(it);
-          }
+      for (std::map<std::string, bool>::iterator it = objects_in_collision.begin(); it != objects_in_collision.end();
+          it++) {
+        if (!CheckIfInsideObjectInX(it->first, start, ray)) {
+          objects_in_collision.erase(it);
+        }
       }
 
       // Loop until the end of the bounding box and fill the leafs
       while (x < end.x - leaf_size / 2) {
         if (!objects_in_collision.empty()) {
           octomap_->setNodeValue(x, y, z, 1);
-        }
-        else {
+        } else {
           octomap_->setNodeValue(x, y, z, 0);
         }
         x += leaf_size;
