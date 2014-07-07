@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>mav_control</name>
-  <version>0.0.0</version>
+  <version>1.0.0</version>
   <description>EuRoC mav_control package</description>
 
   <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>

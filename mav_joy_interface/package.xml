@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>mav_joy_interface</name>
-  <version>0.0.0</version>
+  <version>1.0.0</version>
   <description>The mav_joy_interface package to control MAVs with a joystick</description>
 
   <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
