@@ -132,9 +132,6 @@
       <pose>17 -17 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>934 530000000</sim_time>
-      <real_time>943 751544038</real_time>
-      <wall_time>1404426891 713605185</wall_time>
       <model name='ground_plane'>
         <pose>17 -17 0 0 -0 0</pose>
         <link name='link'>
