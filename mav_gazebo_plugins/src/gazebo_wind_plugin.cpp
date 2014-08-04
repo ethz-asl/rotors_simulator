@@ -40,8 +40,8 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   world_ = model_->GetWorld();
   frame_id_ = "world";
   link_name_ = "base_link";
-  wind_direction_ = math::Vector3(1, 0, 0);
-  wind_gust_direction_ = math::Vector3(0, 1, 0);
+  wind_direction_ = math::Vector3(1, 0, 0); // Default normalized wind direction.
+  wind_gust_direction_ = math::Vector3(0, 1, 0); // Default normalized wind gust direction.
   double wind_gust_start = 10;
   double wind_gust_duration = 0;
 
@@ -67,8 +67,10 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   link_ = this->model_->GetLink(link_name_);
 
   // Wind params
-  if (_sdf->HasElement("windDirection"))
+  if (_sdf->HasElement("windDirection")) {
     wind_direction_ = _sdf->GetElement("windDirection")->Get<math::Vector3>();
+    wind_direction_.Normalize();
+  }
 
   if (_sdf->HasElement("windForceMean"))
     wind_force_mean_ = _sdf->GetElement("windForceMean")->Get<double>();
@@ -80,6 +82,7 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Wind gust params
   if (_sdf->HasElement("windGustDirection")) {
     wind_gust_direction_ = _sdf->GetElement("windGustDirection")->Get<math::Vector3>();
+    wind_gust_direction_.Normalize();
   }
 
   if (_sdf->HasElement("windGustStart"))
