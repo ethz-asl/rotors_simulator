@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   octomap_msgs
   planning_msgs
   geometry_msgs
+  cmake_modules
 )
 
 find_package(Eigen REQUIRED)

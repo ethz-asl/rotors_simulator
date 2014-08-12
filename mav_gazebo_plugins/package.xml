@@ -29,6 +29,7 @@
   <build_depend>opencv</build_depend>
   <build_depend>planning_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>cmake_modules</build_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>gazebo_ros</run_depend>
