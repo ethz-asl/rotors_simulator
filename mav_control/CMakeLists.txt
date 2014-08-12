@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   mav_msgs
   roscpp
   sensor_msgs
+  cmake_modules
 )
 
 find_package(Eigen REQUIRED)
