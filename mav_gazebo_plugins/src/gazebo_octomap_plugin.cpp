@@ -367,7 +367,7 @@ void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request
 
       // Set the start point of the ray to the beginning of the bounding box
       start.y = bounding_box_origin.y - bounding_box_lengths.y / 2 - leaf_size / 2;
-      x = start.y + leaf_size / 2;
+      y = start.y + leaf_size / 2;
 
       // Set the end of the ray to some large value behind itself to check
       // if there is a boundary of an object at the current y-z location in -x
