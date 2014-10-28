@@ -165,6 +165,40 @@ bool OctomapFromGazeboWorld::CheckIfInsideObjectInX(const std::string& name, con
   return false;
 }
 
+bool OctomapFromGazeboWorld::CheckIfInsideObjectInY(const std::string& name, const math::Vector3& central_point,
+                                                    gazebo::physics::RayShapePtr ray) {
+  const double epsilon = 0.00001;
+  const int far_away = 100000;
+  double dist;
+  std::string entity_name;
+  // Set the end of the ray to somewhere far away
+
+  math::Vector3 start_point = central_point;
+  math::Vector3 end_point = central_point;
+
+  end_point.y = far_away;
+
+  ray->SetPoints(start_point, end_point);
+
+  // Check if there is an intersection in the front
+  ray->GetIntersection(dist, entity_name);
+
+  int counter = 0;
+
+  while (entity_name != name && start_point.y < far_away && counter < 6) {
+    start_point.y += dist + epsilon;
+    ray->SetPoints(start_point, end_point);
+    // Check if there is an intersection in the front
+    ray->GetIntersection(dist, entity_name);
+    ++counter;
+  }
+
+  if (entity_name == name)
+    return true;
+
+  return false;
+}
+
 void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request& msg) {
   const double epsilon = 0.00001;
   const int far_away = 100000;
@@ -315,6 +349,128 @@ void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request
       }
     }
   }
+
+  for (int i = 0; i < count_z; ++i) {
+    std::cout << "Percent complete: " << i * 100.0 / count_z << std::endl;
+    double z = i * leaf_size + (bounding_box_origin.z - bounding_box_lengths.z / 2);
+    for (int j = 0; j < count_y; ++j) {
+      double x = j * leaf_size + (bounding_box_origin.x - bounding_box_lengths.x / 2);
+
+      std::map<std::string, bool> objects_in_collision;
+
+      std::string entity_name, entity_name_backwards;
+      double dist, y;
+      math::Vector3 start, end, start_prev;
+
+      start.x = end.x = x;
+      start.z = end.z = z;
+
+      // Set the start point of the ray to the beginning of the bounding box
+      start.y = bounding_box_origin.y - bounding_box_lengths.y / 2 - leaf_size / 2;
+      x = start.y + leaf_size / 2;
+
+      // Set the end of the ray to some large value behind itself to check
+      // if there is a boundary of an object at the current y-z location in -x
+      end.y = -far_away;
+      ray->SetPoints(start, end);
+
+      // Check if there is an intersection in the back
+      ray->GetIntersection(dist, entity_name_backwards);
+
+      bool inside_object = CheckIfInsideObject(entity_name_backwards, start, ray);
+
+      // Set in_object to true, if currently in an object
+      if (!entity_name_backwards.empty() && inside_object) {
+        objects_in_collision.insert(std::pair<std::string, bool>(entity_name, true));
+      }
+
+      // Set the end of the ray to the end of the bounding box
+      end.y = bounding_box_origin.y + bounding_box_lengths.y / 2 + leaf_size / 2;
+
+      ray->SetPoints(start, end);
+
+      // Check if there is an object at the current location
+      ray->GetIntersection(dist, entity_name);
+
+      while (!entity_name.empty() && start.y < end.y) {
+
+        while (y < start.y + dist && y < end.y - leaf_size / 2) {
+          if (!objects_in_collision.empty()) {
+            octomap_->setNodeValue(x, y, z, 1);
+          } else {
+            octomap_->setNodeValue(x, y, z, 0);
+          }
+          y += leaf_size;
+        }
+
+        std::map<std::string, bool>::iterator it = objects_in_collision.find(entity_name);
+        if (it != objects_in_collision.end()) {
+          objects_in_collision.erase(it);
+        } else {
+          objects_in_collision.insert(std::pair<std::string, bool>(entity_name, true));
+        }
+
+        start_prev = start;
+
+        // Set the new starting point just after the last intersection
+        start.y += dist + epsilon;
+
+        start_prev.y = start.y - epsilon;
+
+        // search back
+        ray->SetPoints(start, start_prev);
+        ray->GetIntersection(dist, entity_name_backwards);
+        if (!entity_name_backwards.empty() && entity_name != entity_name_backwards) {
+          std::map<std::string, bool>::iterator it = objects_in_collision.find(entity_name_backwards);
+          if (it != objects_in_collision.end()) {
+            std::cout << "NOT THE SAME ELEMENT ERASE" << std::endl;
+
+            objects_in_collision.erase(it);
+          } else {
+            std::cout << "NOT THE SAME ELEMENT ADD" << std::endl;
+
+            objects_in_collision.insert(std::pair<std::string, bool>(entity_name_backwards, true));
+          }
+        }
+
+//        // garbage collector
+//        for(std::map<std::string,bool>::iterator it = objects_in_collision.begin(); it != objects_in_collision.end(); it++) {
+//            if(!CheckIfInsideObjectInX(it->first,start,ray)){
+//              objects_in_collision.erase(it);
+//            }
+//        }
+        ray->SetPoints(start, end);
+        ray->GetIntersection(dist, entity_name);
+      }
+
+      math::Vector3 end_new = end;
+      end_new.y -= (leaf_size / 2 + epsilon);
+
+      start.y = y;
+
+      // garbage collector
+      for (std::map<std::string, bool>::iterator it = objects_in_collision.begin(); it != objects_in_collision.end();
+          it++) {
+        if (!CheckIfInsideObjectInY(it->first, start, ray)) {
+          objects_in_collision.erase(it);
+        }
+      }
+
+      // Loop until the end of the bounding box and fill the leafs
+      while (y < end.y - leaf_size / 2) {
+        if (!objects_in_collision.empty()) {
+          octomap_->setNodeValue(x, y, z, 1);
+        } else {
+          //octomap_->setNodeValue(x, y, z, 0);
+        }
+        y += leaf_size;
+      }
+    }
+  }
+
+
+
+
   octomap_->prune();
   octomap_->updateInnerOccupancy();
 }
