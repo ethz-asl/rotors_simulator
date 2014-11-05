@@ -19,12 +19,10 @@
 
 
 const MultirotorMixer::Rotor _config_quadshot[] = {
-	{  0.500000, -0.866025, -1.00 },
+	{  0.000000,  -1.000000, -1.00 },
+	{ -0.000000, 1.000000, -1.00 },
 	{  1.000000,  0.000000,  1.00 },
-	{  0.500000,  0.866025, -1.00 },
-	{ -0.500000,  0.866025,  1.00 },
-	{ -1.000000,  0.000000, -1.00 },
-	{ -0.500000, -0.866025,  1.00 },
+	{  -1.000000,  0.000000,  1.00 },
 };
 
 	const MultirotorMixer::Rotor *_config_index = { &_config_quadshot[0]
@@ -32,7 +30,7 @@ const MultirotorMixer::Rotor _config_quadshot[] = {
 	};
 
 MultirotorMixer::MultirotorMixer() :
-		_rotor_count(6), _rotors(_config_index) {
+		_rotor_count(4), _rotors(_config_index) {
 
 	memset(&inputs,0,sizeof(inputs));
 	memset(&outputs,0,sizeof(outputs));
