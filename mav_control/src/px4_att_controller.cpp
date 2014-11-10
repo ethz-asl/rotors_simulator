@@ -22,7 +22,7 @@ std::shared_ptr<ControllerBase> PX4_AttitudeController::Clone() {
 
 void PX4_AttitudeController::InitializeParams() {
   
-  amount_rotors_ = 6;
+  amount_rotors_ = 4;
   initialized_params_ = true;
   
 }
