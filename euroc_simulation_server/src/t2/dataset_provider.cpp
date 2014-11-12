@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,10 +37,20 @@ void process(const rosbag::Bag& bag_in, rosbag::Bag* bag_out) {
   topics.push_back(std::string("vip"));
   rosbag::View view(bag_in, rosbag::TopicQuery(topics));
 
-  // Search the last message
+  struct VipAndTime {
+    euroc_comm::VisualInertialWithPoseConstPtr vip_msg_;
+    ros::Time time_;
+  };
+  std::list<VipAndTime> loaded_bag;
+
+  // Search the last message and load bag to list
   ros::Time last_stamp;
-  for (rosbag::MessageInstance& m : view) {
-    euroc_comm::VisualInertialWithPoseConstPtr vip_msg = m.instantiate<euroc_comm::VisualInertialWithPose>();
+  for (rosbag::MessageInstance& message_instance : view) {
+    euroc_comm::VisualInertialWithPoseConstPtr vip_msg = message_instance.instantiate<euroc_comm::VisualInertialWithPose>();
+    VipAndTime combined_msg;
+    combined_msg.vip_msg_ = vip_msg;
+    combined_msg.time_ = message_instance.getTime();
+    loaded_bag.push_back(combined_msg);
     if (vip_msg != NULL) {
       last_stamp = vip_msg->pose.header.stamp;
     }
@@ -50,15 +60,12 @@ void process(const rosbag::Bag& bag_in, rosbag::Bag* bag_out) {
   bool map_received = false;
   high_resolution_clock::time_point task_start = high_resolution_clock::now();
 
-  for (rosbag::MessageInstance& m : view) {
-
-    euroc_comm::VisualInertialWithPoseConstPtr vip_msg = m.instantiate<euroc_comm::VisualInertialWithPose>();
-
-    if (vip_msg != NULL) {
+  for (VipAndTime& msg : loaded_bag) {
+    if (msg.vip_msg_ != NULL) {
       euroc_comm::Task2 srv;
-      srv.request.vip_data = *vip_msg;
+      srv.request.vip_data = *msg.vip_msg_;
 
-      if (vip_msg->pose.header.stamp == last_stamp)
+      if (msg.vip_msg_->pose.header.stamp == last_stamp)
         srv.request.finished = true;
       else
         srv.request.finished = false;
@@ -81,14 +88,14 @@ void process(const rosbag::Bag& bag_in, rosbag::Bag* bag_out) {
         image_computation_time.data = -1;
       }
       if (bag_out != NULL) {
-        bag_out->write("duration", m.getTime(), image_computation_time);
-        bag_out->write("total_duration", m.getTime(), total_computation_time);
+        bag_out->write("duration", msg.time_, image_computation_time);
+        bag_out->write("total_duration", msg.time_, total_computation_time);
       }
       ++count;
 
       if (map_received) {
         if (bag_out != NULL) {
-          bag_out->write("map", m.getTime(), srv.response.map);
+          bag_out->write("map", msg.time_, srv.response.map);
         }
         ROS_INFO("Received map after %d images", count);
         break;
