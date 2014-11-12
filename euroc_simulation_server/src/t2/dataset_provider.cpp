@@ -38,7 +38,7 @@ void process(const rosbag::Bag& bag_in, rosbag::Bag* bag_out) {
   rosbag::View view(bag_in, rosbag::TopicQuery(topics));
 
   struct VipAndTime {
-    euroc_comm::VisualInertialWithPoseConstPtr vip_msg_;
+    euroc_comm::VisualInertialWithPose vip_msg_;
     ros::Time time_;
   };
   std::list<VipAndTime> loaded_bag;
@@ -47,12 +47,13 @@ void process(const rosbag::Bag& bag_in, rosbag::Bag* bag_out) {
   ros::Time last_stamp;
   for (rosbag::MessageInstance& message_instance : view) {
     euroc_comm::VisualInertialWithPoseConstPtr vip_msg = message_instance.instantiate<euroc_comm::VisualInertialWithPose>();
-    VipAndTime combined_msg;
-    combined_msg.vip_msg_ = vip_msg;
-    combined_msg.time_ = message_instance.getTime();
-    loaded_bag.push_back(combined_msg);
+
     if (vip_msg != NULL) {
       last_stamp = vip_msg->pose.header.stamp;
+      VipAndTime combined_msg;
+      combined_msg.vip_msg_ = *vip_msg;
+      combined_msg.time_ = message_instance.getTime();
+      loaded_bag.push_back(combined_msg);
     }
   }
 
@@ -61,45 +62,43 @@ void process(const rosbag::Bag& bag_in, rosbag::Bag* bag_out) {
   high_resolution_clock::time_point task_start = high_resolution_clock::now();
 
   for (VipAndTime& msg : loaded_bag) {
-    if (msg.vip_msg_ != NULL) {
-      euroc_comm::Task2 srv;
-      srv.request.vip_data = *msg.vip_msg_;
+    euroc_comm::Task2 srv;
+    srv.request.vip_data = msg.vip_msg_;
 
-      if (msg.vip_msg_->pose.header.stamp == last_stamp)
-        srv.request.finished = true;
-      else
-        srv.request.finished = false;
+    if (msg.vip_msg_.pose.header.stamp == last_stamp)
+      srv.request.finished = true;
+    else
+      srv.request.finished = false;
 
-      std_msgs::Float64 image_computation_time;
-      std_msgs::Float64 total_computation_time;
+    std_msgs::Float64 image_computation_time;
+    std_msgs::Float64 total_computation_time;
 
-      high_resolution_clock::time_point start = high_resolution_clock::now();
-      if (client.call(srv)) {
-        high_resolution_clock::time_point now = high_resolution_clock::now();
-        image_computation_time.data = duration_cast<duration<double> >(now - start).count();
-        total_computation_time.data = duration_cast<duration<double> >(now - task_start).count();
+    high_resolution_clock::time_point start = high_resolution_clock::now();
+    if (client.call(srv)) {
+      high_resolution_clock::time_point now = high_resolution_clock::now();
+      image_computation_time.data = duration_cast<duration<double> >(now - start).count();
+      total_computation_time.data = duration_cast<duration<double> >(now - task_start).count();
 
-        if (!srv.response.map.data.empty()) {
-          map_received = true;
-        }
+      if (!srv.response.map.data.empty()) {
+        map_received = true;
       }
-      else {
-        ROS_ERROR("could not contact challenger server");
-        image_computation_time.data = -1;
-      }
+    }
+    else {
+      ROS_ERROR("could not contact challenger server");
+      image_computation_time.data = -1;
+    }
+    if (bag_out != NULL) {
+      bag_out->write("duration", msg.time_, image_computation_time);
+      bag_out->write("total_duration", msg.time_, total_computation_time);
+    }
+    ++count;
+
+    if (map_received) {
       if (bag_out != NULL) {
-        bag_out->write("duration", msg.time_, image_computation_time);
-        bag_out->write("total_duration", msg.time_, total_computation_time);
+        bag_out->write("map", msg.time_, srv.response.map);
       }
-      ++count;
-
-      if (map_received) {
-        if (bag_out != NULL) {
-          bag_out->write("map", msg.time_, srv.response.map);
-        }
-        ROS_INFO("Received map after %d images", count);
-        break;
-      }
+      ROS_INFO("Received map after %d images", count);
+      break;
     }
   }
   ROS_WARN_COND(!map_received, "Finished playing back the dataset, but did not receive a map");
