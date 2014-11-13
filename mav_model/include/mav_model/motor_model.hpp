@@ -14,41 +14,44 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
-
 #ifndef MAV_MODEL_MOTOR_MODEL_H
 #define MAV_MODEL_MOTOR_MODEL_H
 #include <Eigen/Eigen>
 
 class MotorModel
 {
-  public:
-    MotorModel() :
-      motor_rot_vel_(0),
-      ref_motor_rot_vel_(0),
-      prev_ref_motor_rot_vel_(0),
-      prev_simTime_(0),
-      dt_(0.001) {}
-    virtual ~MotorModel() {}
-    void GetMotorVelocity(double &result) const {
-      result = motor_rot_vel_;
-    }
-    void SetReferenceMotorVelocity(double ref_motor_rot_vel) {
-      ref_motor_rot_vel_ = ref_motor_rot_vel;
-    }
+ public:
+  MotorModel()
+      : motor_rot_vel_(0),
+        ref_motor_rot_vel_(0),
+        prev_ref_motor_rot_vel_(0),
+        prev_simTime_(0),
+        dt_(0.01)
+  {
+  }
+  virtual ~MotorModel()
+  {
+  }
+  void GetMotorVelocity(double &result) const
+  {
+    result = motor_rot_vel_;
+  }
+  void SetReferenceMotorVelocity(double ref_motor_rot_vel)
+  {
+    ref_motor_rot_vel_ = ref_motor_rot_vel;
+  }
 
-    virtual void InitializeParams() = 0;
-    virtual void Publish() = 0;
+  virtual void InitializeParams() = 0;
+  virtual void Publish() = 0;
 
-  protected:
-    double motor_rot_vel_;
-    double ref_motor_rot_vel_;
-    double dt_;
-    double prev_simTime_;
-    double prev_ref_motor_rot_vel_;
+ protected:
+  double motor_rot_vel_;
+  double ref_motor_rot_vel_;
+  double dt_;
+  double prev_simTime_;
+  double prev_ref_motor_rot_vel_;
 
-
-
-    virtual void UpdateForcesAndMoments() = 0;
+  virtual void UpdateForcesAndMoments(double alpha_up, double alpha_down) = 0;
 
 };
 

@@ -134,7 +134,7 @@
 
   <!-- Rotor joint and link -->
   <xacro:macro name="vertical_rotor"
-    params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant_up time_constant_dwn max_rot_velocity motor_number rotor_drag_coefficient rolling_moment_coefficient color *origin *inertia">
+    params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant_up time_constant_down max_rot_velocity motor_number rotor_drag_coefficient rolling_moment_coefficient color *origin *inertia">
     <joint name="rotor_${motor_number}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
@@ -171,8 +171,8 @@
         <jointName>rotor_${motor_number}_joint</jointName>
         <linkName>rotor_${motor_number}</linkName>
         <turningDirection>${direction}</turningDirection>
-        <timeConstant_up>${time_constant_up}</timeConstant_up>
-        <timeConstant_dwn>${time_constant_dwn}</timeConstant_dwn>
+        <timeConstantUp>${time_constant_up}</timeConstantUp>
+        <timeConstantDown>${time_constant_down}</timeConstantDown>
         <maxRotVelocity>${max_rot_velocity}</maxRotVelocity>
         <motorConstant>${motor_constant}</motorConstant>
         <momentConstant>${moment_constant}</momentConstant>

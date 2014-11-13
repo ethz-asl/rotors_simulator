@@ -14,7 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
-
 #ifndef MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
 #define MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
 
@@ -40,7 +39,8 @@ const static int CW = -1;
 ;
 
 namespace gazebo {
-class GazeboMotorModel : public MotorModel, public ModelPlugin {
+class GazeboMotorModel : public MotorModel, public ModelPlugin
+{
  public:
   GazeboMotorModel();
   virtual ~GazeboMotorModel();
@@ -49,7 +49,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   virtual void Publish();
 
  protected:
-  virtual void UpdateForcesAndMoments();
+  virtual void UpdateForcesAndMoments(double alpha_up, double alpha_down);
   virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
   virtual void OnUpdate(const common::UpdateInfo & /*_info*/);
 
@@ -66,19 +66,13 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   double motor_constant_;
   double moment_constant_;
   double time_constant_up_;
-  double time_constant_dwn_;
+  double time_constant_down_;
   double max_rot_velocity_;
   double viscous_friction_coefficient_;
   double inertia_;
   double rotor_drag_coefficient_;
   double rolling_moment_coefficient_;
   double rotor_velocity_slowdown_sim_;
-
-  //rotor acceleration/deceleration first order system
-  double alpha_up_;
-  double alpha_dwn_;
-  
-
 
   ros::NodeHandle* node_handle_;
   ros::Publisher motor_vel_pub_;
