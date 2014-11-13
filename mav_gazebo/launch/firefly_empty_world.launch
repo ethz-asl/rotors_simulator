@@ -5,7 +5,7 @@
   
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find mav_gazebo)/worlds/basic.world"/>
-    <!-- <arg name="debug" value="true" /> -->
+    <!--\\\ <arg name="debug" value="true" /> -->
   </include>
   <include file="$(find mav_gazebo)/launch/spawn_firefly.launch">
     <arg name="enable_logging" value="$(arg enable_logging)" />

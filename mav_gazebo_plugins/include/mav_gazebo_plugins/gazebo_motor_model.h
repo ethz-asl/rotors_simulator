@@ -65,13 +65,20 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   double max_force_;
   double motor_constant_;
   double moment_constant_;
-  double time_constant_;
+  double time_constant_up_;
+  double time_constant_dwn_;
   double max_rot_velocity_;
   double viscous_friction_coefficient_;
   double inertia_;
   double rotor_drag_coefficient_;
   double rolling_moment_coefficient_;
   double rotor_velocity_slowdown_sim_;
+
+  //rotor acceleration/deceleration first order system
+  double alpha_up_;
+  double alpha_dwn_;
+  
+
 
   ros::NodeHandle* node_handle_;
   ros::Publisher motor_vel_pub_;
@@ -90,6 +97,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   void QueueThread();
   std_msgs::Float32 turning_velocity_msg_;
   void VelocityCallback(const mav_msgs::MotorSpeedPtr& rot_velocities);
+
 };
 }
 

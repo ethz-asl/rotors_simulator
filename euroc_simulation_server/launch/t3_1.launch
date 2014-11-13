@@ -5,7 +5,7 @@
   
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find mav_gazebo)/worlds/basic.world"/>
-    <!-- <arg name="debug" value="true" /> -->
+    <!-- <arg name="debug" value="true" />  -->
     <arg name="paused" value="true" />
   </include>
 

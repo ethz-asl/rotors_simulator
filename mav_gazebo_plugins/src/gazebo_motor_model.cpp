@@ -114,13 +114,18 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   else
     gzerr << "[gazebo_motor_model] Please specify a maxRotVelocity for the joint.\n";
 
-  if (_sdf->HasElement("timeConstant"))
-    time_constant_ = _sdf->GetElement("timeConstant")->Get<double>();
+  if (_sdf->HasElement("timeConstant_up"))
+    time_constant_up_ = _sdf->GetElement("timeConstant_up")->Get<double>();
   else
-    gzerr << "[gazebo_motor_model] Please specify a timeConstant for the joint.\n";
+    gzerr << "[gazebo_motor_model] Please specify a timeConstant_up for the joint.\n";
+
+  if (_sdf->HasElement("timeConstant_dwn"))
+    time_constant_dwn_ = _sdf->GetElement("timeConstant_dwn")->Get<double>();
+  else
+    gzerr << "[gazebo_motor_model] Please specify a timeConstant_up for the joint.\n";
 
   inertia_ = link_->GetInertial()->GetIZZ();
-  viscous_friction_coefficient_ = inertia_ / time_constant_;
+  viscous_friction_coefficient_ = inertia_ / time_constant_up_;
   max_force_ = max_rot_velocity_ * viscous_friction_coefficient_;
 
   // Set the maximumForce on the joint
@@ -147,13 +152,28 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 }
 
 // Called by the world update start event
-void GazeboMotorModel::OnUpdate(const common::UpdateInfo& /*_info*/) {
+void GazeboMotorModel::OnUpdate(const common::UpdateInfo& _info) {
+  dt_ = _info.simTime.Double() - prev_simTime_;
+  prev_simTime_ = _info.simTime.Double();
+  //Compute filter parameters based on real dt
+  alpha_up_ = dt_/(time_constant_up_ + dt_);
+  alpha_dwn_ = dt_/(time_constant_dwn_ + dt_);
+
+  if(_info.simTime.Double() < 8.0){
+    ref_motor_rot_vel_ = 0;
+  }else{
+    ref_motor_rot_vel_ = 500;
+  }
+
+  if(_info.simTime.Double() > 8.5)
+    ref_motor_rot_vel_ = 0;
+
   UpdateForcesAndMoments();
   Publish();
 }
 
 void GazeboMotorModel::VelocityCallback(const mav_msgs::MotorSpeedPtr& rot_velocities) {
-  ref_motor_rot_vel_ = std::min(rot_velocities->motor_speed[motor_number_], static_cast<float>(max_rot_velocity_));
+//  ref_motor_rot_vel_ = std::min(rot_velocities->motor_speed[motor_number_], static_cast<float>(max_rot_velocity_));
 }
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
@@ -183,7 +203,19 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   // - \omega * \mu_1 * V_A^{\perp}
   rolling_moment = -std::abs(real_motor_velocity) * rolling_moment_coefficient_ * body_velocity_perpendicular;
   this->link_->AddRelativeTorque(rolling_moment);
-  this->joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
+
+  double new_ref_motor_rot_vel;
+  if(real_motor_velocity <= ref_motor_rot_vel_){
+    //Accelerate - use time_constant_up
+    new_ref_motor_rot_vel = alpha_up_*ref_motor_rot_vel_ + (1.0 - alpha_up_)*prev_ref_motor_rot_vel_;
+  }else{
+    //Decelerate
+    new_ref_motor_rot_vel = alpha_dwn_*ref_motor_rot_vel_ + (1.0 - alpha_dwn_)*prev_ref_motor_rot_vel_;
+  }
+  prev_ref_motor_rot_vel_ = new_ref_motor_rot_vel;
+
+  this->joint_->SetVelocity(0, turning_direction_ * new_ref_motor_rot_vel / rotor_velocity_slowdown_sim_);
+
 }
 ;
 
