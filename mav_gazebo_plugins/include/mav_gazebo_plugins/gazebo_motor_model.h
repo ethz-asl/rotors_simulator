@@ -14,9 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
+
 #ifndef MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
 #define MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
 
+#include <mav_gazebo_plugins/common.h>
 #include <mav_model/motor_model.hpp>
 #include <Eigen/Eigen>
 
@@ -39,8 +41,7 @@ const static int CW = -1;
 ;
 
 namespace gazebo {
-class GazeboMotorModel : public MotorModel, public ModelPlugin
-{
+class GazeboMotorModel : public MotorModel, public ModelPlugin {
  public:
   GazeboMotorModel();
   virtual ~GazeboMotorModel();
@@ -49,7 +50,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin
   virtual void Publish();
 
  protected:
-  virtual void UpdateForcesAndMoments(double alpha_up, double alpha_down);
+  virtual void UpdateForcesAndMoments();
   virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
   virtual void OnUpdate(const common::UpdateInfo & /*_info*/);
 
@@ -91,7 +92,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin
   void QueueThread();
   std_msgs::Float32 turning_velocity_msg_;
   void VelocityCallback(const mav_msgs::MotorSpeedPtr& rot_velocities);
-
+  std::unique_ptr<FirstOrderFilter<double>>  rotor_velocity_filter_;
 };
 }
 
