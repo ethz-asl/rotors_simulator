@@ -57,7 +57,7 @@ It allows different acceleration and deceleration time constants.
 
 Short reveiw of discrete time implementation of firest order system:
 Laplace:
-    U(s)/X(s) = 1/(tau*s + 1)
+    X(s)/U(s) = 1/(tau*s + 1)
 continous time system: 
     dx(t) = (-1/tau)*x(t) + (1/tau)*u(t)
 discretized system (ZoH): 
