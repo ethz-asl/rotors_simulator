@@ -29,4 +29,20 @@
       </inertial>
   </link>
 
+  <!-- IMU Link -->
+    <link name="imu_link">
+      <inertial>
+        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0"
+          izz="0.001" />
+        <mass value="1" />  <!-- [kg] -->
+        <origin xyz="0 0 0" rpy="0 0 0" />
+      </inertial>
+    </link>
+    <!-- IMU joint -->
+    <joint name="imu_joint" type="revolute">
+      <parent link="camera_link" />
+      <child link="imu_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+
 </robot>

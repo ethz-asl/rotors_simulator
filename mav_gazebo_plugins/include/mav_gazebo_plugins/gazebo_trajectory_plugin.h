@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -59,7 +59,7 @@ class GazeboCameraTrajectoryPlugin : public ModelPlugin {
   ros::Publisher imu_pub_;
   std::string frame_id_;
   std::string link_name_;
-
+  common::Time last_time_;
 
   int gazebo_seq_;
   int pose_seq_;
@@ -74,6 +74,7 @@ class GazeboCameraTrajectoryPlugin : public ModelPlugin {
   event::ConnectionPtr updateConnection_;
 
   boost::thread callback_queue_thread_;
+
   void QueueThread();
 };
 }
