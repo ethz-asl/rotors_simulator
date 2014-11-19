@@ -16,7 +16,7 @@
 
 
 #include <mav_gazebo_plugins/gazebo_motor_model.h>
-#include <mav_gazebo_plugins/common.h>
+
 
 namespace gazebo {
 GazeboMotorModel::GazeboMotorModel()
@@ -114,13 +114,12 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   else
     gzerr << "[gazebo_motor_model] Please specify a maxRotVelocity for the joint.\n";
 
-  if (_sdf->HasElement("timeConstant"))
-    time_constant_ = _sdf->GetElement("timeConstant")->Get<double>();
-  else
-    gzerr << "[gazebo_motor_model] Please specify a timeConstant for the joint.\n";
+  getSdfParam<double>(_sdf, "timeConstantUp", time_constant_up_, 1.0 / 80.0);
+
+  getSdfParam<double>(_sdf, "timeConstantDown", time_constant_down_, 1.0 / 40.0);
 
   inertia_ = link_->GetInertial()->GetIZZ();
-  viscous_friction_coefficient_ = inertia_ / time_constant_;
+  viscous_friction_coefficient_ = inertia_ / time_constant_up_;
   max_force_ = max_rot_velocity_ * viscous_friction_coefficient_;
 
   // Set the maximumForce on the joint
@@ -144,10 +143,15 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   cmd_sub_ = node_handle_->subscribe(command_topic_, 1000, &GazeboMotorModel::VelocityCallback, this);
   motor_vel_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_topic_, 10);
+
+  //Create the first order filter
+  rotor_velocity_filter_.reset(new FirstOrderFilter<double>(time_constant_up_, time_constant_down_, ref_motor_rot_vel_));
 }
 
 // Called by the world update start event
-void GazeboMotorModel::OnUpdate(const common::UpdateInfo& /*_info*/) {
+void GazeboMotorModel::OnUpdate(const common::UpdateInfo& _info) {
+  sampling_time_ = _info.simTime.Double() - prev_sim_time_;
+  prev_sim_time_ = _info.simTime.Double();
   UpdateForcesAndMoments();
   Publish();
 }
@@ -183,6 +187,8 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   // - \omega * \mu_1 * V_A^{\perp}
   rolling_moment = -std::abs(real_motor_velocity) * rolling_moment_coefficient_ * body_velocity_perpendicular;
   this->link_->AddRelativeTorque(rolling_moment);
+  //Apply the filter on motors velocity
+  ref_motor_rot_vel_ = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
   this->joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
 }
 ;
