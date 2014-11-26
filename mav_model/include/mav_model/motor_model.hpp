@@ -24,7 +24,9 @@ class MotorModel
   public:
     MotorModel() :
       motor_rot_vel_(0),
-      ref_motor_rot_vel_(0) {}
+      ref_motor_rot_vel_(0),
+      prev_sim_time_(0),
+      sampling_time_(0.01) {}
     virtual ~MotorModel() {}
     void GetMotorVelocity(double &result) const {
       result = motor_rot_vel_;
@@ -39,6 +41,10 @@ class MotorModel
   protected:
     double motor_rot_vel_;
     double ref_motor_rot_vel_;
+    double prev_ref_motor_rot_vel_;
+    double prev_sim_time_;
+    double sampling_time_;
+
 
     virtual void UpdateForcesAndMoments() = 0;
 };
