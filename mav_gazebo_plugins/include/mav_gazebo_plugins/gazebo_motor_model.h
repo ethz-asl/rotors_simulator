@@ -18,6 +18,7 @@
 #ifndef MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
 #define MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
 
+#include <mav_gazebo_plugins/common.h>
 #include <mav_model/motor_model.hpp>
 #include <Eigen/Eigen>
 
@@ -65,7 +66,8 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   double max_force_;
   double motor_constant_;
   double moment_constant_;
-  double time_constant_;
+  double time_constant_up_;
+  double time_constant_down_;
   double max_rot_velocity_;
   double viscous_friction_coefficient_;
   double inertia_;
@@ -90,6 +92,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   void QueueThread();
   std_msgs::Float32 turning_velocity_msg_;
   void VelocityCallback(const mav_msgs::MotorSpeedPtr& rot_velocities);
+  std::unique_ptr<FirstOrderFilter<double>>  rotor_velocity_filter_;
 };
 }
 
