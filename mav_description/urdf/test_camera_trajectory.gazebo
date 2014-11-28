@@ -1,54 +1,97 @@
 <?xml version="1.0"?>
 <robot>
 
-    <!-- camera -->
-    <gazebo reference="camera_link">
-      <sensor type="camera" name="camera1">
-        <update_rate>30.0</update_rate>
-        <camera name="head">
-          <horizontal_fov>1.3962634</horizontal_fov>
-          <image>
-            <width>800</width>
-            <height>800</height>
-            <format>R8G8B8</format>
-          </image>
-          <clip>
-            <near>0.02</near>
-            <far>300</far>
-          </clip>
-          <noise>
-            <type>gaussian</type>
-            <!-- Noise is sampled independently per pixel on each frame.
-                 That pixel's noise value is added to each of its color
-                 channels, which at that point lie in the range [0,1]. -->
-            <mean>0.0</mean>
-            <stddev>0.007</stddev>
-          </noise>
-        </camera>
-        <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-          <alwaysOn>true</alwaysOn>
-          <updateRate>0.0</updateRate>
-          <cameraName>test_camera_trajectory/camera1</cameraName>
-          <imageTopicName>image_raw</imageTopicName>
-          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>camera_link</frameName>
-          <hackBaseline>0.07</hackBaseline>
-          <distortionK1>0.0</distortionK1>
-          <distortionK2>0.0</distortionK2>
-          <distortionK3>0.0</distortionK3>
-          <distortionT1>0.0</distortionT1>
-          <distortionT2>0.0</distortionT2>
-        </plugin>
-      </sensor>
-      <turnGravityOff>true</turnGravityOff>
-      <material>Gazebo/Blue</material>
-    </gazebo>
+  <!-- Left Camera -->
+  <gazebo reference="camera_left_link">
+    <sensor type="camera" name="camera_left">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise is sampled independently per pixel on each frame.
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1]. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>vi_sensor/camera_left</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera_left_link</frameName>
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+    <turnGravityOff>true</turnGravityOff>
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <!-- Right Camera -->
+  <gazebo reference="camera_right_link">
+    <sensor type="camera" name="camera_right">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise is sampled independently per pixel on each frame.
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1]. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>vi_sensor/camera_right</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera_right_link</frameName>
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+    <turnGravityOff>true</turnGravityOff>
+    <material>Gazebo/Blue</material>
+  </gazebo>
 
 
   <gazebo>
     <plugin filename="libmav_gazebo_pose_plugin.so" name="ground_truth_pose">
-      <linkName>camera_link</linkName>
-      <robotNamespace>camera_simulator</robotNamespace>
+      <linkName>vi_sensor_link</linkName>
+      <robotNamespace>vi_sensor</robotNamespace>
       <poseTopic>ground_truth/pose</poseTopic>
       <measurementDivisor>1</measurementDivisor>
       <measurementDelay>0</measurementDelay>
@@ -61,8 +104,8 @@
 
   <gazebo>
     <plugin filename="libmav_gazebo_trajectory_plugin.so" name="camera_trajectory">
-      <linkName>camera_link</linkName>
-      <robotNamespace>camera_simulator</robotNamespace>
+      <linkName>vi_sensor_link</linkName>
+      <robotNamespace>vi_sensor</robotNamespace>
       <imuTopic>ground_truth/imu</imuTopic>
     </plugin>
   </gazebo>
@@ -71,7 +114,7 @@
     <!-- IMU -->
     <plugin filename="libhector_gazebo_ros_imu.so" name="imu_ros">
       <!-- parameters according to http://wiki.ros.org/hector_gazebo_plugins#GazeboRosImu -->
-      <robotNamespace>imu</robotNamespace>
+      <robotNamespace>vi_sensor</robotNamespace>
       <bodyName>imu_link</bodyName> <!-- (string, required): name of the body which holds the IMU sensor -->
       <topicName>imu</topicName> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
       <accelOffset>0.0 0.0 0.0</accelOffset> <!-- (Vector3): constant acceleration offset -->

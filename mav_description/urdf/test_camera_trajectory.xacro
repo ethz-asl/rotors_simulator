@@ -1,48 +1,131 @@
 <?xml version="1.0"?>
 <!-- Revolute-Revolute Manipulator -->
 <robot name="test_camera_trajectory" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="PI" value="3.141592654" />
 
   <!-- Import all Gazebo-customization elements, including Gazebo colors -->
   <xacro:include filename="$(find mav_description)/urdf/test_camera_trajectory.gazebo" />
 
-  <!-- Camera Link -->
-  <link name="camera_link">
-      <collision>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-          <box size="0.1 0.1 0.1" />
-        </geometry>
-      </collision>
+  <!-- Vi Sensor Link -->
+  <link name="vi_sensor_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.133 0.057" />
+      </geometry>
+    </collision>
 
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-          <box size="0.1 0.1 0.1" />
-        </geometry>
-        <material name="red" />
-      </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.133 0.057" />
+      </geometry>
+      <material name="red" />
+    </visual>
 
-      <inertial>
-        <mass value="1e-5" />
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
-      </inertial>
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+  <!-- Left Camera Link -->
+  <link name="camera_left_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.01" radius="0.007" />
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+      <geometry>
+        <cylinder length="0.01" radius="0.007" />
+      </geometry>
+      <material name="red" />
+    </visual>
+
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+  <!-- Right Camera Link -->
+  <link name="camera_right_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.01" radius="0.007" />
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+      <geometry>
+        <cylinder length="0.01" radius="0.007" />
+      </geometry>
+      <material name="red" />
+    </visual>
+
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
   </link>
 
   <!-- IMU Link -->
-    <link name="imu_link">
-      <inertial>
-        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0"
-          izz="0.001" />
-        <mass value="1" />  <!-- [kg] -->
-        <origin xyz="0 0 0" rpy="0 0 0" />
-      </inertial>
-    </link>
-    <!-- IMU joint -->
-    <joint name="imu_joint" type="revolute">
-      <parent link="camera_link" />
-      <child link="imu_link" />
-      <limit upper="0" lower="0" effort="0" velocity="0" />
-    </joint>
+  <link name="imu_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.0425 0.024" />
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.0425 0.024" />
+      </geometry>
+      <material name="red" />
+    </visual>
+    <inertial>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0"
+        izz="0.001" />
+      <mass value="1" />  <!-- [kg] -->
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </inertial>
+  </link>
+
+    <!-- Left Camera Joint -->
+  <joint name="camera_left_joint" type="revolute">
+    <origin xyz="0.015 0.055 0.0065" rpy="0 0 0" />
+    <parent link="vi_sensor_link" />
+    <child link="camera_left_link" />
+    <limit upper="0" lower="0" effort="0" velocity="0" />
+  </joint>
+
+    <!-- Right Camera Joint -->
+  <joint name="camera_right_joint" type="revolute">
+    <origin xyz="0.015 -0.055 0.0065" rpy="0 0 0" />
+    <parent link="vi_sensor_link" />
+    <child link="camera_right_link" />
+    <limit upper="0" lower="0" effort="0" velocity="0" />
+  </joint>
+
+  <!-- IMU Joint -->
+  <joint name="imu_joint" type="revolute">
+    <origin xyz="0.015 0 0.0113" rpy="0 0 0" />
+    <parent link="vi_sensor_link" />
+    <child link="imu_link" />
+    <limit upper="0" lower="0" effort="0" velocity="0" />
+  </joint>
+
+
 
 </robot>
