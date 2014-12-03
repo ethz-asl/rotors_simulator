@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   planning_msgs
   geometry_msgs
   cmake_modules
+  mav_planning_utils
 )
 
 find_package(Eigen REQUIRED)
@@ -27,7 +28,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES
-  CATKIN_DEPENDS roscpp mav_model mav_control mav_msgs octomap_ros octomap_msgs planning_msgs geometry_msgs
+  CATKIN_DEPENDS roscpp mav_model mav_control mav_msgs octomap_ros octomap_msgs planning_msgs geometry_msgs mav_planning_utils
   DEPENDS eigen gazebo octomap opencv
 )
 

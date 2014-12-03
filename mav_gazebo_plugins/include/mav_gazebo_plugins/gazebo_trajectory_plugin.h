@@ -34,6 +34,10 @@
 #include <stdio.h>
 #include <sensor_msgs/Imu.h>
 
+#include <mav_planning_utils/path_planning.h>
+#include <mav_planning_utils/segment_planning.h>
+#include <planning_msgs/WayPointArray.h>
+
 namespace gazebo {
 
 class GazeboCameraTrajectoryPlugin : public ModelPlugin {
@@ -52,17 +56,29 @@ class GazeboCameraTrajectoryPlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
-
+  static const int N_ = 12;
   std::string namespace_;
   std::string imu_topic_;
+  std::string path_segments_topic_;
   ros::NodeHandle* node_handle_;
   ros::Publisher imu_pub_;
+  ros::Subscriber path_sub_;
   std::string frame_id_;
   std::string link_name_;
   common::Time last_time_;
+  common::Time path_received_time_;
 
+  typename mav_planning_utils::path_planning::Segment<N_>::Vector sx_;
+  typename mav_planning_utils::path_planning::Segment<N_>::Vector sy_;
+  typename mav_planning_utils::path_planning::Segment<N_>::Vector sz_;
+  typename mav_planning_utils::path_planning::Segment<N_>::Vector syaw_;
+
+  bool follow_path_;
   int gazebo_seq_;
   int pose_seq_;
+  double v_max_;
+  double a_max_;
+  double yaw_max_;
 
   // Pointer to the world
   physics::WorldPtr world_;
@@ -76,6 +92,8 @@ class GazeboCameraTrajectoryPlugin : public ModelPlugin {
   boost::thread callback_queue_thread_;
 
   void QueueThread();
+  bool createSegments(const planning_msgs::WayPointArray::_waypoints_type& wpts);
+  void pathCb(const planning_msgs::WayPointArrayConstPtr& msg);
 };
 }
 
