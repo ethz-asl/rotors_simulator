@@ -14,7 +14,7 @@
         </image>
         <clip>
           <near>0.02</near>
-          <far>300</far>
+          <far>30</far>
         </clip>
         <noise>
           <type>gaussian</type>
@@ -32,7 +32,7 @@
         <imageTopicName>image_raw</imageTopicName>
         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
         <frameName>camera_left_link</frameName>
-        <hackBaseline>0.07</hackBaseline>
+        <hackBaseline>0.0</hackBaseline>
         <distortionK1>0.0</distortionK1>
         <distortionK2>0.0</distortionK2>
         <distortionK3>0.0</distortionK3>
@@ -57,7 +57,7 @@
         </image>
         <clip>
           <near>0.02</near>
-          <far>300</far>
+          <far>30</far>
         </clip>
         <noise>
           <type>gaussian</type>
@@ -75,7 +75,7 @@
         <imageTopicName>image_raw</imageTopicName>
         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
         <frameName>camera_right_link</frameName>
-        <hackBaseline>0.07</hackBaseline>
+        <hackBaseline>0.0</hackBaseline>
         <distortionK1>0.0</distortionK1>
         <distortionK2>0.0</distortionK2>
         <distortionK3>0.0</distortionK3>
