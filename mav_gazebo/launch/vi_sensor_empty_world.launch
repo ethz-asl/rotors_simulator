@@ -4,5 +4,5 @@
     <!-- <arg name="debug" value="true" /> -->
     <arg name="paused" value="true" />
   </include>
-  <include file="$(find mav_gazebo)/launch/spawn_test_camera_trajectory.launch"/>
+  <include file="$(find mav_gazebo)/launch/spawn_vi_sensor.launch"/>
 </launch>

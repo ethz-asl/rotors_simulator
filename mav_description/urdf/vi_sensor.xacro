@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <!-- Revolute-Revolute Manipulator -->
-<robot name="test_camera_trajectory" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="vi_sensor" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:property name="PI" value="3.141592654" />
 
   <!-- Import all Gazebo-customization elements, including Gazebo colors -->
-  <xacro:include filename="$(find mav_description)/urdf/test_camera_trajectory.gazebo" />
+  <xacro:include filename="$(find mav_description)/urdf/vi_sensor.gazebo" />
 
   <!-- Vi Sensor Link -->
   <link name="vi_sensor_link">

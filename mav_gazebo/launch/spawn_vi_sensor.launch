@@ -2,7 +2,7 @@
 
 <launch>
   <param name="robot_description"
-    command="$(find xacro)/xacro.py '$(find mav_description)/urdf/test_camera_trajectory.xacro'" />
+    command="$(find xacro)/xacro.py '$(find mav_description)/urdf/vi_sensor.xacro'" />
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
   <node name="spawn_robot" pkg="gazebo_ros" type="spawn_model"
@@ -11,7 +11,7 @@
          -x 0
          -y 0
          -z 1
-         -model test_camera_trajectory"
+         -model vi_sensor"
    respawn="false" output="screen">
   </node>
 
