@@ -18,9 +18,8 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.03 0.133 0.057" />
+        <mesh filename="package://mav_description/meshes/vi_sensor.dae" scale="1 1 1" />
       </geometry>
-      <material name="red" />
     </visual>
 
     <inertial>
