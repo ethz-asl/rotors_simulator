@@ -38,13 +38,13 @@
       </geometry>
     </collision>
 
-    <visual>
+    <!-- <visual>
       <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
       <geometry>
         <cylinder length="0.01" radius="0.007" />
       </geometry>
       <material name="red" />
-    </visual>
+    </visual> -->
 
     <inertial>
       <mass value="1e-5" />
@@ -62,13 +62,13 @@
       </geometry>
     </collision>
 
-    <visual>
+    <!-- <visual>
       <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
       <geometry>
         <cylinder length="0.01" radius="0.007" />
       </geometry>
       <material name="red" />
-    </visual>
+    </visual> -->
 
     <inertial>
       <mass value="1e-5" />
@@ -86,13 +86,13 @@
       </geometry>
     </collision>
 
-    <visual>
+    <!-- <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
         <box size="0.009 0.0425 0.024" />
       </geometry>
       <material name="red" />
-    </visual>
+    </visual> -->
     <inertial>
       <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0"
         izz="0.001" />
