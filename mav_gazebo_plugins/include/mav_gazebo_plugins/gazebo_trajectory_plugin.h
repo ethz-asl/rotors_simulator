@@ -79,6 +79,7 @@ class GazeboCameraTrajectoryPlugin : public ModelPlugin {
   double v_max_;
   double a_max_;
   double yaw_max_;
+  double path_time_;
 
   // Pointer to the world
   physics::WorldPtr world_;

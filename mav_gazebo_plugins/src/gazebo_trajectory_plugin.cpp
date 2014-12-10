@@ -37,7 +37,8 @@ GazeboCameraTrajectoryPlugin::GazeboCameraTrajectoryPlugin()
       node_handle_(0),
       gazebo_seq_(0),
       pose_seq_(0),
-      follow_path_(false)
+      follow_path_(false),
+      path_time_(0)
 {
 }
 
@@ -99,12 +100,12 @@ void GazeboCameraTrajectoryPlugin::OnUpdate(const common::UpdateInfo& _info) {
   last_time_ = current_time;
   double t = current_time.Double();
 
-  // Get velocities and accelerations from paths at current timestep
+  // Get linear/angular velocities and accelerations from paths at current timestep
   Eigen::Matrix<double, 4, 1> acceleration;
   Eigen::Matrix<double, 4, 1> velocity;
   Eigen::Matrix<double, 3, 1> p;
 
-  if (follow_path_) {
+  if (t >= path_received_time_.Double() && t <= path_received_time_.Double() + path_time_) {
     t -= path_received_time_.Double();
 
     mav_planning_utils::path_planning::samplePath(p, sx_, t);
@@ -120,11 +121,17 @@ void GazeboCameraTrajectoryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     velocity[3] = p[1];
     acceleration[3] = p[2];
 
-    //Set linear/angular velocities and accelerations
+    // Set linear/angular velocities and accelerations
     model_->SetLinearAccel(math::Vector3(acceleration[0], acceleration[1], acceleration[2]));
     model_->SetLinearVel(math::Vector3(velocity[0], velocity[1], velocity[2]));
     model_->SetAngularVel(math::Vector3(0, 0, velocity[3]));
     model_->SetAngularAccel(math::Vector3(0, 0, velocity[3]));
+  }
+  else {
+    model_->SetLinearAccel(math::Vector3(0, 0, 0));
+    model_->SetLinearVel(math::Vector3(0, 0, 0));
+    model_->SetAngularVel(math::Vector3(0, 0, 0));
+    model_->SetAngularAccel(math::Vector3(0, 0, 0));
   }
 
   ++gazebo_seq_;
@@ -193,6 +200,7 @@ bool GazeboCameraTrajectoryPlugin::createSegments(const planning_msgs::WayPointA
     path_time += wps.time;
     sx[s].t = sy[s].t = sz[s].t = syaw[s].t = wps.time;
   }
+  path_time_ = path_time;
 
   sx_ = sx;
   sy_ = sy;
