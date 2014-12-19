@@ -156,7 +156,7 @@
         <geometry>
           <!-- <cylinder length="0.005" radius="${radius_rotor}"/> --> <!-- [m] -->
           <mesh filename="package://mav_description/meshes/propeller_${direction}.dae"
-            scale="${0.01*radius_rotor} ${0.01*radius_rotor} ${0.01*radius_rotor}" /> <!-- radius 0.1m means 0.001 scale -->
+            scale="${radius_rotor} ${radius_rotor} ${radius_rotor}" /> <!-- The propeller meshes have a radius of 1m -->
           <!-- <box size="${2*radius_rotor} 0.01 0.005"/> -->
         </geometry>
       </visual>
