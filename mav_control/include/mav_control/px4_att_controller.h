@@ -34,14 +34,12 @@
  * Multicopter attitude controller.
  *
  * @author Roman Bapst <bapstr@student.ethz.ch>
- *  
+ *
  */
 
 
 #include <mav_control/controller_base.h>
 #include <mav_control/controller_factory.h>
-#include <mc_att_control/mc_att_control_base.h>
-#include <mav_control/mc_mixer.h>
 
 class PX4_AttitudeController : public ControllerBase {
  public:
@@ -61,10 +59,8 @@ class PX4_AttitudeController : public ControllerBase {
   Eigen::Vector3d gain_angular_rate_;
   Eigen::Matrix3d inertia_matrix_;
 
-  float time_last; 
+  float time_last;
 
-  MulticopterAttitudeControlBase *_PX4_base_att_controller;
-  MultirotorMixer *_mc_mixer;
 
 
   void ComputeDesiredAngularAcc(Eigen::Vector3d * angular_acceleration) const;

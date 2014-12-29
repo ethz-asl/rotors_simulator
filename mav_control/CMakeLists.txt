@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(mav_control)
 
-set(PX4_DIR /home/roman/src/Firmware)
 set ( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-D__EXPORT=")
 
 add_definitions(-std=c++0x)
@@ -31,10 +30,6 @@ include_directories(
   include/mav_control
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
-  ${PX4_DIR}/src
-  ${PX4_DIR}/src/lib
-  ${PX4_DIR}/src/modules
-  ${PX4_DIR}/Tools/tests-host
 )
 
 
@@ -47,10 +42,6 @@ add_library(mav_control
   src/motor_controller.cpp
   src/lee_position_controller.cpp
   src/px4_att_controller.cpp
-  src/mc_mixer.cpp
-  src/perf_counter.cpp
-  ${PX4_DIR}/src/modules/mc_att_control/mc_att_control_base.cpp
-  ${PX4_DIR}/src/lib/mathlib/math/Limits.cpp
 )
 
 target_link_libraries(mav_control ${catkin_LIBRARIES})
