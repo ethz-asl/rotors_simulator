@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(mav_control)
 
-set(PX4_DIR /home/roman/src/Firmware)
-set ( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-D__EXPORT=")
-
 add_definitions(-std=c++0x)
 
 find_package(catkin REQUIRED COMPONENTS
@@ -31,10 +28,6 @@ include_directories(
   include/mav_control
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
-  ${PX4_DIR}/src
-  ${PX4_DIR}/src/lib
-  ${PX4_DIR}/src/modules
-  ${PX4_DIR}/Tools/tests-host
 )
 
 
