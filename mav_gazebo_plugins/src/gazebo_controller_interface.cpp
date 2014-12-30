@@ -106,7 +106,7 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 void GazeboControllerInterface::CommandAttitudeCallback(const mav_msgs::CommandAttitudeThrustPtr& input_reference_msg) {
   if (!controller_created_) {
     // Get the controller and initialize its parameters.
-    controller_ = mav_controller_factory::ControllerFactory::Instance().CreateController("PX4_AttitudeController");
+    controller_ = mav_controller_factory::ControllerFactory::Instance().CreateController("PX4dummyController");
     controller_->InitializeParams();
     controller_created_ = true;
     gzmsg << "started AttitudeController" << std::endl;

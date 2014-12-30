@@ -124,7 +124,8 @@
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
 
-  
+
+
   <!-- <xacro:camera_macro robot_namespace="${namespace}">
   </xacro:camera_macro> -->
 

@@ -95,5 +95,13 @@
     </xacro:if>
   </gazebo>
 
+  <!-- attach wing plugin -->
+  <gazebo>
+    <plugin filename="libmav_gazebo_wing_model_plugin.so" name="wing_plugin">
+      <robotNamespace>${namespace}</robotNamespace>
+      <linkName>base_link</linkName>
+      </plugin>
+  </gazebo>
+
 </robot>
 

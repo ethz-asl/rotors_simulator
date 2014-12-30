@@ -13,11 +13,13 @@
 
 #include <string>
 #include <ros/ros.h>
+#include <Eigen/Eigen>
 
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
+ #include <geometry_msgs/PoseWithCovarianceStamped.h>
 
 namespace gazebo {
 /// \brief This plugin is used to create rosbag files in within gazebo.
@@ -39,10 +41,15 @@ class GazeboWingModelPlugin : public ModelPlugin {
   /// \brief Called when the world is updated.
   /// \param[in] _info Update timing information.
   void OnUpdate(const common::UpdateInfo& /*_info*/);
+  void PoseCallback(const geometry_msgs::PoseWithCovarianceStamped& pose);
+  void UpdateForcesAndMoments();
+  void Publish();
+  math::Vector3 get_aerodynamic_forces(math::Vector3 &vel);
+  math::Vector3 get_aerodynamic_moments(math::Vector3 &vel);
 
  private:
   /// \brief The connections.
-  event::ConnectionPtr update_connection_;
+  event::ConnectionPtr updateConnection_;
 
   /// \brief Pointer to the world.
   physics::WorldPtr world_;
@@ -53,14 +60,23 @@ class GazeboWingModelPlugin : public ModelPlugin {
   /// \brief Pointer to the link.
   physics::LinkPtr link_;
 
-  physics::Link_V child_links_;
-
   std::string namespace_;
   std::string wing_pub_topic_;
   std::string frame_id_;
   std::string link_name_;
+  std::string _pose_topic;
+
+  // orientation represented as quaternion
+  math::Quaternion _q;
+  // elevon positions looking from behind, range [-1,1] -> 0 is neutral position
+  float _elevon_pos_left;
+  float _elevon_pos_right;
+
+  float _rho;
+  float _F;
   
   ros::Publisher wing_pub_;
   ros::NodeHandle *node_handle_;
+  ros::Subscriber _pose_sub;
 };
 }
