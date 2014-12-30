@@ -9,7 +9,6 @@ find_package(catkin REQUIRED COMPONENTS
   mav_control
   mav_msgs
   rosbag
-  octomap_ros
   octomap_msgs
   planning_msgs
   geometry_msgs
