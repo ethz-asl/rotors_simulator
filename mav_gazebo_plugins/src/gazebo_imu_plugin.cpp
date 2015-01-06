@@ -5,14 +5,13 @@
  *      Author: burrimi
  */
 
-#include <mav_gazebo_plugins/common.h>
-#include <mav_gazebo_plugins/gazebo_imu_plugin.h>
-#include <iostream>
+#include "mav_gazebo_plugins/gazebo_imu_plugin.h"
 
-
+#include <boost/bind.hpp>
 #include <chrono>
-
-
+#include <cmath>
+#include <iostream>
+#include <stdio.h>
 
 namespace gazebo {
 
@@ -58,6 +57,23 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   link_ = this->model_->GetLink(link_name_);
 
   getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_, "imu");
+  getSdfParam<double>(_sdf, "gyroNoiseDensity", imu_parameters_.gyro_noise_density,
+                           imu_parameters_.gyro_noise_density);
+  getSdfParam<double>(_sdf, "gyroBiasRandomWalk", imu_parameters_.gyro_bias_random_walk,
+                           imu_parameters_.gyro_bias_random_walk);
+  getSdfParam<double>(_sdf, "gyroBiasCorrelationTime", imu_parameters_.gyro_bias_correlation_time,
+                           imu_parameters_.gyro_bias_correlation_time);
+  getSdfParam<double>(_sdf, "gyroTurnOnBiasSigma", imu_parameters_.gyro_turn_on_bias_sigma,
+                           imu_parameters_.gyro_turn_on_bias_sigma);
+  getSdfParam<double>(_sdf, "accNoiseDensity", imu_parameters_.acc_noise_density,
+                           imu_parameters_.acc_noise_density);
+  getSdfParam<double>(_sdf, "accBiasRandomWalk", imu_parameters_.acc_bias_random_walk,
+                           imu_parameters_.acc_bias_random_walk);
+  getSdfParam<double>(_sdf, "accBiasCorrelationTime", imu_parameters_.acc_bias_correlation_time,
+                           imu_parameters_.acc_bias_correlation_time);
+  getSdfParam<double>(_sdf, "accTurnOnBiasSigma", imu_parameters_.acc_turn_on_bias_sigma,
+                           imu_parameters_.acc_turn_on_bias_sigma);
+
 
   frame_id_ = link_name_;
   last_time_ = world_->GetSimTime();
@@ -70,20 +86,28 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   // Fill imu message.
   imu_msg.header.frame_id = frame_id_;
-  // TODO(burrimi): Fill correct values.
-  imu_msg.angular_velocity_covariance[0] = 0;
-  imu_msg.angular_velocity_covariance[4] = 0;
-  imu_msg.angular_velocity_covariance[8] = 0;
-  imu_msg.linear_acceleration_covariance[0] = 0;
-  imu_msg.linear_acceleration_covariance[4] = 0;
-  imu_msg.linear_acceleration_covariance[8] = 0;
 
+  // TODO(nikolic): Check this.
+  imu_msg.angular_velocity_covariance[0] = imu_parameters_.gyro_noise_density *
+      imu_parameters_.gyro_noise_density;
+  imu_msg.angular_velocity_covariance[4] = imu_parameters_.gyro_noise_density *
+      imu_parameters_.gyro_noise_density;
+  imu_msg.angular_velocity_covariance[8] = imu_parameters_.gyro_noise_density *
+      imu_parameters_.gyro_noise_density;
+  imu_msg.linear_acceleration_covariance[0] = imu_parameters_.acc_noise_density *
+      imu_parameters_.acc_noise_density;
+  imu_msg.linear_acceleration_covariance[4] = imu_parameters_.acc_noise_density *
+      imu_parameters_.acc_noise_density;
+  imu_msg.linear_acceleration_covariance[8] = imu_parameters_.acc_noise_density *
+      imu_parameters_.acc_noise_density;
+
+  imu_parameters_.gravity_magnitude = gravity_W_.GetLength();
   gravity_W_ = world_->GetPhysicsEngine()->GetGravity();
 
 
 }
 
-void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration, Eigen::Vector3d* angular_velocity) {
+void GazeboImuPlugin::addNoise(const double dt, Eigen::Vector3d* linear_acceleration, Eigen::Vector3d* angular_velocity) {
   assert(linear_acceleration);
   assert(angular_velocity);
 
@@ -111,7 +135,7 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   Eigen::Vector3d linear_acceleration_I(acceleration_I.x, acceleration_I.y, acceleration_I.z);
   Eigen::Vector3d angular_velocity_I(angular_vel_I.x, angular_vel_I.y, angular_vel_I.z);
 
-  addNoise(&linear_acceleration_I, &angular_velocity_I);
+  addNoise(dt, &linear_acceleration_I, &angular_velocity_I);
 
   // Fill IMU message.
   imu_msg.header.stamp.sec = current_time.sec;
