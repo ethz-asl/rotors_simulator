@@ -34,31 +34,31 @@
 #include <gazebo/common/Plugin.hh>
 
 namespace gazebo {
-  // Default Values
-  static const std::string kDefaultNamespace = "";
+// Default values
+static const std::string kDefaultNamespace = "";
 
-  static const std::string kDefaultGroundTruthPosePubTopic = "/ground_truth/pose";
-  static const std::string kDefaultGroundTruthTwistPubTopic = "/ground_truth/twist";
-  static const std::string kDefaultImuPubTopic = "/imu";
-  static const std::string kDefaultImuSubTopic = "/imu";
-  static const std::string kDefaultControlAttitudeThrustPubTopic = "/command/motors";
-  static const std::string kDefaultControlAttitudeThrustSubTopic = "/command/motors";
-  static const std::string kDefaultControlMotorSpeedPubTopic = "/command/motors";
-  static const std::string kDefaultControlMotorSpeedSubTopic = "/command/motors";
-  static const std::string kDefaultControlRateThrustPubTopic = "/command/rate";
-  static const std::string kDefaultControlRateThrustSubTopic = "/command/rate";
-  static const std::string kDefaultMotorPubTopic = "/motors";
-  static const std::string kDefaultCollisionsPubTopic = "/collisions";
-  static const std::string kDefaultWindPubTopic = "/wind";
-  static const std::string kDefaultWindSubTopic = "/wind";
-  static const std::string kDefaultWaypointPubTopic = "/waypoint";
-  static const std::string kDefaultWaypointSubTopic = "/waypoint";
+static const std::string kDefaultGroundTruthPosePubTopic = "/ground_truth/pose";
+static const std::string kDefaultGroundTruthTwistPubTopic = "/ground_truth/twist";
+static const std::string kDefaultImuPubTopic = "/imu";
+static const std::string kDefaultImuSubTopic = "/imu";
+static const std::string kDefaultControlAttitudeThrustPubTopic = "/command/motors";
+static const std::string kDefaultControlAttitudeThrustSubTopic = "/command/motors";
+static const std::string kDefaultControlMotorSpeedPubTopic = "/command/motors";
+static const std::string kDefaultControlMotorSpeedSubTopic = "/command/motors";
+static const std::string kDefaultControlRateThrustPubTopic = "/command/rate";
+static const std::string kDefaultControlRateThrustSubTopic = "/command/rate";
+static const std::string kDefaultMotorPubTopic = "/motors";
+static const std::string kDefaultCollisionsPubTopic = "/collisions";
+static const std::string kDefaultWindPubTopic = "/wind";
+static const std::string kDefaultWindSubTopic = "/wind";
+static const std::string kDefaultWaypointPubTopic = "/waypoint";
+static const std::string kDefaultWaypointSubTopic = "/waypoint";
 
-  static const std::string kDefaultFrameId = "ground_truth_pose";
-  static const std::string kDefaultLinkName = "base_link";
-  static const std::string kDefaultBagFilename_ = "simulator.bag";
+static const std::string kDefaultFrameId = "ground_truth_pose";
+static const std::string kDefaultLinkName = "base_link";
+static const std::string kDefaultBagFilename_ = "simulator.bag";
 
-  static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
+static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
 
 
 /// \brief This plugin is used to create rosbag files from within gazebo.
