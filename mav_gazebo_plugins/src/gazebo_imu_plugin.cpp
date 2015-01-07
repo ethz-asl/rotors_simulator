@@ -57,22 +57,22 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   link_ = this->model_->GetLink(link_name_);
 
   getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_, "imu");
-  getSdfParam<double>(_sdf, "gyroNoiseDensity", imu_parameters_.gyro_noise_density,
-                           imu_parameters_.gyro_noise_density);
-  getSdfParam<double>(_sdf, "gyroBiasRandomWalk", imu_parameters_.gyro_bias_random_walk,
-                           imu_parameters_.gyro_bias_random_walk);
-  getSdfParam<double>(_sdf, "gyroBiasCorrelationTime", imu_parameters_.gyro_bias_correlation_time,
-                           imu_parameters_.gyro_bias_correlation_time);
-  getSdfParam<double>(_sdf, "gyroTurnOnBiasSigma", imu_parameters_.gyro_turn_on_bias_sigma,
-                           imu_parameters_.gyro_turn_on_bias_sigma);
-  getSdfParam<double>(_sdf, "accNoiseDensity", imu_parameters_.acc_noise_density,
-                           imu_parameters_.acc_noise_density);
-  getSdfParam<double>(_sdf, "accBiasRandomWalk", imu_parameters_.acc_bias_random_walk,
-                           imu_parameters_.acc_bias_random_walk);
-  getSdfParam<double>(_sdf, "accBiasCorrelationTime", imu_parameters_.acc_bias_correlation_time,
-                           imu_parameters_.acc_bias_correlation_time);
-  getSdfParam<double>(_sdf, "accTurnOnBiasSigma", imu_parameters_.acc_turn_on_bias_sigma,
-                           imu_parameters_.acc_turn_on_bias_sigma);
+  getSdfParam<double>(_sdf, "gyroscopeNoiseDensity", imu_parameters_.gyroscope_noise_density,
+                           imu_parameters_.gyroscope_noise_density);
+  getSdfParam<double>(_sdf, "gyroscopeBiasRandomWalk", imu_parameters_.gyroscope_random_walk,
+                           imu_parameters_.gyroscope_random_walk);
+  getSdfParam<double>(_sdf, "gyroscopeBiasCorrelationTime", imu_parameters_.gyroscope_bias_correlation_time,
+                           imu_parameters_.gyroscope_bias_correlation_time);
+  getSdfParam<double>(_sdf, "gyroscopeTurnOnBiasSigma", imu_parameters_.gyroscope_turn_on_bias_sigma,
+                           imu_parameters_.gyroscope_turn_on_bias_sigma);
+  getSdfParam<double>(_sdf, "accelerometerNoiseDensity", imu_parameters_.accelerometer_noise_density,
+                           imu_parameters_.accelerometer_noise_density);
+  getSdfParam<double>(_sdf, "accelerometerBiasRandomWalk", imu_parameters_.accelerometer_bias_random_walk,
+                           imu_parameters_.accelerometer_bias_random_walk);
+  getSdfParam<double>(_sdf, "accelerometerBiasCorrelationTime", imu_parameters_.accelerometer_bias_correlation_time,
+                           imu_parameters_.accelerometer_bias_correlation_time);
+  getSdfParam<double>(_sdf, "accelerometerTurnOnBiasSigma", imu_parameters_.accelerometer_turn_on_bias_sigma,
+                           imu_parameters_.accelerometer_turn_on_bias_sigma);
 
 
   frame_id_ = link_name_;
@@ -88,18 +88,18 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   imu_msg.header.frame_id = frame_id_;
 
   // TODO(nikolic): Check this.
-  imu_msg.angular_velocity_covariance[0] = imu_parameters_.gyro_noise_density *
-      imu_parameters_.gyro_noise_density;
-  imu_msg.angular_velocity_covariance[4] = imu_parameters_.gyro_noise_density *
-      imu_parameters_.gyro_noise_density;
-  imu_msg.angular_velocity_covariance[8] = imu_parameters_.gyro_noise_density *
-      imu_parameters_.gyro_noise_density;
-  imu_msg.linear_acceleration_covariance[0] = imu_parameters_.acc_noise_density *
-      imu_parameters_.acc_noise_density;
-  imu_msg.linear_acceleration_covariance[4] = imu_parameters_.acc_noise_density *
-      imu_parameters_.acc_noise_density;
-  imu_msg.linear_acceleration_covariance[8] = imu_parameters_.acc_noise_density *
-      imu_parameters_.acc_noise_density;
+  imu_msg.angular_velocity_covariance[0] = imu_parameters_.gyroscope_noise_density *
+      imu_parameters_.gyroscope_noise_density;
+  imu_msg.angular_velocity_covariance[4] = imu_parameters_.gyroscope_noise_density *
+      imu_parameters_.gyroscope_noise_density;
+  imu_msg.angular_velocity_covariance[8] = imu_parameters_.gyroscope_noise_density *
+      imu_parameters_.gyroscope_noise_density;
+  imu_msg.linear_acceleration_covariance[0] = imu_parameters_.accelerometer_noise_density *
+      imu_parameters_.accelerometer_noise_density;
+  imu_msg.linear_acceleration_covariance[4] = imu_parameters_.accelerometer_noise_density *
+      imu_parameters_.accelerometer_noise_density;
+  imu_msg.linear_acceleration_covariance[8] = imu_parameters_.accelerometer_noise_density *
+      imu_parameters_.accelerometer_noise_density;
 
   imu_parameters_.gravity_magnitude = gravity_W_.GetLength();
   gravity_W_ = world_->GetPhysicsEngine()->GetGravity();

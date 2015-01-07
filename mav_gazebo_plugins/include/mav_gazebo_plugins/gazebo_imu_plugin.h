@@ -23,25 +23,28 @@
 
 namespace gazebo {
 
+
+// A good description of the parameters by Janosch Nikolic:
+// https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics
 struct ImuParameters {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  /// Gyro noise density. [rad*sqrt(s)/s]
-  double gyro_noise_density;
-  /// Gyro bias random walk. [rad/s]
-  double gyro_bias_random_walk;
-  /// Gyro bias correlation time constant [s]
-  double gyro_bias_correlation_time;
-  /// Gyro turn on bias standart deviation [rad/s]
-  double gyro_turn_on_bias_sigma;
+  /// Gyroscope noise density. [rad*sqrt(s)/s]
+  double gyroscope_noise_density;
+  /// Gyroscope bias random walk. [rad/s]
+  double gyroscope_random_walk;
+  /// Gyroscope bias correlation time constant [s]
+  double gyroscope_bias_correlation_time;
+  /// Gyroscope turn on bias standart deviation [rad/s]
+  double gyroscope_turn_on_bias_sigma;
   /// Accelerometer noise density. [m*sqrt(s)/s^2]
-  double acc_noise_density;
+  double accelerometer_noise_density;
   /// Accelerometer bias random walk. [m/s^2]
-  double acc_bias_random_walk;
+  double accelerometer_bias_random_walk;
   /// Accelerometer turn on bias standart deviation [m/s/s]
-  double acc_bias_correlation_time;
+  double accelerometer_bias_correlation_time;
   /// Accelerometer bias correlation time constant [s]
-  double acc_turn_on_bias_sigma;
+  double accelerometer_turn_on_bias_sigma;
 //  /// Square root of bias convergence time constant
 //  double bias_tau_sqrt;
 //  /// IMU integration sigma
@@ -51,14 +54,14 @@ struct ImuParameters {
 
 
   ImuParameters()
-      : gyro_noise_density(0.000339198),  // Default values for the ADIS16448 IMU
-        gyro_bias_random_walk(0.000038765),
-        gyro_bias_correlation_time(360),
-        gyro_turn_on_bias_sigma(0),
-        acc_noise_density(0.004),
-        acc_bias_random_walk(0.006),
-        acc_bias_correlation_time(360),
-        acc_turn_on_bias_sigma(0),
+      : gyroscope_noise_density(0.000339198),  // Default values for the ADIS16448 IMU
+        gyroscope_random_walk(0.000038765),
+        gyroscope_bias_correlation_time(360),
+        gyroscope_turn_on_bias_sigma(0),
+        accelerometer_noise_density(0.004),
+        accelerometer_bias_random_walk(0.006),
+        accelerometer_bias_correlation_time(360),
+        accelerometer_turn_on_bias_sigma(0),
 //        bias_tau_sqrt(189.74),
 //        imu_integration_sigma(0.0),
         gravity_magnitude(9.80665) {}
