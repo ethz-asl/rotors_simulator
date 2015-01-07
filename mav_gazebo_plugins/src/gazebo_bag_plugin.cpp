@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -147,13 +147,13 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     bag_filename_.erase(pos, key.length());
   bag_filename_ = bag_filename_ + "_" + date_time_str + ".bag";
 
-  // Open a bag file and store it in ~/.ros/<bag_filename_>
+  // Open a bag file and store it in ~/.ros/<bag_filename_>.
   bag_.open(bag_filename_, rosbag::bagmode::Write);
   child_links_ = link_->GetChildJointsLinks();
   for (unsigned int i = 0; i < child_links_.size(); i++) {
     std::string link_name = child_links_[i]->GetScopedName();
 
-    // Check if link contains rotor_ in its name
+    // Check if the link contains rotor_ in its name.
     int pos = link_name.find("rotor_");
     if (pos != link_name.npos) {
       std::string motor_number_str = link_name.substr(pos + 6);
@@ -182,29 +182,29 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     contact_mgr_->CreateFilter(this->link_->GetName(), collisions);
   }
 
-  // Subscriber to IMU Sensor
+  // Subscriber to IMU sensor_msgs::Imu Message.
   imu_sub_ = node_handle_->subscribe(imu_sub_topic_, 10, &GazeboBagPlugin::ImuCallback, this);
 
-  // Subscriber to Wind WrenchStamped Message
+  // Subscriber to Wind WrenchStamped Message.
   wind_sub_ = node_handle_->subscribe(wind_sub_topic_, 10, &GazeboBagPlugin::WindCallback, this);
 
-  // Subscriber to Waypoint CommandTrajectory Message
+  // Subscriber to Waypoint CommandTrajectory Message.
   waypoint_sub_ = node_handle_->subscribe(waypoint_sub_topic_, 10, &GazeboBagPlugin::WaypointCallback, this);
 
-  // Subscriber to Control Attitude Thrust Message
+  // Subscriber to Control Attitude Thrust Message.
   control_attitude_thrust_sub_ = node_handle_->subscribe(control_attitude_thrust_sub_topic_, 10,
                                                          &GazeboBagPlugin::CommandAttitudeThrustCallback, this);
 
-  // Subscriber to Control Motor Speed Message
+  // Subscriber to Control Motor Speed Message.
   control_motor_speed_sub_ = node_handle_->subscribe(control_motor_speed_sub_topic_, 10,
                                                      &GazeboBagPlugin::CommandMotorSpeedCallback, this);
 
-  // Subscriber to Control Rate Thrust Message
+  // Subscriber to Control Rate Thrust Message.
   control_rate_thrust_sub_ = node_handle_->subscribe(control_rate_thrust_sub_topic_, 10,
                                                      &GazeboBagPlugin::CommandRateThrustCallback, this);
 }
 
-// Called by the world update start event
+// This gets called by the world update start event.
 void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Get the current simulation time.
   common::Time now = world_->GetSimTime();
@@ -312,10 +312,11 @@ void GazeboBagPlugin::LogCollisions(const common::Time now) {
     std::string collision2_name = contacts[i]->collision2->GetLink()->GetScopedName();
     double body1_force = contacts[i]->wrench->body1Force.GetLength();
 
-    // Exclude extremely small forces
+    // Exclude extremely small forces.
     if (body1_force < 1e-10)
       continue;
-    // Do this, such that all the contacts are logged (publishing on the same topic with the same stamp is impossible)
+    // Do this, such that all the contacts are logged.
+    // (publishing on the same topic with the same time stamp is impossible)
     ros::Time ros_now = ros::Time(now.sec, now.nsec + i*1000);
     std::string collision1_name = contacts[i]->collision1->GetLink()->GetScopedName();
     wrench_msg.header.frame_id = collision1_name + "--" + collision2_name;
