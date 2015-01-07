@@ -38,9 +38,28 @@
 #include <mav_msgs/MotorSpeed.h>
 
 namespace gazebo {
+// Default values
+static const std::string kDefaultNamespace = "";
+static const std::string kDefaultMotorVelocityCommandPubTopic = "/motor_vel_ref";
+static const std::string kDefaultCommandAttitudeThrustSubTopic = "/command/attitude";
+static const std::string kDefaultCommandRateThrustSubTopic = "/command/rate";
+static const std::string kDefaultCommandMotorSpeedSubTopic = "/command/motors";
+static const std::string kDefaultImuSubTopic = "/imu";
+
+
+
 class GazeboControllerInterface : public ModelPlugin {
  public:
-  GazeboControllerInterface();
+  GazeboControllerInterface()
+      : ModelPlugin(),
+        namespace_(kDefaultNamespace),
+        motor_velocity_command_pub_topic_(kDefaultMotorVelocityCommandPubTopic),
+        command_attitude_thrust_sub_topic_(kDefaultCommandAttitudeThrustSubTopic),
+        command_rate_thrust_sub_topic_(kDefaultCommandRateThrustSubTopic),
+        command_motor_speed_sub_topic_(kDefaultCommandMotorSpeedSubTopic),
+        imu_sub_topic_(kDefaultImuSubTopic),
+        node_handle_(NULL),
+        controller_created_(false) {}
   ~GazeboControllerInterface();
 
   void InitializeParams();
@@ -55,12 +74,14 @@ class GazeboControllerInterface : public ModelPlugin {
   bool controller_created_;
 
   std::string namespace_;
-  std::string command_topic_;
-  std::string imu_topic_;
-  std::string motor_velocity_topic_;
+  std::string motor_velocity_command_pub_topic_;
+  std::string command_attitude_thrust_sub_topic_;
+  std::string command_rate_thrust_sub_topic_;
+  std::string command_motor_speed_sub_topic_;
+  std::string imu_sub_topic_;
 
   ros::NodeHandle* node_handle_;
-  ros::Publisher motor_cmd_pub_;
+  ros::Publisher motor_velocity_command_pub_;
   ros::Subscriber cmd_attitude_sub_;
   ros::Subscriber cmd_rate_sub_;
   ros::Subscriber cmd_motor_sub_;

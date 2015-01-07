@@ -18,10 +18,10 @@
   <!-- Controller interface -->
   <plugin name="controller_interface" filename="libmav_gazebo_controller_interface.so">
     <robotNamespace>${namespace}</robotNamespace>
-    <commandTopicAttitude>command/attitude</commandTopicAttitude>
-    <commandTopicRate>command/rate</commandTopicRate>
-    <commandTopicMotor>command/motors</commandTopicMotor>
-    <imuTopic>imu</imuTopic>
+    <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
+    <commandRateThrustSubTopic>command/rate</commandRateThrustSubTopic>
+    <commandMotorSpeedSubTopic>command/motors</commandMotorSpeedSubTopic>
+    <imuSubTopic>imu</imuSubTopic>
     <poseTopic>pose</poseTopic>
     <motorVelocityReferenceTopic>motor_vel_ref</motorVelocityReferenceTopic>
   </plugin>
