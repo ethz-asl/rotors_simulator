@@ -34,7 +34,7 @@ static constexpr double kDefaultAdisAccelerometerBiasCorrelationTime = 360; // T
 static constexpr double kDefaultAdisAccelerometerTurnOnBiasSigma = 0; // TODO(nikolic): Check this.
 static constexpr double kDefaultGravityMagnitude = 9.80665;
 
-static constexpr std::string kDefaultImuTopic = "imu";
+static const std::string kDefaultImuTopic = "imu";
 
 // A good description of the parameters by Janosch Nikolic:
 // https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics
