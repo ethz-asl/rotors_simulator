@@ -21,10 +21,6 @@
 #include <mav_gazebo_plugins/common.h>
 
 namespace gazebo {
-GazeboBagPlugin::GazeboBagPlugin()
-    : ModelPlugin(),
-      node_handle_(0) {
-}
 
 GazeboBagPlugin::~GazeboBagPlugin() {
   event::Events::DisconnectWorldUpdateBegin(update_connection_);
@@ -34,7 +30,6 @@ GazeboBagPlugin::~GazeboBagPlugin() {
   }
   bag_.close();
 }
-;
 
 // void GazeboBagPlugin::InitializeParams() {};
 // void GazeboBagPlugin::Publish() {};
@@ -52,80 +47,46 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     gzerr << "[gazebo_bag_plugin] Please specify a robotNamespace.\n";
   node_handle_ = new ros::NodeHandle(namespace_);
 
-  // default params
-  ground_truth_pose_pub_topic_ = "/" + namespace_ + "/ground_truth/pose";
-  ground_truth_twist_pub_topic_ = "/" + namespace_ + "/ground_truth/twist";
-  imu_pub_topic_ = "/" + namespace_ + "/imu";
-  imu_sub_topic_ = "/" + namespace_ + "/imu";
-  control_attitude_thrust_sub_topic_ = "/" + namespace_ + "/command/attitude";
-  control_attitude_thrust_pub_topic_ = "/" + namespace_ + "/command/attitude";
-  control_motor_speed_sub_topic_ = "/" + namespace_ + "/command/motors";
-  control_motor_speed_pub_topic_ = "/" + namespace_ + "/command/motors";
-  control_rate_thrust_sub_topic_ = "/" + namespace_ + "/command/rate";
-  control_rate_thrust_pub_topic_ = "/" + namespace_ + "/command/rate";
-  motor_pub_topic_ = "/" + namespace_ + "/motors";
-  frame_id_ = "ground_truth_pose";
-  link_name_ = "base_link";
-
   if (_sdf->HasElement("bagFileName"))
     bag_filename_ = _sdf->GetElement("bagFileName")->Get<std::string>();
   else
     gzerr << "[gazebo_bag_plugin] Please specify a bagFileName.\n";
 
-  if (_sdf->HasElement("frameId"))
-    frame_id_ = _sdf->GetElement("frameId")->GetValue()->GetAsString();
-
   if (_sdf->HasElement("linkName"))
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
   else
     gzwarn << "[gazebo_bag_plugin] No linkName specified, using default " << link_name_ << ".\n";
+
   // Get the pointer to the link
   link_ = this->model_->GetLink(link_name_);
   if (link_ == NULL)
     gzthrow("[gazebo_bag_plugin] link \"" << link_name_ << "\" not found");
 
-  mass_ = link_->GetInertial()->GetMass();
-  gravity_ = world_->GetPhysicsEngine()->GetGravity().GetLength();
+  getSdfParam<std::string>(_sdf, "frameId", frame_id_, frame_id_);
+  getSdfParam<std::string>(_sdf, "imuPubTopic", imu_pub_topic_, imu_pub_topic_);
+  getSdfParam<std::string>(_sdf, "imuSubTopic", imu_sub_topic_, imu_sub_topic_);
+  getSdfParam<std::string>(_sdf, "commandAttitudeThrustPubTopic", control_attitude_thrust_pub_topic_,
+                           control_attitude_thrust_pub_topic_);
+  getSdfParam<std::string>(_sdf, "commandAttitudeThrustSubTopic", control_attitude_thrust_sub_topic_,
+                           control_attitude_thrust_sub_topic_);
+  getSdfParam<std::string>(_sdf, "commandMotorSpeedPubTopic", control_motor_speed_pub_topic_,
+                           control_motor_speed_pub_topic_);
+  getSdfParam<std::string>(_sdf, "commandMotorSpeedSubTopic", control_motor_speed_sub_topic_,
+                           control_motor_speed_sub_topic_);
+  getSdfParam<std::string>(_sdf, "commandRateThrustPubTopic", control_rate_thrust_pub_topic_,
+                           control_rate_thrust_pub_topic_);
+  getSdfParam<std::string>(_sdf, "commandRateThrustSubTopic", control_rate_thrust_sub_topic_,
+                           control_rate_thrust_sub_topic_);
+  getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, motor_pub_topic_);
+  getSdfParam<std::string>(_sdf, "posePubTopic", ground_truth_pose_pub_topic_, ground_truth_pose_pub_topic_);
 
-  if (_sdf->HasElement("imuSubTopic"))
-    imu_sub_topic_ = _sdf->GetElement("imuSubTopic")->Get<std::string>();
+  getSdfParam<std::string>(_sdf, "collisionsPubTopic", collisions_pub_topic_, "/" + namespace_ + collisions_pub_topic_);
+  getSdfParam<std::string>(_sdf, "windPubTopic", wind_pub_topic_, "/" + namespace_ + wind_pub_topic_);
+  getSdfParam<std::string>(_sdf, "windSubTopic", wind_sub_topic_, "/" + namespace_ + wind_sub_topic_);
+  getSdfParam<std::string>(_sdf, "waypointPubTopic", waypoint_pub_topic_, "/" + namespace_ + waypoint_pub_topic_);
+  getSdfParam<std::string>(_sdf, "waypointSubTopic", waypoint_sub_topic_, "/" + namespace_ + waypoint_sub_topic_);
 
-  if (_sdf->HasElement("imuPubTopic"))
-    imu_pub_topic_ = _sdf->GetElement("imuPubTopic")->Get<std::string>();
-
-  if (_sdf->HasElement("commandAttitudeThrustSubTopic"))
-    control_attitude_thrust_sub_topic_ = _sdf->GetElement("commandAttitudeThrustSubTopic")->Get<std::string>();
-
-  if (_sdf->HasElement("commandAttitudeThrustPubTopic"))
-    control_attitude_thrust_pub_topic_ = _sdf->GetElement("commandAttitudeThrustPubTopic")->Get<std::string>();
-
-  if (_sdf->HasElement("commandMotorSpeedSubTopic"))
-    control_motor_speed_sub_topic_ = _sdf->GetElement("commandMotorSpeedSubTopic")->Get<std::string>();
-
-  if (_sdf->HasElement("commandMotorSpeedPubTopic"))
-    control_motor_speed_pub_topic_ = _sdf->GetElement("commandMotorSpeedPubTopic")->Get<std::string>();
-
-  if (_sdf->HasElement("commandRateThrustSubTopic"))
-    control_rate_thrust_sub_topic_ = _sdf->GetElement("commandRateThrustSubTopic")->Get<std::string>();
-
-  if (_sdf->HasElement("commandRateThrustPubTopic"))
-    control_rate_thrust_pub_topic_ = _sdf->GetElement("commandRateThrustPubTopic")->Get<std::string>();
-
-  if (_sdf->HasElement("motorPubTopic"))
-    motor_pub_topic_ = _sdf->GetElement("motorPubTopic")->Get<std::string>();
-
-  if (_sdf->HasElement("poseTopic"))
-    ground_truth_pose_pub_topic_ = _sdf->GetElement("poseTopic")->Get<std::string>();
-
-  getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
-  getSdfParam<std::string>(_sdf, "collisionsPubTopic", collisions_pub_topic_, "/" + namespace_ + "/collisions");
-  getSdfParam<std::string>(_sdf, "windPubTopic", wind_pub_topic_, "/" + namespace_ + "/wind");
-  getSdfParam<std::string>(_sdf, "windSubTopic", wind_sub_topic_, "/" + namespace_ + "/wind");
-  getSdfParam<std::string>(_sdf, "waypointPubTopic", waypoint_pub_topic_, "/" + namespace_ + "/waypoint");
-  getSdfParam<std::string>(_sdf, "waypointSubTopic", waypoint_sub_topic_, "/" + namespace_ + "/waypoint");
-  getSdfParam<std::string>(_sdf, "excludeFloorLinkFromCollisionCheck", exclude_floor_link_from_collision_check_,
-                           "ground_plane::link");
-  getSdfParam<double>(_sdf, "gravitationalForceExclusionMultiplier", gravitational_force_exclusion_multiplier_, 1.1);
+  getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, rotor_velocity_slowdown_sim_);
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
