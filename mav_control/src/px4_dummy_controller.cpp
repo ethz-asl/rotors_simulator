@@ -42,7 +42,6 @@
 #include <iostream>
 #include <ros/ros.h>
 #include <gazebo/gazebo.hh>
-#include <px4/actuator_controls_0.h>
 
 PX4dummyController::PX4dummyController() {
   _sub = _n.subscribe("mixed_motor_commands",1000,&PX4dummyController::MotorVelCallback,this);
