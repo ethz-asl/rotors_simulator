@@ -61,7 +61,7 @@ namespace gazebo {
   static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
 
 
-/// \brief This plugin is used to create rosbag files in within gazebo.
+/// \brief This plugin is used to create rosbag files from within gazebo.
 class GazeboBagPlugin : public ModelPlugin {
   typedef std::map<const unsigned int, const physics::JointPtr> MotorNumberToJointMap;
   typedef std::pair<const unsigned int, const physics::JointPtr> MotorNumberToJointPair;
