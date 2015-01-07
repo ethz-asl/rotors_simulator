@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,13 +31,12 @@ GazeboControllerInterface::~GazeboControllerInterface() {
     delete node_handle_;
   }
 }
-;
 
 // void GazeboControllerInterface::InitializeParams() {};
 // void GazeboControllerInterface::Publish() {};
 
 void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
-  // Store the pointer to the model
+  // Store the pointer to the model.
   model_ = _model;
 
   world_ = model_->GetWorld();
@@ -87,7 +86,7 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
   motor_cmd_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_velocity_topic_, 10);
 }
 
-// Called by the world update start event
+// This gets called by the world update start event.
 void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   if (!controller_created_)
     return;
@@ -157,7 +156,6 @@ void GazeboControllerInterface::ImuCallback(const sensor_msgs::ImuPtr& imu_msg) 
   Eigen::Quaternion<double> orientation(imu_msg->orientation.w, imu_msg->orientation.x, imu_msg->orientation.y,
                                         imu_msg->orientation.z);
   controller_->SetAttitude(orientation);
-  // imu->linear_acceleration;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboControllerInterface);
