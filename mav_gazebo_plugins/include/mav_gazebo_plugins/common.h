@@ -17,6 +17,7 @@
 #ifndef COMMON_H_
 #define COMMON_H_
 
+#include <Eigen/Dense>
 #include <gazebo/gazebo.hh>
 
 namespace gazebo {
@@ -97,6 +98,33 @@ discretized system (ZoH):
     double timeConstantDown_;
     T previousState_;
 };
+
+
+
+/// Computes a quaternion from the 3-element small angle approximation theta.
+template<class Derived>
+Eigen::Quaternion<typename Derived::Scalar> QuaternionFromSmallAngle(const Eigen::MatrixBase<Derived> & theta) {
+  typedef typename Derived::Scalar Scalar;
+  EIGEN_STATIC_ASSERT_FIXED_SIZE(Derived);
+  EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
+  const Scalar q_squared = theta.squaredNorm() / 4.0;
+
+  if (q_squared < 1) {
+    return Eigen::Quaternion<Scalar>(sqrt(1 - q_squared), theta[0] * 0.5, theta[1] * 0.5, theta[2] * 0.5);
+  }
+  else {
+    const Scalar w = 1.0 / sqrt(1 + q_squared);
+    const Scalar f = w * 0.5;
+    return Eigen::Quaternion<Scalar>(w, theta[0] * f, theta[1] * f, theta[2] * f);
+  }
+}
+
+template<class In, class Out>
+void copyPosition(const In& in, Out& out) {
+  out.x = in.x;
+  out.y = in.y;
+  out.z = in.z;
+}
 
 #endif /* COMMON_H_ */
 

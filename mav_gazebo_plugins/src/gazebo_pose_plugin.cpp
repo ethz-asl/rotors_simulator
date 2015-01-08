@@ -25,43 +25,6 @@
 
 namespace gazebo {
 
-/// Computes a quaternion from the 3-element small angle approximation theta.
-template<class Derived>
-Eigen::Quaternion<typename Derived::Scalar> QuaternionFromSmallAngle(const Eigen::MatrixBase<Derived> & theta) {
-  typedef typename Derived::Scalar Scalar;
-  EIGEN_STATIC_ASSERT_FIXED_SIZE(Derived);
-  EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
-  const Scalar q_squared = theta.squaredNorm() / 4.0;
-
-  if (q_squared < 1) {
-    return Eigen::Quaternion<Scalar>(sqrt(1 - q_squared), theta[0] * 0.5, theta[1] * 0.5, theta[2] * 0.5);
-  }
-  else {
-    const Scalar w = 1.0 / sqrt(1 + q_squared);
-    const Scalar f = w * 0.5;
-    return Eigen::Quaternion<Scalar>(w, theta[0] * f, theta[1] * f, theta[2] * f);
-  }
-}
-
-template<class In, class Out>
-void copyPosition(const In& in, Out& out) {
-  out.x = in.x;
-  out.y = in.y;
-  out.z = in.z;
-}
-
-GazeboPosePlugin::GazeboPosePlugin()
-    : ModelPlugin(),
-      node_handle_(0),
-      gen_(rd_()),
-      measurement_delay_(0),
-      measurement_divisor_(1),
-      unknown_delay_(0),
-      gazebo_seq_(0),
-      pose_seq_(0),
-      covariance_image_scale_(1) {
-}
-
 GazeboPosePlugin::~GazeboPosePlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
   if (node_handle_) {
@@ -78,21 +41,11 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   model_ = _model;
   world_ = model_->GetWorld();
 
-  // default params
-  namespace_.clear();
-  pose_topic_ = "pose";
-  measurement_divisor_ = 1;
-  measurement_delay_ = 0;
-  unknown_delay_ = 0;
-
   sdf::Vector3 noise_normal_p;
   sdf::Vector3 noise_normal_q;
   sdf::Vector3 noise_uniform_p;
   sdf::Vector3 noise_uniform_q;
   const sdf::Vector3 zeros3(0.0, 0.0, 0.0);
-
-  gazebo_seq_ = 0;
-  pose_seq_ = 0;
 
   pose_queue_.clear();
 
@@ -106,24 +59,12 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
   else
     gzerr << "[gazebo_pose_plugin] Please specify a linkName.\n";
-  link_ = this->model_->GetLink(link_name_);
   // Get the pointer to the link.
+  link_ = model_->GetLink(link_name_);
+  if (link_ == NULL)
+    gzthrow("[gazebo_pose_plugin] Couldn't find specified link \"" << link_name_ << "\".");
 
-  if (_sdf->HasElement("poseTopic"))
-    pose_topic_ = _sdf->GetElement("poseTopic")->Get<std::string>();
 
-  if (_sdf->HasElement("measurementDelay"))
-    measurement_delay_ = _sdf->GetElement("measurementDelay")->Get<int>();
-
-  if (_sdf->HasElement("measurementDivisor"))
-    measurement_divisor_ = _sdf->GetElement("measurementDivisor")->Get<double>();
-
-  getSdfParam(_sdf, "noiseNormalP", noise_normal_p, zeros3);
-  getSdfParam(_sdf, "noiseNormalQ", noise_normal_q, zeros3);
-  getSdfParam(_sdf, "noiseUniformP", noise_uniform_p, zeros3);
-  getSdfParam(_sdf, "noiseUniformQ", noise_uniform_q, zeros3);
-
-  getSdfParam(_sdf, "unknownDelay", unknown_delay_, 0.0);
 
   if (_sdf->HasElement("covarianceImage")) {
     std::string image_name = _sdf->GetElement("covarianceImage")->Get<std::string>();
@@ -134,14 +75,23 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       gzlog << "loading covariance image " << image_name << " successful" << std::endl;
   }
 
-  getSdfParam(_sdf, "covarianceImageScale", covariance_image_scale_, 1.0);
-
   if (_sdf->HasElement("randomEngineSeed")) {
     gen_.seed(_sdf->GetElement("randomEngineSeed")->Get<unsigned int>());
   }
   else {
     gen_.seed(std::chrono::system_clock::now().time_since_epoch().count());
   }
+
+  getSdfParam<std::string>(_sdf, "poseTopic", pose_pub_topic_, "pose");
+
+  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalP", noise_normal_p, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalQ", noise_normal_q, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformP", noise_uniform_p, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformQ", noise_uniform_q, zeros3);
+  getSdfParam<int>(_sdf, "measurementDelay", measurement_delay_, measurement_delay_);
+  getSdfParam<int>(_sdf, "measurementDivisor", measurement_divisor_, measurement_divisor_);
+  getSdfParam<double>(_sdf, "unknownDelay", unknown_delay_, unknown_delay_);
+  getSdfParam<double>(_sdf, "covarianceImageScale", covariance_image_scale_, covariance_image_scale_);
 
   pos_n_[0] = NormalDistribution(0, noise_normal_p.x);
   pos_n_[1] = NormalDistribution(0, noise_normal_p.y);
@@ -173,7 +123,7 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // simulation iteration.
   this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboPosePlugin::OnUpdate, this, _1));
 
-  pose_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_topic_, 10);
+  pose_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_pub_topic_, 10);
 }
 
 // This gets called by the world update start event.
@@ -199,10 +149,10 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
     }
   }
 
-  if (gazebo_seq_ % measurement_divisor_ == 0) {
+  if (gazebo_sequence_ % measurement_divisor_ == 0) {
     geometry_msgs::PoseStamped pose;
     pose.header.frame_id = frame_id_;
-    pose.header.seq = pose_seq_++;
+    pose.header.seq = pose_sequence_++;
     pose.header.stamp.sec = (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec;
     pose.header.stamp.nsec = (world_->GetSimTime()).nsec + ros::Duration(unknown_delay_).nsec;
 
@@ -213,11 +163,11 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
     pose.pose.orientation.z = gazebo_pose.rot.z;
 
     if (publish_pose)
-      pose_queue_.push_back(std::make_pair(gazebo_seq_ + measurement_delay_, pose));
+      pose_queue_.push_back(std::make_pair(gazebo_sequence_ + measurement_delay_, pose));
   }
 
-  if (gazebo_seq_ == pose_queue_.front().first) {
   // Is it time to publish the front element?
+  if (gazebo_sequence_ == pose_queue_.front().first) {
     geometry_msgs::PoseWithCovarianceStampedPtr pose(new geometry_msgs::PoseWithCovarianceStamped);
 
     pose->header = pose_queue_.front().second.header;
@@ -252,7 +202,7 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
 //        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
   }
 
-  ++gazebo_seq_;
+  ++gazebo_sequence_;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboPosePlugin);
