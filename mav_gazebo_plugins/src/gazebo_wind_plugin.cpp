@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,7 @@ GazeboWindPlugin::~GazeboWindPlugin() {
 ;
 
 void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
-  // Store the pointer to the model
+  // Store the pointer to the model.
   model_ = _model;
   world_ = model_->GetWorld();
   frame_id_ = "world";
@@ -63,8 +63,6 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
   else
     gzwarn << "[gazebo_wind_plugin] No linkName specified, using default " << link_name_ << ".\n";
-  // Get the pointer to the link
-  link_ = this->model_->GetLink(link_name_);
 
   // Wind params
   if (_sdf->HasElement("windDirection")) {
@@ -97,6 +95,8 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   if (_sdf->HasElement("windGustForceMean")) {
     wind_gust_force_mean_ = _sdf->GetElement("windGustForceMean")->Get<double>();
   }
+  // Get the pointer to the link.
+  link_ = this->model_->GetLink(link_name_);
 
   if (_sdf->HasElement("windGustForceVariance")) {
     wind_gust_force_variance_ = _sdf->GetElement("windGustForceVariance")->Get<double>();
@@ -111,24 +111,24 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   wind_pub_ = node_handle_->advertise<geometry_msgs::WrenchStamped>(wind_pub_topic_, 10);
 }
 
-// Called by the world update start event
+// This gets called by the world update start event.
 void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Get the current simulation time.
   common::Time now = world_->GetSimTime();
 
-  // Constant wind
+  // Calculate the wind force.
   double wind_strength = wind_force_mean_;
   math::Vector3 wind = wind_strength * wind_direction_;
-  // Apply a force from the constant wind to the link
-  this->link_->AddForceAtRelativePosition(wind, xyz_offset_);
+  // Apply a force from the constant wind to the link.
+  link_->AddForceAtRelativePosition(wind, xyz_offset_);
 
   math::Vector3 wind_gust(0, 0, 0);
-  // Wind Gusts
+  // Calculate the wind gust force.
   if (now >= wind_gust_start_ && now < wind_gust_end_) {
     double wind_gust_strength = wind_gust_force_mean_;
     wind_gust = wind_gust_strength * wind_gust_direction_;
-    // Apply a force from the wind gust to the link
-    this->link_->AddForceAtRelativePosition(wind_gust, xyz_offset_);
+    // Apply a force from the wind gust to the link.
+    link_->AddForceAtRelativePosition(wind_gust, xyz_offset_);
   }
 
   geometry_msgs::WrenchStamped wrench_msg;
