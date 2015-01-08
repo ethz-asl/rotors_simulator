@@ -40,9 +40,41 @@ const static int CW = -1;
 }
 
 namespace gazebo {
+// Default values
+static const std::string kDefaultNamespace = "";
+static const std::string kDefaultCommandSubTopic = "command/motors";
+static const std::string kDefaultMotorVelocityPubTopic = "turning_vel";
+
+static constexpr double kDefaultMotorConstant = 8.54858e-06;
+static constexpr double kDefaultMomentConstant = 0.016;
+static constexpr double kDefaultTimeConstantUp = 1.0 / 80.0;
+static constexpr double kDefaultTimeConstantDown = 1.0 / 40.0;
+static constexpr double kDefaulMaxRotVelocity = 838.0;
+static constexpr double kDefaultRotorDragCoefficient = 1.0e-4;
+static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
+static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
+
+
+
 class GazeboMotorModel : public MotorModel, public ModelPlugin {
  public:
-  GazeboMotorModel();
+  /// \brief Constructor
+  GazeboMotorModel()
+      : ModelPlugin(),
+        MotorModel(),
+        command_sub_topic_(),
+        motor_velocity_pub_topic_(),
+        motor_constant_(kDefaultMotorConstant),
+        moment_constant_(kDefaultMomentConstant),
+        time_constant_up_(kDefaultTimeConstantUp),
+        time_constant_down_(kDefaultTimeConstantDown),
+        max_rot_velocity_(kDefaulMaxRotVelocity),
+        rotor_drag_coefficient_(kDefaultRotorDragCoefficient),
+        rolling_moment_coefficient_(kDefaultRollingMomentCoefficient),
+        rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
+        node_handle_(NULL) {}
+
+  /// \brief Destructor
   virtual ~GazeboMotorModel();
 
   virtual void InitializeParams();
@@ -57,10 +89,9 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   std::string namespace_;
   std::string joint_name_;
   std::string link_name_;
-  std::string command_topic_;
-  std::string motor_velocity_topic_;
+  std::string command_sub_topic_;
+  std::string motor_velocity_pub_topic_;
   int motor_number_;
-
   int turning_direction_;
   double max_force_;
   double motor_constant_;
@@ -75,8 +106,8 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   double rotor_velocity_slowdown_sim_;
 
   ros::NodeHandle* node_handle_;
-  ros::Publisher motor_vel_pub_;
-  ros::Subscriber cmd_sub_;
+  ros::Publisher motor_velocity_pub_;
+  ros::Subscriber command_sub_;
 
   // Pointer to the model.
   physics::ModelPtr model_;
