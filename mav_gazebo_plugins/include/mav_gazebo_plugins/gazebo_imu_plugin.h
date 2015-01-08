@@ -23,60 +23,66 @@
 
 namespace gazebo {
 
-// Default values for the ADIS16448 IMU
-static constexpr double kDefaultAdisGyroscopeNoiseDensity = 0.000339198;
-static constexpr double kDefaultAdisGyroscopeRandomWalk = 0.000038765;
-static constexpr double kDefaultAdisGyroscopeBiasCorrelationTime = 360; // TODO(nikolic): Check this.
-static constexpr double kDefaultAdisGyroscopeTurnOnBiasSigma = 0; // TODO(nikolic): Check this.
-static constexpr double kDefaultAdisAccelerometerNoiseDensity = 0.004;
-static constexpr double kDefaultAdisAccelerometerBiasRandomWalk = 0.006;
-static constexpr double kDefaultAdisAccelerometerBiasCorrelationTime = 360; // TODO(nikolic): Check this.
-static constexpr double kDefaultAdisAccelerometerTurnOnBiasSigma = 0; // TODO(nikolic): Check this.
-static constexpr double kDefaultGravityMagnitude = 9.80665;
+// Default values for use with ADIS16448 IMU
+static constexpr double kDefaultAdisGyroscopeNoiseDensity =
+    2.0 * 35.0 / 3600.0 / 180.0 * M_PI;
+static constexpr double kDefaultAdisGyroscopeRandomWalk =
+    2.0 * 4.0 / 3600.0 / 180.0 * M_PI;
+static constexpr double kDefaultAdisGyroscopeBiasCorrelationTime =
+    1.0e+3;
+static constexpr double kDefaultAdisGyroscopeTurnOnBiasSigma =
+    0.5 / 180.0 * M_PI;
+static constexpr double kDefaultAdisAccelerometerNoiseDensity =
+    2.0 * 2.0e-3;
+static constexpr double kDefaultAdisAccelerometerBiasRandomWalk =
+    2.0 * 3.0e-3;
+static constexpr double kDefaultAdisAccelerometerBiasCorrelationTime =
+    300.0;
+static constexpr double kDefaultAdisAccelerometerTurnOnBiasSigma =
+    20.0e-3 * 9.8;
+// Earth's gravity in Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84)
+static constexpr double kDefaultGravityMagnitude = 9.8068;
 
 static const std::string kDefaultImuTopic = "imu";
 
-// A good description of the parameters by Janosch Nikolic:
+// A description of the parameters:
 // https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics
+// TODO(burrimi): Should we have a minimalistic description of the params here?
 struct ImuParameters {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  /// Gyroscope noise density. [rad*sqrt(s)/s]
+  /// Gyroscope noise density (two-sided spectrum) [rad/s/sqrt(Hz)]
   double gyroscope_noise_density;
-  /// Gyroscope bias random walk. [rad/s]
+  /// Gyroscope bias random walk [rad/s/s/sqrt(Hz)]
   double gyroscope_random_walk;
   /// Gyroscope bias correlation time constant [s]
   double gyroscope_bias_correlation_time;
-  /// Gyroscope turn on bias standart deviation [rad/s]
+  /// Gyroscope turn on bias standard deviation [rad/s]
   double gyroscope_turn_on_bias_sigma;
-  /// Accelerometer noise density. [m*sqrt(s)/s^2]
+  /// Accelerometer noise density (two-sided spectrum) [m/s^2/sqrt(Hz)]
   double accelerometer_noise_density;
-  /// Accelerometer bias random walk. [m/s^2]
+  /// Accelerometer bias random walk. [m/s^2/s/sqrt(Hz)]
   double accelerometer_bias_random_walk;
-  /// Accelerometer turn on bias standart deviation [m/s/s]
-  double accelerometer_bias_correlation_time;
   /// Accelerometer bias correlation time constant [s]
+  double accelerometer_bias_correlation_time;
+  /// Accelerometer turn on bias standard deviation [m/s^2]
   double accelerometer_turn_on_bias_sigma;
-//  /// Square root of bias convergence time constant
-//  double bias_tau_sqrt;
-//  /// IMU integration sigma
-//  double imu_integration_sigma;
-  /// Norm of the Gravitational acceleration. [m/s^2]
+  /// Norm of the gravitational acceleration [m/s^2]
   double gravity_magnitude;
-
 
 
   ImuParameters()
       : gyroscope_noise_density(kDefaultAdisGyroscopeNoiseDensity),
         gyroscope_random_walk(kDefaultAdisGyroscopeRandomWalk),
-        gyroscope_bias_correlation_time(kDefaultAdisGyroscopeBiasCorrelationTime),
+        gyroscope_bias_correlation_time(
+            kDefaultAdisGyroscopeBiasCorrelationTime),
         gyroscope_turn_on_bias_sigma(kDefaultAdisGyroscopeTurnOnBiasSigma),
         accelerometer_noise_density(kDefaultAdisAccelerometerNoiseDensity),
         accelerometer_bias_random_walk(kDefaultAdisAccelerometerBiasRandomWalk),
-        accelerometer_bias_correlation_time(kDefaultAdisAccelerometerBiasCorrelationTime),
-        accelerometer_turn_on_bias_sigma(kDefaultAdisAccelerometerTurnOnBiasSigma),
-//        bias_tau_sqrt(189.74),
-//        imu_integration_sigma(0.0),
+        accelerometer_bias_correlation_time(
+            kDefaultAdisAccelerometerBiasCorrelationTime),
+        accelerometer_turn_on_bias_sigma(
+            kDefaultAdisAccelerometerTurnOnBiasSigma),
         gravity_magnitude(kDefaultGravityMagnitude) {}
 };
 
@@ -94,7 +100,10 @@ class GazeboImuPlugin : public ModelPlugin {
  protected:
   void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
-  void addNoise(const double dt, Eigen::Vector3d* linear_acceleration, Eigen::Vector3d* angular_velocity);
+  void addNoise(
+      const double dt,
+      Eigen::Vector3d* linear_acceleration,
+      Eigen::Vector3d* angular_velocity);
 
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
