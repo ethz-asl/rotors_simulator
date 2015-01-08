@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,7 +49,7 @@ bool getSdfParam(sdf::ElementPtr sdf, const std::string& name, T& param, const T
 
 
 
-template <typename T> 
+template <typename T>
 class FirstOrderFilter {
 /*
 This class can be used to apply a first order filter on a signal.
@@ -58,9 +58,9 @@ It allows different acceleration and deceleration time constants.
 Short reveiw of discrete time implementation of firest order system:
 Laplace:
     X(s)/U(s) = 1/(tau*s + 1)
-continous time system: 
+continous time system:
     dx(t) = (-1/tau)*x(t) + (1/tau)*u(t)
-discretized system (ZoH): 
+discretized system (ZoH):
     x(k+1) = exp(samplingTime*(-1/tau))*x(k) + (1 - exp(samplingTime*(-1/tau))) * u(k)
 */
 
@@ -71,14 +71,14 @@ discretized system (ZoH):
       previousState_(initialState) {}
 
     T updateFilter(T inputState, double samplingTime) {
-      /* 
+      /*
       This method will apply a first order filter on the inputState.
       */
       T outputState;
       if(inputState > previousState_){
         //Accelerate
         double alphaUp = exp(- samplingTime / timeConstantUp_);
-        // x(k+1) = Ad*x(k) + Bd*u(k) 
+        // x(k+1) = Ad*x(k) + Bd*u(k)
         outputState = alphaUp * previousState_ + (1 - alphaUp) * inputState;
 
       }else{

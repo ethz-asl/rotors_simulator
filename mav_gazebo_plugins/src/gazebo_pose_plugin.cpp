@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -69,7 +69,6 @@ GazeboPosePlugin::~GazeboPosePlugin() {
     delete node_handle_;
   }
 }
-;
 
 // void GazeboPosePlugin::InitializeParams() {};
 // void GazeboPosePlugin::Publish() {};
@@ -77,7 +76,6 @@ GazeboPosePlugin::~GazeboPosePlugin() {
 void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Store the pointer to the model
   model_ = _model;
-  // world_ = physics::get_world(model_->world.name);
   world_ = model_->GetWorld();
 
   // default params
@@ -108,8 +106,8 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
   else
     gzerr << "[gazebo_pose_plugin] Please specify a linkName.\n";
-  // Get the pointer to the link
   link_ = this->model_->GetLink(link_name_);
+  // Get the pointer to the link.
 
   if (_sdf->HasElement("poseTopic"))
     pose_topic_ = _sdf->GetElement("poseTopic")->Get<std::string>();
@@ -161,7 +159,7 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   att_u_[1] = UniformDistribution(-noise_uniform_q.y, noise_uniform_q.y);
   att_u_[2] = UniformDistribution(-noise_uniform_q.z, noise_uniform_q.z);
 
-  // Fill in covariance. We omit uniform noise here, to make it more exciting for the challengers :).
+  // Fill in covariance. We omit uniform noise here.
   Eigen::Map<Eigen::Matrix<double, 6, 6> > cov(covariance_matrix_.data());
   Eigen::Matrix<double, 6, 1> covd;
 
@@ -178,14 +176,14 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   pose_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_topic_, 10);
 }
 
-// Called by the world update start event
+// This gets called by the world update start event.
 void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Pose gazebo_pose = link_->GetWorldCoGPose();
   bool publish_pose = true;
 
-  // first, determine whether we should publish a pose
+  // First, determine whether we should publish a pose.
   if (covariance_image_.data != NULL) {
-    // we have an image
+    // We have an image.
 
     // Image is always centered around the origin:
     int width = covariance_image_.cols;
@@ -218,15 +216,15 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
       pose_queue_.push_back(std::make_pair(gazebo_seq_ + measurement_delay_, pose));
   }
 
-  // Is it time to publish the front element ?
   if (gazebo_seq_ == pose_queue_.front().first) {
+  // Is it time to publish the front element?
     geometry_msgs::PoseWithCovarianceStampedPtr pose(new geometry_msgs::PoseWithCovarianceStamped);
 
     pose->header = pose_queue_.front().second.header;
     pose->pose.pose = pose_queue_.front().second.pose;
     pose_queue_.pop_front();
 
-    //calculate position distortions
+    // Calculate position distortions.
     Eigen::Vector3d pos_n;
     pos_n << pos_n_[0](gen_) + pos_u_[0](gen_), pos_n_[1](gen_) + pos_u_[1](gen_), pos_n_[2](gen_) + pos_u_[2](gen_);
     geometry_msgs::Point& p = pose->pose.pose.position;
@@ -234,7 +232,7 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
     p.y += pos_n[1];
     p.z += pos_n[2];
 
-    //calculate attitude distortions
+    // Calculate attitude distortions.
     Eigen::Vector3d theta;
     theta << att_n_[0](gen_) + att_u_[0](gen_), att_n_[1](gen_) + att_u_[1](gen_), att_n_[2](gen_) + att_u_[2](gen_);
     Eigen::Quaterniond q_n = QuaternionFromSmallAngle(theta);

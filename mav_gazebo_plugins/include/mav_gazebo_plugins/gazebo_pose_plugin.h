@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -85,13 +85,13 @@ class GazeboPosePlugin : public ModelPlugin {
   double covariance_image_scale_;
   cv::Mat covariance_image_;
 
-  // Pointer to the world
+  // Pointer to the world.
   physics::WorldPtr world_;
-  // Pointer to the model
+  // Pointer to the model.
   physics::ModelPtr model_;
-  // Pointer to the link
+  // Pointer to the link.
   physics::LinkPtr link_;
-  // Pointer to the update event connection
+  // Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
   boost::thread callback_queue_thread_;
