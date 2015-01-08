@@ -24,11 +24,43 @@
 #include <gazebo/common/Plugin.hh>
 
 namespace gazebo {
+// Default values
+static const std::string kDefaultNamespace = "";
+static const std::string kDefaultWindPubTopic = "/wind";
+static const std::string kDefaultFrameId = "world";
+static const std::string kDefaultLinkName = "base_link";
+
+static constexpr double kDefaultWindForceMean = 0.0;
+static constexpr double kDefaultWindForceVariance = 0.0;
+static constexpr double kDefaultWindGustForceMean = 0.0;
+static constexpr double kDefaultWindGustForceVariance = 0.0;
+
+static constexpr double kDefaultWindGustStart = 10.0;
+static constexpr double kDefaultWindGustDuration = 0.0;
+
+static const math::Vector3 kDefaultWindDirection = math::Vector3(1, 0, 0);
+static const math::Vector3 kDefaultWindGustDirection = math::Vector3(0, 1, 0);
+
+
+
 /// \brief This gazebo plugin simulates wind acting on a model.
 class GazeboWindPlugin : public ModelPlugin {
  public:
   /// \brief Constructor
-  GazeboWindPlugin();
+  GazeboWindPlugin()
+      : ModelPlugin(),
+        namespace_(kDefaultNamespace),
+        wind_pub_topic_(kDefaultWindPubTopic),
+        wind_force_mean_(kDefaultWindForceMean),
+        wind_force_variance_(kDefaultWindForceVariance),
+        wind_gust_force_mean_(kDefaultWindGustForceMean),
+        wind_gust_force_variance_(kDefaultWindGustForceVariance),
+        wind_direction_(kDefaultWindDirection),
+        wind_gust_direction_(kDefaultWindGustDirection),
+        frame_id_(kDefaultFrameId),
+        link_name_(kDefaultLinkName),
+        node_handle_(NULL) {}
+
   /// \brief Destructor
   virtual ~GazeboWindPlugin();
 
@@ -61,17 +93,17 @@ class GazeboWindPlugin : public ModelPlugin {
   std::string link_name_;
   std::string wind_pub_topic_;
 
-  math::Vector3 xyz_offset_;
-
   double wind_force_mean_;
   double wind_force_variance_;
+  double wind_gust_force_mean_;
+  double wind_gust_force_variance_;
+
+  math::Vector3 xyz_offset_;
   math::Vector3 wind_direction_;
+  math::Vector3 wind_gust_direction_;
 
   common::Time wind_gust_end_;
   common::Time wind_gust_start_;
-  double wind_gust_force_mean_;
-  double wind_gust_force_variance_;
-  math::Vector3 wind_gust_direction_;
 
   ros::Publisher wind_pub_;
 

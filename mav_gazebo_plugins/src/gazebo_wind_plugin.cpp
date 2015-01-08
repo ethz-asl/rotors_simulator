@@ -20,10 +20,6 @@
 #include <geometry_msgs/WrenchStamped.h>
 
 namespace gazebo {
-GazeboWindPlugin::GazeboWindPlugin()
-    : ModelPlugin(),
-      node_handle_(0) {
-}
 
 GazeboWindPlugin::~GazeboWindPlugin() {
   event::Events::DisconnectWorldUpdateBegin(update_connection_);
@@ -38,12 +34,9 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Store the pointer to the model.
   model_ = _model;
   world_ = model_->GetWorld();
-  frame_id_ = "world";
-  link_name_ = "base_link";
-  wind_direction_ = math::Vector3(1, 0, 0); // Default normalized wind direction.
-  wind_gust_direction_ = math::Vector3(0, 1, 0); // Default normalized wind gust direction.
-  double wind_gust_start = 10;
-  double wind_gust_duration = 0;
+
+  double wind_gust_start = kDefaultWindGustStart;
+  double wind_gust_duration = kDefaultWindGustDuration;
 
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
@@ -56,53 +49,30 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   else
     gzerr << "[gazebo_wind_plugin] Please specify a xyzOffset.\n";
 
-  if (_sdf->HasElement("frameId"))
-    frame_id_ = _sdf->GetElement("frameId")->GetValue()->GetAsString();
+  getSdfParam<std::string>(_sdf, "windPubTopic", wind_pub_topic_, "/" + namespace_ + wind_pub_topic_);
+  getSdfParam<std::string>(_sdf, "frameId", frame_id_, frame_id_);
+  getSdfParam<std::string>(_sdf, "linkName", link_name_, link_name_);
+  // Get the wind params from SDF.
+  getSdfParam<double>(_sdf, "windForceMean", wind_force_mean_, wind_force_mean_);
+  getSdfParam<double>(_sdf, "windForceVariance", wind_force_variance_, wind_force_variance_);
+  getSdfParam<math::Vector3>(_sdf, "windDirection", wind_direction_, wind_direction_);
+  // Get the wind gust params from SDF.
+  getSdfParam<double>(_sdf, "windGustStart", wind_gust_start, wind_gust_start);
+  getSdfParam<double>(_sdf, "windGustDuration", wind_gust_duration, wind_gust_duration);
+  getSdfParam<double>(_sdf, "windGustForceMean", wind_gust_force_mean_, wind_gust_force_mean_);
+  getSdfParam<double>(_sdf, "windGustForceVariance", wind_gust_force_variance_, wind_gust_force_variance_);
+  getSdfParam<math::Vector3>(_sdf, "windGustDirection", wind_gust_direction_, wind_gust_direction_);
 
-  if (_sdf->HasElement("linkName"))
-    link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
-  else
-    gzwarn << "[gazebo_wind_plugin] No linkName specified, using default " << link_name_ << ".\n";
-
-  // Wind params
-  if (_sdf->HasElement("windDirection")) {
-    wind_direction_ = _sdf->GetElement("windDirection")->Get<math::Vector3>();
-    wind_direction_.Normalize();
-  }
-
-  if (_sdf->HasElement("windForceMean"))
-    wind_force_mean_ = _sdf->GetElement("windForceMean")->Get<double>();
-
-  if (_sdf->HasElement("windForceVariance")) {
-    wind_force_variance_ = _sdf->GetElement("windForceVariance")->Get<double>();
-  }
-
-  // Wind gust params
-  if (_sdf->HasElement("windGustDirection")) {
-    wind_gust_direction_ = _sdf->GetElement("windGustDirection")->Get<math::Vector3>();
-    wind_gust_direction_.Normalize();
-  }
-
-  if (_sdf->HasElement("windGustStart"))
-    wind_gust_start = _sdf->GetElement("windGustStart")->Get<double>();
+  wind_direction_.Normalize();
+  wind_gust_direction_.Normalize();
   wind_gust_start_ = common::Time(wind_gust_start);
-
-  if (_sdf->HasElement("windGustDuration")) {
-    wind_gust_duration = _sdf->GetElement("windGustDuration")->Get<double>();
-  }
   wind_gust_end_ = common::Time(wind_gust_start + wind_gust_duration);
 
-  if (_sdf->HasElement("windGustForceMean")) {
-    wind_gust_force_mean_ = _sdf->GetElement("windGustForceMean")->Get<double>();
-  }
   // Get the pointer to the link.
   link_ = this->model_->GetLink(link_name_);
+  if (link_ == NULL)
+    gzthrow("[gazebo_wind_plugin] Couldn't find specified link \"" << link_name_ << "\".");
 
-  if (_sdf->HasElement("windGustForceVariance")) {
-    wind_gust_force_variance_ = _sdf->GetElement("windGustForceVariance")->Get<double>();
-  }
-
-  getSdfParam<std::string>(_sdf, "windPubTopic", wind_pub_topic_, "/" + namespace_ + "/wind");
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
