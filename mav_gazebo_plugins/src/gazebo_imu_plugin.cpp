@@ -134,7 +134,6 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
 /// \brief This function adds noise to acceleration and angular rates for
 ///        accelerometer and gyroscope measurement simulation.
-///        TODO(nikolicj) Check if description of simulated process required.
 void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
                                Eigen::Vector3d* angular_velocity,
                                const double dt) {
@@ -148,7 +147,7 @@ void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
   // with integration time dt.
   double sigma_g_d = 1 / sqrt(dt) * imu_parameters_.gyroscope_noise_density;
   double sigma_b_g = imu_parameters_.gyroscope_random_walk;
-  // Compute exact covariance of the process after dt.
+  // Compute exact covariance of the process after dt [Maybeck 4-114].
   double sigma_b_g_d =
       sqrt( - sigma_b_g * sigma_b_g * tau_g / 2.0 *
       (exp(-2.0 * dt / tau_g) - 1.0));
@@ -170,14 +169,14 @@ void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
   // with integration time dt.
   double sigma_a_d = 1 / sqrt(dt) * imu_parameters_.accelerometer_noise_density;
   double sigma_b_a = imu_parameters_.accelerometer_random_walk;
-  // Compute exact covariance of the process after dt.
+  // Compute exact covariance of the process after dt [Maybeck 4-114].
   double sigma_b_a_d =
       sqrt( - sigma_b_a * sigma_b_a * tau_a / 2.0 *
       (exp(-2.0 * dt / tau_a) - 1.0));
   // Compute state-transition.
   double phi_a_d = exp(-1.0 / tau_a * dt);
-  // Simulate accelerometer noise processes and add them to the true angular
-  // rate.
+  // Simulate accelerometer noise processes and add them to the true linear
+  // acceleration.
   for (int i = 0; i < 3; ++i) {
     accelerometer_bias_(i) = phi_a_d * accelerometer_bias_(i) +
         sigma_b_a_d * standard_normal_distribution_(random_generator_);
@@ -202,12 +201,19 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Vector3 velocity_current_W = link_->GetWorldLinearVel();
 
   // link_->GetRelativeLinearAccel() does not work.
+  // TODO For an accurate simulation, this might have to be fixed. Consider the
+  //      time delay introduced by this numerical derivative, for example.
   math::Vector3 acceleration = (velocity_current_W - velocity_prev_W_) / dt;
-  math::Vector3 acceleration_I = C_W_I.RotateVectorReverse(acceleration - gravity_W_);
+  math::Vector3 acceleration_I =
+      C_W_I.RotateVectorReverse(acceleration - gravity_W_);
   math::Vector3 angular_vel_I = link_->GetRelativeAngularVel();
 
-  Eigen::Vector3d linear_acceleration_I(acceleration_I.x, acceleration_I.y, acceleration_I.z);
-  Eigen::Vector3d angular_velocity_I(angular_vel_I.x, angular_vel_I.y, angular_vel_I.z);
+  Eigen::Vector3d linear_acceleration_I(acceleration_I.x,
+                                        acceleration_I.y,
+                                        acceleration_I.z);
+  Eigen::Vector3d angular_velocity_I(angular_vel_I.x,
+                                     angular_vel_I.y,
+                                     angular_vel_I.z);
 
   addNoise(&linear_acceleration_I, &angular_velocity_I, dt);
 
