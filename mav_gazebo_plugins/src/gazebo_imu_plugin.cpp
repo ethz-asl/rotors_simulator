@@ -31,9 +31,6 @@ GazeboImuPlugin::~GazeboImuPlugin() {
 }
 
 
-// void GazeboImuPlugin::InitializeParams() {};
-// void GazeboImuPlugin::Publish() {};
-
 void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Store the pointer to the model
   model_ = _model;
@@ -57,57 +54,136 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   frame_id_ = link_name_;
 
   getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_, kDefaultImuTopic);
-  getSdfParam<double>(_sdf, "gyroscopeNoiseDensity", imu_parameters_.gyroscope_noise_density,
+  getSdfParam<double>(_sdf, "gyroscopeNoiseDensity",
+                      imu_parameters_.gyroscope_noise_density,
                       imu_parameters_.gyroscope_noise_density);
-  getSdfParam<double>(_sdf, "gyroscopeBiasRandomWalk", imu_parameters_.gyroscope_random_walk,
+  getSdfParam<double>(_sdf, "gyroscopeBiasRandomWalk",
+                      imu_parameters_.gyroscope_random_walk,
                       imu_parameters_.gyroscope_random_walk);
-  getSdfParam<double>(_sdf, "gyroscopeBiasCorrelationTime", imu_parameters_.gyroscope_bias_correlation_time,
+  getSdfParam<double>(_sdf, "gyroscopeBiasCorrelationTime",
+                      imu_parameters_.gyroscope_bias_correlation_time,
                       imu_parameters_.gyroscope_bias_correlation_time);
-  getSdfParam<double>(_sdf, "gyroscopeTurnOnBiasSigma", imu_parameters_.gyroscope_turn_on_bias_sigma,
+  assert(imu_parameters_.gyroscope_bias_correlation_time > 0.0);
+  getSdfParam<double>(_sdf, "gyroscopeTurnOnBiasSigma",
+                      imu_parameters_.gyroscope_turn_on_bias_sigma,
                       imu_parameters_.gyroscope_turn_on_bias_sigma);
-  getSdfParam<double>(_sdf, "accelerometerNoiseDensity", imu_parameters_.accelerometer_noise_density,
+  getSdfParam<double>(_sdf, "accelerometerNoiseDensity",
+                      imu_parameters_.accelerometer_noise_density,
                       imu_parameters_.accelerometer_noise_density);
-  getSdfParam<double>(_sdf, "accelerometerBiasRandomWalk", imu_parameters_.accelerometer_bias_random_walk,
-                      imu_parameters_.accelerometer_bias_random_walk);
-  getSdfParam<double>(_sdf, "accelerometerBiasCorrelationTime", imu_parameters_.accelerometer_bias_correlation_time,
+  getSdfParam<double>(_sdf, "accelerometerRandomWalk",
+                      imu_parameters_.accelerometer_random_walk,
+                      imu_parameters_.accelerometer_random_walk);
+  getSdfParam<double>(_sdf, "accelerometerBiasCorrelationTime",
+                      imu_parameters_.accelerometer_bias_correlation_time,
                       imu_parameters_.accelerometer_bias_correlation_time);
-  getSdfParam<double>(_sdf, "accelerometerTurnOnBiasSigma", imu_parameters_.accelerometer_turn_on_bias_sigma,
+  assert(imu_parameters_.accelerometer_bias_correlation_time > 0.0);
+  getSdfParam<double>(_sdf, "accelerometerTurnOnBiasSigma",
+                      imu_parameters_.accelerometer_turn_on_bias_sigma,
                       imu_parameters_.accelerometer_turn_on_bias_sigma);
-
 
   last_time_ = world_->GetSimTime();
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboImuPlugin::OnUpdate, this, _1));
+  this->updateConnection_ =
+      event::Events::ConnectWorldUpdateBegin(
+          boost::bind(&GazeboImuPlugin::OnUpdate, this, _1));
 
   imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 10);
 
   // Fill imu message.
   imu_msg.header.frame_id = frame_id_;
-  // TODO(nikolic): Check this.
-  imu_msg.angular_velocity_covariance[0] = imu_parameters_.gyroscope_noise_density *
+  // TODO(nikolicj): Discuss with burrimi to specify what is needed here.
+  imu_msg.angular_velocity_covariance[0] =
+      imu_parameters_.gyroscope_noise_density *
       imu_parameters_.gyroscope_noise_density;
-  imu_msg.angular_velocity_covariance[4] = imu_parameters_.gyroscope_noise_density *
+  imu_msg.angular_velocity_covariance[4] =
+      imu_parameters_.gyroscope_noise_density *
       imu_parameters_.gyroscope_noise_density;
-  imu_msg.angular_velocity_covariance[8] = imu_parameters_.gyroscope_noise_density *
+  imu_msg.angular_velocity_covariance[8] =
+      imu_parameters_.gyroscope_noise_density *
       imu_parameters_.gyroscope_noise_density;
-  imu_msg.linear_acceleration_covariance[0] = imu_parameters_.accelerometer_noise_density *
+  imu_msg.linear_acceleration_covariance[0] =
+      imu_parameters_.accelerometer_noise_density *
       imu_parameters_.accelerometer_noise_density;
-  imu_msg.linear_acceleration_covariance[4] = imu_parameters_.accelerometer_noise_density *
+  imu_msg.linear_acceleration_covariance[4] =
+      imu_parameters_.accelerometer_noise_density *
       imu_parameters_.accelerometer_noise_density;
-  imu_msg.linear_acceleration_covariance[8] = imu_parameters_.accelerometer_noise_density *
+  imu_msg.linear_acceleration_covariance[8] =
+      imu_parameters_.accelerometer_noise_density *
       imu_parameters_.accelerometer_noise_density;
 
   gravity_W_ = world_->GetPhysicsEngine()->GetGravity();
   imu_parameters_.gravity_magnitude = gravity_W_.GetLength();
+
+  standard_normal_distribution_ = std::normal_distribution<double>(0.0, 1.0);
+
+  double sigma_bon_g = imu_parameters_.gyroscope_turn_on_bias_sigma;
+  double sigma_bon_a = imu_parameters_.accelerometer_turn_on_bias_sigma;
+  for (int i = 0; i < 3; ++i) {
+      gyroscope_turn_on_bias_(i) =
+          sigma_bon_g * standard_normal_distribution_(random_generator_);
+      accelerometer_turn_on_bias_(i) =
+          sigma_bon_a * standard_normal_distribution_(random_generator_);
+  }
+
+  // TODO(nikolicj) incorporate steady-state covariance of bias process
+  gyroscope_bias_.setZero();
+  accelerometer_bias_.setZero();
 }
 
-void GazeboImuPlugin::addNoise(const double dt, Eigen::Vector3d* linear_acceleration, Eigen::Vector3d* angular_velocity) {
+/// \brief This function adds noise to acceleration and angular rates for
+///        accelerometer and gyroscope measurement simulation.
+///        TODO(nikolicj) Check if description of simulated process required.
+void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration, Eigen::Vector3d* angular_velocity, const double dt) {
   assert(linear_acceleration);
   assert(angular_velocity);
+  assert(dt > 0.0);
 
-  //TODO(nikolic): Add noise.
+  // Gyrosocpe
+  double tau_g = imu_parameters_.gyroscope_bias_correlation_time;
+  // Discrete-time standard deviation equivalent to an "integrating" sampler
+  // with integration time dt.
+  double sigma_g_d = 1 / sqrt(dt) * imu_parameters_.gyroscope_noise_density;
+  double sigma_b_g = imu_parameters_.gyroscope_random_walk;
+  // Compute exact covariance of the process after dt.
+  double sigma_b_g_d =
+      sqrt( - sigma_b_g * sigma_b_g * tau_g / 2.0 *
+      (exp(-2.0 * dt / tau_g) - 1.0));
+  // Compute state-transition.
+  double phi_g_d = exp(-1.0 / tau_g * dt);
+  // Simulate gyroscope noise processes and add them to the true angular rate.
+  for (int i = 0; i < 3; ++i) {
+    gyroscope_bias_(i) = phi_g_d * gyroscope_bias_(i) +
+        sigma_b_g_d * standard_normal_distribution_(random_generator_);
+    (*angular_velocity)(i) = (*angular_velocity)(i) +
+        gyroscope_bias_(i) +
+        sigma_g_d * standard_normal_distribution_(random_generator_) +
+        gyroscope_turn_on_bias_(i);
+  }
+
+  // Accelerometer
+  double tau_a = imu_parameters_.accelerometer_bias_correlation_time;
+  // Discrete-time standard deviation equivalent to an "integrating" sampler
+  // with integration time dt.
+  double sigma_a_d = 1 / sqrt(dt) * imu_parameters_.accelerometer_noise_density;
+  double sigma_b_a = imu_parameters_.accelerometer_random_walk;
+  // Compute exact covariance of the process after dt.
+  double sigma_b_a_d =
+      sqrt( - sigma_b_a * sigma_b_a * tau_a / 2.0 *
+      (exp(-2.0 * dt / tau_a) - 1.0));
+  // Compute state-transition.
+  double phi_a_d = exp(-1.0 / tau_a * dt);
+  // Simulate accelerometer noise processes and add them to the true angular
+  // rate.
+  for (int i = 0; i < 3; ++i) {
+    accelerometer_bias_(i) = phi_a_d * accelerometer_bias_(i) +
+        sigma_b_a_d * standard_normal_distribution_(random_generator_);
+    (*linear_acceleration)(i) = (*linear_acceleration)(i) +
+        accelerometer_bias_(i) +
+        sigma_a_d * standard_normal_distribution_(random_generator_) +
+        accelerometer_turn_on_bias_(i);
+  }
 
 }
 
@@ -131,7 +207,7 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   Eigen::Vector3d linear_acceleration_I(acceleration_I.x, acceleration_I.y, acceleration_I.z);
   Eigen::Vector3d angular_velocity_I(angular_vel_I.x, angular_vel_I.y, angular_vel_I.z);
 
-  addNoise(dt, &linear_acceleration_I, &angular_velocity_I);
+  addNoise(&linear_acceleration_I, &angular_velocity_I, dt);
 
   // Fill IMU message.
   imu_msg.header.stamp.sec = current_time.sec;

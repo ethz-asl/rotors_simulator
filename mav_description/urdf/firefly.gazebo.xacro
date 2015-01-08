@@ -56,14 +56,15 @@
       <imuTopic>imu_new</imuTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
 	  <!-- A good description of the IMU parameters can be found in the kalibr documentation:
 	       https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics -->
-      <gyroscopeNoiseDensity>0.0000339198</gyroscopeNoiseDensity> <!-- Gyroscope noise density. [rad*sqrt(s)/s] -->
-      <gyroscopeBiasRandomWalk>0.000038765</gyroscopeBiasRandomWalk> <!-- Gyroscope bias random walk. [rad/s] -->
-      <gyroscopeBiasCorrelationTime>360.0</gyroscopeBiasCorrelationTime> <!-- Gyroscope bias correlation time constant [s] -->
-      <gyroscopeTurnOnBiasSigma>0.0</gyroscopeTurnOnBiasSigma> <!-- Gyroscope turn on bias standart deviation [rad/s] -->
-      <accelerometerNoiseDensity>0.004</accelerometerNoiseDensity> <!-- Accelerometer noise density. [m*sqrt(s)/s^2] -->
-      <accelerometerBiasRandomWalk>0.006</accelerometerBiasRandomWalk> <!-- Accelerometer bias random walk. [m/s^2] -->
-      <accelerometerBiasCorrelationTime>360.0</accelerometerBiasCorrelationTime> <!-- Accelerometer turn on bias standart deviation [m/s/s] -->
-      <accelerometerTurnOnBiasSigma>0.0</accelerometerTurnOnBiasSigma> <!-- Accelerometer bias correlation time constant [s] -->    
+      <gyroscopeNoiseDensity>0.0003394</gyroscopeNoiseDensity> <!-- Gyroscope noise density (two-sided spectrum) [rad/s/sqrt(Hz)] -->
+      <gyroscopeRandomWalk>0.000038785</gyroscopeRandomWalk> <!-- Gyroscope bias random walk [rad/s/s/sqrt(Hz)] -->
+      <gyroscopeBiasCorrelationTime>1000.0</gyroscopeBiasCorrelationTime> <!-- Gyroscope bias correlation time constant [s] -->
+      <gyroscopeTurnOnBiasSigma>0.0087</gyroscopeTurnOnBiasSigma> <!-- Gyroscope turn on bias standard deviation [rad/s] -->
+      <accelerometerNoiseDensity>0.004</accelerometerNoiseDensity> <!-- Accelerometer noise density (two-sided spectrum) [m/s^2/sqrt(Hz)] -->
+      <accelerometerRandomWalk>0.006</accelerometerRandomWalk> <!-- Accelerometer bias random walk. [m/s^2/s/sqrt(Hz)] -->
+      <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime> <!-- Accelerometer bias correlation time constant [s] -->
+      <accelerometerTurnOnBiasSigma>0.1960</accelerometerTurnOnBiasSigma> <!-- Accelerometer turn on bias standard deviation [m/s^2] -->
+      <gravity_magnitude>9.8068</gravity_magnitude> <!-- Earth's gravity in Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84) [m/s^2] -->
     </plugin>
   </gazebo>
 

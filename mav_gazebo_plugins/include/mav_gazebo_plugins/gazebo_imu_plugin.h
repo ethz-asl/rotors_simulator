@@ -34,7 +34,7 @@ static constexpr double kDefaultAdisGyroscopeTurnOnBiasSigma =
     0.5 / 180.0 * M_PI;
 static constexpr double kDefaultAdisAccelerometerNoiseDensity =
     2.0 * 2.0e-3;
-static constexpr double kDefaultAdisAccelerometerBiasRandomWalk =
+static constexpr double kDefaultAdisAccelerometerRandomWalk =
     2.0 * 3.0e-3;
 static constexpr double kDefaultAdisAccelerometerBiasCorrelationTime =
     300.0;
@@ -47,7 +47,7 @@ static const std::string kDefaultImuTopic = "imu";
 
 // A description of the parameters:
 // https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics
-// TODO(burrimi): Should we have a minimalistic description of the params here?
+// TODO(burrimi): Should I have a minimalistic description of the params here?
 struct ImuParameters {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -62,7 +62,7 @@ struct ImuParameters {
   /// Accelerometer noise density (two-sided spectrum) [m/s^2/sqrt(Hz)]
   double accelerometer_noise_density;
   /// Accelerometer bias random walk. [m/s^2/s/sqrt(Hz)]
-  double accelerometer_bias_random_walk;
+  double accelerometer_random_walk;
   /// Accelerometer bias correlation time constant [s]
   double accelerometer_bias_correlation_time;
   /// Accelerometer turn on bias standard deviation [m/s^2]
@@ -78,7 +78,7 @@ struct ImuParameters {
             kDefaultAdisGyroscopeBiasCorrelationTime),
         gyroscope_turn_on_bias_sigma(kDefaultAdisGyroscopeTurnOnBiasSigma),
         accelerometer_noise_density(kDefaultAdisAccelerometerNoiseDensity),
-        accelerometer_bias_random_walk(kDefaultAdisAccelerometerBiasRandomWalk),
+        accelerometer_random_walk(kDefaultAdisAccelerometerRandomWalk),
         accelerometer_bias_correlation_time(
             kDefaultAdisAccelerometerBiasCorrelationTime),
         accelerometer_turn_on_bias_sigma(
@@ -88,8 +88,6 @@ struct ImuParameters {
 
 class GazeboImuPlugin : public ModelPlugin {
  public:
-  typedef std::normal_distribution<> NormalDistribution;
-  typedef std::uniform_real_distribution<> UniformDistribution;
 
   GazeboImuPlugin();
   ~GazeboImuPlugin();
@@ -101,11 +99,11 @@ class GazeboImuPlugin : public ModelPlugin {
   void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
   void addNoise(
-      const double dt,
       Eigen::Vector3d* linear_acceleration,
-      Eigen::Vector3d* angular_velocity);
+      Eigen::Vector3d* angular_velocity,
+      const double dt);
 
-  void OnUpdate(const common::UpdateInfo& /*_info*/);
+  void OnUpdate(const common::UpdateInfo&);
 
  private:
   std::string namespace_;
@@ -114,6 +112,9 @@ class GazeboImuPlugin : public ModelPlugin {
   ros::Publisher imu_pub_;
   std::string frame_id_;
   std::string link_name_;
+
+  std::default_random_engine random_generator_;
+  std::normal_distribution<double> standard_normal_distribution_;
 
   // Pointer to the world
   physics::WorldPtr world_;
@@ -130,6 +131,12 @@ class GazeboImuPlugin : public ModelPlugin {
 
   math::Vector3 gravity_W_;
   math::Vector3 velocity_prev_W_;
+
+  Eigen::Vector3d gyroscope_bias_;
+  Eigen::Vector3d accelerometer_bias_;
+
+  Eigen::Vector3d gyroscope_turn_on_bias_;
+  Eigen::Vector3d accelerometer_turn_on_bias_;
 
   ImuParameters imu_parameters_;
 };
