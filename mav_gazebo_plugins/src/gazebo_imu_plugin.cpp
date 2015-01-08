@@ -135,7 +135,9 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 /// \brief This function adds noise to acceleration and angular rates for
 ///        accelerometer and gyroscope measurement simulation.
 ///        TODO(nikolicj) Check if description of simulated process required.
-void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration, Eigen::Vector3d* angular_velocity, const double dt) {
+void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
+                               Eigen::Vector3d* angular_velocity,
+                               const double dt) {
   assert(linear_acceleration);
   assert(angular_velocity);
   assert(dt > 0.0);
@@ -194,7 +196,7 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   last_time_ = current_time;
   double t = current_time.Double();
 
-  math::Pose T_W_I = link_->GetWorldPose(); //TODO(burrimi): Check transformation.
+  math::Pose T_W_I = link_->GetWorldPose(); //TODO(burrimi): Check tf.
   math::Quaternion C_W_I = T_W_I.rot;
 
   math::Vector3 velocity_current_W = link_->GetWorldLinearVel();
