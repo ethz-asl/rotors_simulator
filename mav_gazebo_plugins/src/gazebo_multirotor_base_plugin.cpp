@@ -20,10 +20,6 @@
 #include <mav_gazebo_plugins/common.h>
 
 namespace gazebo {
-GazeboMultirotorBasePlugin::GazeboMultirotorBasePlugin()
-    : ModelPlugin(),
-      node_handle_(0) {
-}
 
 GazeboMultirotorBasePlugin::~GazeboMultirotorBasePlugin() {
   event::Events::DisconnectWorldUpdateBegin(update_connection_);
@@ -39,20 +35,19 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   namespace_.clear();
 
   getSdfParam<std::string>(_sdf, "robotNamespace", namespace_, "", true);
-  node_handle_ = new ros::NodeHandle(namespace_);
-
   getSdfParam<std::string>(_sdf, "linkName", link_name_, "base_link", true);
+  getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, "motors");
+  getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_,
+                      rotor_velocity_slowdown_sim_);
+
+  node_handle_ = new ros::NodeHandle(namespace_);
+  motor_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_pub_topic_, 10);
   frame_id_ = link_name_;
 
-  // Get the pointer to the link
-  link_ = this->model_->GetLink(link_name_);
+  // Get the pointer to the link.
+  link_ = model_->GetLink(link_name_);
   if (link_ == NULL)
-    gzthrow("[gazebo_multirotor_base_plugin] link \"" << link_name_ << "\" not found");
-
-  getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, "motors");
-
-  getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
-  motor_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_pub_topic_, 10);
+    gzthrow("[gazebo_multirotor_base_plugin] Couldn't find specified link \"" << link_name_ << "\".");
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.

@@ -25,13 +25,31 @@
 #include <gazebo/common/Plugin.hh>
 
 namespace gazebo {
+  // Default values
+static const std::string kDefaultNamespace = "";
+
+static const std::string kDefaultMotorPubTopic = "/ground_truth/pose";
+static const std::string kDefaultLinkName = "base_link";
+static const std::string kDefaultFrameId = "base_link";
+
+static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
+
+
 /// \brief This plugin publishes the motor speeds of your multirotor model.
 class GazeboMultirotorBasePlugin : public ModelPlugin {
   typedef std::map<const unsigned int, const physics::JointPtr> MotorNumberToJointMap;
   typedef std::pair<const unsigned int, const physics::JointPtr> MotorNumberToJointPair;
  public:
   /// \brief Constructor
-  GazeboMultirotorBasePlugin();
+  GazeboMultirotorBasePlugin()
+      : ModelPlugin(),
+        namespace_(kDefaultNamespace),
+        motor_pub_topic_(kDefaultMotorPubTopic),
+        link_name_(kDefaultLinkName),
+        frame_id_(kDefaultFrameId),
+        rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
+        node_handle_(NULL) {}
+
   /// \brief Destructor
   virtual ~GazeboMultirotorBasePlugin();
 
@@ -64,8 +82,8 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
 
   std::string namespace_;
   std::string motor_pub_topic_;
-  std::string frame_id_;
   std::string link_name_;
+  std::string frame_id_;
   double rotor_velocity_slowdown_sim_;
 
   ros::Publisher motor_pub_;
