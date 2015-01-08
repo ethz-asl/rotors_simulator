@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,20 +32,23 @@ GazeboMotorModel::~GazeboMotorModel() {
     delete node_handle_;
   }
 }
-;
 
-void GazeboMotorModel::InitializeParams() {
-}
-;
+
+
+void GazeboMotorModel::InitializeParams() {}
+
+
+
 void GazeboMotorModel::Publish() {
   turning_velocity_msg_.data = this->joint_->GetVelocity(0);
   motor_vel_pub_.publish(turning_velocity_msg_);
 }
-;
+
+
 
 void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
-  // Store the pointer to the model
-  this->model_ = _model;
+  // Store the pointer to the model.
+  model_ = _model;
 
   // default params
   namespace_.clear();
@@ -69,16 +72,22 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   if (_sdf->HasElement("jointName"))
     joint_name_ = _sdf->GetElement("jointName")->Get<std::string>();
   else
-    gzerr << "[gazebo_motor_model] Please specify a jointName.\n";
-  // Get the pointer to the joint
-  this->joint_ = this->model_->GetJoint(joint_name_);
+    gzerr << "[gazebo_motor_model] Please specify a jointName, where the rotor is attached.\n";
+  // Get the pointer to the joint.
+  joint_ = model_->GetJoint(joint_name_);
+  if (joint_ == NULL)
+    gzthrow("[gazebo_motor_model] Couldn't find specified joint \"" << joint_name_ << "\".");
+
 
   if (_sdf->HasElement("linkName"))
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
   else
-    gzerr << "[gazebo_motor_model] Please specify a linkName.\n";
-  // Get the pointer to the link
-  this->link_ = this->model_->GetLink(link_name_);
+    gzerr << "[gazebo_motor_model] Please specify a linkName of the rotor.\n";
+  // Get the pointer to the link.
+  link_ = model_->GetLink(link_name_);
+  if (link_ == NULL)
+    gzthrow("[gazebo_motor_model] Couldn't find specified link \"" << link_name_ << "\".");
+
 
   if (_sdf->HasElement("motorNumber"))
     motor_number_ = _sdf->GetElement("motorNumber")->Get<int>();
@@ -122,7 +131,7 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   viscous_friction_coefficient_ = inertia_ / time_constant_up_;
   max_force_ = max_rot_velocity_ * viscous_friction_coefficient_;
 
-  // Set the maximumForce on the joint
+  // Set the maximumForce on the joint.
   this->joint_->SetMaxForce(0, max_force_);
 
   if (_sdf->HasElement("motorConstant"))

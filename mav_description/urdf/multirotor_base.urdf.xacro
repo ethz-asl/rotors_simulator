@@ -50,7 +50,7 @@
       <child link="imu_link" />
       <limit upper="0" lower="0" effort="0" velocity="0" />
     </joint>
-    
+
     <!-- attach multirotor_base_plugin to the base_link -->
     <gazebo>
       <plugin filename="libmav_gazebo_multirotor_base_plugin.so" name="rosbag">
@@ -145,7 +145,7 @@
 
     </joint>
     <!-- TODO(ff): not currently set because it's not yet supported -->
-    <!-- <gazebo reference="rotor_${motor_number}_joint"> <axis> <xyz>0 0 1</xyz> 
+    <!-- <gazebo reference="rotor_${motor_number}_joint"> <axis> <xyz>0 0 1</xyz>
       <limit> <velocity> ${max_rot_velocity} </velocity> </limit> </axis> </gazebo> -->
     <link name="rotor_${motor_number}">
       <inertial>

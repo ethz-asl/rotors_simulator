@@ -60,7 +60,7 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Get the pointer to the link
   link_ = this->model_->GetLink(link_name_);
   if (link_ == NULL)
-    gzthrow("[gazebo_bag_plugin] link \"" << link_name_ << "\" not found");
+    gzthrow("[gazebo_bag_plugin] Couldn't find specified link \"" << link_name_ << "\".");
 
   getSdfParam<std::string>(_sdf, "frameId", frame_id_, frame_id_);
   getSdfParam<std::string>(_sdf, "imuPubTopic", imu_pub_topic_, imu_pub_topic_);
