@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   planning_msgs
   geometry_msgs
   cmake_modules
+  glog_catkin
 )
 
 find_package(Eigen REQUIRED)
