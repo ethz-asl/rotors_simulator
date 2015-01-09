@@ -51,7 +51,7 @@
   <gazebo>
     <!-- IMU -->
     <plugin filename="libmav_gazebo_imu_plugin.so" name="mav_gazebo_imu_plugin">
-      <robotNamespace>${namespace}</robotNamespace>
+      <robotNamespace>${namespace}</robotNamespace> <!-- (string, required): ros namespace in which the messages are published -->
       <linkName>imu_link</linkName> <!-- (string, required): name of the body which holds the IMU sensor -->
       <imuTopic>imu</imuTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
 	  <!-- A good description of the IMU parameters can be found in the kalibr documentation:
