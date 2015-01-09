@@ -27,8 +27,30 @@
   </plugin>
 </gazebo>
 
+
+<!-- Mount our IMU -->
 <gazebo>
   <!-- IMU -->
+  <plugin filename="libmav_gazebo_imu_plugin.so" name="mav_gazebo_imu_plugin">
+	<!-- A good description of the IMU parameters can be found in the kalibr documentation:
+	     https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics -->
+    <robotNamespace>${namespace}</robotNamespace> <!-- (string, required): ros namespace in which the messages are published -->
+    <linkName>imu_link</linkName> <!-- (string, required): name of the body which holds the IMU sensor -->
+    <imuTopic>imu</imuTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
+    <gyroscopeNoiseDensity>0.0003394</gyroscopeNoiseDensity> <!-- Gyroscope noise density (two-sided spectrum) [rad/s/sqrt(Hz)] -->
+    <gyroscopeRandomWalk>0.000038785</gyroscopeRandomWalk> <!-- Gyroscope bias random walk [rad/s/s/sqrt(Hz)] -->
+    <gyroscopeBiasCorrelationTime>1000.0</gyroscopeBiasCorrelationTime> <!-- Gyroscope bias correlation time constant [s] -->
+    <gyroscopeTurnOnBiasSigma>0.0087</gyroscopeTurnOnBiasSigma> <!-- Gyroscope turn on bias standard deviation [rad/s] -->
+    <accelerometerNoiseDensity>0.004</accelerometerNoiseDensity> <!-- Accelerometer noise density (two-sided spectrum) [m/s^2/sqrt(Hz)] -->
+    <accelerometerRandomWalk>0.006</accelerometerRandomWalk> <!-- Accelerometer bias random walk. [m/s^2/s/sqrt(Hz)] -->
+    <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime> <!-- Accelerometer bias correlation time constant [s] -->
+    <accelerometerTurnOnBiasSigma>0.1960</accelerometerTurnOnBiasSigma> <!-- Accelerometer turn on bias standard deviation [m/s^2] -->
+  </plugin>
+</gazebo>
+
+
+<gazebo>
+  <!-- Hector IMU -->
   <plugin filename="libhector_gazebo_ros_imu.so" name="imu_ros">
     <!-- parameters according to http://wiki.ros.org/hector_gazebo_plugins#GazeboRosImu -->
     <robotNamespace>${namespace}</robotNamespace>
