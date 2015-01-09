@@ -28,18 +28,12 @@ GazeboMotorModel::~GazeboMotorModel() {
   }
 }
 
-
-
 void GazeboMotorModel::InitializeParams() {}
-
-
 
 void GazeboMotorModel::Publish() {
   turning_velocity_msg_.data = joint_->GetVelocity(0);
   motor_velocity_pub_.publish(turning_velocity_msg_);
 }
-
-
 
 void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Store the pointer to the model.
@@ -137,7 +131,6 @@ void GazeboMotorModel::VelocityCallback(const mav_msgs::MotorSpeedPtr& rot_veloc
 }
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
-
   motor_rot_vel_ = joint_->GetVelocity(0);
   // TODO(ff): Here or above we should check that no aliasing is occuring on the spinning rotors.
   double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
@@ -166,7 +159,6 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   ref_motor_rot_vel_ = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
   joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
 }
-;
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMotorModel);
 }
