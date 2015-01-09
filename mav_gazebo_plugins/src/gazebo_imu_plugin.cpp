@@ -96,8 +96,10 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   // Fill imu message.
   imu_message_.header.frame_id = frame_id_;
-  // TODO(nikolicj): Discuss with burrimi to specify what is needed here.
-  // We assume uncorrelated noise on the 3 channels -> only set diagonal elements.
+  // We assume uncorrelated noise on the 3 channels -> only set diagonal
+  // elements. Only the broadband noise component is considered, specified as a
+  // continuous-time density (two-sided spectrum); not the true covariance of
+  // the measurements.
   imu_message_.angular_velocity_covariance[0] =
       imu_parameters_.gyroscope_noise_density *
       imu_parameters_.gyroscope_noise_density;
