@@ -23,7 +23,7 @@
     <commandMotorSpeedSubTopic>command/motors</commandMotorSpeedSubTopic>
     <imuSubTopic>imu</imuSubTopic>
     <poseTopic>pose</poseTopic>
-    <motorVelocityReferenceTopic>motor_vel_ref</motorVelocityReferenceTopic>
+    <motorVelocityReferenceTopic>motor_velocity_reference</motorVelocityReferenceTopic>
   </plugin>
 </gazebo>
 

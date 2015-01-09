@@ -40,7 +40,7 @@
 namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";
-static const std::string kDefaultMotorVelocityCommandPubTopic = "/motor_vel_ref";
+static const std::string kDefaultMotorVelocityReferencePubTopic = "/motor_velocity_reference";
 static const std::string kDefaultCommandAttitudeThrustSubTopic = "/command/attitude";
 static const std::string kDefaultCommandRateThrustSubTopic = "/command/rate";
 static const std::string kDefaultCommandMotorSpeedSubTopic = "/command/motors";
@@ -53,7 +53,7 @@ class GazeboControllerInterface : public ModelPlugin {
   GazeboControllerInterface()
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
-        motor_velocity_command_pub_topic_(kDefaultMotorVelocityCommandPubTopic),
+        motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferencePubTopic),
         command_attitude_thrust_sub_topic_(kDefaultCommandAttitudeThrustSubTopic),
         command_rate_thrust_sub_topic_(kDefaultCommandRateThrustSubTopic),
         command_motor_speed_sub_topic_(kDefaultCommandMotorSpeedSubTopic),
@@ -74,14 +74,14 @@ class GazeboControllerInterface : public ModelPlugin {
   bool controller_created_;
 
   std::string namespace_;
-  std::string motor_velocity_command_pub_topic_;
+  std::string motor_velocity_reference_pub_topic_;
   std::string command_attitude_thrust_sub_topic_;
   std::string command_rate_thrust_sub_topic_;
   std::string command_motor_speed_sub_topic_;
   std::string imu_sub_topic_;
 
   ros::NodeHandle* node_handle_;
-  ros::Publisher motor_velocity_command_pub_;
+  ros::Publisher motor_velocity_reference_pub_;
   ros::Subscriber cmd_attitude_sub_;
   ros::Subscriber cmd_rate_sub_;
   ros::Subscriber cmd_motor_sub_;

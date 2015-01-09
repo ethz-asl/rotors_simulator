@@ -176,7 +176,7 @@
         <maxRotVelocity>${max_rot_velocity}</maxRotVelocity>
         <motorConstant>${motor_constant}</motorConstant>
         <momentConstant>${moment_constant}</momentConstant>
-        <commandSubTopic>${robot_namespace}/motor_vel_ref</commandSubTopic>
+        <commandSubTopic>${robot_namespace}/motor_velocity_reference</commandSubTopic>
         <motorNumber>${motor_number}</motorNumber>
         <rotorDragCoefficient>${rotor_drag_coefficient}</rotorDragCoefficient>
         <rollingMomentCoefficient>${rolling_moment_coefficient}</rollingMomentCoefficient>

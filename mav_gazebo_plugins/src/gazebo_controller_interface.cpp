@@ -52,8 +52,8 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
   getSdfParam<std::string>(_sdf, "commandMotorSpeedSubTopic", command_motor_speed_sub_topic_,
                            command_motor_speed_sub_topic_);
   getSdfParam<std::string>(_sdf, "imuSubTopic", imu_sub_topic_, imu_sub_topic_);
-  getSdfParam<std::string>(_sdf, "motorVelocityCommandPubTopic", motor_velocity_command_pub_topic_,
-                           motor_velocity_command_pub_topic_);
+  getSdfParam<std::string>(_sdf, "motorVelocityCommandPubTopic", motor_velocity_reference_pub_topic_,
+                           motor_velocity_reference_pub_topic_);
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -71,7 +71,7 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
                                            &GazeboControllerInterface::CommandMotorCallback,
                                            this);
   imu_sub_ = node_handle_->subscribe(imu_sub_topic_, 10, &GazeboControllerInterface::ImuCallback, this);
-  motor_velocity_command_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_velocity_command_pub_topic_, 10);
+  motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_velocity_reference_pub_topic_, 10);
 }
 
 // This gets called by the world update start event.
@@ -88,7 +88,7 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   turning_velocities_msg.header.stamp.sec = now.sec;
   turning_velocities_msg.header.stamp.nsec = now.nsec;
 
-  motor_velocity_command_pub_.publish(turning_velocities_msg);
+  motor_velocity_reference_pub_.publish(turning_velocities_msg);
 }
 
 void GazeboControllerInterface::CommandAttitudeCallback(const mav_msgs::CommandAttitudeThrustPtr& input_reference_msg) {

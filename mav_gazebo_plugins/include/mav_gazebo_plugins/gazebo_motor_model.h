@@ -43,7 +43,7 @@ namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultCommandSubTopic = "command/motors";
-static const std::string kDefaultMotorVelocityPubTopic = "turning_vel";
+static const std::string kDefaultMotorVelocityPubTopic = "motor_velocity";
 
 static constexpr double kDefaultMotorConstant = 8.54858e-06;
 static constexpr double kDefaultMomentConstant = 0.016;
