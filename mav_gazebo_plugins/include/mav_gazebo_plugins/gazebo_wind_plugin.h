@@ -46,7 +46,6 @@ static const math::Vector3 kDefaultWindGustDirection = math::Vector3(0, 1, 0);
 /// \brief This gazebo plugin simulates wind acting on a model.
 class GazeboWindPlugin : public ModelPlugin {
  public:
-  /// \brief Constructor
   GazeboWindPlugin()
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
@@ -61,7 +60,6 @@ class GazeboWindPlugin : public ModelPlugin {
         link_name_(kDefaultLinkName),
         node_handle_(NULL) {}
 
-  /// \brief Destructor
   virtual ~GazeboWindPlugin();
 
  protected:
@@ -75,16 +73,11 @@ class GazeboWindPlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
-  /// \brief The connections.
+    /// \brief Pointer to the update event connection.
   event::ConnectionPtr update_connection_;
 
-  /// \brief Pointer to the world.
   physics::WorldPtr world_;
-
-  /// \brief Pointer to the model.
   physics::ModelPtr model_;
-
-  /// \brief Pointer to the link.
   physics::LinkPtr link_;
 
   std::string namespace_;

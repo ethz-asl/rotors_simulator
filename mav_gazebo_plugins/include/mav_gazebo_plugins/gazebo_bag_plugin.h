@@ -66,7 +66,6 @@ class GazeboBagPlugin : public ModelPlugin {
   typedef std::map<const unsigned int, const physics::JointPtr> MotorNumberToJointMap;
   typedef std::pair<const unsigned int, const physics::JointPtr> MotorNumberToJointPair;
  public:
-  /// \brief Constructor
   GazeboBagPlugin()
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
@@ -92,7 +91,6 @@ class GazeboBagPlugin : public ModelPlugin {
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
         node_handle_(NULL) {}
 
-  /// \brief Destructor
   virtual ~GazeboBagPlugin();
 
  protected:
@@ -142,16 +140,11 @@ class GazeboBagPlugin : public ModelPlugin {
   void LogCollisions(const common::Time now);
 
  private:
-  /// \brief The connections.
+  /// \brief Pointer to the update event connection.
   event::ConnectionPtr update_connection_;
 
-  /// \brief Pointer to the world.
   physics::WorldPtr world_;
-
-  /// \brief Pointer to the model.
   physics::ModelPtr model_;
-
-  /// \brief Pointer to the link.
   physics::LinkPtr link_;
 
   physics::Link_V child_links_;

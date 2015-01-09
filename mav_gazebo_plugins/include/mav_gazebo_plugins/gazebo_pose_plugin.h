@@ -110,13 +110,10 @@ class GazeboPosePlugin : public ModelPlugin {
   ros::NodeHandle* node_handle_;
   ros::Publisher pose_pub_;
 
-  // Pointer to the world.
   physics::WorldPtr world_;
-  // Pointer to the model.
   physics::ModelPtr model_;
-  // Pointer to the link.
   physics::LinkPtr link_;
-  // Pointer to the update event connection.
+    /// \brief Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
   boost::thread callback_queue_thread_;

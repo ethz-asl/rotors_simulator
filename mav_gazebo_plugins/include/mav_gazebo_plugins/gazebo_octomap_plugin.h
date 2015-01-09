@@ -31,12 +31,10 @@
 namespace gazebo {
 class OctomapFromGazeboWorld : public WorldPlugin {
  public:
-  /// \brief Constructor
   OctomapFromGazeboWorld()
       : WorldPlugin(),
         node_handle_(NULL),
         octomap_(NULL) {}
-  /// \brief Destructor
   virtual ~OctomapFromGazeboWorld();
 
  protected:

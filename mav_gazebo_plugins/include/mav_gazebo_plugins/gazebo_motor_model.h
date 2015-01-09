@@ -58,7 +58,6 @@ static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
 
 class GazeboMotorModel : public MotorModel, public ModelPlugin {
  public:
-  /// \brief Constructor
   GazeboMotorModel()
       : ModelPlugin(),
         MotorModel(),
@@ -74,7 +73,6 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
         node_handle_(NULL) {}
 
-  /// \brief Destructor
   virtual ~GazeboMotorModel();
 
   virtual void InitializeParams();
@@ -109,13 +107,10 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   ros::Publisher motor_velocity_pub_;
   ros::Subscriber command_sub_;
 
-  // Pointer to the model.
   physics::ModelPtr model_;
-  // Pointer to the joint.
   physics::JointPtr joint_;
-  // Pointer to the link.
   physics::LinkPtr link_;
-  // Pointer to the update event connection.
+  /// \brief Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
   boost::thread callback_queue_thread_;

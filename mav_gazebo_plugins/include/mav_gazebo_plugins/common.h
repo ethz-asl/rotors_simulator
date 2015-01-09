@@ -49,7 +49,6 @@ bool getSdfParam(sdf::ElementPtr sdf, const std::string& name, T& param, const T
 
 
 
-
 template <typename T>
 class FirstOrderFilter {
 /*
