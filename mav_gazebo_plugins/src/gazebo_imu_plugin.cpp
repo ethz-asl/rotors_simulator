@@ -12,6 +12,7 @@
 #include <cmath>
 #include <iostream>
 #include <stdio.h>
+#include <glog/logging.h>
 
 namespace gazebo {
 
@@ -100,6 +101,7 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // elements. Only the broadband noise component is considered, specified as a
   // continuous-time density (two-sided spectrum); not the true covariance of
   // the measurements.
+  // Angular velocity measurement covariance.
   imu_message_.angular_velocity_covariance[0] =
       imu_parameters_.gyroscope_noise_density *
       imu_parameters_.gyroscope_noise_density;
@@ -109,6 +111,7 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   imu_message_.angular_velocity_covariance[8] =
       imu_parameters_.gyroscope_noise_density *
       imu_parameters_.gyroscope_noise_density;
+  // Linear acceleration measurement covariance.
   imu_message_.linear_acceleration_covariance[0] =
       imu_parameters_.accelerometer_noise_density *
       imu_parameters_.accelerometer_noise_density;
@@ -118,6 +121,8 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   imu_message_.linear_acceleration_covariance[8] =
       imu_parameters_.accelerometer_noise_density *
       imu_parameters_.accelerometer_noise_density;
+  // Orientation estimate covariance (no estimate provided).
+  imu_message_.orientation_covariance[0] = -1.0;
 
   gravity_W_ = world_->GetPhysicsEngine()->GetGravity();
   imu_parameters_.gravity_magnitude = gravity_W_.GetLength();
@@ -143,9 +148,9 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
                                Eigen::Vector3d* angular_velocity,
                                const double dt) {
-  assert(linear_acceleration);
-  assert(angular_velocity);
-  assert(dt > 0.0);
+  CHECK(linear_acceleration);
+  CHECK(angular_velocity);
+  CHECK(dt > 0.0);
 
   // Gyrosocpe
   double tau_g = imu_parameters_.gyroscope_bias_correlation_time;
