@@ -49,8 +49,6 @@ static const std::string kDefaultImuTopic = "imu";
 // https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics
 // TODO(burrimi): Should I have a minimalistic description of the params here?
 struct ImuParameters {
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
   /// Gyroscope noise density (two-sided spectrum) [rad/s/sqrt(Hz)]
   double gyroscope_noise_density;
   /// Gyroscope bias random walk [rad/s/s/sqrt(Hz)]
@@ -69,7 +67,6 @@ struct ImuParameters {
   double accelerometer_turn_on_bias_sigma;
   /// Norm of the gravitational acceleration [m/s^2]
   double gravity_magnitude;
-
 
   ImuParameters()
       : gyroscope_noise_density(kDefaultAdisGyroscopeNoiseDensity),
