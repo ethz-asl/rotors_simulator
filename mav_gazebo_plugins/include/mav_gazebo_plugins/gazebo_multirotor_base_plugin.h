@@ -25,7 +25,7 @@
 #include <gazebo/common/Plugin.hh>
 
 namespace gazebo {
-  // Default values
+// Default values
 static const std::string kDefaultNamespace = "";
 
 static const std::string kDefaultMotorPubTopic = "/ground_truth/pose";
