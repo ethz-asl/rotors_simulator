@@ -121,7 +121,7 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboPosePlugin::OnUpdate, this, _1));
+  updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboPosePlugin::OnUpdate, this, _1));
 
   pose_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_pub_topic_, 10);
 }

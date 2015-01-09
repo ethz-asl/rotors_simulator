@@ -35,7 +35,7 @@ void GazeboMotorModel::InitializeParams() {}
 
 
 void GazeboMotorModel::Publish() {
-  turning_velocity_msg_.data = this->joint_->GetVelocity(0);
+  turning_velocity_msg_.data = joint_->GetVelocity(0);
   motor_velocity_pub_.publish(turning_velocity_msg_);
 }
 
@@ -110,11 +110,11 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   max_force_ = max_rot_velocity_ * viscous_friction_coefficient_;
 
   // Set the maximumForce on the joint.
-  this->joint_->SetMaxForce(0, max_force_);
+  joint_->SetMaxForce(0, max_force_);
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboMotorModel::OnUpdate, this, _1));
+  updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboMotorModel::OnUpdate, this, _1));
 
   command_sub_ = node_handle_->subscribe(command_sub_topic_, 1000, &GazeboMotorModel::VelocityCallback, this);
   motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_pub_topic_, 10);
@@ -137,13 +137,12 @@ void GazeboMotorModel::VelocityCallback(const mav_msgs::MotorSpeedPtr& rot_veloc
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
 
-  motor_rot_vel_ = this->joint_->GetVelocity(0);
-  // TODO: We had to add a factor of 10 here and one in the SetVelocity,
-  // because currently gazebo doesn't allow to set the velocity to a higher value than 100.
+  motor_rot_vel_ = joint_->GetVelocity(0);
+  // TODO(ff): Here or above we should check that no aliasing is occuring on the spinning rotors.
   double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
   double force = real_motor_velocity * real_motor_velocity * motor_constant_;
-  // Apply a force to the link
-  this->link_->AddRelativeForce(math::Vector3(0, 0, force));
+  // Apply a force to the link.
+  link_->AddRelativeForce(math::Vector3(0, 0, force));
 
   // Forces from Philppe Martin's and Erwan Salaün's
   // 2010 IEEE Conference on Robotics and Automation paper
@@ -153,18 +152,18 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   math::Vector3 body_velocity = link_->GetWorldLinearVel();
   math::Vector3 body_velocity_perpendicular = body_velocity - (body_velocity * joint_axis) * joint_axis;
   math::Vector3 air_drag = -std::abs(real_motor_velocity) * rotor_drag_coefficient_ * body_velocity_perpendicular;
-  // Apply air_drag to link
-  this->link_->AddForce(air_drag);
+  // Apply air_drag to link.
+  link_->AddForce(air_drag);
   // Moments
-  this->link_->AddRelativeTorque(math::Vector3(0, 0, -turning_direction_ * force * moment_constant_));
+  link_->AddRelativeTorque(math::Vector3(0, 0, -turning_direction_ * force * moment_constant_));
 
   math::Vector3 rolling_moment;
   // - \omega * \mu_1 * V_A^{\perp}
   rolling_moment = -std::abs(real_motor_velocity) * rolling_moment_coefficient_ * body_velocity_perpendicular;
-  this->link_->AddRelativeTorque(rolling_moment);
-  //Apply the filter on motors velocity
+  link_->AddRelativeTorque(rolling_moment);
+  // Apply the filter on the motor's velocity.
   ref_motor_rot_vel_ = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
-  this->joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
+  joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
 }
 ;
 

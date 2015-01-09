@@ -69,14 +69,14 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   wind_gust_end_ = common::Time(wind_gust_start + wind_gust_duration);
 
   // Get the pointer to the link.
-  link_ = this->model_->GetLink(link_name_);
+  link_ = model_->GetLink(link_name_);
   if (link_ == NULL)
     gzthrow("[gazebo_wind_plugin] Couldn't find specified link \"" << link_name_ << "\".");
 
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->update_connection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboWindPlugin::OnUpdate, this, _1));
+  update_connection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboWindPlugin::OnUpdate, this, _1));
 
   wind_pub_ = node_handle_->advertise<geometry_msgs::WrenchStamped>(wind_pub_topic_, 10);
 }

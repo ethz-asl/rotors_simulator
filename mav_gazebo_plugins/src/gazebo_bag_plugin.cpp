@@ -58,7 +58,7 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     gzwarn << "[gazebo_bag_plugin] No linkName specified, using default " << link_name_ << ".\n";
 
   // Get the pointer to the link
-  link_ = this->model_->GetLink(link_name_);
+  link_ = model_->GetLink(link_name_);
   if (link_ == NULL)
     gzthrow("[gazebo_bag_plugin] Couldn't find specified link \"" << link_name_ << "\".");
 
@@ -90,7 +90,7 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->update_connection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboBagPlugin::OnUpdate, this, _1));
+  update_connection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboBagPlugin::OnUpdate, this, _1));
 
   time_t rawtime;
   struct tm *timeinfo;
@@ -120,7 +120,7 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       std::string motor_number_str = link_name.substr(pos + 6);
       unsigned int motor_number = std::stoi(motor_number_str);
       std::string joint_name = child_links_[i]->GetName() + "_joint";
-      physics::JointPtr joint = this->model_->GetJoint(joint_name);
+      physics::JointPtr joint = model_->GetJoint(joint_name);
       motor_joints_.insert(MotorNumberToJointPair(motor_number, joint));
     }
   }
@@ -140,7 +140,7 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   }
 
   if (!collisions.empty()) {
-    contact_mgr_->CreateFilter(this->link_->GetName(), collisions);
+    contact_mgr_->CreateFilter(link_->GetName(), collisions);
   }
 
   // Subscriber to IMU sensor_msgs::Imu Message.
@@ -169,9 +169,9 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Get the current simulation time.
   common::Time now = world_->GetSimTime();
-  this->LogCollisions(now);
-  this->LogGroundTruth(now);
-  this->LogMotorVelocities(now);
+  LogCollisions(now);
+  LogGroundTruth(now);
+  LogMotorVelocities(now);
 }
 
 void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuPtr& imu_msg) {

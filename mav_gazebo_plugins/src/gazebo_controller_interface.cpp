@@ -57,7 +57,7 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(
+  updateConnection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboControllerInterface::OnUpdate, this, _1));
 
   cmd_attitude_sub_ = node_handle_->subscribe(command_attitude_thrust_sub_topic_, 10,

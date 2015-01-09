@@ -51,7 +51,7 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->update_connection_ = event::Events::ConnectWorldUpdateBegin(
+  update_connection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboMultirotorBasePlugin::OnUpdate, this, _1));
 
   child_links_ = link_->GetChildJointsLinks();
