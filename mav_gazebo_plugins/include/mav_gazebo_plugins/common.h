@@ -120,10 +120,10 @@ Eigen::Quaternion<typename Derived::Scalar> QuaternionFromSmallAngle(const Eigen
 }
 
 template<class In, class Out>
-void copyPosition(const In& in, Out& out) {
-  out.x = in.x;
-  out.y = in.y;
-  out.z = in.z;
+void copyPosition(const In& in, Out* out) {
+  out->x = in.x;
+  out->y = in.y;
+  out->z = in.z;
 }
 
 #endif /* COMMON_H_ */
