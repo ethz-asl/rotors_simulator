@@ -41,6 +41,11 @@ add_library(mav_gazebo_pose_plugin src/gazebo_pose_plugin.cpp)
 target_link_libraries(mav_gazebo_pose_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(mav_gazebo_pose_plugin ${catkin_EXPORTED_TARGETS})
 
+
+add_library(mav_gazebo_imu_plugin src/gazebo_imu_plugin.cpp)
+target_link_libraries(mav_gazebo_imu_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(mav_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
+
 add_library(mav_gazebo_controller_interface src/gazebo_controller_interface.cpp)
 target_link_libraries(mav_gazebo_controller_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
