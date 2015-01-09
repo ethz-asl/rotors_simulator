@@ -50,7 +50,10 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   else
     gzerr << "[gazebo_imu_plugin] Please specify a linkName.\n";
   // Get the pointer to the link
-  link_ = this->model_->GetLink(link_name_);
+  link_ = model_->GetLink(link_name_);
+  if (link_ == NULL)
+    gzthrow("[gazebo_imu_plugin] Couldn't find specified link \"" << link_name_ << "\".");
+
   frame_id_ = link_name_;
 
   getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_, kDefaultImuTopic);
@@ -92,24 +95,25 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 10);
 
   // Fill imu message.
-  imu_msg.header.frame_id = frame_id_;
+  imu_message_.header.frame_id = frame_id_;
   // TODO(nikolicj): Discuss with burrimi to specify what is needed here.
-  imu_msg.angular_velocity_covariance[0] =
+  // We assume uncorrelated noise on the 3 channels -> only set diagonal elements.
+  imu_message_.angular_velocity_covariance[0] =
       imu_parameters_.gyroscope_noise_density *
       imu_parameters_.gyroscope_noise_density;
-  imu_msg.angular_velocity_covariance[4] =
+  imu_message_.angular_velocity_covariance[4] =
       imu_parameters_.gyroscope_noise_density *
       imu_parameters_.gyroscope_noise_density;
-  imu_msg.angular_velocity_covariance[8] =
+  imu_message_.angular_velocity_covariance[8] =
       imu_parameters_.gyroscope_noise_density *
       imu_parameters_.gyroscope_noise_density;
-  imu_msg.linear_acceleration_covariance[0] =
+  imu_message_.linear_acceleration_covariance[0] =
       imu_parameters_.accelerometer_noise_density *
       imu_parameters_.accelerometer_noise_density;
-  imu_msg.linear_acceleration_covariance[4] =
+  imu_message_.linear_acceleration_covariance[4] =
       imu_parameters_.accelerometer_noise_density *
       imu_parameters_.accelerometer_noise_density;
-  imu_msg.linear_acceleration_covariance[8] =
+  imu_message_.linear_acceleration_covariance[8] =
       imu_parameters_.accelerometer_noise_density *
       imu_parameters_.accelerometer_noise_density;
 
@@ -121,9 +125,9 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   double sigma_bon_g = imu_parameters_.gyroscope_turn_on_bias_sigma;
   double sigma_bon_a = imu_parameters_.accelerometer_turn_on_bias_sigma;
   for (int i = 0; i < 3; ++i) {
-      gyroscope_turn_on_bias_(i) =
+      gyroscope_turn_on_bias_[i] =
           sigma_bon_g * standard_normal_distribution_(random_generator_);
-      accelerometer_turn_on_bias_(i) =
+      accelerometer_turn_on_bias_[i] =
           sigma_bon_a * standard_normal_distribution_(random_generator_);
   }
 
@@ -155,12 +159,12 @@ void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
   double phi_g_d = exp(-1.0 / tau_g * dt);
   // Simulate gyroscope noise processes and add them to the true angular rate.
   for (int i = 0; i < 3; ++i) {
-    gyroscope_bias_(i) = phi_g_d * gyroscope_bias_(i) +
+    gyroscope_bias_[i] = phi_g_d * gyroscope_bias_[i] +
         sigma_b_g_d * standard_normal_distribution_(random_generator_);
-    (*angular_velocity)(i) = (*angular_velocity)(i) +
-        gyroscope_bias_(i) +
+    (*angular_velocity)[i] = (*angular_velocity)[i] +
+        gyroscope_bias_[i] +
         sigma_g_d * standard_normal_distribution_(random_generator_) +
-        gyroscope_turn_on_bias_(i);
+        gyroscope_turn_on_bias_[i];
   }
 
   // Accelerometer
@@ -178,17 +182,17 @@ void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
   // Simulate accelerometer noise processes and add them to the true linear
   // acceleration.
   for (int i = 0; i < 3; ++i) {
-    accelerometer_bias_(i) = phi_a_d * accelerometer_bias_(i) +
+    accelerometer_bias_[i] = phi_a_d * accelerometer_bias_[i] +
         sigma_b_a_d * standard_normal_distribution_(random_generator_);
-    (*linear_acceleration)(i) = (*linear_acceleration)(i) +
-        accelerometer_bias_(i) +
+    (*linear_acceleration)[i] = (*linear_acceleration)[i] +
+        accelerometer_bias_[i] +
         sigma_a_d * standard_normal_distribution_(random_generator_) +
-        accelerometer_turn_on_bias_(i);
+        accelerometer_turn_on_bias_[i];
   }
 
 }
 
-// Called by the world update start event
+// This gets called by the world update start event.
 void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   common::Time current_time  = world_->GetSimTime();
   double dt = (current_time - last_time_).Double();
@@ -200,7 +204,7 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   math::Vector3 velocity_current_W = link_->GetWorldLinearVel();
 
-  // link_->GetRelativeLinearAccel() does not work.
+  // link_->GetRelativeLinearAccel() does not work sometimes. Returns only 0.
   // TODO For an accurate simulation, this might have to be fixed. Consider the
   //      time delay introduced by this numerical derivative, for example.
   math::Vector3 acceleration = (velocity_current_W - velocity_prev_W_) / dt;
@@ -218,23 +222,23 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   addNoise(&linear_acceleration_I, &angular_velocity_I, dt);
 
   // Fill IMU message.
-  imu_msg.header.stamp.sec = current_time.sec;
-  imu_msg.header.stamp.nsec = current_time.nsec;
+  imu_message_.header.stamp.sec = current_time.sec;
+  imu_message_.header.stamp.nsec = current_time.nsec;
 
   // TODO(burrimi): Add noise to orientation.
-  imu_msg.orientation.w = C_W_I.w;
-  imu_msg.orientation.x = C_W_I.x;
-  imu_msg.orientation.y = C_W_I.y;
-  imu_msg.orientation.z = C_W_I.z;
+  imu_message_.orientation.w = C_W_I.w;
+  imu_message_.orientation.x = C_W_I.x;
+  imu_message_.orientation.y = C_W_I.y;
+  imu_message_.orientation.z = C_W_I.z;
 
-  imu_msg.linear_acceleration.x = linear_acceleration_I(0);
-  imu_msg.linear_acceleration.y = linear_acceleration_I(1);
-  imu_msg.linear_acceleration.z = linear_acceleration_I(2);
-  imu_msg.angular_velocity.x = angular_velocity_I(0);
-  imu_msg.angular_velocity.y = angular_velocity_I(1);
-  imu_msg.angular_velocity.z = angular_velocity_I(2);
+  imu_message_.linear_acceleration.x = linear_acceleration_I[0];
+  imu_message_.linear_acceleration.y = linear_acceleration_I[1];
+  imu_message_.linear_acceleration.z = linear_acceleration_I[2];
+  imu_message_.angular_velocity.x = angular_velocity_I[0];
+  imu_message_.angular_velocity.y = angular_velocity_I[1];
+  imu_message_.angular_velocity.z = angular_velocity_I[2];
 
-  imu_pub_.publish(imu_msg);
+  imu_pub_.publish(imu_message_);
 
   velocity_prev_W_ = velocity_current_W;
 }

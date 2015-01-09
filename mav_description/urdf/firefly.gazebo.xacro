@@ -30,7 +30,7 @@
       <!-- parameters according to http://wiki.ros.org/hector_gazebo_plugins#GazeboRosImu -->
       <robotNamespace>${namespace}</robotNamespace>
       <bodyName>imu_link</bodyName> <!-- (string, required): name of the body which holds the IMU sensor -->
-      <topicName>imu</topicName> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
+      <topicName>imu_hector</topicName> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
       <accelOffset>0.0 0.0 0.0</accelOffset> <!-- (Vector3): constant acceleration offset -->
       <accelDrift>0.0 0.0 0.0</accelDrift> <!-- (Vector3): standard deviation of the acceleration drift error -->
       <accelDriftFrequency>${1.0/3600.0} ${1.0/3600.0} ${1.0/3600.0}</accelDriftFrequency> <!-- (Vector3): mean frequency of the acceleration drift -->
@@ -53,7 +53,7 @@
     <plugin filename="libmav_gazebo_imu_plugin.so" name="mav_gazebo_imu_plugin">
       <robotNamespace>${namespace}</robotNamespace>
       <linkName>imu_link</linkName> <!-- (string, required): name of the body which holds the IMU sensor -->
-      <imuTopic>imu_new</imuTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
+      <imuTopic>imu</imuTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
 	  <!-- A good description of the IMU parameters can be found in the kalibr documentation:
 	       https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics -->
       <gyroscopeNoiseDensity>0.0003394</gyroscopeNoiseDensity> <!-- Gyroscope noise density (two-sided spectrum) [rad/s/sqrt(Hz)] -->
@@ -64,7 +64,6 @@
       <accelerometerRandomWalk>0.006</accelerometerRandomWalk> <!-- Accelerometer bias random walk. [m/s^2/s/sqrt(Hz)] -->
       <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime> <!-- Accelerometer bias correlation time constant [s] -->
       <accelerometerTurnOnBiasSigma>0.1960</accelerometerTurnOnBiasSigma> <!-- Accelerometer turn on bias standard deviation [m/s^2] -->
-      <gravity_magnitude>9.8068</gravity_magnitude> <!-- Earth's gravity in Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84) [m/s^2] -->
     </plugin>
   </gazebo>
 

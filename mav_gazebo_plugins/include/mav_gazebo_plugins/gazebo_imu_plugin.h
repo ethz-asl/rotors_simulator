@@ -127,7 +127,7 @@ class GazeboImuPlugin : public ModelPlugin {
 
   common::Time last_time_;
 
-  sensor_msgs::Imu imu_msg;
+  sensor_msgs::Imu imu_message_;
 
   math::Vector3 gravity_W_;
   math::Vector3 velocity_prev_W_;
