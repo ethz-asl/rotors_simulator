@@ -44,7 +44,6 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   motor_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_pub_topic_, 10);
   frame_id_ = link_name_;
 
-  // Get the pointer to the link.
   link_ = model_->GetLink(link_name_);
   if (link_ == NULL)
     gzthrow("[gazebo_multirotor_base_plugin] Couldn't find specified link \"" << link_name_ << "\".");

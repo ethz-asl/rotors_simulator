@@ -59,7 +59,6 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
   else
     gzerr << "[gazebo_pose_plugin] Please specify a linkName.\n";
-  // Get the pointer to the link.
   link_ = model_->GetLink(link_name_);
   if (link_ == NULL)
     gzthrow("[gazebo_pose_plugin] Couldn't find specified link \"" << link_name_ << "\".");

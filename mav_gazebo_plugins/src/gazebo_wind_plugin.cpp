@@ -68,7 +68,6 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   wind_gust_start_ = common::Time(wind_gust_start);
   wind_gust_end_ = common::Time(wind_gust_start + wind_gust_duration);
 
-  // Get the pointer to the link.
   link_ = model_->GetLink(link_name_);
   if (link_ == NULL)
     gzthrow("[gazebo_wind_plugin] Couldn't find specified link \"" << link_name_ << "\".");
