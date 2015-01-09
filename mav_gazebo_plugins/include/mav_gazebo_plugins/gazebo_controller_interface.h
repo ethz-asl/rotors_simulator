@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,9 +38,28 @@
 #include <mav_msgs/MotorSpeed.h>
 
 namespace gazebo {
+// Default values
+static const std::string kDefaultNamespace = "";
+static const std::string kDefaultMotorVelocityReferencePubTopic = "/motor_velocity_reference";
+static const std::string kDefaultCommandAttitudeThrustSubTopic = "/command/attitude";
+static const std::string kDefaultCommandRateThrustSubTopic = "/command/rate";
+static const std::string kDefaultCommandMotorSpeedSubTopic = "/command/motors";
+static const std::string kDefaultImuSubTopic = "/imu";
+
+
+
 class GazeboControllerInterface : public ModelPlugin {
  public:
-  GazeboControllerInterface();
+  GazeboControllerInterface()
+      : ModelPlugin(),
+        namespace_(kDefaultNamespace),
+        motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferencePubTopic),
+        command_attitude_thrust_sub_topic_(kDefaultCommandAttitudeThrustSubTopic),
+        command_rate_thrust_sub_topic_(kDefaultCommandRateThrustSubTopic),
+        command_motor_speed_sub_topic_(kDefaultCommandMotorSpeedSubTopic),
+        imu_sub_topic_(kDefaultImuSubTopic),
+        node_handle_(NULL),
+        controller_created_(false) {}
   ~GazeboControllerInterface();
 
   void InitializeParams();
@@ -55,22 +74,22 @@ class GazeboControllerInterface : public ModelPlugin {
   bool controller_created_;
 
   std::string namespace_;
-  std::string command_topic_;
-  std::string imu_topic_;
-  std::string motor_velocity_topic_;
+  std::string motor_velocity_reference_pub_topic_;
+  std::string command_attitude_thrust_sub_topic_;
+  std::string command_rate_thrust_sub_topic_;
+  std::string command_motor_speed_sub_topic_;
+  std::string imu_sub_topic_;
 
   ros::NodeHandle* node_handle_;
-  ros::Publisher motor_cmd_pub_;
+  ros::Publisher motor_velocity_reference_pub_;
   ros::Subscriber cmd_attitude_sub_;
   ros::Subscriber cmd_rate_sub_;
   ros::Subscriber cmd_motor_sub_;
   ros::Subscriber imu_sub_;
 
-  /// \brief Pointer to the model
   physics::ModelPtr model_;
-  /// \brief Pointer to the world.
   physics::WorldPtr world_;
-  /// \brief Pointer to the update event connection
+  /// \brief Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
   sensor_msgs::Imu imu_;
