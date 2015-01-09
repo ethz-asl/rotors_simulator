@@ -41,10 +41,10 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   model_ = _model;
   world_ = model_->GetWorld();
 
-  sdf::Vector3 noise_normal_p;
-  sdf::Vector3 noise_normal_q;
-  sdf::Vector3 noise_uniform_p;
-  sdf::Vector3 noise_uniform_q;
+  sdf::Vector3 noise_normal_position;
+  sdf::Vector3 noise_normal_quaternion;
+  sdf::Vector3 noise_uniform_position;
+  sdf::Vector3 noise_uniform_quaternion;
   const sdf::Vector3 zeros3(0.0, 0.0, 0.0);
 
   pose_queue_.clear();
@@ -84,37 +84,37 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   getSdfParam<std::string>(_sdf, "poseTopic", pose_pub_topic_, "pose");
 
-  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalP", noise_normal_p, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalQ", noise_normal_q, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformP", noise_uniform_p, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformQ", noise_uniform_q, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalPosition", noise_normal_position, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalQuaternion", noise_normal_quaternion, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformPosition", noise_uniform_position, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformQuaternion", noise_uniform_quaternion, zeros3);
   getSdfParam<int>(_sdf, "measurementDelay", measurement_delay_, measurement_delay_);
   getSdfParam<int>(_sdf, "measurementDivisor", measurement_divisor_, measurement_divisor_);
   getSdfParam<double>(_sdf, "unknownDelay", unknown_delay_, unknown_delay_);
   getSdfParam<double>(_sdf, "covarianceImageScale", covariance_image_scale_, covariance_image_scale_);
 
-  pos_n_[0] = NormalDistribution(0, noise_normal_p.x);
-  pos_n_[1] = NormalDistribution(0, noise_normal_p.y);
-  pos_n_[2] = NormalDistribution(0, noise_normal_p.z);
+  pos_n_[0] = NormalDistribution(0, noise_normal_position.x);
+  pos_n_[1] = NormalDistribution(0, noise_normal_position.y);
+  pos_n_[2] = NormalDistribution(0, noise_normal_position.z);
 
-  att_n_[0] = NormalDistribution(0, noise_normal_q.x);
-  att_n_[1] = NormalDistribution(0, noise_normal_q.y);
-  att_n_[2] = NormalDistribution(0, noise_normal_q.z);
+  att_n_[0] = NormalDistribution(0, noise_normal_quaternion.x);
+  att_n_[1] = NormalDistribution(0, noise_normal_quaternion.y);
+  att_n_[2] = NormalDistribution(0, noise_normal_quaternion.z);
 
-  pos_u_[0] = UniformDistribution(-noise_uniform_p.x, noise_uniform_p.x);
-  pos_u_[1] = UniformDistribution(-noise_uniform_p.y, noise_uniform_p.y);
-  pos_u_[2] = UniformDistribution(-noise_uniform_p.z, noise_uniform_p.z);
+  pos_u_[0] = UniformDistribution(-noise_uniform_position.x, noise_uniform_position.x);
+  pos_u_[1] = UniformDistribution(-noise_uniform_position.y, noise_uniform_position.y);
+  pos_u_[2] = UniformDistribution(-noise_uniform_position.z, noise_uniform_position.z);
 
-  att_u_[0] = UniformDistribution(-noise_uniform_q.x, noise_uniform_q.x);
-  att_u_[1] = UniformDistribution(-noise_uniform_q.y, noise_uniform_q.y);
-  att_u_[2] = UniformDistribution(-noise_uniform_q.z, noise_uniform_q.z);
+  att_u_[0] = UniformDistribution(-noise_uniform_quaternion.x, noise_uniform_quaternion.x);
+  att_u_[1] = UniformDistribution(-noise_uniform_quaternion.y, noise_uniform_quaternion.y);
+  att_u_[2] = UniformDistribution(-noise_uniform_quaternion.z, noise_uniform_quaternion.z);
 
   // Fill in covariance. We omit uniform noise here.
   Eigen::Map<Eigen::Matrix<double, 6, 6> > cov(covariance_matrix_.data());
   Eigen::Matrix<double, 6, 1> covd;
 
-  covd << noise_normal_p.x * noise_normal_p.x, noise_normal_p.y * noise_normal_p.y, noise_normal_p.z * noise_normal_p.z, noise_normal_q
-      .x * noise_normal_q.x, noise_normal_q.y * noise_normal_q.y, noise_normal_q.z * noise_normal_q.z;
+  covd << noise_normal_position.x * noise_normal_position.x, noise_normal_position.y * noise_normal_position.y, noise_normal_position.z * noise_normal_position.z, noise_normal_quaternion
+      .x * noise_normal_quaternion.x, noise_normal_quaternion.y * noise_normal_quaternion.y, noise_normal_quaternion.z * noise_normal_quaternion.z;
   cov = covd.asDiagonal();
 
   frame_id_ = namespace_ + "/" + link_name_;
@@ -156,7 +156,7 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
     pose.header.stamp.sec = (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec;
     pose.header.stamp.nsec = (world_->GetSimTime()).nsec + ros::Duration(unknown_delay_).nsec;
 
-    copyPosition(gazebo_pose.pos, pose.pose.position);
+    copyPosition(gazebo_pose.pos, &pose.pose.position);
     pose.pose.orientation.w = gazebo_pose.rot.w;
     pose.pose.orientation.x = gazebo_pose.rot.x;
     pose.pose.orientation.y = gazebo_pose.rot.y;
