@@ -21,11 +21,7 @@
 #include <octomap_msgs/conversions.h>
 
 namespace gazebo {
-OctomapFromGazeboWorld::OctomapFromGazeboWorld()
-    : WorldPlugin(),
-      node_handle_(),
-      octomap_(NULL) {
-}
+
 OctomapFromGazeboWorld::~OctomapFromGazeboWorld() {
   delete octomap_;
   octomap_ = NULL;
@@ -297,8 +293,8 @@ void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request
       start.x = x;
 
       // garbage collector
-      for (std::map<std::string, bool>::iterator it = objects_in_collision.begin(); it != objects_in_collision.end();
-          it++) {
+      for (std::map<std::string, bool>::iterator it = objects_in_collision.begin();
+           it != objects_in_collision.end(); it++) {
         if (!CheckIfInsideObjectInX(it->first, start, ray)) {
           objects_in_collision.erase(it);
         }

@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,43 +25,6 @@
 
 namespace gazebo {
 
-/// Computes a quaternion from the 3-element small angle approximation theta.
-template<class Derived>
-Eigen::Quaternion<typename Derived::Scalar> QuaternionFromSmallAngle(const Eigen::MatrixBase<Derived> & theta) {
-  typedef typename Derived::Scalar Scalar;
-  EIGEN_STATIC_ASSERT_FIXED_SIZE(Derived);
-  EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
-  const Scalar q_squared = theta.squaredNorm() / 4.0;
-
-  if (q_squared < 1) {
-    return Eigen::Quaternion<Scalar>(sqrt(1 - q_squared), theta[0] * 0.5, theta[1] * 0.5, theta[2] * 0.5);
-  }
-  else {
-    const Scalar w = 1.0 / sqrt(1 + q_squared);
-    const Scalar f = w * 0.5;
-    return Eigen::Quaternion<Scalar>(w, theta[0] * f, theta[1] * f, theta[2] * f);
-  }
-}
-
-template<class In, class Out>
-void copyPosition(const In& in, Out& out) {
-  out.x = in.x;
-  out.y = in.y;
-  out.z = in.z;
-}
-
-GazeboPosePlugin::GazeboPosePlugin()
-    : ModelPlugin(),
-      node_handle_(0),
-      gen_(rd_()),
-      measurement_delay_(0),
-      measurement_divisor_(1),
-      unknown_delay_(0),
-      gazebo_seq_(0),
-      pose_seq_(0),
-      covariance_image_scale_(1) {
-}
-
 GazeboPosePlugin::~GazeboPosePlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
   if (node_handle_) {
@@ -69,7 +32,6 @@ GazeboPosePlugin::~GazeboPosePlugin() {
     delete node_handle_;
   }
 }
-;
 
 // void GazeboPosePlugin::InitializeParams() {};
 // void GazeboPosePlugin::Publish() {};
@@ -77,24 +39,13 @@ GazeboPosePlugin::~GazeboPosePlugin() {
 void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Store the pointer to the model
   model_ = _model;
-  // world_ = physics::get_world(model_->world.name);
   world_ = model_->GetWorld();
 
-  // default params
-  namespace_.clear();
-  pose_topic_ = "pose";
-  measurement_divisor_ = 1;
-  measurement_delay_ = 0;
-  unknown_delay_ = 0;
-
-  sdf::Vector3 noise_normal_p;
-  sdf::Vector3 noise_normal_q;
-  sdf::Vector3 noise_uniform_p;
-  sdf::Vector3 noise_uniform_q;
+  sdf::Vector3 noise_normal_position;
+  sdf::Vector3 noise_normal_quaternion;
+  sdf::Vector3 noise_uniform_position;
+  sdf::Vector3 noise_uniform_quaternion;
   const sdf::Vector3 zeros3(0.0, 0.0, 0.0);
-
-  gazebo_seq_ = 0;
-  pose_seq_ = 0;
 
   pose_queue_.clear();
 
@@ -108,24 +59,11 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
   else
     gzerr << "[gazebo_pose_plugin] Please specify a linkName.\n";
-  // Get the pointer to the link
-  link_ = this->model_->GetLink(link_name_);
+  link_ = model_->GetLink(link_name_);
+  if (link_ == NULL)
+    gzthrow("[gazebo_pose_plugin] Couldn't find specified link \"" << link_name_ << "\".");
 
-  if (_sdf->HasElement("poseTopic"))
-    pose_topic_ = _sdf->GetElement("poseTopic")->Get<std::string>();
 
-  if (_sdf->HasElement("measurementDelay"))
-    measurement_delay_ = _sdf->GetElement("measurementDelay")->Get<int>();
-
-  if (_sdf->HasElement("measurementDivisor"))
-    measurement_divisor_ = _sdf->GetElement("measurementDivisor")->Get<double>();
-
-  getSdfParam(_sdf, "noiseNormalP", noise_normal_p, zeros3);
-  getSdfParam(_sdf, "noiseNormalQ", noise_normal_q, zeros3);
-  getSdfParam(_sdf, "noiseUniformP", noise_uniform_p, zeros3);
-  getSdfParam(_sdf, "noiseUniformQ", noise_uniform_q, zeros3);
-
-  getSdfParam(_sdf, "unknownDelay", unknown_delay_, 0.0);
 
   if (_sdf->HasElement("covarianceImage")) {
     std::string image_name = _sdf->GetElement("covarianceImage")->Get<std::string>();
@@ -136,8 +74,6 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       gzlog << "loading covariance image " << image_name << " successful" << std::endl;
   }
 
-  getSdfParam(_sdf, "covarianceImageScale", covariance_image_scale_, 1.0);
-
   if (_sdf->HasElement("randomEngineSeed")) {
     gen_.seed(_sdf->GetElement("randomEngineSeed")->Get<unsigned int>());
   }
@@ -145,47 +81,58 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     gen_.seed(std::chrono::system_clock::now().time_since_epoch().count());
   }
 
-  pos_n_[0] = NormalDistribution(0, noise_normal_p.x);
-  pos_n_[1] = NormalDistribution(0, noise_normal_p.y);
-  pos_n_[2] = NormalDistribution(0, noise_normal_p.z);
+  getSdfParam<std::string>(_sdf, "poseTopic", pose_pub_topic_, "pose");
 
-  att_n_[0] = NormalDistribution(0, noise_normal_q.x);
-  att_n_[1] = NormalDistribution(0, noise_normal_q.y);
-  att_n_[2] = NormalDistribution(0, noise_normal_q.z);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalPosition", noise_normal_position, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalQuaternion", noise_normal_quaternion, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformPosition", noise_uniform_position, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformQuaternion", noise_uniform_quaternion, zeros3);
+  getSdfParam<int>(_sdf, "measurementDelay", measurement_delay_, measurement_delay_);
+  getSdfParam<int>(_sdf, "measurementDivisor", measurement_divisor_, measurement_divisor_);
+  getSdfParam<double>(_sdf, "unknownDelay", unknown_delay_, unknown_delay_);
+  getSdfParam<double>(_sdf, "covarianceImageScale", covariance_image_scale_, covariance_image_scale_);
 
-  pos_u_[0] = UniformDistribution(-noise_uniform_p.x, noise_uniform_p.x);
-  pos_u_[1] = UniformDistribution(-noise_uniform_p.y, noise_uniform_p.y);
-  pos_u_[2] = UniformDistribution(-noise_uniform_p.z, noise_uniform_p.z);
+  pos_n_[0] = NormalDistribution(0, noise_normal_position.x);
+  pos_n_[1] = NormalDistribution(0, noise_normal_position.y);
+  pos_n_[2] = NormalDistribution(0, noise_normal_position.z);
 
-  att_u_[0] = UniformDistribution(-noise_uniform_q.x, noise_uniform_q.x);
-  att_u_[1] = UniformDistribution(-noise_uniform_q.y, noise_uniform_q.y);
-  att_u_[2] = UniformDistribution(-noise_uniform_q.z, noise_uniform_q.z);
+  att_n_[0] = NormalDistribution(0, noise_normal_quaternion.x);
+  att_n_[1] = NormalDistribution(0, noise_normal_quaternion.y);
+  att_n_[2] = NormalDistribution(0, noise_normal_quaternion.z);
 
-  // Fill in covariance. We omit uniform noise here, to make it more exciting for the challengers :).
+  pos_u_[0] = UniformDistribution(-noise_uniform_position.x, noise_uniform_position.x);
+  pos_u_[1] = UniformDistribution(-noise_uniform_position.y, noise_uniform_position.y);
+  pos_u_[2] = UniformDistribution(-noise_uniform_position.z, noise_uniform_position.z);
+
+  att_u_[0] = UniformDistribution(-noise_uniform_quaternion.x, noise_uniform_quaternion.x);
+  att_u_[1] = UniformDistribution(-noise_uniform_quaternion.y, noise_uniform_quaternion.y);
+  att_u_[2] = UniformDistribution(-noise_uniform_quaternion.z, noise_uniform_quaternion.z);
+
+  // Fill in covariance. We omit uniform noise here.
   Eigen::Map<Eigen::Matrix<double, 6, 6> > cov(covariance_matrix_.data());
   Eigen::Matrix<double, 6, 1> covd;
 
-  covd << noise_normal_p.x * noise_normal_p.x, noise_normal_p.y * noise_normal_p.y, noise_normal_p.z * noise_normal_p.z, noise_normal_q
-      .x * noise_normal_q.x, noise_normal_q.y * noise_normal_q.y, noise_normal_q.z * noise_normal_q.z;
+  covd << noise_normal_position.x * noise_normal_position.x, noise_normal_position.y * noise_normal_position.y, noise_normal_position.z * noise_normal_position.z, noise_normal_quaternion
+      .x * noise_normal_quaternion.x, noise_normal_quaternion.y * noise_normal_quaternion.y, noise_normal_quaternion.z * noise_normal_quaternion.z;
   cov = covd.asDiagonal();
 
   frame_id_ = namespace_ + "/" + link_name_;
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboPosePlugin::OnUpdate, this, _1));
+  updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboPosePlugin::OnUpdate, this, _1));
 
-  pose_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_topic_, 10);
+  pose_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_pub_topic_, 10);
 }
 
-// Called by the world update start event
+// This gets called by the world update start event.
 void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Pose gazebo_pose = link_->GetWorldCoGPose();
   bool publish_pose = true;
 
-  // first, determine whether we should publish a pose
+  // First, determine whether we should publish a pose.
   if (covariance_image_.data != NULL) {
-    // we have an image
+    // We have an image.
 
     // Image is always centered around the origin:
     int width = covariance_image_.cols;
@@ -201,32 +148,32 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
     }
   }
 
-  if (gazebo_seq_ % measurement_divisor_ == 0) {
+  if (gazebo_sequence_ % measurement_divisor_ == 0) {
     geometry_msgs::PoseStamped pose;
     pose.header.frame_id = frame_id_;
-    pose.header.seq = pose_seq_++;
+    pose.header.seq = pose_sequence_++;
     pose.header.stamp.sec = (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec;
     pose.header.stamp.nsec = (world_->GetSimTime()).nsec + ros::Duration(unknown_delay_).nsec;
 
-    copyPosition(gazebo_pose.pos, pose.pose.position);
+    copyPosition(gazebo_pose.pos, &pose.pose.position);
     pose.pose.orientation.w = gazebo_pose.rot.w;
     pose.pose.orientation.x = gazebo_pose.rot.x;
     pose.pose.orientation.y = gazebo_pose.rot.y;
     pose.pose.orientation.z = gazebo_pose.rot.z;
 
     if (publish_pose)
-      pose_queue_.push_back(std::make_pair(gazebo_seq_ + measurement_delay_, pose));
+      pose_queue_.push_back(std::make_pair(gazebo_sequence_ + measurement_delay_, pose));
   }
 
-  // Is it time to publish the front element ?
-  if (gazebo_seq_ == pose_queue_.front().first) {
+  // Is it time to publish the front element?
+  if (gazebo_sequence_ == pose_queue_.front().first) {
     geometry_msgs::PoseWithCovarianceStampedPtr pose(new geometry_msgs::PoseWithCovarianceStamped);
 
     pose->header = pose_queue_.front().second.header;
     pose->pose.pose = pose_queue_.front().second.pose;
     pose_queue_.pop_front();
 
-    //calculate position distortions
+    // Calculate position distortions.
     Eigen::Vector3d pos_n;
     pos_n << pos_n_[0](gen_) + pos_u_[0](gen_), pos_n_[1](gen_) + pos_u_[1](gen_), pos_n_[2](gen_) + pos_u_[2](gen_);
     geometry_msgs::Point& p = pose->pose.pose.position;
@@ -234,7 +181,7 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
     p.y += pos_n[1];
     p.z += pos_n[2];
 
-    //calculate attitude distortions
+    // Calculate attitude distortions.
     Eigen::Vector3d theta;
     theta << att_n_[0](gen_) + att_u_[0](gen_), att_n_[1](gen_) + att_u_[1](gen_), att_n_[2](gen_) + att_u_[2](gen_);
     Eigen::Quaterniond q_n = QuaternionFromSmallAngle(theta);
@@ -254,7 +201,7 @@ void GazeboPosePlugin::OnUpdate(const common::UpdateInfo& _info) {
 //        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
   }
 
-  ++gazebo_seq_;
+  ++gazebo_sequence_;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboPosePlugin);

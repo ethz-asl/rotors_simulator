@@ -47,12 +47,12 @@
     <!-- Controller interface -->
     <plugin name="controller_interface" filename="libmav_gazebo_controller_interface.so">
       <robotNamespace>${namespace}</robotNamespace>
-      <commandTopicAttitude>command/attitude</commandTopicAttitude>
-      <commandTopicRate>command/rate</commandTopicRate>
-      <commandTopicMotor>command/motors</commandTopicMotor>
-      <imuTopic>imu</imuTopic>
+      <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
+      <commandRateThrustSubTopic>command/rate</commandRateThrustSubTopic>
+      <commandMotorSpeedSubTopic>command/motors</commandMotorSpeedSubTopic>
+      <imuSubTopic>imu</imuSubTopic>
       <poseTopic>pose</poseTopic>
-      <motorVelocityReferenceTopic>motor_vel_ref</motorVelocityReferenceTopic>
+      <motorVelocityReferenceTopic>motor_velocity_reference</motorVelocityReferenceTopic>
     </plugin>
   </gazebo>
 
@@ -66,10 +66,10 @@
       <measurementDivisor>7</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
       <measurementDelay>0</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
       <unknownDelay>0.0</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
-      <noiseNormalP>0.005 0.005 0.005</noiseNormalP> <!-- standard deviation of additive white gaussian noise [m] -->
-      <noiseNormalQ>0.01 0.01 0.01</noiseNormalQ> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
-      <noiseUniformP>0 0 0</noiseUniformP> <!-- symmetric bounds of uniform noise [m] -->
-      <noiseUniformQ>0 0 0</noiseUniformQ> <!-- symmetric bounds of uniform noise [rad], computation see above -->
+      <noiseNormalPosition>0.005 0.005 0.005</noiseNormalPosition> <!-- standard deviation of additive white gaussian noise [m] -->
+      <noiseNormalQuaternion>0.01 0.01 0.01</noiseNormalQuaternion> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
+      <noiseUniformPosition>0 0 0</noiseUniformPosition> <!-- symmetric bounds of uniform noise [m] -->
+      <noiseUniformQuaternion>0 0 0</noiseUniformQuaternion> <!-- symmetric bounds of uniform noise [rad], computation see above -->
     </plugin>
   </gazebo>
 
