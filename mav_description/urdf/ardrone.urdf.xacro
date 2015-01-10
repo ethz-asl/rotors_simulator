@@ -58,7 +58,7 @@
   <xacro:vertical_rotor
     robot_namespace="${namespace}"
     suffix="front_right"
-    direction="cw"
+    direction="ccw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
     parent="base_link"
@@ -78,7 +78,7 @@
   <xacro:vertical_rotor
     robot_namespace="${namespace}"
     suffix="back_left"
-    direction="cw"
+    direction="ccw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
     parent="base_link"
@@ -97,7 +97,7 @@
 
   <xacro:vertical_rotor robot_namespace="${namespace}"
     suffix="front_left"
-    direction="ccw"
+    direction="cw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
     parent="base_link"
@@ -116,7 +116,7 @@
 
   <xacro:vertical_rotor robot_namespace="${namespace}"
     suffix="back_right"
-    direction="ccw"
+    direction="cw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
     parent="base_link"
