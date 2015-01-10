@@ -3,8 +3,9 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro"
-    params="robot_namespace mass body_width body_height mesh_file *inertia">
-    <link name="base_link"></link>
+    params="robot_namespace mass body_width body_height mesh_file mesh_scale color *inertia">
+    <link name="base_link">
+    </link>
     <joint name="base_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <parent link="base_link" />
@@ -21,7 +22,7 @@
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
           <mesh filename="package://mav_description/meshes/${mesh_file}"
-            scale="1 1 1" />
+            scale="${mesh_scale}" />
           <!-- <box size="${body_width} ${body_width} ${body_height}"/> --> <!-- [m] [m] [m] -->
         </geometry>
       </visual>
@@ -50,7 +51,7 @@
       <child link="imu_link" />
       <limit upper="0" lower="0" effort="0" velocity="0" />
     </joint>
-    
+
     <!-- attach multirotor_base_plugin to the base_link -->
     <gazebo>
       <plugin filename="libmav_gazebo_multirotor_base_plugin.so" name="rosbag">
@@ -58,6 +59,10 @@
         <linkName>base_link</linkName>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
       </plugin>
+    </gazebo>
+
+    <gazebo reference="base_link">
+      <material>Gazebo/${color}</material>
     </gazebo>
   </xacro:macro>
 
@@ -134,7 +139,7 @@
 
   <!-- Rotor joint and link -->
   <xacro:macro name="vertical_rotor"
-    params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant max_rot_velocity motor_number rotor_drag_coefficient rolling_moment_coefficient color *origin *inertia">
+    params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant max_rot_velocity motor_number rotor_drag_coefficient rolling_moment_coefficient color mesh *origin *inertia">
     <joint name="rotor_${motor_number}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
@@ -145,7 +150,7 @@
 
     </joint>
     <!-- TODO(ff): not currently set because it's not yet supported -->
-    <!-- <gazebo reference="rotor_${motor_number}_joint"> <axis> <xyz>0 0 1</xyz> 
+    <!-- <gazebo reference="rotor_${motor_number}_joint"> <axis> <xyz>0 0 1</xyz>
       <limit> <velocity> ${max_rot_velocity} </velocity> </limit> </axis> </gazebo> -->
     <link name="rotor_${motor_number}">
       <inertial>
@@ -155,7 +160,8 @@
       <visual>
         <geometry>
           <!-- <cylinder length="0.005" radius="${radius_rotor}"/> --> <!-- [m] -->
-          <mesh filename="package://mav_description/meshes/propeller_${direction}.dae"
+          <!-- <mesh filename="package://mav_description/meshes/propeller_${direction}.dae" -->
+          <mesh filename="package://mav_description/meshes/${mesh}_${direction}.dae"
             scale="0.001 0.001 0.001" />
           <!-- <box size="${2*radius_rotor} 0.01 0.005"/> -->
         </geometry>
