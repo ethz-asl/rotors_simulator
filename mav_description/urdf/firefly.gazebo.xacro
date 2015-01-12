@@ -41,7 +41,7 @@
       <accelerometerTurnOnBiasSigma>0.1960</accelerometerTurnOnBiasSigma> <!-- Accelerometer turn on bias standard deviation [m/s^2] -->
     </plugin>
   </gazebo>
-  
+
   <!-- Instantiate a controller -->
   <gazebo>
     <!-- Controller interface -->
@@ -52,7 +52,7 @@
       <commandMotorSpeedSubTopic>command/motors</commandMotorSpeedSubTopic>
       <imuSubTopic>imu</imuSubTopic>
       <poseTopic>pose</poseTopic>
-      <motorVelocityReferenceTopic>motor_velocity_reference</motorVelocityReferenceTopic>
+      <motorVelocityCommandPubTopic>motor_velocity_reference</motorVelocityCommandPubTopic>
     </plugin>
   </gazebo>
 

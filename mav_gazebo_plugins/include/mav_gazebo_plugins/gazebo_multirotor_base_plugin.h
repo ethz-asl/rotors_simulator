@@ -28,7 +28,7 @@ namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";
 
-static const std::string kDefaultMotorPubTopic = "/ground_truth/pose";
+static const std::string kDefaultMotorPubTopic = "motors";
 static const std::string kDefaultLinkName = "base_link";
 static const std::string kDefaultFrameId = "base_link";
 
