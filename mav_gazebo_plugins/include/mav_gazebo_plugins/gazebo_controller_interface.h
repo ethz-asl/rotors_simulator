@@ -40,11 +40,11 @@
 namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";
-static const std::string kDefaultMotorVelocityReferencePubTopic = "/motor_velocity_reference";
-static const std::string kDefaultCommandAttitudeThrustSubTopic = "/command/attitude";
-static const std::string kDefaultCommandRateThrustSubTopic = "/command/rate";
-static const std::string kDefaultCommandMotorSpeedSubTopic = "/command/motors";
-static const std::string kDefaultImuSubTopic = "/imu";
+static const std::string kDefaultMotorVelocityReferencePubTopic = "motor_velocity_reference";
+static const std::string kDefaultCommandAttitudeThrustSubTopic = "command/attitude";
+static const std::string kDefaultCommandRateThrustSubTopic = "command/rate";
+static const std::string kDefaultCommandMotorSpeedSubTopic = "command/motors";
+static const std::string kDefaultImuSubTopic = "imu";
 
 
 
