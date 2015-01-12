@@ -18,17 +18,39 @@
   <!-- Controller interface -->
   <plugin name="controller_interface" filename="libmav_gazebo_controller_interface.so">
     <robotNamespace>${namespace}</robotNamespace>
-    <commandTopicAttitude>command/attitude</commandTopicAttitude>
-    <commandTopicRate>command/rate</commandTopicRate>
-    <commandTopicMotor>command/motors</commandTopicMotor>
-    <imuTopic>imu</imuTopic>
+    <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
+    <commandRateThrustSubTopic>command/rate</commandRateThrustSubTopic>
+    <commandMotorSpeedSubTopic>command/motors</commandMotorSpeedSubTopic>
+    <imuSubTopic>imu</imuSubTopic>
     <poseTopic>pose</poseTopic>
-    <motorVelocityReferenceTopic>motor_vel_ref</motorVelocityReferenceTopic>
+    <motorVelocityReferenceTopic>motor_velocity_reference</motorVelocityReferenceTopic>
   </plugin>
 </gazebo>
 
+
+<!-- Mount our IMU -->
 <gazebo>
   <!-- IMU -->
+  <plugin filename="libmav_gazebo_imu_plugin.so" name="mav_gazebo_imu_plugin">
+	<!-- A good description of the IMU parameters can be found in the kalibr documentation:
+	     https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics -->
+    <robotNamespace>${namespace}</robotNamespace> <!-- (string, required): ros namespace in which the messages are published -->
+    <linkName>imu_link</linkName> <!-- (string, required): name of the body which holds the IMU sensor -->
+    <imuTopic>imu</imuTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
+    <gyroscopeNoiseDensity>0.0003394</gyroscopeNoiseDensity> <!-- Gyroscope noise density (two-sided spectrum) [rad/s/sqrt(Hz)] -->
+    <gyroscopeRandomWalk>0.000038785</gyroscopeRandomWalk> <!-- Gyroscope bias random walk [rad/s/s/sqrt(Hz)] -->
+    <gyroscopeBiasCorrelationTime>1000.0</gyroscopeBiasCorrelationTime> <!-- Gyroscope bias correlation time constant [s] -->
+    <gyroscopeTurnOnBiasSigma>0.0087</gyroscopeTurnOnBiasSigma> <!-- Gyroscope turn on bias standard deviation [rad/s] -->
+    <accelerometerNoiseDensity>0.004</accelerometerNoiseDensity> <!-- Accelerometer noise density (two-sided spectrum) [m/s^2/sqrt(Hz)] -->
+    <accelerometerRandomWalk>0.006</accelerometerRandomWalk> <!-- Accelerometer bias random walk. [m/s^2/s/sqrt(Hz)] -->
+    <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime> <!-- Accelerometer bias correlation time constant [s] -->
+    <accelerometerTurnOnBiasSigma>0.1960</accelerometerTurnOnBiasSigma> <!-- Accelerometer turn on bias standard deviation [m/s^2] -->
+  </plugin>
+</gazebo>
+
+
+<gazebo>
+  <!-- Hector IMU -->
   <plugin filename="libhector_gazebo_ros_imu.so" name="imu_ros">
     <!-- parameters according to http://wiki.ros.org/hector_gazebo_plugins#GazeboRosImu -->
     <robotNamespace>${namespace}</robotNamespace>
@@ -86,10 +108,10 @@
     <poseTopic>ground_truth/pose</poseTopic>
     <measurementDivisor>1</measurementDivisor>
     <measurementDelay>0</measurementDelay>
-    <noiseNormalP>0 0 0</noiseNormalP>
-    <noiseNormalQ>0 0 0</noiseNormalQ>
-    <noiseUniformP>0 0 0</noiseUniformP>
-    <noiseUniformQ>0 0 0</noiseUniformQ>
+    <noiseNormalPosition>0 0 0</noiseNormalPosition>
+    <noiseNormalQuaternion>0 0 0</noiseNormalQuaternion>
+    <noiseUniformPosition>0 0 0</noiseUniformPosition>
+    <noiseUniformQuaternion>0 0 0</noiseUniformQuaternion>
   </plugin>
 </gazebo>
 
@@ -101,10 +123,10 @@
     <measurementDivisor>7</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
     <measurementDelay>0</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
     <unknownDelay>0.0</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
-    <noiseNormalP>0.01 0.01 0.01</noiseNormalP> <!-- standard deviation of additive white gaussian noise [m] -->
-    <noiseNormalQ>0.02 0.02 0.02</noiseNormalQ> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
-    <noiseUniformP>0 0 0</noiseUniformP> <!-- symmetric bounds of uniform noise [m] -->
-    <noiseUniformQ>0 0 0</noiseUniformQ> <!-- symmetric bounds of uniform noise [rad], computation see above -->
+    <noiseNormalPosition>0.01 0.01 0.01</noiseNormalPosition> <!-- standard deviation of additive white gaussian noise [m] -->
+    <noiseNormalQuaternion>0.02 0.02 0.02</noiseNormalQuaternion> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
+    <noiseUniformPosition>0 0 0</noiseUniformPosition> <!-- symmetric bounds of uniform noise [m] -->
+    <noiseUniformQuaternion>0 0 0</noiseUniformQuaternion> <!-- symmetric bounds of uniform noise [rad], computation see above -->
     <covarianceImage>package://mav_gazebo/worlds/poseplugin_map1.bmp</covarianceImage>
     <covarianceImageScale>0.1</covarianceImageScale>
   </plugin>
@@ -118,10 +140,10 @@
     <measurementDivisor>5</measurementDivisor>
     <measurementDelay>0</measurementDelay>
     <unknownDelay>0.001</unknownDelay>
-    <noiseNormalP>0.01 0.01 0.01</noiseNormalP>
-    <noiseNormalQ>0.02 0.02 0.02</noiseNormalQ>
-    <noiseUniformP>0 0 0</noiseUniformP>
-    <noiseUniformQ>0 0 0</noiseUniformQ>
+    <noiseNormalPosition>0.01 0.01 0.01</noiseNormalPosition>
+    <noiseNormalQuaternion>0.02 0.02 0.02</noiseNormalQuaternion>
+    <noiseUniformPosition>0 0 0</noiseUniformPosition>
+    <noiseUniformQuaternion>0 0 0</noiseUniformQuaternion>
     <covarianceImage>package://mav_gazebo/worlds/poseplugin_map2.bmp</covarianceImage>
     <covarianceImageScale>0.1</covarianceImageScale>
   </plugin>

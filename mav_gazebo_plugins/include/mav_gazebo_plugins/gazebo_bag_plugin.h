@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,14 +34,63 @@
 #include <gazebo/common/Plugin.hh>
 
 namespace gazebo {
-/// \brief This plugin is used to create rosbag files in within gazebo.
+// Default values
+static const std::string kDefaultNamespace = "";
+
+static const std::string kDefaultGroundTruthPosePubTopic = "/ground_truth/pose";
+static const std::string kDefaultGroundTruthTwistPubTopic = "/ground_truth/twist";
+static const std::string kDefaultImuPubTopic = "/imu";
+static const std::string kDefaultImuSubTopic = "/imu";
+static const std::string kDefaultControlAttitudeThrustPubTopic = "/command/attitude";
+static const std::string kDefaultControlAttitudeThrustSubTopic = "/command/attitude";
+static const std::string kDefaultControlMotorSpeedPubTopic = "/command/motors";
+static const std::string kDefaultControlMotorSpeedSubTopic = "/command/motors";
+static const std::string kDefaultControlRateThrustPubTopic = "/command/rate";
+static const std::string kDefaultControlRateThrustSubTopic = "/command/rate";
+static const std::string kDefaultMotorPubTopic = "/motors";
+static const std::string kDefaultCollisionsPubTopic = "/collisions";
+static const std::string kDefaultWindPubTopic = "/wind";
+static const std::string kDefaultWindSubTopic = "/wind";
+static const std::string kDefaultWaypointPubTopic = "/waypoint";
+static const std::string kDefaultWaypointSubTopic = "/waypoint";
+
+static const std::string kDefaultFrameId = "ground_truth_pose";
+static const std::string kDefaultLinkName = "base_link";
+static const std::string kDefaultBagFilename_ = "simulator.bag";
+
+static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
+
+
+/// \brief This plugin is used to create rosbag files from within gazebo.
 class GazeboBagPlugin : public ModelPlugin {
   typedef std::map<const unsigned int, const physics::JointPtr> MotorNumberToJointMap;
   typedef std::pair<const unsigned int, const physics::JointPtr> MotorNumberToJointPair;
  public:
-  /// \brief Constructor
-  GazeboBagPlugin();
-  /// \brief Destructor
+  GazeboBagPlugin()
+      : ModelPlugin(),
+        namespace_(kDefaultNamespace),
+        ground_truth_pose_pub_topic_(kDefaultGroundTruthPosePubTopic),
+        ground_truth_twist_pub_topic_(kDefaultGroundTruthTwistPubTopic),
+        imu_pub_topic_(kDefaultImuPubTopic),
+        imu_sub_topic_(kDefaultImuSubTopic),
+        control_attitude_thrust_pub_topic_(kDefaultControlAttitudeThrustPubTopic),
+        control_attitude_thrust_sub_topic_(kDefaultControlAttitudeThrustSubTopic),
+        control_motor_speed_pub_topic_(kDefaultControlMotorSpeedPubTopic),
+        control_motor_speed_sub_topic_(kDefaultControlMotorSpeedSubTopic),
+        control_rate_thrust_pub_topic_(kDefaultControlRateThrustPubTopic),
+        control_rate_thrust_sub_topic_(kDefaultControlRateThrustSubTopic),
+        motor_pub_topic_(kDefaultMotorPubTopic),
+        collisions_pub_topic_(kDefaultCollisionsPubTopic),
+        wind_pub_topic_(kDefaultWindPubTopic),
+        wind_sub_topic_(kDefaultWindSubTopic),
+        waypoint_pub_topic_(kDefaultWaypointPubTopic),
+        waypoint_sub_topic_(kDefaultWaypointSubTopic),
+        frame_id_(kDefaultFrameId),
+        link_name_(kDefaultLinkName),
+        bag_filename_(kDefaultBagFilename_),
+        rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
+        node_handle_(NULL) {}
+
   virtual ~GazeboBagPlugin();
 
  protected:
@@ -91,16 +140,11 @@ class GazeboBagPlugin : public ModelPlugin {
   void LogCollisions(const common::Time now);
 
  private:
-  /// \brief The connections.
+  /// \brief Pointer to the update event connection.
   event::ConnectionPtr update_connection_;
 
-  /// \brief Pointer to the world.
   physics::WorldPtr world_;
-
-  /// \brief Pointer to the model.
   physics::ModelPtr model_;
-
-  /// \brief Pointer to the link.
   physics::LinkPtr link_;
 
   physics::Link_V child_links_;
@@ -131,11 +175,7 @@ class GazeboBagPlugin : public ModelPlugin {
   std::string frame_id_;
   std::string link_name_;
   std::string bag_filename_;
-  std::string exclude_floor_link_from_collision_check_;
   double rotor_velocity_slowdown_sim_;
-  double mass_;
-  double gravity_;
-  double gravitational_force_exclusion_multiplier_;
 
   /// \brief Mutex lock for thread safty of writing bag files
   boost::mutex mtx_;

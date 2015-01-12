@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,11 +21,7 @@
 #include <octomap_msgs/conversions.h>
 
 namespace gazebo {
-OctomapFromGazeboWorld::OctomapFromGazeboWorld()
-    : WorldPlugin(),
-      node_handle_(),
-      octomap_(NULL) {
-}
+
 OctomapFromGazeboWorld::~OctomapFromGazeboWorld() {
   delete octomap_;
   octomap_ = NULL;
@@ -229,7 +225,7 @@ void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request
 
       // Set in_object to true, if currently in an object
       if (!entity_name_backwards.empty() && inside_object) {
-        objects_in_collision.insert(std::pair<std::string, bool>(entity_name, true));
+        objects_in_collision.insert(std::pair<std::string, bool>(entity_name_backwards, true));
       }
 
       // Set the end of the ray to the end of the bounding box
@@ -297,8 +293,8 @@ void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request
       start.x = x;
 
       // garbage collector
-      for (std::map<std::string, bool>::iterator it = objects_in_collision.begin(); it != objects_in_collision.end();
-          it++) {
+      for (std::map<std::string, bool>::iterator it = objects_in_collision.begin();
+           it != objects_in_collision.end(); it++) {
         if (!CheckIfInsideObjectInX(it->first, start, ray)) {
           objects_in_collision.erase(it);
         }

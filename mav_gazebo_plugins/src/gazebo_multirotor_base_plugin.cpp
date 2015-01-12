@@ -5,10 +5,10 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,10 +20,6 @@
 #include <mav_gazebo_plugins/common.h>
 
 namespace gazebo {
-GazeboMultirotorBasePlugin::GazeboMultirotorBasePlugin()
-    : ModelPlugin(),
-      node_handle_(0) {
-}
 
 GazeboMultirotorBasePlugin::~GazeboMultirotorBasePlugin() {
   event::Events::DisconnectWorldUpdateBegin(update_connection_);
@@ -39,31 +35,29 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   namespace_.clear();
 
   getSdfParam<std::string>(_sdf, "robotNamespace", namespace_, "", true);
-  node_handle_ = new ros::NodeHandle(namespace_);
-
   getSdfParam<std::string>(_sdf, "linkName", link_name_, "base_link", true);
+  getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, "motors");
+  getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_,
+                      rotor_velocity_slowdown_sim_);
+
+  node_handle_ = new ros::NodeHandle(namespace_);
+  motor_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_pub_topic_, 10);
   frame_id_ = link_name_;
 
-  // Get the pointer to the link
-  link_ = this->model_->GetLink(link_name_);
+  link_ = model_->GetLink(link_name_);
   if (link_ == NULL)
-    gzthrow("[gazebo_multirotor_base_plugin] link \"" << link_name_ << "\" not found");
-
-  getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, "motors");
-
-  getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
-  motor_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_pub_topic_, 10);
+    gzthrow("[gazebo_multirotor_base_plugin] Couldn't find specified link \"" << link_name_ << "\".");
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->update_connection_ = event::Events::ConnectWorldUpdateBegin(
+  update_connection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboMultirotorBasePlugin::OnUpdate, this, _1));
 
   child_links_ = link_->GetChildJointsLinks();
   for (unsigned int i = 0; i < child_links_.size(); i++) {
     std::string link_name = child_links_[i]->GetScopedName();
 
-    // Check if link contains rotor_ in its name
+    // Check if link contains rotor_ in its name.
     int pos = link_name.find("rotor_");
     if (pos != link_name.npos) {
       std::string motor_number_str = link_name.substr(pos + 6);
@@ -75,8 +69,9 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   }
 }
 
-// Called by the world update start event
+// This gets called by the world update start event.
 void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
+  // Get the current simulation time.
   common::Time now = world_->GetSimTime();
   mav_msgs::MotorSpeedPtr msg(new mav_msgs::MotorSpeed);
   msg->motor_speed.resize(motor_joints_.size());
