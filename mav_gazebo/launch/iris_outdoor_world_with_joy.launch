@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find mav_gazebo)/launch/iris_outdoor_world.launch" />
+  <node ns="px4_multicopter" name="mav_joy_interface" pkg="mav_joy_interface" type="mav_joy_interface" />
+</launch>
