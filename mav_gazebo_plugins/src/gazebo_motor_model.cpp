@@ -130,7 +130,7 @@ void GazeboMotorModel::VelocityCallback(const mav_msgs::MotorSpeedPtr& rot_veloc
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
   motor_rot_vel_ = joint_->GetVelocity(0);
-  if (motor_rot_vel_ / (2 * M_PI) > 1 / sampling_time_) {
+  if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_) {
     gzerr << "Aliasing on motor [" << motor_number_ << "] might occur. Consider making smaller simulation time steps or raising the rotor_velocity_slowdown_sim_ param.\n";
   }
   double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
