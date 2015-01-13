@@ -142,20 +142,20 @@
     <!-- joint -->
     <joint name="laser_joint" type="fixed">
       <axis xyz="0 1 0" />
-      <origin xyz="0 0 0.2" rpy="0 0 0" />
+      <origin xyz="0 0 -0.2" rpy="0 1.5707963267948966 0" />
       <parent link="base_link" />
       <child link="laser_link" />
     </joint>
 
     <!-- link -->
     <link name="laser_link">
-      <collision>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-          <box size="0.1 0.1 0.1" />
-        </geometry>
+      <!-- <collision> -->
+        <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+        <!-- <geometry> -->
+          <!-- <box size="0.1 0.1 0.1" /> -->
+        <!-- </geometry> -->
 
-      </collision>
+      <!-- </collision> -->
       <!-- <visual> -->
         <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
         <!-- <geometry> -->
@@ -175,20 +175,20 @@
     <gazebo reference="laser_link">
       <sensor type="gpu_ray" name="head_hokuyo_sensor">
         <pose>0 0 0 0 0 0</pose>
-        <visualize>true</visualize>
+        <visualize>false</visualize>
         <update_rate>40</update_rate>
         <ray>
           <scan>
             <horizontal>
-              <samples>720</samples>
+              <samples>1</samples>
               <resolution>1</resolution>
-              <min_angle>-2.0943</min_angle>
-              <max_angle>2.0943</max_angle>
+              <min_angle>-0.1</min_angle>
+              <max_angle>0.1</max_angle>
             </horizontal>
           </scan>
           <range>
             <min>0.10</min>
-            <max>10.0</max>
+            <max>40.0</max>
             <resolution>0.01</resolution>
           </range>
           <noise>
