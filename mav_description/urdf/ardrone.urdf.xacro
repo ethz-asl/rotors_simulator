@@ -5,6 +5,7 @@
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <xacro:property name="mesh_file" value="ardrone.dae"/>
   <xacro:property name="mesh_scale" value="0.001 0.001 0.001"/>
+  <xacro:property name="mesh_scale_prop" value="1 1 1"/>
   <xacro:property name="mass" value="1.5" /> <!-- [kg] -->
   <xacro:property name="body_width" value="0.1" /> <!-- [m] -->
   <xacro:property name="body_height" value="0.16" /> <!-- [m] -->
@@ -72,6 +73,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="ardrone_prop"
+    mesh_scale="${mesh_scale_prop}"
     color="Red">
     <origin xyz="${sqrt2 * arm_length} -${sqrt2 * arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -93,6 +95,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="ardrone_prop"
+    mesh_scale="${mesh_scale_prop}"
     color="DarkGrey">
     <origin xyz="-${sqrt2 * arm_length} ${sqrt2 * arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -113,6 +116,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="ardrone_prop"
+    mesh_scale="${mesh_scale_prop}"
     color="Red">
     <origin xyz="${sqrt2 * arm_length} ${sqrt2 * arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -133,6 +137,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="ardrone_prop"
+    mesh_scale="${mesh_scale_prop}"
     color="DarkGrey">
     <origin xyz="-${sqrt2 * arm_length} -${sqrt2 * arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
