@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   planning_msgs
   geometry_msgs
   cmake_modules
+  glog_catkin
 )
 
 find_package(Eigen REQUIRED)
@@ -27,8 +28,8 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES mav_gazebo_motor_model mav_gazebo_controller_interface
-  CATKIN_DEPENDS roscpp mav_model mav_control mav_msgs octomap_ros octomap_msgs planning_msgs geometry_msgs
-  DEPENDS eigen gazebo octomap opencv
+  CATKIN_DEPENDS roscpp mav_model mav_control mav_msgs octomap_ros octomap_msgs planning_msgs geometry_msgs glog_catkin
+  DEPENDS eigen gazebo octomap opencv glog_catkin
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})
@@ -40,6 +41,11 @@ target_link_libraries(mav_gazebo_motor_model ${catkin_LIBRARIES} ${GAZEBO_LIBRAR
 add_library(mav_gazebo_pose_plugin src/gazebo_pose_plugin.cpp)
 target_link_libraries(mav_gazebo_pose_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(mav_gazebo_pose_plugin ${catkin_EXPORTED_TARGETS})
+
+
+add_library(mav_gazebo_imu_plugin src/gazebo_imu_plugin.cpp)
+target_link_libraries(mav_gazebo_imu_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(mav_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
 
 add_library(mav_gazebo_controller_interface src/gazebo_controller_interface.cpp)
 target_link_libraries(mav_gazebo_controller_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
