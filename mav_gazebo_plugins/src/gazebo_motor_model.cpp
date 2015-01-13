@@ -128,7 +128,7 @@ void GazeboMotorModel::OnUpdate(const common::UpdateInfo& _info) {
 void GazeboMotorModel::VelocityCallback(const mav_msgs::MotorSpeedPtr& rot_velocities) {
   CHECK(rot_velocities->motor_speed.size() > motor_number_)
       << "You tried to access index " << motor_number_
-      << " of the MotorSpeed message array which is of size " << rot_velocities->motor_speed.size() << ".\n";
+      << " of the MotorSpeed message array which is of size " << rot_velocities->motor_speed.size() << ".";
   ref_motor_rot_vel_ = std::min(rot_velocities->motor_speed[motor_number_], static_cast<float>(max_rot_velocity_));
 }
 
