@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+
+<robot name="iris" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="namespace" value="px4_multicopter" />
+  <xacro:property name="enable_bag_plugin" value="false" />
+  <xacro:property name="bag_file" value="iris.bag" />
+
+  <!-- Instantiate iris "mechanics" -->
+  <xacro:include filename="$(find mav_description)/urdf/iris.urdf.xacro" />
+
+  <!-- Create link and joint for a sensor -->
+  <link name="pose_sensor1_link">
+    <inertial>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0"
+        izz="0.001" />
+      <mass value="0.01" />  <!-- [kg] -->
+    </inertial>
+  </link>
+  <joint name="pose_sensor1_joint" type="revolute">
+    <parent link="base_link" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <child link="pose_sensor1_link" />
+    <limit upper="0" lower="0" effort="0" velocity="0" />
+  </joint>
+
+  <!-- Mount an IMU -->
+  <gazebo>
+    <!-- IMU -->
+    <plugin filename="libmav_gazebo_imu_plugin.so" name="mav_gazebo_imu_plugin">
+  	<!-- A good description of the IMU parameters can be found in the kalibr documentation:
+  	     https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics -->
+      <robotNamespace>${namespace}</robotNamespace> <!-- (string, required): ros namespace in which the messages are published -->
+      <linkName>imu_link</linkName> <!-- (string, required): name of the body which holds the IMU sensor -->
+      <imuTopic>imu</imuTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
+      <gyroscopeNoiseDensity>0.0003394</gyroscopeNoiseDensity> <!-- Gyroscope noise density (two-sided spectrum) [rad/s/sqrt(Hz)] -->
+      <gyroscopeRandomWalk>0.000038785</gyroscopeRandomWalk> <!-- Gyroscope bias random walk [rad/s/s/sqrt(Hz)] -->
+      <gyroscopeBiasCorrelationTime>1000.0</gyroscopeBiasCorrelationTime> <!-- Gyroscope bias correlation time constant [s] -->
+      <gyroscopeTurnOnBiasSigma>0.0087</gyroscopeTurnOnBiasSigma> <!-- Gyroscope turn on bias standard deviation [rad/s] -->
+      <accelerometerNoiseDensity>0.004</accelerometerNoiseDensity> <!-- Accelerometer noise density (two-sided spectrum) [m/s^2/sqrt(Hz)] -->
+      <accelerometerRandomWalk>0.006</accelerometerRandomWalk> <!-- Accelerometer bias random walk. [m/s^2/s/sqrt(Hz)] -->
+      <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime> <!-- Accelerometer bias correlation time constant [s] -->
+      <accelerometerTurnOnBiasSigma>0.1960</accelerometerTurnOnBiasSigma> <!-- Accelerometer turn on bias standard deviation [m/s^2] -->
+    </plugin>
+  </gazebo>
+
+  <!-- Instantiate a controller -->
+  <gazebo>
+    <!-- Controller interface -->
+    <plugin name="controller_interface" filename="libmav_gazebo_controller_interface.so">
+      <robotNamespace>${namespace}</robotNamespace>
+      <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
+      <commandRateThrustSubTopic>command/rate</commandRateThrustSubTopic>
+      <commandMotorSpeedSubTopic>command/motors</commandMotorSpeedSubTopic>
+      <imuSubTopic>imu</imuSubTopic>
+      <poseTopic>pose</poseTopic>
+      <motorVelocityCommandPubTopic>motor_velocity_reference</motorVelocityCommandPubTopic>
+    </plugin>
+  </gazebo>
+
+  <!-- Mount a generic pose sensor at link sensor1 -->
+  <gazebo>
+    <!-- Generic 6D pose sensor plugin -->
+    <plugin filename="libmav_gazebo_pose_plugin.so" name="pose_sensor1">
+      <linkName>pose_sensor1_link</linkName>
+      <robotNamespace>${namespace}</robotNamespace>
+      <poseTopic>sensors/pose1</poseTopic>
+      <measurementDivisor>7</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
+      <measurementDelay>0</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
+      <unknownDelay>0.0</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
+      <noiseNormalPosition>0.005 0.005 0.005</noiseNormalPosition> <!-- standard deviation of additive white gaussian noise [m] -->
+      <noiseNormalQuaternion>0.01 0.01 0.01</noiseNormalQuaternion> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
+      <noiseUniformPosition>0 0 0</noiseUniformPosition> <!-- symmetric bounds of uniform noise [m] -->
+      <noiseUniformQuaternion>0 0 0</noiseUniformQuaternion> <!-- symmetric bounds of uniform noise [rad], computation see above -->
+    </plugin>
+  </gazebo>
+
+  <!-- Instantiate a logger -->
+  <gazebo>
+    <!-- ROS Bag Plugin -->
+    <xacro:if value="$(arg enable_logging)">
+      <plugin filename="libmav_gazebo_bag_plugin.so" name="rosbag">
+        <robotNamespace>${namespace}</robotNamespace>
+        <bagFileName>$(arg log_file)</bagFileName>
+        <linkName>base_link</linkName>
+        <frameId>base_link</frameId>
+        <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
+        <commandAttitudeThrustPubTopic>command/attitude</commandAttitudeThrustPubTopic>
+        <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+        <excludeFloorLinkFromCollisionCheck>$(arg exclude_floor_link_from_collision_check)</excludeFloorLinkFromCollisionCheck>
+      </plugin>
+    </xacro:if>
+  </gazebo>
+
+  <!-- attach wing plugin -->
+  <gazebo>
+    <plugin filename="libmav_gazebo_wing_model_plugin.so" name="wing_plugin">
+      <robotNamespace>${namespace}</robotNamespace>
+      <linkName>base_link</linkName>
+      </plugin>
+  </gazebo>
+
+</robot>
+
