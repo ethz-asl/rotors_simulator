@@ -22,7 +22,7 @@
 #include "mav_gazebo_plugins/common.h"
 
 namespace gazebo {
-
+extern bool glog_initialized = false;
 // Default values for use with ADIS16448 IMU
 static constexpr double kDefaultAdisGyroscopeNoiseDensity =
     2.0 * 35.0 / 3600.0 / 180.0 * M_PI;

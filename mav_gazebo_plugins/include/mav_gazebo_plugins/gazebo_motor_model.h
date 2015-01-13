@@ -40,6 +40,7 @@ const static int CW = -1;
 }
 
 namespace gazebo {
+extern bool glog_initialized = false;
 // Default values
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultCommandSubTopic = "command/motors";
