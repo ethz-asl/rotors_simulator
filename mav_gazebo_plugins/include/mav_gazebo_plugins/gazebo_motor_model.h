@@ -18,21 +18,21 @@
 #ifndef MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
 #define MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
 
-#include <mav_gazebo_plugins/common.h>
-#include <mav_model/motor_model.hpp>
-#include <Eigen/Eigen>
-
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
+#include <stdio.h>
 
 #include <boost/bind.hpp>
+#include <Eigen/Eigen>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
-#include <stdio.h>
-#include <std_msgs/Float32.h>
+#include <mav_model/motor_model.hpp>
 #include <mav_msgs/MotorSpeed.h>
+#include <ros/callback_queue.h>
+#include <ros/ros.h>
+#include <std_msgs/Float32.h>
+
+#include <mav_gazebo_plugins/common.h>
 
 namespace turning_direction {
 const static int CCW = 1;

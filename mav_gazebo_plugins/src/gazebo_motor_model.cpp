@@ -16,6 +16,7 @@
 
 
 #include <mav_gazebo_plugins/gazebo_motor_model.h>
+
 #include <glog/logging.h>
 
 

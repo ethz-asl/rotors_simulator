@@ -14,19 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
+#ifndef MAV_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H
+#define MAV_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H
 
 #include <iostream>
 #include <math.h>
+
+#include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-#include <gazebo/common/common.hh>
-#include <sdf/sdf.hh>
-
-#include <ros/ros.h>
-#include <std_srvs/Empty.h>
-
 #include <octomap/octomap.h>
 #include <planning_msgs/Octomap.h>
+#include <ros/ros.h>
+#include <sdf/sdf.hh>
+#include <std_srvs/Empty.h>
 
 namespace gazebo {
 class OctomapFromGazeboWorld : public WorldPlugin {
@@ -55,3 +56,5 @@ class OctomapFromGazeboWorld : public WorldPlugin {
 };
 
 }
+
+#endif // MAV_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H
