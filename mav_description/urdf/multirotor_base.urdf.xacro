@@ -90,7 +90,6 @@
         <!-- <geometry> -->
           <!-- <box size="0.1 0.1 0.1" /> -->
         <!-- </geometry> -->
-        <!-- <material name="red" /> -->
       <!-- </visual> -->
 
       <inertial>
@@ -100,6 +99,7 @@
       </inertial>
     </link>
     <gazebo reference="camera_link">
+      <material>Gazebo/Red</material>
       <sensor type="camera" name="camera1">
         <update_rate>30.0</update_rate>
         <camera name="head">
@@ -161,7 +161,6 @@
         <!-- <geometry> -->
           <!-- <box size="0.1 0.1 0.1" /> -->
         <!-- </geometry> -->
-        <!-- <material name="red" /> -->
       <!-- </visual> -->
 
       <!-- inertial-->
@@ -173,6 +172,7 @@
     </link>
 
     <gazebo reference="laser_link">
+      <material>Gazebo/Blue</material>
       <sensor type="gpu_ray" name="head_hokuyo_sensor">
         <pose>0 0 0 0 0 0</pose>
         <visualize>false</visualize>
