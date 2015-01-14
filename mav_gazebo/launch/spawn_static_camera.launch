@@ -2,7 +2,7 @@
 
 <launch>
   <arg name="name" default="static_camera"/>
-  <arg name="model2" default="$(find mav_description)/urdf/static_camera.gazebo.xacro"/>
+  <arg name="model" default="$(find mav_description)/urdf/static_camera.gazebo.xacro"/>
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
@@ -17,7 +17,7 @@
 
   <!-- send the robot XML to param server -->
   <param name="robot_description" command="
-    $(find xacro)/xacro.py '$(arg model2)'
+    $(find xacro)/xacro.py '$(arg model)'
     enable_logging:=$(arg enable_logging)
     enable_ground_truth:=$(arg enable_ground_truth)
     exclude_floor_link_from_collision_check:=$(arg exclude_floor_link_from_collision_check)
@@ -35,7 +35,8 @@
          -R $(arg roll)
          -P $(arg pitch)
          -Y $(arg yaw)
-         -model $(arg name)"
+         -model $(arg name)
+         -namespace $(arg name)"
    respawn="false" output="screen">
   </node>
 

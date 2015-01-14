@@ -5,9 +5,7 @@
   <xacro:property name="mass" value="1.5" /> <!-- [kg] -->
   <xacro:property name="body_width" value="0.1" /> <!-- [m] -->
   <xacro:property name="body_height" value="0.16" /> <!-- [m] -->
-  <xacro:property name="rpy" value="0 -1.5707963267948966 0" />
-  <xacro:property name="pos" value="0 0 0" />
-  <xacro:property name="namespace" value="observer" />
+  <xacro:property name="namespace" value="static_camera" />
 
   <!-- Property Blocks -->
   <xacro:property name="body_inertia">
@@ -17,19 +15,20 @@
   <!-- Main camera link -->
   <xacro:macro name="camera_base_macro"
     params="robot_namespace mass body_width body_height *inertia">
+
     <link name="base_link">
-    </link>
-    <joint name="base_joint" type="fixed">
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <parent link="base_link" />
-      <child link="base_link_inertia" />
-    </joint>
-    <link name="base_link_inertia">
-      <inertial>
-        <mass value="${mass}" />  <!-- [kg] -->
-        <origin xyz="0 0 0" />
-        <xacro:insert_block name="inertia" />
-      </inertial>
+    <!-- </link> -->
+    <!-- <joint name="base_joint" type="fixed"> -->
+      <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+      <!-- <parent link="base_link" /> -->
+      <!-- <child link="base_link_inertia" /> -->
+    <!-- </joint> -->
+    <!-- <link name="base_link_inertia"> -->
+      <!-- <inertial> -->
+        <!-- <mass value="${mass}" />  [> [kg] <] -->
+        <!-- <origin xyz="0 0 0" /> -->
+        <!-- <xacro:insert_block name="inertia" /> -->
+      <!-- </inertial> -->
 
       <!-- <visual> -->
         <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
@@ -47,6 +46,10 @@
         </geometry>
       </collision>
     </link>
+
+    <gazebo reference="base_link">
+      <static>true</static>
+    </gazebo>
   </xacro:macro>
 
   <xacro:camera_base_macro
@@ -91,7 +94,6 @@
       </inertial>
     </link>
     <gazebo reference="camera_link">
-      <static>true</static>
       <material>Gazebo/Red</material>
       <sensor type="camera" name="camera_static1">
         <update_rate>30.0</update_rate>
@@ -127,6 +129,7 @@
           <distortionT2>0.0</distortionT2>
         </plugin>
       </sensor>
+      <static>true</static>
     </gazebo>
   </xacro:macro>
   <xacro:camera_macro robot_namespace="${namespace}">
