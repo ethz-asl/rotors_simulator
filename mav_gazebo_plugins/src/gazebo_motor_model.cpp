@@ -16,8 +16,6 @@
 
 
 #include <mav_gazebo_plugins/gazebo_motor_model.h>
-#include <glog/logging.h>
-
 
 namespace gazebo {
 
@@ -115,12 +113,6 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   // Create the first order filter.
   rotor_velocity_filter_.reset(new FirstOrderFilter<double>(time_constant_up_, time_constant_down_, ref_motor_rot_vel_));
-
-  // Initialize Google's logging library.
-  if(!glog_initialized) {
-    glog_initialized = true;
-    google::InitGoogleLogging("gazebo_plugins_glogger");
-  }
 }
 
 // This gets called by the world update start event.

@@ -34,13 +34,14 @@
 #include <std_msgs/Float32.h>
 #include <mav_msgs/MotorSpeed.h>
 
+#include "mav_gazebo_plugins/common.h"
+
 namespace turning_direction {
 const static int CCW = 1;
 const static int CW = -1;
 }
 
 namespace gazebo {
-extern bool glog_initialized = false;
 // Default values
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultCommandSubTopic = "command/motors";
@@ -72,7 +73,9 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         rotor_drag_coefficient_(kDefaultRotorDragCoefficient),
         rolling_moment_coefficient_(kDefaultRollingMomentCoefficient),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
-        node_handle_(NULL) {}
+        node_handle_(NULL) {
+    initGlog();
+  }
 
   virtual ~GazeboMotorModel();
 

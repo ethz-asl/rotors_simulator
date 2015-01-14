@@ -19,8 +19,22 @@
 
 #include <Eigen/Dense>
 #include <gazebo/gazebo.hh>
+#include <glog/logging.h>
 
 namespace gazebo {
+
+/**
+ * \brief Helper function to initialize Glog only once.
+ */
+void initGlog() {
+  static bool glog_initialized = false;
+
+  if(!glog_initialized) {
+    google::InitGoogleLogging("gazebo_plugins_glogger");
+    glog_initialized = true;
+  }
+}
+
 
 /**
  * \brief Obtains a parameter from sdf.

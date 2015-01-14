@@ -21,6 +21,7 @@ GazeboImuPlugin::GazeboImuPlugin()
       node_handle_(0),
       velocity_prev_W_(0,0,0)
 {
+  initGlog();
 }
 
 GazeboImuPlugin::~GazeboImuPlugin() {
@@ -141,12 +142,6 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // TODO(nikolicj) incorporate steady-state covariance of bias process
   gyroscope_bias_.setZero();
   accelerometer_bias_.setZero();
-
-  // Initialize Google's logging library.
-  if(!glog_initialized) {
-    glog_initialized = true;
-    google::InitGoogleLogging("gazebo_plugins_glogger");
-  }
 }
 
 /// \brief This function adds noise to acceleration and angular rates for
