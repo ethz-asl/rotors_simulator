@@ -17,28 +17,6 @@
     params="robot_namespace mass body_width body_height *inertia">
 
     <link name="base_link">
-    <!-- </link> -->
-    <!-- <joint name="base_joint" type="fixed"> -->
-      <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
-      <!-- <parent link="base_link" /> -->
-      <!-- <child link="base_link_inertia" /> -->
-    <!-- </joint> -->
-    <!-- <link name="base_link_inertia"> -->
-      <!-- <inertial> -->
-        <!-- <mass value="${mass}" />  [> [kg] <] -->
-        <!-- <origin xyz="0 0 0" /> -->
-        <!-- <xacro:insert_block name="inertia" /> -->
-      <!-- </inertial> -->
-
-      <!-- <visual> -->
-        <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
-        <!-- <geometry> -->
-          <!-- <mesh filename="package://mav_description/meshes/${mesh_file}" -->
-            <!-- scale="${mesh_scale}" /> -->
-          <!-- [> <box size="${body_width} ${body_width} ${body_height}"/> [m] [m] [m] <] -->
-        <!-- </geometry> -->
-      <!-- </visual> -->
-
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
@@ -47,9 +25,6 @@
       </collision>
     </link>
 
-    <gazebo reference="base_link">
-      <static>true</static>
-    </gazebo>
   </xacro:macro>
 
   <xacro:camera_base_macro
@@ -129,7 +104,6 @@
           <distortionT2>0.0</distortionT2>
         </plugin>
       </sensor>
-      <static>true</static>
     </gazebo>
   </xacro:macro>
   <xacro:camera_macro robot_namespace="${namespace}">

@@ -8,5 +8,7 @@
   <!-- Instantiate static_camera "mechanics" -->
   <xacro:include filename="$(find mav_description)/urdf/static_camera.urdf.xacro" />
 
+<gazebo>
+    <static>true</static>
+</gazebo>
 </robot>
-
