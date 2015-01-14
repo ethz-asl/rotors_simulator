@@ -10,7 +10,12 @@
     <scene>
       <ambient>0.2 0.2 0.2 1.0</ambient>
       <grid>false</grid>
-    </scene>
+      <sky>
+        <clouds>
+          <speed>4</speed>
+        </clouds>
+      </sky>
+      </scene>
     <physics type="ode">
       <gravity>0 0 -9.81</gravity>
       <ode>
