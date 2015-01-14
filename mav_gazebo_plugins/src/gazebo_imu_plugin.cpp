@@ -7,11 +7,12 @@
 
 #include "mav_gazebo_plugins/gazebo_imu_plugin.h"
 
-#include <boost/bind.hpp>
 #include <chrono>
 #include <cmath>
 #include <iostream>
 #include <stdio.h>
+
+#include <boost/bind.hpp>
 #include <glog/logging.h>
 
 namespace gazebo {

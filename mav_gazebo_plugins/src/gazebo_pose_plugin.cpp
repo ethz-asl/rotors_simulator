@@ -16,12 +16,14 @@
 
 
 #include <mav_gazebo_plugins/gazebo_pose_plugin.h>
-#include <mav_gazebo_plugins/common.h>
+
+#include <chrono>
 #include <iostream>
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#include <chrono>
+#include <mav_gazebo_plugins/common.h>
 
 namespace gazebo {
 

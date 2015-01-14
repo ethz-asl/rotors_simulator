@@ -14,18 +14,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
+#include <chrono>
+
+#include <euroc_comm/Task2.h>
+#include <euroc_comm/VisualInertial.h>
 #include <ros/ros.h>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
-#include <euroc_comm/Task2.h>
 #include <geometry_msgs/Pose.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/Imu.h>
-#include <euroc_comm/VisualInertial.h>
 #include <std_msgs/Duration.h>
 #include <std_msgs/Float64.h>
 
-#include <chrono>
 
 void process(const rosbag::Bag& bag_in, rosbag::Bag* bag_out) {
   using namespace std::chrono;

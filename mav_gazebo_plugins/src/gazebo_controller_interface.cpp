@@ -16,6 +16,7 @@
 
 
 #include <mav_gazebo_plugins/gazebo_controller_interface.h>
+
 #include <mav_gazebo_plugins/common.h>
 
 namespace gazebo {

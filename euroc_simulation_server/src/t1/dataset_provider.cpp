@@ -5,27 +5,28 @@
  * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
  * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
+#include <chrono>
+
+#include <euroc_comm/Task1.h>
+#include <euroc_comm/VisualInertial.h>
+#include <geometry_msgs/Pose.h>
 #include <ros/ros.h>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
-#include <euroc_comm/Task1.h>
-#include <geometry_msgs/Pose.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/Imu.h>
-#include <euroc_comm/VisualInertial.h>
 #include <std_msgs/Duration.h>
 #include <std_msgs/Float64.h>
 
-#include <chrono>
 
 void process(const rosbag::Bag& bag_in, rosbag::Bag* bag_out) {
   using namespace std::chrono;

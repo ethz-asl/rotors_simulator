@@ -19,23 +19,22 @@
 #define MAV_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H
 
 #include <mav_control/controller_factory.h>
-#include <Eigen/Eigen>
-
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
 
 #include <boost/bind.hpp>
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
+#include <Eigen/Eigen>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
-#include <stdio.h>
-#include <sensor_msgs/Imu.h>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
 #include <geometry_msgs/PoseStamped.h>
 #include <mav_msgs/CommandAttitudeThrust.h>
 #include <mav_msgs/CommandRateThrust.h>
 #include <mav_msgs/CommandMotorSpeed.h>
 #include <mav_msgs/MotorSpeed.h>
+#include <ros/callback_queue.h>
+#include <ros/ros.h>
+#include <sensor_msgs/Imu.h>
+#include <stdio.h>
 
 namespace gazebo {
 // Default values
