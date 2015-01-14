@@ -127,7 +127,7 @@
     <noiseNormalQuaternion>0.02 0.02 0.02</noiseNormalQuaternion> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
     <noiseUniformPosition>0 0 0</noiseUniformPosition> <!-- symmetric bounds of uniform noise [m] -->
     <noiseUniformQuaternion>0 0 0</noiseUniformQuaternion> <!-- symmetric bounds of uniform noise [rad], computation see above -->
-    <covarianceImage>package://mav_gazebo/worlds/poseplugin_map1.bmp</covarianceImage>
+    <covarianceImage>package://mav_gazebo/resource/example_poseplugin_map1.bmp</covarianceImage>
     <covarianceImageScale>0.1</covarianceImageScale>
   </plugin>
 </gazebo>
@@ -144,7 +144,7 @@
     <noiseNormalQuaternion>0.02 0.02 0.02</noiseNormalQuaternion>
     <noiseUniformPosition>0 0 0</noiseUniformPosition>
     <noiseUniformQuaternion>0 0 0</noiseUniformQuaternion>
-    <covarianceImage>package://mav_gazebo/worlds/poseplugin_map2.bmp</covarianceImage>
+    <covarianceImage>package://mav_gazebo/resource/example_poseplugin_map2.bmp</covarianceImage>
     <covarianceImageScale>0.1</covarianceImageScale>
   </plugin>
 </gazebo>

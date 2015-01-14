@@ -4,7 +4,7 @@
   <xacro:property name="namespace" value="firefly" />
 
   <!-- Instantiate default firefly-->
-  <xacro:include filename="$(find euroc_simulation_server)/urdf/firefly_base.urdf.xacro" />
+  <xacro:include filename="$(find mav_description)/urdf/firefly_generic_pose_sensor.gazebo" />
 
   <!-- Mount Pose sensor at pose_sensor1_link -->
   <gazebo>
@@ -24,19 +24,19 @@
   </gazebo>
 
   <gazebo>
-  <!-- Wind Plugin -->
-  <plugin filename="libmav_gazebo_wind_plugin.so" name="wind_plugin">
-    <frameId>base_link</frameId>
-    <linkName>base_link</linkName>
-    <robotNamespace>${namespace}</robotNamespace>
-    <xyzOffset>0 0 0</xyzOffset> <!-- [m] [m] [m] -->
-    <windDirection>1 1 0</windDirection>
-    <windForceMean>0</windForceMean> <!-- [N] -->
-    <windGustDirection>1 1 0</windGustDirection>
-    <windGustDuration>2</windGustDuration> <!-- [s] -->
-    <windGustStart>40</windGustStart> <!-- [s] -->
-    <windGustForceMean>5</windGustForceMean> <!-- [N] -->
-  </plugin>
-</gazebo>
+    <!-- Wind Plugin -->
+    <plugin filename="libmav_gazebo_wind_plugin.so" name="wind_plugin">
+      <frameId>base_link</frameId>
+      <linkName>base_link</linkName>
+      <robotNamespace>${namespace}</robotNamespace>
+      <xyzOffset>0 0 0</xyzOffset> <!-- [m] [m] [m] -->
+      <windDirection>1 1 0</windDirection>
+      <windForceMean>0</windForceMean> <!-- [N] -->
+      <windGustDirection>1 1 0</windGustDirection>
+      <windGustDuration>2</windGustDuration> <!-- [s] -->
+      <windGustStart>40</windGustStart> <!-- [s] -->
+      <windGustForceMean>5</windGustForceMean> <!-- [N] -->
+    </plugin>
+  </gazebo>
 </robot>
 

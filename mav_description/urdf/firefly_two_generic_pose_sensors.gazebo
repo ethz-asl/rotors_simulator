@@ -4,7 +4,7 @@
   <xacro:property name="namespace" value="firefly" />
 
   <!-- Instantiate default firefly-->
-  <xacro:include filename="$(find euroc_simulation_server)/urdf/firefly_base.urdf.xacro" />
+  <xacro:include filename="$(find mav_description)/urdf/firefly_base.xacro" />
 
   <!-- Create joint/link for pose sensor2 -->
   <link name="pose_sensor2_link">
@@ -35,7 +35,7 @@
       <noiseNormalQuaternion>0.017 0.017 0.017</noiseNormalQuaternion> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
       <noiseUniformPosition>0 0 0</noiseUniformPosition> <!-- symmetric bounds of uniform noise [m] -->
       <noiseUniformQuaternion>0 0 0</noiseUniformQuaternion> <!-- symmetric bounds of uniform noise [rad], computation see above -->
-      <covarianceImage>package://mav_gazebo/worlds/poseplugin_map1.bmp</covarianceImage>
+      <covarianceImage>package://mav_gazebo/resource/example_poseplugin_map1.bmp</covarianceImage>
       <covarianceImageScale>0.1</covarianceImageScale>
     </plugin>
   </gazebo>
@@ -43,7 +43,7 @@
     <!-- Mount Pose sensor at pose_sensor2_link -->
   <gazebo>
     <!-- Generic 6D pose sensor plugin -->
-    <plugin filename="libmav_gazebo_pose_plugin.so" name="pose_sensor1">
+    <plugin filename="libmav_gazebo_pose_plugin.so" name="pose_sensor2">
       <linkName>pose_sensor2_link</linkName>
       <robotNamespace>${namespace}</robotNamespace>
       <poseTopic>pose2</poseTopic>
@@ -54,7 +54,7 @@
       <noiseNormalQuaternion>0.017 0.017 0.017</noiseNormalQuaternion> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
       <noiseUniformPosition>0 0 0</noiseUniformPosition> <!-- symmetric bounds of uniform noise [m] -->
       <noiseUniformQuaternion>0 0 0</noiseUniformQuaternion> <!-- symmetric bounds of uniform noise [rad], computation see above -->
-      <covarianceImage>package://mav_gazebo/worlds/poseplugin_map2.bmp</covarianceImage>
+      <covarianceImage>package://mav_gazebo/resource/example_poseplugin_map2.bmp</covarianceImage>
       <covarianceImageScale>0.1</covarianceImageScale>
     </plugin>
   </gazebo>
