@@ -15,13 +15,16 @@
  */
 
 
+#ifndef MAV_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H
+#define MAV_GAZEBO_PLUGINS_GAZEBO_WIND_PLUGIN_H
+
 #include <string>
 #include <ros/ros.h>
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
 
 namespace gazebo {
 // Default values
@@ -103,3 +106,5 @@ class GazeboWindPlugin : public ModelPlugin {
   ros::NodeHandle *node_handle_;
 };
 }
+
+#endif // MAV_GAZEBO_PLUGINS_GAZEBO_WIND_PLUGIN_H

@@ -18,23 +18,21 @@
 #ifndef MAV_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H
 #define MAV_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H
 
-#include <random>
 #include <cmath>
 #include <deque>
-
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
+#include <random>
+#include <stdio.h>
 
 #include <boost/bind.hpp>
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
-#include <stdio.h>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
-
 #include <opencv2/core/core.hpp>
+#include <ros/ros.h>
+#include <ros/callback_queue.h>
 
 //#include <mav_gazebo_plugins/pose_distorter.h>
 

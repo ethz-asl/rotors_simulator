@@ -16,8 +16,11 @@
 
 
 #include <mav_gazebo_plugins/gazebo_bag_plugin.h>
+
 #include <ctime>
+
 #include <mav_msgs/MotorSpeed.h>
+
 #include <mav_gazebo_plugins/common.h>
 
 namespace gazebo {

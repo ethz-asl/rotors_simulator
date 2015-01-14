@@ -16,8 +16,9 @@
 
 
 #include <mav_gazebo_plugins/gazebo_octomap_plugin.h>
-#include <gazebo/math/Vector3.hh>
+
 #include <gazebo/common/Time.hh>
+#include <gazebo/math/Vector3.hh>
 #include <octomap_msgs/conversions.h>
 
 namespace gazebo {
