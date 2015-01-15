@@ -9,7 +9,6 @@
   <xacro:controller_plugin_macro
     namespace="${namespace}"
     imu_sub_topic="imu"
-    pose_topic="pose1"
     >
   </xacro:controller_plugin_macro>
 
@@ -17,6 +16,7 @@
   <xacro:imu_plugin_macro
     namespace="${namespace}"
     imu_suffix=""
+    imu_topic="imu"
     gyroscope_noise_density="0.0003394"
     gyroscopoe_random_walk="0.000038785"
     gyroscope_bias_correlation_time="1000.0"
@@ -34,6 +34,7 @@
     <xacro:imu_plugin_macro
       namespace="${namespace}"
       imu_suffix="gt"
+      imu_topic="ground_truth/imu"
       gyroscope_noise_density="0.0"
       gyroscopoe_random_walk="0.0"
       gyroscope_bias_correlation_time="1000.0"
@@ -50,6 +51,7 @@
     <xacro:pose_plugin_macro
       namespace="${namespace}"
       pose_sensor_suffix="gt"
+      pose_topic="ground_truth/pose"
       measurement_divisor="1"
       measurement_delay="0"
       unknown_delay="0.0"

@@ -10,6 +10,7 @@
   <xacro:pose_plugin_macro
     namespace="${namespace}"
     pose_sensor_suffix="1"
+    pose_topic="pose1"
     measurement_divisor="10"
     measurement_delay="10"
     unknown_delay="0.0"
@@ -28,6 +29,7 @@
   <xacro:pose_plugin_macro
     namespace="${namespace}"
     pose_sensor_suffix="2"
+    pose_topic="pose2"
     measurement_divisor="10"
     measurement_delay="10"
     unknown_delay="0.0"

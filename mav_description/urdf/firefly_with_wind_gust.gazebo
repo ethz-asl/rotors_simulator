@@ -7,7 +7,7 @@
   <xacro:include filename="$(find mav_description)/urdf/firefly_generic_pose_sensor.gazebo" />
 
     <!-- Add a wind gust starting at 40s and lasting for 2s. -->
-  <xacro:pose_plugin_macro
+  <xacro:wind_plugin_macro
     namespace="${namespace}"
     xyz_offset="0 0 0"
     wind_direction="1 0 0"
@@ -15,9 +15,8 @@
     wind_gust_direction="1 1 0"
     wind_gust_duration="2"
     wind_gust_start="40"
-    wind_gust_force_mean="0 0 0"
-    noise_uniform_quaternion="0 0 0"
+    wind_gust_force_mean="5"
   >
-  </xacro:pose_plugin_macro>
+  </xacro:wind_plugin_macro>
 </robot>
 
