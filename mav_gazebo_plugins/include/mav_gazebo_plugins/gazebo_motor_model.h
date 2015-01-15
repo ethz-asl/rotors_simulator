@@ -32,8 +32,6 @@
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
 
-#include <mav_gazebo_plugins/common.h>
-
 #include "mav_gazebo_plugins/common.h"
 
 namespace turning_direction {

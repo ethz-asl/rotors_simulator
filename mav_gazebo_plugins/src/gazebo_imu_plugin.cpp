@@ -13,7 +13,6 @@
 #include <stdio.h>
 
 #include <boost/bind.hpp>
-#include <glog/logging.h>
 
 namespace gazebo {
 
