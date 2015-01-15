@@ -13,7 +13,6 @@
 #include <stdio.h>
 
 #include <boost/bind.hpp>
-#include <glog/logging.h>
 
 namespace gazebo {
 
@@ -22,6 +21,7 @@ GazeboImuPlugin::GazeboImuPlugin()
       node_handle_(0),
       velocity_prev_W_(0,0,0)
 {
+  initGlog();
 }
 
 GazeboImuPlugin::~GazeboImuPlugin() {
