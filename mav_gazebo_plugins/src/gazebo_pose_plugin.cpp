@@ -84,7 +84,6 @@ void GazeboPosePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   }
 
   getSdfParam<std::string>(_sdf, "poseTopic", pose_pub_topic_, "pose");
-
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalPosition", noise_normal_position, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalQuaternion", noise_normal_quaternion, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "noiseUniformPosition", noise_uniform_position, zeros3);

@@ -5,11 +5,13 @@
   <xacro:macro name="multirotor_base_macro"
     params="robot_namespace mass body_width body_height mesh_file *inertia">
     <link name="base_link"></link>
+
     <joint name="base_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <parent link="base_link" />
       <child link="base_link_inertia" />
     </joint>
+
     <link name="base_link_inertia">
       <inertial>
         <mass value="${mass}" />  <!-- [kg] -->
@@ -33,23 +35,6 @@
         </geometry>
       </collision>
     </link>
-
-    <!-- IMU -->
-    <link name="imu_link">
-      <inertial>
-        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0"
-          izz="0.001" />
-        <mass value="0.01" />  <!-- [kg] -->
-        <origin xyz="0 0 0" rpy="0 0 0" />
-      </inertial>
-    </link>
-    <!-- IMU joint -->
-    <joint name="imu_joint" type="revolute">
-      <!--origin xyz="0 0 0" rpy="3.1416 0 0" / -->
-      <parent link="base_link" />
-      <child link="imu_link" />
-      <limit upper="0" lower="0" effort="0" velocity="0" />
-    </joint>
 
     <!-- attach multirotor_base_plugin to the base_link -->
     <gazebo>
