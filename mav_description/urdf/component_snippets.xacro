@@ -101,12 +101,12 @@
   </xacro:macro>
 
   <!-- Macro to add an IMU. -->
-  <xacro:macro name="imu_plugin_macro" params="namespace imu_suffix imu_topic gyroscope_noise_density gyroscopoe_random_walk gyroscope_bias_correlation_time gyroscope_turn_on_bias_sigma accelerometer_noise_density accelerometer_random_walk accelerometer_bias_correlation_time accelerometer_turn_on_bias_sigma *origin">
+  <xacro:macro name="imu_plugin_macro" params="namespace imu_suffix imu_topic mass_imu_sensor gyroscope_noise_density gyroscopoe_random_walk gyroscope_bias_correlation_time gyroscope_turn_on_bias_sigma accelerometer_noise_density accelerometer_random_walk accelerometer_bias_correlation_time accelerometer_turn_on_bias_sigma *inertia *origin">
     <!-- IMU link -->
     <link name="imu${imu_suffix}_link">
       <inertial>
-        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
-        <mass value="0.01" />  <!-- [kg] -->
+        <xacro:insert_block name="inertia" />
+        <mass value="${mass_imu_sensor}" />  <!-- [kg] -->
         <origin xyz="0 0 0" rpy="0 0 0" />
       </inertial>
     </link>
@@ -137,13 +137,12 @@
   </xacro:macro>
 
   <!-- Macro to add a generic pose sensor. -->
-  <xacro:macro name="pose_plugin_macro" params="namespace pose_sensor_suffix pose_topic measurement_divisor measurement_delay unknown_delay noise_normal_position noise_normal_quaternion noise_uniform_position noise_uniform_quaternion enable_pose_map pose_map image_scale *origin">
+  <xacro:macro name="pose_plugin_macro" params="namespace pose_sensor_suffix pose_topic mass_pose_sensor measurement_divisor measurement_delay unknown_delay noise_normal_position noise_normal_quaternion noise_uniform_position noise_uniform_quaternion enable_pose_map pose_map image_scale *inertia *origin">
     <!-- Pose link -->
     <link name="pose_sensor${pose_sensor_suffix}_link">
       <inertial>
-        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0"
-          izz="0.001" />
-        <mass value="0.01" />  <!-- [kg] -->
+        <xacro:insert_block name="inertia" />
+        <mass value="${mass_pose_sensor}" />  <!-- [kg] -->
       </inertial>
     </link>
     <!-- Pose joint -->
