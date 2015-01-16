@@ -105,8 +105,7 @@
     <!-- IMU link -->
     <link name="imu${imu_suffix}_link">
       <inertial>
-        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0"
-          izz="0.001" />
+        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
         <mass value="0.01" />  <!-- [kg] -->
         <origin xyz="0 0 0" rpy="0 0 0" />
       </inertial>
