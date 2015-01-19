@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 
 <robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:property name="namespace" value="firefly" />
 
   <!-- Instantiate firefly with a generic pose sensor. -->
   <xacro:include filename="$(find mav_description)/urdf/firefly_generic_pose_sensor.gazebo" />
