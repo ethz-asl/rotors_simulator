@@ -58,7 +58,8 @@ Installation Instructions
 Basic Usage
 -----------
 
-Launch the simulator with a Firefly model.
+Launch the simulator with a hex-rotor helicopter model, in our case, the AscTec FireFly.
+
 ```
 roslaunch mav_gazebo firefly_empty_world.launch
 ```
