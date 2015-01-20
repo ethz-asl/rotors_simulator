@@ -32,7 +32,7 @@
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
 
-#include <mav_gazebo_plugins/common.h>
+#include "mav_gazebo_plugins/common.h"
 
 namespace turning_direction {
 const static int CCW = 1;
@@ -71,7 +71,9 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         rotor_drag_coefficient_(kDefaultRotorDragCoefficient),
         rolling_moment_coefficient_(kDefaultRollingMomentCoefficient),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
-        node_handle_(NULL) {}
+        node_handle_(NULL) {
+    initGlog();
+  }
 
   virtual ~GazeboMotorModel();
 

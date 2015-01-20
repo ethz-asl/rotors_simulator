@@ -1,11 +1,24 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(mav_gazebo)
 
-find_package(catkin REQUIRED COMPONENTS roscpp geometry_msgs gazebo_msgs)
+add_definitions(-std=c++0x)
 
-catkin_package()
+find_package(catkin REQUIRED COMPONENTS gazebo_msgs geometry_msgs mav_msgs roscpp sensor_msgs)
+
+catkin_package(
+  CATKIN_DEPENDS
+    gazebo_msgs
+    geometry_msgs
+    mav_msgs
+    roscpp
+    sensor_msgs
+)
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(gazebo_pose_publisher src/gazebo_pose_publisher.cpp)
 target_link_libraries(gazebo_pose_publisher ${catkin_LIBRARIES})
+
+add_executable(waypoint_publisher src/waypoint_publisher.cpp)
+target_link_libraries(waypoint_publisher ${catkin_LIBRARIES})
+add_dependencies(waypoint_publisher ${catkin_EXPORTED_TARGETS})
