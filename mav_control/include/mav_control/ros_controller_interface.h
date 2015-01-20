@@ -23,7 +23,7 @@
 #include <mav_msgs/MotorSpeed.h>
 #include <mav_msgs/CommandTrajectory.h>
 
-#include <sensor_fusion_comm/ExtState.h>
+#include <nav_msgs/Odometry.h>
 
 namespace mav_control {
 
@@ -46,7 +46,7 @@ class RosControllerInterface {
   std::string imu_topic_;
   std::string pose_topic_;
   std::string motor_velocity_topic_;
-  std::string ekf_topic_;
+  std::string odometry_topic_;
 
   // command topics
   std::string command_topic_attitude_;
@@ -62,7 +62,7 @@ class RosControllerInterface {
   ros::Subscriber cmd_trajectory_sub_;
   ros::Subscriber imu_sub_;
   ros::Subscriber pose_sub_;
-  ros::Subscriber ekf_sub_;
+  ros::Subscriber odometry_sub_;
 
   void CommandAttitudeCallback(
       const mav_msgs::CommandAttitudeThrustConstPtr& input_reference_msg);
@@ -70,7 +70,7 @@ class RosControllerInterface {
       const mav_msgs::CommandTrajectoryConstPtr& trajectory_reference_msg);
   void CommandMotorCallback(
       const mav_msgs::CommandMotorSpeedConstPtr& input_reference_msg);
-  void ExtEkfCallback(const sensor_fusion_comm::ExtStateConstPtr ekf_state);
+  void OdometryCallback(const nav_msgs::OdometryConstPtr odometry_msg);
   void ImuCallback(const sensor_msgs::ImuConstPtr& imu);
   void PoseCallback(const geometry_msgs::PoseStampedConstPtr& pose);
 };

@@ -24,7 +24,7 @@ RosControllerInterface::RosControllerInterface()
   imu_sub_ = node_handle_->subscribe(imu_topic_, 10, &RosControllerInterface::ImuCallback, this);
   pose_sub_ = node_handle_->subscribe(pose_topic_, 10, &RosControllerInterface::PoseCallback, this);
 
-  ekf_sub_ = node_handle_->subscribe(ekf_topic_, 10, &RosControllerInterface::ExtEkfCallback, this);
+  odometry_sub_ = node_handle_->subscribe(odometry_topic_, 10, &RosControllerInterface::OdometryCallback, this);
 
   motor_cmd_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_velocity_topic_, 10);
 }
@@ -39,7 +39,7 @@ RosControllerInterface::~RosControllerInterface() {
 void RosControllerInterface::InitializeParams() {
   //TODO(burrimi): Read parameters from yaml.
   ros::NodeHandle pnh("~");
-  pnh.param<std::string>("ekf_topic", ekf_topic_, "ext_state");
+  pnh.param<std::string>("odometry_topic", odometry_topic_, "odometry");
   pnh.param<std::string>("command_topic_attitude_", command_topic_attitude_, "command/attitude");
   pnh.param<std::string>("command_topic_rate_", command_topic_rate_, "command/rate");
   pnh.param<std::string>("command_topic_motor_", command_topic_motor_, "command/motors");
@@ -105,29 +105,34 @@ void RosControllerInterface::CommandAttitudeCallback(
   controller_->SetAttitudeThrustReference(input_reference);
 }
 
-void RosControllerInterface::ExtEkfCallback(
-    const sensor_fusion_comm::ExtStateConstPtr ekf_state) {
+void RosControllerInterface::OdometryCallback(
+    const nav_msgs::OdometryConstPtr odometry_msg) {
 
   static bool test = true;
   if(test) {
-    std::cout << "got first ekf message " << std::endl;
+    std::cout << "got first odometry message " << std::endl;
     test=false;
   }
 
   if (!controller_created_)
     return;
 
-  Eigen::Vector3d position(ekf_state->pose.position.x, ekf_state->pose.position.y,
-                           ekf_state->pose.position.z);
+  Eigen::Vector3d position(odometry_msg->pose.pose.position.x, odometry_msg->pose.pose.position.y,
+                           odometry_msg->pose.pose.position.z);
   controller_->SetPosition(position);
 
-  Eigen::Vector3d velocity(ekf_state->velocity.x, ekf_state->velocity.y,
-                           ekf_state->velocity.z);
-  controller_->SetVelocity(velocity);
+  Eigen::Quaternion<double> q_W_I(odometry_msg->pose.pose.orientation.w, odometry_msg->pose.pose.orientation.x,
+                                        odometry_msg->pose.pose.orientation.y, odometry_msg->pose.pose.orientation.z);
+  controller_->SetAttitude(q_W_I);
 
-  Eigen::Quaternion<double> orientation(ekf_state->pose.orientation.w, ekf_state->pose.orientation.x,
-                                        ekf_state->pose.orientation.y, ekf_state->pose.orientation.z);
-  controller_->SetAttitude(orientation);
+  Eigen::Vector3d velocity_I(odometry_msg->twist.twist.linear.x, odometry_msg->twist.twist.linear.y,
+                           odometry_msg->twist.twist.linear.z);
+
+  Eigen::Vector3d velocity_W;
+
+  velocity_W = q_W_I.toRotationMatrix() * velocity_I;
+
+  controller_->SetVelocity(velocity_W);
 
   // TODO(burrimi): do the calculation at a better place.
   Eigen::VectorXd ref_rotor_velocities;
@@ -138,10 +143,9 @@ void RosControllerInterface::ExtEkfCallback(
   turning_velocities_msg.motor_speed.clear();
   for (int i = 0; i < ref_rotor_velocities.size(); i++)
     turning_velocities_msg.motor_speed.push_back(ref_rotor_velocities[i]);
-  turning_velocities_msg.header.stamp = ekf_state->header.stamp;
+  turning_velocities_msg.header.stamp = odometry_msg->header.stamp;
 
   motor_cmd_pub_.publish(turning_velocities_msg);
-
 }
 
 void RosControllerInterface::CommandMotorCallback(
