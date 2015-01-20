@@ -15,14 +15,17 @@
  */
 
 
-#include <string>
-#include <ros/ros.h>
-#include <mav_msgs/MotorSpeed.h>
+#ifndef MAV_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H
+#define MAV_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
+#include <string>
+
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+#include <mav_msgs/MotorSpeed.h>
+#include <ros/ros.h>
 
 namespace gazebo {
 // Default values
@@ -82,3 +85,5 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   ros::NodeHandle *node_handle_;
 };
 }
+
+#endif // MAV_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H

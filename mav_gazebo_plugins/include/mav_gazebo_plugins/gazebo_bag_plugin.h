@@ -14,24 +14,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
+
+#ifndef MAV_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H
+#define MAV_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H
+
 #include <string>
-#include <ros/ros.h>
-#include <rosbag/bag.h>
+
+#include <gazebo/common/common.hh>
+#include <gazebo/common/Plugin.hh>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+#include <geometry_msgs/Point.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
-#include <geometry_msgs/Point.h>
 #include <geometry_msgs/WrenchStamped.h>
-#include <sensor_msgs/Imu.h>
-#include <std_msgs/Float32.h>
 #include <mav_msgs/CommandAttitudeThrust.h>
 #include <mav_msgs/CommandMotorSpeed.h>
 #include <mav_msgs/CommandRateThrust.h>
 #include <mav_msgs/CommandTrajectory.h>
-
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/common/common.hh>
-#include <gazebo/common/Plugin.hh>
+#include <ros/ros.h>
+#include <rosbag/bag.h>
+#include <sensor_msgs/Imu.h>
+#include <std_msgs/Float32.h>
 
 namespace gazebo {
 // Default values
@@ -233,3 +237,5 @@ class GazeboBagPlugin : public ModelPlugin {
 
 };
 }
+
+#endif // MAV_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H

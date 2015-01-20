@@ -15,14 +15,13 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-#include <ros/ros.h>
 #include <ros/callback_queue.h>
+#include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 
 #include "mav_gazebo_plugins/common.h"
 
 namespace gazebo {
-
 // Default values for use with ADIS16448 IMU
 static constexpr double kDefaultAdisGyroscopeNoiseDensity =
     2.0 * 35.0 / 3600.0 / 180.0 * M_PI;

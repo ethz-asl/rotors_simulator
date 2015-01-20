@@ -1,0 +1,16 @@
+<launch>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="hummingbird"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find mav_gazebo)/worlds/basic.world"/>
+    <!-- <arg name="debug" value="true" /> -->
+  </include>
+  <include file="$(find mav_gazebo)/launch/spawn_hummingbird.launch">
+    <arg name="enable_logging" value="$(arg enable_logging)" />
+    <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+    <arg name="log_file" value="$(arg log_file)"/>
+  </include>
+  <!--node name="gazebo_pose_publisher" pkg="mav_gazebo" type="gazebo_pose_publisher" args="hummingbird /hummingbird/pose"/-->
+</launch>

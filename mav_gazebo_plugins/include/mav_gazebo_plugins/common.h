@@ -14,13 +14,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
-#ifndef COMMON_H_
-#define COMMON_H_
+#ifndef MAV_GAZEBO_PLUGINS_COMMON_H_
+#define MAV_GAZEBO_PLUGINS_COMMON_H_
 
 #include <Eigen/Dense>
 #include <gazebo/gazebo.hh>
+#include <glog/logging.h>
 
 namespace gazebo {
+
+/**
+ * \brief Helper function to initialize Glog only once.
+ */
+void initGlog() {
+  static bool glog_initialized = false;
+
+  if(!glog_initialized) {
+    google::InitGoogleLogging("gazebo_plugins_glogger");
+    glog_initialized = true;
+  }
+}
+
 
 /**
  * \brief Obtains a parameter from sdf.
@@ -76,13 +90,13 @@ discretized system (ZoH):
       */
       T outputState;
       if(inputState > previousState_){
-        //Accelerate
+        // Calcuate the outputState if accelerating.
         double alphaUp = exp(- samplingTime / timeConstantUp_);
         // x(k+1) = Ad*x(k) + Bd*u(k)
         outputState = alphaUp * previousState_ + (1 - alphaUp) * inputState;
 
       }else{
-        //Decelerate
+        // Calculate the outputState if decelerating.
         double alphaDown = exp(- samplingTime / timeConstantDown_);
         outputState = alphaDown * previousState_ + (1 - alphaDown) * inputState;
       }
@@ -125,8 +139,4 @@ void copyPosition(const In& in, Out* out) {
   out->z = in.z;
 }
 
-#endif /* COMMON_H_ */
-
-
-
-
+#endif /* MAV_GAZEBO_PLUGINS_COMMON_H_ */

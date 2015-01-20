@@ -1,0 +1,18 @@
+<launch>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="euroc_t3_3_log"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find mav_gazebo)/worlds/basic.world"/>
+    <!-- <arg name="debug" value="true" /> -->
+    <arg name="paused" value="true" />
+  </include>
+
+  <include file="$(find mav_gazebo)/launch/spawn_firefly.launch">
+    <arg name="model" value="$(find mav_description)/urdf/firefly_with_wind_gust.gazebo"/>
+    <arg name="enable_logging" value="$(arg enable_logging)" />
+    <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+    <arg name="log_file" value="$(arg log_file)"/>
+  </include>
+</launch>

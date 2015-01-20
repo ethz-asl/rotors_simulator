@@ -17,7 +17,6 @@
 
 #include <mav_gazebo_plugins/gazebo_motor_model.h>
 
-
 namespace gazebo {
 
 GazeboMotorModel::~GazeboMotorModel() {
@@ -125,12 +124,17 @@ void GazeboMotorModel::OnUpdate(const common::UpdateInfo& _info) {
 }
 
 void GazeboMotorModel::VelocityCallback(const mav_msgs::MotorSpeedPtr& rot_velocities) {
+  CHECK(rot_velocities->motor_speed.size() > motor_number_)
+      << "You tried to access index " << motor_number_
+      << " of the MotorSpeed message array which is of size " << rot_velocities->motor_speed.size() << ".";
   ref_motor_rot_vel_ = std::min(rot_velocities->motor_speed[motor_number_], static_cast<float>(max_rot_velocity_));
 }
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
   motor_rot_vel_ = joint_->GetVelocity(0);
-  // TODO(ff): Here or above we should check that no aliasing is occuring on the spinning rotors.
+  if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_)) {
+    gzerr << "Aliasing on motor [" << motor_number_ << "] might occur. Consider making smaller simulation time steps or raising the rotor_velocity_slowdown_sim_ param.\n";
+  }
   double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
   double force = real_motor_velocity * real_motor_velocity * motor_constant_;
   // Apply a force to the link.
