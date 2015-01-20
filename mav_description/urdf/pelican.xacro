@@ -5,7 +5,7 @@
   <xacro:property name="namespace" value="pelican" />
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <xacro:property name="mesh_file" value="pelican.dae" />
-  <xacro:property name="mass" value="0.6" /> <!-- [kg] -->
+  <xacro:property name="mass" value="1.0" /> <!-- [kg] -->
   <xacro:property name="body_width" value="0.1" /> <!-- [m] -->
   <xacro:property name="body_height" value="0.2" /> <!-- [m] -->
   <xacro:property name="mass_rotor" value="0.01" /> <!-- [kg] -->
