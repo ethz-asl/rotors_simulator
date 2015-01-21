@@ -123,11 +123,7 @@ void RosControllerInterface::CommandAttitudeCallback(
 void RosControllerInterface::OdometryCallback(
     const nav_msgs::OdometryConstPtr odometry_msg) {
 
-  static bool test = true;
-  if(test) {
-    std::cout << "got first odometry message " << std::endl;
-    test=false;
-  }
+  ROS_INFO_ONCE("got first odometry message.");
 
   if (!controller_created_)
     return;

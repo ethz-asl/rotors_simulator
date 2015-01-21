@@ -46,7 +46,7 @@ static const std::string kDefaultCommandRateThrustSubTopic = "command/rate";
 static const std::string kDefaultCommandMotorSpeedSubTopic = "command/motors";
 static const std::string kDefaultImuSubTopic = "imu";
 static const std::string kDefaultPoseSubTopic = "sensor_pose";
-static const std::string kDefaultOdometrySubTopic = "odometry"
+static const std::string kDefaultOdometrySubTopic = "odometry";
 
 class RosControllerInterface {
  public:
