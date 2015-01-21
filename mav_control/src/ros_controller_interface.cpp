@@ -178,11 +178,8 @@ void RosControllerInterface::CommandMotorCallback(
 }
 
 void RosControllerInterface::ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg) {
-  static bool test = true;
-  if(test) {
-    std::cout << "got first imu message " << std::endl;
-    test=false;
-  }
+
+  ROS_INFO_ONCE("Received first IMU message.");
 
   if (!controller_created_)
     return;
