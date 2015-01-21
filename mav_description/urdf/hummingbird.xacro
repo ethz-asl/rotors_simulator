@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 
 <robot name="hummingbird" xmlns:xacro="http://ros.org/wiki/xacro">
-  <!-- Properties -->
+  <!-- Properties (Taken from Novel Dynamic Inversion Architecture Design
+for Quadrocopter Control by Jian Wang et al.) -->
   <xacro:property name="namespace" value="hummingbird" />
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <xacro:property name="mesh_file" value="hummingbird.dae" />
