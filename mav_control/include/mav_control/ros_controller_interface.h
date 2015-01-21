@@ -17,23 +17,21 @@
 #ifndef MAV_CONTROL_ROS_CONTROLLER_INTERFACE_H
 #define MAV_CONTROL_ROS_CONTROLLER_INTERFACE_H
 
-#include <mav_control/controller_factory.h>
-#include <Eigen/Eigen>
-
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
-
 #include <boost/bind.hpp>
-
+#include <Eigen/Eigen>
 #include <stdio.h>
-#include <sensor_msgs/Imu.h>
+
 #include <geometry_msgs/PoseStamped.h>
 #include <mav_msgs/CommandAttitudeThrust.h>
 #include <mav_msgs/CommandMotorSpeed.h>
-#include <mav_msgs/MotorSpeed.h>
 #include <mav_msgs/CommandTrajectory.h>
-
+#include <mav_msgs/MotorSpeed.h>
 #include <nav_msgs/Odometry.h>
+#include <ros/ros.h>
+#include <ros/callback_queue.h>
+#include <sensor_msgs/Imu.h>
+
+#include "mav_control/controller_factory.h"
 
 namespace mav_control {
 
