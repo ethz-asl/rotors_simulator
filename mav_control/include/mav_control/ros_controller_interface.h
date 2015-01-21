@@ -1,9 +1,19 @@
-//==============================================================================
-// Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>, Michael Burri <burri210@gmail.com>
-// All rights reserved.
-//
-// TODO(ff): Enter some license
-//==============================================================================
+/*
+ * Copyright (C) 2014 Fadri Furrer, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Michael Burri, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Pascal Gohl, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ *
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ */
+
 #ifndef MAV_CONTROL_ROS_CONTROLLER_INTERFACE_H
 #define MAV_CONTROL_ROS_CONTROLLER_INTERFACE_H
 
@@ -27,6 +37,16 @@
 
 namespace mav_control {
 
+// Default values
+static const std::string kDefaultNamespace = "";
+static const std::string kDefaultMotorVelocityReferencePubTopic = "motor_velocity_reference";
+static const std::string kDefaultCommandTrajectoryTopic = "command/trajectory";
+static const std::string kDefaultCommandAttitudeThrustSubTopic = "command/attitude";
+static const std::string kDefaultCommandRateThrustSubTopic = "command/rate";
+static const std::string kDefaultCommandMotorSpeedSubTopic = "command/motors";
+static const std::string kDefaultImuSubTopic = "imu";
+static const std::string kDefaultPoseSubTopic = "sensor_pose";
+static const std::string kDefaultOdometrySubTopic = "odometry"
 
 class RosControllerInterface {
  public:
@@ -43,18 +63,18 @@ class RosControllerInterface {
   ros::NodeHandle* node_handle_;
 
   std::string namespace_;
-  std::string imu_topic_;
-  std::string pose_topic_;
-  std::string motor_velocity_topic_;
-  std::string odometry_topic_;
+  std::string imu_sub_topic_;
+  std::string pose_sub_topic_;
+  std::string motor_velocity_reference_pub_topic_;
+  std::string odometry_sub_topic_;
 
   // command topics
-  std::string command_topic_attitude_;
-  std::string command_topic_rate_;
-  std::string command_topic_motor_;
-  std::string command_topic_trajectory_;
+  std::string command_attitude_thrust_sub_topic_;
+  std::string command_rate_thrust_sub_topic_;
+  std::string command_motor_speed_sub_topic_;
+  std::string command_trajectory_sub_topic_;
 
-  ros::Publisher motor_cmd_pub_;
+  ros::Publisher motor_velocity_reference_pub_;
 
   // subscribers
   ros::Subscriber cmd_attitude_sub_;

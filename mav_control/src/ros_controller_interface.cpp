@@ -1,9 +1,19 @@
-//==============================================================================
-// Copyright (c) 2014, Fadri Furrer <ffurrer@gmail.com>, Michael Burri <burri210@gmail.com>
-// All rights reserved.
-//
-// TODO(ff): Enter some license
-//==============================================================================
+/*
+ * Copyright (C) 2014 Fadri Furrer, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Michael Burri, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Pascal Gohl, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
+ * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ *
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ */
+
 #include "mav_control/ros_controller_interface.h"
 
 namespace mav_control {
@@ -11,22 +21,25 @@ namespace mav_control {
 RosControllerInterface::RosControllerInterface()
     : node_handle_(0),
       controller_created_(false) {
-  node_handle_ = new ros::NodeHandle;
 
   InitializeParams();
 
-  cmd_attitude_sub_ = node_handle_->subscribe(command_topic_attitude_, 10,
+  node_handle_ = new ros::NodeHandle(namespace_);
+
+  cmd_trajectory_sub_ = node_handle_->subscribe(command_trajectory_sub_topic_, 10,
+                                                &RosControllerInterface::CommandTrajectoryCallback, this);
+  cmd_attitude_sub_ = node_handle_->subscribe(command_attitude_thrust_sub_topic_, 10,
                                               &RosControllerInterface::CommandAttitudeCallback, this);
-  cmd_motor_sub_ = node_handle_->subscribe(command_topic_motor_, 10,
+  cmd_motor_sub_ = node_handle_->subscribe(command_motor_speed_sub_topic_, 10,
                                            &RosControllerInterface::CommandMotorCallback, this);
-  cmd_trajectory_sub_ = node_handle_->subscribe(command_topic_trajectory_, 10,
-                                           &RosControllerInterface::CommandTrajectoryCallback, this);
-  imu_sub_ = node_handle_->subscribe(imu_topic_, 10, &RosControllerInterface::ImuCallback, this);
-  pose_sub_ = node_handle_->subscribe(pose_topic_, 10, &RosControllerInterface::PoseCallback, this);
-
-  odometry_sub_ = node_handle_->subscribe(odometry_topic_, 10, &RosControllerInterface::OdometryCallback, this);
-
-  motor_cmd_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_velocity_topic_, 10);
+  imu_sub_ = node_handle_->subscribe(imu_sub_topic_, 10,
+                                     &RosControllerInterface::ImuCallback, this);
+  pose_sub_ = node_handle_->subscribe(pose_sub_topic_, 10,
+                                      &RosControllerInterface::PoseCallback, this);
+  odometry_sub_ = node_handle_->subscribe(odometry_sub_topic_, 10,
+                                          &RosControllerInterface::OdometryCallback, this);
+  motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(
+                                          motor_velocity_reference_pub_topic_, 10);
 }
 
 RosControllerInterface::~RosControllerInterface() {
@@ -38,15 +51,17 @@ RosControllerInterface::~RosControllerInterface() {
 
 void RosControllerInterface::InitializeParams() {
   //TODO(burrimi): Read parameters from yaml.
+
   ros::NodeHandle pnh("~");
-  pnh.param<std::string>("odometry_topic", odometry_topic_, "odometry");
-  pnh.param<std::string>("command_topic_attitude_", command_topic_attitude_, "command/attitude");
-  pnh.param<std::string>("command_topic_rate_", command_topic_rate_, "command/rate");
-  pnh.param<std::string>("command_topic_motor_", command_topic_motor_, "command/motors");
-  pnh.param<std::string>("command_topic_trajectory_", command_topic_trajectory_, "command/trajectory");
-  pnh.param<std::string>("imu_topic", imu_topic_, "imu");
-  pnh.param<std::string>("pose_topic", pose_topic_, "sensor_pose");
-  pnh.param<std::string>("motor_velocity_topic", motor_velocity_topic_, "command/motors");
+  pnh.param<std::string>("robotNamespace", namespace_, kDefaultNamespace);
+  pnh.param<std::string>("commandAttitudeThrustSubTopic", command_attitude_thrust_sub_topic_, kDefaultCommandAttitudeThrustSubTopic);
+  pnh.param<std::string>("commandRateThrustSubTopic", command_rate_thrust_sub_topic_, kDefaultCommandRateThrustSubTopic);
+  pnh.param<std::string>("commandMotorSpeedSubTopic", command_motor_speed_sub_topic_, kDefaultCommandMotorSpeedSubTopic);
+  pnh.param<std::string>("commandTrajectorySubTopic", command_trajectory_sub_topic_, kDefaultCommandTrajectoryTopic);
+  pnh.param<std::string>("imuSubTopic", imu_sub_topic_, kDefaultImuSubTopic);
+  pnh.param<std::string>("poseSubTopic", pose_sub_topic_, kDefaultPoseSubTopic);
+  pnh.param<std::string>("odometrySubTopic", odometry_sub_topic_, kDefaultOdometrySubTopic);
+  pnh.param<std::string>("motorVelocityCommandPubTopic", motor_velocity_reference_pub_topic_, kDefaultMotorVelocityReferencePubTopic);
 
 }
 void RosControllerInterface::Publish() {
@@ -134,7 +149,6 @@ void RosControllerInterface::OdometryCallback(
 
   controller_->SetVelocity(velocity_W);
 
-  // TODO(burrimi): do the calculation at a better place.
   Eigen::VectorXd ref_rotor_velocities;
   controller_->CalculateRotorVelocities(&ref_rotor_velocities);
 
@@ -145,7 +159,7 @@ void RosControllerInterface::OdometryCallback(
     turning_velocities_msg.motor_speed.push_back(ref_rotor_velocities[i]);
   turning_velocities_msg.header.stamp = odometry_msg->header.stamp;
 
-  motor_cmd_pub_.publish(turning_velocities_msg);
+  motor_velocity_reference_pub_.publish(turning_velocities_msg);
 }
 
 void RosControllerInterface::CommandMotorCallback(
