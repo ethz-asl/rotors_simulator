@@ -51,8 +51,11 @@ void ExampleControllerPlugin::LoadImpl(const VehicleParameters& vehicle_paramete
 
   const double default_kp = 0.0;
   GetParameter(nh, "kp", default_kp, &controller_parameters.kp_);
+  // get more ...
 
   // create dynamic reconfigure or similar to set parameters at runtime
+
+  controller_->setControllerParameters(controller_parameters);
 }
 
 std::shared_ptr<ControllerBase> ExampleControllerPlugin::GetControllerImpl(){

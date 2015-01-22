@@ -14,6 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
+#include <ros/ros.h>
 #include <mav_control/controller_base.h>
 
 #include <math.h>
@@ -59,38 +60,40 @@ void ControllerBase::SetAngularRate(const Eigen::Vector3d& angular_rate) {
   angular_rate_ = angular_rate;
 }
 
-void ControllerBase::SetAttitudeThrustReference(const Eigen::Vector4d& control_attitude_thrust_reference) {
-  control_attitude_thrust_reference_ = control_attitude_thrust_reference;
+void ControllerBase::SetReferenceAttitudeThrust(const Eigen::Vector4d& control_attitude_thrust_reference) {
+  // default implementation to make the user aware that he's doing something wrong.
+  ROS_WARN_STREAM_THROTTLE(2, "[ControllerBase]: Derived controller does not understand/accept AttitudeThrustCommands");
+  //control_attitude_thrust_reference_ = control_attitude_thrust_reference;
 }
 
-void ControllerBase::SetRateThrustReference(const Eigen::Vector4d& control_rate_thrust_reference) {
+void ControllerBase::SetReferenceRateThrust(const Eigen::Vector4d& control_rate_thrust_reference) {
   control_rate_thrust_reference_ = control_rate_thrust_reference;
 }
 
-void ControllerBase::SetMotorReference(const Eigen::VectorXd& motor_reference) {
+void ControllerBase::SetReferenceMotor(const Eigen::VectorXd& motor_reference) {
   motor_reference_ = motor_reference;
 }
 
-void ControllerBase::SetPositionReference(const Eigen::Vector3d& position_reference) {
+void ControllerBase::SetReferencePosition(const Eigen::Vector3d& position_reference) {
   position_reference_ = position_reference;
 }
 
-void ControllerBase::SetVelocityReference(const Eigen::Vector3d& velocity_reference) {
+void ControllerBase::SetReferenceVelocity(const Eigen::Vector3d& velocity_reference) {
   velocity_reference_ = velocity_reference;
 }
 
-void ControllerBase::SetAccelerationReference(const Eigen::Vector3d& acceleration_reference) {
+void ControllerBase::SetReferenceAcceleration(const Eigen::Vector3d& acceleration_reference) {
   acceleration_reference_ = acceleration_reference;
 }
 
-void ControllerBase::SetJerkReference(const Eigen::Vector3d& jerk_reference) {
+void ControllerBase::SetReferenceJerk(const Eigen::Vector3d& jerk_reference) {
   jerk_reference_ = jerk_reference;
 }
 
-void ControllerBase::SetYawReference(double yaw_reference) {
+void ControllerBase::SetReferenceYaw(double yaw_reference) {
   yaw_reference_ = yaw_reference;
 }
 
-void ControllerBase::SetYawRateReference(double yaw_rate_reference) {
+void ControllerBase::SetReferenceYawRate(double yaw_rate_reference) {
   yaw_rate_reference_ = yaw_rate_reference;
 }
