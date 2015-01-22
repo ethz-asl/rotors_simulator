@@ -22,11 +22,6 @@
 
 #include <Eigen/Eigen>
 
-template <class Derived>
-class ControllerParameterLoaderBase{
-
-};
-
 class VehicleParameters{
  public:
   static Eigen::Matrix3d GetDefaultInertia() const;
