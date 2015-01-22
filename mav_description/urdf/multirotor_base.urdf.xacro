@@ -78,12 +78,12 @@
 
     <!-- link -->
     <link name="camera_link">
-      <collision>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-          <box size="0.1 0.1 0.1" />
-        </geometry>
-      </collision>
+      <!-- <collision> -->
+        <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+        <!-- <geometry> -->
+          <!-- <box size="0.1 0.1 0.1" /> -->
+        <!-- </geometry> -->
+      <!-- </collision> -->
 
       <!-- <visual> -->
         <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
