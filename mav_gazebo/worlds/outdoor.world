@@ -146,9 +146,9 @@
       <pose>30 -8 0 0 0 0</pose>
     </include>
     <include>
-      <uri>model://house_2</uri>
+      <uri>model://gas_station</uri>
       <name>house_2_b</name>
-      <pose>77 8 0 0 0 0</pose>
+      <pose>77 15 0 0 0 -1.5707963267948966</pose>
     </include>
     <include>
       <uri>model://house_2</uri>
@@ -157,7 +157,7 @@
     </include>
     <include>
       <uri>model://house_3</uri>
-      <pose>54 7 0 0 0 0</pose>
+      <pose>44 7 0 0 0 0</pose>
     </include>
     <include>
       <uri>model://house_3</uri>
@@ -186,7 +186,7 @@
       <pose>143 51.5 0 0 0 0</pose>
     </include>
     <include>
-      <uri>model://gas_station</uri>
+      <uri>model://house_2</uri>
       <static>true</static>
       <pose>135 84.8 0 0 0 0</pose>
     </include>
@@ -293,6 +293,11 @@
       <point>150 50 0.01</point>
       <point>150 100 0.01</point>
       <point>200 100 0.01</point>
+    </road>
+    <road name="gas_station_street">
+      <width>17</width>
+      <point>65 25 0.01</point>
+      <point>65 3.66 0.01</point>
     </road>
     <model name="road_boxes">
       <static>true</static>
