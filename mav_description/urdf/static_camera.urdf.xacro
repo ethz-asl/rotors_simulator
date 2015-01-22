@@ -17,12 +17,12 @@
     params="robot_namespace mass body_width body_height *inertia">
 
     <link name="base_link">
-      <collision>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-          <box size="${body_width} ${body_width} ${body_height}" /> <!-- [m] [m] [m] -->
-        </geometry>
-      </collision>
+      <!-- <collision> -->
+        <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+        <!-- <geometry> -->
+          <!-- <box size="${body_width} ${body_width} ${body_height}" /> [> [m] [m] [m] <] -->
+        <!-- </geometry> -->
+      <!-- </collision> -->
     </link>
 
   </xacro:macro>
@@ -48,12 +48,12 @@
 
     <!-- link -->
     <link name="camera_link">
-      <collision>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-          <box size="0.1 0.1 0.1" />
-        </geometry>
-      </collision>
+      <!-- <collision> -->
+        <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+        <!-- <geometry> -->
+          <!-- <box size="0.1 0.1 0.1" /> -->
+        <!-- </geometry> -->
+      <!-- </collision> -->
 
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
@@ -75,8 +75,8 @@
         <camera name="head">
           <horizontal_fov>2</horizontal_fov>
           <image>
-            <width>800</width>
-            <height>600</height>
+            <width>1280</width>
+            <height>720</height>
             <format>R8G8B8</format>
           </image>
           <clip>
