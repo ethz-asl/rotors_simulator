@@ -148,7 +148,9 @@
 
   <xacro:camera_macro robot_namespace="${namespace}">
   </xacro:camera_macro>
-  <xacro:laser_macro robot_namespace="${namespace}">
-  </xacro:laser_macro>
+  <!--
+     - <xacro:laser_macro robot_namespace="${namespace}">
+     - </xacro:laser_macro>
+     -->
 
 </robot>
