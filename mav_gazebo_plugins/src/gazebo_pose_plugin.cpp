@@ -23,8 +23,6 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#include <mav_gazebo_plugins/common.h>
-
 namespace gazebo {
 
 GazeboPosePlugin::~GazeboPosePlugin() {

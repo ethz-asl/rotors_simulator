@@ -20,8 +20,6 @@
 
 #include <mav_msgs/MotorSpeed.h>
 
-#include <mav_gazebo_plugins/common.h>
-
 namespace gazebo {
 
 GazeboMultirotorBasePlugin::~GazeboMultirotorBasePlugin() {

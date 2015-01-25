@@ -34,6 +34,8 @@
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 
+#include "mav_gazebo_plugins/common.h"
+
 //#include <mav_gazebo_plugins/pose_distorter.h>
 
 namespace gazebo {
