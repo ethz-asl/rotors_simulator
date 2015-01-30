@@ -7,12 +7,12 @@
 
 #include "mav_gazebo_plugins/gazebo_imu_plugin.h"
 
-#include <boost/bind.hpp>
 #include <chrono>
 #include <cmath>
 #include <iostream>
 #include <stdio.h>
-#include <glog/logging.h>
+
+#include <boost/bind.hpp>
 
 namespace gazebo {
 
@@ -21,6 +21,7 @@ GazeboImuPlugin::GazeboImuPlugin()
       node_handle_(0),
       velocity_prev_W_(0,0,0)
 {
+  initGlog();
 }
 
 GazeboImuPlugin::~GazeboImuPlugin() {

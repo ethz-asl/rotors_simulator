@@ -2,6 +2,7 @@
 
 <robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Properties -->
+  <xacro:property name="namespace" value="firefly" />
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <xacro:property name="mesh_file" value="firefly.dae" />
   <xacro:property name="mesh_scale" value="1 1 1"/>
@@ -39,7 +40,7 @@
   </xacro:property>
 
   <!-- Included URDF Files -->
-  <xacro:include filename="$(find mav_description)/urdf/multirotor_base.urdf.xacro" />
+  <xacro:include filename="$(find mav_description)/urdf/multirotor_base.xacro" />
 
   <!-- Instantiate multirotor_base_macro once -->
   <xacro:multirotor_base_macro
@@ -184,8 +185,5 @@
     <origin xyz="${cos30*arm_length} -${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
-
-  <!-- <xacro:camera_macro robot_namespace="${namespace}">
-  </xacro:camera_macro> -->
 
 </robot>

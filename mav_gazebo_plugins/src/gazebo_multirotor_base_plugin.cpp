@@ -15,8 +15,11 @@
  */
 
 #include <mav_gazebo_plugins/gazebo_multirotor_base_plugin.h>
+
 #include <ctime>
+
 #include <mav_msgs/MotorSpeed.h>
+
 #include <mav_gazebo_plugins/common.h>
 
 namespace gazebo {
@@ -34,9 +37,9 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   world_ = model_->GetWorld();
   namespace_.clear();
 
-  getSdfParam<std::string>(_sdf, "robotNamespace", namespace_, "", true);
-  getSdfParam<std::string>(_sdf, "linkName", link_name_, "base_link", true);
-  getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, "motors");
+  getSdfParam<std::string>(_sdf, "robotNamespace", namespace_, namespace_, true);
+  getSdfParam<std::string>(_sdf, "linkName", link_name_, link_name_, true);
+  getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, motor_pub_topic_);
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_,
                       rotor_velocity_slowdown_sim_);
 

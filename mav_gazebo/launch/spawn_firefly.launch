@@ -2,7 +2,7 @@
 
 <launch>
   <arg name="name" default="firefly"/>
-  <arg name="model" default="$(find mav_description)/urdf/firefly.gazebo.xacro"/>
+  <arg name="model" default="$(find mav_description)/urdf/firefly_base.xacro"/>
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
@@ -10,14 +10,12 @@
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
   <arg name="log_file" default="firefly"/>
-  <arg name="exclude_floor_link_from_collision_check" default="ground_plane::link"/>
 
   <!-- send the robot XML to param server -->
   <param name="robot_description" command="
     $(find xacro)/xacro.py '$(arg model)'
     enable_logging:=$(arg enable_logging)
     enable_ground_truth:=$(arg enable_ground_truth)
-    exclude_floor_link_from_collision_check:=$(arg exclude_floor_link_from_collision_check)
     log_file:=$(arg log_file)"
   />
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />

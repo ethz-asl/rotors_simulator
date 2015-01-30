@@ -1,4 +1,8 @@
 <launch>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="pelican"/>
+
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find mav_gazebo)/worlds/pelican.world"/>
   </include>

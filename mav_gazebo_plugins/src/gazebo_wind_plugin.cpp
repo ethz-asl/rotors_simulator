@@ -16,8 +16,10 @@
 
 
 #include <mav_gazebo_plugins/gazebo_wind_plugin.h>
-#include <mav_gazebo_plugins/common.h>
+
 #include <geometry_msgs/WrenchStamped.h>
+
+#include <mav_gazebo_plugins/common.h>
 
 namespace gazebo {
 

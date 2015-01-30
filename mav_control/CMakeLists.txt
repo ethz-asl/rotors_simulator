@@ -39,3 +39,7 @@ add_library(mav_control
 
 target_link_libraries(mav_control ${catkin_LIBRARIES})
 add_dependencies(mav_control ${catkin_EXPORTED_TARGETS})
+
+add_executable(ros_controller_node src/ros_controller_interface.cpp)
+add_dependencies(ros_controller_node ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ros_controller_node mav_control ${catkin_LIBRARIES})

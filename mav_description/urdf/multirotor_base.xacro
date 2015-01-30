@@ -3,14 +3,24 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro"
+<<<<<<< HEAD:mav_description/urdf/multirotor_base.urdf.xacro
     params="robot_namespace mass body_width body_height mesh_file mesh_scale color *inertia">
     <link name="base_link">
     </link>
+||||||| merged common ancestors
+    params="robot_namespace mass body_width body_height mesh_file *inertia">
+    <link name="base_link"></link>
+=======
+    params="robot_namespace mass body_width body_height mesh_file *inertia">
+    <link name="base_link"></link>
+
+>>>>>>> origin/master:mav_description/urdf/multirotor_base.xacro
     <joint name="base_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <parent link="base_link" />
       <child link="base_link_inertia" />
     </joint>
+
     <link name="base_link_inertia">
       <inertial>
         <mass value="${mass}" />  <!-- [kg] -->
@@ -35,27 +45,10 @@
       </collision>
     </link>
 
-    <!-- IMU -->
-    <link name="imu_link">
-      <inertial>
-        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0"
-          izz="0.001" />
-        <mass value="0.01" />  <!-- [kg] -->
-        <origin xyz="0 0 0" rpy="0 0 0" />
-      </inertial>
-    </link>
-    <!-- IMU joint -->
-    <joint name="imu_joint" type="revolute">
-      <!--origin xyz="0 0 0" rpy="3.1416 0 0" / -->
-      <parent link="base_link" />
-      <child link="imu_link" />
-      <limit upper="0" lower="0" effort="0" velocity="0" />
-    </joint>
-
     <!-- attach multirotor_base_plugin to the base_link -->
     <gazebo>
       <plugin filename="libmav_gazebo_multirotor_base_plugin.so" name="rosbag">
-        <robotNamespace>${namespace}</robotNamespace>
+        <robotNamespace>${robot_namespace}</robotNamespace>
         <linkName>base_link</linkName>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
       </plugin>

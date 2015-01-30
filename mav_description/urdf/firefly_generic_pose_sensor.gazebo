@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+<robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Instantiate default firefly-->
+  <xacro:include filename="$(find mav_description)/urdf/firefly_base.xacro" />
+
+  <!-- Mount a generic pose sensor without pose map (working everywhere). -->
+  <xacro:pose_plugin_macro
+    namespace="${namespace}"
+    pose_sensor_suffix="1"
+    pose_topic="pose1"
+    mass_pose_sensor="0.00001"
+    measurement_divisor="10"
+    measurement_delay="10"
+    unknown_delay="0.0"
+    noise_normal_position="0.01 0.01 0.01"
+    noise_normal_quaternion="0.017 0.017 0.017"
+    noise_uniform_position="0 0 0"
+    noise_uniform_quaternion="0 0 0"
+    enable_pose_map="false"
+    pose_map=""
+    image_scale=""
+  >
+    <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] -->
+    <origin xyz="0.03 -0.07 0.1" rpy="0.2 -0.1 0.3" />
+  </xacro:pose_plugin_macro>
+</robot>
+
