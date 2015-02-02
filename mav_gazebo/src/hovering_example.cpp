@@ -28,18 +28,16 @@
 int main(int argc, char** argv){
   ros::init(argc, argv, "hovering_example");
   ros::NodeHandle nh;
+  ros::Publisher trajectory_pub = nh.advertise<mav_msgs::CommandTrajectory>("command/trajectory", 10);
 
   ROS_INFO("Started hovering example.");
-
-  ros::Publisher trajectory_pub = nh.advertise<mav_msgs::CommandTrajectory>("command/trajectory", 10);
-  mav_msgs::CommandTrajectory trajectory_msg;
 
   std_srvs::Empty srv;
   bool unpaused = ros::service::call("/gazebo/unpause_physics", srv);
   unsigned int i = 0;
 
-  // Trying to unpause Gazebo for 5 seconds.
-  while (i <= 5 && !unpaused) {
+  // Trying to unpause Gazebo for 10 seconds.
+  while (i <= 10 && !unpaused) {
     ROS_INFO("Wait for 1 second before trying to unpause Gazebo again.");
     std::this_thread::sleep_for(std::chrono::seconds(1));
     unpaused = ros::service::call("/gazebo/unpause_physics", srv);
@@ -47,18 +45,21 @@ int main(int argc, char** argv){
   }
 
   if (!unpaused) {
-    ROS_FATAL("could not wake up Gazebo.");
+    ROS_FATAL("Could not wake up Gazebo.");
     return -1;
   }
   else {
     ROS_INFO("Unpaused the Gazebo simulation.");
   }
 
-  ROS_INFO("fly to position [0 0 1].");
+  // Wait for 5 seconds to let the Gazebo GUI show up.
+  ros::Duration(5.0).sleep();
+
+  ROS_INFO("Fly to position [0 0 1].");
+  mav_msgs::CommandTrajectory trajectory_msg;
   trajectory_msg.position[0] = 0;
   trajectory_msg.position[1] = 0;
   trajectory_msg.position[2] = 1;
-
   trajectory_pub.publish(trajectory_msg);
 
   ros::spin();
