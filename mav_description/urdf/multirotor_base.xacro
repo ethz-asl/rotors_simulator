@@ -3,18 +3,9 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro"
-<<<<<<< HEAD:mav_description/urdf/multirotor_base.urdf.xacro
     params="robot_namespace mass body_width body_height mesh_file mesh_scale color *inertia">
-    <link name="base_link">
-    </link>
-||||||| merged common ancestors
-    params="robot_namespace mass body_width body_height mesh_file *inertia">
-    <link name="base_link"></link>
-=======
-    params="robot_namespace mass body_width body_height mesh_file *inertia">
     <link name="base_link"></link>
 
->>>>>>> origin/master:mav_description/urdf/multirotor_base.xacro
     <joint name="base_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <parent link="base_link" />
@@ -71,19 +62,20 @@
 
     <!-- link -->
     <link name="camera_link">
-      <!-- <collision> -->
-        <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
-        <!-- <geometry> -->
-          <!-- <box size="0.1 0.1 0.1" /> -->
-        <!-- </geometry> -->
-      <!-- </collision> -->
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.1 0.1 0.1" />
+        </geometry>
+      </collision>
 
-      <!-- <visual> -->
-        <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
-        <!-- <geometry> -->
-          <!-- <box size="0.1 0.1 0.1" /> -->
-        <!-- </geometry> -->
-      <!-- </visual> -->
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.1 0.1 0.1" />
+        </geometry>
+        <material name="red" />
+      </visual>
 
       <inertial>
         <mass value="1e-5" />

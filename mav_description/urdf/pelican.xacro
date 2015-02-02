@@ -14,7 +14,7 @@
   <xacro:property name="mass_rotor" value="0.01" /> <!-- [kg] -->
   <xacro:property name="arm_length" value="0.17" /> <!-- [m] -->
   <xacro:property name="rotor_offset_top" value="0.05" /> <!-- [m] -->
-  <xacro:property name="mesh_scale_prop" value="${radius_rotor}"/>
+  <xacro:property name="mesh_scale_prop" value="${radius_rotor} ${radius_rotor} ${radius_rotor}"/>
   <xacro:property name="radius_rotor" value="0.08" /> <!-- [m] -->
   <xacro:property name="motor_constant" value="9.9865e-06" /> <!-- [kg·m/s^2] -->
   <xacro:property name="moment_constant" value="0.016" /> <!-- [m] -->
@@ -64,7 +64,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
-    mesh_scale="${mesh_scale}"
+    mesh_scale="${mesh_scale_prop}"
     color="Red">
     <origin xyz="${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -84,7 +84,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
-    mesh_scale="${mesh_scale}"
+    mesh_scale="${mesh_scale_prop}"
     color="Blue">
     <origin xyz="0 ${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -104,7 +104,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
-    mesh_scale="${mesh_scale}"
+    mesh_scale="${mesh_scale_prop}"
     color="Blue">
     <origin xyz="-${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -124,7 +124,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
-    mesh_scale="${mesh_scale}"
+    mesh_scale="${mesh_scale_prop}"
     color="Blue">
     <origin xyz="0 -${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
