@@ -9,7 +9,12 @@
   <xacro:odometry_plugin_macro
     namespace="${namespace}"
     odometry_sensor_suffix="1"
+    pose_topic=""
+    pose_with_covariance_topic=""
+    position_topic=""
+    transform_topic=""
     odometry_topic="odometry"
+    tf_frame="odometry_sensor"
     mass_odometry_sensor="0.00001"
     measurement_divisor="1"
     measurement_delay="0"

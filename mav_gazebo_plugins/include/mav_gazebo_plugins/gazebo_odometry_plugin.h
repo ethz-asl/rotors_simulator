@@ -32,19 +32,35 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
+#include <geometry_msgs/Point.h>
+#include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovariance.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/Quaternion.h>
+#include <geometry_msgs/Transform.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <geometry_msgs/Twist.h>
 #include <geometry_msgs/TwistWithCovariance.h>
+#include <geometry_msgs/TwistWithCovarianceStamped.h>
 #include <nav_msgs/Odometry.h>
 #include <opencv2/core/core.hpp>
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
+#include <tf/transform_broadcaster.h>
 
 namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultFrameId = "odometry_sensor_link";
 static const std::string kDefaultLinkName = "odometry_sensor_link";
+static const std::string kDefaultPosePubTopic = "pose";
+static const std::string kDefaultPoseWithCovariancePubTopic = "pose";
+static const std::string kDefaultPositionPubTopic = "position";
+static const std::string kDefaultTransformPubTopic = "transform";
 static const std::string kDefaultOdometryPubTopic = "odometry";
+static const std::string kDefaultTfFrame = "tf";
 
 static constexpr int kDefaultMeasurementDelay = 0;
 static constexpr int kDefaultMeasurementDivisor = 1;
@@ -62,7 +78,12 @@ class GazeboOdometryPlugin : public ModelPlugin {
   GazeboOdometryPlugin()
       : ModelPlugin(),
         random_generator_(random_device_()),
+        pose_pub_topic_(kDefaultPosePubTopic),
+        pose_with_covariance_pub_topic_(kDefaultPoseWithCovariancePubTopic),
+        position_pub_topic_(kDefaultPositionPubTopic),
+        transform_pub_topic_(kDefaultTransformPubTopic),
         odometry_pub_topic_(kDefaultOdometryPubTopic),
+        tf_frame_(kDefaultTfFrame),
         frame_id_(kDefaultFrameId),
         link_name_(kDefaultLinkName),
         measurement_delay_(kDefaultMeasurementDelay),
@@ -86,7 +107,12 @@ class GazeboOdometryPlugin : public ModelPlugin {
   OdometryQueue odometry_queue_;
 
   std::string namespace_;
+  std::string pose_pub_topic_;
+  std::string pose_with_covariance_pub_topic_;
+  std::string position_pub_topic_;
+  std::string transform_pub_topic_;
   std::string odometry_pub_topic_;
+  std::string tf_frame_;
   std::string frame_id_;
   std::string link_name_;
 
@@ -114,7 +140,14 @@ class GazeboOdometryPlugin : public ModelPlugin {
   std::mt19937 random_generator_;
 
   ros::NodeHandle* node_handle_;
+  ros::Publisher pose_pub_;
+  ros::Publisher pose_with_covariance_pub_;
+  ros::Publisher position_pub_;
+  ros::Publisher transform_pub_;
   ros::Publisher odometry_pub_;
+
+  tf::Transform tf_;
+  tf::TransformBroadcaster transform_broadcaster_;
 
   physics::WorldPtr world_;
   physics::ModelPtr model_;

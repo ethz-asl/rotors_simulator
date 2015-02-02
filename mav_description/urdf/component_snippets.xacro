@@ -137,7 +137,7 @@
   </xacro:macro>
 
 <!-- Macro to add a generic odometry sensor. -->
-  <xacro:macro name="odometry_plugin_macro" params="namespace odometry_sensor_suffix odometry_topic mass_odometry_sensor measurement_divisor measurement_delay unknown_delay noise_normal_position noise_normal_quaternion noise_normal_linear noise_normal_angular noise_uniform_position noise_uniform_quaternion noise_uniform_linear noise_uniform_angular enable_odometry_map odometry_map image_scale *inertia *origin">
+  <xacro:macro name="odometry_plugin_macro" params="namespace odometry_sensor_suffix pose_topic pose_with_covariance_topic position_topic transform_topic odometry_topic tf_frame mass_odometry_sensor measurement_divisor measurement_delay unknown_delay noise_normal_position noise_normal_quaternion noise_normal_linear noise_normal_angular noise_uniform_position noise_uniform_quaternion noise_uniform_linear noise_uniform_angular enable_odometry_map odometry_map image_scale *inertia *origin">
     <!-- odometry link -->
     <link name="odometry_sensor${odometry_sensor_suffix}_link">
       <inertial>
@@ -156,7 +156,12 @@
       <plugin filename="libmav_gazebo_odometry_plugin.so" name="odometry_sensor${odometry_sensor_suffix}">
         <linkName>odometry_sensor${odometry_sensor_suffix}_link</linkName>
         <robotNamespace>${namespace}</robotNamespace>
+        <poseTopic>${pose_topic}</poseTopic>
+        <poseWithCovarianceTopic>${pose_with_covariance_topic}</poseWithCovarianceTopic>
+        <positionTopic>${position_topic}</positionTopic>
+        <transformTopic>${transform_topic}</transformTopic>
         <odometryTopic>${odometry_topic}</odometryTopic>
+        <tfFrame>${tf_frame}</tfFrame>
         <measurementDivisor>${measurement_divisor}</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
         <measurementDelay>${measurement_delay}</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
         <unknownDelay>${unknown_delay}</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
