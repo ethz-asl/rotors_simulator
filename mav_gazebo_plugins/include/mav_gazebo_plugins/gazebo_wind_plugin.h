@@ -26,6 +26,8 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 
+#include "mav_gazebo_plugins/common.h"
+
 namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";

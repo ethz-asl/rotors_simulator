@@ -27,6 +27,8 @@
 #include <mav_msgs/MotorSpeed.h>
 #include <ros/ros.h>
 
+#include "mav_gazebo_plugins/common.h"
+
 namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";

@@ -19,8 +19,6 @@
 
 #include <geometry_msgs/WrenchStamped.h>
 
-#include <mav_gazebo_plugins/common.h>
-
 namespace gazebo {
 
 GazeboWindPlugin::~GazeboWindPlugin() {

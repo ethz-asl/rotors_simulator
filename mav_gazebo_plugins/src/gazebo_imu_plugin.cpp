@@ -21,7 +21,7 @@ GazeboImuPlugin::GazeboImuPlugin()
       node_handle_(0),
       velocity_prev_W_(0,0,0)
 {
-  initGlog();
+  InitGlogHelper::instance().initGlog();
 }
 
 GazeboImuPlugin::~GazeboImuPlugin() {

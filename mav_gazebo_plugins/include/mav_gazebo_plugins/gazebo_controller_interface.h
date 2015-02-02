@@ -36,6 +36,8 @@
 #include <sensor_msgs/Imu.h>
 #include <stdio.h>
 
+#include "mav_gazebo_plugins/common.h"
+
 namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";
