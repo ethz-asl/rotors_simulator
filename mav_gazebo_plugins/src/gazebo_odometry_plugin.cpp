@@ -73,8 +73,6 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   if (link_ == NULL)
     gzthrow("[gazebo_odometry_plugin] Couldn't find specified link \"" << link_name_ << "\".");
 
-
-
   if (_sdf->HasElement("covarianceImage")) {
     std::string image_name = _sdf->GetElement("covarianceImage")->Get<std::string>();
     covariance_image_ = cv::imread(image_name, CV_LOAD_IMAGE_GRAYSCALE);
