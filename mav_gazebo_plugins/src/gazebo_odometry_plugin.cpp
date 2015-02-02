@@ -291,8 +291,8 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     angular_velocity.y += angular_velocity_n[1];
     angular_velocity.z += angular_velocity_n[2];
 
-    odometry->pose.covariance = pose_covariance_matrix_; //TODO(ff): Put the proper covariance.
-    odometry->twist.covariance = twist_covariance_matrix_; //TODO(ff): Put the proper covariance.
+    odometry->pose.covariance = pose_covariance_matrix_;
+    odometry->twist.covariance = twist_covariance_matrix_;
 
     // Publish all the topics where to topic name is specified.
     if (!pose_pub_topic_.empty()) {
