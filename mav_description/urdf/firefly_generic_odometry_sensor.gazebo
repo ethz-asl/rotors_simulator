@@ -24,22 +24,22 @@
   <!-- Instantiate default firefly-->
   <xacro:include filename="$(find mav_description)/urdf/firefly_base.xacro" />
 
-  <!-- Mount a generic pose sensor without pose map (working everywhere). -->
+  <!-- Mount a generic odometry sensor without odometry map (working everywhere). -->
   <xacro:odometry_plugin_macro
     namespace="${namespace}"
     odometry_sensor_suffix="1"
     pose_topic=""
-    pose_with_covariance_topic="pose1"
+    pose_with_covariance_topic=""
     position_topic=""
     transform_topic=""
-    odometry_topic=""
-    tf_frame=""
+    odometry_topic="odometry"
+    tf_frame="odometry_sensor"
     mass_odometry_sensor="0.00001"
-    measurement_divisor="10"
-    measurement_delay="10"
+    measurement_divisor="1"
+    measurement_delay="0"
     unknown_delay="0.0"
-    noise_normal_position="0.01 0.01 0.01"
-    noise_normal_quaternion="0.017 0.017 0.017"
+    noise_normal_position="0 0 0"
+    noise_normal_quaternion="0 0 0"
     noise_normal_linear_velocity="0 0 0"
     noise_normal_angular_velocity="0 0 0"
     noise_uniform_position="0 0 0"
@@ -51,7 +51,7 @@
     image_scale=""
   >
     <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] -->
-    <origin xyz="0.03 -0.07 0.1" rpy="0.2 -0.1 0.3" />
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
   </xacro:odometry_plugin_macro>
 </robot>
 
