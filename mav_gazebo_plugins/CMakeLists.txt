@@ -38,10 +38,6 @@ include_directories(${Eigen_INCLUDE_DIRS})
 add_library(mav_gazebo_motor_model src/gazebo_motor_model.cpp)
 target_link_libraries(mav_gazebo_motor_model ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
-add_library(mav_gazebo_pose_plugin src/gazebo_pose_plugin.cpp)
-target_link_libraries(mav_gazebo_pose_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${OpenCV_LIBRARIES})
-add_dependencies(mav_gazebo_pose_plugin ${catkin_EXPORTED_TARGETS})
-
 add_library(mav_gazebo_odometry_plugin src/gazebo_odometry_plugin.cpp)
 target_link_libraries(mav_gazebo_odometry_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(mav_gazebo_odometry_plugin ${catkin_EXPORTED_TARGETS})
