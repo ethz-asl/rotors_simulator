@@ -91,8 +91,12 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   getSdfParam<std::string>(_sdf, "frameId", frame_id_, frame_id_);
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalPosition", noise_normal_position, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalQuaternion", noise_normal_quaternion, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalLinearVelocity", noise_normal_linear, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalAngularVelocity", noise_normal_angular, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "noiseUniformPosition", noise_uniform_position, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "noiseUniformQuaternion", noise_uniform_quaternion, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformLinearVelocity", noise_uniform_linear, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformAngularVelocity", noise_uniform_angular, zeros3);
   getSdfParam<int>(_sdf, "measurementDelay", measurement_delay_, measurement_delay_);
   getSdfParam<int>(_sdf, "measurementDivisor", measurement_divisor_, measurement_divisor_);
   getSdfParam<double>(_sdf, "unknownDelay", unknown_delay_, unknown_delay_);
@@ -106,6 +110,14 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   attitude_n_[1] = NormalDistribution(0, noise_normal_quaternion.y);
   attitude_n_[2] = NormalDistribution(0, noise_normal_quaternion.z);
 
+  linear_n_[0] = NormalDistribution(0, noise_normal_linear.x);
+  linear_n_[1] = NormalDistribution(0, noise_normal_linear.y);
+  linear_n_[2] = NormalDistribution(0, noise_normal_linear.z);
+
+  angular_n_[0] = NormalDistribution(0, noise_normal_angular.x);
+  angular_n_[1] = NormalDistribution(0, noise_normal_angular.y);
+  angular_n_[2] = NormalDistribution(0, noise_normal_angular.z);
+
   position_u_[0] = UniformDistribution(-noise_uniform_position.x, noise_uniform_position.x);
   position_u_[1] = UniformDistribution(-noise_uniform_position.y, noise_uniform_position.y);
   position_u_[2] = UniformDistribution(-noise_uniform_position.z, noise_uniform_position.z);
@@ -113,6 +125,14 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   attitude_u_[0] = UniformDistribution(-noise_uniform_quaternion.x, noise_uniform_quaternion.x);
   attitude_u_[1] = UniformDistribution(-noise_uniform_quaternion.y, noise_uniform_quaternion.y);
   attitude_u_[2] = UniformDistribution(-noise_uniform_quaternion.z, noise_uniform_quaternion.z);
+
+  linear_u_[0] = UniformDistribution(-noise_uniform_linear.x, noise_uniform_linear.x);
+  linear_u_[1] = UniformDistribution(-noise_uniform_linear.y, noise_uniform_linear.y);
+  linear_u_[2] = UniformDistribution(-noise_uniform_linear.z, noise_uniform_linear.z);
+
+  angular_u_[0] = UniformDistribution(-noise_uniform_angular.x, noise_uniform_angular.x);
+  angular_u_[1] = UniformDistribution(-noise_uniform_angular.y, noise_uniform_angular.y);
+  angular_u_[2] = UniformDistribution(-noise_uniform_angular.z, noise_uniform_angular.z);
 
   // Fill in covariance. We omit uniform noise here.
   Eigen::Map<Eigen::Matrix<double, 6, 6> > pose_covariance(pose_covariance_matrix_.data());
