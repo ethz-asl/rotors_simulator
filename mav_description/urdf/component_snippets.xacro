@@ -136,36 +136,45 @@
     </gazebo>
   </xacro:macro>
 
-  <!-- Macro to add a generic pose sensor. -->
-  <xacro:macro name="pose_plugin_macro" params="namespace pose_sensor_suffix pose_topic mass_pose_sensor measurement_divisor measurement_delay unknown_delay noise_normal_position noise_normal_quaternion noise_uniform_position noise_uniform_quaternion enable_pose_map pose_map image_scale *inertia *origin">
-    <!-- Pose link -->
-    <link name="pose_sensor${pose_sensor_suffix}_link">
+<!-- Macro to add a generic odometry sensor. -->
+  <xacro:macro name="odometry_plugin_macro" params="namespace odometry_sensor_suffix pose_topic pose_with_covariance_topic position_topic transform_topic odometry_topic tf_frame mass_odometry_sensor measurement_divisor measurement_delay unknown_delay noise_normal_position noise_normal_quaternion noise_normal_linear_velocity noise_normal_angular_velocity noise_uniform_position noise_uniform_quaternion noise_uniform_linear_velocity noise_uniform_angular_velocity enable_odometry_map odometry_map image_scale *inertia *origin">
+    <!-- odometry link -->
+    <link name="odometry_sensor${odometry_sensor_suffix}_link">
       <inertial>
         <xacro:insert_block name="inertia" />
-        <mass value="${mass_pose_sensor}" />  <!-- [kg] -->
+        <mass value="${mass_odometry_sensor}" />  <!-- [kg] -->
       </inertial>
     </link>
-    <!-- Pose joint -->
-    <joint name="pose_sensor${pose_sensor_suffix}_joint" type="revolute">
+    <!-- odometry joint -->
+    <joint name="odometry_sensor${odometry_sensor_suffix}_joint" type="revolute">
       <parent link="base_link" />
       <xacro:insert_block name="origin" />
-      <child link="pose_sensor${pose_sensor_suffix}_link" />
+      <child link="odometry_sensor${odometry_sensor_suffix}_link" />
       <limit upper="0" lower="0" effort="0" velocity="0" />
     </joint>
     <gazebo>
-      <plugin filename="libmav_gazebo_pose_plugin.so" name="pose_sensor${pose_sensor_suffix}">
-        <linkName>pose_sensor${pose_sensor_suffix}_link</linkName>
+      <plugin filename="libmav_gazebo_odometry_plugin.so" name="odometry_sensor${odometry_sensor_suffix}">
+        <linkName>odometry_sensor${odometry_sensor_suffix}_link</linkName>
         <robotNamespace>${namespace}</robotNamespace>
         <poseTopic>${pose_topic}</poseTopic>
+        <poseWithCovarianceTopic>${pose_with_covariance_topic}</poseWithCovarianceTopic>
+        <positionTopic>${position_topic}</positionTopic>
+        <transformTopic>${transform_topic}</transformTopic>
+        <odometryTopic>${odometry_topic}</odometryTopic>
+        <tfFrame>${tf_frame}</tfFrame>
         <measurementDivisor>${measurement_divisor}</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
         <measurementDelay>${measurement_delay}</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
         <unknownDelay>${unknown_delay}</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
         <noiseNormalPosition>${noise_normal_position}</noiseNormalPosition> <!-- standard deviation of additive white gaussian noise [m] -->
         <noiseNormalQuaternion>${noise_normal_quaternion}</noiseNormalQuaternion> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
+        <noiseNormalLinearVelocity>${noise_normal_linear_velocity}</noiseNormalLinearVelocity> <!-- standard deviation of additive white gaussian noise [m/s] -->
+        <noiseNormalAngularVelocity>${noise_normal_angular_velocity}</noiseNormalAngularVelocity> <!-- standard deviation of additive white gaussian noise [rad/s] -->
         <noiseUniformPosition>${noise_uniform_position}</noiseUniformPosition> <!-- symmetric bounds of uniform noise [m] -->
         <noiseUniformQuaternion>${noise_uniform_quaternion}</noiseUniformQuaternion> <!-- symmetric bounds of uniform noise [rad], computation see above -->
-        <xacro:if value="${enable_pose_map}">
-          <covarianceImage>package://mav_gazebo/resource/${pose_map}</covarianceImage>
+        <noiseUniformLinearVelocity>${noise_uniform_linear_velocity}</noiseUniformLinearVelocity>  <!-- symmetric bounds of uniform noise [m/s] -->
+        <noiseUniformAngularVelocity>${noise_uniform_angular_velocity}</noiseUniformAngularVelocity>  <!-- symmetric bounds of uniform noise [rad/s] -->
+        <xacro:if value="${enable_odometry_map}">
+          <covarianceImage>package://mav_gazebo/resource/${odometry_map}</covarianceImage>
           <covarianceImageScale>${image_scale}</covarianceImageScale>
         </xacro:if>
       </plugin>
