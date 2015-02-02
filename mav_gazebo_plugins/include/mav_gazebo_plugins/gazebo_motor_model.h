@@ -72,7 +72,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         rolling_moment_coefficient_(kDefaultRollingMomentCoefficient),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
         node_handle_(NULL) {
-    initGlog();
+    InitGlogHelper::instance().initGlog();
   }
 
   virtual ~GazeboMotorModel();

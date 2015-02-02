@@ -24,16 +24,32 @@
 namespace gazebo {
 
 /**
- * \brief Helper function to initialize Glog only once.
+ * \brief Helper Singleton to initialize Glog only once.
  */
-void initGlog() {
-  static bool glog_initialized = false;
+class InitGlogHelper
+{
+public:
+   static InitGlogHelper& instance()
+   {
+      static InitGlogHelper _instance;
+      return _instance;
+   }
+   ~InitGlogHelper() {}
 
-  if(!glog_initialized) {
-    google::InitGoogleLogging("gazebo_plugins_glogger");
-    glog_initialized = true;
-  }
-}
+   void initGlog() {
+     static bool glog_initialized = false;
+
+     if(!glog_initialized) {
+       google::InitGoogleLogging("gazebo_plugins_glogger");
+       glog_initialized = true;
+     }
+   }
+private:
+   InitGlogHelper() {}
+   InitGlogHelper(const InitGlogHelper&);
+   InitGlogHelper & operator = (const InitGlogHelper&);
+};
+
 
 
 /**
