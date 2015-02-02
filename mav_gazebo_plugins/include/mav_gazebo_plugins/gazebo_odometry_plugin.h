@@ -118,12 +118,12 @@ class GazeboOdometryPlugin : public ModelPlugin {
 
   NormalDistribution position_n_[3];
   NormalDistribution attitude_n_[3];
-  NormalDistribution linear_n_[3];
-  NormalDistribution angular_n_[3];
+  NormalDistribution linear_velocity_n_[3];
+  NormalDistribution angular_velocity_n_[3];
   UniformDistribution position_u_[3];
   UniformDistribution attitude_u_[3];
-  UniformDistribution linear_u_[3];
-  UniformDistribution angular_u_[3];
+  UniformDistribution linear_velocity_u_[3];
+  UniformDistribution angular_velocity_u_[3];
 
   geometry_msgs::PoseWithCovariance::_covariance_type pose_covariance_matrix_;
   geometry_msgs::TwistWithCovariance::_covariance_type twist_covariance_matrix_;

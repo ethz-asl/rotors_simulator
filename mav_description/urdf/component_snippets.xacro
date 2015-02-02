@@ -137,7 +137,7 @@
   </xacro:macro>
 
 <!-- Macro to add a generic odometry sensor. -->
-  <xacro:macro name="odometry_plugin_macro" params="namespace odometry_sensor_suffix pose_topic pose_with_covariance_topic position_topic transform_topic odometry_topic tf_frame mass_odometry_sensor measurement_divisor measurement_delay unknown_delay noise_normal_position noise_normal_quaternion noise_normal_linear noise_normal_angular noise_uniform_position noise_uniform_quaternion noise_uniform_linear noise_uniform_angular enable_odometry_map odometry_map image_scale *inertia *origin">
+  <xacro:macro name="odometry_plugin_macro" params="namespace odometry_sensor_suffix pose_topic pose_with_covariance_topic position_topic transform_topic odometry_topic tf_frame mass_odometry_sensor measurement_divisor measurement_delay unknown_delay noise_normal_position noise_normal_quaternion noise_normal_linear_velocity noise_normal_angular_velocity noise_uniform_position noise_uniform_quaternion noise_uniform_linear_velocity noise_uniform_angular_velocity enable_odometry_map odometry_map image_scale *inertia *origin">
     <!-- odometry link -->
     <link name="odometry_sensor${odometry_sensor_suffix}_link">
       <inertial>
@@ -167,12 +167,12 @@
         <unknownDelay>${unknown_delay}</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
         <noiseNormalPosition>${noise_normal_position}</noiseNormalPosition> <!-- standard deviation of additive white gaussian noise [m] -->
         <noiseNormalQuaternion>${noise_normal_quaternion}</noiseNormalQuaternion> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
-        <noiseNormalLinearVelocity>${noise_normal_linear}</noiseNormalLinearVelocity> <!-- standard deviation of additive white gaussian noise [m/s] -->
-        <noiseNormalAngularVelocity>${noise_normal_angular}</noiseNormalAngularVelocity> <!-- standard deviation of additive white gaussian noise [rad/s] -->
+        <noiseNormalLinearVelocity>${noise_normal_linear_velocity}</noiseNormalLinearVelocity> <!-- standard deviation of additive white gaussian noise [m/s] -->
+        <noiseNormalAngularVelocity>${noise_normal_angular_velocity}</noiseNormalAngularVelocity> <!-- standard deviation of additive white gaussian noise [rad/s] -->
         <noiseUniformPosition>${noise_uniform_position}</noiseUniformPosition> <!-- symmetric bounds of uniform noise [m] -->
         <noiseUniformQuaternion>${noise_uniform_quaternion}</noiseUniformQuaternion> <!-- symmetric bounds of uniform noise [rad], computation see above -->
-        <noiseUniformLinearVelocity>${noise_uniform_linear}</noiseUniformLinearVelocity>  <!-- symmetric bounds of uniform noise [m/s] -->
-        <noiseUniformAngularVelocity>${noise_uniform_angular}</noiseUniformAngularVelocity>  <!-- symmetric bounds of uniform noise [rad/s] -->
+        <noiseUniformLinearVelocity>${noise_uniform_linear_velocity}</noiseUniformLinearVelocity>  <!-- symmetric bounds of uniform noise [m/s] -->
+        <noiseUniformAngularVelocity>${noise_uniform_angular_velocity}</noiseUniformAngularVelocity>  <!-- symmetric bounds of uniform noise [rad/s] -->
         <xacro:if value="${enable_odometry_map}">
           <covarianceImage>package://mav_gazebo/resource/${odometry_map}</covarianceImage>
           <covarianceImageScale>${image_scale}</covarianceImageScale>

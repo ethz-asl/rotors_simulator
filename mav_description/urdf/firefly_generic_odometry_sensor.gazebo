@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <!--
   Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
   Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
@@ -17,7 +18,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<?xml version="1.0"?>
 
 <robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
 
@@ -40,12 +40,12 @@
     unknown_delay="0.0"
     noise_normal_position="0 0 0"
     noise_normal_quaternion="0 0 0"
-    noise_normal_linear="0 0 0"
-    noise_normal_angular="0 0 0"
+    noise_normal_linear_velocity="0 0 0"
+    noise_normal_angular_velocity="0 0 0"
     noise_uniform_position="0 0 0"
     noise_uniform_quaternion="0 0 0"
-    noise_uniform_linear="0 0 0"
-    noise_uniform_angular="0 0 0"
+    noise_uniform_linear_velocity="0 0 0"
+    noise_uniform_angular_velocity="0 0 0"
     enable_odometry_map="false"
     odometry_map=""
     image_scale=""
