@@ -95,6 +95,7 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   getSdfParam<std::string>(_sdf, "transformTopic", transform_pub_topic_, "");
   getSdfParam<std::string>(_sdf, "odometryTopic", odometry_pub_topic_, "");
   getSdfParam<std::string>(_sdf, "frameId", frame_id_, frame_id_);
+  getSdfParam<std::string>(_sdf, "childFrameId", child_frame_id_, child_frame_id_);
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalPosition", noise_normal_position, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalQuaternion", noise_normal_quaternion, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalLinearVelocity", noise_normal_linear_velocity, zeros3);
@@ -164,7 +165,7 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
                 noise_normal_angular_velocity.z * noise_normal_angular_velocity.z;
   twist_covariance = twist_covd.asDiagonal();
 
-  frame_id_ = namespace_ + "/" + link_name_;
+  child_frame_id_ = namespace_ + "/" + child_frame_id_;
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -204,10 +205,11 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     int y = static_cast<int>(std::floor(gazebo_pose.pos.y / covariance_image_scale_)) + height / 2;
 
     if (x >= 0 && x < width && y >= 0 && y < height) {
-      uint8_t val = covariance_image_.at<uint8_t>(y, x);
-      if (val == 0)
+      uint8_t pixel_value = covariance_image_.at<uint8_t>(y, x);
+      if (pixel_value == 0) {
         publish_odometry = false;
-      // TODO: covariance scaling, according to the intensity values could be implemented here.
+        // TODO: covariance scaling, according to the intensity values could be implemented here.
+      }
     }
   }
 
@@ -217,7 +219,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     odometry.header.seq = odometry_sequence_++;
     odometry.header.stamp.sec = (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec;
     odometry.header.stamp.nsec = (world_->GetSimTime()).nsec + ros::Duration(unknown_delay_).nsec;
-    odometry.child_frame_id = frame_id_;
+    odometry.child_frame_id = child_frame_id_;
     copyPosition(gazebo_pose.pos, &odometry.pose.pose.position);
     odometry.pose.pose.orientation.w = gazebo_pose.rot.w;
     odometry.pose.pose.orientation.x = gazebo_pose.rot.x;
@@ -238,6 +240,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
   if (gazebo_sequence_ == odometry_queue_.front().first) {
     nav_msgs::OdometryPtr odometry(new nav_msgs::Odometry);
     odometry->header = odometry_queue_.front().second.header;
+    odometry->child_frame_id = odometry_queue_.front().second.child_frame_id;
     odometry->pose.pose = odometry_queue_.front().second.pose.pose;
     odometry->twist.twist.linear = odometry_queue_.front().second.twist.twist.linear;
     odometry->twist.twist.angular = odometry_queue_.front().second.twist.twist.angular;
@@ -260,13 +263,13 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
              attitude_n_[2](random_generator_) + attitude_u_[2](random_generator_);
     Eigen::Quaterniond q_n = QuaternionFromSmallAngle(theta);
     q_n.normalize();
-    geometry_msgs::Quaternion& q = odometry->pose.pose.orientation;
-    Eigen::Quaterniond _q(q.w, q.x, q.y, q.z);
-    _q = _q * q_n;
-    q.w = _q.w();
-    q.x = _q.x();
-    q.y = _q.y();
-    q.z = _q.z();
+    geometry_msgs::Quaternion& q_W_L = odometry->pose.pose.orientation;
+    Eigen::Quaterniond _q_W_L(q_W_L.w, q_W_L.x, q_W_L.y, q_W_L.z);
+    _q_W_L = _q_W_L * q_n;
+    q_W_L.w = _q_W_L.w();
+    q_W_L.x = _q_W_L.x();
+    q_W_L.y = _q_W_L.y();
+    q_W_L.z = _q_W_L.z();
 
     // Calculate linear velocity distortions.
     Eigen::Vector3d linear_velocity_n;
@@ -320,17 +323,17 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
       translation.y = p.y;
       translation.z = p.z;
       transform->transform.translation = translation;
-      transform->transform.rotation = q;
+      transform->transform.rotation = q_W_L;
       transform_pub_.publish(transform);
     }
     if (!odometry_pub_topic_.empty()) {
       odometry_pub_.publish(odometry);
     }
     if (!tf_frame_.empty()) {
-      tf::Quaternion tf_q(q.x, q.y, q.z, q.w);
-      tf::Vector3 tf_t(p.x, p.y, p.z);
-      tf_ = tf::Transform(tf_q, tf_t);
-      transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, ros::Time::now(), "world", tf_frame_));
+      tf::Quaternion tf_q_W_L(q_W_L.x, q_W_L.y, q_W_L.z, q_W_L.w);
+      tf::Vector3 tf_p(p.x, p.y, p.z);
+      tf_ = tf::Transform(tf_q_W_L, tf_p);
+      transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, odometry->header.stamp, frame_id_, tf_frame_));
     }
 //    std::cout << "published odometry with timestamp " << odometry->header.stamp << "at time t" << world_->GetSimTime().Double()
 //        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;

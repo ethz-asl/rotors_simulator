@@ -53,7 +53,8 @@
 namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";
-static const std::string kDefaultFrameId = "odometry_sensor_link";
+static const std::string kDefaultFrameId = "world";
+static const std::string kDefaultChildFrameId = "odometry_sensor_link";
 static const std::string kDefaultLinkName = "odometry_sensor_link";
 static const std::string kDefaultPosePubTopic = "pose";
 static const std::string kDefaultPoseWithCovariancePubTopic = "pose";
@@ -85,6 +86,7 @@ class GazeboOdometryPlugin : public ModelPlugin {
         odometry_pub_topic_(kDefaultOdometryPubTopic),
         tf_frame_(kDefaultTfFrame),
         frame_id_(kDefaultFrameId),
+        child_frame_id_(kDefaultChildFrameId),
         link_name_(kDefaultLinkName),
         measurement_delay_(kDefaultMeasurementDelay),
         measurement_divisor_(kDefaultMeasurementDivisor),
@@ -114,6 +116,7 @@ class GazeboOdometryPlugin : public ModelPlugin {
   std::string odometry_pub_topic_;
   std::string tf_frame_;
   std::string frame_id_;
+  std::string child_frame_id_;
   std::string link_name_;
 
   NormalDistribution position_n_[3];
