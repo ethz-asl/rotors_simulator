@@ -53,14 +53,13 @@
 
     <!-- Mount a generic odometry sensor providing ground truth. -->
     <xacro:odometry_plugin_macro
-      namespace="${namespace}"
+      namespace="${namespace}/ground_truth"
       odometry_sensor_suffix="gt"
-      pose_topic=""
-      pose_with_covariance_topic="ground_truth/pose"
-      position_topic=""
-      transform_topic=""
-      odometry_topic="ground_truth/odometry"
-      tf_frame="ground_truth/firefly"
+      pose_topic="pose"
+      pose_with_covariance_topic="pose_with_covariance"
+      position_topic="position"
+      transform_topic="transform"
+      odometry_topic="odometry"
       mass_odometry_sensor="0.00001"
       measurement_divisor="1"
       measurement_delay="0"

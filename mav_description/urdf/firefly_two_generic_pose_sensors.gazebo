@@ -7,14 +7,13 @@
 
   <!-- Mount a first generic pose sensor with a pose map (working only at some parts). -->
   <xacro:odometry_plugin_macro
-    namespace="${namespace}"
+    namespace="${namespace}/odometry_sensor1"
     odometry_sensor_suffix="1"
-    pose_topic=""
-    pose_with_covariance_topic="pose1"
-    position_topic=""
-    transform_topic=""
-    odometry_topic=""
-    tf_frame=""
+    pose_topic="pose"
+    pose_with_covariance_topic="pose_with_covariance"
+    position_topic="position"
+    transform_topic="transform"
+    odometry_topic="odometry"
     mass_odometry_sensor="0.00001"
     measurement_divisor="10"
     measurement_delay="10"
@@ -37,14 +36,13 @@
 
   <!-- Mount a second generic pose sensor with a pose map (working only at some parts). -->
   <xacro:odometry_plugin_macro
-    namespace="${namespace}"
+    namespace="${namespace}/odometry_sensor2"
     odometry_sensor_suffix="2"
-    pose_topic=""
-    pose_with_covariance_topic="pose2"
-    position_topic=""
-    transform_topic=""
-    odometry_topic=""
-    tf_frame=""
+    pose_topic="pose"
+    pose_with_covariance_topic="pose_with_covariance"
+    position_topic="position"
+    transform_topic="transform"
+    odometry_topic="odometry"
     mass_odometry_sensor="0.00001"
     measurement_divisor="5"
     measurement_delay="8"
