@@ -91,11 +91,9 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   getSdfParam<std::string>(_sdf, "poseTopic", pose_pub_topic_, "");
   getSdfParam<std::string>(_sdf, "poseWithCovarianceTopic", pose_with_covariance_pub_topic_, "");
   getSdfParam<std::string>(_sdf, "positionTopic", position_pub_topic_, "");
-  getSdfParam<std::string>(_sdf, "tfFrame", tf_frame_, "");
   getSdfParam<std::string>(_sdf, "transformTopic", transform_pub_topic_, "");
   getSdfParam<std::string>(_sdf, "odometryTopic", odometry_pub_topic_, "");
-  getSdfParam<std::string>(_sdf, "frameId", frame_id_, frame_id_);
-  getSdfParam<std::string>(_sdf, "childFrameId", child_frame_id_, child_frame_id_);
+  getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalPosition", noise_normal_position, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalQuaternion", noise_normal_quaternion, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalLinearVelocity", noise_normal_linear_velocity, zeros3);
@@ -165,7 +163,7 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
                 noise_normal_angular_velocity.z * noise_normal_angular_velocity.z;
   twist_covariance = twist_covd.asDiagonal();
 
-  child_frame_id_ = namespace_ + "/" + child_frame_id_;
+  link_name_ = namespace_ + "/" + link_name_;
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -215,11 +213,11 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   if (gazebo_sequence_ % measurement_divisor_ == 0) {
     nav_msgs::Odometry odometry;
-    odometry.header.frame_id = frame_id_;
+    odometry.header.frame_id = parent_frame_id_;
     odometry.header.seq = odometry_sequence_++;
     odometry.header.stamp.sec = (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec;
     odometry.header.stamp.nsec = (world_->GetSimTime()).nsec + ros::Duration(unknown_delay_).nsec;
-    odometry.child_frame_id = child_frame_id_;
+    odometry.child_frame_id = link_name_;
     copyPosition(gazebo_pose.pos, &odometry.pose.pose.position);
     odometry.pose.pose.orientation.w = gazebo_pose.rot.w;
     odometry.pose.pose.orientation.x = gazebo_pose.rot.x;
@@ -294,7 +292,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     odometry->pose.covariance = pose_covariance_matrix_;
     odometry->twist.covariance = twist_covariance_matrix_;
 
-    // Publish all the topics where to topic name is specified.
+    // Publish all the topics, for which the topic name is specified.
     if (!pose_pub_topic_.empty()) {
       geometry_msgs::PoseStampedPtr pose(new geometry_msgs::PoseStamped);
       pose->header = odometry->header;
@@ -329,12 +327,10 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     if (!odometry_pub_topic_.empty()) {
       odometry_pub_.publish(odometry);
     }
-    if (!tf_frame_.empty()) {
-      tf::Quaternion tf_q_W_L(q_W_L.x, q_W_L.y, q_W_L.z, q_W_L.w);
-      tf::Vector3 tf_p(p.x, p.y, p.z);
-      tf_ = tf::Transform(tf_q_W_L, tf_p);
-      transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, odometry->header.stamp, frame_id_, tf_frame_));
-    }
+    tf::Quaternion tf_q_W_L(q_W_L.x, q_W_L.y, q_W_L.z, q_W_L.w);
+    tf::Vector3 tf_p(p.x, p.y, p.z);
+    tf_ = tf::Transform(tf_q_W_L, tf_p);
+    transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, odometry->header.stamp, parent_frame_id_, link_name_));
 //    std::cout << "published odometry with timestamp " << odometry->header.stamp << "at time t" << world_->GetSimTime().Double()
 //        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
   }
