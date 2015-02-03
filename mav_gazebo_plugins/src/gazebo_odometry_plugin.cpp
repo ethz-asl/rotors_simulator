@@ -107,6 +107,10 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   getSdfParam<double>(_sdf, "unknownDelay", unknown_delay_, unknown_delay_);
   getSdfParam<double>(_sdf, "covarianceImageScale", covariance_image_scale_, covariance_image_scale_);
 
+  parent_link_ = world_->GetEntity(parent_frame_id_);
+  if (parent_link_ == NULL && parent_frame_id_ != kDefaultParentFrameId) {
+    gzthrow("[gazebo_odometry_plugin] Couldn't find specified parent link \"" << parent_frame_id_ << "\".");
+  }
   position_n_[0] = NormalDistribution(0, noise_normal_position.x);
   position_n_[1] = NormalDistribution(0, noise_normal_position.y);
   position_n_[2] = NormalDistribution(0, noise_normal_position.z);
@@ -180,6 +184,16 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Pose gazebo_pose = link_->GetWorldCoGPose();
   math::Vector3 gazebo_linear_velocity = link_->GetRelativeLinearVel();
   math::Vector3 gazebo_angular_velocity = link_->GetRelativeAngularVel();
+
+  if (parent_frame_id_ != kDefaultParentFrameId) {
+    math::Pose gazebo_parent_pose = parent_link_->GetWorldPose();
+    math::Vector3 gazebo_parent_linear_velocity = parent_link_->GetRelativeLinearVel();
+    math::Vector3 gazebo_parent_angular_velocity = parent_link_->GetRelativeAngularVel();
+    gazebo_pose -= gazebo_parent_pose;
+    gazebo_linear_velocity -= gazebo_parent_linear_velocity;
+    gazebo_angular_velocity -= gazebo_parent_angular_velocity;
+  }
+
   bool publish_odometry = true;
 
   // First, determine whether we should publish a odometry.

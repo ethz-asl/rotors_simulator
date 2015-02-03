@@ -149,6 +149,7 @@ class GazeboOdometryPlugin : public ModelPlugin {
   physics::WorldPtr world_;
   physics::ModelPtr model_;
   physics::LinkPtr link_;
+  physics::EntityPtr parent_link_;
 
   /// \brief Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;

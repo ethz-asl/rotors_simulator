@@ -33,6 +33,7 @@
     position_topic="position"
     transform_topic="transform"
     odometry_topic="odometry"
+    parent_frame_id="world"
     mass_odometry_sensor="0.00001"
     measurement_divisor="1"
     measurement_delay="0"

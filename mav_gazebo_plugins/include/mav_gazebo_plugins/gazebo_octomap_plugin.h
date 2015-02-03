@@ -30,11 +30,14 @@
 #include <std_srvs/Empty.h>
 
 namespace gazebo {
+// Default values
+static const std::string kDefaultNamespace = "";
+
 class OctomapFromGazeboWorld : public WorldPlugin {
  public:
   OctomapFromGazeboWorld()
       : WorldPlugin(),
-        node_handle_(NULL),
+        node_handle_(kDefaultNamespace),
         octomap_(NULL) {}
   virtual ~OctomapFromGazeboWorld();
 
