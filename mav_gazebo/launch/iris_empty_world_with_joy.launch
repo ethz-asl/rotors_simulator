@@ -1,4 +1,5 @@
 <launch>
   <include file="$(find mav_gazebo)/launch/iris_empty_world.launch" />
-  <node ns="px4_multicopter" name="mav_joy_interface" pkg="mav_joy_interface" type="mav_joy_interface" />
+  <node ns="iris" name="joy_node" pkg="joy" type="joy_node" />
+  <node ns="iris" name="mav_joy_interface" pkg="mav_joy_interface" type="mav_joy_interface" />
 </launch>
