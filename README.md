@@ -33,6 +33,7 @@ Installation Instructions
  $ git clone git@github.com:ethz-asl/mav_comm.git
  $ git clone git@github.com:ethz-asl/glog_catkin.git
  $ git clone git@github.com:catkin/catkin_simple.git
+ $ sudo apt-get install ros-indigo-octomap-ros
  ```
  4. Build your workspace
    - You can either do so by catkin_make
