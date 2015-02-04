@@ -84,7 +84,7 @@ We will here also show how to write a stabilizing controller and how you can con
 We will for now just send some constant motor velocities to the multicopter.
 
 ```
-rostopic pub /firefly/command/motors mav_msgs/CommandMotorSpeed '{motor_speed: [100, 100, 100, 100, 100, 100]}'
+$ rostopic pub /firefly/command/motors mav_msgs/CommandMotorSpeed '{motor_speed: [100, 100, 100, 100, 100, 100]}'
 ```
 
 > **Note** that the size of the `motor_speed` array should be equal to the number of motors you have in your model of choice (e.g. 6 in the firefly model).
@@ -98,7 +98,7 @@ You should see (if you unpaused the simulator and you have a multicopter in it),
 You can let the helicopter hover with ground truth odometry (perfect state estimation), by launching:
 
 ```
-roslaunch mav_gazebo firefly_hovering_example.launch
+$ roslaunch mav_gazebo firefly_hovering_example.launch
 ```
 
 #### Create an attitude controller
