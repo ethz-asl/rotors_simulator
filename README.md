@@ -78,7 +78,7 @@ There are some basic launch files where you can load the different multicopters 
 
 To let the multicopter fly you need to generate thrust with the rotors, this is achieved by sending commands to the multicopter, which make the rotors spin.
 There are currently a few ways to send commands to the multicopter, we will show one of them here.
-The rest is documented [here](../../../wiki) in our Wiki.
+The rest is documented [here](../wiki) in our Wiki.
 We will here also show how to write a stabilizing controller and how you can control the multicopter with a joystick.
 
 #### Send direct motor commands
