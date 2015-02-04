@@ -1,18 +1,17 @@
 <package>
-
   <name>mav_model</name>
   <version>0.0.0</version>
   <description>The mav_model package provides simple models of the AscTec multicopters and its controllers.</description>
 
   <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
 
-  <author>Markus Achtelik</author>
   <author>Fadri Furrer</author>
   <author>Michael Burri</author>
-  <author>Pascal Gohl</author>
-  <author>Sammy Omari</author>
+  <author>Mina Kamel</author>
+  <author>Janosch Nikolic</author>
+  <author>Markus Achtelik</author>
 
-  <license>Other</license>
+  <license>ASL 2.0</license>
 
   <!-- Dependencies which this package needs to build itself. -->
   <buildtool_depend>catkin</buildtool_depend>
