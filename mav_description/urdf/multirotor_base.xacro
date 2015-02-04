@@ -1,16 +1,36 @@
 <?xml version="1.0"?>
+<!--
+  Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro"
     params="robot_namespace mass body_width body_height mesh_file mesh_scale color *inertia">
-    <link name="base_link">
-    </link>
+    <link name="base_link"></link>
+
     <joint name="base_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <parent link="base_link" />
       <child link="base_link_inertia" />
     </joint>
+
     <link name="base_link_inertia">
       <inertial>
         <mass value="${mass}" />  <!-- [kg] -->
@@ -35,27 +55,10 @@
       </collision>
     </link>
 
-    <!-- IMU -->
-    <link name="imu_link">
-      <inertial>
-        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0"
-          izz="0.001" />
-        <mass value="0.01" />  <!-- [kg] -->
-        <origin xyz="0 0 0" rpy="0 0 0" />
-      </inertial>
-    </link>
-    <!-- IMU joint -->
-    <joint name="imu_joint" type="revolute">
-      <!--origin xyz="0 0 0" rpy="3.1416 0 0" / -->
-      <parent link="base_link" />
-      <child link="imu_link" />
-      <limit upper="0" lower="0" effort="0" velocity="0" />
-    </joint>
-
     <!-- attach multirotor_base_plugin to the base_link -->
     <gazebo>
       <plugin filename="libmav_gazebo_multirotor_base_plugin.so" name="rosbag">
-        <robotNamespace>${namespace}</robotNamespace>
+        <robotNamespace>${robot_namespace}</robotNamespace>
         <linkName>base_link</linkName>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
       </plugin>
@@ -78,19 +81,20 @@
 
     <!-- link -->
     <link name="camera_link">
-      <!-- <collision> -->
-        <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
-        <!-- <geometry> -->
-          <!-- <box size="0.1 0.1 0.1" /> -->
-        <!-- </geometry> -->
-      <!-- </collision> -->
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.1 0.1 0.1" />
+        </geometry>
+      </collision>
 
-      <!-- <visual> -->
-        <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
-        <!-- <geometry> -->
-          <!-- <box size="0.1 0.1 0.1" /> -->
-        <!-- </geometry> -->
-      <!-- </visual> -->
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.1 0.1 0.1" />
+        </geometry>
+        <material name="red" />
+      </visual>
 
       <inertial>
         <mass value="1e-5" />

@@ -1,4 +1,23 @@
 <?xml version="1.0"?>
+<!--
+  Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 
 <robot
   name="pelican"
@@ -14,7 +33,7 @@
   <xacro:property name="mass_rotor" value="0.01" /> <!-- [kg] -->
   <xacro:property name="arm_length" value="0.17" /> <!-- [m] -->
   <xacro:property name="rotor_offset_top" value="0.05" /> <!-- [m] -->
-  <xacro:property name="mesh_scale_prop" value="${radius_rotor}"/>
+  <xacro:property name="mesh_scale_prop" value="${radius_rotor} ${radius_rotor} ${radius_rotor}"/>
   <xacro:property name="radius_rotor" value="0.08" /> <!-- [m] -->
   <xacro:property name="motor_constant" value="9.9865e-06" /> <!-- [kg·m/s^2] -->
   <xacro:property name="moment_constant" value="0.016" /> <!-- [m] -->
@@ -33,7 +52,7 @@
   </xacro:property>
 
   <!-- Included URDF Files -->
-  <xacro:include filename="$(find mav_description)/urdf/multirotor_base.urdf.xacro" />
+  <xacro:include filename="$(find mav_description)/urdf/multirotor_base.xacro" />
 
   <!-- Instantiate multirotor_base_macro once -->
   <xacro:multirotor_base_macro
@@ -64,7 +83,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
-    mesh_scale="${mesh_scale}"
+    mesh_scale="${mesh_scale_prop}"
     color="Red">
     <origin xyz="${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -84,7 +103,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
-    mesh_scale="${mesh_scale}"
+    mesh_scale="${mesh_scale_prop}"
     color="Blue">
     <origin xyz="0 ${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -104,7 +123,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
-    mesh_scale="${mesh_scale}"
+    mesh_scale="${mesh_scale_prop}"
     color="Blue">
     <origin xyz="-${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -124,7 +143,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
-    mesh_scale="${mesh_scale}"
+    mesh_scale="${mesh_scale_prop}"
     color="Blue">
     <origin xyz="0 -${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />

@@ -1,32 +1,37 @@
 /*
- * Copyright (C) 2014 Fadri Furrer, ASL, ETH Zurich, Switzerland
- * Copyright (C) 2014 Michael Burri, ASL, ETH Zurich, Switzerland
- * Copyright (C) 2014 Pascal Gohl, ASL, ETH Zurich, Switzerland
- * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
- * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
- * in parts or entirely, is NOT PERMITTED.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
+#ifndef MAV_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H
+#define MAV_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H
 
 #include <iostream>
 #include <math.h>
+
+#include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-#include <gazebo/common/common.hh>
-#include <sdf/sdf.hh>
-
-#include <ros/ros.h>
-#include <std_srvs/Empty.h>
-
 #include <octomap/octomap.h>
 #include <planning_msgs/Octomap.h>
+#include <ros/ros.h>
+#include <sdf/sdf.hh>
+#include <std_srvs/Empty.h>
 
 namespace gazebo {
 class OctomapFromGazeboWorld : public WorldPlugin {
@@ -55,3 +60,5 @@ class OctomapFromGazeboWorld : public WorldPlugin {
 };
 
 }
+
+#endif // MAV_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H

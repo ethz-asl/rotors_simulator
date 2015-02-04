@@ -52,7 +52,6 @@ PX4dummyController::~PX4dummyController() {
 
 std::shared_ptr<ControllerBase> PX4dummyController::Clone() {
   std::shared_ptr<ControllerBase> controller(new PX4dummyController);
-
   return controller;
 }
 
@@ -72,6 +71,9 @@ void PX4dummyController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocit
 }
 
 void PX4dummyController::MotorVelCallback(const mav_msgs::MotorSpeed &msg) {
+  //XXX sometimes this is called on a uninitialized instance: find out why!
+  InitializeParams();
+
   for(int i = 0;i<amount_rotors_;i++) {
     _motor_speeds[i] = msg.motor_speed[i];
   }

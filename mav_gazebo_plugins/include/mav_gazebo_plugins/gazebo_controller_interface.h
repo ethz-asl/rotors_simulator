@@ -1,17 +1,21 @@
 /*
- * Copyright (C) 2014 Fadri Furrer, ASL, ETH Zurich, Switzerland
- * Copyright (C) 2014 Michael Burri, ASL, ETH Zurich, Switzerland
- * Copyright (C) 2014 Pascal Gohl, ASL, ETH Zurich, Switzerland
- * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
- * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
- * in parts or entirely, is NOT PERMITTED.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 
@@ -19,32 +23,33 @@
 #define MAV_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H
 
 #include <mav_control/controller_factory.h>
-#include <Eigen/Eigen>
-
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
 
 #include <boost/bind.hpp>
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
+#include <Eigen/Eigen>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
-#include <stdio.h>
-#include <sensor_msgs/Imu.h>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
 #include <geometry_msgs/PoseStamped.h>
 #include <mav_msgs/CommandAttitudeThrust.h>
 #include <mav_msgs/CommandRateThrust.h>
 #include <mav_msgs/CommandMotorSpeed.h>
 #include <mav_msgs/MotorSpeed.h>
+#include <ros/callback_queue.h>
+#include <ros/ros.h>
+#include <sensor_msgs/Imu.h>
+#include <stdio.h>
+
+#include "mav_gazebo_plugins/common.h"
 
 namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";
-static const std::string kDefaultMotorVelocityReferencePubTopic = "/motor_velocity_reference";
-static const std::string kDefaultCommandAttitudeThrustSubTopic = "/command/attitude";
-static const std::string kDefaultCommandRateThrustSubTopic = "/command/rate";
-static const std::string kDefaultCommandMotorSpeedSubTopic = "/command/motors";
-static const std::string kDefaultImuSubTopic = "/imu";
+static const std::string kDefaultMotorVelocityReferencePubTopic = "motor_velocity_reference";
+static const std::string kDefaultCommandAttitudeThrustSubTopic = "command/attitude";
+static const std::string kDefaultCommandRateThrustSubTopic = "command/rate";
+static const std::string kDefaultCommandMotorSpeedSubTopic = "command/motors";
+static const std::string kDefaultImuSubTopic = "imu";
 
 
 

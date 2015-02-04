@@ -1,26 +1,60 @@
 /*
- * Copyright (C) 2014 Fadri Furrer, ASL, ETH Zurich, Switzerland
- * Copyright (C) 2014 Michael Burri, ASL, ETH Zurich, Switzerland
- * Copyright (C) 2014 Pascal Gohl, ASL, ETH Zurich, Switzerland
- * Copyright (C) 2014 Sammy Omari, ASL, ETH Zurich, Switzerland
- * Copyright (C) 2014 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- * This software is released to the Contestants of the european
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
- * in parts or entirely, is NOT PERMITTED.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-#ifndef COMMON_H_
-#define COMMON_H_
+#ifndef MAV_GAZEBO_PLUGINS_COMMON_H_
+#define MAV_GAZEBO_PLUGINS_COMMON_H_
 
 #include <Eigen/Dense>
 #include <gazebo/gazebo.hh>
+#include <glog/logging.h>
 
 namespace gazebo {
+
+/**
+ * \brief Helper Singleton to initialize Glog only once.
+ */
+class InitGlogHelper
+{
+public:
+   static InitGlogHelper& instance()
+   {
+      static InitGlogHelper _instance;
+      return _instance;
+   }
+   ~InitGlogHelper() {}
+
+   void initGlog() {
+     static bool glog_initialized = false;
+
+     if(!glog_initialized) {
+       google::InitGoogleLogging("gazebo_plugins_glogger");
+       glog_initialized = true;
+     }
+   }
+private:
+   InitGlogHelper() {}
+   InitGlogHelper(const InitGlogHelper&);
+   InitGlogHelper & operator = (const InitGlogHelper&);
+};
+
+
 
 /**
  * \brief Obtains a parameter from sdf.
@@ -76,13 +110,13 @@ discretized system (ZoH):
       */
       T outputState;
       if(inputState > previousState_){
-        //Accelerate
+        // Calcuate the outputState if accelerating.
         double alphaUp = exp(- samplingTime / timeConstantUp_);
         // x(k+1) = Ad*x(k) + Bd*u(k)
         outputState = alphaUp * previousState_ + (1 - alphaUp) * inputState;
 
       }else{
-        //Decelerate
+        // Calculate the outputState if decelerating.
         double alphaDown = exp(- samplingTime / timeConstantDown_);
         outputState = alphaDown * previousState_ + (1 - alphaDown) * inputState;
       }
@@ -125,8 +159,4 @@ void copyPosition(const In& in, Out* out) {
   out->z = in.z;
 }
 
-#endif /* COMMON_H_ */
-
-
-
-
+#endif /* MAV_GAZEBO_PLUGINS_COMMON_H_ */
