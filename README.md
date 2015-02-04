@@ -62,7 +62,7 @@ Basic Usage
 Launch the simulator with a hex-rotor helicopter model, in our case, the AscTec FireFly.
 
 ```
-roslaunch mav_gazebo firefly_empty_world.launch
+$ roslaunch mav_gazebo firefly_empty_world.launch
 ```
 The simulator starts by default in paused mode. To start it you can either
  - use the Gazebo GUI and press the play button
