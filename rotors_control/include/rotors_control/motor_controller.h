@@ -19,7 +19,7 @@
  */
 
 #ifndef ROTORS_CONTROL_MOTOR_CONTROLLER_H
-#define ROTORS_CONTROL_CONTROLLER_H
+#define ROTORS_CONTROL_MOTOR_CONTROLLER_H
 
 #include <rotors_control/controller_base.h>
 #include <rotors_control/controller_factory.h>

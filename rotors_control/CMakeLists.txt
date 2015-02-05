@@ -37,7 +37,7 @@ add_library(rotors_control
 )
 
 target_link_libraries(rotors_control ${catkin_LIBRARIES})
-add_dependencies(mrotors_control ${catkin_EXPORTED_TARGETS})
+add_dependencies(rotors_control ${catkin_EXPORTED_TARGETS})
 
 add_executable(ros_controller_node src/ros_controller_interface.cpp)
 add_dependencies(ros_controller_node ${catkin_EXPORTED_TARGETS})
