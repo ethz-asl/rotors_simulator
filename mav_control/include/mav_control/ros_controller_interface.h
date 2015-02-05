@@ -18,95 +18,84 @@
  * limitations under the License.
  */
 
-
-#ifndef MAV_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H
-#define MAV_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H
-
-#include <mav_control/controller_factory.h>
+#ifndef MAV_CONTROL_ROS_CONTROLLER_INTERFACE_H
+#define MAV_CONTROL_ROS_CONTROLLER_INTERFACE_H
 
 #include <boost/bind.hpp>
 #include <Eigen/Eigen>
-#include <gazebo/common/common.hh>
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
-#include <geometry_msgs/PoseStamped.h>
-#include <mav_msgs/CommandAttitudeThrust.h>
-#include <mav_msgs/CommandRateThrust.h>
-#include <mav_msgs/CommandMotorSpeed.h>
-#include <mav_msgs/MotorSpeed.h>
-#include <ros/callback_queue.h>
-#include <ros/ros.h>
-#include <sensor_msgs/Imu.h>
 #include <stdio.h>
 
-#include "mav_gazebo_plugins/common.h"
+#include <geometry_msgs/PoseStamped.h>
+#include <mav_msgs/CommandAttitudeThrust.h>
+#include <mav_msgs/CommandMotorSpeed.h>
+#include <mav_msgs/CommandTrajectory.h>
+#include <mav_msgs/MotorSpeed.h>
+#include <nav_msgs/Odometry.h>
+#include <ros/ros.h>
+#include <ros/callback_queue.h>
+#include <sensor_msgs/Imu.h>
 
-namespace gazebo {
+#include "mav_control/controller_factory.h"
+
+namespace mav_control {
+
 // Default values
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultMotorVelocityReferencePubTopic = "motor_velocity_reference";
+static const std::string kDefaultCommandTrajectoryTopic = "command/trajectory";
 static const std::string kDefaultCommandAttitudeThrustSubTopic = "command/attitude";
 static const std::string kDefaultCommandRateThrustSubTopic = "command/rate";
 static const std::string kDefaultCommandMotorSpeedSubTopic = "command/motors";
 static const std::string kDefaultImuSubTopic = "imu";
+static const std::string kDefaultPoseSubTopic = "sensor_pose";
+static const std::string kDefaultOdometrySubTopic = "odometry";
 
-
-
-class GazeboControllerInterface : public ModelPlugin {
+class RosControllerInterface {
  public:
-  GazeboControllerInterface()
-      : ModelPlugin(),
-        namespace_(kDefaultNamespace),
-        motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferencePubTopic),
-        command_attitude_thrust_sub_topic_(kDefaultCommandAttitudeThrustSubTopic),
-        command_rate_thrust_sub_topic_(kDefaultCommandRateThrustSubTopic),
-        command_motor_speed_sub_topic_(kDefaultCommandMotorSpeedSubTopic),
-        imu_sub_topic_(kDefaultImuSubTopic),
-        node_handle_(NULL),
-        controller_created_(false) {}
-  ~GazeboControllerInterface();
+  RosControllerInterface();
+  ~RosControllerInterface();
 
   void InitializeParams();
   void Publish();
-
- protected:
-  void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
-  void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
   std::shared_ptr<ControllerBase> controller_;
   bool controller_created_;
 
+  ros::NodeHandle* node_handle_;
+
   std::string namespace_;
+  std::string imu_sub_topic_;
+  std::string pose_sub_topic_;
   std::string motor_velocity_reference_pub_topic_;
+  std::string odometry_sub_topic_;
+
+  // command topics
   std::string command_attitude_thrust_sub_topic_;
   std::string command_rate_thrust_sub_topic_;
   std::string command_motor_speed_sub_topic_;
-  std::string imu_sub_topic_;
+  std::string command_trajectory_sub_topic_;
 
-  ros::NodeHandle* node_handle_;
   ros::Publisher motor_velocity_reference_pub_;
+
+  // subscribers
   ros::Subscriber cmd_attitude_sub_;
-  ros::Subscriber cmd_rate_sub_;
   ros::Subscriber cmd_motor_sub_;
+  ros::Subscriber cmd_trajectory_sub_;
   ros::Subscriber imu_sub_;
+  ros::Subscriber pose_sub_;
+  ros::Subscriber odometry_sub_;
 
-  physics::ModelPtr model_;
-  physics::WorldPtr world_;
-  /// \brief Pointer to the update event connection.
-  event::ConnectionPtr updateConnection_;
-
-  sensor_msgs::Imu imu_;
-
-  boost::thread callback_queue_thread_;
-  void QueueThread();
-  void CommandAttitudeCallback(const mav_msgs::CommandAttitudeThrustPtr& input_reference_msg);
-  void CommandRateCallback(const mav_msgs::CommandRateThrustPtr& input_reference_msg);
-  void CommandMotorCallback(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg);
-  void ImuCallback(const sensor_msgs::ImuPtr& imu);
-  void PoseCallback(const geometry_msgs::PoseStampedPtr& pose);
+  void CommandAttitudeCallback(
+      const mav_msgs::CommandAttitudeThrustConstPtr& input_reference_msg);
+  void CommandTrajectoryCallback(
+      const mav_msgs::CommandTrajectoryConstPtr& trajectory_reference_msg);
+  void CommandMotorCallback(
+      const mav_msgs::CommandMotorSpeedConstPtr& input_reference_msg);
+  void OdometryCallback(const nav_msgs::OdometryConstPtr odometry_msg);
+  void ImuCallback(const sensor_msgs::ImuConstPtr& imu);
+  void PoseCallback(const geometry_msgs::PoseStampedConstPtr& pose);
 };
 }
 
-#endif // MAV_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H
+#endif // MAV_CONTROL_ROS_CONTROLLER_INTERFACE_H

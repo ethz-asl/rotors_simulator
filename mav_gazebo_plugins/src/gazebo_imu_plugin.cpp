@@ -1,8 +1,21 @@
 /*
- * gazebo_imu_plugin.cpp
+ * Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- *  Created on: Dec 22, 2014
- *      Author: burrimi
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #include "mav_gazebo_plugins/gazebo_imu_plugin.h"
@@ -21,7 +34,7 @@ GazeboImuPlugin::GazeboImuPlugin()
       node_handle_(0),
       velocity_prev_W_(0,0,0)
 {
-  initGlog();
+  InitGlogHelper::instance().initGlog();
 }
 
 GazeboImuPlugin::~GazeboImuPlugin() {
@@ -44,7 +57,7 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
-    gzerr << "[gazebo_pose_plugin] Please specify a robotNamespace.\n";
+    gzerr << "[gazebo_imu_plugin] Please specify a robotNamespace.\n";
   node_handle_ = new ros::NodeHandle(namespace_);
 
   if (_sdf->HasElement("linkName"))

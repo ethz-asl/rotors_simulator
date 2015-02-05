@@ -19,8 +19,8 @@
  */
 
 
-#ifndef MAV_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H
-#define MAV_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H
+#ifndef MAV_GAZEBO_PLUGINS_GAZEBO_ODOMETRY_PLUGIN_H
+#define MAV_GAZEBO_PLUGINS_GAZEBO_ODOMETRY_PLUGIN_H
 
 #include <cmath>
 #include <deque>
@@ -32,51 +32,67 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
+#include <geometry_msgs/Point.h>
+#include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PoseWithCovariance.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/Quaternion.h>
+#include <geometry_msgs/Transform.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/TwistWithCovariance.h>
+#include <geometry_msgs/TwistWithCovarianceStamped.h>
+#include <nav_msgs/Odometry.h>
 #include <opencv2/core/core.hpp>
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
-
-#include "mav_gazebo_plugins/common.h"
-
-//#include <mav_gazebo_plugins/pose_distorter.h>
+#include <tf/transform_broadcaster.h>
 
 namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";
-static const std::string kDefaultFrameId = "pose_sensor_link";
-static const std::string kDefaultLinkName = "pose_sensor_link";
+static const std::string kDefaultParentFrameId = "world";
+static const std::string kDefaultLinkName = "odometry_sensor_link";
 static const std::string kDefaultPosePubTopic = "pose";
+static const std::string kDefaultPoseWithCovariancePubTopic = "pose_with_covariance";
+static const std::string kDefaultPositionPubTopic = "position";
+static const std::string kDefaultTransformPubTopic = "transform";
+static const std::string kDefaultOdometryPubTopic = "odometry";
 
 static constexpr int kDefaultMeasurementDelay = 0;
 static constexpr int kDefaultMeasurementDivisor = 1;
 static constexpr int kDefaultGazeboSequence = 0;
-static constexpr int kDefaultPoseSequence = 0;
+static constexpr int kDefaultOdometrySequence = 0;
 static constexpr double kDefaultUnknownDelay = 0.0;
 static constexpr double kDefaultCovarianceImageScale = 1.0;
 
-class GazeboPosePlugin : public ModelPlugin {
+class GazeboOdometryPlugin : public ModelPlugin {
  public:
   typedef std::normal_distribution<> NormalDistribution;
   typedef std::uniform_real_distribution<> UniformDistribution;
-  typedef std::deque<std::pair<int, geometry_msgs::PoseStamped> > PoseQueue;
+  typedef std::deque<std::pair<int, nav_msgs::Odometry> > OdometryQueue;
 
-  GazeboPosePlugin()
+  GazeboOdometryPlugin()
       : ModelPlugin(),
-        gen_(rd_()),
+        random_generator_(random_device_()),
         pose_pub_topic_(kDefaultPosePubTopic),
-        frame_id_(kDefaultFrameId),
+        pose_with_covariance_pub_topic_(kDefaultPoseWithCovariancePubTopic),
+        position_pub_topic_(kDefaultPositionPubTopic),
+        transform_pub_topic_(kDefaultTransformPubTopic),
+        odometry_pub_topic_(kDefaultOdometryPubTopic),
+        parent_frame_id_(kDefaultParentFrameId),
         link_name_(kDefaultLinkName),
         measurement_delay_(kDefaultMeasurementDelay),
         measurement_divisor_(kDefaultMeasurementDivisor),
         unknown_delay_(kDefaultUnknownDelay),
         gazebo_sequence_(kDefaultGazeboSequence),
-        pose_sequence_(kDefaultPoseSequence),
+        odometry_sequence_(kDefaultOdometrySequence),
         covariance_image_scale_(kDefaultCovarianceImageScale),
         node_handle_(NULL) {}
 
-  ~GazeboPosePlugin();
+  ~GazeboOdometryPlugin();
 
   void InitializeParams();
   void Publish();
@@ -86,38 +102,56 @@ class GazeboPosePlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
-  PoseQueue pose_queue_;
+  OdometryQueue odometry_queue_;
 
   std::string namespace_;
   std::string pose_pub_topic_;
-  std::string frame_id_;
+  std::string pose_with_covariance_pub_topic_;
+  std::string position_pub_topic_;
+  std::string transform_pub_topic_;
+  std::string odometry_pub_topic_;
+  std::string parent_frame_id_;
   std::string link_name_;
 
-  NormalDistribution pos_n_[3];
-  NormalDistribution att_n_[3];
-  UniformDistribution pos_u_[3];
-  UniformDistribution att_u_[3];
+  NormalDistribution position_n_[3];
+  NormalDistribution attitude_n_[3];
+  NormalDistribution linear_velocity_n_[3];
+  NormalDistribution angular_velocity_n_[3];
+  UniformDistribution position_u_[3];
+  UniformDistribution attitude_u_[3];
+  UniformDistribution linear_velocity_u_[3];
+  UniformDistribution angular_velocity_u_[3];
 
-  geometry_msgs::PoseWithCovarianceStamped::_pose_type::_covariance_type covariance_matrix_;
+  geometry_msgs::PoseWithCovariance::_covariance_type pose_covariance_matrix_;
+  geometry_msgs::TwistWithCovariance::_covariance_type twist_covariance_matrix_;
 
   int measurement_delay_;
   int measurement_divisor_;
   int gazebo_sequence_;
-  int pose_sequence_;
+  int odometry_sequence_;
   double unknown_delay_;
   double covariance_image_scale_;
   cv::Mat covariance_image_;
 
-  std::random_device rd_;
-  std::mt19937 gen_;
+  std::random_device random_device_;
+  std::mt19937 random_generator_;
 
   ros::NodeHandle* node_handle_;
   ros::Publisher pose_pub_;
+  ros::Publisher pose_with_covariance_pub_;
+  ros::Publisher position_pub_;
+  ros::Publisher transform_pub_;
+  ros::Publisher odometry_pub_;
+
+  tf::Transform tf_;
+  tf::TransformBroadcaster transform_broadcaster_;
 
   physics::WorldPtr world_;
   physics::ModelPtr model_;
   physics::LinkPtr link_;
-    /// \brief Pointer to the update event connection.
+  physics::EntityPtr parent_link_;
+
+  /// \brief Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
   boost::thread callback_queue_thread_;
@@ -125,4 +159,4 @@ class GazeboPosePlugin : public ModelPlugin {
 };
 }
 
-#endif // MAV_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H
+#endif // MAV_GAZEBO_PLUGINS_GAZEBO_ODOMETRY_PLUGIN_H
