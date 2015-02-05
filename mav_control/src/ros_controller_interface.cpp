@@ -140,14 +140,20 @@ void RosControllerInterface::OdometryCallback(
                                         odometry_msg->pose.pose.orientation.y, odometry_msg->pose.pose.orientation.z);
   controller_->SetAttitude(q_W_I);
 
-  Eigen::Vector3d velocity_I(odometry_msg->twist.twist.linear.x, odometry_msg->twist.twist.linear.y,
-                           odometry_msg->twist.twist.linear.z);
-
+  // Convert body linear velocity from odometry message into world frame.
+  Eigen::Vector3d velocity_I(odometry_msg->twist.twist.linear.x,
+                             odometry_msg->twist.twist.linear.y,
+                             odometry_msg->twist.twist.linear.z);
   Eigen::Vector3d velocity_W;
-
   velocity_W = q_W_I.toRotationMatrix() * velocity_I;
-
   controller_->SetVelocity(velocity_W);
+
+  // Get angulare rates from odometry message.
+  Eigen::Vector3d angular_rate_I(odometry_msg->twist.twist.angular.x, odometry_msg->twist.twist.angular.y,
+                           odometry_msg->twist.twist.angular.z);
+
+  // We set the body angular rates.
+  controller_->SetAngularRate(angular_rate_I);
 
   Eigen::VectorXd ref_rotor_velocities;
   controller_->CalculateRotorVelocities(&ref_rotor_velocities);

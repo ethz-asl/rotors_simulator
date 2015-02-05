@@ -19,6 +19,7 @@
 
   <group ns="firefly">
     <node name="ros_controller_node" pkg="mav_control" type="ros_controller_node" output="screen">
+      <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
     <node name="hovering_example" pkg="mav_gazebo" type="hovering_example"/>
   </group>

@@ -21,7 +21,8 @@
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Macro to add logging to a bag file. -->
-  <xacro:macro name="bag_plugin_macro" params="namespace bag_file rotor_velocity_slowdown_sim">
+  <xacro:macro name="bag_plugin_macro"
+    params="namespace bag_file rotor_velocity_slowdown_sim">
     <gazebo>
       <plugin filename="libmav_gazebo_bag_plugin.so" name="rosbag">
         <robotNamespace>${namespace}</robotNamespace>
@@ -36,7 +37,9 @@
   </xacro:macro>
 
   <!-- Macro to add a camera. -->
-  <xacro:macro name="camera_macro" params="namespace camera_number update_rate horizontal_fov image_width image_height image_format *origin">
+  <xacro:macro name="camera_macro"
+    params="namespace camera_number update_rate
+      horizontal_fov image_width image_height image_format *origin">
     <!-- Camera joint -->
     <joint name="camera${camera_number}_joint" type="fixed">
       <axis xyz="0 1 0" />
@@ -121,7 +124,13 @@
   </xacro:macro>
 
   <!-- Macro to add an IMU. -->
-  <xacro:macro name="imu_plugin_macro" params="namespace imu_suffix imu_topic mass_imu_sensor gyroscope_noise_density gyroscopoe_random_walk gyroscope_bias_correlation_time gyroscope_turn_on_bias_sigma accelerometer_noise_density accelerometer_random_walk accelerometer_bias_correlation_time accelerometer_turn_on_bias_sigma *inertia *origin">
+  <xacro:macro name="imu_plugin_macro"
+    params="namespace imu_suffix imu_topic
+      mass_imu_sensor gyroscope_noise_density gyroscopoe_random_walk
+      gyroscope_bias_correlation_time gyroscope_turn_on_bias_sigma
+      accelerometer_noise_density accelerometer_random_walk
+      accelerometer_bias_correlation_time accelerometer_turn_on_bias_sigma
+      *inertia *origin">
     <!-- IMU link -->
     <link name="imu${imu_suffix}_link">
       <inertial>
@@ -157,7 +166,16 @@
   </xacro:macro>
 
 <!-- Macro to add a generic odometry sensor. -->
-  <xacro:macro name="odometry_plugin_macro" params="namespace odometry_sensor_suffix pose_topic pose_with_covariance_topic position_topic transform_topic odometry_topic tf_frame mass_odometry_sensor measurement_divisor measurement_delay unknown_delay noise_normal_position noise_normal_quaternion noise_normal_linear_velocity noise_normal_angular_velocity noise_uniform_position noise_uniform_quaternion noise_uniform_linear_velocity noise_uniform_angular_velocity enable_odometry_map odometry_map image_scale *inertia *origin">
+  <xacro:macro name="odometry_plugin_macro"
+    params="
+      namespace odometry_sensor_suffix pose_topic pose_with_covariance_topic
+      position_topic transform_topic odometry_topic parent_frame_id
+      mass_odometry_sensor measurement_divisor measurement_delay unknown_delay
+      noise_normal_position noise_normal_quaternion noise_normal_linear_velocity
+      noise_normal_angular_velocity noise_uniform_position
+      noise_uniform_quaternion noise_uniform_linear_velocity
+      noise_uniform_angular_velocity enable_odometry_map odometry_map
+      image_scale *inertia *origin">
     <!-- odometry link -->
     <link name="odometry_sensor${odometry_sensor_suffix}_link">
       <inertial>
@@ -181,7 +199,7 @@
         <positionTopic>${position_topic}</positionTopic>
         <transformTopic>${transform_topic}</transformTopic>
         <odometryTopic>${odometry_topic}</odometryTopic>
-        <tfFrame>${tf_frame}</tfFrame>
+        <parentFrameId>${parent_frame_id}</parentFrameId>  <!-- Use the scoped link name here. e.g. Model::link. -->
         <measurementDivisor>${measurement_divisor}</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
         <measurementDelay>${measurement_delay}</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
         <unknownDelay>${unknown_delay}</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
@@ -202,7 +220,10 @@
   </xacro:macro>
 
   <!-- Macro to add the wind plugin. -->
-  <xacro:macro name="wind_plugin_macro" params="namespace xyz_offset wind_direction wind_force_mean wind_gust_direction wind_gust_duration wind_gust_start wind_gust_force_mean">
+  <xacro:macro name="wind_plugin_macro"
+    params="namespace xyz_offset wind_direction wind_force_mean
+      wind_gust_direction wind_gust_duration wind_gust_start
+      wind_gust_force_mean">
     <gazebo>
       <plugin filename="libmav_gazebo_wind_plugin.so" name="wind_plugin">
         <frameId>base_link</frameId>

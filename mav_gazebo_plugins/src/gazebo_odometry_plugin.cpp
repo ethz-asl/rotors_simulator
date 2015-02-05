@@ -88,14 +88,12 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   else {
     random_generator_.seed(std::chrono::system_clock::now().time_since_epoch().count());
   }
-  getSdfParam<std::string>(_sdf, "poseTopic", pose_pub_topic_, "");
-  getSdfParam<std::string>(_sdf, "poseWithCovarianceTopic", pose_with_covariance_pub_topic_, "");
-  getSdfParam<std::string>(_sdf, "positionTopic", position_pub_topic_, "");
-  getSdfParam<std::string>(_sdf, "tfFrame", tf_frame_, "");
-  getSdfParam<std::string>(_sdf, "transformTopic", transform_pub_topic_, "");
-  getSdfParam<std::string>(_sdf, "odometryTopic", odometry_pub_topic_, "");
-  getSdfParam<std::string>(_sdf, "frameId", frame_id_, frame_id_);
-  getSdfParam<std::string>(_sdf, "childFrameId", child_frame_id_, child_frame_id_);
+  getSdfParam<std::string>(_sdf, "poseTopic", pose_pub_topic_, pose_pub_topic_);
+  getSdfParam<std::string>(_sdf, "poseWithCovarianceTopic", pose_with_covariance_pub_topic_, pose_with_covariance_pub_topic_);
+  getSdfParam<std::string>(_sdf, "positionTopic", position_pub_topic_, position_pub_topic_);
+  getSdfParam<std::string>(_sdf, "transformTopic", transform_pub_topic_, transform_pub_topic_);
+  getSdfParam<std::string>(_sdf, "odometryTopic", odometry_pub_topic_, odometry_pub_topic_);
+  getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalPosition", noise_normal_position, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalQuaternion", noise_normal_quaternion, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalLinearVelocity", noise_normal_linear_velocity, zeros3);
@@ -109,6 +107,10 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   getSdfParam<double>(_sdf, "unknownDelay", unknown_delay_, unknown_delay_);
   getSdfParam<double>(_sdf, "covarianceImageScale", covariance_image_scale_, covariance_image_scale_);
 
+  parent_link_ = world_->GetEntity(parent_frame_id_);
+  if (parent_link_ == NULL && parent_frame_id_ != kDefaultParentFrameId) {
+    gzthrow("[gazebo_odometry_plugin] Couldn't find specified parent link \"" << parent_frame_id_ << "\".");
+  }
   position_n_[0] = NormalDistribution(0, noise_normal_position.x);
   position_n_[1] = NormalDistribution(0, noise_normal_position.y);
   position_n_[2] = NormalDistribution(0, noise_normal_position.z);
@@ -165,26 +167,16 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
                 noise_normal_angular_velocity.z * noise_normal_angular_velocity.z;
   twist_covariance = twist_covd.asDiagonal();
 
-  child_frame_id_ = namespace_ + "/" + child_frame_id_;
+  link_name_ = namespace_ + "/" + link_name_;
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboOdometryPlugin::OnUpdate, this, _1));
-  if (!pose_pub_topic_.empty()) {
-    pose_pub_ = node_handle_->advertise<geometry_msgs::PoseStamped>(pose_pub_topic_, 10);
-  }
-  if (!pose_with_covariance_pub_topic_.empty()) {
-    pose_with_covariance_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_with_covariance_pub_topic_, 10);
-  }
-  if (!position_pub_topic_.empty()) {
-    position_pub_ = node_handle_->advertise<geometry_msgs::PointStamped>(position_pub_topic_, 10);
-  }
-  if (!transform_pub_topic_.empty()) {
-    transform_pub_ = node_handle_->advertise<geometry_msgs::TransformStamped>(transform_pub_topic_, 10);
-  }
-  if (!odometry_pub_topic_.empty()) {
-    odometry_pub_ = node_handle_->advertise<nav_msgs::Odometry>(odometry_pub_topic_, 10);
-  }
+  pose_pub_ = node_handle_->advertise<geometry_msgs::PoseStamped>(pose_pub_topic_, 10);
+  pose_with_covariance_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_with_covariance_pub_topic_, 10);
+  position_pub_ = node_handle_->advertise<geometry_msgs::PointStamped>(position_pub_topic_, 10);
+  transform_pub_ = node_handle_->advertise<geometry_msgs::TransformStamped>(transform_pub_topic_, 10);
+  odometry_pub_ = node_handle_->advertise<nav_msgs::Odometry>(odometry_pub_topic_, 10);
 }
 
 // This gets called by the world update start event.
@@ -192,6 +184,35 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Pose gazebo_pose = link_->GetWorldCoGPose();
   math::Vector3 gazebo_linear_velocity = link_->GetRelativeLinearVel();
   math::Vector3 gazebo_angular_velocity = link_->GetRelativeAngularVel();
+
+  if (parent_frame_id_ != kDefaultParentFrameId) {
+    // C denotes child frame, P parent frame, and W world frame.
+    // Further C_pose_W_P denotes pose of P wrt. W expressed in C.
+    math::Pose W_pose_W_C = gazebo_pose;
+    math::Vector3 C_linear_velocity_W_C = gazebo_linear_velocity;
+    math::Vector3 C_angular_velocity_W_C = gazebo_angular_velocity;
+
+    math::Pose W_pose_W_P = parent_link_->GetWorldPose();
+    math::Vector3 P_linear_velocity_W_P = parent_link_->GetRelativeLinearVel();
+    math::Vector3 P_angular_velocity_W_P = parent_link_->GetRelativeAngularVel();
+    math::Pose C_pose_P_C_ = W_pose_W_C - W_pose_W_P;
+    math::Vector3 C_linear_velocity_P_C;
+    // \prescript{}{C}{\dot{r}}_{PC} = -R_{CP}
+    //       \cdot \prescript{}{P}{\omega}_{WP} \cross \prescript{}{P}{r}_{PC}
+    //       + \prescript{}{C}{v}_{WC}
+    //                                 - R_{CP} \cdot \prescript{}{P}{v}_{WP}
+    C_linear_velocity_P_C = - C_pose_P_C_.rot.GetInverse()
+                            * P_angular_velocity_W_P.Cross(C_pose_P_C_.pos)
+                            + C_linear_velocity_W_C
+                            - C_pose_P_C_.rot.GetInverse() * P_linear_velocity_W_P;
+
+    // \prescript{}{C}{\omega}_{PC} = \prescript{}{C}{\omega}_{WC}
+    //       - R_{CP} \cdot \prescript{}{P}{\omega}_{WP}
+    gazebo_angular_velocity = C_angular_velocity_W_C
+                              - C_pose_P_C_.rot.GetInverse() * P_angular_velocity_W_P;
+    gazebo_pose = C_pose_P_C_;
+  }
+
   bool publish_odometry = true;
 
   // First, determine whether we should publish a odometry.
@@ -215,11 +236,11 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   if (gazebo_sequence_ % measurement_divisor_ == 0) {
     nav_msgs::Odometry odometry;
-    odometry.header.frame_id = frame_id_;
+    odometry.header.frame_id = parent_frame_id_;
     odometry.header.seq = odometry_sequence_++;
     odometry.header.stamp.sec = (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec;
     odometry.header.stamp.nsec = (world_->GetSimTime()).nsec + ros::Duration(unknown_delay_).nsec;
-    odometry.child_frame_id = child_frame_id_;
+    odometry.child_frame_id = link_name_;
     copyPosition(gazebo_pose.pos, &odometry.pose.pose.position);
     odometry.pose.pose.orientation.w = gazebo_pose.rot.w;
     odometry.pose.pose.orientation.x = gazebo_pose.rot.x;
@@ -294,14 +315,14 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     odometry->pose.covariance = pose_covariance_matrix_;
     odometry->twist.covariance = twist_covariance_matrix_;
 
-    // Publish all the topics where to topic name is specified.
-    if (!pose_pub_topic_.empty()) {
+    // Publish all the topics, for which the topic name is specified.
+    if (pose_pub_.getNumSubscribers() > 0) {
       geometry_msgs::PoseStampedPtr pose(new geometry_msgs::PoseStamped);
       pose->header = odometry->header;
       pose->pose = odometry->pose.pose;
       pose_pub_.publish(pose);
     }
-    if (!pose_with_covariance_pub_topic_.empty()) {
+    if (pose_with_covariance_pub_.getNumSubscribers() > 0) {
       geometry_msgs::PoseWithCovarianceStampedPtr pose_with_covariance(
         new geometry_msgs::PoseWithCovarianceStamped);
       pose_with_covariance->header = odometry->header;
@@ -309,13 +330,13 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
       pose_with_covariance->pose.covariance = odometry->pose.covariance;
       pose_with_covariance_pub_.publish(pose_with_covariance);
     }
-    if (!position_pub_topic_.empty()) {
+    if (position_pub_.getNumSubscribers() > 0) {
       geometry_msgs::PointStampedPtr position(new geometry_msgs::PointStamped);
       position->header = odometry->header;
       position->point = p;
       position_pub_.publish(position);
     }
-    if (!transform_pub_topic_.empty()) {
+    if (transform_pub_.getNumSubscribers() > 0) {
       geometry_msgs::TransformStampedPtr transform(new geometry_msgs::TransformStamped);
       transform->header = odometry->header;
       geometry_msgs::Vector3 translation;
@@ -326,15 +347,13 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
       transform->transform.rotation = q_W_L;
       transform_pub_.publish(transform);
     }
-    if (!odometry_pub_topic_.empty()) {
+    if (odometry_pub_.getNumSubscribers() > 0) {
       odometry_pub_.publish(odometry);
     }
-    if (!tf_frame_.empty()) {
-      tf::Quaternion tf_q_W_L(q_W_L.x, q_W_L.y, q_W_L.z, q_W_L.w);
-      tf::Vector3 tf_p(p.x, p.y, p.z);
-      tf_ = tf::Transform(tf_q_W_L, tf_p);
-      transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, odometry->header.stamp, frame_id_, tf_frame_));
-    }
+    tf::Quaternion tf_q_W_L(q_W_L.x, q_W_L.y, q_W_L.z, q_W_L.w);
+    tf::Vector3 tf_p(p.x, p.y, p.z);
+    tf_ = tf::Transform(tf_q_W_L, tf_p);
+    transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, odometry->header.stamp, parent_frame_id_, link_name_));
 //    std::cout << "published odometry with timestamp " << odometry->header.stamp << "at time t" << world_->GetSimTime().Double()
 //        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
   }
