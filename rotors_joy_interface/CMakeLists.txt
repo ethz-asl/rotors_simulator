@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(mav_joy_interface)
+project(rotors_joy_interface)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -16,6 +16,6 @@ catkin_package(
   LIBRARIES
 )
 
-add_executable(mav_joy_interface src/joy.cpp)
-add_dependencies(mav_joy_interface ${catkin_EXPORTED_TARGETS})
-target_link_libraries(mav_joy_interface ${catkin_LIBRARIES})
+add_executable(rotors_joy_interface src/joy.cpp)
+add_dependencies(rotors_joy_interface ${catkin_EXPORTED_TARGETS})
+target_link_libraries(rotors_joy_interface ${catkin_LIBRARIES})

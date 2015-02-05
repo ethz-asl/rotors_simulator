@@ -19,7 +19,7 @@
  */
 
 
-#include <mav_joy_interface/joy.h>
+#include <rotors_joy_interface/joy.h>
 
 Joy::Joy() {
   ros::NodeHandle nh;
@@ -84,7 +84,7 @@ void Joy::JoyCallback(const sensor_msgs::JoyConstPtr& msg) {
   control_msg_.thrust = (msg->axes[axes_.thrust] + 1) * max_.thrust / 2.0 * axes_.thrust_direction;
   ros::Time update_time = ros::Time::now();
   control_msg_.header.stamp = update_time;
-  control_msg_.header.frame_id = "mav_joy_frame";
+  control_msg_.header.frame_id = "rotors_joy_frame";
   Publish();
 }
 
@@ -93,7 +93,7 @@ void Joy::Publish() {
 }
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "mav_joy_interface");
+  ros::init(argc, argv, "rotors_joy_interface");
   Joy joy;
 
   ros::spin();

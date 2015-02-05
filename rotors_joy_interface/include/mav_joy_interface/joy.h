@@ -19,8 +19,8 @@
  */
 
 
-#ifndef MAV_JOY_INTERFACE_JOY_H_
-#define MAV_JOY_INTERFACE_JOY_H_
+#ifndef ROTORS_JOY_INTERFACE_JOY_H_
+#define ROTORS_JOY_INTERFACE_JOY_H_
 
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
@@ -84,4 +84,4 @@ class Joy {
   Joy();
 };
 
-#endif /* MAV_JOY_INTERFACE_JOY_H_ */
+#endif // ROTORS_JOY_INTERFACE_JOY_H_
