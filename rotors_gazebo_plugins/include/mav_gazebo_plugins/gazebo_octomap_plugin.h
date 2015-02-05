@@ -36,7 +36,6 @@
 namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";
-
 class OctomapFromGazeboWorld : public WorldPlugin {
  public:
   OctomapFromGazeboWorld()

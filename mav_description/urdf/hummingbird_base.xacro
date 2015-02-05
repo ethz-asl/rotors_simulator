@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+
+<robot name="hummingbird" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find mav_description)/urdf/hummingbird.xacro" />
+</robot>
+
