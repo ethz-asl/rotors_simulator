@@ -1,7 +1,7 @@
 <package>
-  <name>mav_control</name>
+  <name>rotors_control</name>
   <version>1.0.0</version>
-  <description>EuRoC mav_control package</description>
+  <description>RotorS control package</description>
 
   <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
 
