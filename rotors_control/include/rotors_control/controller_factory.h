@@ -18,23 +18,26 @@
  * limitations under the License.
  */
 
+#ifndef ROTORS_CONTROL_CONTROLLER_FACTORY_H
+#define ROTORS_CONTROL_CONTROLLER_FACTORY_H
+
 // controller_factory
 #include <map>
 #include <memory>
 #include <string>
 
-#include <mav_control/controller_base.h>
+#include <rotors_control/controller_base.h>
 
 #define PP_CAT(a, b) a ## b
 
 // Use this macro to register new types with the ControllerFactory:
-#define MAV_CONTROL_REGISTER_CONTROLLER(type) \
-  namespace mav_controller_factory { \
+#define ROTORS_CONTROL_REGISTER_CONTROLLER(type) \
+  namespace rotors_controller_factory { \
     static bool PP_CAT(type, __registered) = \
     ControllerFactory::RegisterControllerType<type>(#type); \
 }
 
-namespace mav_controller_factory {
+namespace rotors_controller_factory {
 class ControllerFactory {
  public:
   std::shared_ptr<ControllerBase> CreateController(const std::string& controller_name);
@@ -61,3 +64,5 @@ class ControllerFactory {
   // ControllerBase* getActiveController();
 };
 }
+
+#endif // ROTORS_CONTROL_CONTROLLER_FACTORY_H

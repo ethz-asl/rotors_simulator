@@ -18,8 +18,11 @@
  * limitations under the License.
  */
 
-#include <mav_control/controller_base.h>
-#include <mav_control/controller_factory.h>
+#ifndef ROTORS_CONTROL_MOTOR_CONTROLLER_H
+#define ROTORS_CONTROL_CONTROLLER_H
+
+#include <rotors_control/controller_base.h>
+#include <rotors_control/controller_factory.h>
 
 class MotorController : public ControllerBase {
  public:
@@ -37,3 +40,5 @@ class MotorController : public ControllerBase {
   Eigen::Vector3d gain_angular_rate_;
   Eigen::Matrix3d inertia_matrix_;
 };
+
+#endif // ROTORS_CONTROL_MOTOR_CONTROLLER_H

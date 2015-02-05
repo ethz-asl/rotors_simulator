@@ -18,6 +18,9 @@
  * limitations under the License.
  */
 
+#ifndef ROTORS_CONTROL_RATE_CONTROLLER_H
+#define ROTORS_CONTROL_RATE_CONTROLLER_H
+
 #include <mav_control/controller_base.h>
 #include <mav_control/controller_factory.h>
 
@@ -43,3 +46,5 @@ class RateController : public ControllerBase {
     void ComputeDesiredAngularAcc(Eigen::Vector3d * angular_acceleration) const;
 
 };
+
+#endif // ROTORS_CONTROL_RATE_CONTROLLER_H

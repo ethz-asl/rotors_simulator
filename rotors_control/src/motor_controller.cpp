@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-#include <mav_control/motor_controller.h>
+#include <rotors_control/motor_controller.h>
 
 
 MotorController::MotorController() {
@@ -46,4 +46,4 @@ void MotorController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities
   *rotor_velocities = motor_reference_;
 }
 
-MAV_CONTROL_REGISTER_CONTROLLER(MotorController);
+ROTORS_CONTROL_REGISTER_CONTROLLER(MotorController);

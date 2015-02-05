@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(mav_control)
+project(rotors_control)
 
 add_definitions(-std=c++0x)
 
@@ -15,7 +15,7 @@ find_package(Eigen REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
-  LIBRARIES mav_control
+  LIBRARIES rotors_control
   CATKIN_DEPENDS geometry_msgs mav_msgs roscpp sensor_msgs
   DEPENDS Eigen
 )
@@ -26,7 +26,7 @@ include_directories(
   ${Eigen_INCLUDE_DIRS}
 )
 
-add_library(mav_control
+add_library(rotors_control
   src/controller_factory.cpp
   src/controller_base.cpp
   src/attitude_controller.cpp
@@ -36,9 +36,9 @@ add_library(mav_control
   src/lee_position_controller.cpp
 )
 
-target_link_libraries(mav_control ${catkin_LIBRARIES})
-add_dependencies(mav_control ${catkin_EXPORTED_TARGETS})
+target_link_libraries(rotors_control ${catkin_LIBRARIES})
+add_dependencies(mrotors_control ${catkin_EXPORTED_TARGETS})
 
 add_executable(ros_controller_node src/ros_controller_interface.cpp)
 add_dependencies(ros_controller_node ${catkin_EXPORTED_TARGETS})
-target_link_libraries(ros_controller_node mav_control ${catkin_LIBRARIES})
+target_link_libraries(ros_controller_node rotors_control ${catkin_LIBRARIES})

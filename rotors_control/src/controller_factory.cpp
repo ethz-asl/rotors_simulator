@@ -18,11 +18,11 @@
  * limitations under the License.
  */
 
-#include <mav_control/controller_factory.h>
+#include <rotors_control/controller_factory.h>
 
 #include <iostream>
 
-namespace mav_controller_factory {
+namespace rotors_controller_factory {
 std::shared_ptr<ControllerBase> ControllerFactory::CreateController(const std::string& controller_name) {
 
   ControllerMap::const_iterator it = name_to_controller_.find(controller_name);

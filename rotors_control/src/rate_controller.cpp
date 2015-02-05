@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-#include <mav_control/rate_controller.h>
+#include <rotors_control/rate_controller.h>
 
 
 RateController::RateController()
@@ -109,4 +109,4 @@ void RateController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_accelerat
 }
 
 
-MAV_CONTROL_REGISTER_CONTROLLER(RateController);
+ROTORS_CONTROL_REGISTER_CONTROLLER(RateController);

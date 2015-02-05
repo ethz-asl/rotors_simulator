@@ -18,8 +18,11 @@
  * limitations under the License.
  */
 
-#include <mav_control/controller_base.h>
-#include <mav_control/controller_factory.h>
+#ifndef ROTORS_CONTROL_CONTROLLER_LEE_POSITION_CONTROLLER_H
+#define ROTORS_CONTROL_CONTROLLER_LEE_POSITION_CONTROLLER_H
+
+#include <rotors_control/controller_base.h>
+#include <rotors_control/controller_factory.h>
 
 class LeePositionController : public ControllerBase {
  public:
@@ -46,3 +49,5 @@ class LeePositionController : public ControllerBase {
   void ComputeDesiredAcceleration(Eigen::Vector3d* acceleration) const;
 
 };
+
+#endif // ROTORS_CONTROL_CONTROLLER_LEE_POSITION_CONTROLLER_H

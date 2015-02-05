@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 
-#ifndef MAV_CONTROL_ROS_CONTROLLER_INTERFACE_H
-#define MAV_CONTROL_ROS_CONTROLLER_INTERFACE_H
+#ifndef ROTORS_CONTROL_ROS_CONTROLLER_INTERFACE_H
+#define ROTORS_CONTROL_ROS_CONTROLLER_INTERFACE_H
 
 #include <boost/bind.hpp>
 #include <Eigen/Eigen>
@@ -35,9 +35,9 @@
 #include <ros/callback_queue.h>
 #include <sensor_msgs/Imu.h>
 
-#include "mav_control/controller_factory.h"
+#include "rotors_control/controller_factory.h"
 
-namespace mav_control {
+namespace rotors_control {
 
 // Default values
 static const std::string kDefaultNamespace = "";
@@ -98,4 +98,4 @@ class RosControllerInterface {
 };
 }
 
-#endif // MAV_CONTROL_ROS_CONTROLLER_INTERFACE_H
+#endif // ROTORS_CONTROL_ROS_CONTROLLER_INTERFACE_H

@@ -18,9 +18,9 @@
  * limitations under the License.
  */
 
-#include "mav_control/ros_controller_interface.h"
+#include "rotors_control/ros_controller_interface.h"
 
-namespace mav_control {
+namespace rotors_control {
 
 RosControllerInterface::RosControllerInterface()
     : node_handle_(0),
@@ -75,7 +75,7 @@ void RosControllerInterface::CommandTrajectoryCallback(
     const mav_msgs::CommandTrajectoryConstPtr& trajectory_reference_msg) {
   if (!controller_created_) {
     // Get the controller and initialize its parameters.
-    controller_ = mav_controller_factory::ControllerFactory::Instance()
+    controller_ = rotors_controller_factory::ControllerFactory::Instance()
         .CreateController("LeePositionController");
     controller_->InitializeParams();
     controller_created_ = true;
@@ -111,7 +111,7 @@ void RosControllerInterface::CommandAttitudeCallback(
     const mav_msgs::CommandAttitudeThrustConstPtr& input_reference_msg) {
   if (!controller_created_) {
     // Get the controller and initialize its parameters.
-    controller_ = mav_controller_factory::ControllerFactory::Instance()
+    controller_ = rotors_controller_factory::ControllerFactory::Instance()
         .CreateController("AttitudeController");
     controller_->InitializeParams();
     controller_created_ = true;
@@ -172,7 +172,7 @@ void RosControllerInterface::CommandMotorCallback(
     const mav_msgs::CommandMotorSpeedConstPtr& input_reference_msg) {
   if (!controller_created_) {
     // Get the controller and initialize its parameters.
-    controller_ = mav_controller_factory::ControllerFactory::Instance()
+    controller_ = rotors_controller_factory::ControllerFactory::Instance()
         .CreateController("MotorController");
     controller_->InitializeParams();
     controller_created_ = true;
@@ -216,7 +216,7 @@ void RosControllerInterface::PoseCallback(
 int main(int argc, char** argv) {
   ros::init(argc, argv, "ros_controller_node");
 
-  mav_control::RosControllerInterface controller_interface;
+  rotors_control::RosControllerInterface controller_interface;
 
   ros::spin();
 

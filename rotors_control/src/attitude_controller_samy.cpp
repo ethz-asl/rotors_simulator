@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-#include <mav_control/attitude_controller_samy.h>
+#include <rotors_control/attitude_controller_samy.h>
 
 #include <iostream>
 
@@ -127,4 +127,4 @@ void AttitudeControllerSamy::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_a
                            + angular_rate_.cross(angular_rate_); // we don't need the inertia matrix here
 }
 
-MAV_CONTROL_REGISTER_CONTROLLER(AttitudeControllerSamy);
+ROTORS_CONTROL_REGISTER_CONTROLLER(AttitudeControllerSamy);

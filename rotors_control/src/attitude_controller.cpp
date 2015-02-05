@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-#include <mav_control/attitude_controller.h>
+#include <rotors_control/attitude_controller.h>
 
 
 AttitudeController::AttitudeController()
@@ -131,4 +131,4 @@ void AttitudeController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_accel
                            + angular_rate_.cross(angular_rate_); // we don't need the inertia matrix here
 }
 
-MAV_CONTROL_REGISTER_CONTROLLER(AttitudeController);
+ROTORS_CONTROL_REGISTER_CONTROLLER(AttitudeController);

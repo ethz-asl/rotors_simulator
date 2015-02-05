@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-#include <mav_control/lee_position_controller.h>
+#include <rotors_control/lee_position_controller.h>
 
 
 LeePositionController::LeePositionController()
@@ -174,4 +174,4 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
 }
 
 
-MAV_CONTROL_REGISTER_CONTROLLER(LeePositionController);
+ROTORS_CONTROL_REGISTER_CONTROLLER(LeePositionController);

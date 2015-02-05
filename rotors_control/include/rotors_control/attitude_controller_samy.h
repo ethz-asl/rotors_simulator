@@ -18,8 +18,11 @@
  * limitations under the License.
  */
 
-#include <mav_control/controller_base.h>
-#include <mav_control/controller_factory.h>
+#ifndef ROTORS_CONTROL_ATTITUDE_CONTROLLER_SAMY_H
+#define ROTORS_CONTROL_ATTITUDE_CONTROLLER_SAMY_H
+
+#include <rotors_control/controller_base.h>
+#include <rotors_control/controller_factory.h>
 
 class AttitudeControllerSamy : public ControllerBase {
  public:
@@ -43,3 +46,5 @@ class AttitudeControllerSamy : public ControllerBase {
   void ComputeDesiredAngularAcc(Eigen::Vector3d * angular_acceleration) const;
 
 };
+
+#endif // ROTORS_CONTROL_ATTITUDE_CONTROLLER_SAMY_H

@@ -1,7 +1,7 @@
-euroc_simulator
+RotorS
 ===============
 
-MAV gazebo simulator.
+RotorS is a UAV gazebo simulator.
 
 
 Installation Instructions
