@@ -19,8 +19,8 @@
  */
 
 
-#ifndef MAV_MODEL_MOTOR_MODEL_H
-#define MAV_MODEL_MOTOR_MODEL_H
+#ifndef ROTORS_MODEL_MOTOR_MODEL_H
+#define ROTORS_MODEL_MOTOR_MODEL_H
 #include <Eigen/Eigen>
 
 class MotorModel
@@ -53,4 +53,4 @@ class MotorModel
     virtual void UpdateForcesAndMoments() = 0;
 };
 
-#endif // MAV_MODEL_MOTOR_MODEL_H
+#endif // ROTORS_MODEL_MOTOR_MODEL_H

@@ -19,11 +19,11 @@
  */
 
 
-#ifndef MAV_MODEL_MULTI_COPTER_H
-#define MAV_MODEL_MULTI_COPTER_H
+#ifndef ROTORS_MODEL_MULTI_COPTER_H
+#define ROTORS_MODEL_MULTI_COPTER_H
 #include <Eigen/Eigen>
-#include <mav_model/motor_controller.hpp>
-#include <mav_model/motor_model.hpp>
+#include <rotors_model/motor_controller.hpp>
+#include <rotors_model/motor_model.hpp>
 
 
 class MultiCopter
@@ -78,4 +78,4 @@ class MultiCopter
     Eigen::VectorXd rotor_rot_vels_;
 };
 
-#endif // MAV_MODEL_MULTI_COPTER_H
+#endif // ROTORS_MODEL_MULTI_COPTER_H

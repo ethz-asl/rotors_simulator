@@ -1,7 +1,7 @@
 <package>
-  <name>mav_model</name>
+  <name>rotors_model</name>
   <version>0.0.0</version>
-  <description>The mav_model package provides simple models of the AscTec multicopters and its controllers.</description>
+  <description>The rotors_model package provides simple models of the AscTec multicopters and its controllers.</description>
 
   <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
 
