@@ -181,17 +181,17 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
 
 // This gets called by the world update start event.
 void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
-  math::Pose gazebo_pose = link_->GetWorldCoGPose();
-  math::Vector3 gazebo_linear_velocity = link_->GetRelativeLinearVel();
-  math::Vector3 gazebo_angular_velocity = link_->GetRelativeAngularVel();
+  // C denotes child frame, P parent frame, and W world frame.
+  // Further C_pose_W_P denotes pose of P wrt. W expressed in C.
+  math::Pose W_pose_W_C = link_->GetWorldCoGPose();
+  math::Vector3 C_linear_velocity_W_C = link_->GetRelativeLinearVel();
+  math::Vector3 C_angular_velocity_W_C = link_->GetRelativeAngularVel();
+
+  math::Vector3 gazebo_linear_velocity = C_linear_velocity_W_C;
+  math::Vector3 gazebo_angular_velocity = C_angular_velocity_W_C;
+  math::Pose gazebo_pose = W_pose_W_C;
 
   if (parent_frame_id_ != kDefaultParentFrameId) {
-    // C denotes child frame, P parent frame, and W world frame.
-    // Further C_pose_W_P denotes pose of P wrt. W expressed in C.
-    math::Pose W_pose_W_C = gazebo_pose;
-    math::Vector3 C_linear_velocity_W_C = gazebo_linear_velocity;
-    math::Vector3 C_angular_velocity_W_C = gazebo_angular_velocity;
-
     math::Pose W_pose_W_P = parent_link_->GetWorldPose();
     math::Vector3 P_linear_velocity_W_P = parent_link_->GetRelativeLinearVel();
     math::Vector3 P_angular_velocity_W_P = parent_link_->GetRelativeAngularVel();
@@ -210,6 +210,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     //       - R_{CP} \cdot \prescript{}{P}{\omega}_{WP}
     gazebo_angular_velocity = C_angular_velocity_W_C
                               - C_pose_P_C_.rot.GetInverse() * P_angular_velocity_W_P;
+    gazebo_linear_velocity = C_linear_velocity_P_C;
     gazebo_pose = C_pose_P_C_;
   }
 
