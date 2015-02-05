@@ -4,23 +4,23 @@
   <arg name="log_file" default="firefly"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find mav_gazebo)/worlds/basic.world"/>
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic.world"/>
     <!-- <arg name="debug" value="true"/> -->
     <arg name="paused" value="true"/>
     <!-- <arg name="gui" value="false"/> -->
   </include>
 
-  <include file="$(find mav_gazebo)/launch/spawn_firefly.launch">
-    <arg name="model" value="$(find mav_description)/urdf/firefly_generic_odometry_sensor.gazebo" />
+  <include file="$(find rotors_gazebo)/launch/spawn_firefly.launch">
+    <arg name="model" value="$(find rotors_description)/urdf/firefly_generic_odometry_sensor.gazebo" />
     <arg name="enable_logging" value="$(arg enable_logging)" />
     <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
     <arg name="log_file" value="$(arg log_file)"/>
   </include>
 
   <group ns="firefly">
-    <node name="ros_controller_node" pkg="mav_control" type="ros_controller_node" output="screen">
+    <node name="ros_controller_node" pkg="rotors_control" type="ros_controller_node" output="screen">
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
-    <node name="hovering_example" pkg="mav_gazebo" type="hovering_example"/>
+    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example"/>
   </group>
 </launch>

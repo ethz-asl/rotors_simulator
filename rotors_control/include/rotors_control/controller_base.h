@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 
-#ifndef MAV_CONTROL_CONTROLLER_BASE_H
-#define MAV_CONTROL_CONTROLLER_BASE_H
+#ifndef ROTORS_CONTROL_CONTROLLER_BASE_H
+#define ROTORS_CONTROL_CONTROLLER_BASE_H
 
 #include <assert.h>
 #include <memory>
@@ -71,4 +71,4 @@ class ControllerBase {
   bool initialized_params_;
 };
 
-#endif // MAV_CONTROL_CONTROLLER_BASE_H
+#endif // ROTORS_CONTROL_CONTROLLER_BASE_H

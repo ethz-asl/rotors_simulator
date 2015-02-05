@@ -2,7 +2,7 @@
 
 <launch>
   <arg name="name" default="pelican"/>
-  <arg name="model" default="$(find mav_description)/urdf/pelican_base.xacro"/>
+  <arg name="model" default="$(find rotors_description)/urdf/pelican_base.xacro"/>
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
