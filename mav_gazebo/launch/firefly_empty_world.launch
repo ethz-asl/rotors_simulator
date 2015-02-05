@@ -7,7 +7,7 @@
     <arg name="world_name" value="$(find mav_gazebo)/worlds/basic.world"/>
     <!-- <arg name="debug" value="true" /> -->
     <arg name="paused" value="true" />
-    <!-- arg name="gui" value="false" / -->
+    <!-- <arg name="gui" value="false" /> -->
   </include>
   <include file="$(find mav_gazebo)/launch/spawn_firefly.launch">
     <arg name="model" value="$(find mav_description)/urdf/firefly_base.xacro" />

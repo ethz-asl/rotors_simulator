@@ -20,7 +20,6 @@
 -->
 
 <robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
-
   <!-- Instantiate default firefly-->
   <xacro:include filename="$(find mav_description)/urdf/firefly_base.xacro" />
 
