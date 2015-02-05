@@ -19,7 +19,7 @@
  */
 
 
-#include <mav_gazebo_plugins/gazebo_pose_plugin.h>
+#include <rotors_gazebo_plugins/gazebo_pose_plugin.h>
 
 #include <chrono>
 #include <iostream>

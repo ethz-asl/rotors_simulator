@@ -19,7 +19,7 @@
  */
 
 
-#include <mav_gazebo_plugins/gazebo_bag_plugin.h>
+#include <rotors_gazebo_plugins/gazebo_bag_plugin.h>
 
 #include <ctime>
 

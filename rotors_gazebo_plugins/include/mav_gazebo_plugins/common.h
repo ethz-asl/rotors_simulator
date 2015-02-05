@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 
-#ifndef MAV_GAZEBO_PLUGINS_COMMON_H_
-#define MAV_GAZEBO_PLUGINS_COMMON_H_
+#ifndef ROTORS_GAZEBO_PLUGINS_COMMON_H_
+#define ROTORS_GAZEBO_PLUGINS_COMMON_H_
 
 #include <Eigen/Dense>
 #include <gazebo/gazebo.hh>
@@ -74,7 +74,7 @@ bool getSdfParam(sdf::ElementPtr sdf, const std::string& name, T& param, const T
   else {
     param = default_value;
     if (verbose)
-      gzerr << "[mav_gazebo_plugins] Please specify a value for parameter \"" << name << "\".\n";
+      gzerr << "[rotors_gazebo_plugins] Please specify a value for parameter \"" << name << "\".\n";
   }
   return false;
 }
@@ -159,4 +159,4 @@ void copyPosition(const In& in, Out* out) {
   out->z = in.z;
 }
 
-#endif /* MAV_GAZEBO_PLUGINS_COMMON_H_ */
+#endif /* ROTORS_GAZEBO_PLUGINS_COMMON_H_ */

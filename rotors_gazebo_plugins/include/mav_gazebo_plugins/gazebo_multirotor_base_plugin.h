@@ -19,8 +19,8 @@
  */
 
 
-#ifndef MAV_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H
-#define MAV_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H
+#ifndef ROTORS_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H
+#define ROTORS_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H
 
 #include <string>
 
@@ -31,7 +31,7 @@
 #include <mav_msgs/MotorSpeed.h>
 #include <ros/ros.h>
 
-#include "mav_gazebo_plugins/common.h"
+#include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
 // Default values
@@ -92,4 +92,4 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
 };
 }
 
-#endif // MAV_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H
+#endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H

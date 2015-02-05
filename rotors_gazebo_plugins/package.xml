@@ -1,7 +1,7 @@
 <package>
-  <name>mav_gazebo_plugins</name>
+  <name>rotors_gazebo_plugins</name>
   <version>1.0.0</version>
-  <description>The mav_gazebo_plugins package</description>
+  <description>The rotors_gazebo_plugins package</description>
 
   <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
 
@@ -19,8 +19,8 @@
   <build_depend>gazebo</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>rosbag</build_depend>
-  <build_depend>mav_model</build_depend>
-  <build_depend>mav_control</build_depend>
+  <build_depend>rotors_model</build_depend>
+  <build_depend>rotors_control</build_depend>
   <build_depend>mav_msgs</build_depend>
   <build_depend>octomap_ros</build_depend>
   <build_depend>octomap</build_depend>
@@ -35,8 +35,8 @@
   <run_depend>gazebo_ros</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rosbag</run_depend>
-  <run_depend>mav_model</run_depend>
-  <run_depend>mav_control</run_depend>
+  <run_depend>rotors_model</run_depend>
+  <run_depend>rotors_control</run_depend>
   <run_depend>mav_msgs</run_depend>
   <run_depend>octomap_ros</run_depend>
   <run_depend>octomap</run_depend>

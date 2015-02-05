@@ -19,7 +19,7 @@
  */
 
 
-#include <mav_gazebo_plugins/gazebo_wind_plugin.h>
+#include <rotors_gazebo_plugins/gazebo_wind_plugin.h>
 
 #include <geometry_msgs/WrenchStamped.h>
 

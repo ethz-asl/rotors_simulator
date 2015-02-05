@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 
-#ifndef MAV_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H
-#define MAV_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H
+#ifndef ROTORS_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H
+#define ROTORS_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H
 
 #include <iostream>
 #include <math.h>
@@ -63,4 +63,4 @@ class OctomapFromGazeboWorld : public WorldPlugin {
 
 }
 
-#endif // MAV_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H
+#endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H

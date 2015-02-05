@@ -19,8 +19,8 @@
  */
 
 
-#ifndef MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
-#define MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
+#ifndef ROTORS_GAZEBO_PLUGINS_MOTOR_MODELS_H
+#define ROTORS_GAZEBO_PLUGINS_MOTOR_MODELS_H
 
 #include <stdio.h>
 
@@ -30,13 +30,13 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
-#include <mav_model/motor_model.hpp>
+#include <rotors_model/motor_model.hpp>
 #include <mav_msgs/MotorSpeed.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
 
-#include "mav_gazebo_plugins/common.h"
+#include "rotors_gazebo_plugins/common.h"
 
 namespace turning_direction {
 const static int CCW = 1;
@@ -127,4 +127,4 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
 };
 }
 
-#endif // MAV_GAZEBO_PLUGINS_MOTOR_MODELS_H
+#endif // ROTORS_GAZEBO_PLUGINS_MOTOR_MODELS_H

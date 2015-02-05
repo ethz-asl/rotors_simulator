@@ -19,8 +19,8 @@
  */
 
 
-#ifndef MAV_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H
-#define MAV_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H
+#ifndef ROTORS_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H
+#define ROTORS_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H
 
 #include <string>
 
@@ -41,7 +41,7 @@
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/Float32.h>
 
-#include "mav_gazebo_plugins/common.h"
+#include "rotors_gazebo_plugins/common.h"
 
 
 namespace gazebo {
@@ -245,4 +245,4 @@ class GazeboBagPlugin : public ModelPlugin {
 };
 }
 
-#endif // MAV_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H
+#endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H

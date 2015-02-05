@@ -19,10 +19,10 @@
  */
 
 
-#ifndef MAV_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H
-#define MAV_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H
+#ifndef ROTORS_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H
+#define ROTORS_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H
 
-#include <mav_control/controller_factory.h>
+#include <rotors_control/controller_factory.h>
 
 #include <boost/bind.hpp>
 #include <Eigen/Eigen>
@@ -40,7 +40,7 @@
 #include <sensor_msgs/Imu.h>
 #include <stdio.h>
 
-#include "mav_gazebo_plugins/common.h"
+#include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
 // Default values
@@ -109,4 +109,4 @@ class GazeboControllerInterface : public ModelPlugin {
 };
 }
 
-#endif // MAV_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H
+#endif // ROTORS_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H

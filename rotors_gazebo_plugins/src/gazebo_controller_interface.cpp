@@ -19,7 +19,7 @@
  */
 
 
-#include <mav_gazebo_plugins/gazebo_controller_interface.h>
+#include <rotors_gazebo_plugins/gazebo_controller_interface.h>
 
 namespace gazebo {
 
@@ -97,7 +97,7 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 void GazeboControllerInterface::CommandAttitudeCallback(const mav_msgs::CommandAttitudeThrustPtr& input_reference_msg) {
   if (!controller_created_) {
     // Get the controller and initialize its parameters.
-    controller_ = mav_controller_factory::ControllerFactory::Instance().CreateController("AttitudeController");
+    controller_ = rotors_controller_factory::ControllerFactory::Instance().CreateController("AttitudeController");
     controller_->InitializeParams();
     controller_created_ = true;
     gzmsg << "started AttitudeController" << std::endl;
@@ -110,7 +110,7 @@ void GazeboControllerInterface::CommandAttitudeCallback(const mav_msgs::CommandA
 void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg) {
   if (!controller_created_) {
     // Get the controller and initialize its parameters.
-    controller_ = mav_controller_factory::ControllerFactory::Instance().CreateController("MotorController");
+    controller_ = rotors_controller_factory::ControllerFactory::Instance().CreateController("MotorController");
     controller_->InitializeParams();
     controller_created_ = true;
     gzmsg << "started MotorController" << std::endl;
@@ -127,7 +127,7 @@ void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMoto
 void GazeboControllerInterface::CommandRateCallback(const mav_msgs::CommandRateThrustPtr& input_reference_msg) {
   if (!controller_created_) {
     // Get the controller and initialize its parameters.
-    controller_ = mav_controller_factory::ControllerFactory::Instance().CreateController("RateController");
+    controller_ = rotors_controller_factory::ControllerFactory::Instance().CreateController("RateController");
     controller_->InitializeParams();
     controller_created_ = true;
     gzmsg << "started RateController" << std::endl;

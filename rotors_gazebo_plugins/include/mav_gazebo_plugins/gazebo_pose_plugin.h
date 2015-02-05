@@ -19,8 +19,8 @@
  */
 
 
-#ifndef MAV_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H
-#define MAV_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H
+#ifndef ROTORS_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H
+#define ROTORS_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H
 
 #include <cmath>
 #include <deque>
@@ -38,9 +38,9 @@
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 
-#include "mav_gazebo_plugins/common.h"
+#include "rotors_gazebo_plugins/common.h"
 
-//#include <mav_gazebo_plugins/pose_distorter.h>
+//#include <rotors_gazebo_plugins/pose_distorter.h>
 
 namespace gazebo {
 // Default values
@@ -125,4 +125,4 @@ class GazeboPosePlugin : public ModelPlugin {
 };
 }
 
-#endif // MAV_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H
+#endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_POSE_PLUGIN_H

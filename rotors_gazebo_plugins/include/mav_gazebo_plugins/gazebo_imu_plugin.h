@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 
-#ifndef MAV_GAZEBO_PLUGINS_GAZEBO_IMU_PLUGIN_H
-#define MAV_GAZEBO_PLUGINS_GAZEBO_IMU_PLUGIN_H
+#ifndef ROTORS_GAZEBO_PLUGINS_GAZEBO_IMU_PLUGIN_H
+#define ROTORS_GAZEBO_PLUGINS_GAZEBO_IMU_PLUGIN_H
 
 #include <random>
 
@@ -32,7 +32,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 
-#include "mav_gazebo_plugins/common.h"
+#include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
 // Default values for use with ADIS16448 IMU
@@ -151,4 +151,4 @@ class GazeboImuPlugin : public ModelPlugin {
 };
 }
 
-#endif // MAV_GAZEBO_PLUGINS_GAZEBO_IMU_PLUGIN_H
+#endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_IMU_PLUGIN_H

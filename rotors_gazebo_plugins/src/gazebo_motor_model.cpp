@@ -19,7 +19,7 @@
  */
 
 
-#include <mav_gazebo_plugins/gazebo_motor_model.h>
+#include <rotors_gazebo_plugins/gazebo_motor_model.h>
 
 namespace gazebo {
 

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-#include "mav_gazebo_plugins/gazebo_imu_plugin.h"
+#include "rotors_gazebo_plugins/gazebo_imu_plugin.h"
 
 #include <chrono>
 #include <cmath>

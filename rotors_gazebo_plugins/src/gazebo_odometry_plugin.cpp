@@ -19,7 +19,7 @@
  */
 
 
-#include <mav_gazebo_plugins/gazebo_odometry_plugin.h>
+#include <rotors_gazebo_plugins/gazebo_odometry_plugin.h>
 
 #include <chrono>
 #include <iostream>
@@ -27,7 +27,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#include <mav_gazebo_plugins/common.h>
+#include <rotors_gazebo_plugins/common.h>
 
 namespace gazebo {
 
