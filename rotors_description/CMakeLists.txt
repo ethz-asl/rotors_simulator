@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(mav_description)
+project(rotors_description)
 
 find_package(catkin REQUIRED)
 

@@ -41,7 +41,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="package://mav_description/meshes/${mesh_file}"
+          <mesh filename="package://rotors_description/meshes/${mesh_file}"
             scale="1 1 1" />
           <!-- <box size="${body_width} ${body_width} ${body_height}"/> --> <!-- [m] [m] [m] -->
         </geometry>
@@ -57,7 +57,7 @@
 
     <!-- attach multirotor_base_plugin to the base_link -->
     <gazebo>
-      <plugin filename="libmav_gazebo_multirotor_base_plugin.so" name="rosbag">
+      <plugin filename="librotors_gazebo_multirotor_base_plugin.so" name="rosbag">
         <robotNamespace>${robot_namespace}</robotNamespace>
         <linkName>base_link</linkName>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
@@ -159,7 +159,7 @@
       <visual>
         <geometry>
           <!-- <cylinder length="0.005" radius="${radius_rotor}"/> --> <!-- [m] -->
-          <mesh filename="package://mav_description/meshes/propeller_${direction}.dae"
+          <mesh filename="package://rotors_description/meshes/propeller_${direction}.dae"
             scale="${radius_rotor} ${radius_rotor} ${radius_rotor}" /> <!-- The propeller meshes have a radius of 1m -->
           <!-- <box size="${2*radius_rotor} 0.01 0.005"/> -->
         </geometry>
@@ -171,7 +171,7 @@
       </collision>
     </link>
     <gazebo>
-      <plugin name="${suffix}_motor_model" filename="libmav_gazebo_motor_model.so">
+      <plugin name="${suffix}_motor_model" filename="librotors_gazebo_motor_model.so">
         <jointName>rotor_${motor_number}_joint</jointName>
         <linkName>rotor_${motor_number}</linkName>
         <turningDirection>${direction}</turningDirection>

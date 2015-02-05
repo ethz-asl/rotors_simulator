@@ -21,7 +21,7 @@
 
 <robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Instantiate default firefly-->
-  <xacro:include filename="$(find mav_description)/urdf/firefly_base.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/firefly_base.xacro" />
 
   <!-- Mount a generic pose sensor without pose map (working everywhere). -->
   <xacro:odometry_plugin_macro

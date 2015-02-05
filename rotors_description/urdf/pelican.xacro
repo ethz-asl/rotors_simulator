@@ -55,7 +55,7 @@
   </xacro:property>
 
   <!-- Included URDF Files -->
-  <xacro:include filename="$(find mav_description)/urdf/multirotor_base.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro" />
 
   <!-- Instantiate multirotor_base_macro once -->
   <xacro:multirotor_base_macro

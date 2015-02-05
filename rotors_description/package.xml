@@ -1,7 +1,7 @@
 <package>
-  <name>mav_description</name>
+  <name>rotors_description</name>
   <version>1.0.0</version>
-  <description>The mav_description package provides URDF models of the AscTec multicopters.</description>
+  <description>The rotors_description package provides URDF models of the AscTec multicopters.</description>
 
   <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
 

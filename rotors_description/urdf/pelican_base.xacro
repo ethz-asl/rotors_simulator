@@ -20,6 +20,6 @@
 -->
 
 <robot name="pelican" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:include filename="$(find mav_description)/urdf/pelican.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/pelican.xacro" />
 </robot>
 

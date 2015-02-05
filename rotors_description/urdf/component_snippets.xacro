@@ -24,7 +24,7 @@
   <xacro:macro name="bag_plugin_macro"
     params="namespace bag_file rotor_velocity_slowdown_sim">
     <gazebo>
-      <plugin filename="libmav_gazebo_bag_plugin.so" name="rosbag">
+      <plugin filename="librotors_gazebo_bag_plugin.so" name="rosbag">
         <robotNamespace>${namespace}</robotNamespace>
         <bagFileName>${bag_file}</bagFileName>
         <linkName>base_link</linkName>
@@ -112,7 +112,7 @@
   <!-- Macro to add the controller interface. -->
   <xacro:macro name="controller_plugin_macro" params="namespace imu_sub_topic">
     <gazebo>
-      <plugin name="controller_interface" filename="libmav_gazebo_controller_interface.so">
+      <plugin name="controller_interface" filename="librotors_gazebo_controller_interface.so">
         <robotNamespace>${namespace}</robotNamespace>
         <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
         <commandRateThrustSubTopic>command/rate</commandRateThrustSubTopic>
@@ -147,7 +147,7 @@
       <limit upper="0" lower="0" effort="0" velocity="0" />
     </joint>
     <gazebo>
-      <plugin filename="libmav_gazebo_imu_plugin.so" name="mav_gazebo_imu${imu_suffix}_plugin">
+      <plugin filename="librotors_gazebo_imu_plugin.so" name="rotors_gazebo_imu${imu_suffix}_plugin">
       <!-- A good description of the IMU parameters can be found in the kalibr documentation:
            https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics -->
         <robotNamespace>${namespace}</robotNamespace> <!-- (string, required): ros namespace in which the messages are published -->
@@ -191,7 +191,7 @@
       <limit upper="0" lower="0" effort="0" velocity="0" />
     </joint>
     <gazebo>
-      <plugin filename="libmav_gazebo_odometry_plugin.so" name="odometry_sensor${odometry_sensor_suffix}">
+      <plugin filename="librotors_gazebo_odometry_plugin.so" name="odometry_sensor${odometry_sensor_suffix}">
         <linkName>odometry_sensor${odometry_sensor_suffix}_link</linkName>
         <robotNamespace>${namespace}</robotNamespace>
         <poseTopic>${pose_topic}</poseTopic>
@@ -212,7 +212,7 @@
         <noiseUniformLinearVelocity>${noise_uniform_linear_velocity}</noiseUniformLinearVelocity>  <!-- symmetric bounds of uniform noise [m/s] -->
         <noiseUniformAngularVelocity>${noise_uniform_angular_velocity}</noiseUniformAngularVelocity>  <!-- symmetric bounds of uniform noise [rad/s] -->
         <xacro:if value="${enable_odometry_map}">
-          <covarianceImage>package://mav_gazebo/resource/${odometry_map}</covarianceImage>
+          <covarianceImage>package://rotors_gazebo/resource/${odometry_map}</covarianceImage>
           <covarianceImageScale>${image_scale}</covarianceImageScale>
         </xacro:if>
       </plugin>
@@ -225,7 +225,7 @@
       wind_gust_direction wind_gust_duration wind_gust_start
       wind_gust_force_mean">
     <gazebo>
-      <plugin filename="libmav_gazebo_wind_plugin.so" name="wind_plugin">
+      <plugin filename="librotors_gazebo_wind_plugin.so" name="wind_plugin">
         <frameId>base_link</frameId>
         <linkName>base_link</linkName>
         <robotNamespace>${namespace}</robotNamespace>

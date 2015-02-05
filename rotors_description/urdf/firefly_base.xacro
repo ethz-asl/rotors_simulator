@@ -20,9 +20,9 @@
 -->
 
 <robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:include filename="$(find mav_description)/urdf/component_snippets.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
   <!-- Instantiate firefly "mechanics" -->
-  <xacro:include filename="$(find mav_description)/urdf/firefly.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/firefly.xacro" />
 
   <!-- Instantiate a controller. -->
   <xacro:controller_plugin_macro
