@@ -186,12 +186,31 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Vector3 gazebo_angular_velocity = link_->GetRelativeAngularVel();
 
   if (parent_frame_id_ != kDefaultParentFrameId) {
-    math::Pose gazebo_parent_pose = parent_link_->GetWorldPose();
-    math::Vector3 gazebo_parent_linear_velocity = parent_link_->GetRelativeLinearVel();
-    math::Vector3 gazebo_parent_angular_velocity = parent_link_->GetRelativeAngularVel();
-    gazebo_pose -= gazebo_parent_pose;
-    gazebo_linear_velocity -= gazebo_parent_linear_velocity;
-    gazebo_angular_velocity -= gazebo_parent_angular_velocity;
+    // C denotes child frame, P parent frame, and W world frame.
+    // Further C_pose_W_P denotes pose of P wrt. W expressed in C.
+    math::Pose W_pose_W_C = gazebo_pose;
+    math::Vector3 C_linear_velocity_W_C = gazebo_linear_velocity;
+    math::Vector3 C_angular_velocity_W_C = gazebo_angular_velocity;
+
+    math::Pose W_pose_W_P = parent_link_->GetWorldPose();
+    math::Vector3 P_linear_velocity_W_P = parent_link_->GetRelativeLinearVel();
+    math::Vector3 P_angular_velocity_W_P = parent_link_->GetRelativeAngularVel();
+    math::Pose C_pose_P_C_ = W_pose_W_C - W_pose_W_P;
+    math::Vector3 C_linear_velocity_P_C;
+    // \prescript{}{C}{\dot{r}}_{PC} = -R_{CP}
+    //       \cdot \prescript{}{P}{\omega}_{WP} \cross \prescript{}{P}{r}_{PC}
+    //       + \prescript{}{C}{v}_{WC}
+    //                                 - R_{CP} \cdot \prescript{}{P}{v}_{WP}
+    C_linear_velocity_P_C = - C_pose_P_C_.rot.GetInverse()
+                            * P_angular_velocity_W_P.Cross(C_pose_P_C_.pos)
+                            + C_linear_velocity_W_C
+                            - C_pose_P_C_.rot.GetInverse() * P_linear_velocity_W_P;
+
+    // \prescript{}{C}{\omega}_{PC} = \prescript{}{C}{\omega}_{WC}
+    //       - R_{CP} \cdot \prescript{}{P}{\omega}_{WP}
+    gazebo_angular_velocity = C_angular_velocity_W_C
+                              - C_pose_P_C_.rot.GetInverse() * P_angular_velocity_W_P;
+    gazebo_pose = C_pose_P_C_;
   }
 
   bool publish_odometry = true;
