@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rotors_gazebo)
 
-add_definitions(-std=c++0x)
+add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS gazebo_msgs geometry_msgs mav_msgs roscpp sensor_msgs)
 

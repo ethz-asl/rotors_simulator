@@ -214,7 +214,7 @@ void RosControllerInterface::PoseCallback(
 }
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "ros_controller_node");
+  ros::init(argc, argv, "rotors_controller_node");
 
   rotors_control::RosControllerInterface controller_interface;
 

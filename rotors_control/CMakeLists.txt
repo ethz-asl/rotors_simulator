@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rotors_control)
 
-add_definitions(-std=c++0x)
+add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
@@ -39,6 +39,6 @@ add_library(rotors_control
 target_link_libraries(rotors_control ${catkin_LIBRARIES})
 add_dependencies(rotors_control ${catkin_EXPORTED_TARGETS})
 
-add_executable(ros_controller_node src/ros_controller_interface.cpp)
-add_dependencies(ros_controller_node ${catkin_EXPORTED_TARGETS})
-target_link_libraries(ros_controller_node rotors_control ${catkin_LIBRARIES})
+add_executable(rotors_controller_node src/ros_controller_interface.cpp)
+add_dependencies(rotors_controller_node ${catkin_EXPORTED_TARGETS})
+target_link_libraries(rotors_controller_node rotors_control ${catkin_LIBRARIES})

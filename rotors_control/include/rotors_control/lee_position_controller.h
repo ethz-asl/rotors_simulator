@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 
-#ifndef ROTORS_CONTROL_CONTROLLER_LEE_POSITION_CONTROLLER_H
-#define ROTORS_CONTROL_CONTROLLER_LEE_POSITION_CONTROLLER_H
+#ifndef ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
+#define ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
 
 #include <rotors_control/controller_base.h>
 #include <rotors_control/controller_factory.h>
@@ -50,4 +50,4 @@ class LeePositionController : public ControllerBase {
 
 };
 
-#endif // ROTORS_CONTROL_CONTROLLER_LEE_POSITION_CONTROLLER_H
+#endif // ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H

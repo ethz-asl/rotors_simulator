@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 
-#ifndef ROTORS_GAZEBO_PLUGINS_GAZEBO_IMU_PLUGIN_H
-#define ROTORS_GAZEBO_PLUGINS_GAZEBO_IMU_PLUGIN_H
+#ifndef ROTORS_GAZEBO_PLUGINS_IMU_PLUGIN_H
+#define ROTORS_GAZEBO_PLUGINS_IMU_PLUGIN_H
 
 #include <random>
 
@@ -151,4 +151,4 @@ class GazeboImuPlugin : public ModelPlugin {
 };
 }
 
-#endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_IMU_PLUGIN_H
+#endif // ROTORS_GAZEBO_PLUGINS_IMU_PLUGIN_H
