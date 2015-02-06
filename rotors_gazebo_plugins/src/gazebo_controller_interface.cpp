@@ -85,6 +85,7 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   Eigen::VectorXd ref_rotor_velocities;
   controller_->CalculateRotorVelocities(&ref_rotor_velocities);
   mav_msgs::MotorSpeed turning_velocities_msg;
+
   for (int i = 0; i < ref_rotor_velocities.size(); i++)
     turning_velocities_msg.motor_speed.push_back(ref_rotor_velocities[i]);
   turning_velocities_msg.header.stamp.sec = now.sec;
