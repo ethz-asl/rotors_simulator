@@ -240,9 +240,9 @@
 			<alwaysOn>true</alwaysOn>
 			<updateRate>20.0</updateRate>
 			<cameraName>vi_sensor</cameraName>
-			<imageTopicName>/vi_sensor/depth/image_raw</imageTopicName>
-			<cameraInfoTopicName>/vi_sensor/depth/camera_info</cameraInfoTopicName>
-			<depthImageTopicName>/vi_sensor/depth/image_raw</depthImageTopicName>
+			<imageTopicName>/vi_sensor/camera/image_raw</imageTopicName>
+			<cameraInfoTopicName>/vi_sensor/camera/camera_info</cameraInfoTopicName>
+			<depthImageTopicName>/vi_sensor/depth/disparity</depthImageTopicName>
 			<depthImageInfoTopicName>/vi_sensor/depth/camera_info</depthImageInfoTopicName>
 			<pointCloudTopicName>/vi_sensor/depth/points</pointCloudTopicName>
 			<frameName>vi_sensor_link</frameName>
