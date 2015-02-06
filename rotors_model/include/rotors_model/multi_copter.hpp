@@ -21,10 +21,11 @@
 
 #ifndef ROTORS_MODEL_MULTI_COPTER_H
 #define ROTORS_MODEL_MULTI_COPTER_H
-#include <Eigen/Eigen>
-#include <rotors_model/motor_controller.hpp>
-#include <rotors_model/motor_model.hpp>
 
+#include <Eigen/Eigen>
+
+#include "rotors_model/motor_controller.hpp"
+#include "rotors_model/motor_model.hpp"
 
 class MultiCopter
 {

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-#include <rotors_gazebo_plugins/gazebo_multirotor_base_plugin.h>
+#include "rotors_gazebo_plugins/gazebo_multirotor_base_plugin.h"
 
 #include <ctime>
 

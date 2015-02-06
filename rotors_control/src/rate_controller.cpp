@@ -18,8 +18,7 @@
  * limitations under the License.
  */
 
-#include <rotors_control/rate_controller.h>
-
+#include "rotors_control/rate_controller.h"
 
 RateController::RateController()
     : gravity_(9.81),

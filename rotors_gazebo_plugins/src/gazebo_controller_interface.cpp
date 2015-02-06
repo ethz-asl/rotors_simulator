@@ -19,7 +19,7 @@
  */
 
 
-#include <rotors_gazebo_plugins/gazebo_controller_interface.h>
+#include "rotors_gazebo_plugins/gazebo_controller_interface.h"
 
 namespace gazebo {
 

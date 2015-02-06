@@ -19,7 +19,7 @@
  */
 
 
-#include <rotors_gazebo_plugins/gazebo_octomap_plugin.h>
+#include "rotors_gazebo_plugins/gazebo_octomap_plugin.h"
 
 #include <gazebo/common/Time.hh>
 #include <gazebo/math/Vector3.hh>

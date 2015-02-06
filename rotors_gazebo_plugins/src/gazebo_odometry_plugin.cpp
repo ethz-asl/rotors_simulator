@@ -19,7 +19,7 @@
  */
 
 
-#include <rotors_gazebo_plugins/gazebo_odometry_plugin.h>
+#include "rotors_gazebo_plugins/gazebo_odometry_plugin.h"
 
 #include <chrono>
 #include <iostream>

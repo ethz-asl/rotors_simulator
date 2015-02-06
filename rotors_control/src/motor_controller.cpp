@@ -18,8 +18,7 @@
  * limitations under the License.
  */
 
-#include <rotors_control/motor_controller.h>
-
+#include "rotors_control/motor_controller.h"
 
 MotorController::MotorController() {
 }

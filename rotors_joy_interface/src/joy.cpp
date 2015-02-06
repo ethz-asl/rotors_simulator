@@ -19,7 +19,7 @@
  */
 
 
-#include <rotors_joy_interface/joy.h>
+#include "rotors_joy_interface/joy.h"
 
 Joy::Joy() {
   ros::NodeHandle nh;

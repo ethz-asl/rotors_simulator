@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-#include <rotors_control/controller_base.h>
+#include "rotors_control/controller_base.h"
 
 #include <math.h>
 

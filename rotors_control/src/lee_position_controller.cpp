@@ -18,8 +18,7 @@
  * limitations under the License.
  */
 
-#include <rotors_control/lee_position_controller.h>
-
+#include "rotors_control/lee_position_controller.h"
 
 LeePositionController::LeePositionController()
     : gravity_(9.81),

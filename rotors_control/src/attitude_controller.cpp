@@ -18,8 +18,7 @@
  * limitations under the License.
  */
 
-#include <rotors_control/attitude_controller.h>
-
+#include "rotors_control/attitude_controller.h"
 
 AttitudeController::AttitudeController()
     : gravity_(9.81),

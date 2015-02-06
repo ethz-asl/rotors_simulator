@@ -21,8 +21,8 @@
 
 #ifndef ROTORS_MODEL_MOTOR_CONTROLLER_H
 #define ROTORS_MODEL_MOTOR_CONTROLLER_H
-#include <Eigen/Eigen>
 
+#include <Eigen/Eigen>
 
 class MotorController
 {

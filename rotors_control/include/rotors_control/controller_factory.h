@@ -26,7 +26,7 @@
 #include <memory>
 #include <string>
 
-#include <rotors_control/controller_base.h>
+#include "rotors_control/controller_base.h"
 
 #define PP_CAT(a, b) a ## b
 
