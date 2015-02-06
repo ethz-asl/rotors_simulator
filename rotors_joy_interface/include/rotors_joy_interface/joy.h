@@ -22,10 +22,10 @@
 #ifndef ROTORS_JOY_INTERFACE_JOY_H_
 #define ROTORS_JOY_INTERFACE_JOY_H_
 
+#include <geometry_msgs/PoseStamped.h>
+#include <mav_msgs/CommandAttitudeThrust.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
-#include <mav_msgs/CommandAttitudeThrust.h>
-#include <geometry_msgs/PoseStamped.h>
 
 struct Axes {
   int roll;

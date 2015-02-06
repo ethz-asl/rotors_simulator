@@ -21,6 +21,7 @@
 
 #ifndef ROTORS_MODEL_MOTOR_MODEL_H
 #define ROTORS_MODEL_MOTOR_MODEL_H
+
 #include <Eigen/Eigen>
 
 class MotorModel

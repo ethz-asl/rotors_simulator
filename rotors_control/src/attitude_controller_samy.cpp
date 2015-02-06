@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-#include <rotors_control/attitude_controller_samy.h>
+#include "rotors_control/attitude_controller_samy.h"
 
 #include <iostream>
 

@@ -21,9 +21,8 @@
 #ifndef ROTORS_CONTROL_RATE_CONTROLLER_H
 #define ROTORS_CONTROL_RATE_CONTROLLER_H
 
-#include <rotors_control/controller_base.h>
-#include <rotors_control/controller_factory.h>
-
+#include "rotors_control/controller_base.h"
+#include "rotors_control/controller_factory.h"
 
 class RateController : public ControllerBase {
  public:

@@ -18,10 +18,9 @@
  * limitations under the License.
  */
 
-#include "gazebo_msgs/GetModelState.h"
-#include "geometry_msgs/PoseStamped.h"
-#include "ros/ros.h"
-
+#include <gazebo_msgs/GetModelState.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <ros/ros.h>
 
 int main(int argc, char** argv) {
 

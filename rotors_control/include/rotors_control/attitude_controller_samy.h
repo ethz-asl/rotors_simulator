@@ -21,8 +21,8 @@
 #ifndef ROTORS_CONTROL_ATTITUDE_CONTROLLER_SAMY_H
 #define ROTORS_CONTROL_ATTITUDE_CONTROLLER_SAMY_H
 
-#include <rotors_control/controller_base.h>
-#include <rotors_control/controller_factory.h>
+#include "rotors_control/controller_base.h"
+#include "rotors_control/controller_factory.h"
 
 class AttitudeControllerSamy : public ControllerBase {
  public:
