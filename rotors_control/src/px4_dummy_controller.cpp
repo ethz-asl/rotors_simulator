@@ -38,7 +38,7 @@
  *
  */
 
-#include <px4_dummy_controller.h>
+#include <rotors_control/px4_dummy_controller.h>
 #include <iostream>
 #include <ros/ros.h>
 #include <gazebo/gazebo.hh>

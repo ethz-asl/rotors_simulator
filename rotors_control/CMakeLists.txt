@@ -25,7 +25,6 @@ catkin_package(
 
 include_directories(
   include
-  include/rotors_control
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
 )

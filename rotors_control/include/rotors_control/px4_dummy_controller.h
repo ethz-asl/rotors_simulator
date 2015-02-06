@@ -38,8 +38,8 @@
  *
  */
 
-#include <controller_base.h>
-#include <controller_factory.h>
+#include <rotors_control/controller_base.h>
+#include <rotors_control/controller_factory.h>
 #include <ros/ros.h>
 #include <mav_msgs/MotorSpeed.h>
 
