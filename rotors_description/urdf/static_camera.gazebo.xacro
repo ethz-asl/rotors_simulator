@@ -6,7 +6,7 @@
   <xacro:property name="bag_file" value="static_camera.bag" />
 
   <!-- Instantiate static_camera "mechanics" -->
-  <xacro:include filename="$(find mav_description)/urdf/static_camera.urdf.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/static_camera.urdf.xacro" />
 
 <gazebo>
     <static>true</static>

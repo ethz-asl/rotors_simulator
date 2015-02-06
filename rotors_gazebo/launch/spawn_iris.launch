@@ -2,7 +2,7 @@
 
 <launch>
   <arg name="name" default="iris"/>
-  <arg name="model" default="$(find mav_description)/urdf/iris.gazebo.xacro"/>
+  <arg name="model" default="$(find rotors_description)/urdf/iris.gazebo.xacro"/>
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>

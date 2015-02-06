@@ -13,7 +13,7 @@
       		<child link="wing_neutral_point" />
   		</joint>
   		<gazebo>
-	      	<plugin name="gazebo_wing_model_plugin" filename="libmav_gazebo_wing_model_plugin.so">
+	      	<plugin name="gazebo_wing_model_plugin" filename="librotors_gazebo_wing_model_plugin.so">
 	      		<robotNamespace>${namespace}</robotNamespace>
 		        <linkName>base_link</linkName>
 		        <commandTopic>vtol/motor_vel_ref</commandTopic>

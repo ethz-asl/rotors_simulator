@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 
 <robot name="ardrone" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:include filename="$(find mav_description)/urdf/component_snippets.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
   <!-- Instantiate ardrone "mechanics" -->
-  <xacro:include filename="$(find mav_description)/urdf/ardrone.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/ardrone.xacro" />
 
   <!-- Instantiate a controller. -->
   <xacro:controller_plugin_macro
@@ -53,14 +53,14 @@
 
     <!-- Mount a generic odometry sensor providing ground truth. -->
     <xacro:odometry_plugin_macro
-      namespace="${namespace}"
+      namespace="${namespace}/ground_truth"
       odometry_sensor_suffix="gt"
-      pose_topic=""
-      pose_with_covariance_topic="ground_truth/pose"
-      position_topic=""
-      transform_topic=""
-      odometry_topic="ground_truth/odometry"
-      tf_frame="ground_truth/firefly"
+      pose_topic="pose"
+      pose_with_covariance_topic="pose_with_covariance"
+      position_topic="position"
+      transform_topic="transform"
+      odometry_topic="odometry"
+      parent_frame_id="world"
       mass_odometry_sensor="0.00001"
       measurement_divisor="1"
       measurement_delay="0"
@@ -76,7 +76,8 @@
       enable_odometry_map="false"
       odometry_map=""
       image_scale=""
-    >
+      >
+
       <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] -->
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
     </xacro:odometry_plugin_macro>

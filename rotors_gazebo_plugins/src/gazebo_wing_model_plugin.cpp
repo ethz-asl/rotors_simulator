@@ -1,18 +1,18 @@
 /*
  * Copyright (C) 2014 Roman Bapst, CVG, ETH Zurich, Switzerland
- * 
- * This software is released to the Contestants of the european 
- * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether 
- * in parts or entirely, is NOT PERMITTED. 
- * 
+ *
+ * This software is released to the Contestants of the european
+ * robotics challenges (EuRoC) for the use in stage 1. (Re)-distribution, whether
+ * in parts or entirely, is NOT PERMITTED.
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
-#include <mav_gazebo_plugins/gazebo_wing_model_plugin.h>
+#include <rotors_gazebo_plugins/gazebo_wing_model_plugin.h>
 #include <ctime>
-#include <mav_gazebo_plugins/common.h>
+#include <rotors_gazebo_plugins/common.h>
 #include <math.h>
 
 namespace gazebo {
