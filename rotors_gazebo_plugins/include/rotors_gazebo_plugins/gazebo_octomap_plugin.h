@@ -51,6 +51,7 @@ class OctomapFromGazeboWorld : public WorldPlugin {
   void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf);
   bool CheckIfInsideObject(const std::string& name, const math::Vector3& central_point, gazebo::physics::RayShapePtr ray);
   bool CheckIfInsideObjectInX(const std::string& name, const math::Vector3& central_point, gazebo::physics::RayShapePtr ray);
+  bool CheckIfInsideObjectInY(const std::string& name, const math::Vector3& central_point, gazebo::physics::RayShapePtr ray);
   void CreateOctomap(const planning_msgs::Octomap::Request& msg);
 
  private:
