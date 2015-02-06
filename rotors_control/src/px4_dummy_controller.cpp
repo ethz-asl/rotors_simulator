@@ -38,7 +38,7 @@
  *
  */
 
-#include <mav_control/px4_dummy_controller.h>
+#include <px4_dummy_controller.h>
 #include <iostream>
 #include <ros/ros.h>
 #include <gazebo/gazebo.hh>
@@ -84,4 +84,4 @@ void PX4dummyController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_accel
 }
 
 
-MAV_CONTROL_REGISTER_CONTROLLER(PX4dummyController);
+ROTORS_CONTROL_REGISTER_CONTROLLER(PX4dummyController);
