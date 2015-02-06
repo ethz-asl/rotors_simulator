@@ -29,7 +29,7 @@ Installation Instructions
 
  ```
  $ cd ~/catkin_ws/src
- $ git clone git@github.com:ethz-asl/euroc_simulator.git
+ $ git clone git@github.com:ethz-asl/rotors_simulator.git
  $ git clone git@github.com:ethz-asl/mav_comm.git
  $ git clone git@github.com:ethz-asl/glog_catkin.git
  $ git clone git@github.com:catkin/catkin_simple.git
