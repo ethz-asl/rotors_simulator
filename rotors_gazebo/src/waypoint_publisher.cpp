@@ -52,10 +52,10 @@ class WaypointWithTime {
 
 int main(int argc, char** argv) {
 
-  ros::init(argc, argv, "euroc_c3_t4_waypoint_publisher");
+  ros::init(argc, argv, "waypoint_publisher");
   ros::NodeHandle nh;
 
-  ROS_INFO("running c3_t4_waypoint_publisher");
+  ROS_INFO("Started waypoint_publisher.");
 
   ros::V_string args;
   ros::removeROSArgs(argc, argv, args);
@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 
   if (wp_file.is_open()) {
     double t, x, y, z, yaw;
-    // very safe ;), but actually only reads complete poses
+    // Only read complete waypoints.
     while (wp_file >> t >> x >> y >> z >> yaw) {
       waypoints.push_back(WaypointWithTime(t, x, y, z, yaw * DEG_2_RAD));
     }
@@ -113,10 +113,10 @@ int main(int argc, char** argv) {
   // Wait for 30s such that everything can settle and the helicopter flies to initial position.
   ros::Duration(30).sleep();
 
-  ROS_INFO("Start publishing waypoints");
+  ROS_INFO("Start publishing waypoints.");
   for (size_t i = 0; i < waypoints.size(); ++i) {
     const WaypointWithTime& wp = waypoints[i];
-    ROS_INFO("Publishing x=%f y=%f z=%f yaw=%f, and wait for %fs", wp.wp.position[0], wp.wp.position[1],
+    ROS_INFO("Publishing x=%f y=%f z=%f yaw=%f, and wait for %fs.", wp.wp.position[0], wp.wp.position[1],
              wp.wp.position[2], wp.wp.yaw, wp.waiting_time);
     wp_pub.publish(wp.wp);
     ros::Duration(wp.waiting_time).sleep();
