@@ -1,0 +1,22 @@
+<package>
+  <name>rotors_description</name>
+  <version>1.0.0</version>
+  <description>The rotors_description package provides URDF models of the AscTec multicopters.</description>
+
+  <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
+
+  <author>Fadri Furrer</author>
+  <author>Michael Burri</author>
+  <author>Mina Kamel</author>
+  <author>Janosch Nikolic</author>
+  <author>Markus Achtelik</author>
+
+  <license>ASL 2.0</license>
+
+  <url type="website">https://github.com/ethz-asl/euroc_simulator/wiki</url>
+
+  <author email="ffurrer@gmail.com">Fadri Furrer</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
