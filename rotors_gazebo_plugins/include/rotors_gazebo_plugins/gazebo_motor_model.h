@@ -97,7 +97,6 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   std::string motor_velocity_pub_topic_;
   int motor_number_;
   int turning_direction_;
-  double max_force_;
   double motor_constant_;
   double moment_constant_;
   double time_constant_up_;
