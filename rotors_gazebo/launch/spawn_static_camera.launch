@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="name" default="static_camera"/>
+  <arg name="model" default="$(find rotors_description)/urdf/static_camera.gazebo.xacro"/>
+  <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0.08"/>
+  <arg name="roll" default="0.0"/>
+  <arg name="pitch" default="0.0"/>
+  <arg name="yaw" default="0.08"/>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="static_camera"/>
+  <arg name="exclude_floor_link_from_collision_check" default="ground_plane::link"/>
+
+  <!-- send the robot XML to param server -->
+  <param name="robot_description" command="
+    $(find xacro)/xacro.py '$(arg model)'
+    enable_logging:=$(arg enable_logging)
+    enable_ground_truth:=$(arg enable_ground_truth)
+    exclude_floor_link_from_collision_check:=$(arg exclude_floor_link_from_collision_check)
+    log_file:=$(arg log_file)"
+  />
+  <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
+
+  <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="spawn_static_camera" pkg="gazebo_ros" type="spawn_model"
+   args="-param robot_description
+         -urdf
+         -x $(arg x)
+         -y $(arg y)
+         -z $(arg z)
+         -R $(arg roll)
+         -P $(arg pitch)
+         -Y $(arg yaw)
+         -model $(arg name)
+         -namespace $(arg name)"
+   respawn="false" output="screen">
+  </node>
+
+</launch>

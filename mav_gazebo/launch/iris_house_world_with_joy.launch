@@ -1,5 +1,0 @@
-<launch>
-  <include file="$(find mav_gazebo)/launch/iris_house_world.launch" />
-  <node ns="iris" name="joy_node" pkg="joy" type="joy_node" />
-  <node ns="iris" name="mav_joy_interface" pkg="mav_joy_interface" type="mav_joy_interface" />
-</launch>

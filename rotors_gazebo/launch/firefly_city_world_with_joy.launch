@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find rotors_gazebo)/launch/firefly_city_world.launch" />
+  <node ns="firefly" name="joy_node" pkg="joy" type="joy_node" />
+  <node ns="firefly" name="rotors_joy_interface" pkg="rotors_joy_interface" type="rotors_joy_interface" />
+</launch>
