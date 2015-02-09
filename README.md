@@ -15,6 +15,8 @@ Installation Instructions
  $ sudo apt-get update
  $ sudo apt-get install ros-indigo-desktop-full
  $ sudo apt-get install python-wstool
+ $ echo "source /opt/ros/indigo/setup.bash" >> ~/.bashrc
+ $ source ~/.bashrc
  ```
  2. If you don't have ROS workspace yet you can do so by
 
@@ -23,6 +25,8 @@ Installation Instructions
  $ cd ~/catkin_ws/src
  $ catkin_init_workspace  # initialize your catkin workspace
  $ wstool init
+ $ sudo rosdep init
+ $ rosdep update
  ```
  > **Note** for setups with multiple workspaces please refer to the official documentation at http://docs.ros.org/independent/api/rosinstall/html/ by replacing `rosws` by `wstool`.
  3. Get the simulator and additional dependencies
