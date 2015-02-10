@@ -101,11 +101,11 @@ class GazeboControllerInterface : public ModelPlugin {
 
   boost::thread callback_queue_thread_;
   void QueueThread();
-  void CommandAttitudeCallback(const mav_msgs::CommandAttitudeThrustPtr& input_reference_msg);
-  void CommandRateCallback(const mav_msgs::CommandRateThrustPtr& input_reference_msg);
-  void CommandMotorCallback(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg);
-  void ImuCallback(const sensor_msgs::ImuPtr& imu);
-  void PoseCallback(const geometry_msgs::PoseStampedPtr& pose);
+  void CommandAttitudeCallback(const mav_msgs::CommandAttitudeThrustConstPtr& input_reference_msg);
+  void CommandRateCallback(const mav_msgs::CommandRateThrustConstPtr& input_reference_msg);
+  void CommandMotorCallback(const mav_msgs::CommandMotorSpeedConstPtr& input_reference_msg);
+  void ImuCallback(const sensor_msgs::ImuConstPtr& imu);
+  void PoseCallback(const geometry_msgs::PoseStampedConstPtr& pose);
 };
 }
 

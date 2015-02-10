@@ -94,7 +94,7 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   motor_velocity_reference_pub_.publish(turning_velocities_msg);
 }
 
-void GazeboControllerInterface::CommandAttitudeCallback(const mav_msgs::CommandAttitudeThrustPtr& input_reference_msg) {
+void GazeboControllerInterface::CommandAttitudeCallback(const mav_msgs::CommandAttitudeThrustConstPtr& input_reference_msg) {
   if (!controller_created_) {
     // Get the controller and initialize its parameters.
     controller_ = rotors_controller_factory::ControllerFactory::Instance().CreateController("AttitudeController");
@@ -107,7 +107,7 @@ void GazeboControllerInterface::CommandAttitudeCallback(const mav_msgs::CommandA
   controller_->SetAttitudeThrustReference(input_reference);
 }
 
-void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg) {
+void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMotorSpeedConstPtr& input_reference_msg) {
   if (!controller_created_) {
     // Get the controller and initialize its parameters.
     controller_ = rotors_controller_factory::ControllerFactory::Instance().CreateController("MotorController");
@@ -124,7 +124,7 @@ void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMoto
   controller_->SetMotorReference(input_reference);
 }
 
-void GazeboControllerInterface::CommandRateCallback(const mav_msgs::CommandRateThrustPtr& input_reference_msg) {
+void GazeboControllerInterface::CommandRateCallback(const mav_msgs::CommandRateThrustConstPtr& input_reference_msg) {
   if (!controller_created_) {
     // Get the controller and initialize its parameters.
     controller_ = rotors_controller_factory::ControllerFactory::Instance().CreateController("RateController");
@@ -138,7 +138,7 @@ void GazeboControllerInterface::CommandRateCallback(const mav_msgs::CommandRateT
   controller_->SetRateThrustReference(input_reference);
 }
 
-void GazeboControllerInterface::ImuCallback(const sensor_msgs::ImuPtr& imu_msg) {
+void GazeboControllerInterface::ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg) {
   if (!controller_created_)
     return;
   Eigen::Vector3d angular_rate(imu_msg->angular_velocity.x, imu_msg->angular_velocity.y, imu_msg->angular_velocity.z);
