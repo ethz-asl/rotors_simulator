@@ -64,25 +64,25 @@ void LeePositionControllerNode::Publish() {
 void LeePositionControllerNode::CommandTrajectoryCallback(
     const mav_msgs::CommandTrajectoryConstPtr& trajectory_reference_msg) {
 
-  Eigen::Vector3d position_reference(trajectory_reference_msg->position[0],
-                                     trajectory_reference_msg->position[1],
-                                     trajectory_reference_msg->position[2]);
+  Eigen::Vector3d position_reference(trajectory_reference_msg->position.x,
+                                     trajectory_reference_msg->position.y,
+                                     trajectory_reference_msg->position.z);
 
   lee_position_controller_.SetPositionReference(position_reference);
 
-  Eigen::Vector3d velocity_reference(trajectory_reference_msg->velocity[0],
-                                     trajectory_reference_msg->velocity[1],
-                                     trajectory_reference_msg->velocity[2]);
+  Eigen::Vector3d velocity_reference(trajectory_reference_msg->velocity.x,
+                                     trajectory_reference_msg->velocity.y,
+                                     trajectory_reference_msg->velocity.z);
   lee_position_controller_.SetVelocityReference(velocity_reference);
 
-  Eigen::Vector3d acceleration_reference(trajectory_reference_msg->acceleration[0],
-                                         trajectory_reference_msg->acceleration[1],
-                                         trajectory_reference_msg->acceleration[2]);
+  Eigen::Vector3d acceleration_reference(trajectory_reference_msg->acceleration.x,
+                                         trajectory_reference_msg->acceleration.y,
+                                         trajectory_reference_msg->acceleration.z);
   lee_position_controller_.SetAccelerationReference(acceleration_reference);
 
-  Eigen::Vector3d jerk_reference(trajectory_reference_msg->jerk[0],
-                                 trajectory_reference_msg->jerk[1],
-                                 trajectory_reference_msg->jerk[2]);
+  Eigen::Vector3d jerk_reference(trajectory_reference_msg->jerk.x,
+                                 trajectory_reference_msg->jerk.y,
+                                 trajectory_reference_msg->jerk.z);
   lee_position_controller_.SetJerkReference(jerk_reference);
 
   lee_position_controller_.SetYawReference(trajectory_reference_msg->yaw);
