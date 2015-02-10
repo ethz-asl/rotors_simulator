@@ -29,10 +29,6 @@ LeePositionControllerNode::LeePositionControllerNode()
 
   node_handle_ = new ros::NodeHandle(namespace_);
 
-
-  imu_sub_ = node_handle_->subscribe(imu_sub_topic_, 10,
-                                     &LeePositionControllerNode::ImuCallback, this);
-
   odometry_sub_ = node_handle_->subscribe(odometry_sub_topic_, 10,
                                           &LeePositionControllerNode::OdometryCallback, this);
 
@@ -53,7 +49,6 @@ void LeePositionControllerNode::InitializeParams() {
   ros::NodeHandle pnh("~");
   pnh.param<std::string>("robotNamespace", namespace_, kDefaultNamespace);
   pnh.param<std::string>("commandTrajectorySubTopic", command_trajectory_sub_topic_, kDefaultCommandTrajectoryTopic);
-  pnh.param<std::string>("imuSubTopic", imu_sub_topic_, kDefaultImuSubTopic);
   pnh.param<std::string>("odometrySubTopic", odometry_sub_topic_, kDefaultOdometrySubTopic);
   pnh.param<std::string>("motorVelocityCommandPubTopic", motor_velocity_reference_pub_topic_, kDefaultMotorVelocityReferencePubTopic);
 
@@ -63,64 +58,25 @@ void LeePositionControllerNode::Publish() {
 
 void LeePositionControllerNode::CommandTrajectoryCallback(
     const mav_msgs::CommandTrajectoryConstPtr& trajectory_reference_msg) {
-
-  Eigen::Vector3d position_reference(trajectory_reference_msg->position.x,
-                                     trajectory_reference_msg->position.y,
-                                     trajectory_reference_msg->position.z);
-
-  lee_position_controller_.SetPositionReference(position_reference);
-
-  Eigen::Vector3d velocity_reference(trajectory_reference_msg->velocity.x,
-                                     trajectory_reference_msg->velocity.y,
-                                     trajectory_reference_msg->velocity.z);
-  lee_position_controller_.SetVelocityReference(velocity_reference);
-
-  Eigen::Vector3d acceleration_reference(trajectory_reference_msg->acceleration.x,
-                                         trajectory_reference_msg->acceleration.y,
-                                         trajectory_reference_msg->acceleration.z);
-  lee_position_controller_.SetAccelerationReference(acceleration_reference);
-
-  Eigen::Vector3d jerk_reference(trajectory_reference_msg->jerk.x,
-                                 trajectory_reference_msg->jerk.y,
-                                 trajectory_reference_msg->jerk.z);
-  lee_position_controller_.SetJerkReference(jerk_reference);
-
-  lee_position_controller_.SetYawReference(trajectory_reference_msg->yaw);
-  lee_position_controller_.SetYawRateReference(trajectory_reference_msg->yaw_rate);
+  mav_msgs::EigenCommandTrajectory trajectory;
+  mav_msgs::eigenCommandTrajectoryFromMsg(trajectory_reference_msg, &trajectory);
+  lee_position_controller_.SetCommandTrajectory(trajectory);
 }
 
 
 void LeePositionControllerNode::OdometryCallback(
     const nav_msgs::OdometryConstPtr odometry_msg) {
 
-  ROS_INFO_ONCE("got first odometry message.");
+  ROS_INFO_ONCE("LeePositionController got first odometry message.");
 
-  Eigen::Vector3d position(odometry_msg->pose.pose.position.x, odometry_msg->pose.pose.position.y,
-                           odometry_msg->pose.pose.position.z);
-  lee_position_controller_.SetPosition(position);
-
-  Eigen::Quaternion<double> q_W_I(odometry_msg->pose.pose.orientation.w, odometry_msg->pose.pose.orientation.x,
-                                        odometry_msg->pose.pose.orientation.y, odometry_msg->pose.pose.orientation.z);
-  lee_position_controller_.SetAttitude(q_W_I);
-
-  // Convert body linear velocity from odometry message into world frame.
-  Eigen::Vector3d velocity_I(odometry_msg->twist.twist.linear.x,
-                             odometry_msg->twist.twist.linear.y,
-                             odometry_msg->twist.twist.linear.z);
-  Eigen::Vector3d velocity_W;
-  velocity_W = q_W_I.toRotationMatrix() * velocity_I;
-  lee_position_controller_.SetVelocity(velocity_W);
-
-  // Get angulare rates from odometry message.
-  Eigen::Vector3d angular_rate_I(odometry_msg->twist.twist.angular.x, odometry_msg->twist.twist.angular.y,
-                           odometry_msg->twist.twist.angular.z);
-
-  // We set the body angular rates.
-  lee_position_controller_.SetAngularRate(angular_rate_I);
+  EigenOdometry odometry;
+  eigenOdometryFromMsg(odometry_msg, &odometry);
+  lee_position_controller_.SetOdometry(odometry);
 
   Eigen::VectorXd ref_rotor_velocities;
   lee_position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
+  // Todo(ffurrer): Do this in the conversions header.
   mav_msgs::MotorSpeed turning_velocities_msg;
 
   turning_velocities_msg.motor_speed.clear();
@@ -130,20 +86,6 @@ void LeePositionControllerNode::OdometryCallback(
 
   motor_velocity_reference_pub_.publish(turning_velocities_msg);
 }
-
-
-void LeePositionControllerNode::ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg) {
-
-  ROS_INFO_ONCE("Received first IMU message.");
-
-
-  Eigen::Vector3d angular_rate(imu_msg->angular_velocity.x,
-                               imu_msg->angular_velocity.y,
-                               imu_msg->angular_velocity.z);
-  lee_position_controller_.SetAngularRate(angular_rate);
-  // imu->linear_acceleration;
-}
-
 
 }
 
