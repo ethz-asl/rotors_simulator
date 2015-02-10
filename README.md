@@ -1,7 +1,7 @@
 RotorS
 ===============
 
-RotorS is a UAV gazebo simulator.
+RotorS is a MAV gazebo simulator.
 
 
 Installation Instructions
