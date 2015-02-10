@@ -40,9 +40,9 @@ class WaypointWithTime {
 
   WaypointWithTime(double t, float x, float y, float z, float yaw)
       : waiting_time(t) {
-    wp.position[0] = x;
-    wp.position[1] = y;
-    wp.position[2] = z;
+    wp.position.x = x;
+    wp.position.y = y;
+    wp.position.z = z;
     wp.yaw = yaw;
   }
 
@@ -116,8 +116,8 @@ int main(int argc, char** argv) {
   ROS_INFO("Start publishing waypoints.");
   for (size_t i = 0; i < waypoints.size(); ++i) {
     const WaypointWithTime& wp = waypoints[i];
-    ROS_INFO("Publishing x=%f y=%f z=%f yaw=%f, and wait for %fs.", wp.wp.position[0], wp.wp.position[1],
-             wp.wp.position[2], wp.wp.yaw, wp.waiting_time);
+    ROS_INFO("Publishing x=%f y=%f z=%f yaw=%f, and wait for %fs.", wp.wp.position.x, wp.wp.position.y,
+             wp.wp.position.z, wp.wp.yaw, wp.waiting_time);
     wp_pub.publish(wp.wp);
     ros::Duration(wp.waiting_time).sleep();
   }
