@@ -72,7 +72,7 @@ The simulator starts by default in paused mode. To start it you can either
    $ rosservice call gazebo/unpause_physics
    ```
 
-There are some basic launch files where you can load the different multicopters with additional sensors. They can all be found in `~/catkin_ws/src/euroc_simulator/rotors_gazebo/launch`.
+There are some basic launch files where you can load the different multicopters with additional sensors. They can all be found in `~/catkin_ws/src/rotors_simulator/rotors_gazebo/launch`.
 
 ### Getting the multicopter to fly
 
