@@ -28,10 +28,6 @@ LeePositionController::LeePositionController()
 LeePositionController::~LeePositionController() {
 }
 
-std::shared_ptr<ControllerBase> LeePositionController::Clone() {
-  std::shared_ptr<ControllerBase> controller(new LeePositionController);
-  return controller;
-}
 
 void LeePositionController::InitializeParams() {
 
@@ -171,6 +167,3 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
                            - angular_rate_error.cwiseProduct(gain_angular_rate_)
                            + angular_rate_.cross(angular_rate_); // we don't need the inertia matrix here
 }
-
-
-ROTORS_CONTROL_REGISTER_CONTROLLER(LeePositionController);

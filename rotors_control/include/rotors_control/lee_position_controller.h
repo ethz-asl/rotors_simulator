@@ -22,15 +22,13 @@
 #define ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
 
 #include "rotors_control/controller_base.h"
-#include "rotors_control/controller_factory.h"
 
 class LeePositionController : public ControllerBase {
  public:
   LeePositionController();
-  virtual ~LeePositionController();
-  virtual void InitializeParams();
-  virtual std::shared_ptr<ControllerBase> Clone();
-  virtual void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const;
+  ~LeePositionController();
+  void InitializeParams();
+  void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
  private:

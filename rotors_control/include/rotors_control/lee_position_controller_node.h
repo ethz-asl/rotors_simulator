@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 
-#ifndef ROTORS_CONTROL_ROS_CONTROLLER_INTERFACE_H
-#define ROTORS_CONTROL_ROS_CONTROLLER_INTERFACE_H
+#ifndef ROTORS_CONTROL_LEE_POSITION_CONTROLLER_NODE_H
+#define ROTORS_CONTROL_LEE_POSITION_CONTROLLER_NODE_H
 
 #include <boost/bind.hpp>
 #include <Eigen/Eigen>
@@ -35,32 +35,29 @@
 #include <ros/callback_queue.h>
 #include <sensor_msgs/Imu.h>
 
-#include "rotors_control/controller_factory.h"
+#include "rotors_control/lee_position_controller.h"
 
 namespace rotors_control {
 
 // Default values
+// TODO(burrimi): Move defaults to common header.
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultMotorVelocityReferencePubTopic = "motor_velocity_reference";
 static const std::string kDefaultCommandTrajectoryTopic = "command/trajectory";
-static const std::string kDefaultCommandAttitudeThrustSubTopic = "command/attitude";
-static const std::string kDefaultCommandRateThrustSubTopic = "command/rate";
-static const std::string kDefaultCommandMotorSpeedSubTopic = "command/motors";
 static const std::string kDefaultImuSubTopic = "imu";
-static const std::string kDefaultPoseSubTopic = "sensor_pose";
 static const std::string kDefaultOdometrySubTopic = "odometry";
 
-class RosControllerInterface {
+class LeePositionControllerNode {
  public:
-  RosControllerInterface();
-  ~RosControllerInterface();
+  LeePositionControllerNode();
+  ~LeePositionControllerNode();
 
   void InitializeParams();
   void Publish();
 
  private:
-  std::shared_ptr<ControllerBase> controller_;
-  bool controller_created_;
+
+  LeePositionController lee_position_controller_;
 
   ros::NodeHandle* node_handle_;
 
@@ -71,31 +68,22 @@ class RosControllerInterface {
   std::string odometry_sub_topic_;
 
   // command topics
-  std::string command_attitude_thrust_sub_topic_;
-  std::string command_rate_thrust_sub_topic_;
-  std::string command_motor_speed_sub_topic_;
   std::string command_trajectory_sub_topic_;
 
   ros::Publisher motor_velocity_reference_pub_;
 
   // subscribers
-  ros::Subscriber cmd_attitude_sub_;
-  ros::Subscriber cmd_motor_sub_;
   ros::Subscriber cmd_trajectory_sub_;
   ros::Subscriber imu_sub_;
   ros::Subscriber pose_sub_;
   ros::Subscriber odometry_sub_;
 
-  void CommandAttitudeCallback(
-      const mav_msgs::CommandAttitudeThrustConstPtr& input_reference_msg);
   void CommandTrajectoryCallback(
       const mav_msgs::CommandTrajectoryConstPtr& trajectory_reference_msg);
-  void CommandMotorCallback(
-      const mav_msgs::CommandMotorSpeedConstPtr& input_reference_msg);
+
   void OdometryCallback(const nav_msgs::OdometryConstPtr odometry_msg);
   void ImuCallback(const sensor_msgs::ImuConstPtr& imu);
-  void PoseCallback(const geometry_msgs::PoseStampedConstPtr& pose);
 };
 }
 
-#endif // ROTORS_CONTROL_ROS_CONTROLLER_INTERFACE_H
+#endif // ROTORS_CONTROL_LEE_POSITION_CONTROLLER_NODE_H

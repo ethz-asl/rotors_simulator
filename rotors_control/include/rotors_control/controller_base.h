@@ -29,10 +29,8 @@
 class ControllerBase {
  public:
   ControllerBase();
-  virtual ~ControllerBase();
+  ~ControllerBase();
 
-  virtual void InitializeParams() = 0;
-  virtual std::shared_ptr<ControllerBase> Clone() = 0;
   void SetPosition(const Eigen::Vector3d& position);
   void SetVelocity(const Eigen::Vector3d& velocity);
   void SetAttitude(const Eigen::Quaternion<double>& attitude);
@@ -47,7 +45,6 @@ class ControllerBase {
   void SetYawRateReference(double yaw_rate_reference);
 
   void SetMotorReference(const Eigen::VectorXd& motor_reference);
-  virtual void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const = 0;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
