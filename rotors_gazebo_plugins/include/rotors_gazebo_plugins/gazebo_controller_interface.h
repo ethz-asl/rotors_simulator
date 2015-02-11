@@ -47,6 +47,7 @@ class GazeboControllerInterface : public ModelPlugin {
  public:
   GazeboControllerInterface()
       : ModelPlugin(),
+        received_first_referenc_(false),
         namespace_(kDefaultNamespace),
         motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferencePubTopic),
         command_motor_speed_sub_topic_(kDefaultCommandMotorSpeedSubTopic),
@@ -62,7 +63,8 @@ class GazeboControllerInterface : public ModelPlugin {
 
  private:
 
-  Eigen::VectorXd input_reference;
+  bool received_first_referenc_;
+  Eigen::VectorXd input_reference_;
 
   std::string namespace_;
   std::string motor_velocity_reference_pub_topic_;

@@ -75,6 +75,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         rotor_drag_coefficient_(kDefaultRotorDragCoefficient),
         rolling_moment_coefficient_(kDefaultRollingMomentCoefficient),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
+        ref_motor_rot_vel_(0),
         node_handle_(NULL) {
     InitGlogHelper::instance().initGlog();
   }
@@ -108,6 +109,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   double rotor_drag_coefficient_;
   double rolling_moment_coefficient_;
   double rotor_velocity_slowdown_sim_;
+  double ref_motor_rot_vel_;
 
   ros::NodeHandle* node_handle_;
   ros::Publisher motor_velocity_pub_;

@@ -26,13 +26,19 @@ LeePositionControllerNode::LeePositionControllerNode() {
 
   InitializeParams();
 
-  ros::NodeHandle node_handle(namespace_);
+  lee_position_controller_.InitializeParams();
 
-  odometry_sub_ = node_handle.subscribe(odometry_sub_topic_, 10,
-                                          &LeePositionControllerNode::OdometryCallback, this);
+  ros::NodeHandle nh(namespace_);
 
-  motor_velocity_reference_pub_ = node_handle.advertise<mav_msgs::MotorSpeed>(
-                                          motor_velocity_reference_pub_topic_, 10);
+  cmd_trajectory_sub_ = nh.subscribe(command_trajectory_sub_topic_, 10,
+                                     &LeePositionControllerNode::CommandTrajectoryCallback, this);
+
+
+  odometry_sub_ = nh.subscribe(odometry_sub_topic_, 10,
+                               &LeePositionControllerNode::OdometryCallback, this);
+
+  motor_velocity_reference_pub_ = nh.advertise<mav_msgs::MotorSpeed>(
+      motor_velocity_reference_pub_topic_, 10);
 }
 
 LeePositionControllerNode::~LeePositionControllerNode() { }

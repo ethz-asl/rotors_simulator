@@ -69,12 +69,15 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 // This gets called by the world update start event.
 void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
+  if(!received_first_referenc_)
+    return;
+
   common::Time now = world_->GetSimTime();
 
   mav_msgs::MotorSpeed turning_velocities_msg;
 
-  for (int i = 0; i < input_reference.size(); i++)
-    turning_velocities_msg.motor_speed.push_back(input_reference[i]);
+  for (int i = 0; i < input_reference_.size(); i++)
+    turning_velocities_msg.motor_speed.push_back(input_reference_[i]);
   turning_velocities_msg.header.stamp.sec = now.sec;
   turning_velocities_msg.header.stamp.nsec = now.nsec;
 
@@ -82,10 +85,11 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 }
 
 void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg) {
-  input_reference.resize(input_reference_msg->motor_speed.size());
+  input_reference_.resize(input_reference_msg->motor_speed.size());
   for (int i = 0; i < input_reference_msg->motor_speed.size(); ++i) {
-    input_reference[i] = input_reference_msg->motor_speed[i];
+    input_reference_[i] = input_reference_msg->motor_speed[i];
   }
+  received_first_referenc_ = true;
 }
 
 

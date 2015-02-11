@@ -61,7 +61,6 @@ class LeePositionControllerNode {
 
   // subscribers
   ros::Subscriber cmd_trajectory_sub_;
-  ros::Subscriber pose_sub_;
   ros::Subscriber odometry_sub_;
 
   void CommandTrajectoryCallback(
