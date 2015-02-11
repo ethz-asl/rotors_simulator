@@ -21,9 +21,8 @@
 #ifndef ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
 #define ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
 
-
-#include <mav_msgs/eigen_mav_msgs.h>
 #include <mav_msgs/conversions.h>
+#include <mav_msgs/eigen_mav_msgs.h>
 
 #include "rotors_control/common.h"
 

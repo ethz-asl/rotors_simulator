@@ -1,8 +1,21 @@
 /*
- * common.h
+ * Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
  *
- *  Created on: Feb 10, 2015
- *      Author: burrimi
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #ifndef INCLUDE_ROTORS_CONTROL_COMMON_H_
@@ -20,8 +33,6 @@ static const std::string kDefaultCommandTrajectoryTopic = "command/trajectory";
 static const std::string kDefaultImuSubTopic = "imu";
 static const std::string kDefaultOdometrySubTopic = "odometry";
 
-
-
 struct EigenOdometry {
   EigenOdometry()
       : position(0.0, 0.0, 0.0),
@@ -30,9 +41,9 @@ struct EigenOdometry {
         angular_velocity(0.0, 0.0, 0.0) {};
 
   EigenOdometry(const Eigen::Vector3d& _position,
-                         const Eigen::Quaterniond& _orientation,
-                         const Eigen::Vector3d& _velocity,
-                         const Eigen::Vector3d& _angular_velocity) {
+                const Eigen::Quaterniond& _orientation,
+                const Eigen::Vector3d& _velocity,
+                const Eigen::Vector3d& _angular_velocity) {
     position = _position;
     orientation = _orientation;
     velocity = _velocity;
@@ -55,6 +66,5 @@ void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
 }
 
 }
-
 
 #endif /* INCLUDE_ROTORS_CONTROL_COMMON_H_ */

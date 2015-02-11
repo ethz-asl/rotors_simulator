@@ -28,7 +28,6 @@ include_directories(
 
 add_library(lee_position_controller
   src/library/lee_position_controller.cpp
-  src/library/controller_base.cpp
 )
 
 target_link_libraries(lee_position_controller ${catkin_LIBRARIES})

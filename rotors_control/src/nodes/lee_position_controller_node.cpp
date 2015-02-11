@@ -22,26 +22,20 @@
 
 namespace rotors_control {
 
-LeePositionControllerNode::LeePositionControllerNode()
-    : node_handle_(0){
+LeePositionControllerNode::LeePositionControllerNode() {
 
   InitializeParams();
 
-  node_handle_ = new ros::NodeHandle(namespace_);
+  ros::NodeHandle node_handle(namespace_);
 
-  odometry_sub_ = node_handle_->subscribe(odometry_sub_topic_, 10,
+  odometry_sub_ = node_handle.subscribe(odometry_sub_topic_, 10,
                                           &LeePositionControllerNode::OdometryCallback, this);
 
-  motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(
+  motor_velocity_reference_pub_ = node_handle.advertise<mav_msgs::MotorSpeed>(
                                           motor_velocity_reference_pub_topic_, 10);
 }
 
-LeePositionControllerNode::~LeePositionControllerNode() {
-  if (node_handle_) {
-    node_handle_->shutdown();
-    delete node_handle_;
-  }
-}
+LeePositionControllerNode::~LeePositionControllerNode() { }
 
 void LeePositionControllerNode::InitializeParams() {
   //TODO(burrimi): Read parameters from yaml.
@@ -64,8 +58,7 @@ void LeePositionControllerNode::CommandTrajectoryCallback(
 }
 
 
-void LeePositionControllerNode::OdometryCallback(
-    const nav_msgs::OdometryConstPtr odometry_msg) {
+void LeePositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg) {
 
   ROS_INFO_ONCE("LeePositionController got first odometry message.");
 

@@ -51,8 +51,6 @@ class LeePositionControllerNode {
 
   LeePositionController lee_position_controller_;
 
-  ros::NodeHandle* node_handle_;
-
   std::string namespace_;
   std::string motor_velocity_reference_pub_topic_;
   std::string odometry_sub_topic_;
@@ -69,7 +67,7 @@ class LeePositionControllerNode {
   void CommandTrajectoryCallback(
       const mav_msgs::CommandTrajectoryConstPtr& trajectory_reference_msg);
 
-  void OdometryCallback(const nav_msgs::OdometryConstPtr odometry_msg);
+  void OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg);
 };
 }
 

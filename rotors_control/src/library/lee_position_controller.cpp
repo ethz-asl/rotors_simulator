@@ -32,7 +32,6 @@ LeePositionController::LeePositionController()
 LeePositionController::~LeePositionController() {
 }
 
-
 void LeePositionController::InitializeParams() {
 
   gain_position_(0) = 6; //8;
@@ -104,8 +103,7 @@ void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velo
   ComputeDesiredAngularAcc(acceleration, &angular_acceleration);
 
   // project thrust to body z axis.
-  Eigen::Vector3d e_3(0, 0, 1);
-  double thrust = -mass_ * acceleration.dot(odometry_.orientation.toRotationMatrix() * e_3);
+  double thrust = -mass_ * acceleration.dot(odometry_.orientation.toRotationMatrix().col(2));
 
   Eigen::Vector4d angular_acceleration_thrust;
   angular_acceleration_thrust.block<3, 1>(0, 0) = angular_acceleration;
@@ -128,24 +126,12 @@ void LeePositionController::SetCommandTrajectory(
 void LeePositionController::ComputeDesiredAcceleration(Eigen::Vector3d* acceleration) const {
   assert(acceleration);
 
-//  Eigen::Quaternion<double> q_W_I(odometry_msg->pose.pose.orientation.w, odometry_msg->pose.pose.orientation.x,
-//                                        odometry_msg->pose.pose.orientation.y, odometry_msg->pose.pose.orientation.z);
-//  lee_position_controller_.SetAttitude(q_W_I);
-//
-//  // Convert body linear velocity from odometry message into world frame.
-//  Eigen::Vector3d velocity_I(odometry_msg->twist.twist.linear.x,
-//                             odometry_msg->twist.twist.linear.y,
-//                             odometry_msg->twist.twist.linear.z);
-//  Eigen::Vector3d velocity_W;
-//  velocity_W = q_W_I.toRotationMatrix() * velocity_I;
-//  lee_position_controller_.SetVelocity(velocity_W);
-
-
   Eigen::Vector3d position_error;
   position_error = odometry_.position - command_trajectory_.position;
 
   // Transform velocity to world frame.
-  Eigen::Vector3d velocity_W = odometry_.orientation.toRotationMatrix() * odometry_.velocity;
+  const Eigen::Matrix3d R_W_I = odometry_.orientation.toRotationMatrix();
+  Eigen::Vector3d velocity_W =  R_W_I * odometry_.velocity;
   Eigen::Vector3d velocity_error;
   velocity_error = velocity_W - command_trajectory_.velocity;
 
