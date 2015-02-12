@@ -1,0 +1,8 @@
+<launch>
+  <node name="msf" pkg="msf_updates" type="pose_sensor" clear_params="true" output="screen">
+    <remap from="msf_updates/pose_with_covariance_input" to="pose1" />
+    <remap from="msf_core/imu_state_input" to="imu" />
+    <rosparam file="$(find rotors_gazebo)/parameters/simulator_msf.yaml"/>
+    <param name="capability_group" value="Core"></param>
+  </node>
+</launch>

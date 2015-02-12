@@ -59,12 +59,14 @@ void LeePositionControllerNode::Publish() {
 void LeePositionControllerNode::CommandTrajectoryCallback(
     const mav_msgs::CommandTrajectoryConstPtr& trajectory_reference_msg) {
   mav_msgs::EigenCommandTrajectory trajectory;
+  printf("Received trajectory msg\n");
   mav_msgs::eigenCommandTrajectoryFromMsg(trajectory_reference_msg, &trajectory);
   lee_position_controller_.SetCommandTrajectory(trajectory);
 }
 
 
 void LeePositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg) {
+
 
   ROS_INFO_ONCE("LeePositionController got first odometry message.");
 

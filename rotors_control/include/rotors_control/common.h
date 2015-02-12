@@ -29,9 +29,10 @@ namespace rotors_control {
 // Default values
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultMotorVelocityReferencePubTopic = "motor_velocity_reference";
+static const std::string kDefaultCommandRollPitchYawRateThrustTopic = "command/roll_pitch_yawrate_thrust";
 static const std::string kDefaultCommandTrajectoryTopic = "command/trajectory";
 static const std::string kDefaultImuSubTopic = "imu";
-static const std::string kDefaultOdometrySubTopic = "odometry";
+static const std::string kDefaultOdometrySubTopic = "msf_core/odometry";
 
 struct EigenOdometry {
   EigenOdometry()

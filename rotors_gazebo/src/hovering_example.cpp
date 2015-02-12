@@ -53,7 +53,7 @@ int main(int argc, char** argv){
   }
 
   // Wait for 5 seconds to let the Gazebo GUI show up.
-  ros::Duration(5.0).sleep();
+  ros::Duration(10.0).sleep();
 
   ROS_INFO("Fly to position [0 0 1].");
   mav_msgs::CommandTrajectory trajectory_msg;

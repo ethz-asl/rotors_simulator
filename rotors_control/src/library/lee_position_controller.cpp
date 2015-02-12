@@ -105,6 +105,8 @@ void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velo
   // project thrust to body z axis.
   double thrust = -mass_ * acceleration.dot(odometry_.orientation.toRotationMatrix().col(2));
 
+  printf("thrust=%f\n", thrust);
+
   Eigen::Vector4d angular_acceleration_thrust;
   angular_acceleration_thrust.block<3, 1>(0, 0) = angular_acceleration;
   angular_acceleration_thrust(3) = thrust;
