@@ -20,17 +20,16 @@
 
 #include "rotors_control/lee_position_controller.h"
 
+namespace rotors_control {
+
 LeePositionController::LeePositionController()
     : gravity_(9.81),
-      mass_(1.56779) {
+      mass_(1.56779),
+      amount_rotors_(6),
+      initialized_params_(false) {
 }
 
 LeePositionController::~LeePositionController() {
-}
-
-std::shared_ptr<ControllerBase> LeePositionController::Clone() {
-  std::shared_ptr<ControllerBase> controller(new LeePositionController);
-  return controller;
 }
 
 void LeePositionController::InitializeParams() {
@@ -104,8 +103,7 @@ void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velo
   ComputeDesiredAngularAcc(acceleration, &angular_acceleration);
 
   // project thrust to body z axis.
-  Eigen::Vector3d e_3(0, 0, 1);
-  double thrust = -mass_ * acceleration.dot(attitude_.toRotationMatrix() * e_3);
+  double thrust = -mass_ * acceleration.dot(odometry_.orientation.toRotationMatrix().col(2));
 
   Eigen::Vector4d angular_acceleration_thrust;
   angular_acceleration_thrust.block<3, 1>(0, 0) = angular_acceleration;
@@ -116,19 +114,31 @@ void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velo
   *rotor_velocities = rotor_velocities->cwiseSqrt();
 }
 
+void LeePositionController::SetOdometry(const EigenOdometry& odometry) {
+  odometry_ = odometry;
+}
+
+void LeePositionController::SetCommandTrajectory(
+    const mav_msgs::EigenCommandTrajectory& command_trajectory) {
+  command_trajectory_ = command_trajectory;
+}
+
 void LeePositionController::ComputeDesiredAcceleration(Eigen::Vector3d* acceleration) const {
   assert(acceleration);
 
   Eigen::Vector3d position_error;
-  position_error = position_ - position_reference_;
+  position_error = odometry_.position - command_trajectory_.position;
 
+  // Transform velocity to world frame.
+  const Eigen::Matrix3d R_W_I = odometry_.orientation.toRotationMatrix();
+  Eigen::Vector3d velocity_W =  R_W_I * odometry_.velocity;
   Eigen::Vector3d velocity_error;
-  velocity_error = velocity_ - velocity_reference_;
+  velocity_error = velocity_W - command_trajectory_.velocity;
 
   Eigen::Vector3d e_3(0, 0, 1);
 
   *acceleration = position_error.cwiseProduct(gain_position_) / mass_
-      + velocity_error.cwiseProduct(gain_velocity_) / mass_ - gravity_ * e_3 - acceleration_reference_;
+      + velocity_error.cwiseProduct(gain_velocity_) / mass_ - gravity_ * e_3 - command_trajectory_.acceleration;
 }
 
 // Implementation from the T. Lee et al. paper
@@ -137,11 +147,11 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
                                                      Eigen::Vector3d* angular_acceleration) const {
   assert(angular_acceleration);
 
-  Eigen::Matrix3d R = attitude_.toRotationMatrix();
+  Eigen::Matrix3d R = odometry_.orientation.toRotationMatrix();
 
   // get desired rotation matrix
   Eigen::Vector3d b1_des;
-  b1_des << cos(yaw_reference_), sin(yaw_reference_), 0;
+  b1_des << cos(command_trajectory_.yaw), sin(command_trajectory_.yaw), 0;
 
   Eigen::Vector3d b3_des;
   b3_des = -acceleration / acceleration.norm();
@@ -163,14 +173,12 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
 
   // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
-  angular_rate_des[2] = control_attitude_thrust_reference_(2);
+  angular_rate_des[2] = command_trajectory_.yaw_rate;
 
-  Eigen::Vector3d angular_rate_error = angular_rate_ - R_des.transpose() * R * angular_rate_des;
+  Eigen::Vector3d angular_rate_error = odometry_.angular_velocity - R_des.transpose() * R * angular_rate_des;
 
   *angular_acceleration = -1 * angle_error.cwiseProduct(gain_attitude_)
                            - angular_rate_error.cwiseProduct(gain_angular_rate_)
-                           + angular_rate_.cross(angular_rate_); // we don't need the inertia matrix here
+                           + odometry_.angular_velocity.cross(odometry_.angular_velocity); // we don't need the inertia matrix here
 }
-
-
-ROTORS_CONTROL_REGISTER_CONTROLLER(LeePositionController);
+}
