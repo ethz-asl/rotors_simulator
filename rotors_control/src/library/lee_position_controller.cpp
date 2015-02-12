@@ -23,10 +23,7 @@
 namespace rotors_control {
 
 LeePositionController::LeePositionController()
-    : gravity_(9.81),
-      mass_(1.56779),
-      amount_rotors_(6),
-      initialized_params_(false) {
+    : initialized_params_(false) {
 }
 
 LeePositionController::~LeePositionController() {
@@ -34,58 +31,77 @@ LeePositionController::~LeePositionController() {
 
 void LeePositionController::InitializeParams() {
 
-  gain_position_(0) = 6; //8;
-  gain_position_(1) = 6; //8
-  gain_position_(2) = 6; //8
+  controller_parameters_.position_gain_ = Eigen::Vector3d(6, 6, 6);
+  controller_parameters_.velocity_gain_ = Eigen::Vector3d(4.7, 4.7, 4.7);
+  controller_parameters_.attitude_gain_ = Eigen::Vector3d(3, 3, 0.035);
+  controller_parameters_.angular_rate_gain_ = Eigen::Vector3d(0.52, 0.52, 0.025);
 
-  gain_velocity_(0) = 4.7; //5.3;
-  gain_velocity_(1) = 4.7; //5.3;
-  gain_velocity_(2) = 4.7; //5.3;
+  vehicle_parameters_.inertia_ << 0.0347563,  0,  0,
+                                  0,  0.0458929,  0,
+                                  0,  0, 0.0977;
 
-  gain_attitude_(0) = 3; //4
-  gain_attitude_(1) = 3; //4
-  gain_attitude_(2) = 0.035;
+  vehicle_parameters_.rotor_force_constant_ = 8.54858e-6;  //F_i = k_n * rotor_velocity_i^2
 
-  gain_angular_rate_(0) = 0.52;//0.6;
-  gain_angular_rate_(1) = 0.52;//0.6;
-  gain_angular_rate_(2) = 0.025;
+  vehicle_parameters_.rotor_moment_constant_ = 1.6e-2;  // M_i = k_m * F_i
+  vehicle_parameters_.arm_length_ = 0.215;
+  vehicle_parameters_.mass_ = 1.56779;
 
-  amount_rotors_ = 6;
-  allocation_matrix_.resize(4,amount_rotors_);
-  allocation_matrix_ << sin(M_PI/6),  1,  sin(M_PI/6), -sin(M_PI/6), -1, -sin(M_PI/6),
-                       -cos(M_PI/6),  0,  cos(M_PI/6),  cos(M_PI/6), 0, -cos(M_PI/6),
-                       -1,  1, -1,  1, -1, 1,
-                        1,  1,  1,  1, 1, 1;
+  Rotor rotor0, rotor1, rotor2, rotor3, rotor4, rotor5;
+  rotor0.angle = 0.52359877559;
+  // rotor0.arm_length = 0.215;
+  rotor0.direction = 1;
+  vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor0);
+  rotor1.angle = 1.57079632679;
+  // rotor0.arm_length = 0.215;
+  rotor1.direction = -1;
+  vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor1);
+  rotor2.angle = 2.61799387799;
+  // rotor0.arm_length = 0.215;
+  rotor2.direction = 1;
+  vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor2);
+  rotor3.angle = -2.61799387799;
+  // rotor0.arm_length = 0.215;
+  rotor3.direction = -1;
+  vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor3);
+  rotor4.angle = -1.57079632679;
+  // rotor0.arm_length = 0.215;
+  rotor4.direction = 1;
+  vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor4);
+  rotor5.angle = -0.52359877559;
+  // rotor0.arm_length = 0.215;
+  rotor5.direction = -1;
+  vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor5);
 
-  inertia_matrix_<< 0.0347563,  0,  0,
-                    0,  0.0458929,  0,
-                    0,  0, 0.0977;
+  UpdateControllerMembers();
+}
 
-  // to make the tuning independent of the inertia matrix we divide here
-  gain_attitude_ = gain_attitude_.transpose() * inertia_matrix_.inverse();
+void LeePositionController::UpdateControllerMembers() {
+  calculateAllocationMatrix(vehicle_parameters_.rotor_configuration_, &(controller_parameters_.allocation_matrix_));
+  // To make the tuning independent of the inertia matrix we divide here.
+  normalized_attitude_gain_ = controller_parameters_.attitude_gain_.transpose()
+      * vehicle_parameters_.inertia_.inverse();
+  // To make the tuning independent of the inertia matrix we divide here.
+  normalized_angular_rate_gain_ = controller_parameters_.angular_rate_gain_.transpose()
+      * vehicle_parameters_.inertia_.inverse();
 
-  // to make the tuning independent of the inertia matrix we divide here
-  gain_angular_rate_ = gain_angular_rate_.transpose() * inertia_matrix_.inverse();
-
-  const double rotor_force_constant = 0.00000854858;  //F_i = k_n * rotor_velocity_i^2
-  const double rotor_moment_constant = 0.016;  // M_i = k_m * F_i
-
-  angular_acc_to_rotor_velocities_.resize(amount_rotors_, 4);
-  const double arm_length = 0.215;
 
   Eigen::Matrix4d K;
-  K.setZero();
-  K(0, 0) = arm_length * rotor_force_constant;
-  K(1, 1) = arm_length * rotor_force_constant;
-  K(2, 2) = rotor_force_constant * rotor_moment_constant;
-  K(3, 3) = rotor_force_constant;
+  Eigen::Vector4d K_diag;
+  K_diag << vehicle_parameters_.arm_length_ * vehicle_parameters_.rotor_force_constant_,
+            vehicle_parameters_.arm_length_ * vehicle_parameters_.rotor_force_constant_,
+            vehicle_parameters_.rotor_force_constant_ * vehicle_parameters_.rotor_moment_constant_,
+            vehicle_parameters_.rotor_force_constant_;
+
+  K << Eigen::Matrix4d(K_diag.asDiagonal());
 
   Eigen::Matrix4d I;
   I.setZero();
-  I.block<3, 3>(0, 0) = inertia_matrix_;
+  I.block<3, 3>(0, 0) = vehicle_parameters_.inertia_;
   I(3, 3) = 1;
-  angular_acc_to_rotor_velocities_ = allocation_matrix_.transpose()
-      * (allocation_matrix_ * allocation_matrix_.transpose()).inverse() * K.inverse() * I;
+  angular_acc_to_rotor_velocities_.resize(vehicle_parameters_.rotor_configuration_.rotors.size(), 4);
+  angular_acc_to_rotor_velocities_ = controller_parameters_.allocation_matrix_.transpose()
+      * (controller_parameters_.allocation_matrix_
+      * controller_parameters_.allocation_matrix_.transpose()).inverse() * K.inverse() * I;
 
   initialized_params_ = true;
 }
@@ -94,7 +110,7 @@ void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velo
   assert(rotor_velocities);
   assert(initialized_params_);
 
-  rotor_velocities->resize(amount_rotors_);
+  rotor_velocities->resize(vehicle_parameters_.rotor_configuration_.rotors.size());
 
   Eigen::Vector3d acceleration;
   ComputeDesiredAcceleration(&acceleration);
@@ -103,7 +119,7 @@ void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velo
   ComputeDesiredAngularAcc(acceleration, &angular_acceleration);
 
   // project thrust to body z axis.
-  double thrust = -mass_ * acceleration.dot(odometry_.orientation.toRotationMatrix().col(2));
+  double thrust = -vehicle_parameters_.mass_ * acceleration.dot(odometry_.orientation.toRotationMatrix().col(2));
 
   Eigen::Vector4d angular_acceleration_thrust;
   angular_acceleration_thrust.block<3, 1>(0, 0) = angular_acceleration;
@@ -137,8 +153,9 @@ void LeePositionController::ComputeDesiredAcceleration(Eigen::Vector3d* accelera
 
   Eigen::Vector3d e_3(0, 0, 1);
 
-  *acceleration = position_error.cwiseProduct(gain_position_) / mass_
-      + velocity_error.cwiseProduct(gain_velocity_) / mass_ - gravity_ * e_3 - command_trajectory_.acceleration;
+  *acceleration = (position_error.cwiseProduct(controller_parameters_.position_gain_)
+      + velocity_error.cwiseProduct(controller_parameters_.velocity_gain_)) / vehicle_parameters_.mass_
+      - physics_parameters_.gravity_ * e_3 - command_trajectory_.acceleration;
 }
 
 // Implementation from the T. Lee et al. paper
@@ -177,8 +194,8 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
 
   Eigen::Vector3d angular_rate_error = odometry_.angular_velocity - R_des.transpose() * R * angular_rate_des;
 
-  *angular_acceleration = -1 * angle_error.cwiseProduct(gain_attitude_)
-                           - angular_rate_error.cwiseProduct(gain_angular_rate_)
+  *angular_acceleration = -1 * angle_error.cwiseProduct(normalized_attitude_gain_)
+                           - angular_rate_error.cwiseProduct(normalized_angular_rate_gain_)
                            + odometry_.angular_velocity.cross(odometry_.angular_velocity); // we don't need the inertia matrix here
 }
 }
