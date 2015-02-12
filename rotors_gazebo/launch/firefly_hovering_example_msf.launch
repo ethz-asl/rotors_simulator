@@ -1,0 +1,38 @@
+<launch>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="firefly"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic.world"/>
+    <!-- <arg name="debug" value="true"/> -->
+    <arg name="paused" value="true"/>
+    <!-- <arg name="gui" value="false"/> -->
+  </include>
+
+  <include file="$(find rotors_gazebo)/launch/spawn_firefly.launch">
+    <arg name="model" value="$(find rotors_description)/urdf/firefly_generic_odometry_sensor.gazebo" />
+    <arg name="enable_logging" value="$(arg enable_logging)" />
+    <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+    <arg name="log_file" value="$(arg log_file)"/>
+  </include>
+
+  <group ns="firefly">
+    <rosparam file="$(find mav_startup)/parameters/mavs/bluebird/mpc_controller.yaml"/> 
+    <node name="rotors_controller_node" pkg="rotors_control" type="rotors_controller_node" output="screen">
+      <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node>
+    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example"/>
+
+
+  <node name="msf" pkg="msf_updates" type="pose_sensor"  output="screen">
+    <remap from="msf_updates/pose_with_covariance_input" to="odometry_sensor1/pose_with_covariance" />
+    <remap from="msf_core/imu_state_input" to="imu/imu" />
+    <rosparam file="$(find rotors_gazebo)/parameters/simulator_msf.yaml"/>
+    <param name="capability_group" value="Core"></param> 
+  </node>
+
+
+
+  </group>
+</launch>
