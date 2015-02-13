@@ -74,13 +74,16 @@ void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
   unsigned int i = 0;
   for (const Rotor& rotor : rotor_configuration.rotors) {
     // Set first row of allocation matrix.
-    (*allocation_matrix)(0, i) = sin(rotor.angle); //* rotor.arm_length;
+    (*allocation_matrix)(0, i) = sin(rotor.angle) * rotor.arm_length
+                                 * rotor.rotor_force_constant;
     // Set second row of allocation matrix.
-    (*allocation_matrix)(1, i) = -cos(rotor.angle); // * rotor.arm_length;
+    (*allocation_matrix)(1, i) = -cos(rotor.angle) * rotor.arm_length
+                                 * rotor.rotor_force_constant;
     // Set third row of allocation matrix.
-    (*allocation_matrix)(2, i) = -rotor.direction;
+    (*allocation_matrix)(2, i) = -rotor.direction * rotor.rotor_force_constant
+                                 * rotor.rotor_moment_constant;
     // Set forth row of allocation matrix.
-    (*allocation_matrix)(3, i) = 1;
+    (*allocation_matrix)(3, i) = rotor.rotor_force_constant;
     ++i;
   }
 }

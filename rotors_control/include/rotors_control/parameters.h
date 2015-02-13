@@ -23,40 +23,48 @@ static constexpr double kDefaultRotorMomentConstant = 1.6e-2;
 static constexpr double kDefaultGravity = 9.81;
 
 struct Rotor {
-  Rotor () : angle(0.0), direction(1) {}
+  Rotor()
+      : angle(0.0),
+        arm_length(kDefaultArmLength),
+        rotor_force_constant(kDefaultRotorForceConstant),
+        rotor_moment_constant(kDefaultRotorMomentConstant),
+        direction(1) {}
+  Rotor(const double _angle, const double _arm_length,
+        const double _rotor_force_constant, const double _rotor_moment_constant,
+        const int _direction)
+      : angle(_angle),
+        arm_length(_arm_length),
+        rotor_force_constant(_rotor_force_constant),
+        rotor_moment_constant(_rotor_moment_constant),
+        direction(_direction) {}
   double angle;
-  // double arm_length;
+  double arm_length;
+  double rotor_force_constant;
+  double rotor_moment_constant;
   int direction;
 };
 
 struct RotorConfiguration {
   RotorConfiguration() {
     // Rotor configuration of Asctec Firefly.
-    Rotor rotor0, rotor1, rotor2, rotor3, rotor4, rotor5;
-    rotor0.angle = kDefaultRotor0Angle;
-    // rotor0.arm_length = 0.215;
-    rotor0.direction = 1;
-    rotors.push_back(rotor0);
-    rotor1.angle = kDefaultRotor1Angle;
-    // rotor0.arm_length = 0.215;
-    rotor1.direction = -1;
-    rotors.push_back(rotor1);
-    rotor2.angle = kDefaultRotor2Angle;
-    // rotor0.arm_length = 0.215;
-    rotor2.direction = 1;
-    rotors.push_back(rotor2);
-    rotor3.angle = kDefaultRotor3Angle;
-    // rotor0.arm_length = 0.215;
-    rotor3.direction = -1;
-    rotors.push_back(rotor3);
-    rotor4.angle = kDefaultRotor4Angle;
-    // rotor0.arm_length = 0.215;
-    rotor4.direction = 1;
-    rotors.push_back(rotor4);
-    rotor5.angle = kDefaultRotor5Angle;
-    // rotor0.arm_length = 0.215;
-    rotor5.direction = -1;
-    rotors.push_back(rotor5);
+    rotors.push_back(
+      Rotor(kDefaultRotor0Angle, kDefaultArmLength, kDefaultRotorForceConstant,
+            kDefaultRotorMomentConstant, 1));
+    rotors.push_back(
+      Rotor(kDefaultRotor1Angle, kDefaultArmLength, kDefaultRotorForceConstant,
+            kDefaultRotorMomentConstant, -1));
+    rotors.push_back(
+      Rotor(kDefaultRotor2Angle, kDefaultArmLength, kDefaultRotorForceConstant,
+            kDefaultRotorMomentConstant, 1));
+    rotors.push_back(
+      Rotor(kDefaultRotor3Angle, kDefaultArmLength, kDefaultRotorForceConstant,
+            kDefaultRotorMomentConstant, -1));
+    rotors.push_back(
+      Rotor(kDefaultRotor4Angle, kDefaultArmLength, kDefaultRotorForceConstant,
+            kDefaultRotorMomentConstant, 1));
+    rotors.push_back(
+      Rotor(kDefaultRotor5Angle, kDefaultArmLength, kDefaultRotorForceConstant,
+            kDefaultRotorMomentConstant, -1));
   }
   std::vector<Rotor> rotors;
 };
@@ -66,17 +74,10 @@ class VehicleParameters {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   VehicleParameters()
       : mass_(kDefaultMass),
-        arm_length_(kDefaultArmLength),
-        rotor_force_constant_(kDefaultRotorForceConstant),
-        rotor_moment_constant_(kDefaultRotorMomentConstant),
         gravity_(kDefaultGravity),
         inertia_(Eigen::Vector3d(kDefaultInertiaXx, kDefaultInertiaYy,
                                  kDefaultInertiaZz).asDiagonal()) {}
-  bool parameters_initialized_;
   double mass_;
-  double arm_length_;
-  double rotor_force_constant_;
-  double rotor_moment_constant_;
   const double gravity_;
   Eigen::Matrix3d inertia_;
   RotorConfiguration rotor_configuration_;

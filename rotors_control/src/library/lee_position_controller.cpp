@@ -38,16 +38,6 @@ void LeePositionController::InitializeParameters() {
   normalized_angular_rate_gain_ = controller_parameters_.angular_rate_gain_.transpose()
       * vehicle_parameters_.inertia_.inverse();
 
-
-  Eigen::Matrix4d K;
-  Eigen::Vector4d K_diag;
-  K_diag << vehicle_parameters_.arm_length_ * vehicle_parameters_.rotor_force_constant_,
-            vehicle_parameters_.arm_length_ * vehicle_parameters_.rotor_force_constant_,
-            vehicle_parameters_.rotor_force_constant_ * vehicle_parameters_.rotor_moment_constant_,
-            vehicle_parameters_.rotor_force_constant_;
-
-  K << Eigen::Matrix4d(K_diag.asDiagonal());
-
   Eigen::Matrix4d I;
   I.setZero();
   I.block<3, 3>(0, 0) = vehicle_parameters_.inertia_;
@@ -55,8 +45,7 @@ void LeePositionController::InitializeParameters() {
   angular_acc_to_rotor_velocities_.resize(vehicle_parameters_.rotor_configuration_.rotors.size(), 4);
   angular_acc_to_rotor_velocities_ = controller_parameters_.allocation_matrix_.transpose()
       * (controller_parameters_.allocation_matrix_
-      * controller_parameters_.allocation_matrix_.transpose()).inverse() * K.inverse() * I;
-
+      * controller_parameters_.allocation_matrix_.transpose()).inverse() * I;
   initialized_params_ = true;
 }
 
