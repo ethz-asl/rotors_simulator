@@ -24,12 +24,12 @@ namespace rotors_control {
 
 LeePositionController::LeePositionController()
     : initialized_params_(false) {
-  UpdateControllerMembers();
+  InitializeParameters();
 }
 
 LeePositionController::~LeePositionController() {}
 
-void LeePositionController::UpdateControllerMembers() {
+void LeePositionController::InitializeParameters() {
   calculateAllocationMatrix(vehicle_parameters_.rotor_configuration_, &(controller_parameters_.allocation_matrix_));
   // To make the tuning independent of the inertia matrix we divide here.
   normalized_attitude_gain_ = controller_parameters_.attitude_gain_.transpose()

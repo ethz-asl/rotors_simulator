@@ -120,7 +120,7 @@ void LeePositionControllerNode::InitializeParams() {
     lee_position_controller_.vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor);
     ++i;
   }
-  lee_position_controller_.UpdateControllerMembers();
+  lee_position_controller_.InitializeParameters();
 }
 void LeePositionControllerNode::Publish() {
 }
