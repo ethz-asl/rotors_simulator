@@ -109,7 +109,7 @@ void LeePositionController::ComputeDesiredAcceleration(Eigen::Vector3d* accelera
 
   *acceleration = (position_error.cwiseProduct(controller_parameters_.position_gain_)
       + velocity_error.cwiseProduct(controller_parameters_.velocity_gain_)) / vehicle_parameters_.mass_
-      - physics_parameters_.gravity_ * e_3 - command_trajectory_.acceleration;
+      - vehicle_parameters_.gravity_ * e_3 - command_trajectory_.acceleration;
 }
 
 // Implementation from the T. Lee et al. paper

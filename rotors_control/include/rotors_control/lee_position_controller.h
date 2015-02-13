@@ -66,7 +66,6 @@ class LeePositionController {
 
   LeePositionControllerParameters controller_parameters_;
   VehicleParameters vehicle_parameters_;
-  PhysicsParameters physics_parameters_;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
  private:

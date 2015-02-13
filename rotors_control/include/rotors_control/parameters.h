@@ -69,6 +69,7 @@ class VehicleParameters {
         arm_length_(kDefaultArmLength),
         rotor_force_constant_(kDefaultRotorForceConstant),
         rotor_moment_constant_(kDefaultRotorMomentConstant),
+        gravity_(kDefaultGravity),
         inertia_(Eigen::Vector3d(kDefaultInertiaXx, kDefaultInertiaYy,
                                  kDefaultInertiaZz).asDiagonal()) {}
   bool parameters_initialized_;
@@ -76,15 +77,9 @@ class VehicleParameters {
   double arm_length_;
   double rotor_force_constant_;
   double rotor_moment_constant_;
+  const double gravity_;
   Eigen::Matrix3d inertia_;
   RotorConfiguration rotor_configuration_;
-};
-
-
-class PhysicsParameters {
- public:
-  PhysicsParameters() : gravity_(kDefaultGravity) {};
-  const double gravity_;
 };
 
 }
