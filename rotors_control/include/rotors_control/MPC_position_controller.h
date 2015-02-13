@@ -16,8 +16,10 @@
 #include <deque>
 #include <Eigen/Eigen>
 #include <iostream>
-#include <sys/time.h>
-#include <ctime>
+
+//#include <sys/time.h>
+//#include <ctime>
+//#include <memory>
 
 
 #ifdef UseForcesSolver
@@ -89,11 +91,7 @@ class MPCPositionController{
 
 #endif
 
-#ifdef UseCVXGENSolver
-    //CVXGEN variables
 
-
-#endif
 
 
 
@@ -106,8 +104,6 @@ class MPCPositionController{
 
   
 
-
-  void quat2rpy(Eigen::Quaternion<double> q, Eigen::Vector3d* rpy) const;
 
 };
 }

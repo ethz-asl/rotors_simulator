@@ -34,9 +34,21 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   cmake_modules
+  message_generation
 )
 
 find_package(Eigen REQUIRED)
+
+add_service_files(
+  FILES
+  InitKF.srv
+  calibrateKF.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}

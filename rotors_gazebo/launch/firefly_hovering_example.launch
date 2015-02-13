@@ -18,9 +18,15 @@
   </include>
 
   <group ns="firefly">
-    <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
-      <remap from="odometry" to="odometry_sensor1/odometry" />
-    </node>
-    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example"/>
+    <rosparam file="$(find mav_startup)/parameters/mavs/bluebird/mpc_controller.yaml"/> 
+    <remap from="odometry" to="odometry_sensor1/odometry" />
+
+    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
+    
+    <node name="MPCPositionControllerNode" pkg="rotors_control" type="MPC_position_controller_node" output="screen"/> 
+    
+    <node name="PIDAttitudeControllerNode" pkg="rotors_control" type="PID_attitude_controller_node" output="screen"/>
+    
+
   </group>
 </launch>

@@ -53,7 +53,6 @@ void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const;
   
 
   void ComputeDesiredAngularAcc(Eigen::Vector3d* angular_acc) const;
-  void quat2rpy(Eigen::Quaternion<double> q, Eigen::Vector3d* rpy) const;
 
 };
 }

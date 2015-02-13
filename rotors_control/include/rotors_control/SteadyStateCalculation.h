@@ -15,7 +15,7 @@
 
 #include <ros/ros.h>
 
-
+namespace rotors_control{
 
 class SteadyStateCalculation
 {
@@ -59,6 +59,6 @@ private:
 
 
 
-
+}
 
 #endif /* INCLUDE_MAV_CONTROL_STEADYSTATECALCULATION_H_ */

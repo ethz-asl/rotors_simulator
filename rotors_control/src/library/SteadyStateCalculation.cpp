@@ -7,6 +7,7 @@
 
 #include <rotors_control/SteadyStateCalculation.h>
 
+namespace rotors_control{
 SteadyStateCalculation::SteadyStateCalculation() {
 
 }
@@ -111,3 +112,4 @@ void SteadyStateCalculation::ComputeSteadyState(Eigen::VectorXd &estimated_distu
    */
 }
 
+}

@@ -180,7 +180,7 @@ void MPCPositionController::InitializeParams() {
   Eigen::Vector3d initial_rpy;
   quat2rpy(odometry_.orientation, &initial_rpy);
 
-  StateObserver->Reset(odometry_.position, odometry_.velocity, initial_rpy, odometry_.angular_velocity, Eigen::Vector3d::Zero(),
+  StateObserver->Reset(odometry_.position, odometry_.orientation.toRotationMatrix()*odometry_.velocity, initial_rpy, odometry_.angular_velocity, Eigen::Vector3d::Zero(),
                        Eigen::Vector3d::Zero());
 
   initialized_params_ = true;
@@ -202,12 +202,13 @@ void MPCPositionController::SetCommandTrajectory(
 
 
 
-void MPCPositionController::CalculateAttitudeThrust(Eigen::Vector4d *ref_attitude_thrust) const {
+void MPCPositionController::CalculateAttitudeThrust(Eigen::Vector4d *ref_attitude_thrust) const{
   assert(initialized_params_);
   assert(ref_attitude_thrust);
   ros::WallTime total_begin_time = ros::WallTime::now();
+
   //Declare variables
-  static Eigen::Vector4d attitude_command;  //actual roll, pitch, yaw, thrust command
+  static Eigen::Vector4d command_roll_pitch_yaw_thrust;  //actual roll, pitch, yaw, thrust command
   static Eigen::Vector3d linearized_roll_pitch_thrust_cmd;
   static int counter = 0;
   static double SolveTime_avg = 0.0;
@@ -215,10 +216,6 @@ void MPCPositionController::CalculateAttitudeThrust(Eigen::Vector4d *ref_attitud
 
   reference << command_trajectory_.position, command_trajectory_.velocity;
 
-  std::cout << "linearized_roll_pitch_thrust_cmd  " << linearized_roll_pitch_thrust_cmd << std::endl;
-  std::cout << "attitude_command  " << attitude_command << std::endl;
-
-  //mav_msgs::ObserverState observer_state;
 
   Eigen::Matrix3d R_rot;
   Eigen::VectorXd KF_estimated_state;
@@ -228,6 +225,8 @@ void MPCPositionController::CalculateAttitudeThrust(Eigen::Vector4d *ref_attitud
 
   Eigen::VectorXd estimated_disturbnces(disturbance_size_);
   Eigen::VectorXd x_0(state_size_);
+
+
 
   double yaw_rate_cmd;
   double roll;
@@ -277,17 +276,19 @@ void MPCPositionController::CalculateAttitudeThrust(Eigen::Vector4d *ref_attitud
 
   R_rot = odometry_.orientation.toRotationMatrix();
 
+  Eigen::Vector3d velocity_W = R_rot*odometry_.velocity;
 
 
-
-  StateObserver->FeedAttitudeCommand(attitude_command);
+  StateObserver->FeedAttitudeCommand(command_roll_pitch_yaw_thrust);
   StateObserver->FeedPositionMeasurement(odometry_.position);
-  StateObserver->FeedVelocityMeasurement(odometry_.velocity );
+  StateObserver->FeedVelocityMeasurement(velocity_W);
   StateObserver->FeedRotationMatrix(R_rot);
 
-  StateObserver->UpdateEstimator(ros::Time::now());
+  StateObserver->UpdateEstimator();
 
   StateObserver->GetEstimatedState(&KF_estimated_state);
+//  std::cout << "forces = \n" << KF_estimated_state.segment(12, disturbance_size_)
+//      << "moments \n" << KF_estimated_state.segment(15, disturbance_size_) << std::endl;
 
   if (offset_free_controller_ == true) {
     estimated_disturbnces = KF_estimated_state.segment(12, disturbance_size_);
@@ -313,17 +314,15 @@ void MPCPositionController::CalculateAttitudeThrust(Eigen::Vector4d *ref_attitud
     yaw = current_roll_pitch_yaw(2);
 
     roll_pitch_inertial_frame << -sin(yaw) * pitch + cos(yaw) * roll, cos(yaw) * pitch + sin(yaw) * roll;
-    x_0 << odometry_.position, odometry_.velocity, roll_pitch_inertial_frame;
+    x_0 << odometry_.position, velocity_W, roll_pitch_inertial_frame;
   }
-
 
 
 
   SteadyStateCalculator->ComputeSteadyState(estimated_disturbnces, reference, &target_state, &target_input);
 
-  std::cout << "target state = \n" << target_state << std::endl;
-  std::cout << "target input = \n" << target_input << std::endl;
-  std::cout << "x0 = \n" << x_0 << std::endl;
+  //std::cout << "target state = \n" << target_state << std::endl;
+ // std::cout << "target input = \n" << target_input << std::endl;
 
   counter++;
 
@@ -355,11 +354,11 @@ void MPCPositionController::CalculateAttitudeThrust(Eigen::Vector4d *ref_attitud
   Eigen::Map<Eigen::VectorXd>(const_cast<double*>(FORCES_params_.f_8), state_size_ + disturbance_size_ + 2*input_size_,1) = f_queue[7];
   Eigen::Map<Eigen::VectorXd>(const_cast<double*>(FORCES_params_.f_9), state_size_ + disturbance_size_ + 2*input_size_,1) = f_queue[8];
   Eigen::Map<Eigen::VectorXd>(const_cast<double*>(FORCES_params_.f_10), state_size_ + disturbance_size_ + 2*input_size_,1)= f_queue[9];
+
   Eigen::Map<Eigen::VectorXd>(const_cast<double*>(FORCES_params_.f_11), state_size_ + disturbance_size_ + 2*input_size_,1)= f_queue[10];
   Eigen::Map<Eigen::VectorXd>(const_cast<double*>(FORCES_params_.f_12), state_size_ + disturbance_size_ + 2*input_size_,1)= f_queue[11];
   Eigen::Map<Eigen::VectorXd>(const_cast<double*>(FORCES_params_.f_13), state_size_ + disturbance_size_ + 2*input_size_,1)= f_queue[12];
   Eigen::Map<Eigen::VectorXd>(const_cast<double*>(FORCES_params_.f_14), state_size_ + disturbance_size_ + 2*input_size_,1)= f_queue[13];
-
   Eigen::Map<Eigen::VectorXd>(const_cast<double*>(FORCES_params_.f_15), state_size_ + disturbance_size_ + 2*input_size_,1)= f_queue[14];
   Eigen::Map<Eigen::VectorXd>(const_cast<double*>(FORCES_params_.f_16), state_size_ + disturbance_size_ + 2*input_size_,1)= f_queue[15];
   Eigen::Map<Eigen::VectorXd>(const_cast<double*>(FORCES_params_.f_17), state_size_ + disturbance_size_ + 2*input_size_,1)= f_queue[16];
@@ -369,11 +368,7 @@ void MPCPositionController::CalculateAttitudeThrust(Eigen::Vector4d *ref_attitud
 
   Eigen::Map<Eigen::VectorXd>(const_cast<double*>(FORCES_params_.f_N), state_size_ + disturbance_size_ + input_size_,1) = f_N;
 
-
-
   Eigen::Map<Eigen::VectorXd>(const_cast<double*>(FORCES_params_.z1), 2*(state_size_ + disturbance_size_ + input_size_),1)= z1;
-
-
 
   FireFlyOffsetFreeMPC_solve(const_cast<FireFlyOffsetFreeMPC_params*>(&FORCES_params_),&output,&info);
 
@@ -414,7 +409,7 @@ printf("using CVXGEN\n");
 
 #endif
 
-  std::cout << "lin cmd = \n" << linearized_roll_pitch_thrust_cmd << std::endl;
+ // std::cout << "lin cmd = \n" << linearized_roll_pitch_thrust_cmd << std::endl;
 
 
   if (counter > 100) {
@@ -423,13 +418,13 @@ printf("using CVXGEN\n");
     counter = 0;
   }
 
-  attitude_command(3) = (linearized_roll_pitch_thrust_cmd(2) + gravity_) / (cos(roll) * cos(pitch));
-  double ux = linearized_roll_pitch_thrust_cmd(1) * (gravity_ / attitude_command(3));
-  double uy = linearized_roll_pitch_thrust_cmd(0) * (gravity_ / attitude_command(3));
+  command_roll_pitch_yaw_thrust(3) = (linearized_roll_pitch_thrust_cmd(2) + gravity_) / (cos(roll) * cos(pitch));
+  double ux = linearized_roll_pitch_thrust_cmd(1) * (gravity_ / command_roll_pitch_yaw_thrust(3));
+  double uy = linearized_roll_pitch_thrust_cmd(0) * (gravity_ / command_roll_pitch_yaw_thrust(3));
 
-  attitude_command(0) = ux * sin(yaw) + uy * cos(yaw);
-  attitude_command(1) = ux * cos(yaw) - uy * sin(yaw);
-  attitude_command(2) = command_trajectory_.yaw;
+  command_roll_pitch_yaw_thrust(0) = ux * sin(yaw) + uy * cos(yaw);
+  command_roll_pitch_yaw_thrust(1) = ux * cos(yaw) - uy * sin(yaw);
+  command_roll_pitch_yaw_thrust(2) = command_trajectory_.yaw;
 
 
   int n_rotations = (int)(yaw / (2.0*M_PI));
@@ -439,7 +434,7 @@ printf("using CVXGEN\n");
 	  yaw = M_PI - yaw;
 
 
-  double yaw_error = attitude_command(2) - yaw;
+  double yaw_error = command_roll_pitch_yaw_thrust(2) - yaw;
 
   if(abs(yaw_error) > M_PI){
 	  if(yaw_error > 0.0)
@@ -452,20 +447,14 @@ printf("using CVXGEN\n");
   yaw_rate_cmd = yaw_gain_ * yaw_error;
 
 
-  *ref_attitude_thrust << attitude_command(0), attitude_command(1) , yaw_rate_cmd, attitude_command(3) * mass_;
+  *ref_attitude_thrust << command_roll_pitch_yaw_thrust(0), command_roll_pitch_yaw_thrust(1) , yaw_rate_cmd, command_roll_pitch_yaw_thrust(3) * mass_;
 
   double diff_time = (ros::WallTime::now() - total_begin_time).toSec();
-  std::cout << "Controller loop time : " << diff_time << " sec" << std::endl;
+ // std::cout << "Controller loop time : " << diff_time << " sec" << std::endl;
 }
 
 
 
 
-void MPCPositionController::quat2rpy(Eigen::Quaternion<double> q, Eigen::Vector3d* rpy) const {
-  assert(rpy);
 
-  *rpy << atan2(2.0 * (q.w() * q.x() + q.y() * q.z()), 1.0 - 2.0 * (q.x() * q.x() + q.y() * q.y())),
-          asin(2.0 * (q.w() * q.y() - q.z() * q.x())), atan2(2.0 * (q.w() * q.z() + q.x() * q.y()),
-          1.0 - 2.0 * (q.y() * q.y() + q.z() * q.z()));
-}
 }

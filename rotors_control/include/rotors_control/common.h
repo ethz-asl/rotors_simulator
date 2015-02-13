@@ -32,7 +32,7 @@ static const std::string kDefaultMotorVelocityReferencePubTopic = "motor_velocit
 static const std::string kDefaultCommandRollPitchYawRateThrustTopic = "command/roll_pitch_yawrate_thrust";
 static const std::string kDefaultCommandTrajectoryTopic = "command/trajectory";
 static const std::string kDefaultImuSubTopic = "imu";
-static const std::string kDefaultOdometrySubTopic = "msf_core/odometry";
+static const std::string kDefaultOdometrySubTopic = "odometry_sensor1/odometry";
 
 struct EigenOdometry {
   EigenOdometry()
@@ -64,6 +64,14 @@ void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
   odometry->orientation = mav_msgs::quaternionFromMsg(msg->pose.pose.orientation);
   odometry->velocity = mav_msgs::vector3FromMsg(msg->twist.twist.linear);
   odometry->angular_velocity = mav_msgs::vector3FromMsg(msg->twist.twist.angular);
+}
+
+inline void quat2rpy(const Eigen::Quaternion<double> &q, Eigen::Vector3d* rpy){
+  assert(rpy);
+
+  *rpy << atan2(2.0 * (q.w() * q.x() + q.y() * q.z()), 1.0 - 2.0 * (q.x() * q.x() + q.y() * q.y())),
+          asin(2.0 * (q.w() * q.y() - q.z() * q.x())),
+          atan2(2.0 * (q.w() * q.z() + q.x() * q.y()),1.0 - 2.0 * (q.y() * q.y() + q.z() * q.z()));
 }
 
 }

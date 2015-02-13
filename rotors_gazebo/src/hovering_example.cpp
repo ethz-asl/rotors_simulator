@@ -24,6 +24,7 @@
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
 #include <mav_msgs/CommandTrajectory.h>
+#include <rotors_control/calibrateKF.h>
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "hovering_example");
@@ -53,14 +54,38 @@ int main(int argc, char** argv){
   }
 
   // Wait for 5 seconds to let the Gazebo GUI show up.
-  ros::Duration(10.0).sleep();
+  ros::Duration(5.0).sleep();
 
   ROS_INFO("Fly to position [0 0 1].");
   mav_msgs::CommandTrajectory trajectory_msg;
   trajectory_msg.position.x = 0;
   trajectory_msg.position.y = 0;
   trajectory_msg.position.z = 1;
+  trajectory_msg.yaw = 0;
   trajectory_pub.publish(trajectory_msg);
+
+  rotors_control::calibrateKFRequest calibrate_req;
+  rotors_control::calibrateKFResponse calibrate_res;
+  calibrate_req.calibration_time = 5.0;
+  ros::Duration(10.0).sleep();
+
+
+ if(!ros::service::call("/firefly/StartCalibrateKF", calibrate_req, calibrate_res)){
+   ROS_WARN("Failed to calibrate");
+ }else{
+   ROS_INFO("Calibrating Disturbances Observer... ");
+ }
+
+ ros::Duration(calibrate_req.calibration_time + 0.5).sleep();
+
+ ROS_INFO("Fly to position [1 1 1].");
+ trajectory_msg.position.x = 1;
+ trajectory_msg.position.y = 1;
+ trajectory_msg.position.z = 1;
+ trajectory_msg.yaw = M_PI_2;
+ trajectory_pub.publish(trajectory_msg);
+
+
 
   ros::spin();
 }

@@ -5,15 +5,16 @@
  *      Author: Mina Kamel, ASL - ETH Zurich
  */
 
-#ifndef SRC_KFDisturbanceObserver_H_
-#define SRC_KFDisturbanceObserver_H_
+#ifndef KFDisturbanceObserver_H_
+#define KFDisturbanceObserver_H_
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <ros/ros.h>
-#include <rotors_control/InitKF.h>
+#include <rotors_control/calibrateKF.h>
+//#include "rotors_control/common.h"
 
-
+namespace rotors_control{
 class KFDisturbanceObserver
 {
  public:
@@ -33,21 +34,33 @@ class KFDisturbanceObserver
   Eigen::Vector3d GetEstimatedVelocity(){if(initialized_) return state_.segment(3, 3); else return Eigen::Vector3d::Zero();};
   Eigen::Vector3d GetEstimatedAttitude(){if(initialized_) return state_.segment(6, 3); else return Eigen::Vector3d::Zero();};
   Eigen::Vector3d GetEstimatedAngularVelocity(){if(initialized_) return state_.segment(9, 3); else return Eigen::Vector3d::Zero();};
-  Eigen::Vector3d GetEstimatedExternalForces(){ if(initialized_) return state_.segment(12, 3); else return Eigen::Vector3d::Zero();};
-  Eigen::Vector3d GetEstimatedExternalMoments(){ if(initialized_) return state_.segment(15, 3); else return Eigen::Vector3d::Zero();};
+
+  Eigen::Vector3d GetEstimatedExternalForces(){
+    if(initialized_ == true && calibrate_ == false)
+      return state_.segment(12, 3) - forces_offset_;
+    else
+      return Eigen::Vector3d::Zero();
+  };
+  Eigen::Vector3d GetEstimatedExternalMoments(){
+    if(initialized_ && calibrate_ == false)
+      return state_.segment(15, 3) - moments_offset_;
+    else
+      return Eigen::Vector3d::Zero();
+  };
+
   void GetEstimatedState(Eigen::VectorXd* estimated_state) const;
 
 
   //Feeding
-  void FeedPositionMeasurement( Eigen::Vector3d position );
-  void FeedVelocityMeasurement( Eigen::Vector3d velocity );
-  void FeedRotationMatrix( Eigen::Matrix3d &rotation_matrix );
-  void FeedAttitudeCommand( Eigen::Vector4d roll_pitch_yaw_thrust_cmd);
-
+  void FeedPositionMeasurement(const  Eigen::Vector3d position );
+  void FeedVelocityMeasurement(  Eigen::Vector3d velocity );
+  void FeedRotationMatrix(const Eigen::Matrix3d &rotation_matrix );
+  void FeedAttitudeCommand( const Eigen::Vector4d &roll_pitch_yaw_thrust_cmd);
+ // void FeedOdometryMsg( EigenOdometry odometry);
 
 
   void Calibrate(ros::WallDuration calibration_time); //TODO(mina)
-  void UpdateEstimator(ros::Time time);
+  void UpdateEstimator();
 
 
 
@@ -75,8 +88,6 @@ class KFDisturbanceObserver
   Eigen::Vector3d external_moments_limit_;
   Eigen::Vector3d omega_limit_;
 
-  Eigen::Vector3d forces_offset_;
-  Eigen::Vector3d moments_offset_;
 
 
 
@@ -95,19 +106,27 @@ class KFDisturbanceObserver
 
   double gravity_;
 
-  ros::NodeHandle *nh_;
   ros::ServiceServer service_;
+  ros::NodeHandle* nh_;
 
 
-  ros::Time time_last_update_;
+
+ bool calibrate_;         // true if calibrating
+ ros::Time start_calibration_time_;   // t0 calibration
+ ros::Duration calibration_time_;     // calibration duration
+ Eigen::Vector3d forces_offset_;
+ Eigen::Vector3d moments_offset_;
+ int calibration_counter_;
+
+
 
 
   void SystemDynamics(double dt);
-  bool test(rotors_control::InitKF::Request &req, rotors_control::InitKF::Response &res);
+  bool StartCalibrationCallback(calibrateKF::Request &req, calibrateKF::Response &res);
 
 
 
 
 };
-
+}
 #endif /* SRC_KFDisturbanceObserver_H_ */
