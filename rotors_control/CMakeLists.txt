@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   cmake_modules
+  glog_catkin
 )
 
 find_package(Eigen REQUIRED)
@@ -16,8 +17,8 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES lee_position_controller
-  CATKIN_DEPENDS geometry_msgs mav_msgs roscpp sensor_msgs
-  DEPENDS Eigen
+  CATKIN_DEPENDS geometry_msgs mav_msgs roscpp sensor_msgs glog_catkin
+  DEPENDS Eigen glog_catkin
 )
 
 include_directories(

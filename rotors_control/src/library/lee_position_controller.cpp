@@ -24,56 +24,10 @@ namespace rotors_control {
 
 LeePositionController::LeePositionController()
     : initialized_params_(false) {
-}
-
-LeePositionController::~LeePositionController() {
-}
-
-void LeePositionController::InitializeParams() {
-
-  controller_parameters_.position_gain_ = Eigen::Vector3d(6, 6, 6);
-  controller_parameters_.velocity_gain_ = Eigen::Vector3d(4.7, 4.7, 4.7);
-  controller_parameters_.attitude_gain_ = Eigen::Vector3d(3, 3, 0.035);
-  controller_parameters_.angular_rate_gain_ = Eigen::Vector3d(0.52, 0.52, 0.025);
-
-  vehicle_parameters_.inertia_ << 0.0347563,  0,  0,
-                                  0,  0.0458929,  0,
-                                  0,  0, 0.0977;
-
-  vehicle_parameters_.rotor_force_constant_ = 8.54858e-6;  //F_i = k_n * rotor_velocity_i^2
-
-  vehicle_parameters_.rotor_moment_constant_ = 1.6e-2;  // M_i = k_m * F_i
-  vehicle_parameters_.arm_length_ = 0.215;
-  vehicle_parameters_.mass_ = 1.56779;
-
-  Rotor rotor0, rotor1, rotor2, rotor3, rotor4, rotor5;
-  rotor0.angle = 0.52359877559;
-  // rotor0.arm_length = 0.215;
-  rotor0.direction = 1;
-  vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor0);
-  rotor1.angle = 1.57079632679;
-  // rotor0.arm_length = 0.215;
-  rotor1.direction = -1;
-  vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor1);
-  rotor2.angle = 2.61799387799;
-  // rotor0.arm_length = 0.215;
-  rotor2.direction = 1;
-  vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor2);
-  rotor3.angle = -2.61799387799;
-  // rotor0.arm_length = 0.215;
-  rotor3.direction = -1;
-  vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor3);
-  rotor4.angle = -1.57079632679;
-  // rotor0.arm_length = 0.215;
-  rotor4.direction = 1;
-  vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor4);
-  rotor5.angle = -0.52359877559;
-  // rotor0.arm_length = 0.215;
-  rotor5.direction = -1;
-  vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor5);
-
   UpdateControllerMembers();
 }
+
+LeePositionController::~LeePositionController() {}
 
 void LeePositionController::UpdateControllerMembers() {
   calculateAllocationMatrix(vehicle_parameters_.rotor_configuration_, &(controller_parameters_.allocation_matrix_));
@@ -118,7 +72,7 @@ void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velo
   Eigen::Vector3d angular_acceleration;
   ComputeDesiredAngularAcc(acceleration, &angular_acceleration);
 
-  // project thrust to body z axis.
+  // Project thrust onto body z axis.
   double thrust = -vehicle_parameters_.mass_ * acceleration.dot(odometry_.orientation.toRotationMatrix().col(2));
 
   Eigen::Vector4d angular_acceleration_thrust;
@@ -166,7 +120,7 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
 
   Eigen::Matrix3d R = odometry_.orientation.toRotationMatrix();
 
-  // get desired rotation matrix
+  // Get the desired rotation matrix.
   Eigen::Vector3d b1_des;
   b1_des << cos(command_trajectory_.yaw), sin(command_trajectory_.yaw), 0;
 
@@ -182,7 +136,7 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
   R_des.col(1) = b2_des;
   R_des.col(2) = b3_des;
 
-  // angle error according to lee et al.
+  // Angle error according to lee et al.
   Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
   Eigen::Vector3d angle_error;
   angle_error << angle_error_matrix(2, 1),  // inverse skew operator
