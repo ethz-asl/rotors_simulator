@@ -18,7 +18,7 @@
   </include>
 
   <group ns="firefly">
-    <node name="rotors_controller_node" pkg="rotors_control" type="rotors_controller_node" output="screen">
+    <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
     <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example"/>

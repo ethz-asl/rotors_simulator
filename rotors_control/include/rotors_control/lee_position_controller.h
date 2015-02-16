@@ -21,16 +21,22 @@
 #ifndef ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
 #define ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
 
-#include "rotors_control/controller_base.h"
-#include "rotors_control/controller_factory.h"
+#include <mav_msgs/conversions.h>
+#include <mav_msgs/eigen_mav_msgs.h>
 
-class LeePositionController : public ControllerBase {
+#include "rotors_control/common.h"
+
+namespace rotors_control {
+
+class LeePositionController {
  public:
   LeePositionController();
-  virtual ~LeePositionController();
-  virtual void InitializeParams();
-  virtual std::shared_ptr<ControllerBase> Clone();
-  virtual void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const;
+  ~LeePositionController();
+  void InitializeParams();
+  void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const;
+
+  void SetOdometry(const EigenOdometry& odometry);
+  void SetCommandTrajectory(const mav_msgs::EigenCommandTrajectory& command_trajectory);
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
  private:
@@ -42,12 +48,18 @@ class LeePositionController : public ControllerBase {
   Eigen::Vector3d gain_angular_rate_;
   Eigen::Matrix3d inertia_matrix_;
 
+  mav_msgs::EigenCommandTrajectory command_trajectory_;
+  EigenOdometry odometry_;
+
   double mass_;
   const double gravity_;
+  double amount_rotors_;
+  bool initialized_params_;
 
   void ComputeDesiredAngularAcc(const Eigen::Vector3d& acceleration, Eigen::Vector3d* angular_acceleration) const;
   void ComputeDesiredAcceleration(Eigen::Vector3d* acceleration) const;
 
 };
+}
 
 #endif // ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
