@@ -13,7 +13,7 @@ for Quadrocopter Control by Jian Wang et al.) -->
   <xacro:property name="arm_length" value="0.17" /> <!-- [m] -->
   <xacro:property name="rotor_offset_top" value="0.01" /> <!-- [m] -->
   <xacro:property name="radius_rotor" value="0.1" /> <!-- [m] -->
-  <xacro:property name="motor_constant" value="5.7e-08" /> <!-- [kg·m/s^2] -->
+  <xacro:property name="motor_constant" value="8.54858e-06" /> <!-- [kg·m/s^2] -->
   <xacro:property name="moment_constant" value="0.016" /> <!-- [m] -->
   <xacro:property name="time_constant_up" value="0.0125" /> <!-- [s] -->
   <xacro:property name="time_constant_down" value="0.025" /> <!-- [s] -->

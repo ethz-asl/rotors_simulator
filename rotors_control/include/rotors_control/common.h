@@ -21,8 +21,11 @@
 #ifndef INCLUDE_ROTORS_CONTROL_COMMON_H_
 #define INCLUDE_ROTORS_CONTROL_COMMON_H_
 
-#include <nav_msgs/Odometry.h>
+#include <glog/logging.h>
 #include <mav_msgs/conversions.h>
+#include <nav_msgs/Odometry.h>
+
+#include "rotors_control/parameters.h"
 
 namespace rotors_control {
 
@@ -56,7 +59,6 @@ struct EigenOdometry {
   Eigen::Vector3d angular_velocity;
 };
 
-
 void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
                           EigenOdometry* odometry) {
   odometry->position = mav_msgs::vector3FromPointMsg(msg->pose.pose.position);
@@ -65,6 +67,26 @@ void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
   odometry->angular_velocity = mav_msgs::vector3FromMsg(msg->twist.twist.angular);
 }
 
+void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
+                               Eigen::Matrix4Xd* allocation_matrix) {
+  CHECK_NOTNULL(allocation_matrix);
+  allocation_matrix->resize(4, rotor_configuration.rotors.size());
+  unsigned int i = 0;
+  for (const Rotor& rotor : rotor_configuration.rotors) {
+    // Set first row of allocation matrix.
+    (*allocation_matrix)(0, i) = sin(rotor.angle) * rotor.arm_length
+                                 * rotor.rotor_force_constant;
+    // Set second row of allocation matrix.
+    (*allocation_matrix)(1, i) = -cos(rotor.angle) * rotor.arm_length
+                                 * rotor.rotor_force_constant;
+    // Set third row of allocation matrix.
+    (*allocation_matrix)(2, i) = -rotor.direction * rotor.rotor_force_constant
+                                 * rotor.rotor_moment_constant;
+    // Set forth row of allocation matrix.
+    (*allocation_matrix)(3, i) = rotor.rotor_force_constant;
+    ++i;
+  }
+}
 }
 
 #endif /* INCLUDE_ROTORS_CONTROL_COMMON_H_ */

@@ -25,40 +25,61 @@
 #include <mav_msgs/eigen_mav_msgs.h>
 
 #include "rotors_control/common.h"
+#include "rotors_control/parameters.h"
 
 namespace rotors_control {
+
+// Default values for the lee position controller and the Asctec Firefly.
+static const Eigen::Vector3d kDefaultPositionGain = Eigen::Vector3d(6, 6, 6);
+static const Eigen::Vector3d kDefaultVelocityGain = Eigen::Vector3d(4.7, 4.7, 4.7);
+static const Eigen::Vector3d kDefaultAttitudeGain = Eigen::Vector3d(3, 3, 0.035);
+static const Eigen::Vector3d kDefaultAngularRateGain = Eigen::Vector3d(0.52, 0.52, 0.025);
+
+class LeePositionControllerParameters {
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  LeePositionControllerParameters()
+      : position_gain_(kDefaultPositionGain),
+        velocity_gain_(kDefaultVelocityGain),
+        attitude_gain_(kDefaultAttitudeGain),
+        angular_rate_gain_(kDefaultAngularRateGain) {
+    calculateAllocationMatrix(rotor_configuration_, &allocation_matrix_);
+  }
+
+  Eigen::Matrix4Xd allocation_matrix_;
+  Eigen::Vector3d position_gain_;
+  Eigen::Vector3d velocity_gain_;
+  Eigen::Vector3d attitude_gain_;
+  Eigen::Vector3d angular_rate_gain_;
+  RotorConfiguration rotor_configuration_;
+};
 
 class LeePositionController {
  public:
   LeePositionController();
   ~LeePositionController();
-  void InitializeParams();
+  void InitializeParameters();
   void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const;
 
   void SetOdometry(const EigenOdometry& odometry);
   void SetCommandTrajectory(const mav_msgs::EigenCommandTrajectory& command_trajectory);
 
+  LeePositionControllerParameters controller_parameters_;
+  VehicleParameters vehicle_parameters_;
+
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
  private:
-  Eigen::Matrix4Xd allocation_matrix_;
+  bool initialized_params_;
+
+  Eigen::Vector3d normalized_attitude_gain_;
+  Eigen::Vector3d normalized_angular_rate_gain_;
   Eigen::MatrixX4d angular_acc_to_rotor_velocities_;
-  Eigen::Vector3d gain_position_;
-  Eigen::Vector3d gain_velocity_;
-  Eigen::Vector3d gain_attitude_;
-  Eigen::Vector3d gain_angular_rate_;
-  Eigen::Matrix3d inertia_matrix_;
 
   mav_msgs::EigenCommandTrajectory command_trajectory_;
   EigenOdometry odometry_;
 
-  double mass_;
-  const double gravity_;
-  double amount_rotors_;
-  bool initialized_params_;
-
   void ComputeDesiredAngularAcc(const Eigen::Vector3d& acceleration, Eigen::Vector3d* angular_acceleration) const;
   void ComputeDesiredAcceleration(Eigen::Vector3d* acceleration) const;
-
 };
 }
 

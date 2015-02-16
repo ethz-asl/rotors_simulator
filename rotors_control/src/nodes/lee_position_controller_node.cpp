@@ -20,20 +20,18 @@
 
 #include "rotors_control/lee_position_controller_node.h"
 
+#include "rotors_control/parameters_ros.h"
+
 namespace rotors_control {
 
 LeePositionControllerNode::LeePositionControllerNode() {
-
+  google::InitGoogleLogging("rotors_control_glogger");
   InitializeParams();
-
-  lee_position_controller_.InitializeParams();
 
   ros::NodeHandle nh(namespace_);
 
   cmd_trajectory_sub_ = nh.subscribe(command_trajectory_sub_topic_, 10,
                                      &LeePositionControllerNode::CommandTrajectoryCallback, this);
-
-
   odometry_sub_ = nh.subscribe(odometry_sub_topic_, 10,
                                &LeePositionControllerNode::OdometryCallback, this);
 
@@ -44,14 +42,99 @@ LeePositionControllerNode::LeePositionControllerNode() {
 LeePositionControllerNode::~LeePositionControllerNode() { }
 
 void LeePositionControllerNode::InitializeParams() {
-  //TODO(burrimi): Read parameters from yaml.
-
   ros::NodeHandle pnh("~");
   pnh.param<std::string>("robotNamespace", namespace_, kDefaultNamespace);
   pnh.param<std::string>("commandTrajectorySubTopic", command_trajectory_sub_topic_, kDefaultCommandTrajectoryTopic);
   pnh.param<std::string>("odometrySubTopic", odometry_sub_topic_, kDefaultOdometrySubTopic);
   pnh.param<std::string>("motorVelocityCommandPubTopic", motor_velocity_reference_pub_topic_, kDefaultMotorVelocityReferencePubTopic);
+  // Read parameters from rosparam.
+  GetRosParameter(pnh, "position_gain/x",
+                  lee_position_controller_.controller_parameters_.position_gain_.x(),
+                  &lee_position_controller_.controller_parameters_.position_gain_.x());
+  GetRosParameter(pnh, "position_gain/y",
+                  lee_position_controller_.controller_parameters_.position_gain_.y(),
+                  &lee_position_controller_.controller_parameters_.position_gain_.y());
+  GetRosParameter(pnh, "position_gain/z",
+                  lee_position_controller_.controller_parameters_.position_gain_.z(),
+                  &lee_position_controller_.controller_parameters_.position_gain_.z());
+  GetRosParameter(pnh, "velocity_gain/x",
+                  lee_position_controller_.controller_parameters_.velocity_gain_.x(),
+                  &lee_position_controller_.controller_parameters_.velocity_gain_.x());
+  GetRosParameter(pnh, "velocity_gain/y",
+                  lee_position_controller_.controller_parameters_.velocity_gain_.y(),
+                  &lee_position_controller_.controller_parameters_.velocity_gain_.y());
+  GetRosParameter(pnh, "velocity_gain/z",
+                  lee_position_controller_.controller_parameters_.velocity_gain_.z(),
+                  &lee_position_controller_.controller_parameters_.velocity_gain_.z());
+  GetRosParameter(pnh, "attitude_gain/x",
+                  lee_position_controller_.controller_parameters_.attitude_gain_.x(),
+                  &lee_position_controller_.controller_parameters_.attitude_gain_.x());
+  GetRosParameter(pnh, "attitude_gain/y",
+                  lee_position_controller_.controller_parameters_.attitude_gain_.y(),
+                  &lee_position_controller_.controller_parameters_.attitude_gain_.y());
+  GetRosParameter(pnh, "attitude_gain/z",
+                  lee_position_controller_.controller_parameters_.attitude_gain_.z(),
+                  &lee_position_controller_.controller_parameters_.attitude_gain_.z());
+  GetRosParameter(pnh, "angular_rate_gain/x",
+                  lee_position_controller_.controller_parameters_.angular_rate_gain_.x(),
+                  &lee_position_controller_.controller_parameters_.angular_rate_gain_.x());
+  GetRosParameter(pnh, "angular_rate_gain/y",
+                  lee_position_controller_.controller_parameters_.angular_rate_gain_.y(),
+                  &lee_position_controller_.controller_parameters_.angular_rate_gain_.y());
+  GetRosParameter(pnh, "angular_rate_gain/z",
+                  lee_position_controller_.controller_parameters_.angular_rate_gain_.z(),
+                  &lee_position_controller_.controller_parameters_.angular_rate_gain_.z());
+  GetRosParameter(pnh, "mass",
+                  lee_position_controller_.vehicle_parameters_.mass_,
+                  &lee_position_controller_.vehicle_parameters_.mass_);
+  GetRosParameter(pnh, "inertia/xx",
+                  lee_position_controller_.vehicle_parameters_.inertia_(0, 0),
+                  &lee_position_controller_.vehicle_parameters_.inertia_(0, 0));
+  GetRosParameter(pnh, "inertia/xy",
+                  lee_position_controller_.vehicle_parameters_.inertia_(0, 1),
+                  &lee_position_controller_.vehicle_parameters_.inertia_(0, 1));
+  lee_position_controller_.vehicle_parameters_.inertia_(1, 0) =
+      lee_position_controller_.vehicle_parameters_.inertia_(0, 1);
+  GetRosParameter(pnh, "inertia/xz",
+                  lee_position_controller_.vehicle_parameters_.inertia_(0, 2),
+                  &lee_position_controller_.vehicle_parameters_.inertia_(0, 2));
+  lee_position_controller_.vehicle_parameters_.inertia_(2, 0) =
+      lee_position_controller_.vehicle_parameters_.inertia_(0, 2);
+  GetRosParameter(pnh, "inertia/yy",
+                  lee_position_controller_.vehicle_parameters_.inertia_(1, 1),
+                  &lee_position_controller_.vehicle_parameters_.inertia_(1, 1));
+  GetRosParameter(pnh, "inertia/yz",
+                  lee_position_controller_.vehicle_parameters_.inertia_(1, 2),
+                  &lee_position_controller_.vehicle_parameters_.inertia_(1, 2));
+  lee_position_controller_.vehicle_parameters_.inertia_(2, 1) =
+      lee_position_controller_.vehicle_parameters_.inertia_(1, 2);
+  GetRosParameter(pnh, "inertia/zz",
+                  lee_position_controller_.vehicle_parameters_.inertia_(2, 2),
+                  &lee_position_controller_.vehicle_parameters_.inertia_(2, 2));
 
+  // Get the rotor configuration.
+  std::map<std::string, double> single_rotor;
+  std::string rotor_configuration_string = "rotor_configuration/";
+  unsigned int i = 0;
+  while (pnh.getParam(rotor_configuration_string + std::to_string(i), single_rotor)) {
+    if (i == 0) {
+      lee_position_controller_.vehicle_parameters_.rotor_configuration_.rotors.clear();
+    }
+    Rotor rotor;
+    pnh.getParam(rotor_configuration_string + std::to_string(i) + "/angle",
+                 rotor.angle);
+    pnh.getParam(rotor_configuration_string + std::to_string(i) + "/arm_length",
+                 rotor.arm_length);
+    pnh.getParam(rotor_configuration_string + std::to_string(i) + "/rotor_force_constant",
+                 rotor.rotor_force_constant);
+    pnh.getParam(rotor_configuration_string + std::to_string(i) + "/rotor_moment_constant",
+                 rotor.rotor_moment_constant);
+    pnh.getParam(rotor_configuration_string + std::to_string(i) + "/direction",
+                 rotor.direction);
+    lee_position_controller_.vehicle_parameters_.rotor_configuration_.rotors.push_back(rotor);
+    ++i;
+  }
+  lee_position_controller_.InitializeParameters();
 }
 void LeePositionControllerNode::Publish() {
 }
