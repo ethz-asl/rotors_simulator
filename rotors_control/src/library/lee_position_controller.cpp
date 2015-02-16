@@ -43,6 +43,8 @@ void LeePositionController::InitializeParameters() {
   I.block<3, 3>(0, 0) = vehicle_parameters_.inertia_;
   I(3, 3) = 1;
   angular_acc_to_rotor_velocities_.resize(vehicle_parameters_.rotor_configuration_.rotors.size(), 4);
+  // Calculate the pseude-inverse A^{ \dagger} and then multiply by the inertia matrix I.
+  // A^{ \dagger} = A^T*(A*A^T)^{-1}
   angular_acc_to_rotor_velocities_ = controller_parameters_.allocation_matrix_.transpose()
       * (controller_parameters_.allocation_matrix_
       * controller_parameters_.allocation_matrix_.transpose()).inverse() * I;
@@ -94,7 +96,7 @@ void LeePositionController::ComputeDesiredAcceleration(Eigen::Vector3d* accelera
   Eigen::Vector3d velocity_error;
   velocity_error = velocity_W - command_trajectory_.velocity;
 
-  Eigen::Vector3d e_3(0, 0, 1);
+  Eigen::Vector3d e_3(Eigen::Vector3d::UnitZ());
 
   *acceleration = (position_error.cwiseProduct(controller_parameters_.position_gain_)
       + velocity_error.cwiseProduct(controller_parameters_.velocity_gain_)) / vehicle_parameters_.mass_

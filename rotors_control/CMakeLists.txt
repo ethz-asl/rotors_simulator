@@ -17,7 +17,7 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES lee_position_controller
-  CATKIN_DEPENDS geometry_msgs mav_msgs roscpp sensor_msgs glog_catkin
+  CATKIN_DEPENDS geometry_msgs mav_msgs roscpp sensor_msgs
   DEPENDS Eigen glog_catkin
 )
 

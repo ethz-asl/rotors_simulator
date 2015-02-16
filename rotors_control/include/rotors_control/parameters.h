@@ -29,9 +29,9 @@ struct Rotor {
         rotor_force_constant(kDefaultRotorForceConstant),
         rotor_moment_constant(kDefaultRotorMomentConstant),
         direction(1) {}
-  Rotor(const double _angle, const double _arm_length,
-        const double _rotor_force_constant, const double _rotor_moment_constant,
-        const int _direction)
+  Rotor(double _angle, double _arm_length,
+        double _rotor_force_constant, double _rotor_moment_constant,
+        int _direction)
       : angle(_angle),
         arm_length(_arm_length),
         rotor_force_constant(_rotor_force_constant),
