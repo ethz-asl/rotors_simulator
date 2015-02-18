@@ -14,11 +14,11 @@
     <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
   </include>
   <node pkg="tf" type="static_transform_publisher" name="camera_left_link_broadcaster"
-    args="0 0 0 -1.570796 0 -1.570796 vi_sensor_link camera_left_link 10" />
+    args="0.015 0.055 0.0065 -1.570796 0 -1.570796 vi_sensor_link camera_left_link 10" />
   <node pkg="tf" type="static_transform_publisher" name="camera_right_link_broadcaster"
-    args="0 0 0 -1.570796 0 -1.570796 vi_sensor_link camera_right_link 10" />
+    args="0.015 -0.055 0.0065 -1.570796 0 -1.570796 vi_sensor_link camera_right_link 10" />
   <node pkg="tf" type="static_transform_publisher" name="kinect_link_broadcaster"
-    args="0 0 0 -1.570796 0 -1.570796 vi_sensor_link kinect_link 10" />
-  <node pkg="tf" type="static_transform_publisher" name="imukinect_link_broadcaster"
-    args="0 0 0 0 0 0 vi_sensor_link imu_link 100" />
+    args="0.015 0 0.0065 -1.570796 0 -1.570796 vi_sensor_link kinect_link 10" />
+  <node pkg="tf" type="static_transform_publisher" name="imu_link_broadcaster"
+    args="0.015 0 0.0113 0 0 0 vi_sensor_link imu_link 100" />
 </launch>
