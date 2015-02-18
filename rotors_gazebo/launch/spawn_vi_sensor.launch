@@ -1,8 +1,15 @@
 <?xml version="1.0"?>
 
 <launch>
+  <arg name="enable_cameras" default="false"/>
+  <arg name="enable_kinect" default="false"/>
+  <arg name="enable_ground_truth" default="false"/>
   <param name="robot_description"
-    command="$(find xacro)/xacro.py '$(find mav_description)/urdf/vi_sensor.xacro'" />
+    command="$(find xacro)/xacro.py '$(find rotors_description)/urdf/vi_sensor_base.xacro'
+    enable_cameras:=$(arg enable_cameras)
+    enable_kinect:=$(arg enable_kinect)
+    enable_ground_truth:=$(arg enable_ground_truth)"
+  />
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
   <node name="spawn_robot" pkg="gazebo_ros" type="spawn_model"

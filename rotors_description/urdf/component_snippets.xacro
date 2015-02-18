@@ -125,7 +125,7 @@
 
   <!-- Macro to add an IMU. -->
   <xacro:macro name="imu_plugin_macro"
-    params="namespace imu_suffix imu_topic
+    params="namespace imu_suffix parent_link imu_topic
       mass_imu_sensor gyroscope_noise_density gyroscopoe_random_walk
       gyroscope_bias_correlation_time gyroscope_turn_on_bias_sigma
       accelerometer_noise_density accelerometer_random_walk
@@ -142,7 +142,7 @@
     <!-- IMU joint -->
     <joint name="imu${imu_suffix}_joint" type="revolute">
       <xacro:insert_block name="origin" />
-      <parent link="base_link" />
+      <parent link="${parent_link}" />
       <child link="imu${imu_suffix}_link" />
       <limit upper="0" lower="0" effort="0" velocity="0" />
     </joint>
@@ -168,7 +168,7 @@
 <!-- Macro to add a generic odometry sensor. -->
   <xacro:macro name="odometry_plugin_macro"
     params="
-      namespace odometry_sensor_suffix pose_topic pose_with_covariance_topic
+      namespace odometry_sensor_suffix parent_link pose_topic pose_with_covariance_topic
       position_topic transform_topic odometry_topic parent_frame_id
       mass_odometry_sensor measurement_divisor measurement_delay unknown_delay
       noise_normal_position noise_normal_quaternion noise_normal_linear_velocity
@@ -185,7 +185,7 @@
     </link>
     <!-- odometry joint -->
     <joint name="odometry_sensor${odometry_sensor_suffix}_joint" type="revolute">
-      <parent link="base_link" />
+      <parent link="${parent_link}" />
       <xacro:insert_block name="origin" />
       <child link="odometry_sensor${odometry_sensor_suffix}_link" />
       <limit upper="0" lower="0" effort="0" velocity="0" />
@@ -237,6 +237,91 @@
         <windGustStart>${wind_gust_start}</windGustStart> <!-- [s] -->
         <windGustForceMean>${wind_gust_force_mean}</windGustForceMean> <!-- [N] -->
       </plugin>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Macro to add the wind plugin. -->
+  <xacro:macro name="vi_sensor_camera_macro"
+    params="camera_suffix frame_rate">
+    <gazebo reference="camera_${camera_suffix}_link">
+      <sensor type="camera" name="camera_${camera_suffix}">
+        <update_rate>${frame_rate}</update_rate>
+        <camera name="head">
+          <horizontal_fov>1.3962634</horizontal_fov>
+          <image>
+            <width>752</width>
+            <height>480</height>
+            <format>L8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>30</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <!-- Noise is sampled independently per pixel on each frame.
+                 That pixel's noise value is added to each of its color
+                 channels, which at that point lie in the range [0,1]. -->
+            <mean>0.0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+        <plugin name="camera_${camera_suffix}_controller" filename="libgazebo_ros_camera.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>${frame_rate}</updateRate>
+          <cameraName>vi_sensor/camera_${camera_suffix}</cameraName>
+          <imageTopicName>image_raw</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+          <frameName>camera_${camera_suffix}_link</frameName>
+          <hackBaseline>0.0</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+      </sensor>
+      <turnGravityOff>true</turnGravityOff>
+      <material>Gazebo/Blue</material>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:macro name="vi_sensor_kinect_macro" params="frame_rate">
+    <gazebo reference="kinect_link">
+      <sensor type="depth" name="vi_sensor_kinect">
+        <always_on>true</always_on>
+        <update_rate>${frame_rate}</update_rate>
+        <camera>
+          <horizontal_fov>2</horizontal_fov>
+          <image>
+            <format>L8</format>
+            <width>640</width>
+            <height>480</height>
+          </image>
+          <clip>
+            <near>0.01</near>
+            <far>100</far>
+          </clip>
+        </camera>
+        <plugin name="kinect" filename="libgazebo_ros_openni_kinect.so">
+          <baseline>0.11</baseline>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>${frame_rate}</updateRate>
+          <cameraName>vi_sensor/kinect</cameraName>
+          <imageTopicName>camera/image_raw</imageTopicName>
+          <cameraInfoTopicName>camera/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>depth/disparity</depthImageTopicName>
+          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>depth/points</pointCloudTopicName>
+          <frameName>kinect_link</frameName>
+          <pointCloudCutoff>0.5</pointCloudCutoff>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+      </sensor>
     </gazebo>
   </xacro:macro>
 </robot>
