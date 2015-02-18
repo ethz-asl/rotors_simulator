@@ -20,14 +20,14 @@
     </visual>
 
     <inertial>
-      <mass value="1e-5" />
+      <mass value="0.13" />
       <origin xyz="0 0 0" rpy="0 0 0" />
       <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
     </inertial>
   </link>
 
   <!-- Left Camera Link -->
-  <link name="camera_left_link">
+  <link name="vi_sensor/camera_left_link">
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -43,7 +43,7 @@
   </link>
 
   <!-- Right Camera Link -->
-  <link name="camera_right_link">
+  <link name="vi_sensor/camera_right_link">
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -59,13 +59,13 @@
   </link>
 
   <!-- Kinect Link -->
-  <link name="kinect_link" />
+  <link name="vi_sensor/kinect_link" />
 
     <!-- Left Camera Joint -->
   <joint name="camera_left_joint" type="fixed">
     <origin xyz="0.015 0.055 0.0065" rpy="0 0 0" />
     <parent link="vi_sensor_link" />
-    <child link="camera_left_link" />
+    <child link="vi_sensor/camera_left_link" />
     <limit upper="0" lower="0" effort="0" velocity="0" />
   </joint>
 
@@ -73,7 +73,7 @@
   <joint name="camera_right_joint" type="fixed">
     <origin xyz="0.015 -0.055 0.0065" rpy="0 0 0" />
     <parent link="vi_sensor_link" />
-    <child link="camera_right_link" />
+    <child link="vi_sensor/camera_right_link" />
     <limit upper="0" lower="0" effort="0" velocity="0" />
   </joint>
 
@@ -81,7 +81,7 @@
   <joint name="kinect_joint" type="fixed">
     <origin xyz="0.015 0 0.0065" rpy="0 0 0" />
     <parent link="vi_sensor_link" />
-    <child link="kinect_link" />
+    <child link="vi_sensor/kinect_link" />
     <limit upper="0" lower="0" effort="0" velocity="0" />
   </joint>
 

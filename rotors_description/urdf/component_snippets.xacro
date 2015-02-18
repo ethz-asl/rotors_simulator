@@ -243,7 +243,7 @@
   <!-- Macro to add the wind plugin. -->
   <xacro:macro name="vi_sensor_camera_macro"
     params="camera_suffix frame_rate">
-    <gazebo reference="camera_${camera_suffix}_link">
+    <gazebo reference="${namespace}/camera_${camera_suffix}_link">
       <sensor type="camera" name="camera_${camera_suffix}">
         <update_rate>${frame_rate}</update_rate>
         <camera name="head">
@@ -267,9 +267,10 @@
           </noise>
         </camera>
         <plugin name="camera_${camera_suffix}_controller" filename="libgazebo_ros_camera.so">
+          <robotNamespace>${namespace}</robotNamespace>
           <alwaysOn>true</alwaysOn>
           <updateRate>${frame_rate}</updateRate>
-          <cameraName>vi_sensor/camera_${camera_suffix}</cameraName>
+          <cameraName>camera_${camera_suffix}</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>camera_${camera_suffix}_link</frameName>
@@ -287,7 +288,7 @@
   </xacro:macro>
 
   <xacro:macro name="vi_sensor_kinect_macro" params="frame_rate">
-    <gazebo reference="kinect_link">
+    <gazebo reference="${namespace}/kinect_link">
       <sensor type="depth" name="vi_sensor_kinect">
         <always_on>true</always_on>
         <update_rate>${frame_rate}</update_rate>
@@ -304,10 +305,11 @@
           </clip>
         </camera>
         <plugin name="kinect" filename="libgazebo_ros_openni_kinect.so">
-          <baseline>0.11</baseline>
+          <robotNamespace>${namespace}</robotNamespace>
           <alwaysOn>true</alwaysOn>
+          <baseline>0.11</baseline>
           <updateRate>${frame_rate}</updateRate>
-          <cameraName>vi_sensor/kinect</cameraName>
+          <cameraName>kinect</cameraName>
           <imageTopicName>camera/image_raw</imageTopicName>
           <cameraInfoTopicName>camera/camera_info</cameraInfoTopicName>
           <depthImageTopicName>depth/disparity</depthImageTopicName>
