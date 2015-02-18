@@ -70,12 +70,4 @@
     <origin xyz="0.015 0 0.0113" rpy="0 0 0" />
   </xacro:imu_plugin_macro>
 
-  <gazebo>
-    <plugin filename="librotors_gazebo_trajectory_plugin.so" name="camera_trajectory">
-      <linkName>vi_sensor_link</linkName>
-      <robotNamespace>vi_sensor</robotNamespace>
-      <imuTopic>imu</imuTopic>
-    </plugin>
-  </gazebo>
-
 </robot>

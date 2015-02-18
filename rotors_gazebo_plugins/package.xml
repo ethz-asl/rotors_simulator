@@ -30,7 +30,6 @@
   <build_depend>geometry_msgs</build_depend>
   <build_depend>cmake_modules</build_depend>
   <build_depend>glog_catkin</build_depend>
-  <build_depend>mav_planning_utils</build_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>gazebo_ros</run_depend>
@@ -46,6 +45,5 @@
   <run_depend>planning_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>glog_catkin</run_depend>
-  <run_depend>mav_planning_utils</run_depend>
 
 </package>

@@ -12,7 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   octomap_ros
   octomap_msgs
   planning_msgs
-  mav_planning_utils
   geometry_msgs
   cmake_modules
   glog_catkin
@@ -29,7 +28,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
-  CATKIN_DEPENDS roscpp rotors_model mav_msgs octomap_ros octomap_msgs planning_msgs geometry_msgs mav_planning_utils glog_catkin
+  CATKIN_DEPENDS roscpp rotors_model mav_msgs octomap_ros octomap_msgs planning_msgs geometry_msgs glog_catkin
   DEPENDS eigen gazebo octomap opencv glog_catkin
 )
 
@@ -55,10 +54,6 @@ add_dependencies(rotors_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})
 add_library(rotors_gazebo_bag_plugin src/gazebo_bag_plugin.cpp)
 target_link_libraries(rotors_gazebo_bag_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(rotors_gazebo_bag_plugin ${catkin_EXPORTED_TARGETS})
-
-add_library(rotors_gazebo_trajectory_plugin src/gazebo_trajectory_plugin.cpp)
-target_link_libraries(rotors_gazebo_trajectory_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-add_dependencies(rotors_gazebo_trajectory_plugin ${catkin_EXPORTED_TARGETS})
 
 add_library(rotors_gazebo_wind_plugin src/gazebo_wind_plugin.cpp)
 target_link_libraries(rotors_gazebo_wind_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
