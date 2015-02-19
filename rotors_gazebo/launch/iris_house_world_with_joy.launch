@@ -1,5 +1,17 @@
 <launch>
-  <include file="$(find rotors_gazebo)/launch/iris_house_world.launch" />
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="iris"/>
+  <arg name="headless" default="false"/>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find rotors_gazebo)/launch/iris_house_world.launch">
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="enable_logging" value="$(arg enable_logging)" />
+    <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+    <arg name="log_file" value="$(arg log_file)"/>
+  </include>
   <node ns="iris" name="joy_node" pkg="joy" type="joy_node" />
   <node ns="iris" name="rotors_joy_interface" pkg="rotors_joy_interface" type="rotors_joy_interface" />
 </launch>
