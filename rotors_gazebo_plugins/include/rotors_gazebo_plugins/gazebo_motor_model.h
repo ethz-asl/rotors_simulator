@@ -31,7 +31,7 @@
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
 #include <rotors_model/motor_model.hpp>
-#include <mav_msgs/MotorSpeed.h>
+#include <mav_msgs/CommandMotorSpeed.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>

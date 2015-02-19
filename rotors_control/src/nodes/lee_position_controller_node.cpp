@@ -158,7 +158,7 @@ void LeePositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPt
   // Todo(ffurrer): Do this in the conversions header.
   mav_msgs::CommandMotorSpeedPtr turning_velocities_msg(new mav_msgs::CommandMotorSpeed);
 
-  turning_velocities_msg.motor_speed.clear();
+  turning_velocities_msg->motor_speed.clear();
   for (int i = 0; i < ref_rotor_velocities.size(); i++)
     turning_velocities_msg->motor_speed.push_back(ref_rotor_velocities[i]);
   turning_velocities_msg->header.stamp = odometry_msg->header.stamp;

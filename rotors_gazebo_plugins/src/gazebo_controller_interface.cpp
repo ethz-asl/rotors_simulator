@@ -63,7 +63,7 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
                                            &GazeboControllerInterface::CommandMotorCallback,
                                            this);
 
-  motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_velocity_reference_pub_topic_, 10);
+  motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::CommandMotorSpeed>(motor_velocity_reference_pub_topic_, 10);
 }
 
 // This gets called by the world update start event.
@@ -74,12 +74,12 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
   common::Time now = world_->GetSimTime();
 
-  mav_msgs::MotorSpeed turning_velocities_msg;
+  mav_msgs::CommandMotorSpeedPtr turning_velocities_msg(new mav_msgs::CommandMotorSpeed);
 
   for (int i = 0; i < input_reference_.size(); i++)
-    turning_velocities_msg.motor_speed.push_back(input_reference_[i]);
-  turning_velocities_msg.header.stamp.sec = now.sec;
-  turning_velocities_msg.header.stamp.nsec = now.nsec;
+    turning_velocities_msg->motor_speed.push_back(input_reference_[i]);
+  turning_velocities_msg->header.stamp.sec = now.sec;
+  turning_velocities_msg->header.stamp.nsec = now.nsec;
 
   motor_velocity_reference_pub_.publish(turning_velocities_msg);
 }
