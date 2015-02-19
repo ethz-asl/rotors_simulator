@@ -60,7 +60,11 @@ int main(int argc, char** argv){
   trajectory_msg.position.x = 0;
   trajectory_msg.position.y = 0;
   trajectory_msg.position.z = 1;
-  trajectory_pub.publish(trajectory_msg);
 
-  ros::spin();
+  while(ros::ok()){
+    ROS_INFO("Publish waypoint.");
+    trajectory_msg.header.stamp = ros::Time::now();
+    trajectory_pub.publish(trajectory_msg);
+    ros::Duration(1.0).sleep();
+  }
 }

@@ -52,17 +52,13 @@ class LeePositionControllerNode {
   LeePositionController lee_position_controller_;
 
   std::string namespace_;
-  std::string motor_velocity_reference_pub_topic_;
-  std::string odometry_sub_topic_;
-
-  // command topics
-  std::string command_trajectory_sub_topic_;
-  ros::Publisher motor_velocity_reference_pub_;
 
   // subscribers
   ros::Subscriber cmd_trajectory_sub_;
   ros::Subscriber odometry_sub_;
 
+  ros::Publisher motor_velocity_reference_pub_;
+  
   void CommandTrajectoryCallback(
       const mav_msgs::CommandTrajectoryConstPtr& trajectory_reference_msg);
 
