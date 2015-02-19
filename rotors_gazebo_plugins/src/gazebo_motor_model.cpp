@@ -100,9 +100,10 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<double>(_sdf, "timeConstantDown", time_constant_down_, time_constant_down_);
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
 
-  // Set the maximumForce on the joint.
+  // Set the maximumForce on the joint. This is deprecated from V5 on, and the joint won't move.
+#if GAZEBO_MAJOR_VERSION < 5
   joint_->SetMaxForce(0, max_force_);
-
+#endif
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboMotorModel::OnUpdate, this, _1));
