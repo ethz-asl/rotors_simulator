@@ -38,10 +38,14 @@
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
+
 // Default values
 static const std::string kDefaultNamespace = "";
-static const std::string kDefaultMotorVelocityReferencePubTopic = "motor_velocity_reference";
-static const std::string kDefaultCommandMotorSpeedSubTopic = "command/motors";
+
+// This just proxies the motor commands from command/motor_speed to the single motors via internal
+// ConsPtr passing, such that the original commands don't have to go n_motors-times over the wire.
+static const std::string kDefaultMotorVelocityReferencePubTopic = "gazebo/command/motor_speed";
+static const std::string kDefaultCommandMotorSpeedSubTopic = "command/motor_speed";
 
 class GazeboControllerInterface : public ModelPlugin {
  public:

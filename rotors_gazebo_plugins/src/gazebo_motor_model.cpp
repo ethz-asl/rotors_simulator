@@ -100,11 +100,6 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<double>(_sdf, "timeConstantDown", time_constant_down_, time_constant_down_);
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
 
-  inertia_ = link_->GetInertial()->GetIZZ();
-  viscous_friction_coefficient_ = inertia_ / time_constant_up_;
-  // Set the max_force_ to the maximum double value the limitations get handled by the FirstOrderFilter.
-  max_force_ = std::numeric_limits<double>::max();
-
   // Set the maximumForce on the joint.
   joint_->SetMaxForce(0, max_force_);
 
@@ -164,6 +159,7 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   // Apply the filter on the motor's velocity.
   ref_motor_rot_vel_ = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
   joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
+  ROS_ERROR("actual ref %f vs joint %f", ref_motor_rot_vel_, joint_->GetVelocity(0));
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMotorModel);

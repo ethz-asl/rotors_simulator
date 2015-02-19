@@ -31,9 +31,6 @@ GazeboControllerInterface::~GazeboControllerInterface() {
   }
 }
 
-// void GazeboControllerInterface::InitializeParams() {};
-// void GazeboControllerInterface::Publish() {};
-
 void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Store the pointer to the model.
   model_ = _model;
@@ -51,7 +48,7 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 
   getSdfParam<std::string>(_sdf, "commandMotorSpeedSubTopic", command_motor_speed_sub_topic_,
                            command_motor_speed_sub_topic_);
-  getSdfParam<std::string>(_sdf, "motorVelocityCommandPubTopic", motor_velocity_reference_pub_topic_,
+  getSdfParam<std::string>(_sdf, "motorSpeedCommandPubTopic", motor_velocity_reference_pub_topic_,
                            motor_velocity_reference_pub_topic_);
 
   // Listen to the update event. This event is broadcast every
