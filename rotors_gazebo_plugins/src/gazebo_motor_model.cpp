@@ -86,8 +86,8 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'ccw').\n";
 
   getSdfParam<std::string>(_sdf, "commandSubTopic", command_sub_topic_, command_sub_topic_);
-  getSdfParam<std::string>(_sdf, "motorVelocityPubTopic", motor_velocity_pub_topic_,
-                           motor_velocity_pub_topic_);
+  getSdfParam<std::string>(_sdf, "motorSpeedPubTopic", motor_speed_pub_topic_,
+                           motor_speed_pub_topic_);
 
   getSdfParam<double>(_sdf, "rotorDragCoefficient", rotor_drag_coefficient_, rotor_drag_coefficient_);
   getSdfParam<double>(_sdf, "rollingMomentCoefficient", rolling_moment_coefficient_,
@@ -100,20 +100,16 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<double>(_sdf, "timeConstantDown", time_constant_down_, time_constant_down_);
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
 
-  inertia_ = link_->GetInertial()->GetIZZ();
-  viscous_friction_coefficient_ = inertia_ / time_constant_up_;
-  // Set the max_force_ to the maximum double value the limitations get handled by the FirstOrderFilter.
-  max_force_ = std::numeric_limits<double>::max();
-
-  // Set the maximumForce on the joint.
+  // Set the maximumForce on the joint. This is deprecated from V5 on, and the joint won't move.
+#if GAZEBO_MAJOR_VERSION < 5
   joint_->SetMaxForce(0, max_force_);
-
+#endif
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboMotorModel::OnUpdate, this, _1));
 
   command_sub_ = node_handle_->subscribe(command_sub_topic_, 1000, &GazeboMotorModel::VelocityCallback, this);
-  motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_pub_topic_, 10);
+  motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_speed_pub_topic_, 10);
 
   // Create the first order filter.
   rotor_velocity_filter_.reset(new FirstOrderFilter<double>(time_constant_up_, time_constant_down_, ref_motor_rot_vel_));
@@ -127,11 +123,11 @@ void GazeboMotorModel::OnUpdate(const common::UpdateInfo& _info) {
   Publish();
 }
 
-void GazeboMotorModel::VelocityCallback(const mav_msgs::MotorSpeedPtr& rot_velocities) {
+void GazeboMotorModel::VelocityCallback(const mav_msgs::CommandMotorSpeedConstPtr& rot_velocities) {
   CHECK(rot_velocities->motor_speed.size() > motor_number_)
       << "You tried to access index " << motor_number_
       << " of the MotorSpeed message array which is of size " << rot_velocities->motor_speed.size() << ".";
-  ref_motor_rot_vel_ = std::min(rot_velocities->motor_speed[motor_number_], static_cast<float>(max_rot_velocity_));
+  ref_motor_rot_vel_ = std::min(rot_velocities->motor_speed[motor_number_], static_cast<double>(max_rot_velocity_));
 }
 
 void GazeboMotorModel::UpdateForcesAndMoments() {

@@ -57,10 +57,14 @@ int main(int argc, char** argv){
 
   ROS_INFO("Fly to position [0 0 1].");
   mav_msgs::CommandTrajectory trajectory_msg;
-  trajectory_msg.position[0] = 0;
-  trajectory_msg.position[1] = 0;
-  trajectory_msg.position[2] = 1;
-  trajectory_pub.publish(trajectory_msg);
+  trajectory_msg.position.x = 0;
+  trajectory_msg.position.y = 0;
+  trajectory_msg.position.z = 1;
 
-  ros::spin();
+  while(ros::ok()){
+    ROS_INFO("Publish waypoint.");
+    trajectory_msg.header.stamp = ros::Time::now();
+    trajectory_pub.publish(trajectory_msg);
+    ros::Duration(1.0).sleep();
+  }
 }

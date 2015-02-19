@@ -1,0 +1,32 @@
+<package>
+  <name>rotors_simulator</name>
+  <version>1.0.0</version>
+  <description>RotorS is a MAV gazebo simulator.</description>
+  <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
+
+  <license>ASL 2.0</license>
+
+  <url type="website">http://ros.org/wiki/rotors_simulator</url>
+  <url type="bugtracker">https://github.com/ethz-asl/rotors_simulator/issues</url>
+
+  <author>Fadri Furrer</author>
+  <author>Michael Burri</author>
+  <author>Mina Kamel</author>
+  <author>Janosch Nikolic</author>
+  <author>Markus Achtelik</author>
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Dependencies needed after this package is compiled. -->
+  <run_depend>rotors_control</run_depend>
+  <run_depend>rotors_description</run_depend>
+  <run_depend>rotors_gazebo</run_depend>
+  <run_depend>rotors_gazebo_plugins</run_depend>
+  <run_depend>rotors_joy_interface</run_depend>
+  <run_depend>rotors_model</run_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>

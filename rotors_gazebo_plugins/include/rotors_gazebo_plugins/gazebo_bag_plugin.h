@@ -116,27 +116,27 @@ class GazeboBagPlugin : public ModelPlugin {
 
   /// \brief Called when an IMU message is received.
   /// \param[in] imu_msg A IMU message from sensor_msgs.
-  void ImuCallback(const sensor_msgs::ImuPtr& imu_msg);
+  void ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg);
 
   /// \brief Called when an Wind message is received.
   /// \param[in] wind_msg A WrenchStamped message from geometry_msgs.
-  void WindCallback(const geometry_msgs::WrenchStampedPtr& wind_msg);
+  void WindCallback(const geometry_msgs::WrenchStampedConstPtr& wind_msg);
 
   /// \brief Called when an Trajectory message is received.
   /// \param[in] trajectory_msg A CommandTrajectory message from mav_msgs.
-  void WaypointCallback(const mav_msgs::CommandTrajectoryPtr& trajectory_msg);
+  void WaypointCallback(const mav_msgs::CommandTrajectoryConstPtr& trajectory_msg);
 
   /// \brief Called when a CommandAttitudeThrust message is received.
   /// \param[in] control_msg A CommandAttitudeThrust message from mav_msgs.
-  void CommandAttitudeThrustCallback(const mav_msgs::CommandAttitudeThrustPtr& control_msg);
+  void CommandAttitudeThrustCallback(const mav_msgs::CommandAttitudeThrustConstPtr& control_msg);
 
   /// \brief Called when a CommandMotorSpeed message is received.
   /// \param[in] control_msg A CommandMotorSpeed message from mav_msgs.
-  void CommandMotorSpeedCallback(const mav_msgs::CommandMotorSpeedPtr& control_msg);
+  void CommandMotorSpeedCallback(const mav_msgs::CommandMotorSpeedConstPtr& control_msg);
 
   /// \brief Called when a CommandRateThrust message is received.
   /// \param[in] control_msg A CommandRateThrust message from mav_msgs.
-  void CommandRateThrustCallback(const mav_msgs::CommandRateThrustPtr& control_msg);
+  void CommandRateThrustCallback(const mav_msgs::CommandRateThrustConstPtr& control_msg);
 
   /// \brief Log the ground truth pose and twist.
   /// \param[in] now The current gazebo common::Time
