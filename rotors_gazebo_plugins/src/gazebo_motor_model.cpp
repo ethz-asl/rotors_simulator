@@ -102,11 +102,6 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   inertia_ = link_->GetInertial()->GetIZZ();
   viscous_friction_coefficient_ = inertia_ / time_constant_up_;
-  // Set the max_force_ to the maximum double value the limitations get handled by the FirstOrderFilter.
-  max_force_ = std::numeric_limits<double>::max();
-
-  // Set the maximumForce on the joint.
-  joint_->SetMaxForce(0, max_force_);
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
