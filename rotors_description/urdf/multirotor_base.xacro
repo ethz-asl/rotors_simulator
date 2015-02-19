@@ -184,7 +184,7 @@
         <motorNumber>${motor_number}</motorNumber>
         <rotorDragCoefficient>${rotor_drag_coefficient}</rotorDragCoefficient>
         <rollingMomentCoefficient>${rolling_moment_coefficient}</rollingMomentCoefficient>
-        <motorVelocityPubTopic>${robot_namespace}/motor_vel/${motor_number}</motorVelocityPubTopic>
+        <motorSpeedPubTopic>${robot_namespace}/motor_speed/${motor_number}</motorSpeedPubTopic>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
       </plugin>
     </gazebo>

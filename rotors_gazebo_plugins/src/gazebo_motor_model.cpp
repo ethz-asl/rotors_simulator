@@ -86,8 +86,8 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'ccw').\n";
 
   getSdfParam<std::string>(_sdf, "commandSubTopic", command_sub_topic_, command_sub_topic_);
-  getSdfParam<std::string>(_sdf, "motorVelocityPubTopic", motor_velocity_pub_topic_,
-                           motor_velocity_pub_topic_);
+  getSdfParam<std::string>(_sdf, "motorSpeedPubTopic", motor_speed_pub_topic_,
+                           motor_speed_pub_topic_);
 
   getSdfParam<double>(_sdf, "rotorDragCoefficient", rotor_drag_coefficient_, rotor_drag_coefficient_);
   getSdfParam<double>(_sdf, "rollingMomentCoefficient", rolling_moment_coefficient_,
@@ -108,7 +108,7 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboMotorModel::OnUpdate, this, _1));
 
   command_sub_ = node_handle_->subscribe(command_sub_topic_, 1000, &GazeboMotorModel::VelocityCallback, this);
-  motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_velocity_pub_topic_, 10);
+  motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_speed_pub_topic_, 10);
 
   // Create the first order filter.
   rotor_velocity_filter_.reset(new FirstOrderFilter<double>(time_constant_up_, time_constant_down_, ref_motor_rot_vel_));
@@ -159,7 +159,6 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   // Apply the filter on the motor's velocity.
   ref_motor_rot_vel_ = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
   joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
-  ROS_ERROR("actual ref %f vs joint %f", ref_motor_rot_vel_, joint_->GetVelocity(0));
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMotorModel);

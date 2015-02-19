@@ -47,7 +47,7 @@ namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultCommandSubTopic = "gazebo/command/motor_speed";
-static const std::string kDefaultMotorVelocityPubTopic = "motor_velocity";
+static const std::string kDefaultMotorVelocityPubTopic = "motor_speed";
 
 // Set the max_force_ to the max double value. The limitations get handled by the FirstOrderFilter.
 static constexpr double kDefaultMaxForce = std::numeric_limits<double>::max();
@@ -66,7 +66,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
       : ModelPlugin(),
         MotorModel(),
         command_sub_topic_(kDefaultCommandSubTopic),
-        motor_velocity_pub_topic_(kDefaultMotorVelocityPubTopic),
+        motor_speed_pub_topic_(kDefaultMotorVelocityPubTopic),
         motor_number_(0),
         turning_direction_(turning_direction::CW),
         max_force_(kDefaultMaxForce),
@@ -97,7 +97,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   std::string command_sub_topic_;
   std::string joint_name_;
   std::string link_name_;
-  std::string motor_velocity_pub_topic_;
+  std::string motor_speed_pub_topic_;
   std::string namespace_;
 
   int motor_number_;
