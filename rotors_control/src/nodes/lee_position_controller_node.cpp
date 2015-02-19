@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-#include "rotors_control/lee_position_controller_node.h"
+#include "lee_position_controller_node.h"
 
 #include "rotors_control/parameters_ros.h"
 
@@ -28,25 +28,22 @@ LeePositionControllerNode::LeePositionControllerNode() {
   google::InitGoogleLogging("rotors_control_glogger");
   InitializeParams();
 
-  ros::NodeHandle nh(namespace_);
+  ros::NodeHandle nh;
 
-  cmd_trajectory_sub_ = nh.subscribe(command_trajectory_sub_topic_, 10,
+  cmd_trajectory_sub_ = nh.subscribe(kDefaultCommandTrajectoryTopic, 10,
                                      &LeePositionControllerNode::CommandTrajectoryCallback, this);
-  odometry_sub_ = nh.subscribe(odometry_sub_topic_, 10,
+  odometry_sub_ = nh.subscribe(kDefaultOdometryTopic, 10,
                                &LeePositionControllerNode::OdometryCallback, this);
 
-  motor_velocity_reference_pub_ = nh.advertise<mav_msgs::MotorSpeed>(
-      motor_velocity_reference_pub_topic_, 10);
+  motor_velocity_reference_pub_ = nh.advertise<mav_msgs::CommandMotorSpeed>(
+      kDefaultMotorSpeedTopic, 10);
 }
 
 LeePositionControllerNode::~LeePositionControllerNode() { }
 
 void LeePositionControllerNode::InitializeParams() {
   ros::NodeHandle pnh("~");
-  pnh.param<std::string>("robotNamespace", namespace_, kDefaultNamespace);
-  pnh.param<std::string>("commandTrajectorySubTopic", command_trajectory_sub_topic_, kDefaultCommandTrajectoryTopic);
-  pnh.param<std::string>("odometrySubTopic", odometry_sub_topic_, kDefaultOdometrySubTopic);
-  pnh.param<std::string>("motorVelocityCommandPubTopic", motor_velocity_reference_pub_topic_, kDefaultMotorVelocityReferencePubTopic);
+
   // Read parameters from rosparam.
   GetRosParameter(pnh, "position_gain/x",
                   lee_position_controller_.controller_parameters_.position_gain_.x(),
@@ -159,12 +156,12 @@ void LeePositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPt
   lee_position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
   // Todo(ffurrer): Do this in the conversions header.
-  mav_msgs::MotorSpeed turning_velocities_msg;
+  mav_msgs::CommandMotorSpeedPtr turning_velocities_msg(new mav_msgs::CommandMotorSpeed);
 
-  turning_velocities_msg.motor_speed.clear();
+  turning_velocities_msg->motor_speed.clear();
   for (int i = 0; i < ref_rotor_velocities.size(); i++)
-    turning_velocities_msg.motor_speed.push_back(ref_rotor_velocities[i]);
-  turning_velocities_msg.header.stamp = odometry_msg->header.stamp;
+    turning_velocities_msg->motor_speed.push_back(ref_rotor_velocities[i]);
+  turning_velocities_msg->header.stamp = odometry_msg->header.stamp;
 
   motor_velocity_reference_pub_.publish(turning_velocities_msg);
 }

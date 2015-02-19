@@ -31,9 +31,6 @@ GazeboControllerInterface::~GazeboControllerInterface() {
   }
 }
 
-// void GazeboControllerInterface::InitializeParams() {};
-// void GazeboControllerInterface::Publish() {};
-
 void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Store the pointer to the model.
   model_ = _model;
@@ -51,7 +48,7 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 
   getSdfParam<std::string>(_sdf, "commandMotorSpeedSubTopic", command_motor_speed_sub_topic_,
                            command_motor_speed_sub_topic_);
-  getSdfParam<std::string>(_sdf, "motorVelocityCommandPubTopic", motor_velocity_reference_pub_topic_,
+  getSdfParam<std::string>(_sdf, "motorSpeedCommandPubTopic", motor_velocity_reference_pub_topic_,
                            motor_velocity_reference_pub_topic_);
 
   // Listen to the update event. This event is broadcast every
@@ -63,7 +60,7 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
                                            &GazeboControllerInterface::CommandMotorCallback,
                                            this);
 
-  motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_velocity_reference_pub_topic_, 10);
+  motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::CommandMotorSpeed>(motor_velocity_reference_pub_topic_, 10);
 }
 
 // This gets called by the world update start event.
@@ -74,12 +71,12 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
   common::Time now = world_->GetSimTime();
 
-  mav_msgs::MotorSpeed turning_velocities_msg;
+  mav_msgs::CommandMotorSpeedPtr turning_velocities_msg(new mav_msgs::CommandMotorSpeed);
 
   for (int i = 0; i < input_reference_.size(); i++)
-    turning_velocities_msg.motor_speed.push_back(input_reference_[i]);
-  turning_velocities_msg.header.stamp.sec = now.sec;
-  turning_velocities_msg.header.stamp.nsec = now.nsec;
+  turning_velocities_msg->motor_speed.push_back(input_reference_[i]);
+  turning_velocities_msg->header.stamp.sec = now.sec;
+  turning_velocities_msg->header.stamp.nsec = now.nsec;
 
   motor_velocity_reference_pub_.publish(turning_velocities_msg);
 }

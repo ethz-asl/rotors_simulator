@@ -116,9 +116,9 @@
         <robotNamespace>${namespace}</robotNamespace>
         <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
         <commandRateThrustSubTopic>command/rate</commandRateThrustSubTopic>
-        <commandMotorSpeedSubTopic>command/motors</commandMotorSpeedSubTopic>
+        <commandMotorSpeedSubTopic>command/motor_speed</commandMotorSpeedSubTopic>
         <imuSubTopic>${imu_sub_topic}</imuSubTopic>
-        <motorVelocityCommandPubTopic>motor_velocity_reference</motorVelocityCommandPubTopic>
+        <motorSpeedCommandPubTopic>gazebo/command/motor_speed</motorSpeedCommandPubTopic>
       </plugin>
     </gazebo>
   </xacro:macro>
