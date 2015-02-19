@@ -32,11 +32,11 @@ LeePositionControllerNode::LeePositionControllerNode() {
 
   cmd_trajectory_sub_ = nh.subscribe(kDefaultCommandTrajectoryTopic, 10,
                                      &LeePositionControllerNode::CommandTrajectoryCallback, this);
-  odometry_sub_ = nh.subscribe(kDefaultOdometrySubTopic, 10,
+  odometry_sub_ = nh.subscribe(kDefaultOdometryTopic, 10,
                                &LeePositionControllerNode::OdometryCallback, this);
 
   motor_velocity_reference_pub_ = nh.advertise<mav_msgs::CommandMotorSpeed>(
-      kDefaultMotorVelocityReferencePubTopic, 10);
+      kDefaultMotorSpeedTopic, 10);
 }
 
 LeePositionControllerNode::~LeePositionControllerNode() { }

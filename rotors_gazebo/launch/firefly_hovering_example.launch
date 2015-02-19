@@ -24,6 +24,6 @@
       <rosparam command="load" file="$(find rotors_gazebo)/resource/firefly.yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
-    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example"/>
+    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
   </group>
 </launch>
