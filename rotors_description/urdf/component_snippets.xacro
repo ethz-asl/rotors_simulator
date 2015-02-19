@@ -240,7 +240,7 @@
     </gazebo>
   </xacro:macro>
 
-  <!-- Macro to add the wind plugin. -->
+  <!-- Macro to add a VI-sensor camera. -->
   <xacro:macro name="vi_sensor_camera_macro"
     params="camera_suffix frame_rate">
     <gazebo reference="${namespace}/camera_${camera_suffix}_link">
@@ -287,6 +287,7 @@
     </gazebo>
   </xacro:macro>
 
+  <!-- Macro to add a kinect camera on the VI-sensor. -->
   <xacro:macro name="vi_sensor_kinect_macro" params="frame_rate">
     <gazebo reference="${namespace}/kinect_link">
       <sensor type="depth" name="vi_sensor_kinect">
