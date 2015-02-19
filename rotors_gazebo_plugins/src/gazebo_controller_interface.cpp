@@ -77,7 +77,7 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   mav_msgs::CommandMotorSpeedPtr turning_velocities_msg(new mav_msgs::CommandMotorSpeed);
 
   for (int i = 0; i < input_reference_.size(); i++)
-    turning_velocities_msg->motor_speed.push_back(input_reference_[i]);
+  turning_velocities_msg->motor_speed.push_back(input_reference_[i]);
   turning_velocities_msg->header.stamp.sec = now.sec;
   turning_velocities_msg->header.stamp.nsec = now.nsec;
 
