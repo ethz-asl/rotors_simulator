@@ -124,7 +124,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   boost::thread callback_queue_thread_;
   void QueueThread();
   std_msgs::Float32 turning_velocity_msg_;
-  void VelocityCallback(const mav_msgs::MotorSpeedConstPtr& rot_velocities);
+  void VelocityCallback(const mav_msgs::CommandMotorSpeedConstPtr& rot_velocities);
   std::unique_ptr<FirstOrderFilter<double>>  rotor_velocity_filter_;
 };
 }
