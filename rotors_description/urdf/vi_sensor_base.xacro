@@ -1,73 +1,34 @@
 <?xml version="1.0"?>
 <robot name="vi_sensor" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="namespace" value="vi_sensor" />
+  <xacro:property name="PI" value="3.141592654" />
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
-  <xacro:include filename="$(find rotors_description)/urdf/vi_sensor.xacro" />
 
-  <!-- Cameras -->
-  <xacro:if value="$(arg enable_cameras)">
-    <!-- Left Camera -->
-    <xacro:vi_sensor_camera_macro camera_suffix="left" frame_rate="30.0" />
-    <!-- Right Camera -->
-    <xacro:vi_sensor_camera_macro camera_suffix="right" frame_rate="30.0" />
-  </xacro:if>
+  <link name="base_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 1.0" />
+      </geometry>
+    </collision>
 
-  <!-- Kinect Sensor -->
-  <xacro:if value="$(arg enable_kinect)">
-    <xacro:vi_sensor_kinect_macro frame_rate="20.0" />
-  </xacro:if>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 1.0" />
+      </geometry>
+      <material name="black" />
+    </visual>
 
-  <!-- Groundtruth -->
-  <xacro:if value="$(arg enable_ground_truth)">
-    <!-- Odometry Sensor -->
-    <xacro:odometry_plugin_macro
-      namespace="${namespace}/ground_truth"
-      odometry_sensor_suffix=""
-      parent_link="vi_sensor_link"
-      pose_topic="pose"
-      pose_with_covariance_topic="pose_with_covariance"
-      position_topic="position"
-      transform_topic="transform"
-      odometry_topic="odometry"
-      parent_frame_id="world"
-      mass_odometry_sensor="0.00001"
-      measurement_divisor="1"
-      measurement_delay="0"
-      unknown_delay="0.0"
-      noise_normal_position="0 0 0"
-      noise_normal_quaternion="0 0 0"
-      noise_normal_linear_velocity="0 0 0"
-      noise_normal_angular_velocity="0 0 0"
-      noise_uniform_position="0 0 0"
-      noise_uniform_quaternion="0 0 0"
-      noise_uniform_linear_velocity="0 0 0"
-      noise_uniform_angular_velocity="0 0 0"
-      enable_odometry_map="false"
-      odometry_map=""
-      image_scale=""
-    >
-      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] -->
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
-    </xacro:odometry_plugin_macro>
-  </xacro:if>
+    <inertial>
+      <mass value="100" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
+    </inertial>
+  </link>
 
-  <!-- ADIS16448 IMU. -->
-  <xacro:imu_plugin_macro
-    namespace="${namespace}"
-    imu_suffix=""
-    parent_link="vi_sensor_link"
-    imu_topic="imu"
-    mass_imu_sensor="0.015"
-    gyroscope_noise_density="0.0003394"
-    gyroscopoe_random_walk="0.000038785"
-    gyroscope_bias_correlation_time="1000.0"
-    gyroscope_turn_on_bias_sigma="0.0087"
-    accelerometer_noise_density="0.004"
-    accelerometer_random_walk="0.006"
-    accelerometer_bias_correlation_time="300.0"
-    accelerometer_turn_on_bias_sigma="0.1960"
-  >
-    <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
-    <origin xyz="0.015 0 0.0113" rpy="0 0 0" />
-  </xacro:imu_plugin_macro>
+  <xacro:vi_sensor_macro namespace="${namespace}" parent_link="base_link">
+    <origin xyz="0.0 0.0 0.6" rpy="0 0 0" />
+  </xacro:vi_sensor_macro>
 
 </robot>

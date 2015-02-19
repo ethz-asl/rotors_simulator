@@ -1,6 +1,6 @@
 <launch>
   <arg name="enable_cameras" default="true"/>
-  <arg name="enable_kinect" default="true"/>
+  <arg name="enable_depth" default="true"/>
   <arg name="enable_ground_truth" default="false"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -10,15 +10,8 @@
   </include>
   <include file="$(find rotors_gazebo)/launch/spawn_vi_sensor.launch">
     <arg name="enable_cameras" value="$(arg enable_cameras)" />
-    <arg name="enable_kinect" value="$(arg enable_kinect)" />
+    <arg name="enable_depth" value="$(arg enable_depth)" />
     <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
   </include>
-  <node pkg="tf" type="static_transform_publisher" name="camera_left_link_broadcaster"
-    args="0.015 0.055 0.0065 -1.570796 0 -1.570796 vi_sensor_link vi_sensor/camera_left_link 10" />
-  <node pkg="tf" type="static_transform_publisher" name="camera_right_link_broadcaster"
-    args="0.015 -0.055 0.0065 -1.570796 0 -1.570796 vi_sensor_link vi_sensor/camera_right_link 10" />
-  <node pkg="tf" type="static_transform_publisher" name="kinect_link_broadcaster"
-    args="0.015 0 0.0065 -1.570796 0 -1.570796 vi_sensor_link vi_sensor/kinect_link 10" />
-  <node pkg="tf" type="static_transform_publisher" name="imu_link_broadcaster"
-    args="0.015 0 0.0113 0 0 0 vi_sensor_link imu_link 100" />
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" ></node>
 </launch>
