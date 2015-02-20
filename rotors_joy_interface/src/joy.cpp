@@ -24,7 +24,8 @@
 Joy::Joy() {
   ros::NodeHandle nh;
   ros::NodeHandle pnh("~");
-  ctrl_pub_ = nh_.advertise < mav_msgs::CommandRollPitchYawrateThrust > ("command/attitude", 10);
+  ctrl_pub_ = nh_.advertise < mav_msgs::CommandRollPitchYawrateThrust > (
+    "command/roll_pitch_yawrate_thrust", 10);
 
   control_msg_.roll = 0;
   control_msg_.pitch = 0;
