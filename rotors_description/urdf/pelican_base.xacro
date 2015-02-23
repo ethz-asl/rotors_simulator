@@ -25,11 +25,7 @@
   <xacro:include filename="$(find rotors_description)/urdf/pelican.xacro" />
 
   <!-- Instantiate a controller. -->
-  <xacro:controller_plugin_macro
-    namespace="${namespace}"
-    imu_sub_topic="imu"
-    >
-  </xacro:controller_plugin_macro>
+  <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />
 
   <!-- Mount an ADIS16448 IMU. -->
   <xacro:imu_plugin_macro
