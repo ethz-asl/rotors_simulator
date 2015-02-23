@@ -1,0 +1,17 @@
+<launch>
+  <arg name="enable_cameras" default="true"/>
+  <arg name="enable_depth" default="true"/>
+  <arg name="enable_ground_truth" default="false"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic.world"/>
+    <!-- <arg name="debug" value="true" /> -->
+    <arg name="paused" value="true" />
+  </include>
+  <include file="$(find rotors_gazebo)/launch/spawn_vi_sensor.launch">
+    <arg name="enable_cameras" value="$(arg enable_cameras)" />
+    <arg name="enable_depth" value="$(arg enable_depth)" />
+    <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+  </include>
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+</launch>
