@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 
-#ifndef ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
-#define ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
+#ifndef ROTORS_CONTROL_ROLL_PITCH_YAWRATE_THRUST_CONTROLLER_H
+#define ROTORS_CONTROL_ROLL_PITCH_YAWRATE_THRUST_CONTROLLER_H
 
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/eigen_mav_msgs.h>
@@ -29,7 +29,7 @@
 
 namespace rotors_control {
 
-// Default values for the lee position controller and the Asctec Firefly.
+// Default values for the roll pitch yawrate thrust controller and the Asctec Firefly.
 static const Eigen::Vector3d kDefaultAttitudeGain = Eigen::Vector3d(3, 3, 0.035);
 static const Eigen::Vector3d kDefaultAngularRateGain = Eigen::Vector3d(0.52, 0.52, 0.025);
 
@@ -77,4 +77,4 @@ class RollPitchYawrateThrustController {
 };
 }
 
-#endif // ROTORS_CONTROL_LEE_POSITION_CONTROLLER_H
+#endif // ROTORS_CONTROL_ROLL_PITCH_YAWRATE_THRUST_CONTROLLER_H
