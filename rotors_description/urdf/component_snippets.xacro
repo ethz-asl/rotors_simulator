@@ -125,7 +125,7 @@
 
   <!-- Macro to add an IMU. -->
   <xacro:macro name="imu_plugin_macro"
-    params="namespace imu_suffix imu_topic
+    params="namespace imu_suffix parent_link imu_topic
       mass_imu_sensor gyroscope_noise_density gyroscopoe_random_walk
       gyroscope_bias_correlation_time gyroscope_turn_on_bias_sigma
       accelerometer_noise_density accelerometer_random_walk
@@ -142,7 +142,7 @@
     <!-- IMU joint -->
     <joint name="imu${imu_suffix}_joint" type="revolute">
       <xacro:insert_block name="origin" />
-      <parent link="base_link" />
+      <parent link="${parent_link}" />
       <child link="imu${imu_suffix}_link" />
       <limit upper="0" lower="0" effort="0" velocity="0" />
     </joint>
@@ -168,7 +168,7 @@
 <!-- Macro to add a generic odometry sensor. -->
   <xacro:macro name="odometry_plugin_macro"
     params="
-      namespace odometry_sensor_suffix pose_topic pose_with_covariance_topic
+      namespace odometry_sensor_suffix parent_link pose_topic pose_with_covariance_topic
       position_topic transform_topic odometry_topic parent_frame_id
       mass_odometry_sensor measurement_divisor measurement_delay unknown_delay
       noise_normal_position noise_normal_quaternion noise_normal_linear_velocity
@@ -185,7 +185,7 @@
     </link>
     <!-- odometry joint -->
     <joint name="odometry_sensor${odometry_sensor_suffix}_joint" type="revolute">
-      <parent link="base_link" />
+      <parent link="${parent_link}" />
       <xacro:insert_block name="origin" />
       <child link="odometry_sensor${odometry_sensor_suffix}_link" />
       <limit upper="0" lower="0" effort="0" velocity="0" />
