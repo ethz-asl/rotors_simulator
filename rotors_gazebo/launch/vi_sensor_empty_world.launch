@@ -13,5 +13,5 @@
     <arg name="enable_depth" value="$(arg enable_depth)" />
     <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
   </include>
-  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" ></node>
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
 </launch>
