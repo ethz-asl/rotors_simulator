@@ -56,7 +56,7 @@ struct EigenOdometry {
 
   Eigen::Vector3d position;
   Eigen::Quaterniond orientation;
-  Eigen::Vector3d velocity; // Velocity in expressed in the Body frame!
+  Eigen::Vector3d velocity; // Velocity is expressed in the Body frame!
   Eigen::Vector3d angular_velocity;
 };
 
