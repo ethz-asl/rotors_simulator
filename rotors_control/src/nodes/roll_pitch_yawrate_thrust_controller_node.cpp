@@ -121,7 +121,7 @@ void RollPitchYawrateThrustControllerNode::Publish() {
 void RollPitchYawrateThrustControllerNode::CommandRollPitchYawrateThrustCallback(
     const mav_msgs::CommandRollPitchYawrateThrustConstPtr& roll_pitch_yawrate_thrust_reference_msg) {
   mav_msgs::EigenCommandRollPitchYawrateThrust roll_pitch_yawrate_thrust;
-  mav_msgs::eigenCommandRollPitchYawrateThrustFromMsg(roll_pitch_yawrate_thrust_reference_msg, &roll_pitch_yawrate_thrust);
+  mav_msgs::eigenCommandRollPitchYawrateThrustFromMsg(*roll_pitch_yawrate_thrust_reference_msg, &roll_pitch_yawrate_thrust);
   roll_pitch_yawrate_thrust_controller_.SetCommandRollPitchYawrateThrust(roll_pitch_yawrate_thrust);
 }
 

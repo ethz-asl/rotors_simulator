@@ -139,7 +139,7 @@ void LeePositionControllerNode::Publish() {
 void LeePositionControllerNode::CommandTrajectoryCallback(
     const mav_msgs::CommandTrajectoryConstPtr& trajectory_reference_msg) {
   mav_msgs::EigenCommandTrajectory trajectory;
-  mav_msgs::eigenCommandTrajectoryFromMsg(trajectory_reference_msg, &trajectory);
+  mav_msgs::eigenCommandTrajectoryFromMsg(*trajectory_reference_msg, &trajectory);
   lee_position_controller_.SetCommandTrajectory(trajectory);
 }
 
