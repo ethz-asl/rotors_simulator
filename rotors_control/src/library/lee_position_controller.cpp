@@ -130,8 +130,7 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
   // Angle error according to lee et al.
   Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
   Eigen::Vector3d angle_error;
-  angle_error << angle_error_matrix(2, 1),  // inverse skew operator
-  angle_error_matrix(0, 2), angle_error_matrix(1, 0);
+  vectorFromSkewMatrix(angle_error_matrix, &angle_error);
 
   // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
