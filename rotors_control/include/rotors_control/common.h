@@ -33,6 +33,7 @@ namespace rotors_control {
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultMotorSpeedTopic = "command/motor_speed";
 static const std::string kDefaultCommandTrajectoryTopic = "command/trajectory";
+static const std::string kDefaultCommandRollPitchYawrateThrustTopic = "command/roll_pitch_yawrate_thrust";
 static const std::string kDefaultImuTopic = "imu";
 static const std::string kDefaultOdometryTopic = "odometry";
 
@@ -55,7 +56,7 @@ struct EigenOdometry {
 
   Eigen::Vector3d position;
   Eigen::Quaterniond orientation;
-  Eigen::Vector3d velocity; // Velocity in expressed in the Body frame!
+  Eigen::Vector3d velocity; // Velocity is expressed in the Body frame!
   Eigen::Vector3d angular_velocity;
 };
 
@@ -86,6 +87,16 @@ void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
     (*allocation_matrix)(3, i) = rotor.rotor_force_constant;
     ++i;
   }
+}
+
+void skewMatrixFromVector(Eigen::Vector3d& vector, Eigen::Matrix3d* skew_matrix) {
+  *skew_matrix << 0, -vector.z(), vector.y(),
+                  vector.z(), 0, -vector.x(),
+                  -vector.y(), vector.x(), 0;
+}
+
+void vectorFromSkewMatrix(Eigen::Matrix3d& skew_matrix, Eigen::Vector3d* vector) {
+  *vector << skew_matrix(2, 1), skew_matrix(0,2), skew_matrix(1, 0);
 }
 }
 

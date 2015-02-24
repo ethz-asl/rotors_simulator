@@ -18,18 +18,18 @@
  * limitations under the License.
  */
 
-#include "rotors_control/lee_position_controller.h"
+#include "rotors_control/roll_pitch_yawrate_thrust_controller.h"
 
 namespace rotors_control {
 
-LeePositionController::LeePositionController()
+RollPitchYawrateThrustController::RollPitchYawrateThrustController()
     : initialized_params_(false) {
   InitializeParameters();
 }
 
-LeePositionController::~LeePositionController() {}
+RollPitchYawrateThrustController::~RollPitchYawrateThrustController() {}
 
-void LeePositionController::InitializeParameters() {
+void RollPitchYawrateThrustController::InitializeParameters() {
   calculateAllocationMatrix(vehicle_parameters_.rotor_configuration_, &(controller_parameters_.allocation_matrix_));
   // To make the tuning independent of the inertia matrix we divide here.
   normalized_attitude_gain_ = controller_parameters_.attitude_gain_.transpose()
@@ -51,81 +51,46 @@ void LeePositionController::InitializeParameters() {
   initialized_params_ = true;
 }
 
-void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const {
+void RollPitchYawrateThrustController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const {
   assert(rotor_velocities);
   assert(initialized_params_);
 
   rotor_velocities->resize(vehicle_parameters_.rotor_configuration_.rotors.size());
 
-  Eigen::Vector3d acceleration;
-  ComputeDesiredAcceleration(&acceleration);
-
   Eigen::Vector3d angular_acceleration;
-  ComputeDesiredAngularAcc(acceleration, &angular_acceleration);
-
-  // Project thrust onto body z axis.
-  double thrust = -vehicle_parameters_.mass_ * acceleration.dot(odometry_.orientation.toRotationMatrix().col(2));
+  ComputeDesiredAngularAcc(&angular_acceleration);
 
   Eigen::Vector4d angular_acceleration_thrust;
   angular_acceleration_thrust.block<3, 1>(0, 0) = angular_acceleration;
-  angular_acceleration_thrust(3) = thrust;
+  angular_acceleration_thrust(3) = command_roll_pitch_yawrate_thrust_.thrust;
 
   *rotor_velocities = angular_acc_to_rotor_velocities_ * angular_acceleration_thrust;
   *rotor_velocities = rotor_velocities->cwiseMax(Eigen::VectorXd::Zero(rotor_velocities->rows()));
   *rotor_velocities = rotor_velocities->cwiseSqrt();
 }
 
-void LeePositionController::SetOdometry(const EigenOdometry& odometry) {
+void RollPitchYawrateThrustController::SetOdometry(const EigenOdometry& odometry) {
   odometry_ = odometry;
 }
 
-void LeePositionController::SetCommandTrajectory(
-    const mav_msgs::EigenCommandTrajectory& command_trajectory) {
-  command_trajectory_ = command_trajectory;
-}
-
-void LeePositionController::ComputeDesiredAcceleration(Eigen::Vector3d* acceleration) const {
-  assert(acceleration);
-
-  Eigen::Vector3d position_error;
-  position_error = odometry_.position - command_trajectory_.position;
-
-  // Transform velocity to world frame.
-  const Eigen::Matrix3d R_W_I = odometry_.orientation.toRotationMatrix();
-  Eigen::Vector3d velocity_W =  R_W_I * odometry_.velocity;
-  Eigen::Vector3d velocity_error;
-  velocity_error = velocity_W - command_trajectory_.velocity;
-
-  Eigen::Vector3d e_3(Eigen::Vector3d::UnitZ());
-
-  *acceleration = (position_error.cwiseProduct(controller_parameters_.position_gain_)
-      + velocity_error.cwiseProduct(controller_parameters_.velocity_gain_)) / vehicle_parameters_.mass_
-      - vehicle_parameters_.gravity_ * e_3 - command_trajectory_.acceleration;
+void RollPitchYawrateThrustController::SetCommandRollPitchYawrateThrust(
+    const mav_msgs::EigenCommandRollPitchYawrateThrust& command_roll_pitch_yawrate_thrust) {
+  command_roll_pitch_yawrate_thrust_ = command_roll_pitch_yawrate_thrust;
 }
 
 // Implementation from the T. Lee et al. paper
 // Control of complex maneuvers for a quadrotor UAV using geometric methods on SE(3)
-void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acceleration,
-                                                     Eigen::Vector3d* angular_acceleration) const {
+void RollPitchYawrateThrustController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_acceleration) const {
   assert(angular_acceleration);
 
   Eigen::Matrix3d R = odometry_.orientation.toRotationMatrix();
+  double yaw = atan2(R(1, 0), R(0, 0));
 
   // Get the desired rotation matrix.
-  Eigen::Vector3d b1_des;
-  b1_des << cos(command_trajectory_.yaw), sin(command_trajectory_.yaw), 0;
-
-  Eigen::Vector3d b3_des;
-  b3_des = -acceleration / acceleration.norm();
-
-  Eigen::Vector3d b2_des;
-  b2_des = b3_des.cross(b1_des);
-  b2_des.normalize();
-
   Eigen::Matrix3d R_des;
-  R_des.col(0) = b2_des.cross(b3_des);
-  R_des.col(1) = b2_des;
-  R_des.col(2) = b3_des;
+  R_des = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())  // yaw
+        * Eigen::AngleAxisd(command_roll_pitch_yawrate_thrust_.roll, Eigen::Vector3d::UnitX())  // roll
+        * Eigen::AngleAxisd(command_roll_pitch_yawrate_thrust_.pitch, Eigen::Vector3d::UnitY());  // pitch
 
   // Angle error according to lee et al.
   Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
@@ -134,7 +99,7 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
 
   // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
-  angular_rate_des[2] = command_trajectory_.yaw_rate;
+  angular_rate_des[2] = command_roll_pitch_yawrate_thrust_.yaw_rate;
 
   Eigen::Vector3d angular_rate_error = odometry_.angular_velocity - R_des.transpose() * R * angular_rate_des;
 
