@@ -23,7 +23,8 @@
 namespace rotors_control {
 
 LeePositionController::LeePositionController()
-    : initialized_params_(false) {
+    : initialized_params_(false),
+      controller_active_(false) {
   InitializeParameters();
 }
 
@@ -56,6 +57,11 @@ void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velo
   assert(initialized_params_);
 
   rotor_velocities->resize(vehicle_parameters_.rotor_configuration_.rotors.size());
+  // Return 0 velocities on all rotors, until the first command is received.
+  if (!controller_active_) {
+    *rotor_velocities = Eigen::VectorXd::Zero(rotor_velocities->rows());
+    return;
+  }
 
   Eigen::Vector3d acceleration;
   ComputeDesiredAcceleration(&acceleration);
@@ -82,6 +88,7 @@ void LeePositionController::SetOdometry(const EigenOdometry& odometry) {
 void LeePositionController::SetCommandTrajectory(
     const mav_msgs::EigenCommandTrajectory& command_trajectory) {
   command_trajectory_ = command_trajectory;
+  controller_active_ = true;
 }
 
 void LeePositionController::ComputeDesiredAcceleration(Eigen::Vector3d* acceleration) const {

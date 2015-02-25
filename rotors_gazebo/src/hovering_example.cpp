@@ -29,7 +29,6 @@ int main(int argc, char** argv){
   ros::init(argc, argv, "hovering_example");
   ros::NodeHandle nh;
   ros::Publisher trajectory_pub = nh.advertise<mav_msgs::CommandTrajectory>("command/trajectory", 10);
-
   ROS_INFO("Started hovering example.");
 
   std_srvs::Empty srv;
@@ -55,14 +54,17 @@ int main(int argc, char** argv){
   // Wait for 5 seconds to let the Gazebo GUI show up.
   ros::Duration(5.0).sleep();
 
-  ROS_INFO("Fly to position [0 0 1].");
   mav_msgs::CommandTrajectory trajectory_msg;
-  trajectory_msg.position.x = 0;
-  trajectory_msg.position.y = 0;
-  trajectory_msg.position.z = 1;
 
-  while(ros::ok()){
-    ROS_INFO("Publish waypoint.");
+  while (ros::ok()) {
+    nh.param<double>("wp_x", trajectory_msg.position.x, 0.0);
+    nh.param<double>("wp_y", trajectory_msg.position.y, 0.0);
+    nh.param<double>("wp_z", trajectory_msg.position.z, 1.0);
+    ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
+             nh.getNamespace().c_str(),
+             trajectory_msg.position.x,
+             trajectory_msg.position.y,
+             trajectory_msg.position.z);
     trajectory_msg.header.stamp = ros::Time::now();
     trajectory_pub.publish(trajectory_msg);
     ros::Duration(1.0).sleep();
