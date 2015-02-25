@@ -23,7 +23,8 @@
 namespace rotors_control {
 
 LeePositionController::LeePositionController()
-    : initialized_params_(false) {
+    : initialized_params_(false),
+      controller_active_(false) {
   InitializeParameters();
 }
 
@@ -56,6 +57,11 @@ void LeePositionController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velo
   assert(initialized_params_);
 
   rotor_velocities->resize(vehicle_parameters_.rotor_configuration_.rotors.size());
+  // Return 0 velocities on all rotors, until the first command is received.
+  if (!controller_active_) {
+    *rotor_velocities = Eigen::VectorXd::Zero(rotor_velocities->rows());
+    return;
+  }
 
   Eigen::Vector3d acceleration;
   ComputeDesiredAcceleration(&acceleration);
@@ -82,6 +88,7 @@ void LeePositionController::SetOdometry(const EigenOdometry& odometry) {
 void LeePositionController::SetCommandTrajectory(
     const mav_msgs::EigenCommandTrajectory& command_trajectory) {
   command_trajectory_ = command_trajectory;
+  controller_active_ = true;
 }
 
 void LeePositionController::ComputeDesiredAcceleration(Eigen::Vector3d* acceleration) const {
@@ -130,8 +137,7 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
   // Angle error according to lee et al.
   Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
   Eigen::Vector3d angle_error;
-  angle_error << angle_error_matrix(2, 1),  // inverse skew operator
-  angle_error_matrix(0, 2), angle_error_matrix(1, 0);
+  vectorFromSkewMatrix(angle_error_matrix, &angle_error);
 
   // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());

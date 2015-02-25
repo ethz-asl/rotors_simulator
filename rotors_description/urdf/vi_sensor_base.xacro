@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<robot name="vi_sensor" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="namespace" value="vi_sensor" />
+  <xacro:property name="PI" value="3.141592654" />
+  <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
+
+  <link name="base_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 1.0" />
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 1.0" />
+      </geometry>
+      <material name="black" />
+    </visual>
+
+    <inertial>
+      <mass value="100" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
+    </inertial>
+  </link>
+
+  <xacro:vi_sensor_macro namespace="${namespace}" parent_link="base_link">
+    <origin xyz="0.0 0.0 0.6" rpy="0 0 0" />
+  </xacro:vi_sensor_macro>
+
+</robot>
