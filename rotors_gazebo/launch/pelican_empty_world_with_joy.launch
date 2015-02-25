@@ -23,7 +23,7 @@
     <node name="roll_pitch_yawrate_thrust_controller_node" pkg="rotors_control" type="roll_pitch_yawrate_thrust_controller_node" output="screen">
       <rosparam
         command="load"
-        file="$(find rotors_gazebo)/resource/pelican_roll_pitch_yawrate_thrust_controller.yaml" />
+        file="$(find rotors_gazebo)/resource/roll_pitch_yawrate_thrust_controller_pelican.yaml" />
       <rosparam command="load" file="$(find rotors_gazebo)/resource/pelican.yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
