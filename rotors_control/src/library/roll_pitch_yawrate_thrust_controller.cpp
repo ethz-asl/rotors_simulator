@@ -23,7 +23,8 @@
 namespace rotors_control {
 
 RollPitchYawrateThrustController::RollPitchYawrateThrustController()
-    : initialized_params_(false) {
+    : initialized_params_(false),
+      controller_active_(false) {
   InitializeParameters();
 }
 
@@ -56,6 +57,11 @@ void RollPitchYawrateThrustController::CalculateRotorVelocities(Eigen::VectorXd*
   assert(initialized_params_);
 
   rotor_velocities->resize(vehicle_parameters_.rotor_configuration_.rotors.size());
+  // Return 0 velocities on all rotors, until the first command is received.
+  if (!controller_active_) {
+    *rotor_velocities = Eigen::VectorXd::Zero(rotor_velocities->rows());
+    return;
+  }
 
   Eigen::Vector3d angular_acceleration;
   ComputeDesiredAngularAcc(&angular_acceleration);
@@ -76,6 +82,7 @@ void RollPitchYawrateThrustController::SetOdometry(const EigenOdometry& odometry
 void RollPitchYawrateThrustController::SetCommandRollPitchYawrateThrust(
     const mav_msgs::EigenCommandRollPitchYawrateThrust& command_roll_pitch_yawrate_thrust) {
   command_roll_pitch_yawrate_thrust_ = command_roll_pitch_yawrate_thrust;
+  controller_active_ = true;
 }
 
 // Implementation from the T. Lee et al. paper
