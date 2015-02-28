@@ -13,9 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Eigen REQUIRED)
-find_package(gazebo REQUIRED)
-link_directories(${GAZEBO_LIBRARY_DIRS})
-include_directories(${GAZEBO_INCLUDE_DIRS})
 
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
