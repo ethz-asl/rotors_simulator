@@ -31,7 +31,7 @@
   <xacro:default_imu namespace="${namespace}" />
 
   <xacro:if value="$(arg enable_ground_truth)">
-   <xacro:ground_truth_imu_and_odometry namespace="${namespace}" />
+    <xacro:ground_truth_imu_and_odometry namespace="${namespace}" />
   </xacro:if>
 
   <xacro:if value="$(arg enable_logging)">
