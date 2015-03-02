@@ -20,7 +20,7 @@
 -->
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <!-- Macro to for the inertial properties of a box -->
+  <!-- Macro for the inertial properties of a box -->
   <xacro:macro name="box_inertial" params="x y z mass *origin">
     <inertial>
       <mass value="${mass}" />
