@@ -9,7 +9,8 @@
     <arg name="paused" value="true" />
     <!-- <arg name="gui" value="false" /> -->
   </include>
-  <include file="$(find rotors_gazebo)/launch/spawn_firefly.launch">
+  <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+    <arg name="mav_name" value="firefly" />
     <arg name="model" value="$(find rotors_description)/urdf/firefly_generic_pose_sensor.gazebo" />
     <arg name="enable_logging" value="$(arg enable_logging)" />
     <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />

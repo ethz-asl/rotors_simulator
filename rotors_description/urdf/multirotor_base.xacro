@@ -71,15 +71,9 @@
     <joint name="rotor_${motor_number}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
-      <!-- TODO(ff): not currently set because it's not yet supported -->
-      <!-- <limit effort="2000" velocity="${max_rot_velocity}" /> -->
       <parent link="${parent}" />
       <child link="rotor_${motor_number}" />
-
     </joint>
-    <!-- TODO(ff): not currently set because it's not yet supported -->
-    <!-- <gazebo reference="rotor_${motor_number}_joint"> <axis> <xyz>0 0 1</xyz>
-      <limit> <velocity> ${max_rot_velocity} </velocity> </limit> </axis> </gazebo> -->
     <link name="rotor_${motor_number}">
       <inertial>
         <mass value="${mass_rotor}" /> <!-- [kg] -->

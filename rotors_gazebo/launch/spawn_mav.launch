@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 
 <launch>
-  <arg name="name" default="pelican"/>
-  <arg name="model" default="$(find rotors_description)/urdf/pelican_base.xacro"/>
+  <arg name="mav_name" />
+  <arg name="model" default="$(find rotors_description)/urdf/$(arg mav_name)_base.xacro"/>
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
   <arg name="z" default="0.1"/>
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
-  <arg name="log_file" default="pelican"/>
+  <arg name="log_file" default="$(arg mav_name)"/>
 
   <!-- send the robot XML to param server -->
   <param name="robot_description" command="
@@ -21,13 +21,13 @@
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
-  <node name="spawn_pelican" pkg="gazebo_ros" type="spawn_model"
+  <node name="spawn_$(arg mav_name)" pkg="gazebo_ros" type="spawn_model"
    args="-param robot_description
          -urdf
          -x $(arg x)
          -y $(arg y)
          -z $(arg z)
-         -model $(arg name)"
+         -model $(arg mav_name)"
    respawn="false" output="screen">
   </node>
 </launch>

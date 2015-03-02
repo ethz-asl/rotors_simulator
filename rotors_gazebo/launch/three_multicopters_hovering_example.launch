@@ -13,7 +13,8 @@
     <rosparam param="wp_x">0</rosparam>
     <rosparam param="wp_y">0</rosparam>
     <rosparam param="wp_z">1</rosparam>
-    <include file="$(find rotors_gazebo)/launch/spawn_hummingbird.launch">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="hummingbird" />
       <arg name="model" value="$(find rotors_description)/urdf/hummingbird_generic_odometry_sensor.gazebo" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
@@ -32,7 +33,8 @@
     <rosparam param="wp_x">0</rosparam>
     <rosparam param="wp_y">1</rosparam>
     <rosparam param="wp_z">1</rosparam>
-    <include file="$(find rotors_gazebo)/launch/spawn_pelican.launch">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="pelican" />
       <arg name="model" value="$(find rotors_description)/urdf/pelican_generic_odometry_sensor.gazebo" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
@@ -52,7 +54,8 @@
     <rosparam param="wp_x">0</rosparam>
     <rosparam param="wp_y">2</rosparam>
     <rosparam param="wp_z">1</rosparam>
-    <include file="$(find rotors_gazebo)/launch/spawn_firefly.launch">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="firefly" />
       <arg name="model" value="$(find rotors_description)/urdf/firefly_generic_odometry_sensor.gazebo" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
