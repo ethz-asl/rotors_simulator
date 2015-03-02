@@ -40,13 +40,13 @@
     <visual>
       <origin xyz="${arm_length/6} 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="${arm_length/2} 0.03 0.01"/> <!-- [m] [m] [m] -->
+        <box size="${arm_length/3} 0.03 0.01"/> <!-- [m] [m] [m] -->
       </geometry>
     </visual>
     <collision>
       <origin xyz="${arm_length/6} 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="${arm_length/2} 0.03 0.01"/> <!-- [m] [m] [m] -->
+        <box size="${arm_length/3} 0.03 0.01"/> <!-- [m] [m] [m] -->
       </geometry>
     </collision>
   </link>
@@ -64,13 +64,13 @@
     <visual>
       <origin xyz="${arm_length/6} 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="${arm_length/2} 0.03 0.01"/> <!-- [m] [m] [m] -->
+        <box size="${arm_length/3} 0.03 0.01"/> <!-- [m] [m] [m] -->
       </geometry>
     </visual>
     <collision>
       <origin xyz="${arm_length/6} 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="${arm_length/2} 0.03 0.01"/> <!-- [m] [m] [m] -->
+        <box size="${arm_length/3} 0.03 0.01"/> <!-- [m] [m] [m] -->
       </geometry>
     </collision>
   </link>
@@ -90,7 +90,7 @@
     noise_stddev="0.007"
     enable_visual="true">
     <box size="0.02 0.05 0.05" />
-    <origin xyz="${arm_length/3+0.05} 0 0" rpy="0 0 0" />
+    <origin xyz="${arm_length/3} 0 0" rpy="0 0 0" />
   </xacro:camera_macro>
 
   <xacro:camera_macro
@@ -108,7 +108,7 @@
     noise_stddev="0.007"
     enable_visual="true">
     <box size="0.02 0.05 0.05" />
-    <origin xyz="${arm_length/3+0.05} 0 0" rpy="0 0 0" />
+    <origin xyz="${arm_length/3} 0 0" rpy="0 0 0" />
   </xacro:camera_macro>
 </robot>
 
