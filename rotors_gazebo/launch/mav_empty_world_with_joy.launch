@@ -11,15 +11,14 @@
     <!-- <arg name="gui" value="false"/> -->
   </include>
 
-  <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
-    <arg name="mav_name" value="$(arg mav_name)" />
-    <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_generic_odometry_sensor.gazebo" />
-    <arg name="enable_logging" value="$(arg enable_logging)" />
-    <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
-    <arg name="log_file" value="$(arg log_file)"/>
-  </include>
-
   <group ns="$(arg mav_name)">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg log_file)"/>
+    </include>
     <node name="joy_node" pkg="joy" type="joy_node" />
     <node name="rotors_joy_interface" pkg="rotors_joy_interface" type="rotors_joy_interface" />
     <node name="roll_pitch_yawrate_thrust_controller_node" pkg="rotors_control" type="roll_pitch_yawrate_thrust_controller_node" output="screen">
