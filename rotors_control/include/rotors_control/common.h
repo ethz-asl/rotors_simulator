@@ -87,6 +87,14 @@ void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
     (*allocation_matrix)(3, i) = rotor.rotor_force_constant;
     ++i;
   }
+  Eigen::FullPivLU<Eigen::Matrix4Xd> lu(*allocation_matrix);
+  int rank = lu.rank();
+  if (rank < 4) {
+    std::cout << "The rank of the allocation matrix is " << lu.rank()
+              << ", it should have rank 4, to have a fully controllable system,"
+              << " check your configuration." << std::endl;
+  }
+
 }
 
 void skewMatrixFromVector(Eigen::Vector3d& vector, Eigen::Matrix3d* skew_matrix) {
