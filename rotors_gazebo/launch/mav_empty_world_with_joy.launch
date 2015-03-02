@@ -1,7 +1,8 @@
 <launch>
-  <arg name="enable_logging" default="false"/>
-  <arg name="enable_ground_truth" default="true"/>
-  <arg name="log_file" default="asymmetric_quadrotor"/>
+  <arg name="mav_name" />
+  <arg name="enable_logging" default="false" />
+  <arg name="enable_ground_truth" default="true" />
+  <arg name="log_file" default="$(arg mav_name)" />
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic.world"/>
@@ -10,9 +11,10 @@
     <!-- <arg name="gui" value="false"/> -->
   </include>
 
-  <group ns="asymmetric_quadrotor">
-    <include file="$(find rotors_gazebo)/launch/spawn_asymmetric_quadrotor.launch">
-      <arg name="model" value="$(find rotors_description)/urdf/asymmetric_quadrotor_generic_odometry_sensor.gazebo" />
+  <group ns="$(arg mav_name)">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)" />
+      <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_generic_odometry_sensor.gazebo" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
       <arg name="log_file" value="$(arg log_file)"/>
@@ -21,9 +23,8 @@
     <node name="rotors_joy_interface" pkg="rotors_joy_interface" type="rotors_joy_interface" />
     <node name="roll_pitch_yawrate_thrust_controller_node" pkg="rotors_control" type="roll_pitch_yawrate_thrust_controller_node" output="screen">
       <rosparam
-        command="load"
-        file="$(find rotors_gazebo)/resource/roll_pitch_yawrate_thrust_controller_asymmetric_quadrotor.yaml" />
-      <rosparam command="load" file="$(find rotors_gazebo)/resource/asymmetric_quadrotor.yaml" />
+        command="load" file="$(find rotors_gazebo)/resource/roll_pitch_yawrate_thrust_controller_$(arg mav_name).yaml" />
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name).yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
   </group>
