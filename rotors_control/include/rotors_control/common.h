@@ -88,6 +88,8 @@ void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
     ++i;
   }
   Eigen::FullPivLU<Eigen::Matrix4Xd> lu(*allocation_matrix);
+  // Setting the threshold for when pivots of the rank calculation should be considered nonzero.
+  lu.setThreshold(1e-9);
   int rank = lu.rank();
   if (rank < 4) {
     std::cout << "The rank of the allocation matrix is " << lu.rank()
