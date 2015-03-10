@@ -21,7 +21,7 @@
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
-  <node name="spawn_robot" pkg="gazebo_ros" type="spawn_model"
+  <node name="spawn_iris" pkg="gazebo_ros" type="spawn_model"
    args="-param robot_description
          -urdf
          -x $(arg x)

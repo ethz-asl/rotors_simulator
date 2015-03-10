@@ -38,42 +38,39 @@
 
   <!-- Macro to add a camera. -->
   <xacro:macro name="camera_macro"
-    params="namespace camera_number update_rate
-      horizontal_fov image_width image_height image_format *origin">
-    <!-- Camera joint -->
-    <joint name="camera${camera_number}_joint" type="fixed">
-      <axis xyz="0 1 0" />
-      <xacro:insert_block name="origin" />
-      <parent link="base_link" />
-      <child link="camera${camera_number}_link" />
-    </joint>
-
-    <!-- Camera link -->
-    <link name="camera${camera_number}_link">
+    params="namespace parent_link camera_suffix frame_rate
+      horizontal_fov image_width image_height image_format min_distance
+      max_distance noise_mean noise_stddev enable_visual *geometry *origin">
+    <link name="${namespace}/camera_${camera_suffix}_link">
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <box size="0.1 0.1 0.1" />
+          <xacro:insert_block name="geometry" />
         </geometry>
       </collision>
-
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-          <box size="0.1 0.1 0.1" />
-        </geometry>
-        <material name="red" />
-      </visual>
-
+      <xacro:if value="${enable_visual}">
+        <visual>
+          <origin xyz="0 0 0" rpy="0 0 0" />
+          <geometry>
+            <xacro:insert_block name="geometry" />
+          </geometry>
+          <material name="red" />
+        </visual>
+      </xacro:if>
       <inertial>
         <mass value="1e-5" />
         <origin xyz="0 0 0" rpy="0 0 0" />
         <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
       </inertial>
     </link>
-    <gazebo reference="camera${camera_number}_link">
-      <sensor type="camera" name="camera${camera_number}">
-        <update_rate>${update_rate}</update_rate>
+    <joint name="${namespace}/camera_${camera_suffix}_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/camera_${camera_suffix}_link" />
+    </joint>
+    <gazebo reference="${namespace}/camera_${camera_suffix}_link">
+      <sensor type="camera" name="${namespace}_camera_${camera_suffix}">
+        <update_rate>${frame_rate}</update_rate>
         <camera name="head">
           <horizontal_fov>${horizontal_fov}</horizontal_fov>
           <image>
@@ -82,22 +79,26 @@
             <format>${image_format}</format>
           </image>
           <clip>
-            <near>0.02</near>
-            <far>300</far>
+            <near>${min_distance}</near>
+            <far>${max_distance}</far>
           </clip>
           <noise>
             <type>gaussian</type>
-            <mean>0.0</mean>
-            <stddev>0.007</stddev>
+            <!-- Noise is sampled independently per pixel on each frame.
+                 That pixel's noise value is added to each of its color
+                 channels, which at that point lie in the range [0,1]. -->
+            <mean>${noise_mean}</mean>
+            <stddev>${noise_stddev}</stddev>
           </noise>
         </camera>
-        <plugin name="camera${camera_number}_controller" filename="libgazebo_ros_camera.so">
+        <plugin name="${namespace}_camera_${camera_suffix}_controller" filename="libgazebo_ros_camera.so">
+          <robotNamespace>${namespace}</robotNamespace>
           <alwaysOn>true</alwaysOn>
-          <updateRate>0.0</updateRate>
-          <cameraName>${namespace}/camera${camera_number}</cameraName>
+          <updateRate>${frame_rate}</updateRate>
+          <cameraName>camera_${camera_suffix}</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>camera${camera_number}_link</frameName>
+          <frameName>camera_${camera_suffix}_link</frameName>
           <hackBaseline>0.0</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
@@ -116,23 +117,23 @@
         <robotNamespace>${namespace}</robotNamespace>
         <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
         <commandRateThrustSubTopic>command/rate</commandRateThrustSubTopic>
-        <commandMotorSpeedSubTopic>command/motors</commandMotorSpeedSubTopic>
+        <commandMotorSpeedSubTopic>command/motor_speed</commandMotorSpeedSubTopic>
         <imuSubTopic>${imu_sub_topic}</imuSubTopic>
-        <motorVelocityCommandPubTopic>motor_velocity_reference</motorVelocityCommandPubTopic>
+        <motorSpeedCommandPubTopic>gazebo/command/motor_speed</motorSpeedCommandPubTopic>
       </plugin>
     </gazebo>
   </xacro:macro>
 
   <!-- Macro to add an IMU. -->
   <xacro:macro name="imu_plugin_macro"
-    params="namespace imu_suffix imu_topic
+    params="namespace imu_suffix parent_link imu_topic
       mass_imu_sensor gyroscope_noise_density gyroscopoe_random_walk
       gyroscope_bias_correlation_time gyroscope_turn_on_bias_sigma
       accelerometer_noise_density accelerometer_random_walk
       accelerometer_bias_correlation_time accelerometer_turn_on_bias_sigma
       *inertia *origin">
     <!-- IMU link -->
-    <link name="imu${imu_suffix}_link">
+    <link name="${namespace}/imu${imu_suffix}_link">
       <inertial>
         <xacro:insert_block name="inertia" />
         <mass value="${mass_imu_sensor}" />  <!-- [kg] -->
@@ -140,10 +141,10 @@
       </inertial>
     </link>
     <!-- IMU joint -->
-    <joint name="imu${imu_suffix}_joint" type="revolute">
+    <joint name="${namespace}/imu${imu_suffix}_joint" type="revolute">
       <xacro:insert_block name="origin" />
-      <parent link="base_link" />
-      <child link="imu${imu_suffix}_link" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/imu${imu_suffix}_link" />
       <limit upper="0" lower="0" effort="0" velocity="0" />
     </joint>
     <gazebo>
@@ -151,7 +152,7 @@
       <!-- A good description of the IMU parameters can be found in the kalibr documentation:
            https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics -->
         <robotNamespace>${namespace}</robotNamespace> <!-- (string, required): ros namespace in which the messages are published -->
-        <linkName>imu${imu_suffix}_link</linkName> <!-- (string, required): name of the body which holds the IMU sensor -->
+        <linkName>${namespace}/imu${imu_suffix}_link</linkName> <!-- (string, required): name of the body which holds the IMU sensor -->
         <imuTopic>${imu_topic}</imuTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
         <gyroscopeNoiseDensity>${gyroscope_noise_density}</gyroscopeNoiseDensity> <!-- Gyroscope noise density (two-sided spectrum) [rad/s/sqrt(Hz)] -->
         <gyroscopeRandomWalk>${gyroscopoe_random_walk}</gyroscopeRandomWalk> <!-- Gyroscope bias random walk [rad/s/s/sqrt(Hz)] -->
@@ -168,7 +169,7 @@
 <!-- Macro to add a generic odometry sensor. -->
   <xacro:macro name="odometry_plugin_macro"
     params="
-      namespace odometry_sensor_suffix pose_topic pose_with_covariance_topic
+      namespace odometry_sensor_suffix parent_link pose_topic pose_with_covariance_topic
       position_topic transform_topic odometry_topic parent_frame_id
       mass_odometry_sensor measurement_divisor measurement_delay unknown_delay
       noise_normal_position noise_normal_quaternion noise_normal_linear_velocity
@@ -177,22 +178,22 @@
       noise_uniform_angular_velocity enable_odometry_map odometry_map
       image_scale *inertia *origin">
     <!-- odometry link -->
-    <link name="odometry_sensor${odometry_sensor_suffix}_link">
+    <link name="${namespace}/odometry_sensor${odometry_sensor_suffix}_link">
       <inertial>
         <xacro:insert_block name="inertia" />
         <mass value="${mass_odometry_sensor}" />  <!-- [kg] -->
       </inertial>
     </link>
     <!-- odometry joint -->
-    <joint name="odometry_sensor${odometry_sensor_suffix}_joint" type="revolute">
-      <parent link="base_link" />
+    <joint name="${namespace}/odometry_sensor${odometry_sensor_suffix}_joint" type="revolute">
+      <parent link="${parent_link}" />
       <xacro:insert_block name="origin" />
-      <child link="odometry_sensor${odometry_sensor_suffix}_link" />
+      <child link="${namespace}/odometry_sensor${odometry_sensor_suffix}_link" />
       <limit upper="0" lower="0" effort="0" velocity="0" />
     </joint>
     <gazebo>
       <plugin filename="librotors_gazebo_odometry_plugin.so" name="odometry_sensor${odometry_sensor_suffix}">
-        <linkName>odometry_sensor${odometry_sensor_suffix}_link</linkName>
+        <linkName>${namespace}/odometry_sensor${odometry_sensor_suffix}_link</linkName>
         <robotNamespace>${namespace}</robotNamespace>
         <poseTopic>${pose_topic}</poseTopic>
         <poseWithCovarianceTopic>${pose_with_covariance_topic}</poseWithCovarianceTopic>
@@ -239,4 +240,204 @@
       </plugin>
     </gazebo>
   </xacro:macro>
+
+  <!-- VI sensor macros -->
+  <!-- Macro to add a VI-sensor camera. -->
+  <xacro:macro name="vi_sensor_camera_macro"
+    params="namespace parent_link camera_suffix frame_rate *origin">
+    <xacro:camera_macro
+      namespace="${namespace}"
+      parent_link="${parent_link}"
+      camera_suffix="${camera_suffix}"
+      frame_rate="${frame_rate}"
+      horizontal_fov="1.3962634"
+      image_width="752"
+      image_height="480"
+      image_format="L8"
+      min_distance="0.02"
+      max_distance="30"
+      noise_mean="0.0"
+      noise_stddev="0.007"
+      enable_visual="false">
+      <cylinder length="0.01" radius="0.007" />
+      <xacro:insert_block name="origin" />
+    </xacro:camera_macro>
+  </xacro:macro>
+
+  <!-- Macro to add a depth camera on the VI-sensor. -->
+  <xacro:macro name="vi_sensor_depth_macro"
+    params="namespace parent_link camera_suffix frame_rate *origin">
+    <link name="${namespace}/camera_${camera_suffix}_link">
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <cylinder length="0.01" radius="0.007" />
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
+    <joint name="${namespace}/camera_${camera_suffix}_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/camera_${camera_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+    <!-- Optical center of camera -->
+    <link name="${namespace}/camera_${camera_suffix}_optical_center_link" />
+    <joint name="${namespace}/camera_${camera_suffix}_optical_center_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-PI/2} 0 ${-PI/2}" />
+      <parent link="${namespace}/camera_${camera_suffix}_link" />
+      <child link="${namespace}/camera_${camera_suffix}_optical_center_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+    <gazebo reference="${namespace}/camera_${camera_suffix}_link">
+      <sensor type="depth" name="${namespace}_camera_{camera_suffix}">
+        <always_on>true</always_on>
+        <update_rate>${frame_rate}</update_rate>
+        <camera>
+          <horizontal_fov>2</horizontal_fov>
+          <image>
+            <format>L8</format>
+            <width>640</width>
+            <height>480</height>
+          </image>
+          <clip>
+            <near>0.01</near>
+            <far>100</far>
+          </clip>
+        </camera>
+        <plugin name="${namespace}_camera_{camera_suffix}" filename="libgazebo_ros_openni_kinect.so">
+          <robotNamespace>${namespace}</robotNamespace>
+          <alwaysOn>true</alwaysOn>
+          <baseline>0.11</baseline>
+          <updateRate>${frame_rate}</updateRate>
+          <cameraName>camera_${camera_suffix}</cameraName>
+          <imageTopicName>camera/image_raw</imageTopicName>
+          <cameraInfoTopicName>camera/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>depth/disparity</depthImageTopicName>
+          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>depth/points</pointCloudTopicName>
+          <frameName>camera_${camera_suffix}_optical_center_link</frameName>
+          <pointCloudCutoff>0.5</pointCloudCutoff>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- VI-Sensor Macro -->
+  <xacro:macro name="vi_sensor_macro" params="namespace parent_link *origin">
+    <!-- Vi Sensor Link -->
+    <link name="${namespace}/vi_sensor_link">
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.03 0.133 0.057" />
+        </geometry>
+      </collision>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://rotors_description/meshes/vi_sensor.dae" scale="1 1 1" />
+        </geometry>
+      </visual>
+
+      <inertial>
+        <mass value="0.13" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
+    <joint name="{namespace}_vi_sensor_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/vi_sensor_link" />
+    </joint>
+    <!-- Cameras -->
+    <xacro:if value="$(arg enable_cameras)">
+      <!-- Left Camera -->
+      <xacro:vi_sensor_camera_macro
+        namespace="${namespace}" parent_link="${namespace}/vi_sensor_link"
+        camera_suffix="left" frame_rate="30.0">
+        <origin xyz="0.015 0.055 0.0065" rpy="0 0 0" />
+      </xacro:vi_sensor_camera_macro>
+      <!-- Right Camera -->
+      <xacro:vi_sensor_camera_macro namespace="${namespace}"
+        parent_link="${namespace}/vi_sensor_link"
+        camera_suffix="right" frame_rate="30.0">
+        <origin xyz="0.015 -0.055 0.0065" rpy="0 0 0" />
+      </xacro:vi_sensor_camera_macro>
+    </xacro:if>
+
+    <!-- Depth Sensor -->
+    <xacro:if value="$(arg enable_depth)">
+      <xacro:vi_sensor_depth_macro
+        namespace="${namespace}" parent_link="${namespace}/vi_sensor_link"
+        camera_suffix="depth" frame_rate="30.0">
+        <origin xyz="0.015 0.055 0.0065" rpy="0 0 0" />
+      </xacro:vi_sensor_depth_macro>
+    </xacro:if>
+
+    <!-- Groundtruth -->
+    <xacro:if value="$(arg enable_ground_truth)">
+      <!-- Odometry Sensor -->
+      <xacro:odometry_plugin_macro
+        namespace="${namespace}/ground_truth"
+        odometry_sensor_suffix=""
+        parent_link="${namespace}/vi_sensor_link"
+        pose_topic="pose"
+        pose_with_covariance_topic="pose_with_covariance"
+        position_topic="position"
+        transform_topic="transform"
+        odometry_topic="odometry"
+        parent_frame_id="world"
+        mass_odometry_sensor="0.00001"
+        measurement_divisor="1"
+        measurement_delay="0"
+        unknown_delay="0.0"
+        noise_normal_position="0 0 0"
+        noise_normal_quaternion="0 0 0"
+        noise_normal_linear_velocity="0 0 0"
+        noise_normal_angular_velocity="0 0 0"
+        noise_uniform_position="0 0 0"
+        noise_uniform_quaternion="0 0 0"
+        noise_uniform_linear_velocity="0 0 0"
+        noise_uniform_angular_velocity="0 0 0"
+        enable_odometry_map="false"
+        odometry_map=""
+        image_scale="">
+        <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] -->
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      </xacro:odometry_plugin_macro>
+    </xacro:if>
+
+    <!-- ADIS16448 IMU. -->
+    <xacro:imu_plugin_macro
+      namespace="${namespace}"
+      imu_suffix=""
+      parent_link="${namespace}/vi_sensor_link"
+      imu_topic="imu"
+      mass_imu_sensor="0.015"
+      gyroscope_noise_density="0.0003394"
+      gyroscopoe_random_walk="0.000038785"
+      gyroscope_bias_correlation_time="1000.0"
+      gyroscope_turn_on_bias_sigma="0.0087"
+      accelerometer_noise_density="0.004"
+      accelerometer_random_walk="0.006"
+      accelerometer_bias_correlation_time="300.0"
+      accelerometer_turn_on_bias_sigma="0.1960">
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <origin xyz="0.015 0 0.0113" rpy="0 0 0" />
+    </xacro:imu_plugin_macro>
+  </xacro:macro>
+
 </robot>

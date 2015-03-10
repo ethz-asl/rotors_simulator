@@ -179,37 +179,37 @@ void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
   LogMotorVelocities(now);
 }
 
-void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuPtr& imu_msg) {
+void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(imu_pub_topic_, ros_now, imu_msg);
 }
 
-void GazeboBagPlugin::WindCallback(const geometry_msgs::WrenchStampedPtr& wind_msg) {
+void GazeboBagPlugin::WindCallback(const geometry_msgs::WrenchStampedConstPtr& wind_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(wind_pub_topic_, ros_now, wind_msg);
 }
 
-void GazeboBagPlugin::WaypointCallback(const mav_msgs::CommandTrajectoryPtr& trajectory_msg) {
+void GazeboBagPlugin::WaypointCallback(const mav_msgs::CommandTrajectoryConstPtr& trajectory_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(waypoint_pub_topic_, ros_now, trajectory_msg);
 }
 
-void GazeboBagPlugin::CommandAttitudeThrustCallback(const mav_msgs::CommandAttitudeThrustPtr& control_msg) {
+void GazeboBagPlugin::CommandAttitudeThrustCallback(const mav_msgs::CommandAttitudeThrustConstPtr& control_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(control_attitude_thrust_pub_topic_, ros_now, control_msg);
 }
 
-void GazeboBagPlugin::CommandMotorSpeedCallback(const mav_msgs::CommandMotorSpeedPtr& control_msg) {
+void GazeboBagPlugin::CommandMotorSpeedCallback(const mav_msgs::CommandMotorSpeedConstPtr& control_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(control_motor_speed_pub_topic_, ros_now, control_msg);
 }
 
-void GazeboBagPlugin::CommandRateThrustCallback(const mav_msgs::CommandRateThrustPtr& control_msg) {
+void GazeboBagPlugin::CommandRateThrustCallback(const mav_msgs::CommandRateThrustConstPtr& control_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(control_rate_thrust_pub_topic_, ros_now, control_msg);

@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="enable_cameras" default="false"/>
+  <arg name="enable_depth" default="false"/>
+  <arg name="enable_ground_truth" default="false"/>
+  <param name="robot_description"
+    command="$(find xacro)/xacro.py '$(find rotors_description)/urdf/vi_sensor_base.xacro'
+    enable_cameras:=$(arg enable_cameras)
+    enable_depth:=$(arg enable_depth)
+    enable_ground_truth:=$(arg enable_ground_truth)"
+  />
+
+  <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="spawn_robot" pkg="gazebo_ros" type="spawn_model"
+   args="-param robot_description
+         -urdf
+         -x 0
+         -y 0
+         -z 0.5
+         -model vi_sensor"
+   respawn="false" output="screen">
+  </node>
+
+  <!-- Combine joint values -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher"/>
+</launch>
