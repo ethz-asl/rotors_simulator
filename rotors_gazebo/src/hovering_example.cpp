@@ -24,6 +24,7 @@
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
 #include <mav_msgs/CommandTrajectory.h>
+#include <sensor_fusion_comm/InitScale.h>
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "hovering_example");
@@ -54,6 +55,16 @@ int main(int argc, char** argv){
   // Wait for 5 seconds to let the Gazebo GUI show up.
   ros::Duration(5.0).sleep();
 
+  // Init msf.
+  sensor_fusion_comm::InitScale srv_init;
+  srv_init.request.scale = 1;
+  bool msf_ok = ros::service::call("msf/pose_sensor/initialize_msf_scale", srv_init);
+    
+  if(msf_ok) {
+    // Wait for 5 seconds to let msf settle.
+    ros::Duration(5.0).sleep();
+  }
+    
   mav_msgs::CommandTrajectory trajectory_msg;
 
   while (ros::ok()) {
