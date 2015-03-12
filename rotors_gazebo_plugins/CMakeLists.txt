@@ -5,6 +5,7 @@ add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  tf
   rotors_model
   rotors_control
   mav_msgs
