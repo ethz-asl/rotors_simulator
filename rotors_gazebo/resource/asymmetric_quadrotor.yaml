@@ -1,0 +1,12 @@
+# Asymmetric quadrotor vehicle parameters
+mass: 1.0
+inertia: {xx: 0.01, xy: 0.0, xz: 0.0, yy: 0.01, yz: 0.0, zz: 0.02}
+
+# angle should be expressed in rad
+# direction 1 means counter clockwise, -1 clockwise
+# The order of the rotors matters for the calculation of the allocation matrix.
+rotor_configuration:
+  '0': {angle: 0, arm_length: 0.6, rotor_force_constant: 9.9865e-06, rotor_moment_constant: 1.6e-2, direction: 1.0}
+  '1': {angle: 2.09439510239, arm_length: 0.6, rotor_force_constant: 9.9865e-06, rotor_moment_constant: 1.6e-2, direction: -1.0}
+  '2': {angle: 3.14159265359, arm_length: 0.2, rotor_force_constant: 9.9865e-06, rotor_moment_constant: 1.6e-2, direction: 1.0}
+  '3': {angle: 4.18879020478, arm_length: 0.6, rotor_force_constant: 9.9865e-06, rotor_moment_constant: 1.6e-2, direction: -1.0}

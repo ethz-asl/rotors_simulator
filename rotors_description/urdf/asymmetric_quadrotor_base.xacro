@@ -19,10 +19,10 @@
   limitations under the License.
 -->
 
-<robot name="hummingbird" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="asymmetric_quadrotor" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
-  <!-- Instantiate hummingbird "mechanics" -->
-  <xacro:include filename="$(find rotors_description)/urdf/hummingbird.xacro" />
+  <!-- Instantiate asymmetric_quadrotor "mechanics" -->
+  <xacro:include filename="$(find rotors_description)/urdf/asymmetric_quadrotor.xacro" />
 
   <!-- Instantiate a controller. -->
   <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />

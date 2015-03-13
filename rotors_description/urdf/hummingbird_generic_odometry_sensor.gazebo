@@ -49,8 +49,7 @@
     noise_uniform_angular_velocity="0 0 0"
     enable_odometry_map="false"
     odometry_map=""
-    image_scale=""
-  >
+    image_scale="">
     <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
   </xacro:odometry_plugin_macro>
