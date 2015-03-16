@@ -24,7 +24,7 @@
   <!-- Instantiate firefly with a generic odometry sensor. -->
   <xacro:include filename="$(find rotors_description)/urdf/firefly_generic_odometry_sensor.gazebo" />
 
-  <!-- Mount a generic odometry sensor without odometry map (working everywhere). -->
+  <!-- Mount a VI-sensor in front of the Firefly. -->
   <xacro:vi_sensor_macro
     namespace="${namespace}/vi_sensor"
     parent_link="base_link"
@@ -35,4 +35,3 @@
     <origin xyz="0.1 0.0 -0.03" rpy="0.0 0.1 0.0" />
   </xacro:vi_sensor_macro>
 </robot>
-
