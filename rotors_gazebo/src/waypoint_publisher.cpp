@@ -21,7 +21,7 @@
 #include <fstream>
 #include <iostream>
 
-#include <mav_msgs/CommandTrajectory.h>
+#include <mav_msgs/CommandTrajectoryPositionYaw.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 
@@ -46,7 +46,7 @@ class WaypointWithTime {
     wp.yaw = yaw;
   }
 
-  mav_msgs::CommandTrajectory wp;
+  mav_msgs::CommandTrajectoryPositionYaw wp;
   double waiting_time;
 };
 
@@ -98,8 +98,9 @@ int main(int argc, char** argv) {
 
   ros::Subscriber sub = nh.subscribe("imu", 10, &callback);
 
-  ros::Publisher wp_pub = nh.advertise<mav_msgs::CommandTrajectory>("waypoint", 10);
-  mav_msgs::CommandTrajectory wp_msg;
+  ros::Publisher wp_pub = nh.advertise<mav_msgs::CommandTrajectoryPositionYaw>(
+    "command/trajectory_position_yaw", 10);
+  mav_msgs::CommandTrajectoryPositionYaw wp_msg;
 
   ROS_INFO("Wait for simulation to become ready...");
 

@@ -154,7 +154,7 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Subscriber to Wind WrenchStamped Message.
   wind_sub_ = node_handle_->subscribe(wind_sub_topic_, 10, &GazeboBagPlugin::WindCallback, this);
 
-  // Subscriber to Waypoint CommandTrajectory Message.
+  // Subscriber to Waypoint CommandTrajectoryPositionYaw Message.
   waypoint_sub_ = node_handle_->subscribe(waypoint_sub_topic_, 10, &GazeboBagPlugin::WaypointCallback, this);
 
   // Subscriber to Control Attitude Thrust Message.
@@ -191,13 +191,15 @@ void GazeboBagPlugin::WindCallback(const geometry_msgs::WrenchStampedConstPtr& w
   writeBag(wind_pub_topic_, ros_now, wind_msg);
 }
 
-void GazeboBagPlugin::WaypointCallback(const mav_msgs::CommandTrajectoryConstPtr& trajectory_msg) {
+void GazeboBagPlugin::WaypointCallback(
+    const mav_msgs::CommandTrajectoryPositionYawConstPtr& trajectory_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(waypoint_pub_topic_, ros_now, trajectory_msg);
 }
 
-void GazeboBagPlugin::CommandAttitudeThrustCallback(const mav_msgs::CommandAttitudeThrustConstPtr& control_msg) {
+void GazeboBagPlugin::CommandAttitudeThrustCallback(
+    const mav_msgs::CommandAttitudeThrustConstPtr& control_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(control_attitude_thrust_pub_topic_, ros_now, control_msg);

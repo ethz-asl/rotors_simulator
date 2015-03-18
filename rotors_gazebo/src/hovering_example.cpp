@@ -23,12 +23,13 @@
 
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
-#include <mav_msgs/CommandTrajectory.h>
+#include <mav_msgs/CommandTrajectoryPositionYaw.h>
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "hovering_example");
   ros::NodeHandle nh;
-  ros::Publisher trajectory_pub = nh.advertise<mav_msgs::CommandTrajectory>("command/trajectory", 10);
+  ros::Publisher trajectory_pub = nh.advertise<mav_msgs::CommandTrajectoryPositionYaw>(
+    "command/trajectory_position_yaw", 10);
   ROS_INFO("Started hovering example.");
 
   std_srvs::Empty srv;
@@ -54,7 +55,7 @@ int main(int argc, char** argv){
   // Wait for 5 seconds to let the Gazebo GUI show up.
   ros::Duration(5.0).sleep();
 
-  mav_msgs::CommandTrajectory trajectory_msg;
+  mav_msgs::CommandTrajectoryPositionYaw trajectory_msg;
 
   while (ros::ok()) {
     nh.param<double>("wp_x", trajectory_msg.position.x, 0.0);

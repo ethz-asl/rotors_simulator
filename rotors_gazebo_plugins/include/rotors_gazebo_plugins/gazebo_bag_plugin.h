@@ -35,7 +35,7 @@
 #include <mav_msgs/CommandAttitudeThrust.h>
 #include <mav_msgs/CommandMotorSpeed.h>
 #include <mav_msgs/CommandRateThrust.h>
-#include <mav_msgs/CommandTrajectory.h>
+#include <mav_msgs/CommandTrajectoryPositionYaw.h>
 #include <ros/ros.h>
 #include <rosbag/bag.h>
 #include <sensor_msgs/Imu.h>
@@ -54,16 +54,16 @@ static const std::string kDefaultImuPubTopic = "/imu";
 static const std::string kDefaultImuSubTopic = "/imu";
 static const std::string kDefaultControlAttitudeThrustPubTopic = "/command/attitude";
 static const std::string kDefaultControlAttitudeThrustSubTopic = "/command/attitude";
-static const std::string kDefaultControlMotorSpeedPubTopic = "/command/motors";
-static const std::string kDefaultControlMotorSpeedSubTopic = "/command/motors";
+static const std::string kDefaultControlMotorSpeedPubTopic = "/command/motor_speed";
+static const std::string kDefaultControlMotorSpeedSubTopic = "/command/motor_speed";
 static const std::string kDefaultControlRateThrustPubTopic = "/command/rate";
 static const std::string kDefaultControlRateThrustSubTopic = "/command/rate";
 static const std::string kDefaultMotorPubTopic = "/motors";
 static const std::string kDefaultCollisionsPubTopic = "/collisions";
 static const std::string kDefaultWindPubTopic = "/wind";
 static const std::string kDefaultWindSubTopic = "/wind";
-static const std::string kDefaultWaypointPubTopic = "/waypoint";
-static const std::string kDefaultWaypointSubTopic = "/waypoint";
+static const std::string kDefaultWaypointPubTopic = "/command/trajectory_position_yaw";
+static const std::string kDefaultWaypointSubTopic = "/command/trajectory_position_yaw";
 
 static const std::string kDefaultFrameId = "ground_truth_pose";
 static const std::string kDefaultLinkName = "base_link";
@@ -122,9 +122,9 @@ class GazeboBagPlugin : public ModelPlugin {
   /// \param[in] wind_msg A WrenchStamped message from geometry_msgs.
   void WindCallback(const geometry_msgs::WrenchStampedConstPtr& wind_msg);
 
-  /// \brief Called when an Trajectory message is received.
+  /// \brief Called when a CommandTrajectoryPositionYaw message is received.
   /// \param[in] trajectory_msg A CommandTrajectory message from mav_msgs.
-  void WaypointCallback(const mav_msgs::CommandTrajectoryConstPtr& trajectory_msg);
+  void WaypointCallback(const mav_msgs::CommandTrajectoryPositionYawConstPtr& trajectory_msg);
 
   /// \brief Called when a CommandAttitudeThrust message is received.
   /// \param[in] control_msg A CommandAttitudeThrust message from mav_msgs.
