@@ -28,7 +28,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <mav_msgs/CommandAttitudeThrust.h>
 #include <mav_msgs/CommandMotorSpeed.h>
-#include <mav_msgs/CommandTrajectory.h>
+#include <mav_msgs/CommandTrajectoryPositionYaw.h>
 #include <mav_msgs/MotorSpeed.h>
 #include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
@@ -58,9 +58,9 @@ class LeePositionControllerNode {
   ros::Subscriber odometry_sub_;
 
   ros::Publisher motor_velocity_reference_pub_;
-  
-  void CommandTrajectoryCallback(
-      const mav_msgs::CommandTrajectoryConstPtr& trajectory_reference_msg);
+
+  void CommandTrajectoryPositionYawCallback(
+      const mav_msgs::CommandTrajectoryPositionYawConstPtr& trajectory_reference_msg);
 
   void OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg);
 };
