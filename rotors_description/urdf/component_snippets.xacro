@@ -20,6 +20,7 @@
 -->
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="PI" value="3.141592654" />
   <!-- Macro for the inertial properties of a box -->
   <xacro:macro name="box_inertial" params="x y z mass *origin">
     <inertial>
@@ -345,7 +346,7 @@
   </xacro:macro>
 
   <!-- VI-Sensor Macro -->
-  <xacro:macro name="vi_sensor_macro" params="namespace parent_link *origin">
+  <xacro:macro name="vi_sensor_macro" params="namespace parent_link enable_cameras enable_depth enable_ground_truth *origin">
     <!-- Vi Sensor Link -->
     <link name="${namespace}/vi_sensor_link">
       <collision>
@@ -374,7 +375,7 @@
       <child link="${namespace}/vi_sensor_link" />
     </joint>
     <!-- Cameras -->
-    <xacro:if value="$(arg enable_cameras)">
+    <xacro:if value="${enable_cameras}">
       <!-- Left Camera -->
       <xacro:vi_sensor_camera_macro
         namespace="${namespace}" parent_link="${namespace}/vi_sensor_link"
@@ -390,7 +391,7 @@
     </xacro:if>
 
     <!-- Depth Sensor -->
-    <xacro:if value="$(arg enable_depth)">
+    <xacro:if value="${enable_depth}">
       <xacro:vi_sensor_depth_macro
         namespace="${namespace}" parent_link="${namespace}/vi_sensor_link"
         camera_suffix="depth" frame_rate="30.0">
@@ -399,7 +400,7 @@
     </xacro:if>
 
     <!-- Groundtruth -->
-    <xacro:if value="$(arg enable_ground_truth)">
+    <xacro:if value="${enable_ground_truth}">
       <!-- Odometry Sensor -->
       <xacro:odometry_plugin_macro
         namespace="${namespace}/ground_truth"
