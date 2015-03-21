@@ -47,6 +47,10 @@ add_library(rotors_gazebo_imu_plugin src/gazebo_imu_plugin.cpp)
 target_link_libraries(rotors_gazebo_imu_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(rotors_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
 
+add_library(rotors_gazebo_magnetometer_plugin src/gazebo_magnetometer_plugin.cpp)
+target_link_libraries(rotors_gazebo_magnetometer_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(rotors_gazebo_magnetometer_plugin ${catkin_EXPORTED_TARGETS})
+
 add_library(rotors_gazebo_controller_interface src/gazebo_controller_interface.cpp)
 target_link_libraries(rotors_gazebo_controller_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
