@@ -99,7 +99,7 @@ void GazeboMagnetometerPlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Pose gazebo_pose = W_pose_W_C;
 
 
-  // TODO(alex): insert code here.
+  // TODO(alessandro): insert code here.
   // the pose is in gazebo_pose.
 
   // TODO calculate magnetic field
