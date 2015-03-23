@@ -60,7 +60,7 @@ struct EigenOdometry {
   Eigen::Vector3d angular_velocity;
 };
 
-void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
+inline void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
                           EigenOdometry* odometry) {
   odometry->position = mav_msgs::vector3FromPointMsg(msg->pose.pose.position);
   odometry->orientation = mav_msgs::quaternionFromMsg(msg->pose.pose.orientation);
@@ -68,7 +68,7 @@ void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
   odometry->angular_velocity = mav_msgs::vector3FromMsg(msg->twist.twist.angular);
 }
 
-void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
+inline void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
                                Eigen::Matrix4Xd* allocation_matrix) {
   CHECK_NOTNULL(allocation_matrix);
   allocation_matrix->resize(4, rotor_configuration.rotors.size());
@@ -99,13 +99,13 @@ void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
 
 }
 
-void skewMatrixFromVector(Eigen::Vector3d& vector, Eigen::Matrix3d* skew_matrix) {
+inline void skewMatrixFromVector(Eigen::Vector3d& vector, Eigen::Matrix3d* skew_matrix) {
   *skew_matrix << 0, -vector.z(), vector.y(),
                   vector.z(), 0, -vector.x(),
                   -vector.y(), vector.x(), 0;
 }
 
-void vectorFromSkewMatrix(Eigen::Matrix3d& skew_matrix, Eigen::Vector3d* vector) {
+inline void vectorFromSkewMatrix(Eigen::Matrix3d& skew_matrix, Eigen::Vector3d* vector) {
   *vector << skew_matrix(2, 1), skew_matrix(0,2), skew_matrix(1, 0);
 }
 }
