@@ -66,26 +66,17 @@ int main(int argc, char** argv){
   ros::Duration(5.0).sleep();
 
   mav_msgs::CommandTrajectoryPositionYaw trajectory_msg;
-  mav_msgs::CommandTrajectoryPositionYaw trajectory_msg_prev;
+  trajectory_msg.header.stamp = ros::Time::now();
+  trajectory_msg.position.x = 0.0;
+  trajectory_msg.position.y = 0.0;
+  trajectory_msg.position.z = 1.0;
 
-  while (ros::ok()) {
-    // Read waypoint from ROS parameters.
-    nh.param<double>("wp_x", trajectory_msg.position.x, 0.0);
-    nh.param<double>("wp_y", trajectory_msg.position.y, 0.0);
-    nh.param<double>("wp_z", trajectory_msg.position.z, 1.0);
+  ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
+           nh.getNamespace().c_str(),
+           trajectory_msg.position.x,
+           trajectory_msg.position.y,
+           trajectory_msg.position.z);
+  trajectory_pub.publish(trajectory_msg);
 
-    // Publish waypoint if it changed.
-    if(waypoint_changed(trajectory_msg_prev, trajectory_msg)) {
-      ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
-               nh.getNamespace().c_str(),
-               trajectory_msg.position.x,
-               trajectory_msg.position.y,
-               trajectory_msg.position.z);
-      trajectory_msg.header.stamp = ros::Time::now();
-      trajectory_pub.publish(trajectory_msg);
-
-      trajectory_msg_prev = trajectory_msg;
-    }
-    ros::Duration(1.0).sleep();
-  }
+  ros::spin();
 }
