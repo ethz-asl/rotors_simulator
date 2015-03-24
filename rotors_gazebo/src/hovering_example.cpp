@@ -21,15 +21,25 @@
 #include <thread>
 #include <chrono>
 
+#include <mav_msgs/CommandTrajectoryPositionYaw.h>
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
-#include <mav_msgs/CommandTrajectoryPositionYaw.h>
+
+bool waypoint_changed(const mav_msgs::CommandTrajectoryPositionYaw& trajectory_prev,
+                      const mav_msgs::CommandTrajectoryPositionYaw& trajectory) {
+  if(trajectory_prev.position.x != trajectory.position.x ||
+      trajectory_prev.position.y != trajectory.position.y ||
+      trajectory_prev.position.z != trajectory.position.z) {
+    return true;
+  }
+  return false;
+}
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "hovering_example");
   ros::NodeHandle nh;
   ros::Publisher trajectory_pub = nh.advertise<mav_msgs::CommandTrajectoryPositionYaw>(
-    "command/trajectory_position_yaw", 10);
+      "command/trajectory_position_yaw", 10);
   ROS_INFO("Started hovering example.");
 
   std_srvs::Empty srv;
@@ -56,18 +66,26 @@ int main(int argc, char** argv){
   ros::Duration(5.0).sleep();
 
   mav_msgs::CommandTrajectoryPositionYaw trajectory_msg;
+  mav_msgs::CommandTrajectoryPositionYaw trajectory_msg_prev;
 
   while (ros::ok()) {
+    // Read waypoint from ROS parameters.
     nh.param<double>("wp_x", trajectory_msg.position.x, 0.0);
     nh.param<double>("wp_y", trajectory_msg.position.y, 0.0);
     nh.param<double>("wp_z", trajectory_msg.position.z, 1.0);
-    ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
-             nh.getNamespace().c_str(),
-             trajectory_msg.position.x,
-             trajectory_msg.position.y,
-             trajectory_msg.position.z);
-    trajectory_msg.header.stamp = ros::Time::now();
-    trajectory_pub.publish(trajectory_msg);
+
+    // Publish waypoint if it changed.
+    if(waypoint_changed(trajectory_msg_prev, trajectory_msg)) {
+      ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
+               nh.getNamespace().c_str(),
+               trajectory_msg.position.x,
+               trajectory_msg.position.y,
+               trajectory_msg.position.z);
+      trajectory_msg.header.stamp = ros::Time::now();
+      trajectory_pub.publish(trajectory_msg);
+
+      trajectory_msg_prev = trajectory_msg;
+    }
     ros::Duration(1.0).sleep();
   }
 }

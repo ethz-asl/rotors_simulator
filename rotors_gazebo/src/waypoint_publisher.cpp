@@ -86,16 +86,7 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-//  waypoints.push_back(WaypointWithTime(20, 10, 10, 5, 22.5 * DEG_2_RAD));
-//  waypoints.push_back(WaypointWithTime(15, 10,  0, 5, 45.0 * DEG_2_RAD));
-//  waypoints.push_back(WaypointWithTime(15,  0, 10, 1, 67.5 * DEG_2_RAD));
-//  waypoints.push_back(WaypointWithTime(15,  0,  0, 1, 90.0 * DEG_2_RAD));
-
-//  waypoints.push_back(WaypointWithTime(15, 2, 2, 1.5, 0 * DEG_2_RAD));
-//  waypoints.push_back(WaypointWithTime(15, 2, 0, 1.5, 0 * DEG_2_RAD));
-//  waypoints.push_back(WaypointWithTime(15, 0, 2, 1.0,   0 * DEG_2_RAD));
-//  waypoints.push_back(WaypointWithTime(15, 0, 0, 1.0,   0 * DEG_2_RAD));
-
+  // The IMU is used, to determine if the simulator is running or not.
   ros::Subscriber sub = nh.subscribe("imu", 10, &callback);
 
   ros::Publisher wp_pub = nh.advertise<mav_msgs::CommandTrajectoryPositionYaw>(
@@ -106,19 +97,20 @@ int main(int argc, char** argv) {
 
   while (!sim_running && ros::ok()) {
     ros::spinOnce();
-    ros::Duration(0.01).sleep();
+    ros::Duration(0.1).sleep();
   }
 
   ROS_INFO("...ok");
 
-  // Wait for 30s such that everything can settle and the helicopter flies to initial position.
+  // Wait for 30s such that everything can settle and the mav flies to the initial position.
   ros::Duration(30).sleep();
 
   ROS_INFO("Start publishing waypoints.");
   for (size_t i = 0; i < waypoints.size(); ++i) {
-    const WaypointWithTime& wp = waypoints[i];
+    WaypointWithTime& wp = waypoints[i];
     ROS_INFO("Publishing x=%f y=%f z=%f yaw=%f, and wait for %fs.", wp.wp.position.x, wp.wp.position.y,
              wp.wp.position.z, wp.wp.yaw, wp.waiting_time);
+    wp.wp.header.stamp = ros::Time::now();
     wp_pub.publish(wp.wp);
     ros::Duration(wp.waiting_time).sleep();
   }
