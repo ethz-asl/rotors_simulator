@@ -216,83 +216,78 @@ def get_evaluation_period(waypoints, index, bag_time_start, bag_time_end,
     return [begin_time, end_time]
 
 
-def get_settling_time(positions, set_point, radius, min_time, index):
+def get_settling_time(positions, set_point, radius, min_time, index,
+                      print_output=True):
     settling_time = analyze_bag.settling_time(
         set_point, positions, radius, min_time)
     if settling_time is not None:
-        print("[Waypoint %d]: Settling time: %.3f s" % (index, settling_time))
+        if print_output:
+            print("[Waypoint %d]: Settling time: %.3f s"
+                  % (index, settling_time))
         return settling_time
     else:
-        print("[Waypoint %d]: System didn't settle -- inserting 101 % of "
-              "defined maximum values." % index)
+        if print_output:
+            print("[Waypoint %d]: System didn't settle -- inserting 101 % of "
+                  "defined maximum values." % index)
         return None
 
 
-def get_rms_position_error(positions, position_set_point, index):
+def get_rms_position_error(positions, position_set_point, index,
+                           print_output=True):
     pos_rms_error = analyze_bag.xyz_rms_error(position_set_point, positions)
-    print("[Waypoint %d]: Position RMS error: %.3f m"
-          % (index, pos_rms_error))
+    if print_output:
+        print("[Waypoint %d]: Position RMS error: %.3f m"
+              % (index, pos_rms_error))
     return pos_rms_error
 
 
 def get_rms_angular_velocity_error(angular_velocities,
-                                   angular_velocity_set_point, index):
+                                   angular_velocity_set_point, index,
+                                   print_output=True):
     pqr_rms_error = analyze_bag.xyz_rms_error(angular_velocity_set_point,
                                               angular_velocities)
-    print("[Waypoint %d]: Angular velocity RMS error: %.3f rad/s"
-          % (index, pqr_rms_error))
+    if print_output:
+        print("[Waypoint %d]: Angular velocity RMS error: %.3f rad/s"
+              % (index, pqr_rms_error))
     return pqr_rms_error
 
 
 def plot_positions(analyze_bag, start_time, end_time, settling_time,
                    settling_radius, set_point_position, x_range, plot_suffix):
-    if settling_time is not None:
+    try:
         absolute_settling_time = settling_time + start_time
-        analyze_bag.plot_positions(
-            start_time=start_time,
-            end_time=end_time,
-            settling_time=absolute_settling_time,
-            x_range=x_range,
-            plot_suffix=plot_suffix)
-        analyze_bag.plot_position_error(
-            set_point=set_point_position,
-            settling_radius=settling_radius,
-            start_time=start_time,
-            end_time=end_time,
-            settling_time=absolute_settling_time,
-            x_range=x_range,
-            y_range=[0, 1],
-            plot_suffix=plot_suffix)
-    else:
-        analyze_bag.plot_positions(
-            start_time=start_time,
-            x_range=x_range,
-            plot_suffix=plot_suffix)
-        analyze_bag.plot_position_error(
-            set_point=set_point_position,
-            settling_radius=settling_radius,
-            start_time=start_time,
-            x_range=x_range,
-            y_range=[0, 1],
-            plot_suffix=plot_suffix)
+    except:
+        absolute_settling_time = None
+    analyze_bag.plot_positions(
+        start_time=start_time,
+        end_time=end_time,
+        settling_time=absolute_settling_time,
+        x_range=x_range,
+        plot_suffix=plot_suffix)
+    analyze_bag.plot_position_error(
+        set_point=set_point_position,
+        settling_radius=settling_radius,
+        start_time=start_time,
+        end_time=end_time,
+        settling_time=absolute_settling_time,
+        x_range=x_range,
+        y_range=[0, 1],
+        plot_suffix=plot_suffix)
 
 
 def plot_angular_velocities(analyze_bag, start_time, end_time, settling_time,
                             x_range, plot_suffix):
-    if settling_time is not None:
+    try:
         absolute_settling_time = settling_time + start_time
-        analyze_bag.plot_angular_velocities(
-            start_time=start_time,
-            end_time=end_time,
-            settling_time=absolute_settling_time,
-            x_range=x_range,
-            plot_suffix=plot_suffix,
-            y_range=[-1.5, 1.5])
-    else:
-        analyze_bag.plot_angular_velocities(
-            start_time=start_time,
-            plot_suffix=plot_suffix,
-            y_range=[-1.5, 1.5])
+    except:
+        absolute_settling_time = None
+    analyze_bag.plot_angular_velocities(
+        start_time=start_time,
+        end_time=end_time,
+        settling_time=absolute_settling_time,
+        x_range=x_range,
+        plot_suffix=plot_suffix,
+        y_range=[-1.5, 1.5])
 
 
 def calculate_average(list_values):
@@ -323,7 +318,7 @@ def no_collisions_occured(analyze_bag, start_time, end_time):
 
 
 def print_scoring(average_value, max_value, value_type, unit, scores):
-    if average_value:
+    if average_value is not None:
         score = get_score(average_value, max_value, scores)
         print("Average %s: %.3f %s" % (value_type, average_value, unit))
         print("Score for %s: %.2f" % (value_type, score))
