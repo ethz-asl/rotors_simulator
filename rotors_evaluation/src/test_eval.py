@@ -15,7 +15,7 @@ __email__ = "fadri.furrer@mavt.ethz.ch"
 __status__ = "Development"
 
 
-executable = os.path.abspath(__file__ + "/../") + "/eval.py"
+executable = os.path.abspath(__file__ + "/../") + "/waypoints_eval.py"
 example_bag = (os.path.abspath(__file__ + "/../../") +
                "/test_bags/waypoint_example.bag")
 call([
@@ -23,7 +23,7 @@ call([
     "-b", example_bag,
     "--settling_radius", "0.1",
     "--min_settled_time", "3",
-    "--delay_first_evaluation", "3",
+    "--delay_first_evaluation", "5",
     "--save_plot", "True",
     "-w", "/asymmetric_quadrotor/command/trajectory_position_yaw",
     "-W", "/asymmetric_quadrotor/collisions"])
