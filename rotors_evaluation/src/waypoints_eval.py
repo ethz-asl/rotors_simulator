@@ -84,7 +84,7 @@ def main():
             settling_time = helpers.get_settling_time(
                 positions, set_point_pos, settling_radius, min_settled_time,
                 index)
-            if settling_time is not None:
+            if settling_time is not None and settling_time < settling_time_max:
                 rms_evaluation_start_time = begin_time + settling_time
                 rms_evaluation_end_time = min(begin_time + settling_time +
                                               rms_calc_time, end_time)
@@ -104,8 +104,9 @@ def main():
                 list_pos_rms.append(pos_rms_error)
                 list_pqr_rms.append(pqr_rms_error)
             else:
-                print("[Waypoint %d]: System didn't settle -- inserting 101 % "
-                      "of defined maximum values." % index)
+                print("[Waypoint %d]: System didn't settle  in %f seconds -- "
+                      "inserting 101 % of defined maximum values."
+                      % (index, settling_time_max))
                 list_settling_time.append(settling_time_max * 1.01)
                 list_pos_rms.append(position_error_max * 1.01)
                 list_pqr_rms.append(angular_velocity_error_max * 1.01)

@@ -227,8 +227,7 @@ def get_settling_time(positions, set_point, radius, min_time, index,
         return settling_time
     else:
         if print_output:
-            print("[Waypoint %d]: System didn't settle -- inserting 101 % of "
-                  "defined maximum values." % index)
+            print("[Waypoint %d]: System didn't settle." % index)
         return None
 
 
