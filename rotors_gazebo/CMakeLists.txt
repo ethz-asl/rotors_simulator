@@ -16,9 +16,6 @@ catkin_package(
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(gazebo_pose_publisher src/gazebo_pose_publisher.cpp)
-target_link_libraries(gazebo_pose_publisher ${catkin_LIBRARIES})
-
 add_executable(waypoint_publisher src/waypoint_publisher.cpp)
 target_link_libraries(waypoint_publisher ${catkin_LIBRARIES})
 add_dependencies(waypoint_publisher ${catkin_EXPORTED_TARGETS})
