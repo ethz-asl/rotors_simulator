@@ -8,6 +8,17 @@ roslib.load_manifest('rotors_evaluation')
 from rosbag_tools import analyze_bag, helpers
 
 
+__author__ = "Fadri Furrer, Michael Burri, Markus Achtelik"
+__copyright__ = ("Copyright 2015, Fadri Furrer & Michael Burri & "
+                 "Markus Achtelik, ASL, ETH Zurich, Switzerland")
+__credits__ = ["Fadri Furrer", "Michael Burri", "Markus Achtelik"]
+__license__ = "ASL 2.0"
+__version__ = "0.1"
+__maintainer__ = "Fadri Furrer"
+__email__ = "fadri.furrer@mavt.ethz.ch"
+__status__ = "Development"
+
+
 def main():
     [ab, plot, begin_time, total_end_time, rms_calc_time, settling_radius,
      min_settled_time, first_waypoint_evaluation_delay] = helpers.initialize()

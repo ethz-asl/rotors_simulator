@@ -4,6 +4,17 @@ import optparse
 from rosbag_tools import analyze_bag
 
 
+__author__ = "Fadri Furrer, Michael Burri, Markus Achtelik"
+__copyright__ = ("Copyright 2015, Fadri Furrer & Michael Burri & "
+                 "Markus Achtelik, ASL, ETH Zurich, Switzerland")
+__credits__ = ["Fadri Furrer", "Michael Burri", "Markus Achtelik"]
+__license__ = "ASL 2.0"
+__version__ = "0.1"
+__maintainer__ = "Fadri Furrer"
+__email__ = "fadri.furrer@mavt.ethz.ch"
+__status__ = "Development"
+
+
 def get_score(evaluated_variable, max_variable, scores):
     """
     Calculate the score from the evaluated_variable.

@@ -10,6 +10,17 @@ from scipy import signal
 from geometry_msgs.msg import PoseStamped, Quaternion, Point
 
 
+__author__ = "Fadri Furrer, Michael Burri, Markus Achtelik"
+__copyright__ = ("Copyright 2015, Fadri Furrer & Michael Burri & "
+                 "Markus Achtelik, ASL, ETH Zurich, Switzerland")
+__credits__ = ["Fadri Furrer", "Michael Burri", "Markus Achtelik"]
+__license__ = "ASL 2.0"
+__version__ = "0.1"
+__maintainer__ = "Fadri Furrer"
+__email__ = "fadri.furrer@mavt.ethz.ch"
+__status__ = "Development"
+
+
 class BaseWithTime(object):
 
     """Base Class for all objects with time and bag_time."""
