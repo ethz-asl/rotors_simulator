@@ -23,7 +23,7 @@ def main():
     [ab, plot, begin_time, total_end_time, rms_calc_time, settling_radius,
      min_settled_time, first_waypoint_evaluation_delay] = helpers.initialize()
 
-    disturbance_time = 15  # [s]
+    disturbance_time = 40  # [s]
     settling_time_max = 10.0  # [s]
     position_error_max = 0.2  # [m]
     angular_velocity_error_max = 0.2  # [rad/s]

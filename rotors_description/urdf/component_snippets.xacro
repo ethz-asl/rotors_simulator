@@ -212,7 +212,7 @@
         <positionTopic>${position_topic}</positionTopic>
         <transformTopic>${transform_topic}</transformTopic>
         <odometryTopic>${odometry_topic}</odometryTopic>
-        <parentFrameId>${parent_frame_id}</parentFrameId>  <!-- Use the scoped link name here. e.g. Model::link. -->
+        <parentFrameId>${parent_frame_id}</parentFrameId> <!-- Use the scoped link name here. e.g. Model::link. -->
         <measurementDivisor>${measurement_divisor}</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
         <measurementDelay>${measurement_delay}</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
         <unknownDelay>${unknown_delay}</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
@@ -222,11 +222,11 @@
         <noiseNormalAngularVelocity>${noise_normal_angular_velocity}</noiseNormalAngularVelocity> <!-- standard deviation of additive white gaussian noise [rad/s] -->
         <noiseUniformPosition>${noise_uniform_position}</noiseUniformPosition> <!-- symmetric bounds of uniform noise [m] -->
         <noiseUniformQuaternion>${noise_uniform_quaternion}</noiseUniformQuaternion> <!-- symmetric bounds of uniform noise [rad], computation see above -->
-        <noiseUniformLinearVelocity>${noise_uniform_linear_velocity}</noiseUniformLinearVelocity>  <!-- symmetric bounds of uniform noise [m/s] -->
-        <noiseUniformAngularVelocity>${noise_uniform_angular_velocity}</noiseUniformAngularVelocity>  <!-- symmetric bounds of uniform noise [rad/s] -->
+        <noiseUniformLinearVelocity>${noise_uniform_linear_velocity}</noiseUniformLinearVelocity> <!-- symmetric bounds of uniform noise [m/s] -->
+        <noiseUniformAngularVelocity>${noise_uniform_angular_velocity}</noiseUniformAngularVelocity> <!-- symmetric bounds of uniform noise [rad/s] -->
         <xacro:if value="${enable_odometry_map}">
-          <covarianceImage>package://rotors_gazebo/resource/${odometry_map}</covarianceImage>
-          <covarianceImageScale>${image_scale}</covarianceImageScale>
+          <covarianceImage>package://rotors_gazebo/resource/${odometry_map}</covarianceImage> <!-- a bitmap image describing where the sensor works (white), and where not (black) -->
+          <covarianceImageScale>${image_scale}</covarianceImageScale> <!-- the scale of the image in the gazebo world, if set to 1.0, 1 pixel in the image corresponds to 1 meter in the world -->
         </xacro:if>
       </plugin>
     </gazebo>

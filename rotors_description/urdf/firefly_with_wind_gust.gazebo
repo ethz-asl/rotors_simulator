@@ -23,7 +23,7 @@
   <!-- Instantiate firefly with a generic pose sensor. -->
   <xacro:include filename="$(find rotors_description)/urdf/firefly_generic_odometry_sensor.gazebo" />
 
-    <!-- Add a wind gust starting at 15s and lasting for 2s. -->
+    <!-- Add a wind gust starting at 40s and lasting for 2s. -->
   <xacro:wind_plugin_macro
     namespace="${namespace}"
     xyz_offset="0 0 0"
@@ -31,7 +31,7 @@
     wind_force_mean="0"
     wind_gust_direction="1 1 0"
     wind_gust_duration="2"
-    wind_gust_start="15"
+    wind_gust_start="40"
     wind_gust_force_mean="5"
   >
   </xacro:wind_plugin_macro>
