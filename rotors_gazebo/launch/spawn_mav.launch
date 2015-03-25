@@ -17,7 +17,7 @@
     enable_logging:=$(arg enable_logging)
     enable_ground_truth:=$(arg enable_ground_truth)
     log_file:=$(arg log_file)
-    mav_name:=${arg mav_name}"
+    mav_name:=$(arg mav_name)"
   />
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
 
