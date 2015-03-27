@@ -20,9 +20,11 @@
 -->
 
 <robot name="asymmetric_quadrotor" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Included URDF Files -->
+  <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro" />
   <!-- Properties  -->
   <xacro:property name="namespace" value="asymmetric_quadrotor" />
-  <xacro:property name="pi" value="3.14159265359" />
+  <xacro:property name="use_mesh_file" value="false" />
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <xacro:property name="mass_arm" value="0.01" /> <!-- [kg] -->
   <xacro:property name="mass" value="1.0" /> <!-- [kg] -->
@@ -47,36 +49,20 @@
 
   <!-- inertia of a single rotor, assuming it is a cuboid. Height=3mm, width=15mm -->
   <xacro:property name="rotor_inertia">
-    <inertia
-    ixx="${1/12 * mass_rotor * (0.015 * 0.015 + 0.003 * 0.003) * rotor_velocity_slowdown_sim}"
-    iyy="${1/12 * mass_rotor * (4 * radius_rotor * radius_rotor + 0.003 * 0.003) * rotor_velocity_slowdown_sim}"
-    izz="${1/12 * mass_rotor * (4 * radius_rotor * radius_rotor + 0.015 * 0.015) * rotor_velocity_slowdown_sim}"
-    ixy="0.0" ixz="0.0"  iyz="0.0" /> <!-- [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] -->
+    <xacro:box_inertia x="${radius_rotor}" y="0.015" z="0.003" mass="${mass_rotor*rotor_velocity_slowdown_sim}" />
   </xacro:property>
 
-  <!-- Included URDF Files -->
-  <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro" />
-
   <!-- Instantiate multirotor_base_macro once -->
-  <link name="base_link">
-    <inertial>
-      <mass value="${mass}" />  <!-- [kg] -->
-      <origin xyz="0 0 0" />
-      <xacro:insert_block name="body_inertia" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <box size="${body_width} ${body_width} ${body_height}"/> <!-- [m] [m] [m] -->
-      </geometry>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <box size="${body_width} ${body_width} ${body_height}" /> <!-- [m] [m] [m] -->
-      </geometry>
-    </collision>
-  </link>
+  <xacro:multirotor_base_macro
+    robot_namespace="${namespace}"
+    mass="${mass}"
+    body_width="${body_width}"
+    body_height="${body_height}"
+    use_mesh_file="${use_mesh_file}"
+    mesh_file=""
+    >
+    <xacro:insert_block name="body_inertia" />
+  </xacro:multirotor_base_macro>
 
     <!-- attach multirotor_base_plugin to the base_link -->
   <gazebo>

@@ -24,6 +24,7 @@
   <!-- TODO(ff): Update these params when identifying the model. -->
   <xacro:property name="namespace" value="pelican" />
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
+  <xacro:property name="use_mesh_file" value="true" />
   <xacro:property name="mesh_file" value="pelican.dae" />
   <xacro:property name="mass" value="1.0" /> <!-- [kg] -->
   <xacro:property name="body_width" value="0.1" /> <!-- [m] -->
@@ -47,11 +48,7 @@
 
   <!-- inertia of a single rotor, assuming it is a cuboid. Height=3mm, width=15mm -->
   <xacro:property name="rotor_inertia">
-    <inertia
-    ixx="${1/12 * mass_rotor * (0.015 * 0.015 + 0.003 * 0.003) * rotor_velocity_slowdown_sim}"
-    iyy="${1/12 * mass_rotor * (4 * radius_rotor * radius_rotor + 0.003 * 0.003) * rotor_velocity_slowdown_sim}"
-    izz="${1/12 * mass_rotor * (4 * radius_rotor * radius_rotor + 0.015 * 0.015) * rotor_velocity_slowdown_sim}"
-    ixy="0.0" ixz="0.0"  iyz="0.0" /> <!-- [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] [kg·m^2] -->
+    <xacro:box_inertia x="${radius_rotor}" y="0.015" z="0.003" mass="${mass_rotor*rotor_velocity_slowdown_sim}" />
   </xacro:property>
 
   <!-- Included URDF Files -->
@@ -63,6 +60,7 @@
     mass="${mass}"
     body_width="${body_width}"
     body_height="${body_height}"
+    use_mesh_file="${use_mesh_file}"
     mesh_file="${mesh_file}">
     <xacro:insert_block name="body_inertia" />
   </xacro:multirotor_base_macro>
