@@ -49,20 +49,20 @@ def initialize():
     default_rms_calc_time = 10.0
     default_settling_radius = 0.1
     default_min_settled_time = 3
+    default_mav_name = ""
     default_motor_velocity_topic = "/motors"
     default_waypoint_topic = "/command/trajectory_position_yaw"
-    default_wrench_topic = "/collisions"
+    default_wrench_topic = "/wrench"
 
     parser = optparse.OptionParser(
         """usage: %prog -b bagfile -p topic1 -t topic2
 
         e.g.:
         %prog -b /home/username/.ros/firefly.bag
-              -p /firefly/ground_truth/pose -t /firefly/ground_truth/twist
+              --mav_name firefly
         or
         %prog -b /Users/username/.ros/hummingbird.bag
-              -w /hummingbird/command/trajectory_position_yaw
-              -W /hummingbird/collisions --save_plots True
+              --mav_name hummingbird --save_plots True
               --delay_first_evaluation 3
         """)
     parser.add_option(
@@ -149,7 +149,7 @@ def initialize():
         dest="wrench_topic",
         default=default_wrench_topic,
         type="string",
-        help="The collision topic that you want to extract from the bag file.")
+        help="The wrench topic that you want to extract from the bag file.")
     parser.add_option(
         "-D", "--delay_first_evaluation",
         dest="first_waypoint_delay",
@@ -157,19 +157,31 @@ def initialize():
         type="float",
         help="The time when the evaluation should start after the first "
              "waypoint got published.")
+    parser.add_option(
+        "-n", "--mav_name",
+        dest="mav_name",
+        default=default_mav_name,
+        type="string",
+        help="The name of your MAV (should correspond to the namespace).")
 
     (options, args) = parser.parse_args()
     if not options.bagfile:
         parser.error('Bagfile not given.')
+    mav_name = options.mav_name
+    topic_prefix = mav_name
     save_plots = options.save_plots
     prefix = options.prefix
     bagfile = options.bagfile
-    pose_topics = analyze_bag.create_topic_list(options.pose_topic)
-    twist_topics = analyze_bag.create_topic_list(options.twist_topic)
+    pose_topics = analyze_bag.create_topic_list(
+        topic_prefix + options.pose_topic)
+    twist_topics = analyze_bag.create_topic_list(
+        topic_prefix + options.twist_topic)
     motor_velocity_topics = analyze_bag.create_topic_list(
-        options.motor_velocity_topic)
-    waypoint_topics = analyze_bag.create_topic_list(options.waypoint_topic)
-    wrench_topics = analyze_bag.create_topic_list(options.wrench_topic)
+        topic_prefix + options.motor_velocity_topic)
+    waypoint_topics = analyze_bag.create_topic_list(
+        topic_prefix + options.waypoint_topic)
+    wrench_topics = analyze_bag.create_topic_list(
+        topic_prefix + options.wrench_topic)
     plot = True if (options.plot and options.plot.lower() == 'true') else False
     if save_plots:
         plot = True

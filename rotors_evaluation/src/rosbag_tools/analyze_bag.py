@@ -400,11 +400,11 @@ class AnalyzeBag(object):
         pyplot.ylabel('position [m]')
         # Shrink current axis's height by 10% on the bottom
         box = a_x.get_position()
-        a_x.set_position([box.x0, box.y0 + box.height * 0.1,
-                         box.width, box.height * 0.9])
+        a_x.set_position([box.x0, box.y0 + box.height * 0.2,
+                         box.width, box.height * 0.8])
 
         # Put a legend below current axis
-        a_x.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+        a_x.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
                    fancybox=True, shadow=True, ncol=5)
         pyplot.xlim(x_range)
         pyplot.ylim(y_range)
@@ -465,11 +465,11 @@ class AnalyzeBag(object):
         pyplot.ylabel('position error [m]')
         # Shrink current axis's height by 10% on the bottom
         box = a_x.get_position()
-        a_x.set_position([box.x0, box.y0 + box.height * 0.1,
-                         box.width, box.height * 0.9])
+        a_x.set_position([box.x0, box.y0 + box.height * 0.2,
+                         box.width, box.height * 0.8])
 
         # Put a legend below current axis
-        a_x.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+        a_x.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
                    fancybox=True, shadow=True, ncol=5)
         pyplot.xlim(x_range)
         pyplot.ylim(y_range)
@@ -521,11 +521,11 @@ class AnalyzeBag(object):
         pyplot.ylabel('angular velocity [rad/s]')
         # Shrink current axis's height by 10% on the bottom
         box = a_x.get_position()
-        a_x.set_position([box.x0, box.y0 + box.height * 0.1,
-                         box.width, box.height * 0.9])
+        a_x.set_position([box.x0, box.y0 + box.height * 0.2,
+                         box.width, box.height * 0.8])
 
         # Put a legend below current axis
-        a_x.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+        a_x.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
                    fancybox=True, shadow=True, ncol=5)
         pyplot.xlim(x_range)
         pyplot.ylim(y_range)
