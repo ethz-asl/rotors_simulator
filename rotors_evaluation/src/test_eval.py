@@ -25,5 +25,4 @@ call([
     "--min_settled_time", "3",
     "--delay_first_evaluation", "5",
     "--save_plot", "True",
-    "-w", "/asymmetric_quadrotor/command/trajectory_position_yaw",
-    "-W", "/asymmetric_quadrotor/collisions"])
+    "--mav_name", "asymmetric_quadrotor"])
