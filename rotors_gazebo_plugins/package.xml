@@ -20,7 +20,6 @@
   <build_depend>roscpp</build_depend>
   <build_depend>rosbag</build_depend>
   <build_depend>tf</build_depend>
-  <build_depend>rotors_model</build_depend>
   <build_depend>rotors_control</build_depend>
   <build_depend>mav_msgs</build_depend>
   <build_depend>octomap_ros</build_depend>
@@ -37,7 +36,6 @@
   <run_depend>roscpp</run_depend>
   <run_depend>rosbag</run_depend>
   <run_depend>tf</run_depend>
-  <run_depend>rotors_model</run_depend>
   <run_depend>rotors_control</run_depend>
   <run_depend>mav_msgs</run_depend>
   <run_depend>octomap_ros</run_depend>

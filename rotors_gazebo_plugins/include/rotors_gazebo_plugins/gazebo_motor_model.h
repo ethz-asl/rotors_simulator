@@ -30,13 +30,13 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
-#include <rotors_model/motor_model.hpp>
 #include <mav_msgs/CommandMotorSpeed.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
 
 #include "rotors_gazebo_plugins/common.h"
+#include "rotors_gazebo_plugins/motor_model.hpp"
 
 namespace turning_direction {
 const static int CCW = 1;

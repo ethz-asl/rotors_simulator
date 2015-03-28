@@ -19,8 +19,8 @@
  */
 
 
-#ifndef ROTORS_MODEL_MOTOR_CONTROLLER_H
-#define ROTORS_MODEL_MOTOR_CONTROLLER_H
+#ifndef ROTORS_GAZEBO_PLUGIN_MOTOR_CONTROLLER_H
+#define ROTORS_GAZEBO_PLUGIN_MOTOR_CONTROLLER_H
 
 #include <Eigen/Eigen>
 
@@ -50,4 +50,4 @@ class MotorController
     Eigen::VectorXd ref_rotor_rot_vels_;
 };
 
-#endif // ROTORS_MODEL_MOTOR_CONTROLLER_H
+#endif // ROTORS_GAZEBO_PLUGIN_MOTOR_CONTROLLER_H

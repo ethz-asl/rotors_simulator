@@ -19,13 +19,13 @@
  */
 
 
-#ifndef ROTORS_MODEL_MULTI_COPTER_H
-#define ROTORS_MODEL_MULTI_COPTER_H
+#ifndef ROTORS_GAZEBO_PLUGINS_MULTI_COPTER_H
+#define ROTORS_GAZEBO_PLUGINS_MULTI_COPTER_H
 
 #include <Eigen/Eigen>
 
-#include "rotors_model/motor_controller.hpp"
-#include "rotors_model/motor_model.hpp"
+#include "rotors_gazebo_plugins/motor_controller.hpp"
+#include "rotors_gazebo_plugins/motor_model.hpp"
 
 class MultiCopter
 {
@@ -79,4 +79,4 @@ class MultiCopter
     Eigen::VectorXd rotor_rot_vels_;
 };
 
-#endif // ROTORS_MODEL_MULTI_COPTER_H
+#endif // ROTORS_GAZEBO_PLUGINS_MULTI_COPTER_H
