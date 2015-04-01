@@ -8,7 +8,7 @@
 
 namespace rotors_control {
 
-inline template<typename T> void GetRosParameter(const ros::NodeHandle& nh,
+template<typename T> inline void GetRosParameter(const ros::NodeHandle& nh,
                                           const std::string& key,
                                           const T& default_value,
                                           T* value) {
