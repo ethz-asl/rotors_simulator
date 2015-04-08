@@ -151,11 +151,12 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   // Apply air_drag to link.
   link_->AddForce(air_drag);
   // Moments
+  // Getting the parent link, such that the resulting torques can be applied to it.
   physics::Link_V parent_links = link_->GetParentJointsLinks();
   // The tansformation from the parent_link to the link_.
   math::Pose pose_difference = link_->GetWorldCoGPose() - parent_links.at(0)->GetWorldCoGPose();
-
   math::Vector3 drag_torque(0, 0, -turning_direction_ * force * moment_constant_);
+  // Transforming the drag torque into the parent frame to handle arbitrary rotor orientations.
   math::Vector3 drag_torque_parent_frame = pose_difference.rot.RotateVector(drag_torque);
   parent_links.at(0)->AddRelativeTorque(drag_torque_parent_frame);
 
