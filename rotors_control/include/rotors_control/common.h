@@ -61,7 +61,7 @@ struct EigenOdometry {
 };
 
 inline void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
-                          EigenOdometry* odometry) {
+                                 EigenOdometry* odometry) {
   odometry->position = mav_msgs::vector3FromPointMsg(msg->pose.pose.position);
   odometry->orientation = mav_msgs::quaternionFromMsg(msg->pose.pose.orientation);
   odometry->velocity = mav_msgs::vector3FromMsg(msg->twist.twist.linear);
@@ -69,7 +69,7 @@ inline void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
 }
 
 inline void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
-                               Eigen::Matrix4Xd* allocation_matrix) {
+                                      Eigen::Matrix4Xd* allocation_matrix) {
   CHECK_NOTNULL(allocation_matrix);
   allocation_matrix->resize(4, rotor_configuration.rotors.size());
   unsigned int i = 0;
