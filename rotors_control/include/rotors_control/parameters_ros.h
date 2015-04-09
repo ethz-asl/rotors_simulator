@@ -9,9 +9,9 @@
 namespace rotors_control {
 
 template<typename T> inline void GetRosParameter(const ros::NodeHandle& nh,
-                                          const std::string& key,
-                                          const T& default_value,
-                                          T* value) {
+                                                 const std::string& key,
+                                                 const T& default_value,
+                                                 T* value) {
   CHECK_NOTNULL(value);
   bool have_parameter = nh.getParam(key, *value);
   if (!have_parameter) {
@@ -21,7 +21,8 @@ template<typename T> inline void GetRosParameter(const ros::NodeHandle& nh,
   }
 }
 
-inline void GetRotorConfiguration(const ros::NodeHandle& nh, RotorConfiguration* rotor_configuration) {
+inline void GetRotorConfiguration(const ros::NodeHandle& nh, 
+                                  RotorConfiguration* rotor_configuration) {
   std::map<std::string, double> single_rotor;
   std::string rotor_configuration_string = "rotor_configuration/";
   unsigned int i = 0;
