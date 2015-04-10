@@ -19,6 +19,7 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
+  <run_depend>rotors_comm</run_depend>
   <run_depend>rotors_control</run_depend>
   <run_depend>rotors_description</run_depend>
   <run_depend>rotors_evaluation</run_depend>

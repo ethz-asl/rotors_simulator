@@ -4,17 +4,17 @@ project(rotors_gazebo_plugins)
 add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  tf
-  rotors_control
-  mav_msgs
-  rosbag
-  octomap_ros
-  octomap_msgs
-  planning_msgs
-  geometry_msgs
   cmake_modules
+  geometry_msgs
   glog_catkin
+  mav_msgs
+  octomap_msgs
+  octomap_ros
+  rosbag
+  roscpp
+  rotors_comm
+  rotors_control
+  tf
 )
 
 find_package(Eigen REQUIRED)
@@ -28,7 +28,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
-  CATKIN_DEPENDS roscpp tf mav_msgs octomap_ros octomap_msgs planning_msgs geometry_msgs glog_catkin
+  CATKIN_DEPENDS roscpp tf mav_msgs octomap_ros octomap_msgs rotors_comm geometry_msgs glog_catkin
   DEPENDS eigen gazebo octomap opencv glog_catkin
 )
 

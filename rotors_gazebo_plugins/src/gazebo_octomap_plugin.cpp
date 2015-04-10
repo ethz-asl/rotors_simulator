@@ -39,8 +39,8 @@ void OctomapFromGazeboWorld::Load(physics::WorldPtr _parent, sdf::ElementPtr _sd
   srv_ = node_handle_.advertiseService(service_name, &OctomapFromGazeboWorld::ServiceCallback, this);
 }
 
-bool OctomapFromGazeboWorld::ServiceCallback(planning_msgs::Octomap::Request& req,
-                                             planning_msgs::Octomap::Response& res) {
+bool OctomapFromGazeboWorld::ServiceCallback(rotors_comm::Octomap::Request& req,
+                                             rotors_comm::Octomap::Response& res) {
   std::cout << "Creating octomap with origin at (" << req.bounding_box_origin.x << ", " << req.bounding_box_origin.y
             << ", " << req.bounding_box_origin.z << "), and bounding box lengths (" << req.bounding_box_lengths.x
             << ", " << req.bounding_box_lengths.y << ", " << req.bounding_box_lengths.z << "), and leaf size: "
@@ -166,7 +166,7 @@ bool OctomapFromGazeboWorld::CheckIfInsideObjectInX(const std::string& name, con
   return false;
 }
 
-void OctomapFromGazeboWorld::CreateOctomap(const planning_msgs::Octomap::Request& msg) {
+void OctomapFromGazeboWorld::CreateOctomap(const rotors_comm::Octomap::Request& msg) {
   const double epsilon = 0.00001;
   const int far_away = 100000;
   math::Vector3 bounding_box_origin(msg.bounding_box_origin.x, msg.bounding_box_origin.y, msg.bounding_box_origin.z);

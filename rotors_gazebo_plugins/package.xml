@@ -16,34 +16,34 @@
   <buildtool_depend>catkin</buildtool_depend>>
 
   <!-- Dependencies needed to compile this package. -->
+  <build_depend>cmake_modules</build_depend>
   <build_depend>gazebo</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>rosbag</build_depend>
-  <build_depend>tf</build_depend>
-  <build_depend>rotors_control</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>glog_catkin</build_depend>
   <build_depend>mav_msgs</build_depend>
-  <build_depend>octomap_ros</build_depend>
   <build_depend>octomap</build_depend>
   <build_depend>octomap_msgs</build_depend>
+  <build_depend>octomap_ros</build_depend>
   <build_depend>opencv</build_depend>
-  <build_depend>planning_msgs</build_depend>
-  <build_depend>geometry_msgs</build_depend>
-  <build_depend>cmake_modules</build_depend>
-  <build_depend>glog_catkin</build_depend>
+  <build_depend>rosbag</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rotors_comm</build_depend>
+  <build_depend>rotors_control</build_depend>
+  <build_depend>tf</build_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>gazebo_ros</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>rosbag</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>rotors_control</run_depend>
-  <run_depend>mav_msgs</run_depend>
-  <run_depend>octomap_ros</run_depend>
-  <run_depend>octomap</run_depend>
-  <run_depend>octomap_msgs</run_depend>
-  <run_depend>opencv</run_depend>
-  <run_depend>planning_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>glog_catkin</run_depend>
+  <run_depend>mav_msgs</run_depend>
+  <run_depend>octomap</run_depend>
+  <run_depend>octomap_msgs</run_depend>
+  <run_depend>octomap_ros</run_depend>
+  <run_depend>opencv</run_depend>
+  <run_depend>rosbag</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>rotors_comm</run_depend>
+  <run_depend>rotors_control</run_depend>
+  <run_depend>tf</run_depend>
 
 </package>
