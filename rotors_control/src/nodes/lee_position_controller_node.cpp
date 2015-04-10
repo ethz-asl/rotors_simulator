@@ -25,6 +25,7 @@
 namespace rotors_control {
 
 LeePositionControllerNode::LeePositionControllerNode() {
+  google::InitGoogleLogging("rotors_control_glogger");
   InitializeParams();
 
   ros::NodeHandle nh;

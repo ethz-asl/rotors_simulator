@@ -21,8 +21,7 @@
 #ifndef INCLUDE_ROTORS_CONTROL_COMMON_H_
 #define INCLUDE_ROTORS_CONTROL_COMMON_H_
 
-#include <assert.h>
-
+#include <glog/logging.h>
 #include <mav_msgs/conversions.h>
 #include <nav_msgs/Odometry.h>
 
@@ -71,8 +70,7 @@ inline void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
 
 inline void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
                                       Eigen::Matrix4Xd* allocation_matrix) {
-  assert(allocation_matrix != nullptr);
-
+  CHECK_NOTNULL(allocation_matrix);
   allocation_matrix->resize(4, rotor_configuration.rotors.size());
   unsigned int i = 0;
   for (const Rotor& rotor : rotor_configuration.rotors) {
