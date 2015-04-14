@@ -522,18 +522,6 @@
         frame_rate="30.0" offset_x="0.015" baseline_y="${0.055*2}"
         offset_z="0.0065" >
       </xacro:vi_sensor_stereo_camera_macro>
-      <!-- Left Camera -->
-      <!-- <xacro:vi_sensor_camera_macro
-        namespace="${namespace}" parent_link="${namespace}/vi_sensor_link"
-        camera_suffix="left" frame_rate="30.0">
-        <origin xyz="0.015 0.055 0.0065" rpy="0 0 0" />
-      </xacro:vi_sensor_camera_macro> -->
-      <!-- Right Camera -->
-      <!-- <xacro:vi_sensor_camera_macro namespace="${namespace}"
-        parent_link="${namespace}/vi_sensor_link"
-        camera_suffix="right" frame_rate="30.0">
-        <origin xyz="0.015 -0.055 0.0065" rpy="0 0 0" />
-      </xacro:vi_sensor_camera_macro> -->
     </xacro:if>
 
     <!-- Depth Sensor -->
