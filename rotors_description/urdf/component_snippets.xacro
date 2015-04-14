@@ -149,8 +149,10 @@
   <!-- Camera sensor macro - just image parameters. -->
   <xacro:macro name="camera_sensor_macro"
     params="camera_suffix horizontal_fov image_width image_height
-      image_format min_distance max_distance noise_mean noise_stddev" >
+      image_format min_distance max_distance noise_mean noise_stddev
+      baseline" >
     <camera name="${camera_suffix}">
+      <pose>0 ${-baseline} 0 0 0 0</pose>
       <horizontal_fov>${horizontal_fov}</horizontal_fov>
       <image>
         <width>${image_width}</width>
@@ -203,14 +205,16 @@
             horizontal_fov="${horizontal_fov}" image_width="${image_width}"
             image_height="${image_height}" image_format="${image_format}"
             min_distance="${min_distance}" max_distance="${max_distance}"
-            noise_mean="${noise_mean}" noise_stddev="${noise_stddev}">
+            noise_mean="${noise_mean}" noise_stddev="${noise_stddev}"
+            baseline="0">
         </xacro:camera_sensor_macro>
 
         <xacro:camera_sensor_macro camera_suffix="right"
             horizontal_fov="${horizontal_fov}" image_width="${image_width}"
             image_height="${image_height}" image_format="${image_format}"
             min_distance="${min_distance}" max_distance="${max_distance}"
-            noise_mean="${noise_mean}" noise_stddev="${noise_stddev}">
+            noise_mean="${noise_mean}" noise_stddev="${noise_stddev}"
+            baseline="${baseline_y}">
         </xacro:camera_sensor_macro>
 
         <!-- Stereo controller, setting the transforms between the two cameras. -->
@@ -220,7 +224,7 @@
           <cameraName>${camera_name}</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>${namespace}/camera_left_link</frameName>
+          <frameName>${camera_name}/camera_left_link</frameName>
           <!-- This is unfortunately the way to get correct parameters for the
                stereo camera. -->
           <hackBaseline>${baseline_y}</hackBaseline>
