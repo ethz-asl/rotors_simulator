@@ -178,20 +178,20 @@
   <xacro:macro name="stereo_camera_macro"
     params="namespace camera_name parent_link frame_rate
       horizontal_fov image_width image_height image_format min_distance
-      max_distance noise_mean noise_stddev enable_visual offset_x baseline_y
-      offset_z *geometry">
+      max_distance noise_mean noise_stddev enable_visual origin_offset_x
+      baseline_y origin_offset_z *geometry">
     <!-- These are parameters for the left camera link and then the right
         as well. -->
     <xacro:camera_joint_macro namespace="${namespace}"
       parent_link="${parent_link}"
       camera_suffix="left" enable_visual="${enable_visual}">
-      <origin xyz="${offset_x} ${baseline_y/2} ${offset_z}" rpy="0 0 0" />
+      <origin xyz="${origin_offset_x} ${baseline_y/2} ${origin_offset_z}" rpy="0 0 0" />
       <xacro:insert_block name="geometry" />
     </xacro:camera_joint_macro>
     <xacro:camera_joint_macro namespace="${namespace}"
       parent_link="${parent_link}"
       camera_suffix="right" enable_visual="${enable_visual}">
-      <origin xyz="${offset_x} ${-baseline_y/2} ${offset_z}" rpy="0 0 0" />
+      <origin xyz="${origin_offset_x} ${-baseline_y/2} ${origin_offset_z}" rpy="0 0 0" />
       <xacro:insert_block name="geometry" />
     </xacro:camera_joint_macro>
 
@@ -225,8 +225,6 @@
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>${camera_name}/camera_left_link</frameName>
-          <!-- This is unfortunately the way to get correct parameters for the
-               stereo camera. -->
           <hackBaseline>${baseline_y}</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
@@ -394,7 +392,7 @@
 
   <!-- Macro to add a VI-sensor stereo camera. -->
   <xacro:macro name="vi_sensor_stereo_camera_macro"
-    params="namespace parent_link frame_rate offset_x baseline_y offset_z">
+    params="namespace parent_link frame_rate origin_offset_x baseline_y origin_offset_z">
     <xacro:stereo_camera_macro
       namespace="${namespace}"
       camera_name="vi_sensor"
@@ -409,9 +407,9 @@
       noise_mean="0.0"
       noise_stddev="0.007"
       enable_visual="false"
-      offset_x="${offset_x}"
+      origin_offset_x="${origin_offset_x}"
       baseline_y="${baseline_y}"
-      offset_z="${offset_z}" >
+      origin_offset_z="${origin_offset_z}" >
       <cylinder length="0.01" radius="0.007" />
     </xacro:stereo_camera_macro>
   </xacro:macro>
@@ -519,8 +517,8 @@
       <!-- Insert stereo pair. -->
       <xacro:vi_sensor_stereo_camera_macro
         namespace="${namespace}" parent_link="${namespace}/vi_sensor_link"
-        frame_rate="30.0" offset_x="0.015" baseline_y="${0.055*2}"
-        offset_z="0.0065" >
+        frame_rate="30.0" origin_offset_x="0.015" baseline_y="${0.055*2}"
+        origin_offset_z="0.0065" >
       </xacro:vi_sensor_stereo_camera_macro>
     </xacro:if>
 
