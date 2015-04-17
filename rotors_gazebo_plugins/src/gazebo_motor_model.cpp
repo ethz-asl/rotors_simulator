@@ -133,6 +133,7 @@ void GazeboMotorModel::VelocityCallback(const mav_msgs::CommandMotorSpeedConstPt
 }
 
 void GazeboMotorModel::WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed) {
+  // TODO(burrimi): Transform velocity to world frame if frame_id is set to something else.
   wind_speed_W_.x = wind_speed->velocity.x;
   wind_speed_W_.y = wind_speed->velocity.y;
   wind_speed_W_.z = wind_speed->velocity.z;
