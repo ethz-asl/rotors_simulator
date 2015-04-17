@@ -86,6 +86,7 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'ccw').\n";
 
   getSdfParam<std::string>(_sdf, "commandSubTopic", command_sub_topic_, command_sub_topic_);
+  getSdfParam<std::string>(_sdf, "windSpeedSubTopic", wind_speed_sub_topic_, wind_speed_sub_topic_);
   getSdfParam<std::string>(_sdf, "motorSpeedPubTopic", motor_speed_pub_topic_,
                            motor_speed_pub_topic_);
 
@@ -109,6 +110,7 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboMotorModel::OnUpdate, this, _1));
 
   command_sub_ = node_handle_->subscribe(command_sub_topic_, 1000, &GazeboMotorModel::VelocityCallback, this);
+  wind_speed_sub_ = node_handle_->subscribe(wind_speed_sub_topic_, 1000, &GazeboMotorModel::WindSpeedCallback, this);
   motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_speed_pub_topic_, 10);
 
   // Create the first order filter.
@@ -130,6 +132,13 @@ void GazeboMotorModel::VelocityCallback(const mav_msgs::CommandMotorSpeedConstPt
   ref_motor_rot_vel_ = std::min(rot_velocities->motor_speed[motor_number_], static_cast<double>(max_rot_velocity_));
 }
 
+void GazeboMotorModel::WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed) {
+  // TODO(burrimi): Transform velocity to world frame if frame_id is set to something else.
+  wind_speed_W_.x = wind_speed->velocity.x;
+  wind_speed_W_.y = wind_speed->velocity.y;
+  wind_speed_W_.z = wind_speed->velocity.z;
+}
+
 void GazeboMotorModel::UpdateForcesAndMoments() {
   motor_rot_vel_ = joint_->GetVelocity(0);
   if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_)) {
@@ -145,8 +154,9 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   // The True Role of Accelerometer Feedback in Quadrotor Control
   // - \omega * \lambda_1 * V_A^{\perp}
   math::Vector3 joint_axis = joint_->GetGlobalAxis(0);
-  math::Vector3 body_velocity = link_->GetWorldLinearVel();
-  math::Vector3 body_velocity_perpendicular = body_velocity - (body_velocity * joint_axis) * joint_axis;
+  math::Vector3 body_velocity_W = link_->GetWorldLinearVel();
+  math::Vector3 relative_wind_velocity_W = body_velocity_W - wind_speed_W_;
+  math::Vector3 body_velocity_perpendicular = relative_wind_velocity_W - (relative_wind_velocity_W * joint_axis) * joint_axis;
   math::Vector3 air_drag = -std::abs(real_motor_velocity) * rotor_drag_coefficient_ * body_velocity_perpendicular;
   // Apply air_drag to link.
   link_->AddForce(air_drag);
