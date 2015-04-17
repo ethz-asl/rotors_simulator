@@ -79,9 +79,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
         time_constant_down_(kDefaultTimeConstantDown),
         time_constant_up_(kDefaultTimeConstantUp),
-        node_handle_(nullptr) {
-    InitGlogHelper::instance().initGlog();
-  }
+        node_handle_(nullptr) {}
 
   virtual ~GazeboMotorModel();
 
