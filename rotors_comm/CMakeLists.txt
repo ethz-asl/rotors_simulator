@@ -9,6 +9,11 @@ add_service_files(
   Octomap.srv
 )
 
+add_message_files(
+  FILES
+  WindSpeed.msg
+)
+
 generate_messages(DEPENDENCIES geometry_msgs octomap_msgs)
 
 catkin_package(
