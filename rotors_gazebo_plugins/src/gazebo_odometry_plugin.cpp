@@ -167,8 +167,6 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
                 noise_normal_angular_velocity.z * noise_normal_angular_velocity.z;
   twist_covariance = twist_covd.asDiagonal();
 
-  link_name_ = namespace_ + "/" + link_name_;
-
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboOdometryPlugin::OnUpdate, this, _1));
@@ -241,7 +239,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     odometry.header.seq = odometry_sequence_++;
     odometry.header.stamp.sec = (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec;
     odometry.header.stamp.nsec = (world_->GetSimTime()).nsec + ros::Duration(unknown_delay_).nsec;
-    odometry.child_frame_id = link_name_;
+    odometry.child_frame_id = namespace_;
     copyPosition(gazebo_pose.pos, &odometry.pose.pose.position);
     odometry.pose.pose.orientation.w = gazebo_pose.rot.w;
     odometry.pose.pose.orientation.x = gazebo_pose.rot.x;
@@ -354,9 +352,9 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     tf::Quaternion tf_q_W_L(q_W_L.x, q_W_L.y, q_W_L.z, q_W_L.w);
     tf::Vector3 tf_p(p.x, p.y, p.z);
     tf_ = tf::Transform(tf_q_W_L, tf_p);
-    transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, odometry->header.stamp, parent_frame_id_, link_name_));
-//    std::cout << "published odometry with timestamp " << odometry->header.stamp << "at time t" << world_->GetSimTime().Double()
-//        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
+    transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, odometry->header.stamp, parent_frame_id_, namespace_));
+    //    std::cout << "published odometry with timestamp " << odometry->header.stamp << "at time t" << world_->GetSimTime().Double()
+    //        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
   }
 
   ++gazebo_sequence_;
