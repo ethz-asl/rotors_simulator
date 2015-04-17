@@ -32,10 +32,7 @@ namespace gazebo {
 GazeboImuPlugin::GazeboImuPlugin()
     : ModelPlugin(),
       node_handle_(0),
-      velocity_prev_W_(0,0,0)
-{
-  InitGlogHelper::instance().initGlog();
-}
+      velocity_prev_W_(0, 0, 0) {}
 
 GazeboImuPlugin::~GazeboImuPlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
@@ -162,9 +159,9 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
                                Eigen::Vector3d* angular_velocity,
                                const double dt) {
-  CHECK(linear_acceleration);
-  CHECK(angular_velocity);
-  CHECK(dt > 0.0);
+  ROS_ERROR_COND(linear_acceleration == nullptr, "linear_acceleration is a nullptr.");
+  ROS_ERROR_COND(angular_velocity == nullptr, "angular_velocity is a nullptr.");
+  ROS_ERROR_COND(dt <= 0.0, "dt <= 0.0.");
 
   // Gyrosocpe
   double tau_g = imu_parameters_.gyroscope_bias_correlation_time;
