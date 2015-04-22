@@ -3,6 +3,8 @@ project(rotors_gazebo_plugins)
 
 add_definitions(-std=c++11)
 
+add_definitions(-DROS_ASSERT_ENABLED)
+
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   geometry_msgs

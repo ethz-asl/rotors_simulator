@@ -11,7 +11,7 @@ template<typename T> inline void GetRosParameter(const ros::NodeHandle& nh,
                                                  const std::string& key,
                                                  const T& default_value,
                                                  T* value) {
-  ROS_ERROR_COND(value == nullptr, "value is a nullptr.");
+  ROS_ASSERT(value != nullptr);
   bool have_parameter = nh.getParam(key, *value);
   if (!have_parameter) {
     ROS_WARN_STREAM("[rosparam]: could not find parameter " << nh.getNamespace()
