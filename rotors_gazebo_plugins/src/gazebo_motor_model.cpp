@@ -18,7 +18,6 @@
  * limitations under the License.
  */
 
-
 #include "rotors_gazebo_plugins/gazebo_motor_model.h"
 
 namespace gazebo {
@@ -126,10 +125,9 @@ void GazeboMotorModel::OnUpdate(const common::UpdateInfo& _info) {
 }
 
 void GazeboMotorModel::VelocityCallback(const mav_msgs::CommandMotorSpeedConstPtr& rot_velocities) {
-  ROS_ERROR_STREAM_COND(rot_velocities->motor_speed.size() <= motor_number_,
-                        "You tried to access index " << motor_number_
-                        << " of the MotorSpeed message array which is of size "
-                        << rot_velocities->motor_speed.size() << ".");
+  ROS_ASSERT_MSG(rot_velocities->motor_speed.size() > motor_number_,
+                 "You tried to access index %d of the MotorSpeed message array which is of size %d.",
+                 motor_number_, rot_velocities->motor_speed.size());
   ref_motor_rot_vel_ = std::min(rot_velocities->motor_speed[motor_number_], static_cast<double>(max_rot_velocity_));
 }
 
