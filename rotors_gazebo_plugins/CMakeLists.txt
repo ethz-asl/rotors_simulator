@@ -3,10 +3,12 @@ project(rotors_gazebo_plugins)
 
 add_definitions(-std=c++11)
 
+# To enable assertions when compiled in release mode.
+add_definitions(-DROS_ASSERT_ENABLED)
+
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   geometry_msgs
-  glog_catkin
   mav_msgs
   octomap_msgs
   octomap_ros
@@ -28,8 +30,8 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
-  CATKIN_DEPENDS roscpp tf mav_msgs octomap_ros octomap_msgs rotors_comm geometry_msgs glog_catkin
-  DEPENDS eigen gazebo octomap opencv glog_catkin
+  CATKIN_DEPENDS roscpp tf mav_msgs octomap_ros octomap_msgs rotors_comm geometry_msgs
+  DEPENDS eigen gazebo octomap opencv
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})

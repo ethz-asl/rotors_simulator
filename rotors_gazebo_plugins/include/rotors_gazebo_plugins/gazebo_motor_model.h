@@ -83,9 +83,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         time_constant_down_(kDefaultTimeConstantDown),
         time_constant_up_(kDefaultTimeConstantUp),
         node_handle_(nullptr),
-        wind_speed_W_(0, 0, 0) {
-    InitGlogHelper::instance().initGlog();
-  }
+        wind_speed_W_(0, 0, 0) {}
 
   virtual ~GazeboMotorModel();
 
