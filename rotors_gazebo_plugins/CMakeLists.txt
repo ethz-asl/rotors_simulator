@@ -3,6 +3,7 @@ project(rotors_gazebo_plugins)
 
 add_definitions(-std=c++11)
 
+# To enable assertions when compiled in release mode.
 add_definitions(-DROS_ASSERT_ENABLED)
 
 find_package(catkin REQUIRED COMPONENTS
