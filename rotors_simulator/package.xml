@@ -2,7 +2,8 @@
   <name>rotors_simulator</name>
   <version>1.0.0</version>
   <description>RotorS is a MAV gazebo simulator.</description>
-  <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
+
+  <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
 
   <license>ASL 2.0</license>
 

@@ -3,7 +3,7 @@
   <version>1.0.0</version>
   <description>The rotors_joy_interface package to control MAVs with a joystick</description>
 
-  <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
+  <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
 
   <author>Fadri Furrer</author>
   <author>Michael Burri</author>
