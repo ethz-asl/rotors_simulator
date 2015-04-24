@@ -8,6 +8,7 @@ add_definitions(-DROS_ASSERT_ENABLED)
 
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
+  cv_bridge
   geometry_msgs
   mav_msgs
   octomap_msgs
@@ -30,7 +31,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
-  CATKIN_DEPENDS roscpp tf mav_msgs octomap_ros octomap_msgs rotors_comm geometry_msgs
+  CATKIN_DEPENDS cv_bridge roscpp tf mav_msgs octomap_ros octomap_msgs rotors_comm geometry_msgs
   DEPENDS eigen gazebo octomap opencv
 )
 
