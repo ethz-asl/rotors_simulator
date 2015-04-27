@@ -17,4 +17,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>rospy</build_depend>
+
+  <run_depend>rospy</run_depend>
 </package>
