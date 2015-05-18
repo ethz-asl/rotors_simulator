@@ -54,4 +54,23 @@
     <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
   </xacro:odometry_plugin_macro>
+
+  <!-- Mount a generic piksi sensor without odometry map (working everywhere). -->
+  <xacro:piksi_plugin_macro
+    namespace="${namespace}/piksi"
+    piksi_sensor_suffix="1"
+    parent_link="base_link"
+    spp_position_topic="spp_position"
+    rtk_position_topic="rtk_position"
+    parent_frame_id="world"
+    publish_ground_truth="true"
+    mass_piksi="0.00001"
+    spp_noise_normal="3 4 7"
+    spp_offset="0.3 0.2 50"
+    rtk_fixed_noise_normal="0.005 0.01 0.015"
+    rtk_fixed_offset="0.01 0.02 -0.04"
+  >
+    <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+  </xacro:piksi_plugin_macro>
 </robot>

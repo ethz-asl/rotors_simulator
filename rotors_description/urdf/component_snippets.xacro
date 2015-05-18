@@ -346,6 +346,43 @@
     </gazebo>
   </xacro:macro>
 
+<!-- Macro to add a Piksi RTK GPS sensor. -->
+  <xacro:macro name="piksi_plugin_macro"
+    params="
+      namespace piksi_sensor_suffix parent_link spp_position_topic rtk_position_topic
+      parent_frame_id mass_piksi publish_ground_truth spp_noise_normal spp_offset 	
+      rtk_fixed_noise_normal
+      rtk_fixed_offset *inertia *origin">
+    <!-- piksi link -->
+    <link name="${namespace}/piksi_sensor${piksi_sensor_suffix}_link">
+      <inertial>
+        <xacro:insert_block name="inertia" />
+        <mass value="${mass_piksi}" />  <!-- [kg] -->
+      </inertial>
+    </link>
+    <!-- piksi joint -->
+    <joint name="${namespace}/piksi_sensor${piksi_sensor_suffix}_joint" type="revolute">
+      <parent link="${parent_link}" />
+      <xacro:insert_block name="origin" />
+      <child link="${namespace}/piksi_sensor${piksi_sensor_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+    <gazebo>
+      <plugin filename="librotors_gazebo_piksi_plugin.so" name="piksi_sensor${piksi_sensor_suffix}">
+        <linkName>${namespace}/piksi_sensor${piksi_sensor_suffix}_link</linkName>
+        <robotNamespace>${namespace}</robotNamespace>
+        <sppPositionTopic>${spp_position_topic}</sppPositionTopic>
+	<rtkPositionTopic>${rtk_position_topic}</rtkPositionTopic>
+	<publishGroundTruth>${publish_ground_truth}</publishGroundTruth>
+        <parentFrameId>${parent_frame_id}</parentFrameId> <!-- Use the scoped link name here. e.g. Model::link. -->
+	<sppNoiseNormal>${spp_noise_normal}</sppNoiseNormal> <!-- standard deviation of additive white gaussian noise [m] -->
+	<sppOffset>${spp_offset}</sppOffset> <!-- offset against ground truth for SPP GPS output [m] -->
+        <rtkFixedNoiseNormal>${rtk_fixed_noise_normal}</rtkFixedNoiseNormal> <!-- standard deviation of additive white gaussian noise [m] -->
+	<rtkFixedOffset>${rtk_fixed_offset}</rtkFixedOffset> <!-- offset against ground truth for RTK Fixed GPS output [m] -->
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
   <!-- Macro to add the wind plugin. -->
   <xacro:macro name="wind_plugin_macro"
     params="namespace xyz_offset wind_direction wind_force_mean
