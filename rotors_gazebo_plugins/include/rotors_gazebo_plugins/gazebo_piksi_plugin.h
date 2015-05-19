@@ -63,6 +63,7 @@ static const std::string kDefaultRTKPositionPubTopic = "rtk_position";
 class GazeboPiksiPlugin : public ModelPlugin {
  public:
   typedef std::normal_distribution<> NormalDistribution;
+  typedef std::uniform_real_distribution<> UniformDistribution;
 
   GazeboPiksiPlugin()
       : ModelPlugin(),
@@ -86,6 +87,15 @@ class GazeboPiksiPlugin : public ModelPlugin {
   double update_rate_ = 10;        // default update rate: 10Hz
   common::Time prev_update_time_;
 
+  double lat_start;
+  double lon_start;
+  double alt_start;
+  double m_to_lat;
+  double m_to_lon;
+  double lat_to_m;
+  double lon_to_m;
+  const double rtk_float_start_error_width = 500;  //[m]
+
   std::string namespace_;
   std::string spp_position_pub_topic_;
   std::string rtk_position_pub_topic_;
@@ -102,6 +112,10 @@ class GazeboPiksiPlugin : public ModelPlugin {
 
   std::random_device random_device_;
   std::mt19937 random_generator_;
+
+  sensor_msgs::NavSatFix sol_spp_;
+  sensor_msgs::NavSatFix sol_gt_;
+  rotors_comm::PiksiRTKPos sol_rtk_;
 
   ros::NodeHandle* node_handle_;
   ros::Publisher spp_position_pub_;

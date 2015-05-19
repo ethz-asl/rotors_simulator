@@ -101,8 +101,26 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   rtk_position_pub_ = node_handle_->advertise<rotors_comm::PiksiRTKPos>(rtk_position_pub_topic_, 10);
 
   if(publish_ground_truth_ == "true"){
-    ground_truth_pub_ = node_handle_->advertise<geometry_msgs::Point>("position_ground_truth", 10);
+    ground_truth_pub_ = node_handle_->advertise<sensor_msgs::NavSatFix>("position_ground_truth", 10);
   }
+
+  lat_start = gps_start_position_.x;
+  lon_start = gps_start_position_.y;
+  alt_start = gps_start_position_.z;
+
+  // Calculate position scaling factors (m to lat/lon)
+  lat_to_m = 111132.954 - 559.822*cos(2*lat_start) + 1.175*cos(4*lat_start);
+  lon_to_m = (M_PI*6367449*cos(lon_start))/180;
+  m_to_lat = 1/lat_to_m;
+  m_to_lon = 1/lon_to_m;
+
+  // Start in Float Mode and initialize at random position
+  // TODO: This initialization might not reflect real behavior. Double check!
+  sol_rtk_.mode = "Float";
+  UniformDistribution rtk_initialize_u = UniformDistribution(-rtk_float_start_error_width, rtk_float_start_error_width);
+  sol_rtk_.position.latitude =  lat_start + rtk_initialize_u(random_generator_)*m_to_lat;
+  sol_rtk_.position.longitude = lon_start + rtk_initialize_u(random_generator_)*m_to_lon;
+  sol_rtk_.position.altitude =  alt_start + rtk_initialize_u(random_generator_)/10;
 }
 
 // This gets called by the world update start event.
@@ -171,60 +189,61 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
   odometry_queue_.pop_front();
   */
 
-  // Calculate position scaling factors (m to lat/lon)
-  const double lat_start = gps_start_position_.x;
-  const double lon_start = gps_start_position_.y;
-  const double alt_start = gps_start_position_.z;
-  double m_in_lat = 1/(111132.954 - 559.822*cos(2*lat_start) + 1.175*cos(4*lat_start));
-  double m_in_lon = 180/(M_PI*6367449*cos(lon_start));
+  // Calculate Ground Truth
+  sol_gt_.latitude = lat_start + m_to_lat * gazebo_pose.pos.x;
+  sol_gt_.longitude = lon_start + m_to_lon * gazebo_pose.pos.y;
+  sol_gt_.altitude = alt_start + gazebo_pose.pos.z;
 
   // Calculate position distortions for SPP GPS.
   Eigen::Vector3d spp_pos_n;
   spp_pos_n << spp_position_n_[0](random_generator_),
                spp_position_n_[1](random_generator_),
                spp_position_n_[2](random_generator_);
-  sensor_msgs::NavSatFix sol_spp;
-  sol_spp.latitude = lat_start + m_in_lat * (gazebo_pose.pos.x + offset_spp_.x + spp_pos_n[0]);
-  sol_spp.longitude = lon_start + m_in_lon * (gazebo_pose.pos.y + offset_spp_.y + spp_pos_n[1]);
-  sol_spp.altitude = alt_start + gazebo_pose.pos.z + offset_spp_.z + spp_pos_n[2];
+  sol_spp_.latitude = lat_start + m_to_lat * (gazebo_pose.pos.x + offset_spp_.x + spp_pos_n.x());
+  sol_spp_.longitude = lon_start + m_to_lon * (gazebo_pose.pos.y + offset_spp_.y + spp_pos_n.y());
+  sol_spp_.altitude = alt_start + gazebo_pose.pos.z + offset_spp_.z + spp_pos_n.z();
 
   // Calculate position distortions for RTK GPS.
-  Eigen::Vector3d rtk_pos_n;
-  rtk_pos_n << rtk_position_n_[0](random_generator_),
-               rtk_position_n_[1](random_generator_),
-               rtk_position_n_[2](random_generator_);
-  rotors_comm::PiksiRTKPosPtr sol_rtk(new rotors_comm::PiksiRTKPos);
-  sol_rtk->mode = "Fixed";
-  sol_rtk->position.latitude =  lat_start + m_in_lat * (gazebo_pose.pos.x + offset_rtk_fixed_.x + rtk_pos_n[0]);
-  sol_rtk->position.longitude = lon_start + m_in_lon * (gazebo_pose.pos.y + offset_rtk_fixed_.y + rtk_pos_n[1]);
-  sol_rtk->position.altitude =  alt_start + gazebo_pose.pos.z + offset_rtk_fixed_.z + rtk_pos_n[2];
+  if(sol_rtk_.mode == "Float"){
+    double dist_x = lat_to_m*(sol_gt_.latitude - sol_rtk_.position.latitude);
+    double dist_y = lon_to_m*(sol_gt_.longitude - sol_rtk_.position.longitude);
+    double dist_z = sol_gt_.altitude - sol_rtk_.position.altitude;
+
+    double step_x = NormalDistribution(0.003*dist_x, 0.003*abs(dist_x))(random_generator_);
+    double step_y = NormalDistribution(0.003*dist_y, 0.003*abs(dist_y))(random_generator_);
+    double step_z = NormalDistribution(0.003*dist_z, 0.003*abs(dist_z))(random_generator_);
+
+    sol_rtk_.position.latitude = sol_rtk_.position.latitude + m_to_lat*step_x;
+    sol_rtk_.position.longitude = sol_rtk_.position.longitude + m_to_lon*step_y;
+    sol_rtk_.position.altitude = sol_rtk_.position.altitude + step_z;
+
+    // If solution converged close to real solution set to RTK Fixed, with a certain probability.
+    if(sqrt(dist_x*dist_x + dist_y*dist_y + dist_z*dist_z) < 0.5
+           && UniformDistribution(0, 1)(random_generator_) > 0.95)
+       sol_rtk_.mode = "Fixed";
+  }
+  else if(sol_rtk_.mode == "Fixed")
+  {
+    Eigen::Vector3d rtk_pos_n;
+    rtk_pos_n << rtk_position_n_[0](random_generator_),
+                 rtk_position_n_[1](random_generator_),
+                 rtk_position_n_[2](random_generator_);
+
+    sol_rtk_.position.latitude =  lat_start + m_to_lat * (gazebo_pose.pos.x + offset_rtk_fixed_.x + rtk_pos_n.x());
+    sol_rtk_.position.longitude = lon_start + m_to_lon * (gazebo_pose.pos.y + offset_rtk_fixed_.y + rtk_pos_n.y());
+    sol_rtk_.position.altitude =  alt_start + gazebo_pose.pos.z + offset_rtk_fixed_.z + rtk_pos_n.z();
+  }
 
   // Publish all the topics, for which the topic name is specified.
   if (spp_position_pub_.getNumSubscribers() > 0) {
-    spp_position_pub_.publish(sol_spp);
+    spp_position_pub_.publish(sol_spp_);
   }
   if (rtk_position_pub_.getNumSubscribers() > 0) {
-    rtk_position_pub_.publish(sol_rtk);
+    rtk_position_pub_.publish(sol_rtk_);
   }
-
-  // Publish Ground Truth
-  if(publish_ground_truth_ == "true"){
-    geometry_msgs::PointPtr p_spp_gt(new geometry_msgs::Point);
-    p_spp_gt->x = gazebo_pose.pos.x;
-    p_spp_gt->y = gazebo_pose.pos.y;
-    p_spp_gt->z = gazebo_pose.pos.z;
-    ground_truth_pub_.publish(p_spp_gt);
+  if(publish_ground_truth_ == "true" && ground_truth_pub_.getNumSubscribers() > 0){
+    ground_truth_pub_.publish(sol_gt_);
   }
-
-  /*
-  tf::Quaternion tf_q_W_L(q_W_L.x, q_W_L.y, q_W_L.z, q_W_L.w);
-  tf::Vector3 tf_p(p.x, p.y, p.z);
-  tf_ = tf::Transform(tf_q_W_L, tf_p);
-  transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, odometry->header.stamp, parent_frame_id_, namespace_));
-  //    std::cout << "published odometry with timestamp " << odometry->header.stamp << "at time t" << world_->GetSimTime().Double()
-  //        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
-   *
-   */
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboPiksiPlugin);
