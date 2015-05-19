@@ -90,9 +90,8 @@ class GazeboPiksiPlugin : public ModelPlugin {
   std::string link_name_;
   std::string publish_ground_truth_;
 
-  // TODO: Fix data types!!
-  double offset_spp_[3];
-  double offset_rtk_fixed_[3];
+  sdf::Vector3 offset_spp_;
+  sdf::Vector3 offset_rtk_fixed_;
   sdf::Vector3 gps_start_position_;
 
   NormalDistribution rtk_position_n_[3];

@@ -48,9 +48,7 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   world_ = model_->GetWorld();
 
   sdf::Vector3 spp_noise_normal;
-  sdf::Vector3 spp_offset;
   sdf::Vector3 rtk_fixed_noise_normal;
-  sdf::Vector3 rtk_fixed_offset;
   const sdf::Vector3 zeros3(0.0, 0.0, 0.0);
 
   if (_sdf->HasElement("robotNamespace"))
@@ -78,9 +76,9 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
   getSdfParam<std::string>(_sdf, "publishGroundTruth", publish_ground_truth_, publish_ground_truth_);
   getSdfParam<sdf::Vector3>(_sdf, "sppNoiseNormal", spp_noise_normal, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "sppOffset", spp_offset, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "sppOffset", offset_spp_, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "rtkFixedNoiseNormal", rtk_fixed_noise_normal, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "rtkFixedOffset", rtk_fixed_offset, zeros3);
+  getSdfParam<sdf::Vector3>(_sdf, "rtkFixedOffset", offset_rtk_fixed_, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "gpsStartPosition", gps_start_position_, {0, 0, 0});
 
   parent_link_ = world_->GetEntity(parent_frame_id_);
@@ -94,14 +92,6 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   rtk_position_n_[0] = NormalDistribution(0, rtk_fixed_noise_normal.x);
   rtk_position_n_[1] = NormalDistribution(0, rtk_fixed_noise_normal.y);
   rtk_position_n_[2] = NormalDistribution(0, rtk_fixed_noise_normal.z);
-
-  offset_spp_[0] = spp_offset.x;
-  offset_spp_[1] = spp_offset.y;
-  offset_spp_[2] = spp_offset.z;
-
-  offset_rtk_fixed_[0] = rtk_fixed_offset.x;
-  offset_rtk_fixed_[1] = rtk_fixed_offset.y;
-  offset_rtk_fixed_[2] = rtk_fixed_offset.z;
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -188,9 +178,9 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
                spp_position_n_[1](random_generator_),
                spp_position_n_[2](random_generator_);
   sensor_msgs::NavSatFix sol_spp;
-  sol_spp.latitude = lat_start + m_in_lat * (gazebo_pose.pos.x + offset_spp_[0] + spp_pos_n[0]);
-  sol_spp.longitude = lon_start + m_in_lon * (gazebo_pose.pos.y + offset_spp_[1] + spp_pos_n[1]);
-  sol_spp.altitude = alt_start + gazebo_pose.pos.z + offset_spp_[2] + spp_pos_n[2];
+  sol_spp.latitude = lat_start + m_in_lat * (gazebo_pose.pos.x + offset_spp_.x + spp_pos_n[0]);
+  sol_spp.longitude = lon_start + m_in_lon * (gazebo_pose.pos.y + offset_spp_.y + spp_pos_n[1]);
+  sol_spp.altitude = alt_start + gazebo_pose.pos.z + offset_spp_.z + spp_pos_n[2];
 
   // Calculate position distortions for RTK GPS.
   Eigen::Vector3d rtk_pos_n;
@@ -199,9 +189,9 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
                rtk_position_n_[2](random_generator_);
   rotors_comm::PiksiRTKPosPtr sol_rtk(new rotors_comm::PiksiRTKPos);
   sol_rtk->mode = "Fixed";
-  sol_rtk->position.latitude =  lat_start + m_in_lat * (gazebo_pose.pos.x + offset_rtk_fixed_[0] + rtk_pos_n[0]);
-  sol_rtk->position.longitude = lon_start + m_in_lon * (gazebo_pose.pos.y + offset_rtk_fixed_[0] + rtk_pos_n[1]);
-  sol_rtk->position.altitude =  alt_start + gazebo_pose.pos.z + offset_rtk_fixed_[0] + rtk_pos_n[2];
+  sol_rtk->position.latitude =  lat_start + m_in_lat * (gazebo_pose.pos.x + offset_rtk_fixed_.x + rtk_pos_n[0]);
+  sol_rtk->position.longitude = lon_start + m_in_lon * (gazebo_pose.pos.y + offset_rtk_fixed_.y + rtk_pos_n[1]);
+  sol_rtk->position.altitude =  alt_start + gazebo_pose.pos.z + offset_rtk_fixed_.z + rtk_pos_n[2];
 
   // Publish all the topics, for which the topic name is specified.
   if (spp_position_pub_.getNumSubscribers() > 0) {
