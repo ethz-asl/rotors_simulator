@@ -80,6 +80,7 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<sdf::Vector3>(_sdf, "rtkFixedNoiseNormal", rtk_fixed_noise_normal, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "rtkFixedOffset", offset_rtk_fixed_, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "gpsStartPosition", gps_start_position_, {0, 0, 0});
+  getSdfParam<double>(_sdf, "updateRate", update_rate_, update_rate_);
 
   parent_link_ = world_->GetEntity(parent_frame_id_);
   if (parent_link_ == NULL && parent_frame_id_ != kDefaultParentFrameId) {
@@ -106,6 +107,11 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
 // This gets called by the world update start event.
 void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
+  // Set update rate
+  if ((_info.simTime - prev_update_time_).Double() <= 1/update_rate_)
+      return;
+  prev_update_time_ = _info.simTime;
+
   // C denotes child frame, P parent frame, and W world frame.
   // Further C_pose_W_P denotes pose of P wrt. W expressed in C.
   math::Pose W_pose_W_C = link_->GetWorldCoGPose();

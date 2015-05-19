@@ -83,6 +83,9 @@ class GazeboPiksiPlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
+  double update_rate_ = 10;        // default update rate: 10Hz
+  common::Time prev_update_time_;
+
   std::string namespace_;
   std::string spp_position_pub_topic_;
   std::string rtk_position_pub_topic_;
