@@ -49,6 +49,8 @@
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <tf/transform_broadcaster.h>
+#include <rotors_comm/PiksiRTKPos.h>
+
 
 namespace gazebo {
 // Default values
@@ -88,8 +90,10 @@ class GazeboPiksiPlugin : public ModelPlugin {
   std::string link_name_;
   std::string publish_ground_truth_;
 
+  // TODO: Fix data types!!
   double offset_spp_[3];
   double offset_rtk_fixed_[3];
+  sdf::Vector3 gps_start_position_;
 
   NormalDistribution rtk_position_n_[3];
   NormalDistribution spp_position_n_[3];

@@ -351,8 +351,7 @@
     params="
       namespace piksi_sensor_suffix parent_link spp_position_topic rtk_position_topic
       parent_frame_id mass_piksi publish_ground_truth spp_noise_normal spp_offset 	
-      rtk_fixed_noise_normal
-      rtk_fixed_offset *inertia *origin">
+      rtk_fixed_noise_normal rtk_fixed_offset gps_start_position *inertia *origin">
     <!-- piksi link -->
     <link name="${namespace}/piksi_sensor${piksi_sensor_suffix}_link">
       <inertial>
@@ -379,6 +378,7 @@
 	<sppOffset>${spp_offset}</sppOffset> <!-- offset against ground truth for SPP GPS output [m] -->
         <rtkFixedNoiseNormal>${rtk_fixed_noise_normal}</rtkFixedNoiseNormal> <!-- standard deviation of additive white gaussian noise [m] -->
 	<rtkFixedOffset>${rtk_fixed_offset}</rtkFixedOffset> <!-- offset against ground truth for RTK Fixed GPS output [m] -->
+	<gpsStartPosition>${gps_start_position}</gpsStartPosition> <!-- GPS position of Gazebo origin [lat lon alt] -->
       </plugin>
     </gazebo>
   </xacro:macro>
