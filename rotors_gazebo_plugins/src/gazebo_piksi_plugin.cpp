@@ -232,6 +232,15 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
     sol_rtk_.position.latitude =  lat_start + m_to_lat * (gazebo_pose.pos.x + offset_rtk_fixed_.x + rtk_pos_n.x());
     sol_rtk_.position.longitude = lon_start + m_to_lon * (gazebo_pose.pos.y + offset_rtk_fixed_.y + rtk_pos_n.y());
     sol_rtk_.position.altitude =  alt_start + gazebo_pose.pos.z + offset_rtk_fixed_.z + rtk_pos_n.z();
+
+    // Loose fix with a certain probability, and jump to random nearby position
+    if(UniformDistribution(0, 1)(random_generator_) > 0.9995){
+       UniformDistribution loose_fix_u = UniformDistribution(-rtk_float_start_error_width/4, rtk_float_start_error_width/4);
+       sol_rtk_.position.latitude =  lat_start + loose_fix_u(random_generator_)*m_to_lat;
+       sol_rtk_.position.longitude = lon_start + loose_fix_u(random_generator_)*m_to_lon;
+       sol_rtk_.position.altitude =  alt_start + loose_fix_u(random_generator_)/10;
+       sol_rtk_.mode = "Float";
+    }
   }
 
   // Publish all the topics, for which the topic name is specified.
