@@ -90,14 +90,16 @@ class GazeboPiksiPlugin : public ModelPlugin {
   double update_rate_ = 10;        // default update rate: 10Hz
   common::Time prev_update_time_;
 
-  double lat_start;
-  double lon_start;
-  double alt_start;
-  double m_to_lat;
-  double m_to_lon;
-  double lat_to_m;
-  double lon_to_m;
-  const double rtk_float_start_error_width = 500;  //[m]
+  double lat_start_;
+  double lon_start_;
+  double alt_start_;
+  double m_to_lat_;
+  double m_to_lon_;
+  double lat_to_m_;
+  double lon_to_m_;
+  double convergence_speed_;
+  double fix_loss_probability_;
+  const double rtk_float_start_error_width_= 400;  //[m]
 
   std::string namespace_;
   std::string spp_position_pub_topic_;

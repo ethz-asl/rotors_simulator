@@ -49,6 +49,7 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   sdf::Vector3 spp_noise_normal;
   sdf::Vector3 rtk_fixed_noise_normal;
+  std::string start_fixed;
   const sdf::Vector3 zeros3(0.0, 0.0, 0.0);
 
   if (_sdf->HasElement("robotNamespace"))
@@ -76,12 +77,15 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<std::string>(_sdf, "rtkModeTopic", rtk_mode_pub_topic_, rtk_mode_pub_topic_);
   getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
   getSdfParam<std::string>(_sdf, "publishGroundTruth", publish_ground_truth_, publish_ground_truth_);
+  getSdfParam<std::string>(_sdf, "startFixed", start_fixed, start_fixed);
   getSdfParam<sdf::Vector3>(_sdf, "sppNoiseNormal", spp_noise_normal, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "sppOffset", offset_spp_, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "rtkFixedNoiseNormal", rtk_fixed_noise_normal, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "rtkFixedOffset", offset_rtk_fixed_, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "gpsStartPosition", gps_start_position_, {0, 0, 0});
   getSdfParam<double>(_sdf, "updateRate", update_rate_, update_rate_);
+  getSdfParam<double>(_sdf, "convergenceSpeed", convergence_speed_, convergence_speed_);
+  getSdfParam<double>(_sdf, "fixLossProbability", fix_loss_probability_, fix_loss_probability_);
 
   parent_link_ = world_->GetEntity(parent_frame_id_);
   if (parent_link_ == NULL && parent_frame_id_ != kDefaultParentFrameId) {
@@ -106,23 +110,26 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     ground_truth_pub_ = node_handle_->advertise<sensor_msgs::NavSatFix>("position_ground_truth", 10);
   }
 
-  lat_start = gps_start_position_.x;
-  lon_start = gps_start_position_.y;
-  alt_start = gps_start_position_.z;
+  lat_start_ = gps_start_position_.x;
+  lon_start_ = gps_start_position_.y;
+  alt_start_ = gps_start_position_.z;
 
   // Calculate position scaling factors (m to lat/lon)
-  lat_to_m = 111132.954 - 559.822*cos(2*lat_start) + 1.175*cos(4*lat_start);
-  lon_to_m = (M_PI*6367449*cos(lon_start))/180;
-  m_to_lat = 1/lat_to_m;
-  m_to_lon = 1/lon_to_m;
+  lat_to_m_ = 111132.954 - 559.822*cos(2*lat_start_) + 1.175*cos(4*lat_start_);
+  lon_to_m_ = (M_PI*6367449*cos(lon_start_))/180;
+  m_to_lat_ = 1/lat_to_m_;
+  m_to_lon_ = 1/lon_to_m_;
 
   // Start in Float Mode and initialize at random position
-  // TODO: This initialization might not reflect real behavior. Double check!
-  mode_rtk_.data = "Float";
-  UniformDistribution rtk_initialize_u = UniformDistribution(-rtk_float_start_error_width, rtk_float_start_error_width);
-  sol_rtk_.latitude =  lat_start + rtk_initialize_u(random_generator_)*m_to_lat;
-  sol_rtk_.longitude = lon_start + rtk_initialize_u(random_generator_)*m_to_lon;
-  sol_rtk_.altitude =  alt_start + rtk_initialize_u(random_generator_)/10;
+  if(start_fixed == "true")
+    mode_rtk_.data = "Fixed";
+  else {
+    mode_rtk_.data = "Float";
+    UniformDistribution rtk_initialize_u = UniformDistribution(-rtk_float_start_error_width_, rtk_float_start_error_width_);
+    sol_rtk_.latitude =  lat_start_ + rtk_initialize_u(random_generator_)*m_to_lat_;
+    sol_rtk_.longitude = lon_start_ + rtk_initialize_u(random_generator_)*m_to_lon_;
+    sol_rtk_.altitude =  alt_start_ + rtk_initialize_u(random_generator_)/10;
+  }
 }
 
 // This gets called by the world update start event.
@@ -192,31 +199,32 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
   */
 
   // Calculate Ground Truth
-  sol_gt_.latitude = lat_start + m_to_lat * gazebo_pose.pos.x;
-  sol_gt_.longitude = lon_start + m_to_lon * gazebo_pose.pos.y;
-  sol_gt_.altitude = alt_start + gazebo_pose.pos.z;
+  sol_gt_.latitude = lat_start_ + m_to_lat_ * gazebo_pose.pos.x;
+  sol_gt_.longitude = lon_start_ + m_to_lon_ * gazebo_pose.pos.y;
+  sol_gt_.altitude = alt_start_ + gazebo_pose.pos.z;
 
   // Calculate position distortions for SPP GPS.
   Eigen::Vector3d spp_pos_n;
   spp_pos_n << spp_position_n_[0](random_generator_),
                spp_position_n_[1](random_generator_),
                spp_position_n_[2](random_generator_);
-  sol_spp_.latitude = lat_start + m_to_lat * (gazebo_pose.pos.x + offset_spp_.x + spp_pos_n.x());
-  sol_spp_.longitude = lon_start + m_to_lon * (gazebo_pose.pos.y + offset_spp_.y + spp_pos_n.y());
-  sol_spp_.altitude = alt_start + gazebo_pose.pos.z + offset_spp_.z + spp_pos_n.z();
+  sol_spp_.latitude = lat_start_ + m_to_lat_ * (gazebo_pose.pos.x + offset_spp_.x + spp_pos_n.x());
+  sol_spp_.longitude = lon_start_ + m_to_lon_ * (gazebo_pose.pos.y + offset_spp_.y + spp_pos_n.y());
+  sol_spp_.altitude = alt_start_ + gazebo_pose.pos.z + offset_spp_.z + spp_pos_n.z();
 
   // Calculate position distortions for RTK GPS.
   if(mode_rtk_.data == "Float"){
-    double dist_x = lat_to_m*(sol_gt_.latitude - sol_rtk_.latitude);
-    double dist_y = lon_to_m*(sol_gt_.longitude - sol_rtk_.longitude);
+    double dist_x = lat_to_m_*(sol_gt_.latitude - sol_rtk_.latitude);
+    double dist_y = lon_to_m_*(sol_gt_.longitude - sol_rtk_.longitude);
     double dist_z = sol_gt_.altitude - sol_rtk_.altitude;
 
-    double step_x = NormalDistribution((0.002*sin(dist_x)+0.002)*dist_x, 0.01*abs(dist_x) + 0.005)(random_generator_);
-    double step_y = NormalDistribution((0.002*cos(dist_y)+0.002)*dist_y, 0.01*abs(dist_y) + 0.005)(random_generator_);
-    double step_z = NormalDistribution((0.002*sin(dist_z)+0.002)*dist_z, 0.01*abs(dist_z) + 0.005)(random_generator_);
+    double c_s = convergence_speed_/100;
+    double step_x = NormalDistribution((c_s*sin(dist_x)+1.1*c_s)*dist_x, 0.01*abs(dist_x) + 0.005)(random_generator_);
+    double step_y = NormalDistribution((c_s*cos(dist_y)+1.1*c_s)*dist_y, 0.01*abs(dist_y) + 0.005)(random_generator_);
+    double step_z = NormalDistribution((c_s*sin(dist_z)+1.1*c_s)*dist_z, 0.01*abs(dist_z) + 0.005)(random_generator_);
 
-    sol_rtk_.latitude = sol_rtk_.latitude + m_to_lat*step_x;
-    sol_rtk_.longitude = sol_rtk_.longitude + m_to_lon*step_y;
+    sol_rtk_.latitude = sol_rtk_.latitude + m_to_lat_*step_x;
+    sol_rtk_.longitude = sol_rtk_.longitude + m_to_lon_*step_y;
     sol_rtk_.altitude = sol_rtk_.altitude + step_z;
 
     // If solution converged close to real solution set to RTK Fixed, with a certain probability.
@@ -231,16 +239,16 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
                  rtk_position_n_[1](random_generator_),
                  rtk_position_n_[2](random_generator_);
 
-    sol_rtk_.latitude =  lat_start + m_to_lat * (gazebo_pose.pos.x + offset_rtk_fixed_.x + rtk_pos_n.x());
-    sol_rtk_.longitude = lon_start + m_to_lon * (gazebo_pose.pos.y + offset_rtk_fixed_.y + rtk_pos_n.y());
-    sol_rtk_.altitude =  alt_start + gazebo_pose.pos.z + offset_rtk_fixed_.z + rtk_pos_n.z();
+    sol_rtk_.latitude =  lat_start_ + m_to_lat_ * (gazebo_pose.pos.x + offset_rtk_fixed_.x + rtk_pos_n.x());
+    sol_rtk_.longitude = lon_start_ + m_to_lon_ * (gazebo_pose.pos.y + offset_rtk_fixed_.y + rtk_pos_n.y());
+    sol_rtk_.altitude =  alt_start_ + gazebo_pose.pos.z + offset_rtk_fixed_.z + rtk_pos_n.z();
 
     // Loose fix with a certain probability, and jump to random nearby position
-    if(UniformDistribution(0, 1)(random_generator_) > 0.9995){
-       UniformDistribution loose_fix_u = NormalDistribution(0, rtk_float_start_error_width/7);
-       sol_rtk_.latitude =  lat_start + loose_fix_u(random_generator_)*m_to_lat;
-       sol_rtk_.longitude = lon_start + loose_fix_u(random_generator_)*m_to_lon;
-       sol_rtk_.altitude =  alt_start + loose_fix_u(random_generator_)/10;
+    if(UniformDistribution(0, 1)(random_generator_) <= fix_loss_probability_){
+       NormalDistribution loose_fix_pos = NormalDistribution(0, rtk_float_start_error_width_/7);
+       sol_rtk_.latitude =  lat_start_ + loose_fix_pos(random_generator_)*m_to_lat_;
+       sol_rtk_.longitude = lon_start_ + loose_fix_pos(random_generator_)*m_to_lon_;
+       sol_rtk_.altitude =  alt_start_ + loose_fix_pos(random_generator_)/5;
        mode_rtk_.data = "Float";
     }
   }
