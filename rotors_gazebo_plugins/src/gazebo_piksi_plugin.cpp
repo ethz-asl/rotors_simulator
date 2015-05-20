@@ -115,8 +115,8 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   alt_start_ = gps_start_position_.z;
 
   // Calculate position scaling factors (m to lat/lon)
-  lat_to_m_ = 111132.954 - 559.822*cos(2*lat_start_) + 1.175*cos(4*lat_start_);
-  lon_to_m_ = (M_PI*6367449*cos(lon_start_))/180;
+  lat_to_m_ = 111132.954 - 559.822*cos(2*lat_start_*M_PI/180) + 1.175*cos(4*lat_start_);
+  lon_to_m_ = (M_PI*6367449*cos(lon_start_*M_PI/180))/180;
   m_to_lat_ = 1/lat_to_m_;
   m_to_lon_ = 1/lon_to_m_;
 
