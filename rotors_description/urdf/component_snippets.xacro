@@ -350,8 +350,8 @@
   <xacro:macro name="piksi_plugin_macro"
     params="
       namespace piksi_sensor_suffix parent_link spp_position_topic rtk_position_topic
-      parent_frame_id mass_piksi publish_ground_truth spp_noise_normal spp_offset 	
-      rtk_fixed_noise_normal rtk_fixed_offset gps_start_position update_rate
+      rtk_mode_topic parent_frame_id mass_piksi publish_ground_truth spp_noise_normal
+      spp_offset rtk_fixed_noise_normal rtk_fixed_offset gps_start_position update_rate
       *inertia *origin">
     <!-- piksi link -->
     <link name="${namespace}/piksi_sensor${piksi_sensor_suffix}_link">
@@ -373,6 +373,7 @@
         <robotNamespace>${namespace}</robotNamespace>
         <sppPositionTopic>${spp_position_topic}</sppPositionTopic>
 	<rtkPositionTopic>${rtk_position_topic}</rtkPositionTopic>
+	<rtkModeTopic>${rtk_mode_topic}</rtkModeTopic>
 	<publishGroundTruth>${publish_ground_truth}</publishGroundTruth>
         <parentFrameId>${parent_frame_id}</parentFrameId> <!-- Use the scoped link name here. e.g. Model::link. -->
 	<sppNoiseNormal>${spp_noise_normal}</sppNoiseNormal> <!-- standard deviation of additive white gaussian noise [m] -->

@@ -45,6 +45,7 @@
 #include <geometry_msgs/TwistWithCovariance.h>
 #include <geometry_msgs/TwistWithCovarianceStamped.h>
 #include <nav_msgs/Odometry.h>
+#include <std_msgs/String.h>
 #include <opencv2/core/core.hpp>
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
@@ -59,6 +60,7 @@ static const std::string kDefaultParentFrameId = "world";
 static const std::string kDefaultLinkName = "piksi_sensor_link";
 static const std::string kDefaultSPPPositionPubTopic = "spp_position";
 static const std::string kDefaultRTKPositionPubTopic = "rtk_position";
+static const std::string kDefaultRTKModePubTopic = "rtk_mode";
 
 class GazeboPiksiPlugin : public ModelPlugin {
  public:
@@ -70,6 +72,7 @@ class GazeboPiksiPlugin : public ModelPlugin {
         random_generator_(random_device_()),
         spp_position_pub_topic_(kDefaultSPPPositionPubTopic),
         rtk_position_pub_topic_(kDefaultRTKPositionPubTopic),
+        rtk_mode_pub_topic_(kDefaultRTKModePubTopic),
         parent_frame_id_(kDefaultParentFrameId),
         link_name_(kDefaultLinkName),
         node_handle_(NULL) {}
@@ -99,6 +102,7 @@ class GazeboPiksiPlugin : public ModelPlugin {
   std::string namespace_;
   std::string spp_position_pub_topic_;
   std::string rtk_position_pub_topic_;
+  std::string rtk_mode_pub_topic_;
   std::string parent_frame_id_;
   std::string link_name_;
   std::string publish_ground_truth_;
@@ -115,11 +119,13 @@ class GazeboPiksiPlugin : public ModelPlugin {
 
   sensor_msgs::NavSatFix sol_spp_;
   sensor_msgs::NavSatFix sol_gt_;
-  rotors_comm::PiksiRTKPos sol_rtk_;
+  sensor_msgs::NavSatFix sol_rtk_;
+  std_msgs::String mode_rtk_;
 
   ros::NodeHandle* node_handle_;
   ros::Publisher spp_position_pub_;
   ros::Publisher rtk_position_pub_;
+  ros::Publisher rtk_mode_pub_;
   ros::Publisher ground_truth_pub_;
 
   tf::Transform tf_;

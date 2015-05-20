@@ -62,6 +62,7 @@
     parent_link="base_link"
     spp_position_topic="spp_position"
     rtk_position_topic="rtk_position"
+    rtk_mode_topic="rtk_mode"
     parent_frame_id="world"
     publish_ground_truth="true"
     mass_piksi="0.00001"
