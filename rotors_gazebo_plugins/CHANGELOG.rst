@@ -2,6 +2,9 @@
 Changelog for package rotors_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.1.1 (2015-04-24)
 ------------------
 * switched from opencv to cv_bridge

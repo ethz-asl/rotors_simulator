@@ -2,6 +2,9 @@
 Changelog for package rotors_simulator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.1.1 (2015-04-24)
 ------------------
 
