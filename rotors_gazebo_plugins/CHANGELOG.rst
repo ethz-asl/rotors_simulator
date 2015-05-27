@@ -2,6 +2,10 @@
 Changelog for package rotors_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* added installation of controller libraries
+
 1.1.2 (2015-05-27)
 ------------------
 
