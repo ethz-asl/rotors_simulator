@@ -2,6 +2,11 @@
 Changelog for package rotors_evaluation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* added nav_msgs dependency and fixed rotors_evaluation's setup.py
+* rotors_evaluation: added rospy dependency
+
 1.1.1 (2015-04-24)
 ------------------
 
