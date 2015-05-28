@@ -2,6 +2,9 @@
 Changelog for package rotors_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.1.3 (2015-05-28)
 ------------------
 

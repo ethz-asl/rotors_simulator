@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rotors_comm
   rotors_control
+  std_srvs
   tf
 )
 
@@ -31,7 +32,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
-  CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control tf
+  CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf
   DEPENDS eigen gazebo octomap opencv
 )
 
