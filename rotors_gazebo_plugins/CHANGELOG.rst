@@ -2,8 +2,8 @@
 Changelog for package rotors_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.4 (2015-05-28)
+------------------
 * added std_srvs dependency
 
 1.1.3 (2015-05-28)
