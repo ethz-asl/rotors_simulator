@@ -51,3 +51,7 @@ add_executable(roll_pitch_yawrate_thrust_controller_node
 add_dependencies(roll_pitch_yawrate_thrust_controller_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(roll_pitch_yawrate_thrust_controller_node
   roll_pitch_yawrate_thrust_controller ${catkin_LIBRARIES})
+
+install(TARGETS lee_position_controller roll_pitch_yawrate_thrust_controller
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
