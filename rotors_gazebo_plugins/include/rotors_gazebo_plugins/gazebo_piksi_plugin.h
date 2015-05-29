@@ -46,6 +46,7 @@
 #include <geometry_msgs/TwistWithCovarianceStamped.h>
 #include <nav_msgs/Odometry.h>
 #include <std_msgs/String.h>
+#include <sensor_msgs/NavSatFix.h>
 #include <opencv2/core/core.hpp>
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
@@ -106,6 +107,7 @@ class GazeboPiksiPlugin : public ModelPlugin {
   std::string rtk_position_pub_topic_;
   std::string rtk_mode_pub_topic_;
   std::string parent_frame_id_;
+  std::string frame_id_;
   std::string link_name_;
   std::string publish_ground_truth_;
 

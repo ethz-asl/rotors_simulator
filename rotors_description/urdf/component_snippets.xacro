@@ -350,7 +350,7 @@
   <xacro:macro name="piksi_plugin_macro"
     params="
       namespace piksi_sensor_suffix parent_link spp_position_topic rtk_position_topic
-      rtk_mode_topic parent_frame_id mass_piksi publish_ground_truth start_fixed
+      rtk_mode_topic frame_id parent_frame_id mass_piksi publish_ground_truth start_fixed
       spp_noise_normal spp_offset rtk_fixed_noise_normal rtk_fixed_offset 
       gps_start_position update_rate convergence_speed fix_loss_probability 
       *inertia *origin">
@@ -378,6 +378,7 @@
 	<publishGroundTruth>${publish_ground_truth}</publishGroundTruth>
 	<startFixed>${start_fixed}</startFixed>
         <parentFrameId>${parent_frame_id}</parentFrameId> <!-- Use the scoped link name here. e.g. Model::link. -->
+	<frameId>${frame_id}</frameId> <!-- Coordinate frame of the GPS receiver with respect to the base link -->
 	<sppNoiseNormal>${spp_noise_normal}</sppNoiseNormal> <!-- standard deviation of additive white gaussian noise [m] -->
 	<sppOffset>${spp_offset}</sppOffset> <!-- offset against ground truth for SPP GPS output [m] -->
         <rtkFixedNoiseNormal>${rtk_fixed_noise_normal}</rtkFixedNoiseNormal> <!-- standard deviation of additive white gaussian noise [m] -->

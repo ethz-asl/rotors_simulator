@@ -1,9 +1,5 @@
 /*
- * Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
- * Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
- * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
- * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
- * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Daniel Eckert, ASL, ETH Zurich, Switzerland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +74,7 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
   getSdfParam<std::string>(_sdf, "publishGroundTruth", publish_ground_truth_, publish_ground_truth_);
   getSdfParam<std::string>(_sdf, "startFixed", start_fixed, start_fixed);
+  getSdfParam<std::string>(_sdf, "frameId", frame_id_, frame_id_);
   getSdfParam<sdf::Vector3>(_sdf, "sppNoiseNormal", spp_noise_normal, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "sppOffset", offset_spp_, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "rtkFixedNoiseNormal", rtk_fixed_noise_normal, zeros3);
@@ -91,6 +88,7 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   if (parent_link_ == NULL && parent_frame_id_ != kDefaultParentFrameId) {
     gzthrow("[gazebo_piksi_plugin] Couldn't find specified parent link \"" << parent_frame_id_ << "\".");
   }
+
   spp_position_n_[0] = NormalDistribution(0, spp_noise_normal.x);
   spp_position_n_[1] = NormalDistribution(0, spp_noise_normal.y);
   spp_position_n_[2] = NormalDistribution(0, spp_noise_normal.z);
@@ -130,6 +128,21 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     sol_rtk_.longitude = lon_start_ + rtk_initialize_u(random_generator_)*m_to_lon_;
     sol_rtk_.altitude =  alt_start_ + rtk_initialize_u(random_generator_)/10;
   }
+
+  // Define fixed attributes of the NavSatFixed messages
+  sol_spp_.header.frame_id = frame_id_;
+  sol_spp_.status.status = sol_spp_.status.STATUS_FIX;
+  sol_spp_.status.service = sol_spp_.status.SERVICE_GPS;
+  // TODO: Handle covariance properly!
+  sol_spp_.position_covariance = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  sol_spp_.position_covariance_type = sol_spp_.COVARIANCE_TYPE_UNKNOWN;
+
+  sol_rtk_.header.frame_id = frame_id_;
+  sol_rtk_.status.status = sol_rtk_.status.STATUS_GBAS_FIX;
+  sol_rtk_.status.service = sol_rtk_.status.SERVICE_GPS;
+  // TODO: Handle covariance properly!
+  sol_rtk_.position_covariance = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  sol_rtk_.position_covariance_type = sol_rtk_.COVARIANCE_TYPE_UNKNOWN;
 }
 
 // This gets called by the world update start event.
@@ -211,8 +224,10 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
   sol_spp_.latitude = lat_start_ + m_to_lat_ * (gazebo_pose.pos.x + offset_spp_.x + spp_pos_n.x());
   sol_spp_.longitude = lon_start_ + m_to_lon_ * (gazebo_pose.pos.y + offset_spp_.y + spp_pos_n.y());
   sol_spp_.altitude = alt_start_ + gazebo_pose.pos.z + offset_spp_.z + spp_pos_n.z();
+  sol_spp_.header.stamp = ros::Time().now();
 
   // Calculate position distortions for RTK GPS.
+  sol_rtk_.header.stamp = ros::Time().now();
   if(mode_rtk_.data == "Float"){
     double dist_x = lat_to_m_*(sol_gt_.latitude - sol_rtk_.latitude);
     double dist_y = lon_to_m_*(sol_gt_.longitude - sol_rtk_.longitude);
@@ -253,15 +268,15 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
     }
   }
 
-  // Publish all the topics, for which the topic name is specified.
-  if (spp_position_pub_.getNumSubscribers() > 0) {
-    spp_position_pub_.publish(sol_spp_);
+  // Publish messages
+  if (rtk_mode_pub_.getNumSubscribers() > 0) {
+    rtk_mode_pub_.publish(mode_rtk_);
   }
   if (rtk_position_pub_.getNumSubscribers() > 0) {
     rtk_position_pub_.publish(sol_rtk_);
   }
-  if (rtk_mode_pub_.getNumSubscribers() > 0) {
-    rtk_mode_pub_.publish(mode_rtk_);
+  if (spp_position_pub_.getNumSubscribers() > 0) {
+    spp_position_pub_.publish(sol_spp_);
   }
   if(publish_ground_truth_ == "true" && ground_truth_pub_.getNumSubscribers() > 0){
     ground_truth_pub_.publish(sol_gt_);
