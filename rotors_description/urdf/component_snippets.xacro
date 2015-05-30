@@ -353,6 +353,7 @@
       rtk_mode_topic frame_id parent_frame_id mass_piksi publish_ground_truth start_fixed
       spp_noise_normal spp_offset rtk_fixed_noise_normal rtk_fixed_offset 
       gps_start_position update_rate convergence_speed fix_loss_probability 
+      rtk_navsatfix_covariance spp_navsatfix_covariance
       *inertia *origin">
     <!-- piksi link -->
     <link name="${namespace}/piksi_sensor${piksi_sensor_suffix}_link">
@@ -385,6 +386,8 @@
 	<rtkFixedOffset>${rtk_fixed_offset}</rtkFixedOffset> <!-- offset against ground truth for RTK Fixed GPS output [m] -->
 	<gpsStartPosition>${gps_start_position}</gpsStartPosition> <!-- GPS position of Gazebo origin [lat lon alt] -->
 	<updateRate>${update_rate}</updateRate> <!-- update rate of the sensor [Hz] -->
+	<sppNavsatfixCovariance>${spp_navsatfix_covariance}</sppNavsatfixCovariance> <!-- noise covariance published in the NavSatFix SPP message -->
+	<rtkNavsatfixCovariance>${rtk_navsatfix_covariance}</rtkNavsatfixCovariance> <!-- noise covariance published in the NavSatFix RTK message -->
 	<convergenceSpeed>${convergence_speed}</convergenceSpeed> <!-- the higher, the faster the sensor converges to RTK Fixed [<1]-->
 	<fixLossProbability>${fix_loss_probability}</fixLossProbability> <!-- probability that RTK Fix is lost per update -->
       </plugin>

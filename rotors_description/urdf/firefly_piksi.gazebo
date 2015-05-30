@@ -72,6 +72,8 @@
     spp_offset="0.3 0.2 50"
     rtk_fixed_noise_normal="0.005 0.01 0.015"
     rtk_fixed_offset="0.01 0.02 -0.04"
+    spp_navsatfix_covariance = "50 0 0 0 50 0 0 0 50"
+    rtk_navsatfix_covariance = "1 0 0 0 1 0 0 0 1"
     gps_start_position="47.37717 8.547047 472"
     update_rate="10"
     convergence_speed="0.2"
@@ -80,4 +82,15 @@
     <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
   </xacro:piksi_plugin_macro>
+
+  <!-- Mount a VI-sensor in front of the Firefly. -->
+  <xacro:vi_sensor_macro
+    namespace="${namespace}/vi_sensor"
+    parent_link="base_link"
+    enable_cameras="true"
+    enable_depth="true"
+    enable_ground_truth="true"
+  >
+    <origin xyz="0.1 0.0 -0.03" rpy="0.0 0.1 0.0" />
+  </xacro:vi_sensor_macro>
 </robot>

@@ -46,6 +46,8 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   sdf::Vector3 spp_noise_normal;
   sdf::Vector3 rtk_fixed_noise_normal;
   std::string start_fixed;
+  std::string spp_navsatfix_covariance;
+  std::string rtk_navsatfix_covariance;
   const sdf::Vector3 zeros3(0.0, 0.0, 0.0);
 
   if (_sdf->HasElement("robotNamespace"))
@@ -80,6 +82,11 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<sdf::Vector3>(_sdf, "rtkFixedNoiseNormal", rtk_fixed_noise_normal, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "rtkFixedOffset", offset_rtk_fixed_, zeros3);
   getSdfParam<sdf::Vector3>(_sdf, "gpsStartPosition", gps_start_position_, {0, 0, 0});
+  getSdfParam<std::string>(_sdf, "sppNavsatfixCovariance", spp_navsatfix_covariance, spp_navsatfix_covariance);
+  getSdfParam<std::string>(_sdf, "rtkNavsatfixCovariance", rtk_navsatfix_covariance, rtk_navsatfix_covariance);
+  strToDoubleArray(spp_navsatfix_covariance, spp_navsatfix_covariance_, 9);
+  strToDoubleArray(rtk_navsatfix_covariance, rtk_navsatfix_covariance_, 9);
+
   getSdfParam<double>(_sdf, "updateRate", update_rate_, update_rate_);
   getSdfParam<double>(_sdf, "convergenceSpeed", convergence_speed_, convergence_speed_);
   getSdfParam<double>(_sdf, "fixLossProbability", fix_loss_probability_, fix_loss_probability_);
@@ -134,15 +141,19 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   sol_spp_.status.status = sol_spp_.status.STATUS_FIX;
   sol_spp_.status.service = sol_spp_.status.SERVICE_GPS;
   // TODO: Handle covariance properly!
-  sol_spp_.position_covariance = {1, 0, 0, 0, 1, 0, 0, 0, 1};
-  sol_spp_.position_covariance_type = sol_spp_.COVARIANCE_TYPE_UNKNOWN;
+  for(int i=0; i<=9; i++) {
+    sol_spp_.position_covariance.elems[i] = spp_navsatfix_covariance_[i];
+  }
+  sol_spp_.position_covariance_type = sol_spp_.COVARIANCE_TYPE_DIAGONAL_KNOWN;
 
   sol_rtk_.header.frame_id = frame_id_;
   sol_rtk_.status.status = sol_rtk_.status.STATUS_GBAS_FIX;
   sol_rtk_.status.service = sol_rtk_.status.SERVICE_GPS;
   // TODO: Handle covariance properly!
-  sol_rtk_.position_covariance = {1, 0, 0, 0, 1, 0, 0, 0, 1};
-  sol_rtk_.position_covariance_type = sol_rtk_.COVARIANCE_TYPE_UNKNOWN;
+  for(int i=0; i<=9; i++) {
+    sol_rtk_.position_covariance.elems[i] = rtk_navsatfix_covariance_[i];
+  }
+  sol_rtk_.position_covariance_type = sol_rtk_.COVARIANCE_TYPE_DIAGONAL_KNOWN;
 }
 
 // This gets called by the world update start event.

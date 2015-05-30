@@ -28,6 +28,8 @@
 #include <stdio.h>
 
 #include <boost/bind.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/range/algorithm/transform.hpp>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
@@ -101,6 +103,8 @@ class GazeboPiksiPlugin : public ModelPlugin {
   double convergence_speed_;
   double fix_loss_probability_;
   const double rtk_float_start_error_width_= 400;  //[m]
+  double spp_navsatfix_covariance_[9];
+  double rtk_navsatfix_covariance_[9];
 
   std::string namespace_;
   std::string spp_position_pub_topic_;
@@ -145,6 +149,18 @@ class GazeboPiksiPlugin : public ModelPlugin {
 
   boost::thread callback_queue_thread_;
   void QueueThread();
+
+  // \brief Used to convert numbers in a string to doubles
+  void strToDoubleArray(std::string string, double* array, int array_len) {
+    std::vector<double> doubles;
+    boost::tokenizer<> tok(string);
+    int i = 0;
+    for(boost::tokenizer<>::iterator beg=tok.begin(); beg!=tok.end();++beg){
+        if(i < array_len)
+          array[i] = atof(beg->c_str());
+        i++;
+    }
+  };
 };
 }
 
