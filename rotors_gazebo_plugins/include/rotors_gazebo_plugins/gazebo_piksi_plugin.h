@@ -155,9 +155,10 @@ class GazeboPiksiPlugin : public ModelPlugin {
 
   // \brief Used to convert numbers in a string to doubles
   void strToDoubleArray(std::string string, double* array, int array_len) {
-    boost::tokenizer<> tok(string);
+    boost::char_separator<char> sep(" ");
+    boost::tokenizer<boost::char_separator<char>> tok(string , sep);
     int i = 0;
-    for(boost::tokenizer<>::iterator beg=tok.begin(); beg!=tok.end();++beg){
+    for(boost::tokenizer<boost::char_separator<char>>::iterator beg=tok.begin(); beg!=tok.end();++beg){
         if(i < array_len)
           array[i] = atof(beg->c_str());
         i++;
