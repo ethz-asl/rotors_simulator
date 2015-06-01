@@ -282,10 +282,10 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
   }
 
   if(mode_rtk_.data == "Fixed")
-    sol_piksi_rtk_.modeFixed = 1;
+    sol_piksi_rtk_.mode_fixed = 1;
   else
-    sol_piksi_rtk_.modeFixed = 0;
-  sol_piksi_rtk_.navSatFix = sol_rtk_;
+    sol_piksi_rtk_.mode_fixed = 0;
+  sol_piksi_rtk_.navsatfix = sol_rtk_;
 
   // Publish messages
   if (rtk_piksi_pub_.getNumSubscribers() > 0) {
