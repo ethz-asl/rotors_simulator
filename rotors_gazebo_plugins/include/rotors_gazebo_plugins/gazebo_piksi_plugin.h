@@ -110,6 +110,7 @@ class GazeboPiksiPlugin : public ModelPlugin {
   std::string spp_position_pub_topic_;
   std::string rtk_position_pub_topic_;
   std::string rtk_mode_pub_topic_;
+  std::string rtk_piksi_pub_topic_;
   std::string parent_frame_id_;
   std::string frame_id_;
   std::string link_name_;
@@ -128,12 +129,14 @@ class GazeboPiksiPlugin : public ModelPlugin {
   sensor_msgs::NavSatFix sol_spp_;
   sensor_msgs::NavSatFix sol_gt_;
   sensor_msgs::NavSatFix sol_rtk_;
+  rotors_comm::PiksiRTKPos sol_piksi_rtk_;
   std_msgs::String mode_rtk_;
 
   ros::NodeHandle* node_handle_;
   ros::Publisher spp_position_pub_;
   ros::Publisher rtk_position_pub_;
   ros::Publisher rtk_mode_pub_;
+  ros::Publisher rtk_piksi_pub_;
   ros::Publisher ground_truth_pub_;
 
   tf::Transform tf_;
@@ -152,7 +155,6 @@ class GazeboPiksiPlugin : public ModelPlugin {
 
   // \brief Used to convert numbers in a string to doubles
   void strToDoubleArray(std::string string, double* array, int array_len) {
-    std::vector<double> doubles;
     boost::tokenizer<> tok(string);
     int i = 0;
     for(boost::tokenizer<>::iterator beg=tok.begin(); beg!=tok.end();++beg){

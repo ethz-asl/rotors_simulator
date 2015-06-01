@@ -73,6 +73,7 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<std::string>(_sdf, "sppPositionTopic", spp_position_pub_topic_, spp_position_pub_topic_);
   getSdfParam<std::string>(_sdf, "rtkPositionTopic", rtk_position_pub_topic_, rtk_position_pub_topic_);
   getSdfParam<std::string>(_sdf, "rtkModeTopic", rtk_mode_pub_topic_, rtk_mode_pub_topic_);
+  getSdfParam<std::string>(_sdf, "rtkPiksiTopic", rtk_piksi_pub_topic_, rtk_piksi_pub_topic_);
   getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
   getSdfParam<std::string>(_sdf, "publishGroundTruth", publish_ground_truth_, publish_ground_truth_);
   getSdfParam<std::string>(_sdf, "startFixed", start_fixed, start_fixed);
@@ -110,6 +111,7 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   spp_position_pub_ = node_handle_->advertise<sensor_msgs::NavSatFix>(spp_position_pub_topic_, 10);
   rtk_position_pub_ = node_handle_->advertise<sensor_msgs::NavSatFix>(rtk_position_pub_topic_, 10);
   rtk_mode_pub_ = node_handle_->advertise<std_msgs::String>(rtk_mode_pub_topic_, 10);
+  rtk_piksi_pub_ = node_handle_->advertise<rotors_comm::PiksiRTKPos>(rtk_piksi_pub_topic_, 10);
 
   if(publish_ground_truth_ == "true"){
     ground_truth_pub_ = node_handle_->advertise<sensor_msgs::NavSatFix>("position_ground_truth", 10);
@@ -279,7 +281,16 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
     }
   }
 
+  if(mode_rtk_.data == "Fixed")
+    sol_piksi_rtk_.modeFixed = 1;
+  else
+    sol_piksi_rtk_.modeFixed = 0;
+  sol_piksi_rtk_.navSatFix = sol_rtk_;
+
   // Publish messages
+  if (rtk_piksi_pub_.getNumSubscribers() > 0) {
+    rtk_piksi_pub_.publish(sol_piksi_rtk_);
+  }
   if (rtk_mode_pub_.getNumSubscribers() > 0) {
     rtk_mode_pub_.publish(mode_rtk_);
   }
