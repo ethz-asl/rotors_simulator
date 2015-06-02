@@ -225,8 +225,8 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
   */
 
   // Calculate Ground Truth
-  sol_gt_.latitude = lat_start_ + m_to_lat_ * gazebo_pose.pos.x;
-  sol_gt_.longitude = lon_start_ + m_to_lon_ * gazebo_pose.pos.y;
+  sol_gt_.longitude = lon_start_ + m_to_lon_ * gazebo_pose.pos.x;
+  sol_gt_.latitude = lat_start_ + m_to_lat_ * gazebo_pose.pos.y;
   sol_gt_.altitude = alt_start_ + gazebo_pose.pos.z;
 
   // Calculate position distortions for SPP GPS.
@@ -234,16 +234,16 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
   spp_pos_n << spp_position_n_[0](random_generator_),
                spp_position_n_[1](random_generator_),
                spp_position_n_[2](random_generator_);
-  sol_spp_.latitude = lat_start_ + m_to_lat_ * (gazebo_pose.pos.x + offset_spp_.x + spp_pos_n.x());
-  sol_spp_.longitude = lon_start_ + m_to_lon_ * (gazebo_pose.pos.y + offset_spp_.y + spp_pos_n.y());
+  sol_spp_.longitude = lon_start_ + m_to_lon_ * (gazebo_pose.pos.x + offset_spp_.x + spp_pos_n.x());
+  sol_spp_.latitude = lat_start_ + m_to_lat_ * (gazebo_pose.pos.y + offset_spp_.y + spp_pos_n.y());
   sol_spp_.altitude = alt_start_ + gazebo_pose.pos.z + offset_spp_.z + spp_pos_n.z();
   sol_spp_.header.stamp = ros::Time().now();
 
   // Calculate position distortions for RTK GPS.
   sol_rtk_.header.stamp = ros::Time().now();
   if(mode_rtk_.data == "Float"){
-    double dist_x = lat_to_m_*(sol_gt_.latitude - sol_rtk_.latitude);
-    double dist_y = lon_to_m_*(sol_gt_.longitude - sol_rtk_.longitude);
+    double dist_x = lon_to_m_*(sol_gt_.longitude - sol_rtk_.longitude);
+    double dist_y = lat_to_m_*(sol_gt_.latitude - sol_rtk_.latitude);
     double dist_z = sol_gt_.altitude - sol_rtk_.altitude;
 
     double c_s = convergence_speed_/100;
@@ -251,8 +251,8 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
     double step_y = NormalDistribution((c_s*cos(dist_y)+1.1*c_s)*dist_y, 0.01*abs(dist_y) + 0.005)(random_generator_);
     double step_z = NormalDistribution((c_s*sin(dist_z)+1.1*c_s)*dist_z, 0.01*abs(dist_z) + 0.005)(random_generator_);
 
-    sol_rtk_.latitude = sol_rtk_.latitude + m_to_lat_*step_x;
-    sol_rtk_.longitude = sol_rtk_.longitude + m_to_lon_*step_y;
+    sol_rtk_.longitude = sol_rtk_.longitude + m_to_lon_*step_x;
+    sol_rtk_.latitude = sol_rtk_.latitude + m_to_lat_*step_y;
     sol_rtk_.altitude = sol_rtk_.altitude + step_z;
 
     // If solution converged close to real solution set to RTK Fixed, with a certain probability.
@@ -267,15 +267,15 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
                  rtk_position_n_[1](random_generator_),
                  rtk_position_n_[2](random_generator_);
 
-    sol_rtk_.latitude =  lat_start_ + m_to_lat_ * (gazebo_pose.pos.x + offset_rtk_fixed_.x + rtk_pos_n.x());
-    sol_rtk_.longitude = lon_start_ + m_to_lon_ * (gazebo_pose.pos.y + offset_rtk_fixed_.y + rtk_pos_n.y());
+    sol_rtk_.longitude = lon_start_ + m_to_lon_ * (gazebo_pose.pos.x + offset_rtk_fixed_.x + rtk_pos_n.x());
+    sol_rtk_.latitude =  lat_start_ + m_to_lat_ * (gazebo_pose.pos.y + offset_rtk_fixed_.y + rtk_pos_n.y());
     sol_rtk_.altitude =  alt_start_ + gazebo_pose.pos.z + offset_rtk_fixed_.z + rtk_pos_n.z();
 
     // Loose fix with a certain probability, and jump to random nearby position
     if(UniformDistribution(0, 1)(random_generator_) <= fix_loss_probability_){
        NormalDistribution loose_fix_pos = NormalDistribution(0, rtk_float_start_error_width_/7);
-       sol_rtk_.latitude =  lat_start_ + loose_fix_pos(random_generator_)*m_to_lat_;
        sol_rtk_.longitude = lon_start_ + loose_fix_pos(random_generator_)*m_to_lon_;
+       sol_rtk_.latitude =  lat_start_ + loose_fix_pos(random_generator_)*m_to_lat_;
        sol_rtk_.altitude =  alt_start_ + loose_fix_pos(random_generator_)/5;
        mode_rtk_.data = "Float";
     }
