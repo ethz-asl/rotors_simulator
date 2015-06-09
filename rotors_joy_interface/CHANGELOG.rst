@@ -2,8 +2,8 @@
 Changelog for package rotors_joy_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.5 (2015-06-09)
+------------------
 * added install targets
 
 1.1.4 (2015-05-28)
