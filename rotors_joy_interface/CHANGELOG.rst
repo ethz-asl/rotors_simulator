@@ -2,8 +2,8 @@
 Changelog for package rotors_joy_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.6 (2015-06-11)
+------------------
 * removed wrong install folder
 
 1.1.5 (2015-06-09)
