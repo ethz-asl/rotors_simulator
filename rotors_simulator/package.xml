@@ -1,6 +1,6 @@
 <package>
   <name>rotors_simulator</name>
-  <version>1.1.5</version>
+  <version>1.1.6</version>
   <description>RotorS is a MAV gazebo simulator.</description>
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
