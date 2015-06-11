@@ -2,6 +2,9 @@
 Changelog for package rotors_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.1.5 (2015-06-09)
 ------------------
 * added install targets
