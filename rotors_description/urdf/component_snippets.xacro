@@ -657,4 +657,69 @@
     </xacro:imu_plugin_macro>
   </xacro:macro>
 
+	<!-- Macro to add a generic force sensor. -->
+  <xacro:macro name="force_sensor_plugin_macro" params="namespace force_sensor_suffix parent_link force_sensor_topic 			
+		force_sensor_truth_topic parent_frame_id reference_frame_id mass_force_sensor measurement_divisor	measurement_delay unknown_delay 
+		noise_normal_linear_force noise_normal_torque noise_uniform_linear_force noise_uniform_torque *inertia *origin">
+    <!-- force-to-ground link -->
+    <link name="${namespace}/force_sensor_${force_sensor_suffix}_link">
+      <inertial>
+        <xacro:insert_block name="inertia" />
+        <mass value="${mass_force_sensor}" />  <!-- [kg] -->
+      </inertial>
+    </link>
+    <!-- force-to-ground joint -->
+    <joint name="${namespace}/force_sensor_${force_sensor_suffix}_joint" type="revolute">
+      <parent link="${parent_link}" />
+      <xacro:insert_block name="origin" />
+      <child link="${namespace}/force_sensor_${force_sensor_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+		<!-- force-to-ground plugin -->
+    <gazebo>
+      <plugin filename="librotors_gazebo_force_sensor_plugin.so" name="force_sensor_${force_sensor_suffix}">
+        <linkName>${namespace}/force_sensor_${force_sensor_suffix}_link</linkName>
+        <robotNamespace>${namespace}</robotNamespace>
+        <forceSensorTopic>${force_sensor_topic}</forceSensorTopic>
+        <forceSensorTruthTopic>${force_sensor_truth_topic}</forceSensorTruthTopic>
+        <parentFrameId>${parent_frame_id}</parentFrameId> <!-- Use the scoped link name here. e.g. Model::link. -->
+				<referenceFrameId>${reference_frame_id}</referenceFrameId>
+        <measurementDivisor>${measurement_divisor}</measurementDivisor> 
+				<!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
+        <measurementDelay>${measurement_delay}</measurementDelay> 
+				<!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
+        <unknownDelay>${unknown_delay}</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
+        <noiseNormalLinearForce>${noise_normal_linear_force}</noiseNormalLinearForce> 
+				<!-- standard deviation of additive white gaussian noise [N] -->
+        <noiseNormalTorque>${noise_normal_torque}</noiseNormalTorque> <!-- standard deviation of additive white gaussian noise [N*m] -->
+        <noiseUniformLinearForce>${noise_uniform_linear_force}</noiseUniformLinearForce> <!-- symmetric bounds of uniform noise [N] -->
+        <noiseUniformTorque>${noise_uniform_torque}</noiseUniformTorque> <!-- symmetric bounds of uniform noise [N*m] -->
+      </plugin>
+    </gazebo>	
+  </xacro:macro>
+	
+	<!-- Macro to add a default force-to-ground sensor. -->
+  <xacro:macro name="default_force_sensor" params="namespace suffix link reference_frame">
+		<xacro:force_sensor_plugin_macro 
+			namespace="${namespace}/force_sensor_${suffix}" 
+			force_sensor_suffix="${suffix}" 
+			parent_link="${link}" 
+			force_sensor_topic="force_sensor" 
+			force_sensor_truth_topic="force_sensor_truth" 
+			parent_frame_id="${link}" 
+			reference_frame_id="${reference_frame}"	
+			mass_force_sensor="0.001"	
+			measurement_divisor="1" 
+			measurement_delay="0"	
+			unknown_delay="0.0" 
+			noise_normal_linear_force="0 0 0"	
+			noise_normal_torque="0 0 0" 
+			noise_uniform_linear_force="0 0 0" 
+			noise_uniform_torque="0 0 0" >	
+			<inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+			<!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+			<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+		</xacro:force_sensor_plugin_macro>
+	</xacro:macro>
+
 </robot>

@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<!--
+  Copyright 2015 Simone Comari, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+	<!-- Attach a generic gripper-shaped end-effector to a given parent link -->
+	<xacro:macro name="generic_tool" params="parent_link ee_link_name scale">		
+		<xacro:property name="inertia_scale" value="${scale*scale*scale*scale*scale}"/>
+		<xacro:property name="mass_scale" value="${scale*scale*scale}"/>
+		<link name="${ee_link_name}">
+		  <inertial>
+		    <origin rpy="0 0 0" xyz="0 0 ${scale*(-0.018369)}"/>
+		    <mass value="${mass_scale*0.0047176}"/>
+		    <inertia 
+					ixx="${inertia_scale*5.4437E-07}" 
+					ixy="${inertia_scale*(-2.4815E-24)}" 
+					ixz="${inertia_scale*3.5714E-22}" 
+					iyy="${inertia_scale*6.4924E-07}" 
+					iyz="${inertia_scale*(-8.9887E-24)}" 
+					izz="${inertia_scale*1.9101E-07}"/>
+		  </inertial>
+		  <visual>
+		    <origin rpy="0 0 0" xyz="0 0 0"/>
+		    <geometry>
+		      <mesh filename="package://rotors_description/meshes/puma260_end_effector.STL" scale="${scale} ${scale} ${scale}"/>
+		    </geometry>
+		  </visual>
+		  <collision>
+		    <origin rpy="0 0 0" xyz="0 0 0"/>
+		    <geometry>
+		      <mesh filename="package://rotors_description/meshes/puma260_end_effector.STL" scale="${scale} ${scale} ${scale}"/>
+		    </geometry>
+		  </collision>
+		</link>
+		<gazebo reference="${ee_link_name}">
+		  <material>Gazebo/Blue</material>
+		</gazebo>
+		<joint name="joint_ee" type="revolute">
+		  <origin rpy="0 0 0" xyz="0 0 ${scale*0.065}"/>
+		  <parent link="${parent_link}"/>
+		  <child link="${ee_link_name}"/>
+		  <axis xyz="0 0 1"/>
+		  <limit effort="0" lower="-3.7525" upper="5.1487" velocity="0"/>
+		</joint>
+	</xacro:macro>
+
+	<!-- Rigidly attach a polisher tool as end-effector to a given parent link -->
+	<xacro:macro name="polisher_tool" params="parent_link ee_link_name scale">		
+		<xacro:property name="inertia_scale" value="${scale*scale*scale*scale*scale}"/>
+		<xacro:property name="mass_scale" value="${scale*scale*scale}"/>
+		<link name="polisher/case">
+		  <inertial>
+		    <origin xyz="0 0 ${scale*(-0.032313)}" rpy="0 0 0" />
+		    <mass value="${mass_scale*0.00086286}" />
+		    <inertia
+		      ixx="${inertia_scale*2.0479E-08}"
+		      ixy="${inertia_scale*7.7232E-41}"
+		      ixz="${inertia_scale*4.0693E-42}"
+		      iyy="${inertia_scale*2.0479E-08}"
+		      iyz="${inertia_scale*1.0947E-40}"
+		      izz="${inertia_scale*1.6934E-08}" />
+		  </inertial>
+		  <visual>
+		    <origin xyz="0 0 0" rpy="0 0 0" />
+		    <geometry>
+		      <mesh filename="package://rotors_description/meshes/polisher_case.STL" scale="${scale} ${scale} ${scale}"/>
+		    </geometry>
+		  </visual>
+		  <collision>
+		    <origin xyz="0 0 0" rpy="0 0 0" />
+		    <geometry>
+		      <mesh filename="package://rotors_description/meshes/polisher_case.STL" scale="${scale} ${scale} ${scale}"/>
+		    </geometry>
+		  </collision>
+		</link>
+		<gazebo reference="polisher/case">
+		  <material>Gazebo/Blue</material>
+		</gazebo>
+		<joint name="flange_joint" type="fixed">
+		  <origin rpy="0 0 0" xyz="0 0 ${scale*0.065}"/>
+		  <parent link="${parent_link}"/>
+		  <child link="polisher/case"/>
+		</joint>
+		<link name="${ee_link_name}">
+		  <inertial>
+		    <origin xyz="0 0 ${scale*(-0.0063614)}" rpy="0 0 0" />
+		    <mass value="${mass_scale*0.0052997}" />
+		    <inertia
+		      ixx="${inertia_scale*7.0988E-07}"
+		      ixy="${inertia_scale*(-4.1064E-14)}"
+		      ixz="${inertia_scale*(-3.5084E-09)}"
+		      iyy="${inertia_scale*7.2057E-07}"
+		      iyz="${inertia_scale*1.6868E-14}"
+		      izz="${inertia_scale*6.7377E-07}" />
+		  </inertial>
+		  <visual>
+		    <origin xyz="0 0 0" rpy="0 0 0" />
+		    <geometry>
+		      <mesh filename="package://rotors_description/meshes/polisher_tool.STL" scale="${scale} ${scale} ${scale}"/>
+		    </geometry>
+		  </visual>
+		  <collision>
+		    <origin xyz="0 0 0" rpy="0 0 0" />
+		    <geometry>
+		      <mesh filename="package://rotors_description/meshes/polisher_tool.STL" scale="${scale} ${scale} ${scale}"/>
+		    </geometry>
+		  </collision>
+		</link>
+		<gazebo reference="${ee_link_name}">
+		  <material>Gazebo/Black</material>
+		</gazebo>
+		<joint name="joint_polisher" type="continuous">
+		  <origin xyz="0 0 0" rpy="0 0 0" />
+		  <parent link="polisher/case" />
+		  <child link="${ee_link_name}" />
+		  <axis xyz="0 0 1" />
+		</joint>
+	</xacro:macro>
+
+</robot>

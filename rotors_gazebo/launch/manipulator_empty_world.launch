@@ -1,0 +1,25 @@
+<launch>
+  <arg name="robot_name" default="puma260"/>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="$(arg robot_name)"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic.world"/>
+    <!-- <arg name="debug" value="true" /> -->
+    <arg name="paused" value="true" />
+    <!-- <arg name="gui" value="false" /> -->
+  </include>
+
+  <group ns="$(arg robot_name)">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg robot_name)" />
+      <arg name="model" value="$(find rotors_description)/urdf/$(arg robot_name)_base.xacro" />
+			<arg name="z" value="0.0" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg log_file)"/>
+    </include>
+  </group>
+
+</launch>
