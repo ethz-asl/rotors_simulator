@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!--
+  Copyright 2015 Simone Comari, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<robot name="puma260" xmlns:xacro="http://ros.org/wiki/xacro">
+	<xacro:property name="namespace" value="puma260"/>
+	<xacro:property name="ee_tool_type" value="polisher"/> <!-- available tool types can be found in "end_effectors.xacro" file -->
+	<xacro:property name="scale" value="8"/>
+	<xacro:property name="reference_frame" value="world"/>
+
+	<!-- Instantiate 5DOF robotic arm "puma260" mechanics (almost) automatically generated from SolidWorks assembly --> 
+	<xacro:include filename="$(find rotors_description)/urdf/puma260_5DOF.xacro"/>
+
+	<!-- Include end-effector snippets -->
+	<xacro:include filename="$(find rotors_description)/urdf/end_effectors.xacro"/>
+
+	<!-- Instantiate end-effector -->
+	<xacro:if value="${ee_tool_type == 'generic'}">
+		<xacro:property name="ee_link_name" value="fake_gripper"/>
+		<xacro:generic_tool parent_link="link_5" ee_link_name="${ee_link_name}" scale="${scale}"></xacro:generic_tool>
+	</xacro:if>
+	<xacro:if value="${ee_tool_type == 'polisher'}">
+		<xacro:property name="ee_link_name" value="polisher_tool"/>
+		<xacro:polisher_tool parent_link="link_5" ee_link_name="${ee_link_name}" scale="${scale}"></xacro:polisher_tool>
+	</xacro:if>
+
+	<!-- Include force sensor plugin --> 
+	<xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro"/>
+
+	<!-- Instantiate default force sensors -->
+	<xacro:default_force_sensor namespace="${namespace}" suffix="base" link="base_link" reference_frame="${reference_frame}">
+	</xacro:default_force_sensor>
+  <xacro:default_force_sensor namespace="${namespace}" suffix="1"    link="link_1" reference_frame="${reference_frame}">
+	</xacro:default_force_sensor>
+	<xacro:default_force_sensor namespace="${namespace}" suffix="2" 	 link="link_2" reference_frame="${reference_frame}">
+	</xacro:default_force_sensor>
+	<xacro:default_force_sensor namespace="${namespace}" suffix="3" 	 link="link_3" reference_frame="${reference_frame}">
+	</xacro:default_force_sensor>
+	<xacro:default_force_sensor namespace="${namespace}" suffix="4" 	 link="link_4" reference_frame="${reference_frame}">
+	</xacro:default_force_sensor>
+	<xacro:default_force_sensor namespace="${namespace}" suffix="5" 	 link="link_5" reference_frame="${reference_frame}">
+	</xacro:default_force_sensor>
+	<xacro:default_force_sensor namespace="${namespace}" suffix="ee" 	 link="${ee_link_name}" reference_frame="${reference_frame}">
+	</xacro:default_force_sensor>
+
+</robot>

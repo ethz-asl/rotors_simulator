@@ -1,0 +1,236 @@
+<?xml version="1.0"?>
+<!--
+  Copyright 2015 Simone Comari, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<robot name="puma260" xmlns:xacro="http://ros.org/wiki/xacro">
+	<xacro:property name="inertia_scale" value="${scale*scale*scale*scale*scale}"/>
+	<xacro:property name="mass_scale" value="${scale*scale*scale}"/>
+
+	<!-- Used for fixing robot to Gazebo 'base_link' -->
+  <link name="world"/>
+  <joint name="fixed" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+  </joint>
+
+  <link name="base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 ${0.007*scale}"/>
+      <mass value="${mass_scale*0.062832}"/>
+      <inertia 
+				ixx="${inertia_scale*3.0117E-05}" 
+				ixy="${inertia_scale*-2.3115E-38}" 
+				ixz="${inertia_scale*-1.8549E-22}"
+				iyy="${inertia_scale*3.0117E-05}" 
+				iyz="${inertia_scale*4.9858E-38}" 
+				izz="${inertia_scale*5.7805E-05}"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/puma260_base_link.STL" scale="${scale} ${scale} ${scale}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/puma260_base_link.STL" scale="${scale} ${scale} ${scale}"/>
+      </geometry>
+    </collision>
+  </link>
+	<gazebo reference="base_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <link name="link_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="${scale*4.83108194844244E-08} ${scale*(-0.0236481108604471)} ${scale*(-0.00362259861402453)}"/>
+      <mass value="${mass_scale*0.135504858051603}"/>
+      <inertia 
+				ixx="${inertia_scale*0.000133397244256389}" 
+				ixy="${inertia_scale*4.6651291992229E-11}" 
+				ixz="${inertia_scale*1.16952884270289E-10}" 
+				iyy="${inertia_scale*4.44244269429258E-05}" 			
+				iyz="${inertia_scale*-1.16082240041452E-05}" 
+				izz="${inertia_scale*0.000130177553428058}"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/puma260_link_1.STL" scale="${scale} ${scale} ${scale}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/puma260_link_1.STL" scale="${scale} ${scale} ${scale}"/>
+      </geometry>
+    </collision>
+  </link>
+	<gazebo reference="link_1">
+    <material>Gazebo/Yellow</material>
+  </gazebo>
+  <joint name="joint_1_waist" type="revolute">
+    <origin rpy="1.5708 0 0" xyz="0 0 ${scale*0.08}"/>
+    <parent link="base_link"/>
+    <child link="link_1"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="0" lower="-3.1416" upper="1.9199" velocity="0"/>
+  </joint>
+
+  <link name="link_2">
+    <inertial>
+      <origin rpy="0 0 0" xyz="${scale*0.025136817} ${scale*(-1.53438552419338E-08)} ${scale*0.0281870163012263}"/>
+      <mass value="${mass_scale*0.145251220063132}"/>
+      <inertia 
+				ixx="${inertia_scale*6.17956734767571E-05}" 
+				ixy="${inertia_scale*-2.53160434616146E-11}" 
+				ixz="${inertia_scale*2.48757312312342E-05}" 
+				iyy="${inertia_scale*0.000221255617375372}" 			
+				iyz="${inertia_scale*4.94239204130159E-11}" 
+				izz="${inertia_scale*0.000190553757643375}"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="${scale*0.08} 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/puma260_link_2.STL" scale="${scale} ${scale} ${scale}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="${scale*0.08} 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/puma260_link_2.STL" scale="${scale} ${scale} ${scale}"/>
+      </geometry>
+    </collision>
+  </link>
+	<gazebo reference="link_2">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <joint name="joint_2_shoulder" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="link_1"/>
+    <child link="link_2"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="0" lower="-1.309" upper="4.1888" velocity="0"/>
+  </joint>
+
+  <link name="link_3">
+    <inertial>
+      <origin rpy="0 0 0" xyz="${scale*(-1.27582117093183E-09)} ${scale*(-2.18958198794361E-10)} ${scale*0.013232442591055}"/>
+      <mass value="${mass_scale*0.0383797833121112}"/>
+      <inertia 
+				ixx="${inertia_scale*1.81393126360174E-05}" 
+				ixy="${inertia_scale*-2.14693504967953E-12}" 
+				ixz="${inertia_scale*-5.68530063036535E-13}" 
+				iyy="${inertia_scale*1.98217007026413E-05}" 			
+				iyz="${inertia_scale*6.26674127273324E-14}" 
+				izz="${inertia_scale*4.60794711297067E-06}"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/puma260_link_3.STL" scale="${scale} ${scale} ${scale}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/puma260_link_3.STL" scale="${scale} ${scale} ${scale}"/>
+      </geometry>
+    </collision>
+  </link>
+	<gazebo reference="link_3">
+    <material>Gazebo/Green</material>
+  </gazebo>
+  <joint name="joint_3_elbow" type="revolute">
+    <origin rpy="-1.5708 0 0" xyz="${scale*0.08} 0 ${scale*0.035}"/>
+    <parent link="link_2"/>
+    <child link="link_3"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="0" lower="-4.1015" upper="1.0472" velocity="0"/>
+  </joint>
+
+  <link name="link_4">
+    <inertial>
+      <origin rpy="0 0 0" xyz="${scale*1.0478E-08} ${scale*0.011511} ${scale*3.1559E-09}"/>
+      <mass value="${mass_scale*0.017584}"/>
+      <inertia 
+				ixx="${inertia_scale*4.7303E-06}" 
+				ixy="${inertia_scale*5.0083E-14}" 
+				ixz="${inertia_scale*2.9626E-12}" 
+				iyy="${inertia_scale*1.8333E-06}" 
+				iyz="${inertia_scale*2.0354E-13}" 
+				izz="${inertia_scale*4.0568E-06}"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/puma260_link_4.STL" scale="${scale} ${scale} ${scale}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/puma260_link_4.STL" scale="${scale} ${scale} ${scale}"/>
+      </geometry>
+    </collision>
+  </link>
+	<gazebo reference="link_4">
+    <material>Gazebo/White</material>
+  </gazebo>
+  <joint name="joint_4_wrist" type="revolute">
+    <origin rpy="-1.5708 0 0" xyz="0 0 ${scale*0.08}"/>
+    <parent link="link_3"/>
+    <child link="link_4"/>
+    <axis xyz="0 -1 0"/>
+    <limit effort="0" lower="-1.0123" upper="6.9813" velocity="0"/>
+  </joint>
+
+  <link name="link_5">
+    <inertial>
+      <origin rpy="0 0 0" xyz="${scale*7.0993E-08} ${scale*3.5581E-08} ${scale*0.0074777}"/>
+      <mass value="${mass_scale*0.0080528}"/>
+      <inertia 
+				ixx="${inertia_scale*1.2912E-06}" 
+				ixy="${inertia_scale*-2.7727E-12}" 
+				ixz="${inertia_scale*4.149E-12}" 
+				iyy="${inertia_scale*1.448E-06}" 
+				iyz="${inertia_scale*2.4714E-12}" 
+				izz="${inertia_scale*3.5332E-07}"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/puma260_link_5.STL" scale="${scale} ${scale} ${scale}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/puma260_link_5.STL" scale="${scale} ${scale} ${scale}"/>
+      </geometry>
+    </collision>
+  </link>
+	<gazebo reference="link_5">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <joint name="joint_5_bend" type="revolute">
+    <origin rpy="1.5708 0 -1.5708" xyz="0 0 0"/>
+    <parent link="link_4"/>
+    <child link="link_5"/>
+    <axis xyz="0 -1 0"/>
+    <limit effort="0" lower="-5.236" upper="3.4907" velocity="0"/>
+  </joint>
+</robot>
