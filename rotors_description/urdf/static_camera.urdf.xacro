@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+
+<robot name="static_camera" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Properties -->
+  <xacro:property name="mass" value="1.5" /> <!-- [kg] -->
+  <xacro:property name="body_width" value="0.1" /> <!-- [m] -->
+  <xacro:property name="body_height" value="0.16" /> <!-- [m] -->
+  <xacro:property name="namespace" value="static_camera" />
+
+  <!-- Property Blocks -->
+  <xacro:property name="body_inertia">
+    <inertia ixx="0.0347563" ixy="0.0" ixz="0.0" iyy="0.0458929" iyz="0.0" izz="0.0977" /> <!-- [kg.m^2] [kg.m^2] [kg.m^2] [kg.m^2] [kg.m^2] [kg.m^2] -->
+  </xacro:property>
+
+  <!-- Main camera link -->
+  <xacro:macro name="camera_base_macro"
+    params="robot_namespace mass body_width body_height *inertia">
+
+    <link name="base_link">
+      <!-- <collision> -->
+        <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+        <!-- <geometry> -->
+          <!-- <box size="${body_width} ${body_width} ${body_height}" /> [> [m] [m] [m] <] -->
+        <!-- </geometry> -->
+      <!-- </collision> -->
+    </link>
+
+  </xacro:macro>
+
+  <xacro:camera_base_macro
+    robot_namespace="${namespace}"
+    mass="${mass}"
+    body_width="${body_width}"
+    body_height="${body_height}"
+    >
+    <xacro:insert_block name="body_inertia" />
+  </xacro:camera_base_macro>
+
+  <!-- camera -->
+  <xacro:macro name="camera_macro" params="robot_namespace">
+    <!-- joint -->
+    <joint name="camera_joint" type="fixed">
+      <axis xyz="0 1 0" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="base_link" />
+      <child link="camera_link" />
+    </joint>
+
+    <!-- link -->
+    <link name="camera_link">
+      <!-- <collision> -->
+        <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+        <!-- <geometry> -->
+          <!-- <box size="0.1 0.1 0.1" /> -->
+        <!-- </geometry> -->
+      <!-- </collision> -->
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.1 0.1 0.1" />
+        </geometry>
+      </visual>
+
+      <inertial>
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
+    <gazebo reference="camera_link">
+      <material>Gazebo/Red</material>
+      <sensor type="camera" name="camera_static1">
+        <update_rate>30.0</update_rate>
+        <camera name="head">
+          <horizontal_fov>2</horizontal_fov>
+          <image>
+            <width>1280</width>
+            <height>720</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>300</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+        <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>0.0</updateRate>
+          <cameraName>${robot_namespace}/camera1</cameraName>
+          <imageTopicName>image_raw</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+          <frameName>camera_link</frameName>
+          <hackBaseline>0.07</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+  <xacro:camera_macro robot_namespace="${namespace}">
+  </xacro:camera_macro>
+
+</robot>

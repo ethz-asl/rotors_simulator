@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+
+<robot name="vtol" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="namespace" value="vtol" />
+  <xacro:property name="enable_bag_plugin" value="false" />
+  <xacro:property name="bag_file" value="vtol.bag" />
+
+  <!-- Instantiate vtol "mechanics" -->
+  <xacro:include filename="$(find rotors_description)/urdf/vtol.urdf.xacro" />
+
+  <!-- Create link and joint for a sensor -->
+  <link name="pose_sensor1_link">
+    <inertial>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0"
+        izz="0.001" />
+      <mass value="0.01" />  <!-- [kg] -->
+    </inertial>
+  </link>
+  <joint name="pose_sensor1_joint" type="revolute">
+    <parent link="base_link" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <child link="pose_sensor1_link" />
+    <limit upper="0" lower="0" effort="0" velocity="0" />
+  </joint>
+
+  <!-- Mount an IMU -->
+  <gazebo>
+    <!-- IMU -->
+    <plugin filename="libhector_gazebo_ros_imu.so" name="imu_ros">
+      <!-- parameters according to http://wiki.ros.org/hector_gazebo_plugins#GazeboRosImu -->
+      <robotNamespace>${namespace}</robotNamespace>
+      <bodyName>imu_link</bodyName> <!-- (string, required): name of the body which holds the IMU sensor -->
+      <topicName>imu</topicName> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
+      <accelOffset>0.0 0.0 0.0</accelOffset> <!-- (Vector3): constant acceleration offset -->
+      <accelDrift>0.0 0.0 0.0</accelDrift> <!-- (Vector3): standard deviation of the acceleration drift error -->
+      <accelDriftFrequency>${1.0/3600.0} ${1.0/3600.0} ${1.0/3600.0}</accelDriftFrequency> <!-- (Vector3): mean frequency of the acceleration drift -->
+      <accelGaussianNoise>0.0 0.0 0.0</accelGaussianNoise> <!-- (Vector3): standard deviation of the additive Gaussian acceleration noise -->
+      <rateOffset>0.0 0.0 0.0</rateOffset> <!-- (Vector3): constant rate offset -->
+      <rateDrift>0.0 0.0 0.0</rateDrift> <!-- (Vector3): standard deviation of the rate drift error -->
+      <rateDriftFrequency>${1.0/3600.0} ${1.0/3600.0} ${1.0/3600.0}</rateDriftFrequency> <!-- (Vector3): mean frequency of the rate drift -->
+      <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise> <!-- (Vector3): standard deviation of the additive Gaussian rate noise -->
+      <headingOffset>0.0</headingOffset> <!-- (double): constant heading offset -->
+      <headingDrift>0.0</headingDrift> <!-- (double): standard deviation of the heading drift error -->
+      <headingDriftFrequency>${1.0/3600.0}</headingDriftFrequency> <!-- (double): mean frequency of the heading drift -->
+      <headingGaussianNoise>0.0</headingGaussianNoise> <!-- (double): standard deviation of the heading additive Gaussian noise -->
+      <rpyOffsets>0.0 0.0 0.0</rpyOffsets> <!-- (Vector3): if non-zero, used to calculate accelOffset and headingOffset so that resulting roll, pitch and yaw errors correspond to this values when the platform is leveled (for compatibility with gazebo_plugins) -->
+    </plugin>
+  </gazebo>
+
+  <!-- Instantiate a controller -->
+  <gazebo>
+    <!-- Controller interface -->
+    <plugin name="controller_interface" filename="librotors_gazebo_controller_interface.so">
+      <robotNamespace>${namespace}</robotNamespace>
+      <commandTopicAttitude>command/attitude</commandTopicAttitude>
+      <commandTopicRate>command/rate</commandTopicRate>
+      <commandTopicMotor>command/motors</commandTopicMotor>
+      <imuTopic>imu</imuTopic>
+      <poseTopic>pose</poseTopic>
+      <motorVelocityReferenceTopic>motor_vel_ref</motorVelocityReferenceTopic>
+    </plugin>
+  </gazebo>
+
+  <!-- Mount a generic pose sensor at link sensor1 -->
+  <gazebo>
+    <!-- Generic 6D pose sensor plugin -->
+    <plugin filename="librotors_gazebo_pose_plugin.so" name="pose_sensor1">
+      <linkName>pose_sensor1_link</linkName>
+      <robotNamespace>${namespace}</robotNamespace>
+      <poseTopic>sensors/pose1</poseTopic>
+      <measurementDivisor>7</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
+      <measurementDelay>0</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
+      <unknownDelay>0.0</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
+      <noiseNormalP>0.005 0.005 0.005</noiseNormalP> <!-- standard deviation of additive white gaussian noise [m] -->
+      <noiseNormalQ>0.01 0.01 0.01</noiseNormalQ> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
+      <noiseUniformP>0 0 0</noiseUniformP> <!-- symmetric bounds of uniform noise [m] -->
+      <noiseUniformQ>0 0 0</noiseUniformQ> <!-- symmetric bounds of uniform noise [rad], computation see above -->
+    </plugin>
+  </gazebo>
+
+  <!-- Instantiate a logger -->
+  <gazebo>
+    <!-- ROS Bag Plugin -->
+    <xacro:if value="$(arg enable_logging)">
+      <plugin filename="librotors_gazebo_bag_plugin.so" name="rosbag">
+        <robotNamespace>${namespace}</robotNamespace>
+        <bagFileName>$(arg log_file)</bagFileName>
+        <linkName>base_link</linkName>
+        <frameId>base_link</frameId>
+        <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
+        <commandAttitudeThrustPubTopic>command/attitude</commandAttitudeThrustPubTopic>
+        <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+        <excludeFloorLinkFromCollisionCheck>$(arg exclude_floor_link_from_collision_check)</excludeFloorLinkFromCollisionCheck>
+      </plugin>
+    </xacro:if>
+  </gazebo>
+
+  <!-- attach wing plugin -->
+  <gazebo>
+    <plugin filename="librotors_gazebo_wing_model_plugin.so" name="wing_plugin">
+      <robotNamespace>${namespace}</robotNamespace>
+      <linkName>base_link</linkName>
+      </plugin>
+  </gazebo>
+
+</robot>
+

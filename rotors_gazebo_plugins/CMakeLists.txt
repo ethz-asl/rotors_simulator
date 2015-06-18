@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   geometry_msgs
   mav_msgs
+  rosbag
   octomap_msgs
   octomap_ros
   rosbag

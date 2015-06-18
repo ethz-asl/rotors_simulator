@@ -38,7 +38,7 @@
 
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro"
-    params="robot_namespace mass body_width body_height use_mesh_file mesh_file *inertia">
+    params="robot_namespace mass body_width body_height mesh_file mesh_scale color *inertia">
     <link name="base_link"></link>
 
     <joint name="base_joint" type="fixed">
@@ -83,11 +83,15 @@
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
       </plugin>
     </gazebo>
+
+    <gazebo reference="base_link">
+      <material>Gazebo/${color}</material>
+    </gazebo>
   </xacro:macro>
 
   <!-- Rotor joint and link -->
   <xacro:macro name="vertical_rotor"
-    params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant_up time_constant_down max_rot_velocity motor_number rotor_drag_coefficient rolling_moment_coefficient color *origin *inertia">
+    params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant_up time_constant_down max_rot_velocity motor_number rotor_drag_coefficient rolling_moment_coefficient color mesh mesh_scale *origin *inertia">
     <joint name="rotor_${motor_number}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
@@ -102,8 +106,9 @@
       <visual>
         <geometry>
           <!-- <cylinder length="0.005" radius="${radius_rotor}"/> --> <!-- [m] -->
-          <mesh filename="package://rotors_description/meshes/propeller_${direction}.dae"
-            scale="${radius_rotor} ${radius_rotor} ${radius_rotor}" /> <!-- The propeller meshes have a radius of 1m -->
+          <!-- <mesh filename="package://rotors_description/meshes/propeller_${direction}.dae" -->
+          <mesh filename="package://rotors_description/meshes/${mesh}_${direction}.dae"
+            scale="${mesh_scale}" />
           <!-- <box size="${2*radius_rotor} 0.01 0.005"/> -->
         </geometry>
       </visual>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<robot name="static_camera" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="namespace" value="static_camera" />
+  <xacro:property name="enable_bag_plugin" value="false" />
+  <xacro:property name="bag_file" value="static_camera.bag" />
+
+  <!-- Instantiate static_camera "mechanics" -->
+  <xacro:include filename="$(find rotors_description)/urdf/static_camera.urdf.xacro" />
+
+<gazebo>
+    <static>true</static>
+</gazebo>
+</robot>
