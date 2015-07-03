@@ -27,7 +27,7 @@
   <!-- Mount a VI-sensor in front of the Firefly. -->
   <xacro:vi_sensor_macro
     namespace="${namespace}/vi_sensor"
-    parent_link="base_link"
+    parent_link="${namespace}/base_link"
     enable_cameras="true"
     enable_depth="true"
     enable_ground_truth="true"

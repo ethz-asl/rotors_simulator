@@ -64,22 +64,13 @@
     <xacro:insert_block name="body_inertia" />
   </xacro:multirotor_base_macro>
 
-    <!-- attach multirotor_base_plugin to the base_link -->
-  <gazebo>
-    <plugin filename="librotors_gazebo_multirotor_base_plugin.so" name="rosbag">
-      <robotNamespace>${namespace}</robotNamespace>
-      <linkName>base_link</linkName>
-      <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
-    </plugin>
-  </gazebo>
-
-  <joint name="arm0_joint" type="fixed">
+  <joint name="${namespace}/arm0_joint" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="base_link" />
-    <child link="arm0_link" />
+    <parent link="${namespace}/base_link" />
+    <child link="${namespace}/arm0_link" />
   </joint>
 
-  <link name="arm0_link">
+  <link name="${namespace}/arm0_link">
     <xacro:box_inertial x="${arm_length}" y="0.03" z="0.01" mass="${(mass_rotor/3+mass_arm*5/9)*2}">
       <origin xyz="${arm_length/2} 0 0" />
     </xacro:box_inertial>
@@ -97,13 +88,13 @@
     </collision>
   </link>
 
-  <joint name="arm1_joint" type="fixed">
+  <joint name="${namespace}/arm1_joint" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 ${2*pi/3}" />
-    <parent link="base_link" />
-    <child link="arm1_link" />
+    <parent link="${namespace}/base_link" />
+    <child link="${namespace}/arm1_link" />
   </joint>
 
-  <link name="arm1_link">
+  <link name="${namespace}/arm1_link">
     <xacro:box_inertial x="${arm_length}" y="0.03" z="0.01" mass="${mass_arm}">
       <origin xyz="${arm_length/2} 0 0" />
     </xacro:box_inertial>
@@ -121,13 +112,13 @@
     </collision>
   </link>
 
-  <joint name="arm2_joint" type="fixed">
+  <joint name="${namespace}/arm2_joint" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 ${pi}" />
-    <parent link="base_link" />
-    <child link="arm2_link" />
+    <parent link="${namespace}/base_link" />
+    <child link="${namespace}/arm2_link" />
   </joint>
 
-  <link name="arm2_link">
+  <link name="${namespace}/arm2_link">
     <xacro:box_inertial x="${arm_length/3}" y="0.03" z="0.01" mass="${mass_arm/3}">
       <origin xyz="${arm_length/6} 0 0" />
     </xacro:box_inertial>
@@ -145,13 +136,13 @@
     </collision>
   </link>
 
-  <joint name="arm3_joint" type="fixed">
+  <joint name="${namespace}/arm3_joint" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 -${2*pi/3}" />
-    <parent link="base_link" />
-    <child link="arm3_link" />
+    <parent link="${namespace}/base_link" />
+    <child link="${namespace}/arm3_link" />
   </joint>
 
-  <link name="arm3_link">
+  <link name="${namespace}/arm3_link">
     <xacro:box_inertial x="${arm_length}" y="0.03" z="0.01" mass="${mass_arm}">
       <origin xyz="${arm_length/2} 0 0" />
     </xacro:box_inertial>
@@ -176,7 +167,7 @@
     direction="ccw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
-    parent="arm0_link"
+    parent="${namespace}/arm0_link"
     mass_rotor="${mass_rotor}"
     radius_rotor="${radius_rotor}"
     time_constant_up="${time_constant_up}"
@@ -196,7 +187,7 @@
     direction="cw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
-    parent="arm1_link"
+    parent="${namespace}/arm1_link"
     mass_rotor="${mass_rotor}"
     radius_rotor="${radius_rotor}"
     time_constant_up="${time_constant_up}"
@@ -216,7 +207,7 @@
     direction="ccw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
-    parent="arm2_link"
+    parent="${namespace}/arm2_link"
     mass_rotor="${mass_rotor}"
     radius_rotor="${radius_rotor}"
     time_constant_up="${time_constant_up}"
@@ -236,7 +227,7 @@
     direction="cw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
-    parent="arm3_link"
+    parent="${namespace}/arm3_link"
     mass_rotor="${mass_rotor}"
     radius_rotor="${radius_rotor}"
     time_constant_up="${time_constant_up}"
