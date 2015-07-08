@@ -27,7 +27,7 @@
   <xacro:odometry_plugin_macro
     namespace="${namespace}/odometry_sensor1"
     odometry_sensor_suffix="1"
-    parent_link="base_link"
+    parent_link="${namespace}/base_link"
     pose_topic="pose"
     pose_with_covariance_topic="pose_with_covariance"
     position_topic="position"
@@ -57,7 +57,7 @@
   <xacro:odometry_plugin_macro
     namespace="${namespace}/odometry_sensor2"
     odometry_sensor_suffix="2"
-    parent_link="base_link"
+    parent_link="${namespace}/base_link"
     pose_topic="pose"
     pose_with_covariance_topic="pose_with_covariance"
     position_topic="position"
@@ -83,4 +83,3 @@
     <origin xyz="-0.05 -0.08 0.1" rpy="-0.1 0.2 0.3" />
   </xacro:odometry_plugin_macro>
 </robot>
-
