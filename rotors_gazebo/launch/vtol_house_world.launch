@@ -1,0 +1,17 @@
+<launch>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="vtol"/>
+
+  <env name="GAZEBO_MODEL_PATH" value="$(find rotors_gazebo)/models"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/house.world"/>
+    <!-- <arg name="debug" value="true" /> -->
+  </include>
+  <include file="$(find rotors_gazebo)/launch/spawn_vtol.launch">
+    <arg name="enable_logging" value="$(arg enable_logging)" />
+    <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+    <arg name="log_file" value="$(arg log_file)"/>
+  </include>
+  <!--node name="gazebo_pose_publisher" pkg="rotors_gazebo" type="gazebo_pose_publisher" args="vtol /vtol/pose"/-->
+</launch>

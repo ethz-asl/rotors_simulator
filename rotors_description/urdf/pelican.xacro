@@ -26,29 +26,36 @@
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <xacro:property name="use_mesh_file" value="true" />
   <xacro:property name="mesh_file" value="pelican.dae" />
+  <xacro:property name="mesh_scale" value="1 1 1"/>
   <xacro:property name="mass" value="1.0" /> <!-- [kg] -->
   <xacro:property name="body_width" value="0.1" /> <!-- [m] -->
   <xacro:property name="body_height" value="0.2" /> <!-- [m] -->
   <xacro:property name="mass_rotor" value="0.01" /> <!-- [kg] -->
   <xacro:property name="arm_length" value="0.21" /> <!-- [m] -->
   <xacro:property name="rotor_offset_top" value="0.05" /> <!-- [m] -->
+  <xacro:property name="mesh_scale_prop" value="${radius_rotor} ${radius_rotor} ${radius_rotor}"/>
   <xacro:property name="radius_rotor" value="0.128" /> <!-- [m] -->
-  <xacro:property name="motor_constant" value="9.9865e-06" /> <!-- [kg m/s^2] -->
+  <xacro:property name="motor_constant" value="9.9865e-06" /> <!-- [kg.m/s^2] -->
   <xacro:property name="moment_constant" value="0.016" /> <!-- [m] -->
   <xacro:property name="time_constant_up" value="0.0125" /> <!-- [s] -->
   <xacro:property name="time_constant_down" value="0.025" /> <!-- [s] -->
   <xacro:property name="max_rot_velocity" value="838" /> <!-- [rad/s] -->
   <xacro:property name="rotor_drag_coefficient" value="8.06428e-05" />
   <xacro:property name="rolling_moment_coefficient" value="0.000001" />
+  <xacro:property name="color" value="White" />
 
   <!-- Property Blocks -->
   <xacro:property name="body_inertia">
-    <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.02" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+    <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.02" /> <!-- [kg.m^2] [kg.m^2] [kg.m^2] [kg.m^2] [kg.m^2] [kg.m^2] -->
   </xacro:property>
 
   <!-- inertia of a single rotor, assuming it is a cuboid. Height=3mm, width=15mm -->
   <xacro:property name="rotor_inertia">
-    <xacro:box_inertia x="${radius_rotor}" y="0.015" z="0.003" mass="${mass_rotor*rotor_velocity_slowdown_sim}" />
+    <inertia
+    ixx="${1/12 * mass_rotor * (0.015 * 0.015 + 0.003 * 0.003) * rotor_velocity_slowdown_sim}"
+    iyy="${1/12 * mass_rotor * (4 * radius_rotor * radius_rotor + 0.003 * 0.003) * rotor_velocity_slowdown_sim}"
+    izz="${1/12 * mass_rotor * (4 * radius_rotor * radius_rotor + 0.015 * 0.015) * rotor_velocity_slowdown_sim}"
+    ixy="0.0" ixz="0.0"  iyz="0.0" /> <!-- [kg.m^2] [kg.m^2] [kg.m^2] [kg.m^2] [kg.m^2] [kg.m^2] -->
   </xacro:property>
 
   <!-- Included URDF Files -->
@@ -60,8 +67,9 @@
     mass="${mass}"
     body_width="${body_width}"
     body_height="${body_height}"
-    use_mesh_file="${use_mesh_file}"
-    mesh_file="${mesh_file}">
+    mesh_file="${mesh_file}"
+    mesh_scale="${mesh_scale}"
+    color="${color}">
     <xacro:insert_block name="body_inertia" />
   </xacro:multirotor_base_macro>
 
@@ -81,6 +89,8 @@
     motor_number="0"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
+    mesh="propeller"
+    mesh_scale="${mesh_scale_prop}"
     color="Red">
     <origin xyz="${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -101,6 +111,8 @@
     motor_number="1"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
+    mesh="propeller"
+    mesh_scale="${mesh_scale_prop}"
     color="Blue">
     <origin xyz="0 ${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -121,6 +133,8 @@
     motor_number="2"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
+    mesh="propeller"
+    mesh_scale="${mesh_scale_prop}"
     color="Blue">
     <origin xyz="-${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -141,6 +155,8 @@
     motor_number="3"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
+    mesh="propeller"
+    mesh_scale="${mesh_scale_prop}"
     color="Blue">
     <origin xyz="0 -${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
