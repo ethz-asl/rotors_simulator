@@ -21,7 +21,7 @@
 
 <robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Instantiate firefly with a generic pose sensor. -->
-  <xacro:include filename="$(find rotors_description)/urdf/firefly_generic_pose_sensor.gazebo" />
+  <xacro:include filename="$(find rotors_description)/urdf/firefly_generic_odometry_sensor.gazebo" />
 
     <!-- Add a wind gust starting at 40s and lasting for 2s. -->
   <xacro:wind_plugin_macro
@@ -36,4 +36,3 @@
   >
   </xacro:wind_plugin_macro>
 </robot>
-

@@ -44,52 +44,62 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   model_ = _model;
   // world_ = physics::get_world(model_->world.name);
   world_ = model_->GetWorld();
-  namespace_.clear();
 
-  if (_sdf->HasElement("robotNamespace"))
+  if (_sdf->HasElement("robotNamespace")) {
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
-  else
+  }
+  else {
     gzerr << "[gazebo_bag_plugin] Please specify a robotNamespace.\n";
+  }
   node_handle_ = new ros::NodeHandle(namespace_);
 
-  if (_sdf->HasElement("bagFileName"))
+  if (_sdf->HasElement("bagFileName")) {
     bag_filename_ = _sdf->GetElement("bagFileName")->Get<std::string>();
-  else
+  }
+  else {
     gzerr << "[gazebo_bag_plugin] Please specify a bagFileName.\n";
+  }
 
-  if (_sdf->HasElement("linkName"))
+  if (_sdf->HasElement("linkName")) {
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
-  else
+  }
+  else {
     gzwarn << "[gazebo_bag_plugin] No linkName specified, using default " << link_name_ << ".\n";
+  }
 
   // Get the pointer to the link
   link_ = model_->GetLink(link_name_);
-  if (link_ == NULL)
+  if (link_ == NULL) {
     gzthrow("[gazebo_bag_plugin] Couldn't find specified link \"" << link_name_ << "\".");
+  }
 
   getSdfParam<std::string>(_sdf, "frameId", frame_id_, frame_id_);
-  getSdfParam<std::string>(_sdf, "imuPubTopic", imu_pub_topic_, imu_pub_topic_);
+  getSdfParam<std::string>(_sdf, "imuPubTopic", imu_pub_topic_, namespace_ + "/" + imu_pub_topic_);
   getSdfParam<std::string>(_sdf, "imuSubTopic", imu_sub_topic_, imu_sub_topic_);
   getSdfParam<std::string>(_sdf, "commandAttitudeThrustPubTopic", control_attitude_thrust_pub_topic_,
-                           control_attitude_thrust_pub_topic_);
+                           namespace_ + "/" + control_attitude_thrust_pub_topic_);
   getSdfParam<std::string>(_sdf, "commandAttitudeThrustSubTopic", control_attitude_thrust_sub_topic_,
                            control_attitude_thrust_sub_topic_);
   getSdfParam<std::string>(_sdf, "commandMotorSpeedPubTopic", control_motor_speed_pub_topic_,
-                           control_motor_speed_pub_topic_);
+                           namespace_ + "/" + control_motor_speed_pub_topic_);
   getSdfParam<std::string>(_sdf, "commandMotorSpeedSubTopic", control_motor_speed_sub_topic_,
                            control_motor_speed_sub_topic_);
   getSdfParam<std::string>(_sdf, "commandRateThrustPubTopic", control_rate_thrust_pub_topic_,
-                           control_rate_thrust_pub_topic_);
+                           namespace_ + "/" + control_rate_thrust_pub_topic_);
   getSdfParam<std::string>(_sdf, "commandRateThrustSubTopic", control_rate_thrust_sub_topic_,
                            control_rate_thrust_sub_topic_);
-  getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, motor_pub_topic_);
-  getSdfParam<std::string>(_sdf, "posePubTopic", ground_truth_pose_pub_topic_, ground_truth_pose_pub_topic_);
-
-  getSdfParam<std::string>(_sdf, "collisionsPubTopic", collisions_pub_topic_, "/" + namespace_ + collisions_pub_topic_);
-  getSdfParam<std::string>(_sdf, "windPubTopic", wind_pub_topic_, "/" + namespace_ + wind_pub_topic_);
-  getSdfParam<std::string>(_sdf, "windSubTopic", wind_sub_topic_, "/" + namespace_ + wind_sub_topic_);
-  getSdfParam<std::string>(_sdf, "waypointPubTopic", waypoint_pub_topic_, "/" + namespace_ + waypoint_pub_topic_);
-  getSdfParam<std::string>(_sdf, "waypointSubTopic", waypoint_sub_topic_, "/" + namespace_ + waypoint_sub_topic_);
+  getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, namespace_ + "/" + motor_pub_topic_);
+  getSdfParam<std::string>(_sdf, "posePubTopic", ground_truth_pose_pub_topic_,
+                           namespace_ + "/" + ground_truth_pose_pub_topic_);
+  getSdfParam<std::string>(_sdf, "twistPubTopic", ground_truth_twist_pub_topic_,
+                           namespace_ + "/" + ground_truth_twist_pub_topic_);
+  getSdfParam<std::string>(_sdf, "wrenchesPubTopic", wrench_pub_topic_,
+                           namespace_ + "/" + wrench_pub_topic_);
+  getSdfParam<std::string>(_sdf, "windPubTopic", wind_pub_topic_, namespace_ + "/" + wind_pub_topic_);
+  getSdfParam<std::string>(_sdf, "windSubTopic", wind_sub_topic_, wind_sub_topic_);
+  getSdfParam<std::string>(_sdf, "waypointPubTopic", waypoint_pub_topic_,
+                           namespace_ + "/" + waypoint_pub_topic_);
+  getSdfParam<std::string>(_sdf, "waypointSubTopic", waypoint_sub_topic_, waypoint_sub_topic_);
 
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, rotor_velocity_slowdown_sim_);
 
@@ -109,8 +119,9 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   std::string key(".bag");
   size_t pos = bag_filename_.rfind(key);
-  if (pos != std::string::npos)
+  if (pos != std::string::npos) {
     bag_filename_.erase(pos, key.length());
+  }
   bag_filename_ = bag_filename_ + "_" + date_time_str + ".bag";
 
   // Open a bag file and store it in ~/.ros/<bag_filename_>.
@@ -154,7 +165,7 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Subscriber to Wind WrenchStamped Message.
   wind_sub_ = node_handle_->subscribe(wind_sub_topic_, 10, &GazeboBagPlugin::WindCallback, this);
 
-  // Subscriber to Waypoint CommandTrajectory Message.
+  // Subscriber to Waypoint CommandTrajectoryPositionYaw Message.
   waypoint_sub_ = node_handle_->subscribe(waypoint_sub_topic_, 10, &GazeboBagPlugin::WaypointCallback, this);
 
   // Subscriber to Control Attitude Thrust Message.
@@ -174,7 +185,7 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Get the current simulation time.
   common::Time now = world_->GetSimTime();
-  LogCollisions(now);
+  LogWrenches(now);
   LogGroundTruth(now);
   LogMotorVelocities(now);
 }
@@ -191,13 +202,15 @@ void GazeboBagPlugin::WindCallback(const geometry_msgs::WrenchStampedConstPtr& w
   writeBag(wind_pub_topic_, ros_now, wind_msg);
 }
 
-void GazeboBagPlugin::WaypointCallback(const mav_msgs::CommandTrajectoryConstPtr& trajectory_msg) {
+void GazeboBagPlugin::WaypointCallback(
+    const mav_msgs::CommandTrajectoryPositionYawConstPtr& trajectory_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(waypoint_pub_topic_, ros_now, trajectory_msg);
 }
 
-void GazeboBagPlugin::CommandAttitudeThrustCallback(const mav_msgs::CommandAttitudeThrustConstPtr& control_msg) {
+void GazeboBagPlugin::CommandAttitudeThrustCallback(
+    const mav_msgs::CommandAttitudeThrustConstPtr& control_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(control_attitude_thrust_pub_topic_, ros_now, control_msg);
@@ -269,7 +282,7 @@ void GazeboBagPlugin::LogGroundTruth(const common::Time now) {
   writeBag(ground_truth_twist_pub_topic_, ros_now, twist_msg);
 }
 
-void GazeboBagPlugin::LogCollisions(const common::Time now) {
+void GazeboBagPlugin::LogWrenches(const common::Time now) {
 
   geometry_msgs::WrenchStamped wrench_msg;
   std::vector<physics::Contact *> contacts = contact_mgr_->GetContacts();
@@ -295,7 +308,7 @@ void GazeboBagPlugin::LogCollisions(const common::Time now) {
     wrench_msg.wrench.torque.y = contacts[i]->wrench->body1Torque.y;
     wrench_msg.wrench.torque.z = contacts[i]->wrench->body1Torque.z;
 
-    writeBag(collisions_pub_topic_, ros_now, wrench_msg);
+    writeBag(wrench_pub_topic_, ros_now, wrench_msg);
   }
 }
 

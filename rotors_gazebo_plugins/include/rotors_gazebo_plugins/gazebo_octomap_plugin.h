@@ -28,7 +28,7 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <octomap/octomap.h>
-#include <planning_msgs/Octomap.h>
+#include <rotors_comm/Octomap.h>
 #include <ros/ros.h>
 #include <sdf/sdf.hh>
 #include <std_srvs/Empty.h>
@@ -51,14 +51,14 @@ class OctomapFromGazeboWorld : public WorldPlugin {
   void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf);
   bool CheckIfInsideObject(const std::string& name, const math::Vector3& central_point, gazebo::physics::RayShapePtr ray);
   bool CheckIfInsideObjectInX(const std::string& name, const math::Vector3& central_point, gazebo::physics::RayShapePtr ray);
-  void CreateOctomap(const planning_msgs::Octomap::Request& msg);
+  void CreateOctomap(const rotors_comm::Octomap::Request& msg);
 
  private:
   physics::WorldPtr world_;
   ros::NodeHandle node_handle_;
   ros::ServiceServer srv_;
   octomap::OcTree* octomap_;
-  bool ServiceCallback(planning_msgs::Octomap::Request& req, planning_msgs::Octomap::Response& res);
+  bool ServiceCallback(rotors_comm::Octomap::Request& req, rotors_comm::Octomap::Response& res);
 };
 
 }

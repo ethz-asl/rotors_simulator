@@ -25,13 +25,13 @@
 namespace rotors_control {
 
 LeePositionControllerNode::LeePositionControllerNode() {
-  google::InitGoogleLogging("rotors_control_glogger");
   InitializeParams();
 
   ros::NodeHandle nh;
 
-  cmd_trajectory_sub_ = nh.subscribe(kDefaultCommandTrajectoryTopic, 10,
-                                     &LeePositionControllerNode::CommandTrajectoryCallback, this);
+  cmd_trajectory_sub_ = nh.subscribe(kDefaultCommandTrajectoryPositionYawTopic, 10,
+                                     &LeePositionControllerNode::CommandTrajectoryPositionYawCallback,
+                                     this);
   odometry_sub_ = nh.subscribe(kDefaultOdometryTopic, 10,
                                &LeePositionControllerNode::OdometryCallback, this);
 
@@ -87,11 +87,11 @@ void LeePositionControllerNode::InitializeParams() {
 void LeePositionControllerNode::Publish() {
 }
 
-void LeePositionControllerNode::CommandTrajectoryCallback(
-    const mav_msgs::CommandTrajectoryConstPtr& trajectory_reference_msg) {
-  mav_msgs::EigenCommandTrajectory trajectory;
-  mav_msgs::eigenCommandTrajectoryFromMsg(*trajectory_reference_msg, &trajectory);
-  lee_position_controller_.SetCommandTrajectory(trajectory);
+void LeePositionControllerNode::CommandTrajectoryPositionYawCallback(
+    const mav_msgs::CommandTrajectoryPositionYawConstPtr& trajectory_reference_msg) {
+  mav_msgs::EigenCommandTrajectoryPositionYaw trajectory;
+  mav_msgs::eigenCommandTrajectoryPositionYawFromMsg(*trajectory_reference_msg, &trajectory);
+  lee_position_controller_.SetCommandTrajectoryPositionYaw(trajectory);
 }
 
 

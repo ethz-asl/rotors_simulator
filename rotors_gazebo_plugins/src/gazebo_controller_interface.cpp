@@ -39,10 +39,12 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 
   namespace_.clear();
 
-  if (_sdf->HasElement("robotNamespace"))
+  if (_sdf->HasElement("robotNamespace")) {
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
-  else
+  }
+  else {
     gzerr << "[gazebo_motor_model] Please specify a robotNamespace.\n";
+  }
 
   node_handle_ = new ros::NodeHandle(namespace_);
 
@@ -66,15 +68,17 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 // This gets called by the world update start event.
 void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
-  if(!received_first_referenc_)
+  if (!received_first_reference_) {
     return;
+  }
 
   common::Time now = world_->GetSimTime();
 
   mav_msgs::CommandMotorSpeedPtr turning_velocities_msg(new mav_msgs::CommandMotorSpeed);
 
-  for (int i = 0; i < input_reference_.size(); i++)
-  turning_velocities_msg->motor_speed.push_back(input_reference_[i]);
+  for (int i = 0; i < input_reference_.size(); i++) {
+    turning_velocities_msg->motor_speed.push_back(input_reference_[i]);
+  }
   turning_velocities_msg->header.stamp.sec = now.sec;
   turning_velocities_msg->header.stamp.nsec = now.nsec;
 
@@ -86,7 +90,7 @@ void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMoto
   for (int i = 0; i < input_reference_msg->motor_speed.size(); ++i) {
     input_reference_[i] = input_reference_msg->motor_speed[i];
   }
-  received_first_referenc_ = true;
+  received_first_reference_ = true;
 }
 
 

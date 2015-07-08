@@ -21,7 +21,8 @@
 #ifndef INCLUDE_ROTORS_CONTROL_COMMON_H_
 #define INCLUDE_ROTORS_CONTROL_COMMON_H_
 
-#include <glog/logging.h>
+#include <assert.h>
+
 #include <mav_msgs/conversions.h>
 #include <nav_msgs/Odometry.h>
 
@@ -32,7 +33,7 @@ namespace rotors_control {
 // Default values
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultMotorSpeedTopic = "command/motor_speed";
-static const std::string kDefaultCommandTrajectoryTopic = "command/trajectory";
+static const std::string kDefaultCommandTrajectoryPositionYawTopic = "command/trajectory_position_yaw";
 static const std::string kDefaultCommandRollPitchYawrateThrustTopic = "command/roll_pitch_yawrate_thrust";
 static const std::string kDefaultImuTopic = "imu";
 static const std::string kDefaultOdometryTopic = "odometry";
@@ -60,17 +61,17 @@ struct EigenOdometry {
   Eigen::Vector3d angular_velocity;
 };
 
-void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
-                          EigenOdometry* odometry) {
+inline void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
+                                 EigenOdometry* odometry) {
   odometry->position = mav_msgs::vector3FromPointMsg(msg->pose.pose.position);
   odometry->orientation = mav_msgs::quaternionFromMsg(msg->pose.pose.orientation);
   odometry->velocity = mav_msgs::vector3FromMsg(msg->twist.twist.linear);
   odometry->angular_velocity = mav_msgs::vector3FromMsg(msg->twist.twist.angular);
 }
 
-void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
-                               Eigen::Matrix4Xd* allocation_matrix) {
-  CHECK_NOTNULL(allocation_matrix);
+inline void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
+                                      Eigen::Matrix4Xd* allocation_matrix) {
+  assert(allocation_matrix != nullptr);
   allocation_matrix->resize(4, rotor_configuration.rotors.size());
   unsigned int i = 0;
   for (const Rotor& rotor : rotor_configuration.rotors) {
@@ -87,15 +88,25 @@ void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
     (*allocation_matrix)(3, i) = rotor.rotor_force_constant;
     ++i;
   }
+  Eigen::FullPivLU<Eigen::Matrix4Xd> lu(*allocation_matrix);
+  // Setting the threshold for when pivots of the rank calculation should be considered nonzero.
+  lu.setThreshold(1e-9);
+  int rank = lu.rank();
+  if (rank < 4) {
+    std::cout << "The rank of the allocation matrix is " << lu.rank()
+              << ", it should have rank 4, to have a fully controllable system,"
+              << " check your configuration." << std::endl;
+  }
+
 }
 
-void skewMatrixFromVector(Eigen::Vector3d& vector, Eigen::Matrix3d* skew_matrix) {
+inline void skewMatrixFromVector(Eigen::Vector3d& vector, Eigen::Matrix3d* skew_matrix) {
   *skew_matrix << 0, -vector.z(), vector.y(),
                   vector.z(), 0, -vector.x(),
                   -vector.y(), vector.x(), 0;
 }
 
-void vectorFromSkewMatrix(Eigen::Matrix3d& skew_matrix, Eigen::Vector3d* vector) {
+inline void vectorFromSkewMatrix(Eigen::Matrix3d& skew_matrix, Eigen::Vector3d* vector) {
   *vector << skew_matrix(2, 1), skew_matrix(0,2), skew_matrix(1, 0);
 }
 }
