@@ -78,14 +78,8 @@
     noise_uniform_angular_velocity="0 0 0"
     enable_odometry_map="true"
     odometry_map="example_odometry_plugin_map2.bmp"
-<<<<<<< HEAD
     image_scale="0.1">
     <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
-=======
-    image_scale="0.1"
-  >
-    <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg.m^2] [kg.m^2] [kg.m^2] [kg.m^2] [kg.m^2] [kg.m^2] -->
->>>>>>> d7cc1592ce512529d836c3f6695af4ed6d123225
     <origin xyz="-0.05 -0.08 0.1" rpy="-0.1 0.2 0.3" />
   </xacro:odometry_plugin_macro>
 </robot>
