@@ -18,6 +18,8 @@
  * limitations under the License.
  */
 
+#include <ros/ros.h>
+
 #include "lee_position_controller_node.h"
 
 #include "rotors_control/parameters_ros.h"
@@ -32,11 +34,19 @@ LeePositionControllerNode::LeePositionControllerNode() {
   cmd_trajectory_sub_ = nh.subscribe(kDefaultCommandTrajectoryPositionYawTopic, 10,
                                      &LeePositionControllerNode::CommandTrajectoryPositionYawCallback,
                                      this);
+
+  cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(
+      kDefaultCommandMultiDofJointTrajectoryTopic, 1,
+      &LeePositionControllerNode::CommandMultiDofJointTrajectoryCallback, this);
+
   odometry_sub_ = nh.subscribe(kDefaultOdometryTopic, 10,
                                &LeePositionControllerNode::OdometryCallback, this);
 
   motor_velocity_reference_pub_ = nh.advertise<mav_msgs::CommandMotorSpeed>(
       kDefaultMotorSpeedTopic, 10);
+
+  command_timer_ = nh.createTimer(ros::Duration(0), &LeePositionControllerNode::TimedCommandCallback, this,
+                                  true, false);
 }
 
 LeePositionControllerNode::~LeePositionControllerNode() { }
@@ -89,11 +99,74 @@ void LeePositionControllerNode::Publish() {
 
 void LeePositionControllerNode::CommandTrajectoryPositionYawCallback(
     const mav_msgs::CommandTrajectoryPositionYawConstPtr& trajectory_reference_msg) {
+  // Clear all pending commands.
+  command_timer_.stop();
+  commands_.clear();
+  command_waiting_times_.clear();
+
   mav_msgs::EigenCommandTrajectoryPositionYaw trajectory;
   mav_msgs::eigenCommandTrajectoryPositionYawFromMsg(*trajectory_reference_msg, &trajectory);
   lee_position_controller_.SetCommandTrajectoryPositionYaw(trajectory);
 }
 
+void LeePositionControllerNode::CommandMultiDofJointTrajectoryCallback(
+    const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg) {
+  // Clear all pending commands.
+  command_timer_.stop();
+  commands_.clear();
+  command_waiting_times_.clear();
+
+  const size_t n_commands = msg->points.size();
+
+  if(n_commands < 1){
+    ROS_WARN_STREAM("Got MultiDOFJointTrajectory message, but message has no points.");
+    return;
+  }
+
+  mav_msgs::EigenCommandTrajectoryPositionYaw eigen_reference;
+  mav_msgs::eigenCommandTrajectoryPositionYawFromMultiDofJointTrajectoryPointMsg(msg->points.front(),
+                                                                                 &eigen_reference);
+  commands_.push_front(eigen_reference);
+
+  for (size_t i = 1; i < n_commands; ++i) {
+    const trajectory_msgs::MultiDOFJointTrajectoryPoint& reference_before = msg->points[i-1];
+    const trajectory_msgs::MultiDOFJointTrajectoryPoint& current_reference = msg->points[i];
+
+    mav_msgs::eigenCommandTrajectoryPositionYawFromMultiDofJointTrajectoryPointMsg(current_reference,
+                                                                                   &eigen_reference);
+
+    commands_.push_back(eigen_reference);
+    command_waiting_times_.push_back(current_reference.time_from_start - reference_before.time_from_start);
+  }
+
+  // We can trigger the first command immediately.
+  lee_position_controller_.SetCommandTrajectoryPositionYaw(commands_.front());
+  commands_.pop_front();
+
+  if (n_commands > 1) {
+    command_timer_.setPeriod(command_waiting_times_.front());
+    command_waiting_times_.pop_front();
+    command_timer_.start();
+  }
+}
+
+void LeePositionControllerNode::TimedCommandCallback(const ros::TimerEvent& e) {
+
+  if(commands_.empty()){
+    ROS_WARN("Commands empty, this should not happen here");
+    return;
+  }
+
+  const mav_msgs::EigenCommandTrajectoryPositionYaw eigen_reference = commands_.front();
+  lee_position_controller_.SetCommandTrajectoryPositionYaw(commands_.front());
+  commands_.pop_front();
+  command_timer_.stop();
+  if(!command_waiting_times_.empty()){
+    command_timer_.setPeriod(command_waiting_times_.front());
+    command_waiting_times_.pop_front();
+    command_timer_.start();
+  }
+}
 
 void LeePositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg) {
 
