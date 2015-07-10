@@ -63,14 +63,14 @@ int main(int argc, char** argv) {
   ros::removeROSArgs(argc, argv, args);
 
   if (args.size() != 2 && args.size() != 3) {
-    ROS_ERROR(
-        "Usage: waypoint_publisher <waypoint_file> [--multi_dof_joint_trajectory](one per line, space separated: wait_time [s] x[m] y[m] z[m] yaw[deg])");
+    ROS_ERROR("Usage: waypoint_publisher <waypoint_file> [--multi_dof_joint_trajectory] "
+        "\nThe waypoint file should be structured as: space separated: wait_time [s] x[m] y[m] z[m] yaw[deg])");
     return -1;
   }
 
   bool use_multi_dof_joint_trajectory = false;
-  if(args.size() == 3){
-    if(args[2] == "--multi_dof_joint_trajectory"){
+  if (args.size() == 3) {
+    if (args[2] == "--multi_dof_joint_trajectory") {
       use_multi_dof_joint_trajectory = true;
     }
   }
