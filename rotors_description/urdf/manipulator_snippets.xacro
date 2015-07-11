@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<!--
+  Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="PI" value="3.1415926535897931"/>
+  <xacro:property name="kgcm2Nm" value="0.0981"/>
+
+ <!-- Include components snippets -->
+  <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
+
+  <!-- Use this Macro to close a kinematic loop-->
+  <xacro:macro name="gazebo_revolute_joint_macro"
+    params="namespace joint_name parent_link child_link pose axis friction damping spring_reference spring_stiffness
+            lower_limit upper_limit effort_limit">
+    <gazebo>
+      <joint name="${namespace}/${joint_name}" type="revolute">
+        <pose>${pose}</pose>
+        <child>${namespace}/${child_link}</child>
+        <parent>${namespace}/${parent_link}</parent>
+        <axis>
+          <xyz>${axis}</xyz>
+          <dynamics>
+            <damping>${damping}</damping>
+            <friction>${friction}</friction>
+            <spring_reference>${spring_reference}</spring_reference>
+            <spring_stiffness>${spring_stiffness}</spring_stiffness>
+          </dynamics>
+          <limit>
+            <lower>${lower_limit}</lower>
+            <upper>${upper_limit}</upper>
+            <effort>${effort_limit}</effort>
+          </limit>
+        </axis>
+      </joint>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- fixed joint macro -->
+  <xacro:macro name="fixed_joint_macro"
+    params="namespace joint_name parent_link child_link *origin">
+            <joint name="${namespace}/${joint_name}" type="fixed">
+              <parent link="${namespace}/${parent_link}"/>
+              <child  link="${namespace}/${child_link}"/>
+              <xacro:insert_block name="origin" />
+            </joint>
+  </xacro:macro>
+
+  <!-- continous revolute joint -->
+  <xacro:macro name="revolute_joint_macro"
+    params="namespace joint_name parent_link child_link axis friction damping *origin">
+            <joint name="${namespace}/${joint_name}" type="continuous">
+              <parent link="${namespace}/${parent_link}"/>
+              <child  link="${namespace}/${child_link}"/>
+              <axis xyz="${axis}"/>
+              <dynamics damping="${damping}"/>
+              <dynamics friction="${friction}"/>
+              <limit velocity="1e+16" effort="1e+16" />
+              <xacro:insert_block name="origin" />
+            </joint>
+  </xacro:macro>
+
+  <!-- prismatic joint Macro -->
+  <xacro:macro name="prismatic_joint_macro"
+    params="namespace joint_name parent_link child_link axis friction damping lower_limit upper_limit
+            effort_limit velocity_limit *origin">
+            <joint name="${namespace}/${joint_name}" type="prismatic">
+              <parent link="${namespace}/${parent_link}"/>
+              <child link="${namespace}/${child_link}"/>
+              <axis xyz="${axis}"/>
+              <dynamics damping="${damping}"/>
+              <dynamics friction="${friction}"/>
+              <limit lower="${lower_limit}" velocity="${velocity_limit}" upper="${upper_limit}" effort="${effort_limit}" />
+              <xacro:insert_block name="origin" />
+            </joint>
+  </xacro:macro>
+
+  <xacro:macro name="servo_motor_macro"
+    params="namespace motor_name parent_link actuated_joint motor_model maxTorque noLoadSpeed
+            Kp Kd Ki maxAngle minAngle enable_visual visual_scale color *origin *inertial">
+
+            <link name="${namespace}/${motor_name}">
+              <xacro:insert_block name="inertial" />
+
+              <xacro:if value="${enable_visual}">
+                <visual>
+                  <geometry>
+                    <mesh filename="package://rotors_description/meshes/generic_servo.dae"
+                      scale="${visual_scale} ${visual_scale} ${visual_scale}"/>
+                  </geometry>
+                </visual>
+              </xacro:if>
+            </link>
+
+            <gazebo reference="${namespace}/${motor_name}">
+              <material>Gazebo/${color}</material>
+            </gazebo>
+
+            <joint name="${namespace}/${motor_name}" type="revolute">
+              <parent link="${namespace}/${parent_link}"/>
+              <child link="${namespace}/${motor_name}"/>
+              <xacro:insert_block name="origin" />
+              <limit upper="0" lower="0" effort="0" velocity="0" />
+            </joint>
+            <gazebo>
+              <plugin name="${namespace}/${motor_name}" filename="librotors_gazebo_servo_motor_plugin.so">
+                <robotNamespace>${namespace}</robotNamespace>
+                <jointName>${namespace}/${actuated_joint}</jointName>
+                <motorModel>${motor_model}</motorModel>
+                <commandSubTopic>command/${motor_name}</commandSubTopic>
+                <maxTorque>${maxTorque}</maxTorque>
+                <noLoadSpeed>${noLoadSpeed}</noLoadSpeed>
+                <maxAngleIntegralError>1.0</maxAngleIntegralError>
+                <maxAngle>${maxAngle}</maxAngle>
+                <minAngle>${minAngle}</minAngle>
+                <Kp>${Kp}</Kp>
+                <Kd>${Kd}</Kd>
+                <Ki>${Ki}</Ki>
+              </plugin>
+            </gazebo>
+  </xacro:macro>
+</robot>
