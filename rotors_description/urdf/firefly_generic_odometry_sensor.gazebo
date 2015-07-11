@@ -28,7 +28,7 @@
   <xacro:odometry_plugin_macro
     namespace="${namespace}/odometry_sensor1"
     odometry_sensor_suffix="1"
-    parent_link="base_link"
+    parent_link="${namespace}/base_link"
     pose_topic="pose"
     pose_with_covariance_topic="pose_with_covariance"
     position_topic="position"

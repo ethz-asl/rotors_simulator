@@ -21,9 +21,11 @@
 #include <fstream>
 #include <iostream>
 
+#include <Eigen/Geometry>
 #include <mav_msgs/CommandTrajectoryPositionYaw.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
+#include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
 
 bool sim_running = false;
@@ -60,10 +62,17 @@ int main(int argc, char** argv) {
   ros::V_string args;
   ros::removeROSArgs(argc, argv, args);
 
-  if (args.size() != 2) {
-    ROS_ERROR(
-        "Usage: waypoint_publisher <waypoint_file> (one per line, space separated: wait_time [s] x[m] y[m] z[m] yaw[deg])");
+  if (args.size() != 2 && args.size() != 3) {
+    ROS_ERROR("Usage: waypoint_publisher <waypoint_file> [--multi_dof_joint_trajectory] "
+        "\nThe waypoint file should be structured as: space separated: wait_time [s] x[m] y[m] z[m] yaw[deg])");
     return -1;
+  }
+
+  bool use_multi_dof_joint_trajectory = false;
+  if (args.size() == 3) {
+    if (args[2] == "--multi_dof_joint_trajectory") {
+      use_multi_dof_joint_trajectory = true;
+    }
   }
 
   std::vector<WaypointWithTime> waypoints;
@@ -89,9 +98,14 @@ int main(int argc, char** argv) {
   // The IMU is used, to determine if the simulator is running or not.
   ros::Subscriber sub = nh.subscribe("imu", 10, &callback);
 
-  ros::Publisher wp_pub = nh.advertise<mav_msgs::CommandTrajectoryPositionYaw>(
-    "command/trajectory_position_yaw", 10);
-  mav_msgs::CommandTrajectoryPositionYaw wp_msg;
+  ros::Publisher wp_pub;
+  if (!use_multi_dof_joint_trajectory) {
+    wp_pub = nh.advertise<mav_msgs::CommandTrajectoryPositionYaw>("command/trajectory_position_yaw", 10);
+  }
+  else{
+    ROS_INFO("Using MultiDOFJointTrajectory message");
+    wp_pub = nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>("command/multi_dof_joint_trajectory", 1);
+  }
 
   ROS_INFO("Wait for simulation to become ready...");
 
@@ -106,13 +120,39 @@ int main(int argc, char** argv) {
   ros::Duration(30).sleep();
 
   ROS_INFO("Start publishing waypoints.");
-  for (size_t i = 0; i < waypoints.size(); ++i) {
-    WaypointWithTime& wp = waypoints[i];
-    ROS_INFO("Publishing x=%f y=%f z=%f yaw=%f, and wait for %fs.", wp.wp.position.x, wp.wp.position.y,
-             wp.wp.position.z, wp.wp.yaw, wp.waiting_time);
-    wp.wp.header.stamp = ros::Time::now();
-    wp_pub.publish(wp.wp);
-    ros::Duration(wp.waiting_time).sleep();
+  if (!use_multi_dof_joint_trajectory) {
+    for (size_t i = 0; i < waypoints.size(); ++i) {
+      WaypointWithTime& wp = waypoints[i];
+      ROS_INFO("Publishing x=%f y=%f z=%f yaw=%f, and wait for %fs.", wp.wp.position.x, wp.wp.position.y,
+               wp.wp.position.z, wp.wp.yaw, wp.waiting_time);
+      wp.wp.header.stamp = ros::Time::now();
+      wp_pub.publish(wp.wp);
+      ros::Duration(wp.waiting_time).sleep();
+    }
+  }
+  else {
+    trajectory_msgs::MultiDOFJointTrajectoryPtr msg(new trajectory_msgs::MultiDOFJointTrajectory);
+    msg->header.stamp = ros::Time::now();
+    msg->points.resize(waypoints.size());
+    ros::Duration time_from_start(0);
+    for (size_t i = 0; i < waypoints.size(); ++i) {
+      WaypointWithTime& wp = waypoints[i];
+
+      msg->points[i].transforms.resize(1);
+      msg->points[i].velocities.resize(1);
+      msg->points[i].accelerations.resize(1);
+
+      msg->points[i].transforms[0].translation = wp.wp.position;
+      msg->points[i].transforms[0].rotation.w = cos(wp.wp.yaw * 0.5);
+      msg->points[i].transforms[0].rotation.x = 0;
+      msg->points[i].transforms[0].rotation.y = 0;
+      msg->points[i].transforms[0].rotation.z = sin(wp.wp.yaw * 0.5);
+      // We don't need velocities and accelerations here. Their constructors initialize them to zero.
+
+      msg->points[i].time_from_start = time_from_start;
+      time_from_start += ros::Duration(wp.waiting_time);
+    }
+    wp_pub.publish(msg);
   }
 
   return 0;

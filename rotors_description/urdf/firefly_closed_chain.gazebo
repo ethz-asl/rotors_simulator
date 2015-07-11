@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <!--
+  Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
   Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
   Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
-  Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
   Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
   Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
 
@@ -23,15 +23,14 @@
 
   <!-- Instantiate firefly with a generic odometry sensor. -->
   <xacro:include filename="$(find rotors_description)/urdf/firefly_generic_odometry_sensor.gazebo" />
+  <xacro:include filename="$(find rotors_description)/urdf/closed_chain.xacro" />
 
-  <!-- Mount a VI-sensor in front of the Firefly. -->
-  <xacro:vi_sensor_macro
-    namespace="${namespace}/vi_sensor"
-    parent_link="${namespace}/base_link"
-    enable_cameras="true"
-    enable_depth="true"
-    enable_ground_truth="true"
-  >
-    <origin xyz="0.1 0.0 -0.03" rpy="0.0 0.1 0.0" />
-  </xacro:vi_sensor_macro>
+  <!-- <link name="world"/> -->
+  <!-- Mount a closed chain arm on the belly of the Firefly. -->
+  <xacro:closed_chain_macro
+    namespace="closed_chain"
+    parent_link="base_link">
+    <origin xyz="0 0 -0.03" rpy="0.0 0.0 -1.57" />
+  </xacro:closed_chain_macro>
+
 </robot>
