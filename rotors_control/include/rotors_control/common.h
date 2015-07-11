@@ -34,6 +34,7 @@ namespace rotors_control {
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultMotorSpeedTopic = "command/motor_speed";
 static const std::string kDefaultCommandTrajectoryPositionYawTopic = "command/trajectory_position_yaw";
+static const std::string kDefaultCommandMultiDofJointTrajectoryTopic = "command/multi_dof_joint_trajectory";
 static const std::string kDefaultCommandRollPitchYawrateThrustTopic = "command/roll_pitch_yawrate_thrust";
 static const std::string kDefaultImuTopic = "imu";
 static const std::string kDefaultOdometryTopic = "odometry";
