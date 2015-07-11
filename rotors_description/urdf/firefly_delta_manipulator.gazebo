@@ -28,8 +28,8 @@
   <!-- <link name="world"/> -->
   <!-- Mount a closed chain arm on the belly of the Firefly. -->
   <xacro:closed_chain_macro
-    namespace="closed_chain"
-    parent_link="base_link">
+    namespace="delta_manipulator"
+    parent_link="${namespace}/base_link">
     <origin xyz="0 0 -0.03" rpy="0.0 0.0 -1.57" />
   </xacro:closed_chain_macro>
 
