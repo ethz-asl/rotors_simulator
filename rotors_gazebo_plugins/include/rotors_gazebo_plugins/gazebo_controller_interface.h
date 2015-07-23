@@ -36,6 +36,7 @@
 #include <stdio.h>
 
 #include "rotors_gazebo_plugins/common.h"
+#include <mavros/utils.h>
 
 namespace gazebo {
 
@@ -46,6 +47,7 @@ static const std::string kDefaultNamespace = "";
 // ConsPtr passing, such that the original commands don't have to go n_motors-times over the wire.
 static const std::string kDefaultMotorVelocityReferencePubTopic = "gazebo/command/motor_speed";
 static const std::string kDefaultCommandMotorSpeedSubTopic = "command/motor_speed";
+static const std::string kDefaultMavlinkControlSubTopic = "mavlink/to";
 
 class GazeboControllerInterface : public ModelPlugin {
  public:
@@ -55,6 +57,7 @@ class GazeboControllerInterface : public ModelPlugin {
         namespace_(kDefaultNamespace),
         motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferencePubTopic),
         command_motor_speed_sub_topic_(kDefaultCommandMotorSpeedSubTopic),
+        mavlink_control_sub_topic_(kDefaultMavlinkControlSubTopic),
         node_handle_(NULL){}
   ~GazeboControllerInterface();
 
@@ -73,10 +76,12 @@ class GazeboControllerInterface : public ModelPlugin {
   std::string namespace_;
   std::string motor_velocity_reference_pub_topic_;
   std::string command_motor_speed_sub_topic_;
+  std::string mavlink_control_sub_topic_;
 
   ros::NodeHandle* node_handle_;
   ros::Publisher motor_velocity_reference_pub_;
   ros::Subscriber cmd_motor_sub_;
+  ros::Subscriber mav_control_sub_;
 
   physics::ModelPtr model_;
   physics::WorldPtr world_;
@@ -86,6 +91,12 @@ class GazeboControllerInterface : public ModelPlugin {
   boost::thread callback_queue_thread_;
   void QueueThread();
   void CommandMotorCallback(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg);
+  void CommandMotorMavros(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg);
+  void MavlinkControlCallback(const mavros::Mavlink::ConstPtr &rmsg);
+  unsigned _rotor_count;
+  struct {
+    float control[8];
+  } inputs;  
 };
 }
 

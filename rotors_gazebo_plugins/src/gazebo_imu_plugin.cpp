@@ -32,6 +32,7 @@ namespace gazebo {
 GazeboImuPlugin::GazeboImuPlugin()
     : ModelPlugin(),
       node_handle_(0),
+      hil_sensor_mavlink_pub_topic_(kDefaultMavlinkHilSensorPubTopic),
       velocity_prev_W_(0,0,0)
 {
   InitGlogHelper::instance().initGlog();
@@ -100,7 +101,9 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
                       imu_parameters_.accelerometer_turn_on_bias_sigma);
 
   last_time_ = world_->GetSimTime();
+  last_gps_time_ = world_->GetSimTime();
 
+  double gps_update_interval_ = 200*1000000;  // nanoseconds for 5Hz
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   this->updateConnection_ =
@@ -108,6 +111,7 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
           boost::bind(&GazeboImuPlugin::OnUpdate, this, _1));
 
   imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 10);
+  hil_sensor_pub_ = node_handle_->advertise<mavros::Mavlink>(hil_sensor_mavlink_pub_topic_, 10);
 
   // Fill imu message.
   imu_message_.header.frame_id = frame_id_;
@@ -141,6 +145,8 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   gravity_W_ = world_->GetPhysicsEngine()->GetGravity();
   imu_parameters_.gravity_magnitude = gravity_W_.GetLength();
 
+  // Magnetic field data for Zurich from WMM2015 (10^5xnanoTesla (N, E, D))
+  mag_W_ = {0.21523, 0.00771, 0.42741};
   standard_normal_distribution_ = std::normal_distribution<double>(0.0, 1.0);
 
   double sigma_bon_g = imu_parameters_.gyroscope_turn_on_bias_sigma;
@@ -222,6 +228,7 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   math::Pose T_W_I = link_->GetWorldPose(); //TODO(burrimi): Check tf.
   math::Quaternion C_W_I = T_W_I.rot;
+  math::Vector3 pos_W_I = T_W_I.pos;
 
   math::Vector3 velocity_current_W = link_->GetWorldLinearVel();
 
@@ -265,6 +272,71 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   imu_pub_.publish(imu_message_);
 
+  mavlink_message_t mmsg;
+
+  math::Vector3 mag_I = C_W_I.RotateVectorReverse(mag_W_); // TODO: Add noise based on bais and variance like for imu and gyro
+
+  hil_sensor_msg_.time_usec = current_time.nsec*1000;
+  hil_sensor_msg_.xacc = linear_acceleration_I[0];
+  hil_sensor_msg_.yacc = linear_acceleration_I[1];
+  hil_sensor_msg_.zacc = linear_acceleration_I[2];
+  hil_sensor_msg_.xgyro = angular_velocity_I[0];
+  hil_sensor_msg_.ygyro = angular_velocity_I[1];
+  hil_sensor_msg_.zgyro = angular_velocity_I[2];
+  hil_sensor_msg_.xmag = mag_I.x;
+  hil_sensor_msg_.ymag = mag_I.y;
+  hil_sensor_msg_.zmag = mag_I.z;
+  hil_sensor_msg_.abs_pressure = 0.0;
+  hil_sensor_msg_.diff_pressure = 0.0;
+  hil_sensor_msg_.pressure_alt = pos_W_I.z;
+  hil_sensor_msg_.temperature = 0.0;
+  hil_sensor_msg_.fields_updated = 4095;  // 0b1111111111111 (All updated since new data with new noise added always)
+
+  mavlink_hil_sensor_t* hil_msg = &hil_sensor_msg_;
+  mavlink_msg_hil_sensor_encode(1, 240, &mmsg, hil_msg);
+  mavlink_message_t* msg = &mmsg;
+  mavros::MavlinkPtr rmsg = boost::make_shared<mavros::Mavlink>();
+  rmsg->header.stamp = ros::Time::now();
+  mavutils::copy_mavlink_to_ros(msg, rmsg);
+  hil_sensor_pub_.publish(rmsg);
+
+  math::Vector3 velocity_current_W_xy = velocity_current_W;
+  velocity_current_W_xy.z = 0.0;
+
+  // TODO: Remove GPS message from IMU plugin. Added gazebo GPS plugin. This is temp here.
+  float lat_zurich = 47.3667;  // deg
+  float long_zurich = 8.5500;  // deg
+  float earth_radius = 6353000;  // m
+  
+  common::Time gps_update(gps_update_interval_);
+
+  if(current_time - last_gps_time_ > gps_update){  // 5Hz
+    mavlink_message_t gps_mmsg;
+
+    hil_gps_msg_.time_usec = current_time.nsec*1000;
+    hil_gps_msg_.fix_type = 3;
+    hil_gps_msg_.lat = (lat_zurich + (pos_W_I.x/earth_radius)*180/3.1416) * 10000000;
+    hil_gps_msg_.lon = (long_zurich + (-pos_W_I.y/earth_radius)*180/3.1416) * 10000000;
+    hil_gps_msg_.alt = pos_W_I.z * 1000;
+    hil_gps_msg_.eph = 100;
+    hil_gps_msg_.epv = 100;
+    hil_gps_msg_.vel = velocity_current_W_xy.GetLength() * 100;
+    hil_gps_msg_.vn = velocity_current_W.x * 100;
+    hil_gps_msg_.ve = -velocity_current_W.y * 100;
+    hil_gps_msg_.vd = -velocity_current_W.z * 100;
+    hil_gps_msg_.cog = atan2(hil_gps_msg_.ve, hil_gps_msg_.vn) * 180.0/3.1416 * 100.0;
+    hil_gps_msg_.satellites_visible = 10;
+           
+    mavlink_hil_gps_t* hil_gps_msg = &hil_gps_msg_;
+    mavlink_msg_hil_gps_encode(1, 240, &gps_mmsg, hil_gps_msg);
+    mavlink_message_t* gps_msg = &gps_mmsg;
+    mavros::MavlinkPtr gps_rmsg = boost::make_shared<mavros::Mavlink>();
+    gps_rmsg->header.stamp = ros::Time::now();
+    mavutils::copy_mavlink_to_ros(gps_msg, gps_rmsg);
+    hil_sensor_pub_.publish(gps_rmsg);
+
+    last_gps_time_ = current_time;
+  }
   velocity_prev_W_ = velocity_current_W;
 }
 

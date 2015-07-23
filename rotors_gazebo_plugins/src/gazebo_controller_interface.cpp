@@ -60,7 +60,11 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
                                            &GazeboControllerInterface::CommandMotorCallback,
                                            this);
 
+  mav_control_sub_ = node_handle_->subscribe(mavlink_control_sub_topic_, 10,
+                                           &GazeboControllerInterface::MavlinkControlCallback,
+                                           this);
   motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::CommandMotorSpeed>(motor_velocity_reference_pub_topic_, 10);
+  _rotor_count = 4;
 }
 
 // This gets called by the world update start event.
@@ -79,6 +83,7 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   turning_velocities_msg->header.stamp.nsec = now.nsec;
 
   motor_velocity_reference_pub_.publish(turning_velocities_msg);
+  turning_velocities_msg.reset();
 }
 
 void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg) {
@@ -89,6 +94,51 @@ void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMoto
   received_first_referenc_ = true;
 }
 
+void GazeboControllerInterface::CommandMotorMavros(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg) {
+  input_reference_.resize(input_reference_msg->motor_speed.size());
+  for (int i = 0; i < input_reference_msg->motor_speed.size(); ++i) {
+    input_reference_[i] = input_reference_msg->motor_speed[i];
+  }
+  received_first_referenc_ = true;
+}
+
+
+void GazeboControllerInterface::MavlinkControlCallback(const mavros::Mavlink::ConstPtr &rmsg) {
+  mavlink_message_t mmsg;
+
+  if(mavutils::copy_ros_to_mavlink(rmsg, mmsg)){
+    mavlink_hil_controls_t act_msg;
+
+    mavlink_message_t* msg = &mmsg;
+
+    mavlink_msg_hil_controls_decode(msg, &act_msg);
+
+    inputs.control[0] =(double)act_msg.roll_ailerons;
+    inputs.control[1] =(double)act_msg.pitch_elevator;
+    inputs.control[2] =(double)act_msg.yaw_rudder;
+    inputs.control[3] =(double)act_msg.throttle;
+    inputs.control[4] =(double)act_msg.aux1;
+    inputs.control[5] =(double)act_msg.aux2;
+    inputs.control[6] =(double)act_msg.aux3;
+    inputs.control[7] =(double)act_msg.aux4;
+
+    // publish message
+    double scaling = 150;
+    double offset = 600;
+
+    mav_msgs::CommandMotorSpeedPtr turning_velocities_msg(new mav_msgs::CommandMotorSpeed);
+
+    for (int i = 0; i < _rotor_count; i++) {
+      turning_velocities_msg->motor_speed.push_back(inputs.control[i] * scaling + offset);
+    }
+
+    CommandMotorMavros(turning_velocities_msg);
+    turning_velocities_msg.reset();
+
+  } else{
+    std::cout << "incorrect mavlink data" <<"\n";
+  }
+}
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboControllerInterface);
 }
