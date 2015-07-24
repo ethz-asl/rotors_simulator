@@ -91,6 +91,7 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<double>(_sdf, "updateRate", update_rate_, update_rate_);
   getSdfParam<double>(_sdf, "convergenceSpeed", convergence_speed_, convergence_speed_);
   getSdfParam<double>(_sdf, "fixLossProbability", fix_loss_probability_, fix_loss_probability_);
+  getSdfParam<double>(_sdf, "fixLossTime", fix_loss_time_, fix_loss_time_);
 
   parent_link_ = world_->GetEntity(parent_frame_id_);
   if (parent_link_ == NULL && parent_frame_id_ != kDefaultParentFrameId) {
@@ -122,8 +123,11 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   alt_start_ = gps_start_position_.z;
 
   // Calculate position scaling factors (m to lat/lon)
-  lat_to_m_ = 111132.954 - 559.822*cos(2*lat_start_*M_PI/180) + 1.175*cos(4*lat_start_);
-  lon_to_m_ = (M_PI*6367449*cos(lon_start_*M_PI/180))/180;
+  //lon_to_m_ = (M_PI*6367449*cos(lon_start_*M_PI/180))/180;
+  //lon_to_m_ = (6378137*cos(0.99664719*tan(lat_start_*M_PI/180)))*M_PI/180;
+  //lat_to_m_ = 111132.954 - 559.822*cos(2*lat_start_*M_PI/180) + 1.175*cos(4*lat_start_*M_PI/180);
+  lon_to_m_ = 111412.84 * cos(lat_start_*M_PI/180) - 93.5 * cos(3 * lat_start_ * M_PI/180) + 0.118 * cos(5 * lat_start_ * M_PI/180);
+  lat_to_m_ = 111132.954 - 559.822 * cos(2 * lat_start_ * M_PI/180) + 1.175 * cos(4 * lat_start_ * M_PI/180) - 0.0023 * cos(6 * lat_start_ * M_PI/180);
   m_to_lat_ = 1/lat_to_m_;
   m_to_lon_ = 1/lon_to_m_;
 
@@ -272,7 +276,8 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
     sol_rtk_.altitude =  alt_start_ + gazebo_pose.pos.z + offset_rtk_fixed_.z + rtk_pos_n.z();
 
     // Loose fix with a certain probability, and jump to random nearby position
-    if(UniformDistribution(0, 1)(random_generator_) <= fix_loss_probability_){
+    if(UniformDistribution(0, 1)(random_generator_) <= fix_loss_probability_
+       || std::abs((world_->GetRealTime()).sec - fix_loss_time_) <= 0.5/update_rate_){
        NormalDistribution loose_fix_pos = NormalDistribution(0, rtk_float_start_error_width_/7);
        sol_rtk_.longitude = lon_start_ + loose_fix_pos(random_generator_)*m_to_lon_;
        sol_rtk_.latitude =  lat_start_ + loose_fix_pos(random_generator_)*m_to_lat_;

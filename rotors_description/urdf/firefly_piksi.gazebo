@@ -24,9 +24,9 @@
   <!-- Instantiate default firefly-->
   <xacro:include filename="$(find rotors_description)/urdf/firefly_base.xacro" />
 
-  <!-- Mount a generic odometry sensor without odometry map (working everywhere). -->
-  <xacro:odometry_plugin_macro
-    namespace="${namespace}/odometry_sensor1"
+  <!-- Mount a generic odometry (GPS) sensor without odometry map (working everywhere). -->
+  <!-- <xacro:odometry_plugin_macro
+    namespace="${namespace}/odometry_sensor"
     odometry_sensor_suffix="1"
     parent_link="base_link"
     pose_topic="pose"
@@ -36,10 +36,10 @@
     odometry_topic="odometry"
     parent_frame_id="world"
     mass_odometry_sensor="0.00001"
-    measurement_divisor="1"
-    measurement_delay="0"
+    measurement_divisor="8"
+    measurement_delay="2"
     unknown_delay="0.0"
-    noise_normal_position="0 0 0"
+    noise_normal_position="2 2 1"
     noise_normal_quaternion="0 0 0"
     noise_normal_linear_velocity="0 0 0"
     noise_normal_angular_velocity="0 0 0"
@@ -51,9 +51,9 @@
     odometry_map=""
     image_scale=""
   >
-    <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+    <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2]
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
-  </xacro:odometry_plugin_macro>
+  </xacro:odometry_plugin_macro> -->
 
   <!-- Mount a generic piksi sensor without odometry map (working everywhere). -->
   <xacro:piksi_plugin_macro
@@ -69,23 +69,24 @@
     publish_ground_truth="true"
     start_fixed = "true"
     mass_piksi="0.00001"
-    spp_noise_normal="3 4 7"
-    spp_offset="0.3 0.2 50"
+    spp_noise_normal="1 1 1"
+    spp_offset="0 0 0"
     rtk_fixed_noise_normal="0.005 0.01 0.015"
     rtk_fixed_offset="0.01 0.02 -0.04"
-    spp_navsatfix_covariance = "50 0 0 0 50 0 0 0 50"
-    rtk_navsatfix_covariance = "1 0 0 0 1 0 0 0 1"
+    spp_navsatfix_covariance = "1 0 0 0 1 0 0 0 1"
+    rtk_navsatfix_covariance = "0.000025 0 0 0 0.0001 0 0 0 0.000225"
     gps_start_position="47.37717 8.547047 472"
     update_rate="10"
-    convergence_speed="0.2"
-    fix_loss_probability = "0.001"
+    convergence_speed="0.999"
+    fix_loss_probability = "0.00"
+    fix_loss_time = "-1"
   >
     <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
   </xacro:piksi_plugin_macro>
 
   <!-- Mount a VI-sensor in front of the Firefly. -->
-  <xacro:vi_sensor_macro
+  <!-- <xacro:vi_sensor_macro
     namespace="${namespace}/vi_sensor"
     parent_link="base_link"
     enable_cameras="true"
@@ -93,5 +94,36 @@
     enable_ground_truth="true"
   >
     <origin xyz="0.1 0.0 -0.03" rpy="0.0 0.1 0.0" />
-  </xacro:vi_sensor_macro>
+  </xacro:vi_sensor_macro> -->
+
+  <!-- Mount a generic odometry sensor for simulation of VI sensor -->
+  <xacro:odometry_plugin_macro
+    namespace="${namespace}/vi_sensor"
+    odometry_sensor_suffix="2"
+    parent_link="base_link"
+    pose_topic="pose"
+    pose_with_covariance_topic="pose_with_covariance"
+    position_topic="position"
+    transform_topic="transform"
+    odometry_topic="odometry"
+    parent_frame_id="world"
+    mass_odometry_sensor="0.00001"
+    measurement_divisor="13"
+    measurement_delay="0"
+    unknown_delay="0.0"
+    noise_normal_position="0.1 0.1 0.1"
+    noise_normal_quaternion="0.08 0.08 0.08"
+    noise_normal_linear_velocity="0 0 0"
+    noise_normal_angular_velocity="0 0 0"
+    noise_uniform_position="0 0 0"
+    noise_uniform_quaternion="0 0 0"
+    noise_uniform_linear_velocity="0 0 0"
+    noise_uniform_angular_velocity="0 0 0"
+    enable_odometry_map="false"
+    odometry_map=""
+    image_scale=""
+  >
+    <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+  </xacro:odometry_plugin_macro>
 </robot>

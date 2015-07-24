@@ -102,6 +102,7 @@ class GazeboPiksiPlugin : public ModelPlugin {
   double lon_to_m_;
   double convergence_speed_;
   double fix_loss_probability_;
+  double fix_loss_time_;
   const double rtk_float_start_error_width_= 400;  //[m]
   double spp_navsatfix_covariance_[9];
   double rtk_navsatfix_covariance_[9];

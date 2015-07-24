@@ -352,7 +352,7 @@
       namespace piksi_sensor_suffix parent_link spp_position_topic rtk_position_topic
       rtk_mode_topic frame_id parent_frame_id mass_piksi publish_ground_truth start_fixed
       spp_noise_normal spp_offset rtk_fixed_noise_normal rtk_fixed_offset 
-      gps_start_position update_rate convergence_speed fix_loss_probability 
+      gps_start_position update_rate convergence_speed fix_loss_probability fix_loss_time
       rtk_navsatfix_covariance spp_navsatfix_covariance rtk_piksi_topic
       *inertia *origin">
     <!-- piksi link -->
@@ -391,6 +391,7 @@
 	<rtkNavsatfixCovariance>${rtk_navsatfix_covariance}</rtkNavsatfixCovariance> <!-- noise covariance published in the NavSatFix RTK message -->
 	<convergenceSpeed>${convergence_speed}</convergenceSpeed> <!-- the higher, the faster the sensor converges to RTK Fixed [<1]-->
 	<fixLossProbability>${fix_loss_probability}</fixLossProbability> <!-- probability that RTK Fix is lost per update -->
+	<fixLossTime>${fix_loss_time}</fixLossTime> <!-- time at which fix is lost -->
       </plugin>
     </gazebo>
   </xacro:macro>
