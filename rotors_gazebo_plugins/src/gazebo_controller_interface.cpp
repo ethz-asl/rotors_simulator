@@ -59,6 +59,7 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
   cmd_motor_sub_ = node_handle_->subscribe(command_motor_speed_sub_topic_, 10,
                                            &GazeboControllerInterface::CommandMotorCallback,
                                            this);
+
   motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::CommandMotorSpeed>(motor_velocity_reference_pub_topic_, 10);
 }
 
@@ -78,7 +79,6 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   turning_velocities_msg->header.stamp.nsec = now.nsec;
 
   motor_velocity_reference_pub_.publish(turning_velocities_msg);
-  turning_velocities_msg.reset();
 }
 
 void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg) {
@@ -90,4 +90,5 @@ void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMoto
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboControllerInterface);
+
 }
