@@ -33,7 +33,6 @@
 #include <sensor_msgs/Imu.h>
 
 #include "rotors_gazebo_plugins/common.h"
-#include <mavros/utils.h>
 
 namespace gazebo {
 // Default values for use with ADIS16448 IMU
@@ -57,7 +56,6 @@ static constexpr double kDefaultAdisAccelerometerTurnOnBiasSigma =
 static constexpr double kDefaultGravityMagnitude = 9.8068;
 
 static const std::string kDefaultImuTopic = "imu";
-static const std::string kDefaultMavlinkHilSensorPubTopic = "mavlink/from";
 
 // A description of the parameters:
 // https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics
@@ -121,8 +119,6 @@ class GazeboImuPlugin : public ModelPlugin {
   std::string imu_topic_;
   ros::NodeHandle* node_handle_;
   ros::Publisher imu_pub_;
-  std::string hil_sensor_mavlink_pub_topic_;
-  ros::Publisher hil_sensor_pub_;
   std::string frame_id_;
   std::string link_name_;
 
@@ -139,16 +135,11 @@ class GazeboImuPlugin : public ModelPlugin {
   event::ConnectionPtr updateConnection_;
 
   common::Time last_time_;
-  common::Time last_gps_time_;
-  double gps_update_interval_;
 
   sensor_msgs::Imu imu_message_;
-  mavlink_hil_sensor_t hil_sensor_msg_;
-  mavlink_hil_gps_t hil_gps_msg_;
 
   math::Vector3 gravity_W_;
   math::Vector3 velocity_prev_W_;
-  math::Vector3 mag_W_;
 
   Eigen::Vector3d gyroscope_bias_;
   Eigen::Vector3d accelerometer_bias_;

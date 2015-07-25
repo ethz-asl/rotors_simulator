@@ -49,7 +49,6 @@ add_dependencies(rotors_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
 
 add_library(rotors_gazebo_controller_interface src/gazebo_controller_interface.cpp)
 target_link_libraries(rotors_gazebo_controller_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-
 add_dependencies(rotors_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})
 
 add_library(rotors_gazebo_bag_plugin src/gazebo_bag_plugin.cpp)
@@ -67,3 +66,7 @@ add_dependencies(rotors_gazebo_octomap_plugin ${catkin_EXPORTED_TARGETS})
 add_library(rotors_gazebo_multirotor_base_plugin src/gazebo_multirotor_base_plugin.cpp)
 target_link_libraries(rotors_gazebo_multirotor_base_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(rotors_gazebo_multirotor_base_plugin ${catkin_EXPORTED_TARGETS})
+
+add_library(rotors_gazebo_mavlink_interface src/gazebo_mavlink_interface.cpp)
+target_link_libraries(rotors_gazebo_mavlink_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS})
