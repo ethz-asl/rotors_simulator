@@ -86,8 +86,6 @@ class GazeboMavlinkInterface : public ModelPlugin {
 
   physics::ModelPtr model_;
   physics::WorldPtr world_;
-  // Pointer to the link
-  physics::LinkPtr link_;
 
   /// \brief Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;

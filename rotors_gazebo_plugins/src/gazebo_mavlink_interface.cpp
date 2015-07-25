@@ -45,14 +45,6 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     gzerr << "[gazebo_mavlink_interface] Please specify a robotNamespace.\n";
 
   node_handle_ = new ros::NodeHandle(namespace_);
-  if (_sdf->HasElement("linkName"))
-    link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
-  else
-    gzerr << "[gazebo_mavlink_interface] Please specify a linkName.\n";
-  // Get the pointer to the link
-  link_ = model_->GetLink(link_name_);
-  if (link_ == NULL)
-    gzthrow("[gazebo_mavlink_interface] Couldn't find specified link \"" << link_name_ << "\".");
 
   getSdfParam<std::string>(_sdf, "motorSpeedCommandPubTopic", motor_velocity_reference_pub_topic_,
                            motor_velocity_reference_pub_topic_);
@@ -85,7 +77,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
 // This gets called by the world update start event.
 void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
-
+  gzerr << "[gazebo_mavlink_interface] Please specify a robotNamespace.\n";
   if(!received_first_referenc_)
     return;
 
@@ -107,10 +99,10 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   last_time_ = current_time;
   double t = current_time.Double();
 
-  math::Pose T_W_I = link_->GetWorldPose(); //TODO(burrimi): Check tf.
-  math::Vector3 pos_W_I = T_W_I.pos;
+  math::Pose T_W_I = model_->GetWorldPose(); //TODO(burrimi): Check tf.
+  math::Vector3 pos_W_I = T_W_I.pos;  // Use the models' world position for GPS and pressure alt.
 
-  math::Vector3 velocity_current_W = link_->GetWorldLinearVel();
+  math::Vector3 velocity_current_W = model_->GetWorldLinearVel();  // Use the models' world position for GPS velocity.
 
   math::Vector3 velocity_current_W_xy = velocity_current_W;
   velocity_current_W_xy.z = 0.0;
@@ -200,9 +192,14 @@ void GazeboMavlinkInterface::MavlinkControlCallback(const mavros::Mavlink::Const
 void GazeboMavlinkInterface::ImuCallback(const sensor_msgs::ImuConstPtr& imu_message) {
   mavlink_message_t mmsg;
 
-  math::Pose T_W_I = link_->GetWorldPose(); //TODO(burrimi): Check tf.
-  math::Quaternion C_W_I = T_W_I.rot;
-  math::Vector3 pos_W_I = T_W_I.pos;
+  math::Pose T_W_I = model_->GetWorldPose();
+  math::Vector3 pos_W_I = T_W_I.pos;  // Use the models'world position for GPS and pressure alt.
+
+  math::Quaternion C_W_I;
+  C_W_I.w = imu_message->orientation.w;
+  C_W_I.x = imu_message->orientation.x;
+  C_W_I.y = imu_message->orientation.y;
+  C_W_I.z = imu_message->orientation.z;
 
   math::Vector3 mag_I = C_W_I.RotateVectorReverse(mag_W_); // TODO: Add noise based on bais and variance like for imu and gyro
 
