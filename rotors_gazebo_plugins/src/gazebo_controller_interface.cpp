@@ -89,6 +89,6 @@ void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::CommandMoto
   received_first_referenc_ = true;
 }
 
-GZ_REGISTER_MODEL_PLUGIN(GazeboControllerInterface);
 
+GZ_REGISTER_MODEL_PLUGIN(GazeboControllerInterface);
 }
