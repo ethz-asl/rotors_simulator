@@ -31,10 +31,10 @@
     params="namespace joint_name parent_link child_link pose axis friction damping spring_reference spring_stiffness
             lower_limit upper_limit effort_limit">
     <gazebo>
-      <joint name="${namespace}/${joint_name}" type="revolute">
+      <joint name="${joint_name}" type="revolute">
         <pose>${pose}</pose>
-        <child>${namespace}/${child_link}</child>
-        <parent>${namespace}/${parent_link}</parent>
+        <child>${child_link}</child>
+        <parent>${parent_link}</parent>
         <axis>
           <xyz>${axis}</xyz>
           <dynamics>
@@ -56,9 +56,9 @@
   <!-- fixed joint macro -->
   <xacro:macro name="fixed_joint_macro"
     params="namespace joint_name parent_link child_link *origin">
-            <joint name="${namespace}/${joint_name}" type="fixed">
-              <parent link="${namespace}/${parent_link}"/>
-              <child  link="${namespace}/${child_link}"/>
+            <joint name="${joint_name}" type="fixed">
+              <parent link="${parent_link}"/>
+              <child  link="${child_link}"/>
               <xacro:insert_block name="origin" />
             </joint>
   </xacro:macro>
@@ -66,9 +66,9 @@
   <!-- continous revolute joint -->
   <xacro:macro name="revolute_joint_macro"
     params="namespace joint_name parent_link child_link axis friction damping *origin">
-            <joint name="${namespace}/${joint_name}" type="continuous">
-              <parent link="${namespace}/${parent_link}"/>
-              <child  link="${namespace}/${child_link}"/>
+            <joint name="${joint_name}" type="continuous">
+              <parent link="${parent_link}"/>
+              <child  link="${child_link}"/>
               <axis xyz="${axis}"/>
               <dynamics damping="${damping}"/>
               <dynamics friction="${friction}"/>
@@ -81,9 +81,9 @@
   <xacro:macro name="prismatic_joint_macro"
     params="namespace joint_name parent_link child_link axis friction damping lower_limit upper_limit
             effort_limit velocity_limit *origin">
-            <joint name="${namespace}/${joint_name}" type="prismatic">
-              <parent link="${namespace}/${parent_link}"/>
-              <child link="${namespace}/${child_link}"/>
+            <joint name="${joint_name}" type="prismatic">
+              <parent link="${parent_link}"/>
+              <child link="${child_link}"/>
               <axis xyz="${axis}"/>
               <dynamics damping="${damping}"/>
               <dynamics friction="${friction}"/>
@@ -114,7 +114,7 @@
             </gazebo>
 
             <joint name="${namespace}/${motor_name}" type="revolute">
-              <parent link="${namespace}/${parent_link}"/>
+              <parent link="${parent_link}"/>
               <child link="${namespace}/${motor_name}"/>
               <xacro:insert_block name="origin" />
               <limit upper="0" lower="0" effort="0" velocity="0" />
@@ -122,7 +122,7 @@
             <gazebo>
               <plugin name="${namespace}/${motor_name}" filename="librotors_gazebo_servo_motor_plugin.so">
                 <robotNamespace>${namespace}</robotNamespace>
-                <jointName>${namespace}/${actuated_joint}</jointName>
+                <jointName>${actuated_joint}</jointName>
                 <motorModel>${motor_model}</motorModel>
                 <commandSubTopic>command/${motor_name}</commandSubTopic>
                 <maxTorque>${maxTorque}</maxTorque>

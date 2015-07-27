@@ -102,17 +102,24 @@
   <xacro:macro name="closed_chain_macro"
     params="namespace parent_link *origin">
 
+    <xacro:revolute_joint_macro
+      namespace="${namespace}"
+      joint_name="${namespace}/pitching"
+      parent_link="${parent_link}"
+      child_link="${namespace}/r3"
+      axis="1 0 0"
+      friction="0"
+      damping="0.1">
+      <xacro:insert_block name="origin" />
+    </xacro:revolute_joint_macro>
 
-    <joint name="${namespace}/fixed_joint" type="fixed">
+    <!-- <joint name="${namespace}/fixed_joint" type="fixed">
       <parent link="${parent_link}"/>
       <child  link="${namespace}/r3"/>
       <xacro:insert_block name="origin" />
-    </joint>
-
+    </joint> -->
 
   <!-- Here we define base link of closed kinematic chain -->
-
-
   <link name="${namespace}/r3">
    <collision>
      <xacro:insert_block name="r3_frame"/>
@@ -129,7 +136,6 @@
       <xacro:insert_block name="r3_inertial"/>
     </inertial>
   </link>
-
 
   <link name="${namespace}/r1_left">
    <collision>
@@ -164,7 +170,6 @@
       <xacro:insert_block name="r1_inertial"/>
     </inertial>
   </link>
-
 
   <link name="${namespace}/r2_left">
    <collision>
@@ -220,9 +225,9 @@
 <!-- Define joints -->
   <xacro:revolute_joint_macro
     namespace="${namespace}"
-    joint_name="left_1"
-    parent_link="r3"
-    child_link="r1_left"
+    joint_name="${namespace}/left_1"
+    parent_link="${namespace}/r3"
+    child_link="${namespace}/r1_left"
     axis="0 0 1"
     friction="0"
     damping="0.1">
@@ -231,9 +236,9 @@
 
   <xacro:revolute_joint_macro
     namespace="${namespace}"
-    joint_name="right_1"
-    parent_link="r3"
-    child_link="r1_right"
+    joint_name="${namespace}/right_1"
+    parent_link="${namespace}/r3"
+    child_link="${namespace}/r1_right"
     axis="0 0 1"
     friction="0"
     damping="0.1">
@@ -242,9 +247,9 @@
 
   <xacro:revolute_joint_macro
     namespace="${namespace}"
-    joint_name="left_2"
-    parent_link="r1_left"
-    child_link="r2_left"
+    joint_name="${namespace}/left_2"
+    parent_link="${namespace}/r1_left"
+    child_link="${namespace}/r2_left"
     axis="0 0 1"
     friction="0"
     damping="0.1">
@@ -253,21 +258,20 @@
 
   <xacro:revolute_joint_macro
     namespace="${namespace}"
-    joint_name="right_2"
-    parent_link="r1_right"
-    child_link="r2_right"
+    joint_name="${namespace}/right_2"
+    parent_link="${namespace}/r1_right"
+    child_link="${namespace}/r2_right"
     axis="0 0 1"
     friction="0"
     damping="0.1">
     <origin xyz="${r1_length} 0 0.015" rpy="0 0 0"/>
   </xacro:revolute_joint_macro>
 
-
   <xacro:gazebo_revolute_joint_macro
     namespace="${namespace}"
-    joint_name="closing"
-    parent_link="r2_left"
-    child_link="r2_right"
+    joint_name="${namespace}/closing"
+    parent_link="${namespace}/r2_left"
+    child_link="${namespace}/r2_right"
     pose="${r2_length} 0 0 0 0 0"
     axis="0 0 1"
     friction="0"
@@ -279,20 +283,11 @@
     effort_limit="1000">
   </xacro:gazebo_revolute_joint_macro>
 
-  <!-- params="namespace suffix parent_link child_link *origin"> -->
-  <!-- <xacro:fixed_joint_macro
-    namespace="${namespace}"
-    suffix="end_effector"
-    parent_link="r2_left"
-    child_link="end_effector">
-    <origin xyz="${r2_length} 0 0" rpy="0 ${PI/2} 0"/>
-  </xacro:fixed_joint_macro> -->
-
   <xacro:revolute_joint_macro
     namespace="${namespace}"
-    joint_name="end_effector"
-    parent_link="r2_left"
-    child_link="end_effector"
+    joint_name="${namespace}/end_effector"
+    parent_link="${namespace}/r2_left"
+    child_link="${namespace}/end_effector"
     axis="0 0 1"
     friction="0"
     damping="0.1">
@@ -312,15 +307,15 @@
 
  <xacro:servo_motor_macro
    namespace="${namespace}"
-   motor_name="left_motor"
-   parent_link="r3"
-   actuated_joint="left_1"
+   motor_name="motor_left"
+   parent_link="${namespace}/r3"
+   actuated_joint="${namespace}/left_1"
    motor_model="generic_servo1"
    maxTorque="3"
    noLoadSpeed="0.11"
    Kp="30.0"
    Kd="0.05"
-   Ki="0.4"
+   Ki="0.40"
    minAngle="${-PI}"
    maxAngle="${PI}"
    enable_visual="true"
@@ -332,15 +327,15 @@
 
  <xacro:servo_motor_macro
    namespace="${namespace}"
-   motor_name="motor_right_1"
-   parent_link="r3"
-   actuated_joint="right_1"
+   motor_name="motor_right"
+   parent_link="${namespace}/r3"
+   actuated_joint="${namespace}/right_1"
    motor_model="generic_servo2"
    maxTorque="3"
    noLoadSpeed="0.11"
    Kp="30.0"
    Kd="0.05"
-   Ki="0.4"
+   Ki="0.40"
    minAngle="${-PI}"
    maxAngle="${PI}"
    enable_visual="true"
@@ -353,14 +348,14 @@
  <xacro:servo_motor_macro
    namespace="${namespace}"
    motor_name="motor_end_effector"
-   parent_link="r2_left"
-   actuated_joint="end_effector"
+   parent_link="${namespace}/r2_left"
+   actuated_joint="${namespace}/end_effector"
    motor_model="generic_servo3"
    maxTorque="0.8"
    noLoadSpeed="0.11"
    Kp="10.0"
    Kd="0.05"
-   Ki="0.4"
+   Ki="0.40"
    minAngle="${-PI}"
    maxAngle="${PI}"
    enable_visual="false"
@@ -368,17 +363,42 @@
    color="Red">
    <origin xyz="${r2_length} 0 0.02" rpy="-1.57 0 0"/>
    <xacro:insert_block name="generic_servo_inertial"/>
- </xacro:servo_motor_macro> >
+ </xacro:servo_motor_macro>
+
+
+ >
+
+ <xacro:servo_motor_macro
+   namespace="${namespace}"
+   motor_name="motor_pitching"
+   parent_link="${parent_link}"
+   actuated_joint="${namespace}/pitching"
+   motor_model="generic_servo0"
+   maxTorque="3"
+   noLoadSpeed="0.11"
+   Kp="30.0"
+   Kd="0.05"
+   Ki="0.40"
+   minAngle="${-PI}"
+   maxAngle="${PI}"
+   enable_visual="true"
+   visual_scale="1"
+   color="Red">
+   <origin xyz="0 0 0.02" rpy="0 0 0"/>
+   <xacro:insert_block name="generic_servo_inertial"/>
+ </xacro:servo_motor_macro>
+
 
 <!-- Initial configuration plugin -->
 <gazebo>
   <plugin name="initial_configuration" filename="librotors_gazebo_robot_initial_configuration_plugin.so">
     <robotNamespace>${namespace}</robotNamespace>
  <initial_configuration>
-   <config joint_name="left_1" initial_position="0.3415"/>
-   <config joint_name="left_2" initial_position="2.2942"/>
+   <config joint_name="left_1"  initial_position="0.3415"/>
+   <config joint_name="left_2"  initial_position="2.2942"/>
    <config joint_name="right_1" initial_position="2.8001"/>
    <config joint_name="right_2" initial_position="-2.2942"/>
+   <config joint_name="pitching" initial_position="0"/>
  </initial_configuration>
  <loop_closure_joints>
    <joint joint_name="closing"/>
