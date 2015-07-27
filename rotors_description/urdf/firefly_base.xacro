@@ -25,7 +25,7 @@
   <xacro:include filename="$(find rotors_description)/urdf/firefly.xacro" />
 
   <!-- Instantiate a controller. -->
-  <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />
+  <xacro:controller_plugin_macro namespace="${namespace}" />
 
   <!-- Mount an ADIS16448 IMU. -->
   <xacro:default_imu namespace="${namespace}" parent_link="${namespace}/base_link" />

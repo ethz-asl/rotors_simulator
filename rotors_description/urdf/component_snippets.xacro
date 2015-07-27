@@ -237,14 +237,14 @@
   </xacro:macro>
 
   <!-- Macro to add the controller interface. -->
-  <xacro:macro name="controller_plugin_macro" params="namespace imu_sub_topic">
+  <xacro:macro name="controller_plugin_macro" params="namespace">
     <gazebo>
       <plugin name="controller_interface" filename="librotors_gazebo_controller_interface.so">
         <robotNamespace>${namespace}</robotNamespace>
         <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
         <commandRateThrustSubTopic>command/rate</commandRateThrustSubTopic>
         <commandMotorSpeedSubTopic>command/motor_speed</commandMotorSpeedSubTopic>
-        <imuSubTopic>${imu_sub_topic}</imuSubTopic>
+        <imuSubTopic>imu</imuSubTopic>
         <motorSpeedCommandPubTopic>gazebo/command/motor_speed</motorSpeedCommandPubTopic>
       </plugin>
     </gazebo>
