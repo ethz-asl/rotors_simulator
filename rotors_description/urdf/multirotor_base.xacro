@@ -58,8 +58,7 @@
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
           <xacro:if value="${use_mesh_file}">
-            <mesh filename="package://rotors_description/meshes/${mesh_file}"
-              scale="1 1 1" />
+            <mesh filename="${mesh_file}" scale="1 1 1" />
           </xacro:if>
           <xacro:unless value="${use_mesh_file}">
             <box size="${body_width} ${body_width} ${body_height}"/> <!-- [m] [m] [m] -->
@@ -87,7 +86,7 @@
 
   <!-- Rotor joint and link -->
   <xacro:macro name="vertical_rotor"
-    params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant_up time_constant_down max_rot_velocity motor_number rotor_drag_coefficient rolling_moment_coefficient color *origin *inertia">
+    params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant_up time_constant_down max_rot_velocity motor_number rotor_drag_coefficient rolling_moment_coefficient color use_own_mesh mesh *origin *inertia">
     <joint name="${robot_namespace}/rotor_${motor_number}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
@@ -102,9 +101,15 @@
       <visual>
         <geometry>
           <!-- <cylinder length="0.005" radius="${radius_rotor}"/> --> <!-- [m] -->
-          <mesh filename="package://rotors_description/meshes/propeller_${direction}.dae"
-            scale="${radius_rotor} ${radius_rotor} ${radius_rotor}" /> <!-- The propeller meshes have a radius of 1m -->
-          <!-- <box size="${2*radius_rotor} 0.01 0.005"/> -->
+          <xacro:if value="${use_own_mesh}">
+            <mesh filename="${mesh}"
+              scale="1 1 1" />
+          </xacro:if>
+          <xacro:unless value="${use_own_mesh}">
+            <mesh filename="package://rotors_description/meshes/propeller_${direction}.dae"
+              scale="${radius_rotor} ${radius_rotor} ${radius_rotor}" /> <!-- The propeller meshes have a radius of 1m -->
+            <!-- <box size="${2*radius_rotor} 0.01 0.005"/> -->
+          </xacro:unless>
         </geometry>
       </visual>
       <collision>
