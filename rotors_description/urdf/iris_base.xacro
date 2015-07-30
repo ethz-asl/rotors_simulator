@@ -12,6 +12,13 @@
     >
   </xacro:controller_plugin_macro>
 
+  <!-- Instantiate mavlink telemetry interface. -->
+  <xacro:mavlink_interface_macro
+    namespace="${namespace}"
+    imu_sub_topic="imu"
+    >
+  </xacro:mavlink_interface_macro>
+
   <!-- Mount an ADIS16448 IMU. -->
   <xacro:imu_plugin_macro
     namespace="${namespace}"

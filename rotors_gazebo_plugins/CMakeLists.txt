@@ -1,7 +1,24 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rotors_gazebo_plugins)
 
+set(MAVLINK_INTERFACE)
+set(BUILD_MAVLINK_INTERFACE)
+
+if (MAVLINK_INTERFACE STREQUAL "y")
+  set(BUILD_MAVLINK_INTERFACE TRUE)
+else ()
+  set(BUILD_MAVLINK_INTERFACE FALSE)
+endif ()
+
+if (BUILD_MAVLINK_INTERFACE)
+  message(STATUS "Adding mavros dependency and building mavlink_interface_plugin")
+endif ()
+
 add_definitions(-std=c++11)
+
+add_definitions(
+  -DMAVLINK_INTERFACE=${MAVLINK_INTERFACE}
+)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -16,6 +33,12 @@ find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   glog_catkin
 )
+
+if (BUILD_MAVLINK_INTERFACE)
+  find_package(mavros)
+  message(STATUS "Added mavros dependency")
+endif()
+
 
 find_package(Eigen REQUIRED)
 find_package(octomap REQUIRED)
@@ -48,7 +71,6 @@ add_dependencies(rotors_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
 
 add_library(rotors_gazebo_controller_interface src/gazebo_controller_interface.cpp)
 target_link_libraries(rotors_gazebo_controller_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-
 add_dependencies(rotors_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})
 
 add_library(rotors_gazebo_bag_plugin src/gazebo_bag_plugin.cpp)
@@ -66,3 +88,11 @@ add_dependencies(rotors_gazebo_octomap_plugin ${catkin_EXPORTED_TARGETS})
 add_library(rotors_gazebo_multirotor_base_plugin src/gazebo_multirotor_base_plugin.cpp)
 target_link_libraries(rotors_gazebo_multirotor_base_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(rotors_gazebo_multirotor_base_plugin ${catkin_EXPORTED_TARGETS})
+
+if (BUILD_MAVLINK_INTERFACE)
+  add_library(rotors_gazebo_mavlink_interface src/gazebo_mavlink_interface.cpp)
+  target_link_libraries(rotors_gazebo_mavlink_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${mavros_LIBRARIES})
+  add_dependencies(rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS})
+  message(STATUS "Built mavlink_interface_plugin")
+endif()
+
