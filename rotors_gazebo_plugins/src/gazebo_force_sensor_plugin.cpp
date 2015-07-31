@@ -86,6 +86,8 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
   getSdfParam<int>(_sdf, "measurementDelay", measurement_delay_, measurement_delay_);
   getSdfParam<int>(_sdf, "measurementDivisor", measurement_divisor_, measurement_divisor_);
   getSdfParam<double>(_sdf, "unknownDelay", unknown_delay_, unknown_delay_);
+  getSdfParam<bool>(_sdf, "linForceMeasEnabled", lin_force_meas_enabled_, lin_force_meas_enabled_);
+  getSdfParam<bool>(_sdf, "torqueMeasEnabled", torque_meas_enabled_, torque_meas_enabled_);
 
   parent_link_ = model_->GetLink(parent_frame_id_);
   if (parent_link_ == NULL && parent_frame_id_ != kDefaultParentFrameId) {
@@ -97,27 +99,36 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
     gzthrow("[gazebo_force_sensor_plugin] Couldn't find specified reference frame \"" << reference_frame_id_ << "\".");
   }
 
-  linear_force_n_[0] = NormalDistribution(0, noise_normal_linear_force.x);
-  linear_force_n_[1] = NormalDistribution(0, noise_normal_linear_force.y);
-  linear_force_n_[2] = NormalDistribution(0, noise_normal_linear_force.z);
+  if (lin_force_meas_enabled_) {
+    linear_force_n_[0] = NormalDistribution(0, noise_normal_linear_force.x);
+    linear_force_n_[1] = NormalDistribution(0, noise_normal_linear_force.y);
+    linear_force_n_[2] = NormalDistribution(0, noise_normal_linear_force.z);
 
-  torque_n_[0] = NormalDistribution(0, noise_normal_torque.x);
-  torque_n_[1] = NormalDistribution(0, noise_normal_torque.y);
-  torque_n_[2] = NormalDistribution(0, noise_normal_torque.z);
+    linear_force_u_[0] = UniformDistribution(-noise_uniform_linear_force.x, noise_uniform_linear_force.x);
+    linear_force_u_[1] = UniformDistribution(-noise_uniform_linear_force.y, noise_uniform_linear_force.y);
+    linear_force_u_[2] = UniformDistribution(-noise_uniform_linear_force.z, noise_uniform_linear_force.z);
 
-  linear_force_u_[0] = UniformDistribution(-noise_uniform_linear_force.x, noise_uniform_linear_force.x);
-  linear_force_u_[1] = UniformDistribution(-noise_uniform_linear_force.y, noise_uniform_linear_force.y);
-  linear_force_u_[2] = UniformDistribution(-noise_uniform_linear_force.z, noise_uniform_linear_force.z);
+    // Linear forces publisher
+    lin_force_sensor_pub_ = node_handle_->advertise<geometry_msgs::Vector3Stamped>(force_sensor_pub_topic_+"/linear", 10);
+    lin_force_sensor_truth_pub_ = node_handle_->advertise<geometry_msgs::Vector3Stamped>(force_sensor_truth_pub_topic_+"/linear", 10);
+  }
 
-  torque_u_[0] = UniformDistribution(-noise_uniform_torque.x, noise_uniform_torque.x);
-  torque_u_[1] = UniformDistribution(-noise_uniform_torque.y, noise_uniform_torque.y);
-  torque_u_[2] = UniformDistribution(-noise_uniform_torque.z, noise_uniform_torque.z);
+  if (torque_meas_enabled_) {
+    torque_n_[0] = NormalDistribution(0, noise_normal_torque.x);
+    torque_n_[1] = NormalDistribution(0, noise_normal_torque.y);
+    torque_n_[2] = NormalDistribution(0, noise_normal_torque.z);
+
+    torque_u_[0] = UniformDistribution(-noise_uniform_torque.x, noise_uniform_torque.x);
+    torque_u_[1] = UniformDistribution(-noise_uniform_torque.y, noise_uniform_torque.y);
+    torque_u_[2] = UniformDistribution(-noise_uniform_torque.z, noise_uniform_torque.z);
+
+    // Torques publisher
+    ang_force_sensor_pub_ = node_handle_->advertise<geometry_msgs::Vector3Stamped>(force_sensor_pub_topic_+"/angular", 10);
+    ang_force_sensor_truth_pub_ = node_handle_->advertise<geometry_msgs::Vector3Stamped>(force_sensor_truth_pub_topic_+"/angular", 10);
+  }
 
   // Listen to the update event. This event is broadcast every simulation iteration.
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboForceSensorPlugin::OnUpdate, this, _1));
-
-  force_sensor_pub_ = node_handle_->advertise<geometry_msgs::WrenchStamped>(force_sensor_pub_topic_, 10);
-  force_sensor_truth_pub_ = node_handle_->advertise<geometry_msgs::WrenchStamped>(force_sensor_truth_pub_topic_, 10);
 
 }
 
@@ -184,60 +195,80 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // Is it time to publish the front element?
   if (gazebo_sequence_ == wrench_queue_.front().first) {
-    // Init true force message.
-    geometry_msgs::WrenchStampedPtr true_forces(new geometry_msgs::WrenchStamped);
+    if (lin_force_meas_enabled_) {
+      // Init true and noisy linear force message.
+      geometry_msgs::Vector3StampedPtr true_lin_forces(new geometry_msgs::Vector3Stamped);
+      geometry_msgs::Vector3StampedPtr noisy_lin_forces(new geometry_msgs::Vector3Stamped);
 
-    // Fill true force message with latest data.
-    true_forces->header = wrench_queue_.front().second.header;
-    true_forces->wrench = wrench_queue_.front().second.wrench;
+      // Fill true force message with latest linear forces data.
+      true_lin_forces->vector = wrench_queue_.front().second.wrench.force;
 
-    // Remove first element from array (LIFO policy).
-    wrench_queue_.pop_front();
+      // Update headers.
+      true_lin_forces->header = wrench_queue_.front().second.header;
+      noisy_lin_forces->header = true_lin_forces->header;
 
-    // Init noisy force message
-    geometry_msgs::WrenchStampedPtr noisy_forces(new geometry_msgs::WrenchStamped);
-    noisy_forces->header = true_forces->header;
+      // Calculate linear force distortions.
+      Eigen::Vector3d linear_force_n;
+      linear_force_n << linear_force_n_[0](random_generator_) + linear_force_u_[0](random_generator_),
+                        linear_force_n_[1](random_generator_) + linear_force_u_[1](random_generator_),
+                        linear_force_n_[2](random_generator_) + linear_force_u_[2](random_generator_);
+      // Fill linear force fields.
+      noisy_lin_forces->vector.x = true_lin_forces->vector.x + linear_force_n[0];
+      noisy_lin_forces->vector.y = true_lin_forces->vector.y + linear_force_n[1];
+      noisy_lin_forces->vector.z = true_lin_forces->vector.z + linear_force_n[2];
 
-    // Calculate linear force distortions.
-    Eigen::Vector3d linear_force_n;
-    linear_force_n << linear_force_n_[0](random_generator_) + linear_force_u_[0](random_generator_),
-                      linear_force_n_[1](random_generator_) + linear_force_u_[1](random_generator_),
-                      linear_force_n_[2](random_generator_) + linear_force_u_[2](random_generator_);
-    // Fill linear force fields.
-    noisy_forces->wrench.force.x = true_forces->wrench.force.x + linear_force_n[0];
-    noisy_forces->wrench.force.y = true_forces->wrench.force.y + linear_force_n[1];
-    noisy_forces->wrench.force.z = true_forces->wrench.force.z + linear_force_n[2];
-
-    // Calculate torque distortions.
-    Eigen::Vector3d torque_n;
-    torque_n << torque_n_[0](random_generator_) + torque_u_[0](random_generator_),
-                torque_n_[1](random_generator_) + torque_u_[1](random_generator_),
-                torque_n_[2](random_generator_) + torque_u_[2](random_generator_);
-    // Fill torque fields.
-    noisy_forces->wrench.torque.x = true_forces->wrench.torque.x + torque_n[0];
-    noisy_forces->wrench.torque.y = true_forces->wrench.torque.y + torque_n[1];
-    noisy_forces->wrench.torque.z = true_forces->wrench.torque.z + torque_n[2];
-
-    // Publish all the topics, for which the topic name is specified.
-    if (force_sensor_pub_.getNumSubscribers() >= 0) {
-      force_sensor_pub_.publish(noisy_forces);
+      // Publish all the topics, for which the topic name is specified.
+      if (lin_force_sensor_pub_.getNumSubscribers() >= 0) {
+        lin_force_sensor_pub_.publish(noisy_lin_forces);
+      }
+      if (lin_force_sensor_truth_pub_.getNumSubscribers() > 0) {
+        lin_force_sensor_truth_pub_.publish(true_lin_forces);
+      }
     }
-    if (force_sensor_truth_pub_.getNumSubscribers() > 0) {
-      force_sensor_truth_pub_.publish(true_forces);
+
+    if (torque_meas_enabled_) {
+      // Init true and noisy torque message.
+      geometry_msgs::Vector3StampedPtr true_torques(new geometry_msgs::Vector3Stamped);
+      geometry_msgs::Vector3StampedPtr noisy_torques(new geometry_msgs::Vector3Stamped);
+
+      // Fill true force message with latest torques data.
+      true_torques->vector = wrench_queue_.front().second.wrench.torque;
+
+      // Update headers.
+      true_torques->header = wrench_queue_.front().second.header;
+      noisy_torques->header = true_torques->header;
+
+      // Calculate torque distortions.
+      Eigen::Vector3d torque_n;
+      torque_n << torque_n_[0](random_generator_) + torque_u_[0](random_generator_),
+                  torque_n_[1](random_generator_) + torque_u_[1](random_generator_),
+                  torque_n_[2](random_generator_) + torque_u_[2](random_generator_);
+      // Fill torque fields.
+      noisy_torques->vector.x = true_torques->vector.x + torque_n[0];
+      noisy_torques->vector.y = true_torques->vector.y + torque_n[1];
+      noisy_torques->vector.z = true_torques->vector.z + torque_n[2];
+
+      // Publish all the topics, for which the topic name is specified.
+      if (ang_force_sensor_pub_.getNumSubscribers() >= 0) {
+        ang_force_sensor_pub_.publish(noisy_torques);
+      }
+      if (ang_force_sensor_truth_pub_.getNumSubscribers() > 0) {
+        ang_force_sensor_truth_pub_.publish(true_torques);
+      }
     }
 
     // Transformation between sensor link and parent link.
     tf::Quaternion tf_q_P_C(gazebo_pose.rot.x, gazebo_pose.rot.y, gazebo_pose.rot.z, gazebo_pose.rot.w);
     tf::Vector3 tf_p_P_C(gazebo_pose.pos.x, gazebo_pose.pos.y, gazebo_pose.pos.z);
     tf_ = tf::Transform(tf_q_P_C, tf_p_P_C);
-    transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, true_forces->header.stamp, parent_frame_id_, namespace_));
+    transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, wrench_queue_.front().second.header.stamp, parent_frame_id_, namespace_));
     if (parent_frame_id_ != kDefaultParentFrameId && reference_frame_id_ != parent_frame_id_) {
       // Transformation between parent link and reference frame.
       tf::Quaternion tf_q_R_P(gazebo_parent_pose.rot.x, gazebo_parent_pose.rot.y, gazebo_parent_pose.rot.z, gazebo_parent_pose.rot.w);
       tf::Vector3 tf_p_R_P(gazebo_parent_pose.pos.x, gazebo_parent_pose.pos.y, gazebo_parent_pose.pos.z);
       tf_.setOrigin(tf_p_R_P);
       tf_.setRotation(tf_q_R_P);
-      transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, true_forces->header.stamp, reference_frame_id_, parent_frame_id_));
+      transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, wrench_queue_.front().second.header.stamp, reference_frame_id_, parent_frame_id_));
     }
     if (reference_frame_id_ != kDefaultReferenceFrameId) {
       // Transformation between reference frame and world (default).
@@ -245,11 +276,17 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
       tf::Vector3 tf_p_W_R(gazebo_reference_pose.pos.x, gazebo_reference_pose.pos.y, gazebo_reference_pose.pos.z);
       tf_.setOrigin(tf_p_W_R);
       tf_.setRotation(tf_q_W_R);
-      transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, true_forces->header.stamp, "world", reference_frame_id_));
+      transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, wrench_queue_.front().second.header.stamp, "world", reference_frame_id_));
     }
+
+    // Remove first element from wrench array (LIFO policy).
+    wrench_queue_.pop_front();
+
   }
   ++gazebo_sequence_;
 }
+
+
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboForceSensorPlugin);
 }
