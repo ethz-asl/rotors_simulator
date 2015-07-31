@@ -58,6 +58,8 @@ static constexpr int kDefaultMeasurementDivisor = 1;
 static constexpr int kDefaultGazeboSequence = 0;
 static constexpr int kDefaultWrenchSequence = 0;
 static constexpr double kDefaultUnknownDelay = 0.0;
+static constexpr bool kDefaultLinforceMeasEnabled = true;
+static constexpr bool kDefaultTorqueMeasEnabled = true;
 
 
 class GazeboForceSensorPlugin : public ModelPlugin {
@@ -78,6 +80,8 @@ class GazeboForceSensorPlugin : public ModelPlugin {
         measurement_delay_(kDefaultMeasurementDelay),
         measurement_divisor_(kDefaultMeasurementDivisor),
         unknown_delay_(kDefaultUnknownDelay),
+        lin_force_meas_enabled_(kDefaultLinforceMeasEnabled),
+        torque_meas_enabled_(kDefaultTorqueMeasEnabled),
         gazebo_sequence_(kDefaultGazeboSequence),
         wrench_sequence_(kDefaultWrenchSequence),
         node_handle_(NULL) {}
@@ -115,13 +119,17 @@ class GazeboForceSensorPlugin : public ModelPlugin {
   int gazebo_sequence_;
   int wrench_sequence_;
   double unknown_delay_;
+  bool lin_force_meas_enabled_;
+  bool torque_meas_enabled_;
 
   std::random_device random_device_;
   std::mt19937 random_generator_;
 
   ros::NodeHandle* node_handle_;
-  ros::Publisher force_sensor_pub_;
-  ros::Publisher force_sensor_truth_pub_;
+  ros::Publisher lin_force_sensor_pub_;
+  ros::Publisher lin_force_sensor_truth_pub_;
+  ros::Publisher ang_force_sensor_pub_;
+  ros::Publisher ang_force_sensor_truth_pub_;
 
   tf::Transform tf_;
   tf::TransformBroadcaster transform_broadcaster_;
