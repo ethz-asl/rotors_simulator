@@ -36,15 +36,8 @@
 
 namespace gazebo {
 // Default values
-static const std::string kDefaultNamespace = "";
-
-static const std::string kDefaultMotorPubTopic =
-    mav_msgs::default_topics::MOTOR_MEASUREMENT;  // "motors"
 static const std::string kDefaultLinkName = "base_link";
 static const std::string kDefaultFrameId = "base_link";
-
-static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
-
 
 /// \brief This plugin publishes the motor speeds of your multirotor model.
 class GazeboMultirotorBasePlugin : public ModelPlugin {
@@ -54,7 +47,7 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   GazeboMultirotorBasePlugin()
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
-        motor_pub_topic_(kDefaultMotorPubTopic),
+        motor_pub_topic_(kDefaultMotorTopic),
         link_name_(kDefaultLinkName),
         frame_id_(kDefaultFrameId),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
