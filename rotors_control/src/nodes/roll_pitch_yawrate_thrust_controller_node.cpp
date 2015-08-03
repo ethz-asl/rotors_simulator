@@ -88,15 +88,14 @@ void RollPitchYawrateThrustControllerNode::OdometryCallback(const nav_msgs::Odom
   roll_pitch_yawrate_thrust_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
   // Todo(ffurrer): Do this in the conversions header.
-  // TODO(helenol): why is this a shared ptr???
-  mav_msgs::ActuatorsPtr turning_velocities_msg(new mav_msgs::Actuators);
+  mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
 
-  turning_velocities_msg->angular_velocities.clear();
+  actuator_msg->angular_velocities.clear();
   for (int i = 0; i < ref_rotor_velocities.size(); i++)
-    turning_velocities_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
-  turning_velocities_msg->header.stamp = odometry_msg->header.stamp;
+    actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
+  actuator_msg->header.stamp = odometry_msg->header.stamp;
 
-  motor_velocity_reference_pub_.publish(turning_velocities_msg);
+  motor_velocity_reference_pub_.publish(actuator_msg);
 }
 
 }

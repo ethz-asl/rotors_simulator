@@ -24,6 +24,7 @@
 #include <Eigen/Geometry>
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/default_topics.h>
+#include <mav_msgs/eigen_mav_msgs.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
@@ -109,25 +110,19 @@ int main(int argc, char** argv) {
   trajectory_msgs::MultiDOFJointTrajectoryPtr msg(new trajectory_msgs::MultiDOFJointTrajectory);
   msg->header.stamp = ros::Time::now();
   msg->points.resize(waypoints.size());
-  ros::Duration time_from_start(0);
+  msg->joint_names.push_back("base_link");
+  int64_t time_from_start_ns = 0;
   for (size_t i = 0; i < waypoints.size(); ++i) {
     WaypointWithTime& wp = waypoints[i];
 
-    msg->points[i].transforms.resize(1);
-    msg->points[i].velocities.resize(1);
-    msg->points[i].accelerations.resize(1);
+    mav_msgs::EigenTrajectoryPoint trajectory_point;
+    trajectory_point.position = wp.position;
+    trajectory_point.setFromYaw(wp.yaw);
+    trajectory_point.time_from_start_ns = time_from_start_ns;
 
-    msg->points[i].transforms[0].translation.x = wp.position.x();
-    msg->points[i].transforms[0].translation.y = wp.position.y();
-    msg->points[i].transforms[0].translation.z = wp.position.z();
-    msg->points[i].transforms[0].rotation.w = cos(wp.yaw * 0.5);
-    msg->points[i].transforms[0].rotation.x = 0;
-    msg->points[i].transforms[0].rotation.y = 0;
-    msg->points[i].transforms[0].rotation.z = sin(wp.yaw * 0.5);
-    // We don't need velocities and accelerations here. Their constructors initialize them to zero.
+    time_from_start_ns += static_cast<int64_t>(wp.waiting_time * 1000000000);
 
-    msg->points[i].time_from_start = time_from_start;
-    time_from_start += ros::Duration(wp.waiting_time);
+    mav_msgs::msgMultiDofJointTrajectoryPointFromEigen(trajectory_point, &msg->points[i]);
   }
   wp_pub.publish(msg);
 
