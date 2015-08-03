@@ -56,8 +56,6 @@ static constexpr double kDefaultAdisAccelerometerTurnOnBiasSigma =
 // Earth's gravity in Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84)
 static constexpr double kDefaultGravityMagnitude = 9.8068;
 
-static const std::string kDefaultImuTopic = mav_msgs::default_topics::IMU; // "imu"
-
 // A description of the parameters:
 // https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics
 // TODO(burrimi): Should I have a minimalistic description of the params here?

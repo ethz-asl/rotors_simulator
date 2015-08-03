@@ -46,41 +46,10 @@
 
 
 namespace gazebo {
-// Default values, as many of these from mav_msgs as possible.
-static const std::string kDefaultNamespace = "";
-
-static const std::string kDefaultGroundTruthPosePubTopic = "ground_truth/pose";
-static const std::string kDefaultGroundTruthTwistPubTopic = "ground_truth/twist";
-static const std::string kDefaultImuPubTopic = mav_msgs::default_topics::IMU; // "imu"
-static const std::string kDefaultImuSubTopic = mav_msgs::default_topics::IMU; // "imu"
-static const std::string kDefaultControlAttitudeThrustPubTopic =
-    mav_msgs::default_topics::COMMAND_ATTITUDE_THRUST; // "command/attitude"
-static const std::string kDefaultControlAttitudeThrustSubTopic =
-    mav_msgs::default_topics::COMMAND_ATTITUDE_THRUST; // "command/attitude"
-static const std::string kDefaultControlMotorSpeedPubTopic =
-    mav_msgs::default_topics::COMMAND_ACTUATORS;  // "command/motor_speed"
-static const std::string kDefaultControlMotorSpeedSubTopic =
-    mav_msgs::default_topics::COMMAND_ACTUATORS;  // "command/motor_speed"
-static const std::string kDefaultControlRateThrustPubTopic =
-    mav_msgs::default_topics::COMMAND_RATE_THRUST;  // "command/rate"
-static const std::string kDefaultControlRateThrustSubTopic =
-    mav_msgs::default_topics::COMMAND_RATE_THRUST;  // "command/rate"
-static const std::string kDefaultMotorPubTopic =
-    mav_msgs::default_topics::MOTOR_MEASUREMENT;    // "motor_speed"
-static const std::string kDefaultWrenchPubTopic = "wrench";
-static const std::string kDefaultWindPubTopic = "wind";
-static const std::string kDefaultWindSubTopic = "wind";
-static const std::string kDefaultWaypointPubTopic =
-    mav_msgs::default_topics::COMMAND_TRAJECTORY;  // "command/trajectory"
-static const std::string kDefaultWaypointSubTopic =
-    mav_msgs::default_topics::COMMAND_TRAJECTORY;  // "command/trajectory"
-
+// Default values, the rest from common.h
 static const std::string kDefaultFrameId = "ground_truth_pose";
 static const std::string kDefaultLinkName = "base_link";
 static const std::string kDefaultBagFilename_ = "simulator.bag";
-
-static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
-
 
 /// \brief This plugin is used to create rosbag files from within gazebo.
 class GazeboBagPlugin : public ModelPlugin {
@@ -90,22 +59,22 @@ class GazeboBagPlugin : public ModelPlugin {
   GazeboBagPlugin()
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
-        ground_truth_pose_pub_topic_(kDefaultGroundTruthPosePubTopic),
-        ground_truth_twist_pub_topic_(kDefaultGroundTruthTwistPubTopic),
-        imu_pub_topic_(kDefaultImuPubTopic),
-        imu_sub_topic_(kDefaultImuSubTopic),
-        control_attitude_thrust_pub_topic_(kDefaultControlAttitudeThrustPubTopic),
-        control_attitude_thrust_sub_topic_(kDefaultControlAttitudeThrustSubTopic),
-        control_motor_speed_pub_topic_(kDefaultControlMotorSpeedPubTopic),
-        control_motor_speed_sub_topic_(kDefaultControlMotorSpeedSubTopic),
-        control_rate_thrust_pub_topic_(kDefaultControlRateThrustPubTopic),
-        control_rate_thrust_sub_topic_(kDefaultControlRateThrustSubTopic),
-        motor_pub_topic_(kDefaultMotorPubTopic),
-        wrench_pub_topic_(kDefaultWrenchPubTopic),
-        wind_pub_topic_(kDefaultWindPubTopic),
-        wind_sub_topic_(kDefaultWindSubTopic),
-        waypoint_pub_topic_(kDefaultWaypointPubTopic),
-        waypoint_sub_topic_(kDefaultWaypointSubTopic),
+        ground_truth_pose_pub_topic_(kDefaultGroundTruthPoseTopic),
+        ground_truth_twist_pub_topic_(kDefaultGroundTruthTwistTopic),
+        imu_pub_topic_(kDefaultImuTopic),
+        imu_sub_topic_(kDefaultImuTopic),
+        control_attitude_thrust_pub_topic_(kDefaultCommandAttitudeThrustTopic),
+        control_attitude_thrust_sub_topic_(kDefaultCommandAttitudeThrustTopic),
+        control_motor_speed_pub_topic_(kDefaultCommandMotorSpeedTopic),
+        control_motor_speed_sub_topic_(kDefaultCommandMotorSpeedTopic),
+        control_rate_thrust_pub_topic_(kDefaultCommandRateThrustTopic),
+        control_rate_thrust_sub_topic_(kDefaultCommandRateThrustTopic),
+        motor_pub_topic_(kDefaultMotorTopic),
+        wrench_pub_topic_(kDefaultWrenchTopic),
+        wind_pub_topic_(kDefaultWindTopic),
+        wind_sub_topic_(kDefaultWindTopic),
+        waypoint_pub_topic_(kDefaultTrajectoryTopic),
+        waypoint_sub_topic_(kDefaultTrajectoryTopic),
         frame_id_(kDefaultFrameId),
         link_name_(kDefaultLinkName),
         bag_filename_(kDefaultBagFilename_),

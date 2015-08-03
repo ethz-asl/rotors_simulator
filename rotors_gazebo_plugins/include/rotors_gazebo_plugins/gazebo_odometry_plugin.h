@@ -44,27 +44,18 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/TwistWithCovariance.h>
 #include <geometry_msgs/TwistWithCovarianceStamped.h>
+#include <mav_msgs/default_topics.h>
 #include <nav_msgs/Odometry.h>
 #include <opencv2/core/core.hpp>
-#include <ros/ros.h>
 #include <ros/callback_queue.h>
+#include <ros/ros.h>
+#include <rotors_gazebo_plugins/common.h>
 #include <tf/transform_broadcaster.h>
-#include <mav_msgs/default_topics.h>
 
 namespace gazebo {
 // Default values
-static const std::string kDefaultNamespace = "";
 static const std::string kDefaultParentFrameId = "world";
 static const std::string kDefaultLinkName = "odometry_sensor_link";
-static const std::string kDefaultPosePubTopic =
-    mav_msgs::default_topics::POSE;  // "pose"
-static const std::string kDefaultPoseWithCovariancePubTopic =
-    mav_msgs::default_topics::POSE_WITH_COVARIANCE;  // "pose_with_covariance"
-static const std::string kDefaultPositionPubTopic = "position";
-static const std::string kDefaultTransformPubTopic =
-    mav_msgs::default_topics::TRANSFORM;  // "transform"
-static const std::string kDefaultOdometryPubTopic =
-    mav_msgs::default_topics::ODOMETRY;  // "odometry"
 
 static constexpr int kDefaultMeasurementDelay = 0;
 static constexpr int kDefaultMeasurementDivisor = 1;
@@ -82,11 +73,11 @@ class GazeboOdometryPlugin : public ModelPlugin {
   GazeboOdometryPlugin()
       : ModelPlugin(),
         random_generator_(random_device_()),
-        pose_pub_topic_(kDefaultPosePubTopic),
-        pose_with_covariance_pub_topic_(kDefaultPoseWithCovariancePubTopic),
-        position_pub_topic_(kDefaultPositionPubTopic),
-        transform_pub_topic_(kDefaultTransformPubTopic),
-        odometry_pub_topic_(kDefaultOdometryPubTopic),
+        pose_pub_topic_(kDefaultPoseTopic),
+        pose_with_covariance_pub_topic_(kDefaultPoseWithCovarianceTopic),
+        position_pub_topic_(kDefaultPositionTopic),
+        transform_pub_topic_(kDefaultTransformTopic),
+        odometry_pub_topic_(kDefaultOdometryTopic),
         parent_frame_id_(kDefaultParentFrameId),
         link_name_(kDefaultLinkName),
         measurement_delay_(kDefaultMeasurementDelay),

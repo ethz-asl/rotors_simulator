@@ -47,11 +47,8 @@ const static int CW = -1;
 
 namespace gazebo {
 // Default values
-static const std::string kDefaultNamespace = "";
 static const std::string kDefaultCommandSubTopic = "gazebo/command/motor_speed";
 static const std::string kDefaultWindSpeedSubTopic = "gazebo/wind_speed";
-static const std::string kDefaultMotorVelocityPubTopic =
-    mav_msgs::default_topics::MOTOR_MEASUREMENT;    // "motor_speed"
 
 // Set the max_force_ to the max double value. The limitations get handled by the FirstOrderFilter.
 static constexpr double kDefaultMaxForce = std::numeric_limits<double>::max();
@@ -62,7 +59,6 @@ static constexpr double kDefaultTimeConstantDown = 1.0 / 40.0;
 static constexpr double kDefaulMaxRotVelocity = 838.0;
 static constexpr double kDefaultRotorDragCoefficient = 1.0e-4;
 static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
-static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
 
 class GazeboMotorModel : public MotorModel, public ModelPlugin {
  public:
@@ -71,7 +67,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         MotorModel(),
         command_sub_topic_(kDefaultCommandSubTopic),
         wind_speed_sub_topic_(kDefaultWindSpeedSubTopic),
-        motor_speed_pub_topic_(kDefaultMotorVelocityPubTopic),
+        motor_speed_pub_topic_(kDefaultMotorTopic),
         motor_number_(0),
         turning_direction_(turning_direction::CW),
         max_force_(kDefaultMaxForce),

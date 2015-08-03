@@ -41,13 +41,9 @@
 namespace gazebo {
 
 // Default values
-static const std::string kDefaultNamespace = "";
-
 // This just proxies the motor commands from command/motor_speed to the single motors via internal
 // ConsPtr passing, such that the original commands don't have to go n_motors-times over the wire.
-static const std::string kDefaultMotorVelocityReferencePubTopic = "gazebo/command/motor_speed";
-static const std::string kDefaultCommandMotorSpeedSubTopic =
-    mav_msgs::default_topics::COMMAND_ACTUATORS;  // "command/motor_speed"
+static const std::string kDefaultMotorVelocityReferenceTopic = "gazebo/command/motor_speed";
 
 class GazeboControllerInterface : public ModelPlugin {
  public:
@@ -55,8 +51,8 @@ class GazeboControllerInterface : public ModelPlugin {
       : ModelPlugin(),
         received_first_reference_(false),
         namespace_(kDefaultNamespace),
-        motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferencePubTopic),
-        command_motor_speed_sub_topic_(kDefaultCommandMotorSpeedSubTopic),
+        motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferenceTopic),
+        command_motor_speed_sub_topic_(kDefaultCommandMotorSpeedTopic),
         node_handle_(NULL){}
   ~GazeboControllerInterface();
 
