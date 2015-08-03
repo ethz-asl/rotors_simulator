@@ -23,7 +23,7 @@
 
 #include <ctime>
 
-#include <mav_msgs/MotorSpeed.h>
+#include <mav_msgs/Actuators.h>
 
 namespace gazebo {
 
@@ -74,32 +74,32 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   }
 
   getSdfParam<std::string>(_sdf, "frameId", frame_id_, frame_id_);
-  getSdfParam<std::string>(_sdf, "imuPubTopic", imu_pub_topic_, namespace_ + "/" + imu_pub_topic_);
-  getSdfParam<std::string>(_sdf, "imuSubTopic", imu_sub_topic_, imu_sub_topic_);
-  getSdfParam<std::string>(_sdf, "commandAttitudeThrustPubTopic", control_attitude_thrust_pub_topic_,
-                           namespace_ + "/" + control_attitude_thrust_pub_topic_);
-  getSdfParam<std::string>(_sdf, "commandAttitudeThrustSubTopic", control_attitude_thrust_sub_topic_,
-                           control_attitude_thrust_sub_topic_);
-  getSdfParam<std::string>(_sdf, "commandMotorSpeedPubTopic", control_motor_speed_pub_topic_,
-                           namespace_ + "/" + control_motor_speed_pub_topic_);
-  getSdfParam<std::string>(_sdf, "commandMotorSpeedSubTopic", control_motor_speed_sub_topic_,
-                           control_motor_speed_sub_topic_);
-  getSdfParam<std::string>(_sdf, "commandRateThrustPubTopic", control_rate_thrust_pub_topic_,
-                           namespace_ + "/" + control_rate_thrust_pub_topic_);
-  getSdfParam<std::string>(_sdf, "commandRateThrustSubTopic", control_rate_thrust_sub_topic_,
-                           control_rate_thrust_sub_topic_);
-  getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, namespace_ + "/" + motor_pub_topic_);
-  getSdfParam<std::string>(_sdf, "posePubTopic", ground_truth_pose_pub_topic_,
-                           namespace_ + "/" + ground_truth_pose_pub_topic_);
-  getSdfParam<std::string>(_sdf, "twistPubTopic", ground_truth_twist_pub_topic_,
-                           namespace_ + "/" + ground_truth_twist_pub_topic_);
-  getSdfParam<std::string>(_sdf, "wrenchesPubTopic", wrench_pub_topic_,
-                           namespace_ + "/" + wrench_pub_topic_);
-  getSdfParam<std::string>(_sdf, "windPubTopic", wind_pub_topic_, namespace_ + "/" + wind_pub_topic_);
-  getSdfParam<std::string>(_sdf, "windSubTopic", wind_sub_topic_, wind_sub_topic_);
-  getSdfParam<std::string>(_sdf, "waypointPubTopic", waypoint_pub_topic_,
-                           namespace_ + "/" + waypoint_pub_topic_);
-  getSdfParam<std::string>(_sdf, "waypointSubTopic", waypoint_sub_topic_, waypoint_sub_topic_);
+  getSdfParam<std::string>(_sdf, "imuPubTopic", imu_topic_, namespace_ + "/" + imu_topic_);
+  getSdfParam<std::string>(_sdf, "imuSubTopic", imu_topic_, imu_topic_);
+  getSdfParam<std::string>(_sdf, "commandAttitudeThrustPubTopic", control_attitude_thrust_topic_,
+                           namespace_ + "/" + control_attitude_thrust_topic_);
+  getSdfParam<std::string>(_sdf, "commandAttitudeThrustSubTopic", control_attitude_thrust_topic_,
+                           control_attitude_thrust_topic_);
+  getSdfParam<std::string>(_sdf, "commandMotorSpeedPubTopic", control_motor_speed_topic_,
+                           namespace_ + "/" + control_motor_speed_topic_);
+  getSdfParam<std::string>(_sdf, "commandMotorSpeedSubTopic", control_motor_speed_topic_,
+                           control_motor_speed_topic_);
+  getSdfParam<std::string>(_sdf, "commandRateThrustPubTopic", control_rate_thrust_topic_,
+                           namespace_ + "/" + control_rate_thrust_topic_);
+  getSdfParam<std::string>(_sdf, "commandRateThrustSubTopic", control_rate_thrust_topic_,
+                           control_rate_thrust_topic_);
+  getSdfParam<std::string>(_sdf, "motorPubTopic", motor_topic_, namespace_ + "/" + motor_topic_);
+  getSdfParam<std::string>(_sdf, "posePubTopic", ground_truth_pose_topic_,
+                           namespace_ + "/" + ground_truth_pose_topic_);
+  getSdfParam<std::string>(_sdf, "twistPubTopic", ground_truth_twist_topic_,
+                           namespace_ + "/" + ground_truth_twist_topic_);
+  getSdfParam<std::string>(_sdf, "wrenchesPubTopic", wrench_topic_,
+                           namespace_ + "/" + wrench_topic_);
+  getSdfParam<std::string>(_sdf, "windPubTopic", wind_topic_, namespace_ + "/" + wind_topic_);
+  getSdfParam<std::string>(_sdf, "windSubTopic", wind_topic_, wind_topic_);
+  getSdfParam<std::string>(_sdf, "waypointPubTopic", waypoint_topic_,
+                           namespace_ + "/" + waypoint_topic_);
+  getSdfParam<std::string>(_sdf, "waypointSubTopic", waypoint_topic_, waypoint_topic_);
 
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, rotor_velocity_slowdown_sim_);
 
@@ -160,25 +160,25 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   }
 
   // Subscriber to IMU sensor_msgs::Imu Message.
-  imu_sub_ = node_handle_->subscribe(imu_sub_topic_, 10, &GazeboBagPlugin::ImuCallback, this);
+  imu_sub_ = node_handle_->subscribe(imu_topic_, 10, &GazeboBagPlugin::ImuCallback, this);
 
   // Subscriber to Wind WrenchStamped Message.
-  wind_sub_ = node_handle_->subscribe(wind_sub_topic_, 10, &GazeboBagPlugin::WindCallback, this);
+  wind_sub_ = node_handle_->subscribe(wind_topic_, 10, &GazeboBagPlugin::WindCallback, this);
 
   // Subscriber to Waypoint CommandTrajectoryPositionYaw Message.
-  waypoint_sub_ = node_handle_->subscribe(waypoint_sub_topic_, 10, &GazeboBagPlugin::WaypointCallback, this);
+  waypoint_sub_ = node_handle_->subscribe(waypoint_topic_, 10, &GazeboBagPlugin::WaypointCallback, this);
 
   // Subscriber to Control Attitude Thrust Message.
-  control_attitude_thrust_sub_ = node_handle_->subscribe(control_attitude_thrust_sub_topic_, 10,
-                                                         &GazeboBagPlugin::CommandAttitudeThrustCallback, this);
+  control_attitude_thrust_sub_ = node_handle_->subscribe(control_attitude_thrust_topic_, 10,
+                                                         &GazeboBagPlugin::AttitudeThrustCallback, this);
 
   // Subscriber to Control Motor Speed Message.
-  control_motor_speed_sub_ = node_handle_->subscribe(control_motor_speed_sub_topic_, 10,
-                                                     &GazeboBagPlugin::CommandMotorSpeedCallback, this);
+  control_motor_speed_sub_ = node_handle_->subscribe(control_motor_speed_topic_, 10,
+                                                     &GazeboBagPlugin::ActuatorsCallback, this);
 
   // Subscriber to Control Rate Thrust Message.
-  control_rate_thrust_sub_ = node_handle_->subscribe(control_rate_thrust_sub_topic_, 10,
-                                                     &GazeboBagPlugin::CommandRateThrustCallback, this);
+  control_rate_thrust_sub_ = node_handle_->subscribe(control_rate_thrust_topic_, 10,
+                                                     &GazeboBagPlugin::RateThrustCallback, this);
 }
 
 // This gets called by the world update start event.
@@ -193,56 +193,56 @@ void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
 void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
-  writeBag(imu_pub_topic_, ros_now, imu_msg);
+  writeBag(imu_topic_, ros_now, imu_msg);
 }
 
 void GazeboBagPlugin::WindCallback(const geometry_msgs::WrenchStampedConstPtr& wind_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
-  writeBag(wind_pub_topic_, ros_now, wind_msg);
+  writeBag(wind_topic_, ros_now, wind_msg);
 }
 
 void GazeboBagPlugin::WaypointCallback(
-    const mav_msgs::CommandTrajectoryPositionYawConstPtr& trajectory_msg) {
+    const trajectory_msgs::MultiDOFJointTrajectoryPoint& trajectory_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
-  writeBag(waypoint_pub_topic_, ros_now, trajectory_msg);
+  writeBag(waypoint_topic_, ros_now, trajectory_msg);
 }
 
-void GazeboBagPlugin::CommandAttitudeThrustCallback(
-    const mav_msgs::CommandAttitudeThrustConstPtr& control_msg) {
+void GazeboBagPlugin::AttitudeThrustCallback(
+    const mav_msgs::AttitudeThrustConstPtr& control_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
-  writeBag(control_attitude_thrust_pub_topic_, ros_now, control_msg);
+  writeBag(control_attitude_thrust_topic_, ros_now, control_msg);
 }
 
-void GazeboBagPlugin::CommandMotorSpeedCallback(const mav_msgs::CommandMotorSpeedConstPtr& control_msg) {
+void GazeboBagPlugin::ActuatorsCallback(const mav_msgs::ActuatorsConstPtr& control_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
-  writeBag(control_motor_speed_pub_topic_, ros_now, control_msg);
+  writeBag(control_motor_speed_topic_, ros_now, control_msg);
 }
 
-void GazeboBagPlugin::CommandRateThrustCallback(const mav_msgs::CommandRateThrustConstPtr& control_msg) {
+void GazeboBagPlugin::RateThrustCallback(const mav_msgs::RateThrustConstPtr& control_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
-  writeBag(control_rate_thrust_pub_topic_, ros_now, control_msg);
+  writeBag(control_rate_thrust_topic_, ros_now, control_msg);
 }
 
 void GazeboBagPlugin::LogMotorVelocities(const common::Time now) {
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
 
-  mav_msgs::MotorSpeed rot_velocities_msg;
-  rot_velocities_msg.motor_speed.resize(motor_joints_.size());
+  mav_msgs::Actuators rot_velocities_msg;
+  rot_velocities_msg.angular_velocities.resize(motor_joints_.size());
 
   MotorNumberToJointMap::iterator m;
   for (m = motor_joints_.begin(); m != motor_joints_.end(); ++m) {
     double motor_rot_vel = m->second->GetVelocity(0) * rotor_velocity_slowdown_sim_;
-    rot_velocities_msg.motor_speed[m->first] = motor_rot_vel;
+    rot_velocities_msg.angular_velocities[m->first] = motor_rot_vel;
   }
   rot_velocities_msg.header.stamp.sec = now.sec;
   rot_velocities_msg.header.stamp.nsec = now.nsec;
 
-  writeBag(motor_pub_topic_, ros_now, rot_velocities_msg);
+  writeBag(motor_topic_, ros_now, rot_velocities_msg);
 }
 
 void GazeboBagPlugin::LogGroundTruth(const common::Time now) {
@@ -264,7 +264,7 @@ void GazeboBagPlugin::LogGroundTruth(const common::Time now) {
   pose_msg.pose.orientation.y = pose.rot.y;
   pose_msg.pose.orientation.z = pose.rot.z;
 
-  writeBag(ground_truth_pose_pub_topic_, ros_now, pose_msg);
+  writeBag(ground_truth_pose_topic_, ros_now, pose_msg);
 
   // Get twist and update the message.
   math::Vector3 linear_veloctiy = link_->GetWorldLinearVel();
@@ -279,7 +279,7 @@ void GazeboBagPlugin::LogGroundTruth(const common::Time now) {
   twist_msg.twist.angular.y = angular_veloctiy.y;
   twist_msg.twist.angular.z = angular_veloctiy.z;
 
-  writeBag(ground_truth_twist_pub_topic_, ros_now, twist_msg);
+  writeBag(ground_truth_twist_topic_, ros_now, twist_msg);
 }
 
 void GazeboBagPlugin::LogWrenches(const common::Time now) {
@@ -308,7 +308,7 @@ void GazeboBagPlugin::LogWrenches(const common::Time now) {
     wrench_msg.wrench.torque.y = contacts[i]->wrench->body1Torque.y;
     wrench_msg.wrench.torque.z = contacts[i]->wrench->body1Torque.z;
 
-    writeBag(wrench_pub_topic_, ros_now, wrench_msg);
+    writeBag(wrench_topic_, ros_now, wrench_msg);
   }
 }
 

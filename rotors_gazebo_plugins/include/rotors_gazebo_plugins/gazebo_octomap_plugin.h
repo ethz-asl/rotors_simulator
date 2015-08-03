@@ -24,18 +24,18 @@
 #include <iostream>
 #include <math.h>
 
+#include <rotors_gazebo_plugins/common.h>
 #include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <octomap/octomap.h>
-#include <rotors_comm/Octomap.h>
 #include <ros/ros.h>
+#include <rotors_comm/Octomap.h>
 #include <sdf/sdf.hh>
 #include <std_srvs/Empty.h>
 
 namespace gazebo {
-// Default values
-static const std::string kDefaultNamespace = "";
+
 class OctomapFromGazeboWorld : public WorldPlugin {
  public:
   OctomapFromGazeboWorld()

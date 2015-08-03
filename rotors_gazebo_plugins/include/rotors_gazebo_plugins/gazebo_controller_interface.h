@@ -24,28 +24,26 @@
 
 #include <boost/bind.hpp>
 #include <Eigen/Eigen>
+#include <stdio.h>
+
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-#include <mav_msgs/CommandMotorSpeed.h>
-#include <mav_msgs/MotorSpeed.h>
+#include <mav_msgs/Actuators.h>
+#include <mav_msgs/default_topics.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
-#include <stdio.h>
 
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
 
 // Default values
-static const std::string kDefaultNamespace = "";
-
 // This just proxies the motor commands from command/motor_speed to the single motors via internal
 // ConsPtr passing, such that the original commands don't have to go n_motors-times over the wire.
-static const std::string kDefaultMotorVelocityReferencePubTopic = "gazebo/command/motor_speed";
-static const std::string kDefaultCommandMotorSpeedSubTopic = "command/motor_speed";
+static const std::string kDefaultMotorVelocityReferenceTopic = "gazebo/command/motor_speed";
 
 class GazeboControllerInterface : public ModelPlugin {
  public:
@@ -53,8 +51,8 @@ class GazeboControllerInterface : public ModelPlugin {
       : ModelPlugin(),
         received_first_reference_(false),
         namespace_(kDefaultNamespace),
-        motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferencePubTopic),
-        command_motor_speed_sub_topic_(kDefaultCommandMotorSpeedSubTopic),
+        motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferenceTopic),
+        command_motor_speed_sub_topic_(mav_msgs::default_topics::COMMAND_ACTUATORS),
         node_handle_(NULL){}
   ~GazeboControllerInterface();
 
@@ -85,7 +83,7 @@ class GazeboControllerInterface : public ModelPlugin {
 
   boost::thread callback_queue_thread_;
   void QueueThread();
-  void CommandMotorCallback(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg);
+  void CommandMotorCallback(const mav_msgs::ActuatorsConstPtr& input_reference_msg);
 };
 }
 
