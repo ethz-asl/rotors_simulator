@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
     WaypointWithTime& wp = waypoints[i];
 
     mav_msgs::EigenTrajectoryPoint trajectory_point;
-    trajectory_point.position = wp.position;
+    trajectory_point.position_W = wp.position;
     trajectory_point.setFromYaw(wp.yaw);
     trajectory_point.time_from_start_ns = time_from_start_ns;
 
