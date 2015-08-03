@@ -135,7 +135,7 @@ void LeePositionControllerNode::MultiDofJointTrajectoryCallback(
 void LeePositionControllerNode::TimedCommandCallback(const ros::TimerEvent& e) {
 
   if(commands_.empty()){
-    ROS_WARN("s empty, this should not happen here");
+    ROS_WARN("Commands empty, this should not happen here");
     return;
   }
 
@@ -162,14 +162,14 @@ void LeePositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPt
   lee_position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
   // Todo(ffurrer): Do this in the conversions header.
-  mav_msgs::ActuatorsPtr turning_velocities_msg(new mav_msgs::Actuators);
+  mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
 
-  turning_velocities_msg->angular_velocities.clear();
+  actuator_msg->angular_velocities.clear();
   for (int i = 0; i < ref_rotor_velocities.size(); i++)
-    turning_velocities_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
-  turning_velocities_msg->header.stamp = odometry_msg->header.stamp;
+    actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
+  actuator_msg->header.stamp = odometry_msg->header.stamp;
 
-  motor_velocity_reference_pub_.publish(turning_velocities_msg);
+  motor_velocity_reference_pub_.publish(actuator_msg);
 }
 
 }
