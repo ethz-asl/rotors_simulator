@@ -32,38 +32,48 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/WrenchStamped.h>
-#include <mav_msgs/CommandAttitudeThrust.h>
-#include <mav_msgs/CommandMotorSpeed.h>
-#include <mav_msgs/CommandRateThrust.h>
-#include <mav_msgs/CommandTrajectoryPositionYaw.h>
+#include <mav_msgs/Actuators.h>
+#include <mav_msgs/AttitudeThrust.h>
+#include <mav_msgs/default_topics.h>
+#include <mav_msgs/RateThrust.h>
 #include <ros/ros.h>
 #include <rosbag/bag.h>
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/Float32.h>
+#include <trajectory_msgs/MultiDOFJointTrajectoryPoint.h>
 
 #include "rotors_gazebo_plugins/common.h"
 
 
 namespace gazebo {
-// Default values
+// Default values, as many of these from mav_msgs as possible.
 static const std::string kDefaultNamespace = "";
 
 static const std::string kDefaultGroundTruthPosePubTopic = "ground_truth/pose";
 static const std::string kDefaultGroundTruthTwistPubTopic = "ground_truth/twist";
-static const std::string kDefaultImuPubTopic = "imu";
-static const std::string kDefaultImuSubTopic = "imu";
-static const std::string kDefaultControlAttitudeThrustPubTopic = "command/attitude";
-static const std::string kDefaultControlAttitudeThrustSubTopic = "command/attitude";
-static const std::string kDefaultControlMotorSpeedPubTopic = "command/motor_speed";
-static const std::string kDefaultControlMotorSpeedSubTopic = "command/motor_speed";
-static const std::string kDefaultControlRateThrustPubTopic = "command/rate";
-static const std::string kDefaultControlRateThrustSubTopic = "command/rate";
-static const std::string kDefaultMotorPubTopic = "motors";
+static const std::string kDefaultImuPubTopic = mav_msgs::default_topics::IMU; // "imu"
+static const std::string kDefaultImuSubTopic = mav_msgs::default_topics::IMU; // "imu"
+static const std::string kDefaultControlAttitudeThrustPubTopic =
+    mav_msgs::default_topics::COMMAND_ATTITUDE_THRUST; // "command/attitude"
+static const std::string kDefaultControlAttitudeThrustSubTopic =
+    mav_msgs::default_topics::COMMAND_ATTITUDE_THRUST; // "command/attitude"
+static const std::string kDefaultControlMotorSpeedPubTopic =
+    mav_msgs::default_topics::COMMAND_ACTUATORS;  // "command/motor_speed"
+static const std::string kDefaultControlMotorSpeedSubTopic =
+    mav_msgs::default_topics::COMMAND_ACTUATORS;  // "command/motor_speed"
+static const std::string kDefaultControlRateThrustPubTopic =
+    mav_msgs::default_topics::COMMAND_RATE_THRUST;  // "command/rate"
+static const std::string kDefaultControlRateThrustSubTopic =
+    mav_msgs::default_topics::COMMAND_RATE_THRUST;  // "command/rate"
+static const std::string kDefaultMotorPubTopic =
+    mav_msgs::default_topics::MOTOR_MEASUREMENT;    // "motor_speed"
 static const std::string kDefaultWrenchPubTopic = "wrench";
 static const std::string kDefaultWindPubTopic = "wind";
 static const std::string kDefaultWindSubTopic = "wind";
-static const std::string kDefaultWaypointPubTopic = "command/trajectory_position_yaw";
-static const std::string kDefaultWaypointSubTopic = "command/trajectory_position_yaw";
+static const std::string kDefaultWaypointPubTopic =
+    mav_msgs::default_topics::COMMAND_TRAJECTORY;  // "command/trajectory"
+static const std::string kDefaultWaypointSubTopic =
+    mav_msgs::default_topics::COMMAND_TRAJECTORY;  // "command/trajectory"
 
 static const std::string kDefaultFrameId = "ground_truth_pose";
 static const std::string kDefaultLinkName = "base_link";
@@ -124,19 +134,19 @@ class GazeboBagPlugin : public ModelPlugin {
 
   /// \brief Called when a CommandTrajectoryPositionYaw message is received.
   /// \param[in] trajectory_msg A CommandTrajectory message from mav_msgs.
-  void WaypointCallback(const mav_msgs::CommandTrajectoryPositionYawConstPtr& trajectory_msg);
+  void WaypointCallback(const trajectory_msgs::MultiDOFJointTrajectoryPoint& trajectory_msg);
 
   /// \brief Called when a CommandAttitudeThrust message is received.
   /// \param[in] control_msg A CommandAttitudeThrust message from mav_msgs.
-  void CommandAttitudeThrustCallback(const mav_msgs::CommandAttitudeThrustConstPtr& control_msg);
+  void AttitudeThrustCallback(const mav_msgs::AttitudeThrustConstPtr& control_msg);
 
   /// \brief Called when a CommandMotorSpeed message is received.
   /// \param[in] control_msg A CommandMotorSpeed message from mav_msgs.
-  void CommandMotorSpeedCallback(const mav_msgs::CommandMotorSpeedConstPtr& control_msg);
+  void ActuatorsCallback(const mav_msgs::ActuatorsConstPtr& control_msg);
 
   /// \brief Called when a CommandRateThrust message is received.
   /// \param[in] control_msg A CommandRateThrust message from mav_msgs.
-  void CommandRateThrustCallback(const mav_msgs::CommandRateThrustConstPtr& control_msg);
+  void RateThrustCallback(const mav_msgs::RateThrustConstPtr& control_msg);
 
   /// \brief Log the ground truth pose and twist.
   /// \param[in] now The current gazebo common::Time

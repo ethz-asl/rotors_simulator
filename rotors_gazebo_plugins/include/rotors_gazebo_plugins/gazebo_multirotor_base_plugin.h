@@ -28,8 +28,9 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-#include <mav_msgs/MotorSpeed.h>
+#include <mav_msgs/Actuators.h>
 #include <ros/ros.h>
+#include <mav_msgs/default_topics.h>
 
 #include "rotors_gazebo_plugins/common.h"
 
@@ -37,7 +38,8 @@ namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";
 
-static const std::string kDefaultMotorPubTopic = "motors";
+static const std::string kDefaultMotorPubTopic =
+    mav_msgs::default_topics::MOTOR_MEASUREMENT;  // "motors"
 static const std::string kDefaultLinkName = "base_link";
 static const std::string kDefaultFrameId = "base_link";
 

@@ -26,11 +26,12 @@
 
 #include <boost/bind.hpp>
 #include <Eigen/Eigen>
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
-#include <mav_msgs/CommandMotorSpeed.h>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+#include <mav_msgs/Actuators.h>
+#include <mav_msgs/default_topics.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
 #include <rotors_comm/WindSpeed.h>
@@ -49,7 +50,8 @@ namespace gazebo {
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultCommandSubTopic = "gazebo/command/motor_speed";
 static const std::string kDefaultWindSpeedSubTopic = "gazebo/wind_speed";
-static const std::string kDefaultMotorVelocityPubTopic = "motor_speed";
+static const std::string kDefaultMotorVelocityPubTopic =
+    mav_msgs::default_topics::MOTOR_MEASUREMENT;    // "motor_speed"
 
 // Set the max_force_ to the max double value. The limitations get handled by the FirstOrderFilter.
 static constexpr double kDefaultMaxForce = std::numeric_limits<double>::max();
@@ -131,7 +133,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   boost::thread callback_queue_thread_;
   void QueueThread();
   std_msgs::Float32 turning_velocity_msg_;
-  void VelocityCallback(const mav_msgs::CommandMotorSpeedConstPtr& rot_velocities);
+  void VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_velocities);
   void WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed);
 
   std::unique_ptr<FirstOrderFilter<double>>  rotor_velocity_filter_;

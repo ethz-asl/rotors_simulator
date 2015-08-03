@@ -49,17 +49,22 @@
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <tf/transform_broadcaster.h>
+#include <mav_msgs/default_topics.h>
 
 namespace gazebo {
 // Default values
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultParentFrameId = "world";
 static const std::string kDefaultLinkName = "odometry_sensor_link";
-static const std::string kDefaultPosePubTopic = "pose";
-static const std::string kDefaultPoseWithCovariancePubTopic = "pose_with_covariance";
+static const std::string kDefaultPosePubTopic =
+    mav_msgs::default_topics::POSE;  // "pose"
+static const std::string kDefaultPoseWithCovariancePubTopic =
+    mav_msgs::default_topics::POSE_WITH_COVARIANCE;  // "pose_with_covariance"
 static const std::string kDefaultPositionPubTopic = "position";
-static const std::string kDefaultTransformPubTopic = "transform";
-static const std::string kDefaultOdometryPubTopic = "odometry";
+static const std::string kDefaultTransformPubTopic =
+    mav_msgs::default_topics::TRANSFORM;  // "transform"
+static const std::string kDefaultOdometryPubTopic =
+    mav_msgs::default_topics::ODOMETRY;  // "odometry"
 
 static constexpr int kDefaultMeasurementDelay = 0;
 static constexpr int kDefaultMeasurementDivisor = 1;
