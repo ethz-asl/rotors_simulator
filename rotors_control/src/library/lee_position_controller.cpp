@@ -85,8 +85,8 @@ void LeePositionController::SetOdometry(const EigenOdometry& odometry) {
   odometry_ = odometry;
 }
 
-void LeePositionController::SetCommandTrajectoryPositionYaw(
-    const mav_msgs::EigenCommandTrajectoryPositionYaw& command_trajectory) {
+void LeePositionController::SetTrajectoryPoint(
+    const mav_msgs::EigenTrajectoryPoint& command_trajectory) {
   command_trajectory_ = command_trajectory;
   controller_active_ = true;
 }
@@ -120,7 +120,8 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
 
   // Get the desired rotation matrix.
   Eigen::Vector3d b1_des;
-  b1_des << cos(command_trajectory_.yaw), sin(command_trajectory_.yaw), 0;
+  double yaw = command_trajectory_.getYaw();
+  b1_des << cos(yaw), sin(yaw), 0;
 
   Eigen::Vector3d b3_des;
   b3_des = -acceleration / acceleration.norm();
@@ -141,7 +142,7 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
 
   // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
-  angular_rate_des[2] = command_trajectory_.yaw_rate;
+  angular_rate_des[2] = command_trajectory_.getYawRate();
 
   Eigen::Vector3d angular_rate_error = odometry_.angular_velocity - R_des.transpose() * R * angular_rate_des;
 
