@@ -47,7 +47,7 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   GazeboMultirotorBasePlugin()
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
-        motor_pub_topic_(kDefaultMotorTopic),
+        motor_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
         link_name_(kDefaultLinkName),
         frame_id_(kDefaultFrameId),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),

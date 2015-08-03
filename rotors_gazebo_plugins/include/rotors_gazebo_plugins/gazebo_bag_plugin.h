@@ -59,22 +59,16 @@ class GazeboBagPlugin : public ModelPlugin {
   GazeboBagPlugin()
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
-        ground_truth_pose_pub_topic_(kDefaultGroundTruthPoseTopic),
-        ground_truth_twist_pub_topic_(kDefaultGroundTruthTwistTopic),
-        imu_pub_topic_(kDefaultImuTopic),
-        imu_sub_topic_(kDefaultImuTopic),
-        control_attitude_thrust_pub_topic_(kDefaultCommandAttitudeThrustTopic),
-        control_attitude_thrust_sub_topic_(kDefaultCommandAttitudeThrustTopic),
-        control_motor_speed_pub_topic_(kDefaultCommandMotorSpeedTopic),
-        control_motor_speed_sub_topic_(kDefaultCommandMotorSpeedTopic),
-        control_rate_thrust_pub_topic_(kDefaultCommandRateThrustTopic),
-        control_rate_thrust_sub_topic_(kDefaultCommandRateThrustTopic),
-        motor_pub_topic_(kDefaultMotorTopic),
-        wrench_pub_topic_(kDefaultWrenchTopic),
-        wind_pub_topic_(kDefaultWindTopic),
-        wind_sub_topic_(kDefaultWindTopic),
-        waypoint_pub_topic_(kDefaultTrajectoryTopic),
-        waypoint_sub_topic_(kDefaultTrajectoryTopic),
+        ground_truth_pose_topic_(mav_msgs::default_topics::GROUND_TRUTH_POSE),
+        ground_truth_twist_topic_(mav_msgs::default_topics::GROUND_TRUTH_TWIST),
+        imu_topic_(mav_msgs::default_topics::IMU),
+        control_attitude_thrust_topic_(mav_msgs::default_topics::COMMAND_ATTITUDE_THRUST),
+        control_motor_speed_topic_(mav_msgs::default_topics::COMMAND_ACTUATORS),
+        control_rate_thrust_topic_(mav_msgs::default_topics::COMMAND_RATE_THRUST),
+        motor_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
+        wrench_topic_(mav_msgs::default_topics::WRENCH),
+        wind_topic_(mav_msgs::default_topics::WIND),
+        waypoint_topic_(mav_msgs::default_topics::COMMAND_TRAJECTORY),
         frame_id_(kDefaultFrameId),
         link_name_(kDefaultLinkName),
         bag_filename_(kDefaultBagFilename_),
@@ -146,22 +140,16 @@ class GazeboBagPlugin : public ModelPlugin {
   physics::ContactManager *contact_mgr_;
 
   std::string namespace_;
-  std::string ground_truth_pose_pub_topic_;
-  std::string ground_truth_twist_pub_topic_;
-  std::string imu_pub_topic_;
-  std::string imu_sub_topic_;
-  std::string wind_pub_topic_;
-  std::string wind_sub_topic_;
-  std::string waypoint_pub_topic_;
-  std::string waypoint_sub_topic_;
-  std::string control_attitude_thrust_pub_topic_;
-  std::string control_attitude_thrust_sub_topic_;
-  std::string control_motor_speed_pub_topic_;
-  std::string control_motor_speed_sub_topic_;
-  std::string control_rate_thrust_pub_topic_;
-  std::string control_rate_thrust_sub_topic_;
-  std::string wrench_pub_topic_;
-  std::string motor_pub_topic_;
+  std::string ground_truth_pose_topic_;
+  std::string ground_truth_twist_topic_;
+  std::string imu_topic_;
+  std::string wind_topic_;
+  std::string waypoint_topic_;
+  std::string control_attitude_thrust_topic_;
+  std::string control_motor_speed_topic_;
+  std::string control_rate_thrust_topic_;
+  std::string wrench_topic_;
+  std::string motor_topic_;
   std::string frame_id_;
   std::string link_name_;
   std::string bag_filename_;
