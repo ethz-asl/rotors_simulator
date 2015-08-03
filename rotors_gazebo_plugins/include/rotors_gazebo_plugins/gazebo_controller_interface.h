@@ -52,7 +52,7 @@ class GazeboControllerInterface : public ModelPlugin {
         received_first_reference_(false),
         namespace_(kDefaultNamespace),
         motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferenceTopic),
-        command_motor_speed_sub_topic_(kDefaultCommandMotorSpeedTopic),
+        command_motor_speed_sub_topic_(mav_msgs::default_topics::COMMAND_ACTUATORS),
         node_handle_(NULL){}
   ~GazeboControllerInterface();
 

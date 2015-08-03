@@ -31,6 +31,8 @@
 
 bool sim_running = false;
 
+static const int64_t kNanoSecondsInSecond = 1000000000;
+
 void callback(const sensor_msgs::ImuPtr& /*msg*/) {
   sim_running = true;
 }
@@ -120,7 +122,7 @@ int main(int argc, char** argv) {
     trajectory_point.setFromYaw(wp.yaw);
     trajectory_point.time_from_start_ns = time_from_start_ns;
 
-    time_from_start_ns += static_cast<int64_t>(wp.waiting_time * 1000000000);
+    time_from_start_ns += static_cast<int64_t>(wp.waiting_time * kNanoSecondsInSecond);
 
     mav_msgs::msgMultiDofJointTrajectoryPointFromEigen(trajectory_point, &msg->points[i]);
   }

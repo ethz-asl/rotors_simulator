@@ -29,38 +29,7 @@ namespace gazebo {
 
 // Default values
 static const std::string kDefaultNamespace = "";
-
 static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
-
-static const std::string kDefaultGroundTruthPoseTopic =
-    mav_msgs::default_topics::GROUND_TRUTH_POSE; // "ground_truth/pose";
-static const std::string kDefaultGroundTruthTwistTopic =
-    mav_msgs::default_topics::GROUND_TRUTH_TWIST;   // "ground_truth/twist";
-static const std::string kDefaultImuTopic =
-    mav_msgs::default_topics::IMU; // "imu"
-static const std::string kDefaultCommandAttitudeThrustTopic =
-    mav_msgs::default_topics::COMMAND_ATTITUDE_THRUST; // "command/attitude"
-static const std::string kDefaultCommandMotorSpeedTopic =
-    mav_msgs::default_topics::COMMAND_ACTUATORS;  // "command/motor_speed"
-static const std::string kDefaultCommandRateThrustTopic =
-    mav_msgs::default_topics::COMMAND_RATE_THRUST;  // "command/rate"
-static const std::string kDefaultMotorTopic =
-    mav_msgs::default_topics::MOTOR_MEASUREMENT;    // "motor_speed"
-static const std::string kDefaultWrenchTopic =
-    mav_msgs::default_topics::WRENCH;    // "wrench"
-static const std::string kDefaultWindTopic =
-    mav_msgs::default_topics::WIND;      // "wind";
-static const std::string kDefaultTrajectoryTopic =
-    mav_msgs::default_topics::COMMAND_TRAJECTORY;  // "command/trajectory"
-static const std::string kDefaultPoseTopic =
-    mav_msgs::default_topics::POSE;  // "pose"
-static const std::string kDefaultPoseWithCovarianceTopic =
-    mav_msgs::default_topics::POSE_WITH_COVARIANCE;  // "pose_with_covariance"
-static const std::string kDefaultPositionTopic = "position";
-static const std::string kDefaultTransformTopic =
-    mav_msgs::default_topics::TRANSFORM;  // "transform"
-static const std::string kDefaultOdometryTopic =
-    mav_msgs::default_topics::ODOMETRY;  // "odometry"
 
 /**
  * \brief Obtains a parameter from sdf.
@@ -86,8 +55,6 @@ bool getSdfParam(sdf::ElementPtr sdf, const std::string& name, T& param, const T
 }
 
 }
-
-
 
 template <typename T>
 class FirstOrderFilter {
