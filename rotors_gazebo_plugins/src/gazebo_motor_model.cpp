@@ -155,7 +155,7 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   math::Vector3 joint_axis = joint_->GetGlobalAxis(0);
   math::Vector3 body_velocity_W = link_->GetWorldLinearVel();
   math::Vector3 relative_wind_velocity_W = body_velocity_W - wind_speed_W_;
-  math::Vector3 body_velocity_perpendicular = relative_wind_velocity_W - (relative_wind_velocity_W.Dot(joint_axis) * joint_axis;
+  math::Vector3 body_velocity_perpendicular = relative_wind_velocity_W - (relative_wind_velocity_W.Dot(joint_axis) * joint_axis);
   math::Vector3 air_drag = -std::abs(real_motor_velocity) * rotor_drag_coefficient_ * body_velocity_perpendicular;
   // Apply air_drag to link.
   link_->AddForce(air_drag);
