@@ -69,6 +69,7 @@ class GazeboBagPlugin : public ModelPlugin {
         wrench_topic_(mav_msgs::default_topics::WRENCH),
         wind_topic_(mav_msgs::default_topics::WIND),
         waypoint_topic_(mav_msgs::default_topics::COMMAND_TRAJECTORY),
+        command_pose_topic_(mav_msgs::default_topics::COMMAND_POSE),
         frame_id_(kDefaultFrameId),
         link_name_(kDefaultLinkName),
         bag_filename_(kDefaultBagFilename_),
@@ -95,20 +96,24 @@ class GazeboBagPlugin : public ModelPlugin {
   /// \param[in] wind_msg A WrenchStamped message from geometry_msgs.
   void WindCallback(const geometry_msgs::WrenchStampedConstPtr& wind_msg);
 
-  /// \brief Called when a CommandTrajectoryPositionYaw message is received.
-  /// \param[in] trajectory_msg A CommandTrajectory message from mav_msgs.
+  /// \brief Called when a MultiDOFJointTrajectoryPoint message is received.
+  /// \param[in] trajectory_msg A MultiDOFJointTrajectoryPoint message from trajectory_msgs.
   void WaypointCallback(const trajectory_msgs::MultiDOFJointTrajectoryPoint& trajectory_msg);
 
-  /// \brief Called when a CommandAttitudeThrust message is received.
-  /// \param[in] control_msg A CommandAttitudeThrust message from mav_msgs.
+  /// \brief Called when a PoseStamped message is received.
+  /// \param[in] pose_msg A PoseStamped message from geometry_msgs.
+  void CommandPoseCallback(const geometry_msgs::PoseStamped& pose_msg);
+
+  /// \brief Called when a AttitudeThrust message is received.
+  /// \param[in] control_msg A AttitudeThrust message from mav_msgs.
   void AttitudeThrustCallback(const mav_msgs::AttitudeThrustConstPtr& control_msg);
 
-  /// \brief Called when a CommandMotorSpeed message is received.
-  /// \param[in] control_msg A CommandMotorSpeed message from mav_msgs.
+  /// \brief Called when a Actuators message is received.
+  /// \param[in] control_msg A Actuators message from mav_msgs.
   void ActuatorsCallback(const mav_msgs::ActuatorsConstPtr& control_msg);
 
-  /// \brief Called when a CommandRateThrust message is received.
-  /// \param[in] control_msg A CommandRateThrust message from mav_msgs.
+  /// \brief Called when a RateThrust message is received.
+  /// \param[in] control_msg A RateThrust message from mav_msgs.
   void RateThrustCallback(const mav_msgs::RateThrustConstPtr& control_msg);
 
   /// \brief Log the ground truth pose and twist.
@@ -145,6 +150,7 @@ class GazeboBagPlugin : public ModelPlugin {
   std::string imu_topic_;
   std::string wind_topic_;
   std::string waypoint_topic_;
+  std::string command_pose_topic_;
   std::string control_attitude_thrust_topic_;
   std::string control_motor_speed_topic_;
   std::string control_rate_thrust_topic_;
@@ -168,6 +174,7 @@ class GazeboBagPlugin : public ModelPlugin {
   ros::Subscriber control_attitude_thrust_sub_;
   ros::Subscriber control_motor_speed_sub_;
   ros::Subscriber control_rate_thrust_sub_;
+  ros::Subscriber command_pose_sub_;
 
   std::ofstream csvOut;
 
