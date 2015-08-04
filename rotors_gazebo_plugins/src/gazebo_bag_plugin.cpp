@@ -216,7 +216,7 @@ void GazeboBagPlugin::WaypointCallback(
 void GazeboBagPlugin::CommandPoseCallback(const geometry_msgs::PoseStamped& pose_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
-  writeBag(waypoint_topic_, ros_now, pose_msg);
+  writeBag(command_pose_topic_, ros_now, pose_msg);
 }
 
 void GazeboBagPlugin::AttitudeThrustCallback(
