@@ -31,7 +31,7 @@
 
 namespace rotors_control {
 
-// Default values, now using values from mav_comm.
+// Default values.
 static const std::string kDefaultNamespace = "";
 static const std::string kDefaultCommandMotorSpeedTopic =
     mav_msgs::default_topics::COMMAND_ACTUATORS; // "command/motor_speed";

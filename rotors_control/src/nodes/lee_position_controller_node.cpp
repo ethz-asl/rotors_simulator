@@ -19,6 +19,7 @@
  */
 
 #include <ros/ros.h>
+#include <mav_msgs/default_topics.h>
 
 #include "lee_position_controller_node.h"
 
@@ -31,15 +32,19 @@ LeePositionControllerNode::LeePositionControllerNode() {
 
   ros::NodeHandle nh;
 
+  cmd_pose_sub_ = nh.subscribe(
+      mav_msgs::default_topics::COMMAND_POSE, 1,
+      &LeePositionControllerNode::CommandPoseCallback, this);
+
   cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(
-      kDefaultCommandMultiDofJointTrajectoryTopic, 1,
+      mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
       &LeePositionControllerNode::MultiDofJointTrajectoryCallback, this);
 
-  odometry_sub_ = nh.subscribe(kDefaultOdometryTopic, 10,
+  odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 10,
                                &LeePositionControllerNode::OdometryCallback, this);
 
   motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(
-      kDefaultCommandMotorSpeedTopic, 10);
+      mav_msgs::default_topics::COMMAND_ACTUATORS, 10);
 
   command_timer_ = nh.createTimer(ros::Duration(0), &LeePositionControllerNode::TimedCommandCallback, this,
                                   true, false);
@@ -91,6 +96,21 @@ void LeePositionControllerNode::InitializeParams() {
   lee_position_controller_.InitializeParameters();
 }
 void LeePositionControllerNode::Publish() {
+}
+
+void LeePositionControllerNode::CommandPoseCallback(
+    const geometry_msgs::PoseStampedConstPtr& pose_msg) {
+  // Clear all pending commands.
+  command_timer_.stop();
+  commands_.clear();
+  command_waiting_times_.clear();
+
+  mav_msgs::EigenTrajectoryPoint eigen_reference;
+  mav_msgs::eigenTrajectoryPointFromPoseMsg(*pose_msg, &eigen_reference);
+  commands_.push_front(eigen_reference);
+
+  lee_position_controller_.SetTrajectoryPoint(commands_.front());
+  commands_.pop_front();
 }
 
 void LeePositionControllerNode::MultiDofJointTrajectoryCallback(
