@@ -7,7 +7,7 @@
   <xacro:property name="r1_length" value="0.24"/>
 
   <xacro:property name="r2_width" value="0.05"/>
-  <xacro:property name="r2_height" value="0.01"/>
+  <xacro:property name="r2_height" value="0.008"/>
   <xacro:property name="r2_length" value="0.35"/>
 
   <xacro:property name="r3_width" value="0.05"/>
@@ -23,7 +23,7 @@
   </xacro:property>
 
   <xacro:property name="r3_inertial">
-    <mass value="0.02"/>
+    <mass value="0.002"/>
     <inertia ixx="0.0031" ixy="0.0" ixz="0.0"
     iyy="0.0061" iyz="0.0"
     izz="0.0081"/>
@@ -44,9 +44,9 @@
   </xacro:property>
 
   <xacro:property name="r2_inertial">
-    <mass value="0.02"/>
-    <inertia ixx="0.0031" ixy="0.0" ixz="0.0"
-    iyy="0.0061" iyz="0.0"
+    <mass value="0.0025"/>
+    <inertia ixx="0.0021" ixy="0.0" ixz="0.0"
+    iyy="0.0031" iyz="0.0"
     izz="0.0081"/>
   </xacro:property>
 
@@ -65,9 +65,9 @@
   </xacro:property>
 
   <xacro:property name="r1_inertial">
-    <mass value="0.02"/>
+    <mass value="0.0025"/>
     <inertia ixx="0.0031" ixy="0.0" ixz="0.0"
-    iyy="0.0051" iyz="0.0"
+    iyy="0.0031" iyz="0.0"
     izz="0.0081"/>
   </xacro:property>
 
@@ -144,8 +144,14 @@
     </collision>
 
     <visual>
-      <xacro:insert_block name="r1_frame"/>
-      <xacro:insert_block name="r1_geometry"/>
+      <!-- <xacro:insert_block name="r1_frame"/> -->
+      <!-- <xacro:insert_block name="r1_geometry"/> -->
+      <!-- <origin xyz="0.03 0.115 -0.005" rpy="1.57 0 -0.3"/> -->
+      <origin xyz="${r1_length/2} 0 -0.004" rpy="1.57 0 0"/>
+
+      <geometry>
+          <mesh filename="package://rotors_description/meshes/delta_arm_meshes/R1_v2.dae" scale="0.001 0.001 0.001" />
+      </geometry>
     </visual>
 
     <inertial>
@@ -161,8 +167,13 @@
     </collision>
 
     <visual>
-      <xacro:insert_block name="r1_frame"/>
-      <xacro:insert_block name="r1_geometry"/>
+      <!-- <xacro:insert_block name="r1_frame"/>
+      <xacro:insert_block name="r1_geometry"/> -->
+      <!-- <origin xyz="0.03 -0.115 0.008" rpy="-1.57 0 0.3"/> -->
+       <origin xyz="${r1_length/2} 0 0.012" rpy="-1.57 0 0"/>
+      <geometry>
+          <mesh filename="package://rotors_description/meshes/delta_arm_meshes/R1_v2.dae" scale="0.001 0.001 0.001" />
+      </geometry>
     </visual>
 
     <inertial>
@@ -178,8 +189,12 @@
     </collision>
 
     <visual>
-      <xacro:insert_block name="r2_frame"/>
-      <xacro:insert_block name="r2_geometry"/>
+      <!-- <xacro:insert_block name="r2_frame"/>
+      <xacro:insert_block name="r2_geometry"/> -->
+      <origin xyz="${r2_length/2} 0 -0.026" rpy="1.57 0 0"/>
+      <geometry>
+          <mesh filename="package://rotors_description/meshes/delta_arm_meshes/R2_v2.dae" scale="0.001 0.001 0.001" />
+      </geometry>
     </visual>
 
     <inertial>
@@ -195,8 +210,12 @@
     </collision>
 
     <visual>
-      <xacro:insert_block name="r2_frame"/>
-      <xacro:insert_block name="r2_geometry"/>
+      <!-- <xacro:insert_block name="r2_frame"/>
+      <xacro:insert_block name="r2_geometry"/> -->
+      <origin xyz="${r2_length/2} 0 -0.005" rpy="1.57 0 0"/>
+      <geometry>
+          <mesh filename="package://rotors_description/meshes/delta_arm_meshes/R2_v2.dae" scale="0.001 0.001 0.001" />
+      </geometry>
     </visual>
 
     <inertial>
@@ -212,8 +231,13 @@
     </collision>
 
     <visual>
-      <xacro:insert_block name="end_effector_frame"/>
-      <xacro:insert_block name="end_effector_geometry"/>
+      <!-- <xacro:insert_block name="end_effector_frame"/>
+      <xacro:insert_block name="end_effector_geometry"/> -->
+      <origin xyz="0 0 -0.015" rpy="1.57 0 1.2"/>
+      <geometry>
+          <mesh filename="package://rotors_description/meshes/delta_arm_meshes/end_effector_plate.dae" scale="0.001 0.001 0.001" />
+      </geometry>
+
     </visual>
 
     <inertial>
@@ -311,7 +335,7 @@
    parent_link="${namespace}/r3"
    actuated_joint="${namespace}/left_1"
    motor_model="generic_servo1"
-   maxTorque="3"
+   maxTorque="2"
    noLoadSpeed="0.11"
    Kp="30.0"
    Kd="0.05"
@@ -331,7 +355,7 @@
    parent_link="${namespace}/r3"
    actuated_joint="${namespace}/right_1"
    motor_model="generic_servo2"
-   maxTorque="3"
+   maxTorque="2"
    noLoadSpeed="0.11"
    Kp="30.0"
    Kd="0.05"
@@ -374,7 +398,7 @@
    parent_link="${parent_link}"
    actuated_joint="${namespace}/pitching"
    motor_model="generic_servo0"
-   maxTorque="3"
+   maxTorque="2"
    noLoadSpeed="0.11"
    Kp="30.0"
    Kd="0.05"
