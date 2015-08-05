@@ -100,6 +100,7 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<std::string>(_sdf, "waypointPubTopic", waypoint_topic_,
                            namespace_ + "/" + waypoint_topic_);
   getSdfParam<std::string>(_sdf, "waypointSubTopic", waypoint_topic_, waypoint_topic_);
+  getSdfParam<std::string>(_sdf, "commandPoseSubTopic", command_pose_topic_, command_pose_topic_);
 
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, rotor_velocity_slowdown_sim_);
 
@@ -168,6 +169,9 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Subscriber to Waypoint CommandTrajectoryPositionYaw Message.
   waypoint_sub_ = node_handle_->subscribe(waypoint_topic_, 10, &GazeboBagPlugin::WaypointCallback, this);
 
+  // Subscriber to PoseStamped pose command message.
+  command_pose_sub_ = node_handle_->subscribe(command_pose_topic_, 10, &GazeboBagPlugin::CommandPoseCallback, this);
+
   // Subscriber to Control Attitude Thrust Message.
   control_attitude_thrust_sub_ = node_handle_->subscribe(control_attitude_thrust_topic_, 10,
                                                          &GazeboBagPlugin::AttitudeThrustCallback, this);
@@ -207,6 +211,12 @@ void GazeboBagPlugin::WaypointCallback(
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(waypoint_topic_, ros_now, trajectory_msg);
+}
+
+void GazeboBagPlugin::CommandPoseCallback(const geometry_msgs::PoseStamped& pose_msg) {
+  common::Time now = world_->GetSimTime();
+  ros::Time ros_now = ros::Time(now.sec, now.nsec);
+  writeBag(command_pose_topic_, ros_now, pose_msg);
 }
 
 void GazeboBagPlugin::AttitudeThrustCallback(
