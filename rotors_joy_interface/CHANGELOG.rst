@@ -2,8 +2,8 @@
 Changelog for package rotors_joy_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2015-08-09)
+------------------
 * Propagate mav_comm changes.
 * Contributors: Helen Oleynikova
 
