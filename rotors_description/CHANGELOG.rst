@@ -2,6 +2,14 @@
 Changelog for package rotors_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fixed base_link issue with gazebo 2.2
+* added a mesh for the vi_camera and fixed the mesh for the vi_sensor
+* added possibility to add own meshes of propellers
+* updated gazebo links to also contain the namespace
+* Contributors: Fadri Furrer, Helen Oleynikova, Michael Burri
+
 1.1.6 (2015-06-11)
 ------------------
 
