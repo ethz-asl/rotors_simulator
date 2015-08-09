@@ -2,6 +2,11 @@
 Changelog for package rotors_joy_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Propagate mav_comm changes.
+* Contributors: Helen Oleynikova
+
 1.1.6 (2015-06-11)
 ------------------
 * removed wrong install folder

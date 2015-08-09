@@ -2,6 +2,12 @@
 Changelog for package rotors_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Changed to new mav_comm messages.
+* Changed default topics to be those from mav_msgs/default.h.
+* Contributors: Haoyao Chen, Helen Oleynikova, Michael Burri
+
 1.1.6 (2015-06-11)
 ------------------
 

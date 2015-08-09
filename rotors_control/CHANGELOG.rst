@@ -2,6 +2,12 @@
 Changelog for package rotors_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Converted to new mav_comm messages, including new MultiDOFJointTrajectory and PoseStamped as waypoints.
+* Added subscriber for MultiDOFJointTrajectory messages and extended waypoint_publisher_file to test it. resolves `#243 <https://github.com/ethz-asl/rotors_simulator/issues/243>`_
+* Contributors: Helen Oleynikova, Markus Achtelik
+
 1.1.6 (2015-06-11)
 ------------------
 
