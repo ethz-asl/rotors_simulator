@@ -26,7 +26,7 @@
 #include <mav_msgs/default_topics.h>
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
-#include <trajectory_msgs/MultiDOFJointTrajectoryPoint.h>
+#include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "hovering_example");
