@@ -2,17 +2,18 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find rotors_description)/urdf/manipulator_snippets.xacro" />
 
-  <xacro:property name="r1_width" value="0.05"/>
-  <xacro:property name="r1_height" value="0.01"/>
+  <xacro:property name="r1_width" value="0.04"/>
+  <xacro:property name="r1_height" value="0.008"/>
   <xacro:property name="r1_length" value="0.24"/>
 
-  <xacro:property name="r2_width" value="0.05"/>
+  <xacro:property name="r2_width" value="0.04"/>
   <xacro:property name="r2_height" value="0.008"/>
   <xacro:property name="r2_length" value="0.35"/>
 
-  <xacro:property name="r3_width" value="0.05"/>
-  <xacro:property name="r3_height" value="0.01"/>
-  <xacro:property name="r3_length" value="0.16"/>
+  <xacro:property name="r3_width" value="0.04"/>
+  <xacro:property name="r3_height" value="0.0015"/>
+  <xacro:property name="r3_length" value="0.14"/>
+  <xacro:property name="center_to_center_length" value="0.1"/>
 
   <xacro:property name="end_effector_length" value="0.12"/>
   <xacro:property name="end_effector_radius" value="0.03"/>
@@ -98,20 +99,32 @@
     </geometry>
   </xacro:property>
 
-<!-- macro used to define a closed chain -->
+
+<!-- ################################################################################################# -->
+<!-- #################################### Manipulator Macro ########################################## -->
+<!-- ################################################################################################# -->
+
   <xacro:macro name="closed_chain_macro"
     params="namespace parent_link *origin">
 
     <xacro:revolute_joint_macro
       namespace="${namespace}"
       joint_name="${namespace}/pitching"
-      parent_link="${parent_link}"
+      parent_link="${namespace}/r0"
       child_link="${namespace}/r3"
       axis="1 0 0"
       friction="0"
       damping="0.1">
-      <xacro:insert_block name="origin" />
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
     </xacro:revolute_joint_macro>
+
+    <joint name="my_joint" type="floating">
+        <parent link="${parent_link}"/>
+        <child link="${namespace}/r0"/>
+        <xacro:insert_block name="origin" />
+        <dynamics damping="0.0" friction="0.0"/>
+     </joint>
+
 
     <!-- <joint name="${namespace}/fixed_joint" type="fixed">
       <parent link="${parent_link}"/>
@@ -120,15 +133,49 @@
     </joint> -->
 
   <!-- Here we define base link of closed kinematic chain -->
-  <link name="${namespace}/r3">
+
+  <link name="${namespace}/r0">
    <collision>
-     <xacro:insert_block name="r3_frame"/>
-     <xacro:insert_block name="r3_geometry"/>
+     <!-- <xacro:insert_block name="r3_frame"/>
+     <xacro:insert_block name="r3_geometry"/> -->
+     <origin xyz="0 0 0" rpy="0 0 0"/>
+
+     <geometry>
+         <mesh filename="package://rotors_description/meshes/delta_arm_meshes/pitching_base.dae" scale="0.001 0.001 0.001" />
+     </geometry>
     </collision>
 
     <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+
+        <geometry>
+            <mesh filename="package://rotors_description/meshes/delta_arm_meshes/pitching_base.dae" scale="0.001 0.001 0.001" />
+        </geometry>
+    </visual>
+
+    <inertial>
       <xacro:insert_block name="r3_frame"/>
-      <xacro:insert_block name="r3_geometry"/>
+      <xacro:insert_block name="r3_inertial"/>
+    </inertial>
+  </link>
+
+  <link name="${namespace}/r3">
+   <collision>
+     <!-- <xacro:insert_block name="r3_frame"/>
+     <xacro:insert_block name="r3_geometry"/> -->
+     <origin xyz="0 0 0" rpy="0 0 0"/>
+
+     <geometry>
+         <mesh filename="package://rotors_description/meshes/delta_arm_meshes/pitching_base.dae" scale="0.001 0.001 0.001" />
+     </geometry>
+    </collision>
+
+    <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+
+            <geometry>
+                <mesh filename="package://rotors_description/meshes/delta_arm_meshes/pitching_base.dae" scale="0.001 0.001 0.001" />
+            </geometry>
     </visual>
 
     <inertial>
@@ -139,18 +186,23 @@
 
   <link name="${namespace}/r1_left">
    <collision>
-     <xacro:insert_block name="r1_frame"/>
-     <xacro:insert_block name="r1_geometry"/>
+     <!-- <xacro:insert_block name="r1_frame"/>
+     <xacro:insert_block name="r1_geometry"/> -->
+     <origin xyz="0 0 0" rpy="0 0 0"/>
+
+     <geometry>
+         <mesh filename="package://rotors_description/meshes/delta_arm_meshes/R1_v2_left.dae" scale="0.001 0.001 0.001" />
+     </geometry>
     </collision>
 
     <visual>
       <!-- <xacro:insert_block name="r1_frame"/> -->
       <!-- <xacro:insert_block name="r1_geometry"/> -->
       <!-- <origin xyz="0.03 0.115 -0.005" rpy="1.57 0 -0.3"/> -->
-      <origin xyz="${r1_length/2} 0 -0.004" rpy="1.57 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
 
       <geometry>
-          <mesh filename="package://rotors_description/meshes/delta_arm_meshes/R1_v2.dae" scale="0.001 0.001 0.001" />
+          <mesh filename="package://rotors_description/meshes/delta_arm_meshes/R1_v2_left.dae" scale="0.001 0.001 0.001" />
       </geometry>
     </visual>
 
@@ -162,15 +214,19 @@
 
   <link name="${namespace}/r1_right">
    <collision>
-     <xacro:insert_block name="r1_frame"/>
-     <xacro:insert_block name="r1_geometry"/>
+     <!-- <xacro:insert_block name="r1_frame"/>
+     <xacro:insert_block name="r1_geometry"/> -->
+     <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+        <mesh filename="package://rotors_description/meshes/delta_arm_meshes/R1_v2.dae" scale="0.001 0.001 0.001" />
+    </geometry>
     </collision>
 
     <visual>
       <!-- <xacro:insert_block name="r1_frame"/>
       <xacro:insert_block name="r1_geometry"/> -->
       <!-- <origin xyz="0.03 -0.115 0.008" rpy="-1.57 0 0.3"/> -->
-       <origin xyz="${r1_length/2} 0 0.012" rpy="-1.57 0 0"/>
+       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
           <mesh filename="package://rotors_description/meshes/delta_arm_meshes/R1_v2.dae" scale="0.001 0.001 0.001" />
       </geometry>
@@ -184,14 +240,18 @@
 
   <link name="${namespace}/r2_left">
    <collision>
-     <xacro:insert_block name="r2_frame"/>
-     <xacro:insert_block name="r2_geometry"/>
+     <!-- <xacro:insert_block name="r2_frame"/>
+     <xacro:insert_block name="r2_geometry"/> -->
+     <origin xyz="0 0 0" rpy="0 0 0"/>
+     <geometry>
+         <mesh filename="package://rotors_description/meshes/delta_arm_meshes/R2_v2.dae" scale="0.001 0.001 0.001" />
+     </geometry>
     </collision>
 
     <visual>
       <!-- <xacro:insert_block name="r2_frame"/>
       <xacro:insert_block name="r2_geometry"/> -->
-      <origin xyz="${r2_length/2} 0 -0.026" rpy="1.57 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
           <mesh filename="package://rotors_description/meshes/delta_arm_meshes/R2_v2.dae" scale="0.001 0.001 0.001" />
       </geometry>
@@ -205,14 +265,18 @@
 
   <link name="${namespace}/r2_right">
    <collision>
-     <xacro:insert_block name="r2_frame"/>
-     <xacro:insert_block name="r2_geometry"/>
+     <!-- <xacro:insert_block name="r2_frame"/>
+     <xacro:insert_block name="r2_geometry"/> -->
+     <origin xyz="0 0 0" rpy="0 0 0"/>
+     <geometry>
+         <mesh filename="package://rotors_description/meshes/delta_arm_meshes/R2_v2.dae" scale="0.001 0.001 0.001" />
+     </geometry>
     </collision>
 
     <visual>
       <!-- <xacro:insert_block name="r2_frame"/>
       <xacro:insert_block name="r2_geometry"/> -->
-      <origin xyz="${r2_length/2} 0 -0.005" rpy="1.57 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
           <mesh filename="package://rotors_description/meshes/delta_arm_meshes/R2_v2.dae" scale="0.001 0.001 0.001" />
       </geometry>
@@ -226,14 +290,18 @@
 
   <link name="${namespace}/end_effector">
    <collision>
-     <xacro:insert_block name="end_effector_frame"/>
-     <xacro:insert_block name="end_effector_geometry"/>
+     <!-- <xacro:insert_block name="end_effector_frame"/>
+     <xacro:insert_block name="end_effector_geometry"/> -->
+     <origin xyz="0 0 -0.015" rpy="0 0 1.2"/>
+     <geometry>
+         <mesh filename="package://rotors_description/meshes/delta_arm_meshes/end_effector_plate.dae" scale="0.001 0.001 0.001" />
+     </geometry>
     </collision>
 
     <visual>
       <!-- <xacro:insert_block name="end_effector_frame"/>
       <xacro:insert_block name="end_effector_geometry"/> -->
-      <origin xyz="0 0 -0.015" rpy="1.57 0 1.2"/>
+      <origin xyz="0 0 -0.015" rpy="0 0 1.2"/>
       <geometry>
           <mesh filename="package://rotors_description/meshes/delta_arm_meshes/end_effector_plate.dae" scale="0.001 0.001 0.001" />
       </geometry>
@@ -255,7 +323,7 @@
     axis="0 0 1"
     friction="0"
     damping="0.1">
-    <origin xyz="${r3_length/2} 0 -0.01" rpy="0 0 0"/>
+    <origin xyz="${-center_to_center_length/2} 0 -0.005" rpy="0 0 0"/>
   </xacro:revolute_joint_macro>
 
   <xacro:revolute_joint_macro
@@ -266,7 +334,7 @@
     axis="0 0 1"
     friction="0"
     damping="0.1">
-    <origin xyz="${-r3_length/2} 0 -0.015" rpy="0 0 0"/>
+    <origin xyz="${center_to_center_length/2} 0 -0.005" rpy="0 0 0"/>
   </xacro:revolute_joint_macro>
 
   <xacro:revolute_joint_macro
@@ -277,7 +345,7 @@
     axis="0 0 1"
     friction="0"
     damping="0.1">
-    <origin xyz="${r1_length} 0 0.015" rpy="0 0 0"/>
+    <origin xyz="${r1_length} 0 0.01" rpy="0 0 0"/>
   </xacro:revolute_joint_macro>
 
   <xacro:revolute_joint_macro
@@ -288,7 +356,7 @@
     axis="0 0 1"
     friction="0"
     damping="0.1">
-    <origin xyz="${r1_length} 0 0.015" rpy="0 0 0"/>
+    <origin xyz="${r1_length} 0 -0.01" rpy="0 0 0"/>
   </xacro:revolute_joint_macro>
 
   <xacro:gazebo_revolute_joint_macro
@@ -345,7 +413,7 @@
    enable_visual="true"
    visual_scale="1"
    color="Blue">
-   <origin xyz="${r3_length/2} 0 0.02" rpy="-1.57 0 0"/>
+   <origin xyz="${center_to_center_length/2} 0 0" rpy="0 0 0"/>
    <xacro:insert_block name="generic_servo_inertial"/>
  </xacro:servo_motor_macro>
 
@@ -365,7 +433,7 @@
    enable_visual="true"
    visual_scale="1"
    color="Red">
-   <origin xyz="${-r3_length/2} 0 0.02" rpy="-1.57 0 0"/>
+   <origin xyz="${-center_to_center_length/2} 0 0" rpy="0 0 0"/>
    <xacro:insert_block name="generic_servo_inertial"/>
  </xacro:servo_motor_macro>
 
@@ -395,7 +463,7 @@
  <xacro:servo_motor_macro
    namespace="${namespace}"
    motor_name="motor_pitching"
-   parent_link="${parent_link}"
+   parent_link="${namespace}/r0"
    actuated_joint="${namespace}/pitching"
    motor_model="generic_servo0"
    maxTorque="2"
@@ -408,7 +476,7 @@
    enable_visual="true"
    visual_scale="1"
    color="Red">
-   <origin xyz="0 0 0.02" rpy="0 0 0"/>
+   <origin xyz="0 0.02 -0.02" rpy="1.57 1.57 0"/>
    <xacro:insert_block name="generic_servo_inertial"/>
  </xacro:servo_motor_macro>
 
@@ -418,15 +486,26 @@
   <plugin name="initial_configuration" filename="librotors_gazebo_robot_initial_configuration_plugin.so">
     <robotNamespace>${namespace}</robotNamespace>
  <initial_configuration>
-   <config joint_name="left_1"  initial_position="0.3415"/>
-   <config joint_name="left_2"  initial_position="2.2942"/>
-   <config joint_name="right_1" initial_position="2.8001"/>
-   <config joint_name="right_2" initial_position="-2.2942"/>
-   <config joint_name="pitching" initial_position="0"/>
+   <config joint_name="left_1"  initial_position="2.488"/>
+   <config joint_name="left_2"  initial_position="-1.676"/>
+   <config joint_name="right_1" initial_position="0.653"/>
+   <config joint_name="right_2" initial_position="1.676"/>
  </initial_configuration>
  <loop_closure_joints>
    <joint joint_name="closing"/>
  </loop_closure_joints>
+ </plugin>
+</gazebo>
+
+<gazebo>
+  <plugin name="6dof_shock_absorber" filename="librotors_gazebo_six_dof_shock_absorber_plugin.so">
+    <robotNamespace>${namespace}</robotNamespace>
+    <ParentLinkName>${parent_link} </ParentLinkName>
+    <ChildLinkName>${namespace}/r0 </ChildLinkName>
+    <translational_spring_constant>20 20 100</translational_spring_constant>
+    <translational_damper_constant>5 5 20</translational_damper_constant>
+    <rotational_spring_constant>8 15 8</rotational_spring_constant>
+    <rotational_damper_constant>1 1 1</rotational_damper_constant>
  </plugin>
 </gazebo>
 
