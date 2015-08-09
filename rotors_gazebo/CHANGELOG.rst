@@ -2,8 +2,8 @@
 Changelog for package rotors_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2015-08-09)
+------------------
 * Change to use the new datatypes defined in mav_comm.
 * Update hummingbird.yaml
   The original 0.68 did not involve the mass of rotors (0.009 each). Now change to 0.68 + 0.009*4
