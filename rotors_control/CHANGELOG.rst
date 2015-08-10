@@ -2,6 +2,9 @@
 Changelog for package rotors_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.0.0 (2015-08-09)
 ------------------
 * Converted to new mav_comm messages, including new MultiDOFJointTrajectory and PoseStamped as waypoints.
