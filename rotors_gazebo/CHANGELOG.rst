@@ -2,8 +2,8 @@
 Changelog for package rotors_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.1 (2015-08-10)
+------------------
 * fixed the bag plugin and the evaluation
 * Contributors: Fadri Furrer
 
