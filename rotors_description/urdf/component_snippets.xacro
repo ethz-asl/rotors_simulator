@@ -31,8 +31,6 @@
         <bagFileName>${bag_file}</bagFileName>
         <linkName>${namespace}/base_link</linkName>
         <frameId>${namespace}/base_link</frameId>
-        <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
-        <commandAttitudeThrustPubTopic>command/attitude</commandAttitudeThrustPubTopic>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
       </plugin>
     </gazebo>
