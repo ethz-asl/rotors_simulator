@@ -76,7 +76,7 @@
 
     <!-- attach multirotor_base_plugin to the base_link -->
     <gazebo>
-      <plugin filename="librotors_gazebo_multirotor_base_plugin.so" name="rosbag">
+      <plugin filename="librotors_gazebo_multirotor_base_plugin.so" name="multirotor_base_plugin">
         <robotNamespace>${robot_namespace}</robotNamespace>
         <linkName>${robot_namespace}/base_link</linkName>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>

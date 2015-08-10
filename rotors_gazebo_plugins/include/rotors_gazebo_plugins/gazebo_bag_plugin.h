@@ -40,7 +40,7 @@
 #include <rosbag/bag.h>
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/Float32.h>
-#include <trajectory_msgs/MultiDOFJointTrajectoryPoint.h>
+#include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
 #include "rotors_gazebo_plugins/common.h"
 
@@ -98,11 +98,11 @@ class GazeboBagPlugin : public ModelPlugin {
 
   /// \brief Called when a MultiDOFJointTrajectoryPoint message is received.
   /// \param[in] trajectory_msg A MultiDOFJointTrajectoryPoint message from trajectory_msgs.
-  void WaypointCallback(const trajectory_msgs::MultiDOFJointTrajectoryPoint& trajectory_msg);
+  void WaypointCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_msg);
 
   /// \brief Called when a PoseStamped message is received.
   /// \param[in] pose_msg A PoseStamped message from geometry_msgs.
-  void CommandPoseCallback(const geometry_msgs::PoseStamped& pose_msg);
+  void CommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg);
 
   /// \brief Called when a AttitudeThrust message is received.
   /// \param[in] control_msg A AttitudeThrust message from mav_msgs.
