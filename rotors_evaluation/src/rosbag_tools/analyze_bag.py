@@ -164,10 +164,12 @@ class WaypointWithTime(XYZWithTime):
 
     def append_waypoint(self, waypoint_msg, msg_time, bag_time):
         """Append data from a waypoint to its arrays."""
-        point_msg = Point(waypoint_msg.position.x,
-                          waypoint_msg.position.y,
-                          waypoint_msg.position.z)
-        yaw = waypoint_msg.yaw
+        position = waypoint_msg.points[0].transforms[0].translation
+        rotation = waypoint_msg.points[0].transforms[0].rotation
+        quaternion = (rotation.x, rotation.y, rotation.z, rotation.w)
+        euler = tf.transformations.euler_from_quaternion(quaternion)
+        point_msg = Point(position.x, position.y, position.z)
+        yaw = euler[2]
         # Check if the waypoint is different from the last one.
         try:
             different_waypoint = (self.yaw[-1] != yaw or
