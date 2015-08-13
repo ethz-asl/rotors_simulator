@@ -13,9 +13,8 @@
 
   <license>ASL 2.0</license>
 
-  <url type="website">https://github.com/ethz-asl/euroc_simulator/wiki</url>
-
-  <author email="ffurrer@gmail.com">Fadri Furrer</author>
+  <url type="website">http://ros.org/wiki/rotors_description</url>
+  <url type="bugtracker">https://github.com/ethz-asl/rotors_simulator/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 

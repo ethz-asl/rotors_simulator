@@ -13,6 +13,9 @@
 
   <license>ASL 2.0</license>
 
+  <url type="website">http://ros.org/wiki/rotors_joy_interface</url>
+  <url type="bugtracker">https://github.com/ethz-asl/rotors_simulator/issues</url>
+
   <buildtool_depend>catkin</buildtool_depend>
 
   <!-- Dependencies needed to compile this package. -->
