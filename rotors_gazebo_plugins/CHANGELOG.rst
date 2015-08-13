@@ -2,6 +2,17 @@
 Changelog for package rotors_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.1 (2015-08-10)
+------------------
+* fixed the bag plugin and the evaluation
+* Contributors: Fadri Furrer
+
+2.0.0 (2015-08-09)
+------------------
+* Changed to new mav_comm messages.
+* Changed default topics to be those from mav_msgs/default.h.
+* Contributors: Haoyao Chen, Helen Oleynikova, Michael Burri
+
 1.1.6 (2015-06-11)
 ------------------
 

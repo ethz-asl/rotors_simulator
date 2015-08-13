@@ -91,7 +91,7 @@ We will here also show how to write a stabilizing controller and how you can con
 We will for now just send some constant motor velocities to the multicopter.
 
 ```
-$ rostopic pub /firefly/command/motors mav_msgs/CommandMotorSpeed '{motor_speed: [100, 100, 100, 100, 100, 100]}'
+$ rostopic pub /firefly/command/motor_speed mav_msgs/Actuators '{angular_velocities: [100, 100, 100, 100, 100, 100]}'
 ```
 
 > **Note** The size of the `motor_speed` array should be equal to the number of motors you have in your model of choice (e.g. 6 in the Firefly model).

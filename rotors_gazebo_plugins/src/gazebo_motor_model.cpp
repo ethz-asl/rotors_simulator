@@ -124,11 +124,11 @@ void GazeboMotorModel::OnUpdate(const common::UpdateInfo& _info) {
   Publish();
 }
 
-void GazeboMotorModel::VelocityCallback(const mav_msgs::CommandMotorSpeedConstPtr& rot_velocities) {
-  ROS_ASSERT_MSG(rot_velocities->motor_speed.size() > motor_number_,
+void GazeboMotorModel::VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_velocities) {
+  ROS_ASSERT_MSG(rot_velocities->angular_velocities.size() > motor_number_,
                  "You tried to access index %d of the MotorSpeed message array which is of size %d.",
-                 motor_number_, rot_velocities->motor_speed.size());
-  ref_motor_rot_vel_ = std::min(rot_velocities->motor_speed[motor_number_], static_cast<double>(max_rot_velocity_));
+                 motor_number_, rot_velocities->angular_velocities.size());
+  ref_motor_rot_vel_ = std::min(rot_velocities->angular_velocities[motor_number_], static_cast<double>(max_rot_velocity_));
 }
 
 void GazeboMotorModel::WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed) {
@@ -155,7 +155,7 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   math::Vector3 joint_axis = joint_->GetGlobalAxis(0);
   math::Vector3 body_velocity_W = link_->GetWorldLinearVel();
   math::Vector3 relative_wind_velocity_W = body_velocity_W - wind_speed_W_;
-  math::Vector3 body_velocity_perpendicular = relative_wind_velocity_W - (relative_wind_velocity_W * joint_axis) * joint_axis;
+  math::Vector3 body_velocity_perpendicular = relative_wind_velocity_W - (relative_wind_velocity_W.Dot(joint_axis) * joint_axis);
   math::Vector3 air_drag = -std::abs(real_motor_velocity) * rotor_drag_coefficient_ * body_velocity_perpendicular;
   // Apply air_drag to link.
   link_->AddForce(air_drag);
