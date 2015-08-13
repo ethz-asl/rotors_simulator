@@ -13,9 +13,7 @@
 
   <license>ASL 2.0</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
-
-  <url type="website">https://github.com/ethz-asl/rotors_simulator</url>
+  <url type="website">http://ros.org/wiki/rotors_comm</url>
   <url type="bugtracker">https://github.com/ethz-asl/rotors_simulator/issues</url>
 
   <!-- Dependencies which this package needs to build itself. -->
