@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <launch>
-  <arg name="mav_name" />
+  <arg name="mav_name" default="firefly"/>
   <arg name="model" default="$(find rotors_description)/urdf/$(arg mav_name)_base.xacro"/>
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
   <arg name="x" default="0.0"/>
