@@ -22,7 +22,7 @@
 <robot name="pelican" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Properties  -->
   <!-- TODO(ff): Update these params when identifying the model. -->
-  <xacro:property name="namespace" value="pelican" />
+  <xacro:property name="namespace" value="$(arg mav_name)" />
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <xacro:property name="use_mesh_file" value="true" />
   <xacro:property name="mesh_file" value="package://rotors_description/meshes/pelican.dae" />
