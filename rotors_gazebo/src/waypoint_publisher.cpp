@@ -49,8 +49,7 @@ int main(int argc, char** argv) {
     delay = std::stof(args.at(5));
   }
   else{
-    ROS_ERROR(
-        "Usage: waypoint_publisher <x> <y> <z> <yaw_deg> [<delay>]\n");
+    ROS_ERROR("Usage: waypoint_publisher <x> <y> <z> <yaw_deg> [<delay>]\n");
     return -1;
   }
 
