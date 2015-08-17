@@ -5,17 +5,13 @@
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic.world"/>
     <!-- <arg name="debug" value="true"/> -->
-    <arg name="paused" value="true"/>
+    <arg name="paused" value="false"/>
     <!-- <arg name="gui" value="false"/> -->
   </include>
 
   <group ns="$(arg mav_name)1">
-    <rosparam param="wp_x">0</rosparam>
-    <rosparam param="wp_y">-1</rosparam>
-    <rosparam param="wp_z">1</rosparam>
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
-      <arg name="mav_name" value="$(arg mav_name)" />
-      <arg name="mav_name_suffix" value="1" />
+      <arg name="mav_name" value="$(arg mav_name)1" />
       <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_generic_odometry_sensor.gazebo" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
@@ -27,16 +23,12 @@
       <rosparam command="load" file="$(find rotors_gazebo)/resource/firefly.yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
-    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="0 -1 1 0 2"/>
   </group>
 
   <group ns="$(arg mav_name)2">
-    <rosparam param="wp_x">0</rosparam>
-    <rosparam param="wp_y">0</rosparam>
-    <rosparam param="wp_z">1</rosparam>
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
-      <arg name="mav_name" value="$(arg mav_name)" />
-      <arg name="mav_name_suffix" value="2" />
+      <arg name="mav_name" value="$(arg mav_name)2" />
       <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_generic_odometry_sensor.gazebo" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
@@ -48,16 +40,12 @@
       <rosparam command="load" file="$(find rotors_gazebo)/resource/firefly.yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
-    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="0 0 1 0 4"/>
   </group>
 
   <group ns="$(arg mav_name)3">
-    <rosparam param="wp_x">0</rosparam>
-    <rosparam param="wp_y">1</rosparam>
-    <rosparam param="wp_z">1</rosparam>
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
-      <arg name="mav_name" value="$(arg mav_name)" />
-      <arg name="mav_name_suffix" value="3" />
+      <arg name="mav_name" value="$(arg mav_name)3" />
       <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_generic_odometry_sensor.gazebo" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
@@ -69,7 +57,7 @@
       <rosparam command="load" file="$(find rotors_gazebo)/resource/firefly.yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
-    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="0 1 1 0 6"/>
   </group>
 
   <group ns="$(arg mav_name)4">
@@ -77,8 +65,7 @@
     <rosparam param="wp_y">0</rosparam>
     <rosparam param="wp_z">1</rosparam>
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
-      <arg name="mav_name" value="$(arg mav_name)" />
-      <arg name="mav_name_suffix" value="4" />
+      <arg name="mav_name" value="$(arg mav_name)4" />
       <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_generic_odometry_sensor.gazebo" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
@@ -90,7 +77,7 @@
       <rosparam command="load" file="$(find rotors_gazebo)/resource/firefly.yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
-    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="1 0 1 0 8"/>
   </group>
 
   <group ns="$(arg mav_name)5">
@@ -98,8 +85,7 @@
     <rosparam param="wp_y">0</rosparam>
     <rosparam param="wp_z">1</rosparam>
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
-      <arg name="mav_name" value="$(arg mav_name)" />
-      <arg name="mav_name_suffix" value="5" />
+      <arg name="mav_name" value="$(arg mav_name)5" />
       <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_generic_odometry_sensor.gazebo" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
@@ -111,7 +97,7 @@
       <rosparam command="load" file="$(find rotors_gazebo)/resource/firefly.yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
-    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
-  </group>  
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="-1 0 1 0 10"/>
+  </group>
 
 </launch>

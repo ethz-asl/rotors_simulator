@@ -40,9 +40,17 @@ int main(int argc, char** argv) {
   ros::V_string args;
   ros::removeROSArgs(argc, argv, args);
 
-  if (args.size() != 5) {
+  double delay;
+
+  if (args.size() == 5) {
+    delay = 1.0;
+  }
+  else if (args.size() == 6) {
+    delay = std::stof(args.at(5));
+  }
+  else{
     ROS_ERROR(
-        "Usage: waypoint_publisher <x> <y> <z> <yaw> \n");
+        "Usage: waypoint_publisher <x> <y> <z> <yaw_deg> [<delay>]\n");
     return -1;
   }
 
@@ -56,11 +64,12 @@ int main(int argc, char** argv) {
 
   double desired_yaw = std::stof(args.at(4)) * DEG_2_RAD;
 
+
   mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(desired_position,
       desired_yaw, &trajectory_msg);
 
   // Wait for some time to create the ros publisher.
-  ros::Duration(1.0).sleep();
+  ros::Duration(delay).sleep();
 
   ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
            nh.getNamespace().c_str(),
