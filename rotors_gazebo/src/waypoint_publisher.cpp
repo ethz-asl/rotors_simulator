@@ -69,6 +69,10 @@ int main(int argc, char** argv) {
   // Wait for some time to create the ros publisher.
   ros::Duration(delay).sleep();
 
+  while (trajectory_pub.getNumSubscribers() == 0 && ros::ok()) {
+    ROS_INFO("There is no subscriber available, trying again in 1 second.");
+    ros::Duration(1.0).sleep();
+  }
   ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
            nh.getNamespace().c_str(),
            desired_position.x(),
