@@ -27,6 +27,8 @@
       <rosparam command="load" file="$(find rotors_gazebo)/resource/hummingbird.yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
     <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
   </group>
   <group ns="pelican">
@@ -47,6 +49,8 @@
       <rosparam command="load" file="$(find rotors_gazebo)/resource/pelican.yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
     <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example"/>
   </group>
 
@@ -67,6 +71,8 @@
       <rosparam command="load" file="$(find rotors_gazebo)/resource/firefly.yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
     <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
   </group>
 </launch>
