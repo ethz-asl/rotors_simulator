@@ -1,18 +1,16 @@
 <launch>
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
+  <arg name="paused" value="false"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic.world"/>
     <!-- <arg name="debug" value="true"/> -->
-    <arg name="paused" value="true"/>
+    <arg name="paused" value="$(arg paused)"/>
     <!-- <arg name="gui" value="false"/> -->
   </include>
 
   <group ns="hummingbird">
-    <rosparam param="wp_x">0</rosparam>
-    <rosparam param="wp_y">0</rosparam>
-    <rosparam param="wp_z">1</rosparam>
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
       <arg name="mav_name" value="hummingbird" />
       <arg name="model" value="$(find rotors_description)/urdf/hummingbird_generic_odometry_sensor.gazebo" />
@@ -21,7 +19,6 @@
       <arg name="log_file" value="hummingbird"/>
       <arg name="y" value="0.0"/>
     </include>
-
     <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
       <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_hummingbird.yaml" />
       <rosparam command="load" file="$(find rotors_gazebo)/resource/hummingbird.yaml" />
@@ -29,12 +26,10 @@
     </node>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="0 0 1 0 5"/>
   </group>
+
   <group ns="pelican">
-    <rosparam param="wp_x">0</rosparam>
-    <rosparam param="wp_y">1</rosparam>
-    <rosparam param="wp_z">1</rosparam>
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
       <arg name="mav_name" value="pelican" />
       <arg name="model" value="$(find rotors_description)/urdf/pelican_generic_odometry_sensor.gazebo" />
@@ -43,7 +38,6 @@
       <arg name="log_file" value="pelican"/>
       <arg name="y" value="1.0"/>
     </include>
-
     <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
       <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_pelican.yaml" />
       <rosparam command="load" file="$(find rotors_gazebo)/resource/pelican.yaml" />
@@ -51,13 +45,10 @@
     </node>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example"/>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="0 1 1 0 5"/>
   </group>
 
   <group ns="firefly">
-    <rosparam param="wp_x">0</rosparam>
-    <rosparam param="wp_y">2</rosparam>
-    <rosparam param="wp_z">1</rosparam>
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
       <arg name="mav_name" value="firefly" />
       <arg name="model" value="$(find rotors_description)/urdf/firefly_generic_odometry_sensor.gazebo" />
@@ -73,6 +64,6 @@
     </node>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="0 2 1 0 5"/>
   </group>
 </launch>

@@ -23,7 +23,7 @@
   <!-- Included URDF Files -->
   <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro" />
   <!-- Properties  -->
-  <xacro:property name="namespace" value="asymmetric_quadrotor" />
+  <xacro:property name="namespace" value="$(arg mav_name)" />
   <xacro:property name="use_mesh_file" value="false" />
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <xacro:property name="mass_arm" value="0.01" /> <!-- [kg] -->

@@ -40,9 +40,16 @@ int main(int argc, char** argv) {
   ros::V_string args;
   ros::removeROSArgs(argc, argv, args);
 
-  if (args.size() != 5) {
-    ROS_ERROR(
-        "Usage: waypoint_publisher <x> <y> <z> <yaw> \n");
+  double delay;
+
+  if (args.size() == 5) {
+    delay = 1.0;
+  }
+  else if (args.size() == 6) {
+    delay = std::stof(args.at(5));
+  }
+  else{
+    ROS_ERROR("Usage: waypoint_publisher <x> <y> <z> <yaw_deg> [<delay>]\n");
     return -1;
   }
 
@@ -60,8 +67,12 @@ int main(int argc, char** argv) {
       desired_yaw, &trajectory_msg);
 
   // Wait for some time to create the ros publisher.
-  ros::Duration(1.0).sleep();
+  ros::Duration(delay).sleep();
 
+  while (trajectory_pub.getNumSubscribers() == 0 && ros::ok()) {
+    ROS_INFO("There is no subscriber available, trying again in 1 second.");
+    ros::Duration(1.0).sleep();
+  }
   ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
            nh.getNamespace().c_str(),
            desired_position.x(),
