@@ -171,11 +171,11 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboOdometryPlugin::OnUpdate, this, _1));
-  pose_pub_ = node_handle_->advertise<geometry_msgs::PoseStamped>(pose_pub_topic_, 10);
-  pose_with_covariance_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_with_covariance_pub_topic_, 10);
-  position_pub_ = node_handle_->advertise<geometry_msgs::PointStamped>(position_pub_topic_, 10);
-  transform_pub_ = node_handle_->advertise<geometry_msgs::TransformStamped>(transform_pub_topic_, 10);
-  odometry_pub_ = node_handle_->advertise<nav_msgs::Odometry>(odometry_pub_topic_, 10);
+  pose_pub_ = node_handle_->advertise<geometry_msgs::PoseStamped>(pose_pub_topic_, 1);
+  pose_with_covariance_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_with_covariance_pub_topic_, 1);
+  position_pub_ = node_handle_->advertise<geometry_msgs::PointStamped>(position_pub_topic_, 1);
+  transform_pub_ = node_handle_->advertise<geometry_msgs::TransformStamped>(transform_pub_topic_, 1);
+  odometry_pub_ = node_handle_->advertise<nav_msgs::Odometry>(odometry_pub_topic_, 1);
 }
 
 // This gets called by the world update start event.

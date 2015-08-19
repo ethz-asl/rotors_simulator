@@ -29,13 +29,13 @@ RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustControllerNode() {
 
   ros::NodeHandle nh;
 
-  cmd_roll_pitch_yawrate_thrust_sub_ = nh.subscribe(kDefaultCommandRollPitchYawrateThrustTopic, 10,
+  cmd_roll_pitch_yawrate_thrust_sub_ = nh.subscribe(kDefaultCommandRollPitchYawrateThrustTopic, 1,
                                      &RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustCallback, this);
-  odometry_sub_ = nh.subscribe(kDefaultOdometryTopic, 10,
+  odometry_sub_ = nh.subscribe(kDefaultOdometryTopic, 1,
                                &RollPitchYawrateThrustControllerNode::OdometryCallback, this);
 
   motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(
-      kDefaultCommandMotorSpeedTopic, 10);
+      kDefaultCommandMotorSpeedTopic, 1);
 }
 
 RollPitchYawrateThrustControllerNode::~RollPitchYawrateThrustControllerNode() { }
