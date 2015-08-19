@@ -20,6 +20,9 @@
 
 #include "rotors_gazebo_plugins/gazebo_motor_model.h"
 
+#include <chrono>
+#include <thread>
+
 namespace gazebo {
 
 GazeboMotorModel::~GazeboMotorModel() {
@@ -107,6 +110,12 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboMotorModel::OnUpdate, this, _1));
+  // This sleep was added such that not all motor plugins get registered at the same time.
+  // At some instances, the subscription to the command_sub_topic_ doesn't work.
+  // Hence, the VelocityCallback get's never called and the moter doesn't listen to commands.
+  // TODO(ff): Figure out, why/when this is happening.
+  double time_sleep = (double)std::rand() / (RAND_MAX * 2.0);
+  std::this_thread::sleep_for(std::chrono::duration<double>(time_sleep));
 
   command_sub_ = node_handle_->subscribe(command_sub_topic_, 1, &GazeboMotorModel::VelocityCallback, this);
   wind_speed_sub_ = node_handle_->subscribe(wind_speed_sub_topic_, 1, &GazeboMotorModel::WindSpeedCallback, this);
