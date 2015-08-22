@@ -353,7 +353,7 @@
       rtk_mode_topic frame_id parent_frame_id mass_piksi publish_ground_truth start_fixed
       spp_noise_normal spp_offset rtk_fixed_noise_normal rtk_fixed_offset 
       gps_start_position update_rate convergence_speed fix_loss_probability fix_loss_time
-      rtk_navsatfix_covariance spp_navsatfix_covariance rtk_piksi_topic
+      rtk_navsatfix_covariance spp_navsatfix_covariance rtk_piksi_topic baseline_topic
       *inertia *origin">
     <!-- piksi link -->
     <link name="${namespace}/piksi_sensor${piksi_sensor_suffix}_link">
@@ -377,6 +377,7 @@
 	<rtkPositionTopic>${rtk_position_topic}</rtkPositionTopic>
 	<rtkModeTopic>${rtk_mode_topic}</rtkModeTopic>
 	<rtkPiksiTopic>${rtk_piksi_topic}</rtkPiksiTopic>
+	<baselineTopic>${baseline_topic}</baselineTopic> <!-- Piksi baseline with the base at [0, 0, 0] [m] -->
 	<publishGroundTruth>${publish_ground_truth}</publishGroundTruth>
 	<startFixed>${start_fixed}</startFixed>
         <parentFrameId>${parent_frame_id}</parentFrameId> <!-- Use the scoped link name here. e.g. Model::link. -->

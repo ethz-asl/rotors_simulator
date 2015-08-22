@@ -74,6 +74,7 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<std::string>(_sdf, "rtkPositionTopic", rtk_position_pub_topic_, rtk_position_pub_topic_);
   getSdfParam<std::string>(_sdf, "rtkModeTopic", rtk_mode_pub_topic_, rtk_mode_pub_topic_);
   getSdfParam<std::string>(_sdf, "rtkPiksiTopic", rtk_piksi_pub_topic_, rtk_piksi_pub_topic_);
+  getSdfParam<std::string>(_sdf, "baselineTopic", baseline_pub_topic_, baseline_pub_topic_);
   getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
   getSdfParam<std::string>(_sdf, "publishGroundTruth", publish_ground_truth_, publish_ground_truth_);
   getSdfParam<std::string>(_sdf, "startFixed", start_fixed, start_fixed);
@@ -113,6 +114,7 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   rtk_position_pub_ = node_handle_->advertise<sensor_msgs::NavSatFix>(rtk_position_pub_topic_, 10);
   rtk_mode_pub_ = node_handle_->advertise<std_msgs::String>(rtk_mode_pub_topic_, 10);
   rtk_piksi_pub_ = node_handle_->advertise<rotors_comm::PiksiRTKPos>(rtk_piksi_pub_topic_, 10);
+  baseline_pub_ = node_handle_->advertise<rotors_comm::PiksiBaseline>(baseline_pub_topic_, 10);
 
   if(publish_ground_truth_ == "true"){
     ground_truth_pub_ = node_handle_->advertise<sensor_msgs::NavSatFix>("position_ground_truth", 10);
@@ -246,18 +248,19 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Calculate position distortions for RTK GPS.
   sol_rtk_.header.stamp = ros::Time().now();
   if(mode_rtk_.data == "Float"){
-    double dist_x = lon_to_m_*(sol_gt_.longitude - sol_rtk_.longitude);
-    double dist_y = lat_to_m_*(sol_gt_.latitude - sol_rtk_.latitude);
-    double dist_z = sol_gt_.altitude - sol_rtk_.altitude;
+    double dist_x = lon_to_m_*sol_gt_.longitude - baseline_.x;
+    double dist_y = lat_to_m_*sol_gt_.latitude - baseline_.y;
+    double dist_z = sol_gt_.altitude - baseline_.z;
 
+    // Random walk towards actual position
     double c_s = convergence_speed_/100;
     double step_x = NormalDistribution((c_s*sin(dist_x)+1.1*c_s)*dist_x, 0.01*abs(dist_x) + 0.005)(random_generator_);
     double step_y = NormalDistribution((c_s*cos(dist_y)+1.1*c_s)*dist_y, 0.01*abs(dist_y) + 0.005)(random_generator_);
     double step_z = NormalDistribution((c_s*sin(dist_z)+1.1*c_s)*dist_z, 0.01*abs(dist_z) + 0.005)(random_generator_);
 
-    sol_rtk_.longitude = sol_rtk_.longitude + m_to_lon_*step_x;
-    sol_rtk_.latitude = sol_rtk_.latitude + m_to_lat_*step_y;
-    sol_rtk_.altitude = sol_rtk_.altitude + step_z;
+    baseline_.x = baseline_.x + step_x;
+    baseline_.y = baseline_.y + step_y;
+    baseline_.z = baseline_.z + step_z;
 
     // If solution converged close to real solution set to RTK Fixed, with a certain probability.
     if(sqrt(dist_x*dist_x + dist_y*dist_y + dist_z*dist_z) < 0.7
@@ -271,30 +274,43 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
                  rtk_position_n_[1](random_generator_),
                  rtk_position_n_[2](random_generator_);
 
-    sol_rtk_.longitude = lon_start_ + m_to_lon_ * (gazebo_pose.pos.x + offset_rtk_fixed_.x + rtk_pos_n.x());
-    sol_rtk_.latitude =  lat_start_ + m_to_lat_ * (gazebo_pose.pos.y + offset_rtk_fixed_.y + rtk_pos_n.y());
-    sol_rtk_.altitude =  alt_start_ + gazebo_pose.pos.z + offset_rtk_fixed_.z + rtk_pos_n.z();
+    baseline_.x = gazebo_pose.pos.x + offset_rtk_fixed_.x + rtk_pos_n.x();
+    baseline_.y = gazebo_pose.pos.y + offset_rtk_fixed_.y + rtk_pos_n.y();
+    baseline_.z = gazebo_pose.pos.z + offset_rtk_fixed_.z + rtk_pos_n.z();
 
-    // Loose fix with a certain probability, and jump to random nearby position
+    // Loose fix with a certain probability (or at fix_loss_time_), and jump to random nearby position
     if(UniformDistribution(0, 1)(random_generator_) <= fix_loss_probability_
        || std::abs((world_->GetRealTime()).sec - fix_loss_time_) <= 0.5/update_rate_){
        NormalDistribution loose_fix_pos = NormalDistribution(0, rtk_float_start_error_width_/7);
-       sol_rtk_.longitude = lon_start_ + loose_fix_pos(random_generator_)*m_to_lon_;
-       sol_rtk_.latitude =  lat_start_ + loose_fix_pos(random_generator_)*m_to_lat_;
-       sol_rtk_.altitude =  alt_start_ + loose_fix_pos(random_generator_)/5;
+       baseline_.x = loose_fix_pos(random_generator_);
+       baseline_.y = loose_fix_pos(random_generator_);
+       baseline_.z = loose_fix_pos(random_generator_)/5;
        mode_rtk_.data = "Float";
     }
   }
 
-  if(mode_rtk_.data == "Fixed")
+  // Use baseline to calculate RTK NavSatFix output
+  sol_rtk_.longitude = lon_start_ + baseline_.x*m_to_lon_;
+  sol_rtk_.latitude = lat_start_ + baseline_.y*m_to_lat_;
+  sol_rtk_.altitude = alt_start_ + baseline_.z;
+
+  if(mode_rtk_.data == "Fixed") {
     sol_piksi_rtk_.mode_fixed = 1;
-  else
+  	sol_baseline_.mode_fixed = 1;
+  }
+  else {
     sol_piksi_rtk_.mode_fixed = 0;
+    sol_baseline_.mode_fixed = 0;
+  }
   sol_piksi_rtk_.navsatfix = sol_rtk_;
+  sol_baseline_.baseline = baseline_;
 
   // Publish messages
   if (rtk_piksi_pub_.getNumSubscribers() > 0) {
     rtk_piksi_pub_.publish(sol_piksi_rtk_);
+  }
+  if (baseline_pub_.getNumSubscribers() > 0) {
+    baseline_pub_.publish(sol_baseline_);
   }
   if (rtk_mode_pub_.getNumSubscribers() > 0) {
     rtk_mode_pub_.publish(mode_rtk_);

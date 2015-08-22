@@ -13,6 +13,7 @@ add_message_files(
   FILES
   WindSpeed.msg
   PiksiRTKPos.msg
+  PiksiBaseline.msg
 )
 
 generate_messages(DEPENDENCIES sensor_msgs geometry_msgs octomap_msgs)

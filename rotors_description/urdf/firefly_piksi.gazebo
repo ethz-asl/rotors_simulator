@@ -64,6 +64,7 @@
     rtk_position_topic="navsatfix_rtk"
     rtk_mode_topic="rtk_mode"
     rtk_piksi_topic="rtk_piksi"
+    baseline_topic="baseline_piksi"
     parent_frame_id="world"
     frame_id="base_link"
     publish_ground_truth="true"
