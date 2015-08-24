@@ -5,16 +5,16 @@
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
 
-  <license>ASL 2.0</license>
-
-  <url type="website">http://ros.org/wiki/rotors_simulator</url>
-  <url type="bugtracker">https://github.com/ethz-asl/rotors_simulator/issues</url>
-
   <author>Fadri Furrer</author>
   <author>Michael Burri</author>
   <author>Mina Kamel</author>
   <author>Janosch Nikolic</author>
   <author>Markus Achtelik</author>
+
+  <license>ASL 2.0</license>
+
+  <url type="website">https://github.com/ethz-asl/rotors_simulator</url>
+  <url type="bugtracker">https://github.com/ethz-asl/rotors_simulator/issues</url>
 
   <!-- Dependencies which this package needs to build itself. -->
   <buildtool_depend>catkin</buildtool_depend>
