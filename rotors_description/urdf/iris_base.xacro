@@ -12,12 +12,14 @@
     >
   </xacro:controller_plugin_macro>
 
+  <xacro:if value="$(arg enable_mavlink_interface)">
   <!-- Instantiate mavlink telemetry interface. -->
   <xacro:mavlink_interface_macro
     namespace="${namespace}"
     imu_sub_topic="imu"
     >
   </xacro:mavlink_interface_macro>
+  </xacro:if>
 
   <!-- Mount an ADIS16448 IMU. -->
   <xacro:imu_plugin_macro

@@ -9,6 +9,7 @@
   <arg name="z" default="0.08"/>
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
+  <arg name="enable_mavlink_interface" default="false"/>
   <arg name="log_file" default="iris"/>
 
   <!-- send the robot XML to param server -->
@@ -16,6 +17,7 @@
     $(find xacro)/xacro.py '$(arg model)'
     enable_logging:=$(arg enable_logging)
     enable_ground_truth:=$(arg enable_ground_truth)
+    enable_mavlink_interface:=$(arg enable_mavlink_interface)
     log_file:=$(arg log_file)"
   />
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
