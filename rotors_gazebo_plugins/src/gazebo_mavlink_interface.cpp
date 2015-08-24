@@ -61,7 +61,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   imu_sub_ = node_handle_->subscribe(imu_sub_topic_, 10, &GazeboMavlinkInterface::ImuCallback, this);
   
   motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::CommandMotorSpeed>(motor_velocity_reference_pub_topic_, 10);
-  hil_sensor_pub_ = node_handle_->advertise<mavros::Mavlink>(hil_sensor_mavlink_pub_topic_, 10);
+  hil_sensor_pub_ = node_handle_->advertise<mavros_msgs::Mavlink>(hil_sensor_mavlink_pub_topic_, 10);
 
   _rotor_count = 4;
   last_time_ = world_->GetSimTime();
@@ -134,9 +134,10 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
     mavlink_hil_gps_t* hil_gps_msg = &hil_gps_msg_;
     mavlink_msg_hil_gps_encode(1, 240, &gps_mmsg, hil_gps_msg);
     mavlink_message_t* gps_msg = &gps_mmsg;
-    mavros::MavlinkPtr gps_rmsg = boost::make_shared<mavros::Mavlink>();
+    mavros_msgs::MavlinkPtr gps_rmsg = boost::make_shared<mavros_msgs::Mavlink>();
     gps_rmsg->header.stamp = ros::Time::now();
-    mavutils::copy_mavlink_to_ros(gps_msg, gps_rmsg);
+    mavros_msgs::mavlink::convert(*gps_msg, *gps_rmsg);
+    
     hil_sensor_pub_.publish(gps_rmsg);
 
     last_gps_time_ = current_time;
@@ -152,10 +153,10 @@ void GazeboMavlinkInterface::CommandMotorMavros(const mav_msgs::CommandMotorSpee
 }
 
 
-void GazeboMavlinkInterface::MavlinkControlCallback(const mavros::Mavlink::ConstPtr &rmsg) {
+void GazeboMavlinkInterface::MavlinkControlCallback(const mavros_msgs::Mavlink::ConstPtr &rmsg) {
   mavlink_message_t mmsg;
 
-  if(mavutils::copy_ros_to_mavlink(rmsg, mmsg)){
+  if(mavros_msgs::mavlink::convert(*rmsg, mmsg)){
     mavlink_hil_controls_t act_msg;
 
     mavlink_message_t* msg = &mmsg;
@@ -222,9 +223,11 @@ void GazeboMavlinkInterface::ImuCallback(const sensor_msgs::ImuConstPtr& imu_mes
   mavlink_hil_sensor_t* hil_msg = &hil_sensor_msg_;
   mavlink_msg_hil_sensor_encode(1, 240, &mmsg, hil_msg);
   mavlink_message_t* msg = &mmsg;
-  mavros::MavlinkPtr rmsg = boost::make_shared<mavros::Mavlink>();
+  
+  mavros_msgs::MavlinkPtr rmsg = boost::make_shared<mavros_msgs::Mavlink>();
   rmsg->header.stamp = ros::Time::now();
-  mavutils::copy_mavlink_to_ros(msg, rmsg);
+  mavros_msgs::mavlink::convert(*msg, *rmsg);
+
   hil_sensor_pub_.publish(rmsg);
 
 }

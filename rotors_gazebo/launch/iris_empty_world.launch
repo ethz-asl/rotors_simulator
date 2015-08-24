@@ -1,6 +1,7 @@
 <launch>
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
+  <arg name="enable_mavlink_interface" default="false"/>
   <arg name="log_file" default="iris"/>
   <arg name="headless" default="false"/>
   <arg name="gui" default="true"/>
@@ -15,6 +16,7 @@
     <arg name="model" value="$(find rotors_description)/urdf/iris_base.xacro" />
     <arg name="enable_logging" value="$(arg enable_logging)" />
     <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+    <arg name="enable_mavlink_interface" value="$(arg enable_mavlink_interface)" />
     <arg name="log_file" value="$(arg log_file)"/>
   </include>
 </launch>

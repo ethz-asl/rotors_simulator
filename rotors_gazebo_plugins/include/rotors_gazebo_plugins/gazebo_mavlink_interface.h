@@ -36,7 +36,7 @@
 #include <stdio.h>
 
 #include "rotors_gazebo_plugins/common.h"
-#include <mavros/utils.h>
+#include <mavros_msgs/mavlink_convert.h>
 
 namespace gazebo {
 
@@ -93,7 +93,7 @@ class GazeboMavlinkInterface : public ModelPlugin {
   boost::thread callback_queue_thread_;
   void QueueThread();
   void CommandMotorMavros(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg);
-  void MavlinkControlCallback(const mavros::Mavlink::ConstPtr &rmsg);
+  void MavlinkControlCallback(const mavros_msgs::Mavlink::ConstPtr &rmsg);
   void ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg);
 
 
