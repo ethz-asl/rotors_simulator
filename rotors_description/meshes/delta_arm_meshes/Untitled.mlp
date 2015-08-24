@@ -1,7 +1,7 @@
 <!DOCTYPE MeshLabDocument>
 <MeshLabProject>
  <MeshGroup>
-  <MLMesh label="R1_v2.dae" filename="R1_v2.dae">
+  <MLMesh label="end_effector_plate.dae" filename="end_effector_plate.dae">
    <MLMatrix44>
 1 0 0 0 
 0 1 0 0 
