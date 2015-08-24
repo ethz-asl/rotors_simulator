@@ -51,7 +51,7 @@ def initialize():
     default_min_settled_time = 3
     default_mav_name = ""
     default_motor_velocity_topic = "/motors"
-    default_waypoint_topic = "/command/trajectory_position_yaw"
+    default_waypoint_topic = "/command/trajectory"
     default_wrench_topic = "/wrench"
 
     parser = optparse.OptionParser(

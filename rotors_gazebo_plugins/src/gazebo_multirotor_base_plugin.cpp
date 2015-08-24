@@ -22,7 +22,7 @@
 
 #include <ctime>
 
-#include <mav_msgs/MotorSpeed.h>
+#include <mav_msgs/Actuators.h>
 
 namespace gazebo {
 
@@ -46,7 +46,7 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
                       rotor_velocity_slowdown_sim_);
 
   node_handle_ = new ros::NodeHandle(namespace_);
-  motor_pub_ = node_handle_->advertise<mav_msgs::MotorSpeed>(motor_pub_topic_, 10);
+  motor_pub_ = node_handle_->advertise<mav_msgs::Actuators>(motor_pub_topic_, 10);
   frame_id_ = link_name_;
 
   link_ = model_->GetLink(link_name_);
@@ -78,13 +78,13 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
 void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Get the current simulation time.
   common::Time now = world_->GetSimTime();
-  mav_msgs::MotorSpeedPtr msg(new mav_msgs::MotorSpeed);
-  msg->motor_speed.resize(motor_joints_.size());
+  mav_msgs::ActuatorsPtr msg(new mav_msgs::Actuators);
+  msg->angular_velocities.resize(motor_joints_.size());
 
   MotorNumberToJointMap::iterator m;
   for (m = motor_joints_.begin(); m != motor_joints_.end(); ++m) {
     double motor_rot_vel = m->second->GetVelocity(0) * rotor_velocity_slowdown_sim_;
-    msg->motor_speed[m->first] = motor_rot_vel;
+    msg->angular_velocities[m->first] = motor_rot_vel;
   }
   msg->header.stamp.sec = now.sec;
   msg->header.stamp.nsec = now.nsec;

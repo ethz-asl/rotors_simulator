@@ -22,13 +22,16 @@
 #include <iostream>
 
 #include <Eigen/Geometry>
-#include <mav_msgs/CommandTrajectoryPositionYaw.h>
+#include <mav_msgs/conversions.h>
+#include <mav_msgs/default_topics.h>
+#include <mav_msgs/eigen_mav_msgs.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
-
 bool sim_running = false;
+
+static const int64_t kNanoSecondsInSecond = 1000000000;
 
 void callback(const sensor_msgs::ImuPtr& /*msg*/) {
   sim_running = true;
@@ -40,15 +43,12 @@ class WaypointWithTime {
       : waiting_time(0) {
   }
 
-  WaypointWithTime(double t, float x, float y, float z, float yaw)
-      : waiting_time(t) {
-    wp.position.x = x;
-    wp.position.y = y;
-    wp.position.z = z;
-    wp.yaw = yaw;
+  WaypointWithTime(double t, float x, float y, float z, float _yaw)
+      : position(x, y, z), yaw(_yaw), waiting_time(t) {
   }
 
-  mav_msgs::CommandTrajectoryPositionYaw wp;
+  Eigen::Vector3d position;
+  double yaw;
   double waiting_time;
 };
 
@@ -63,16 +63,9 @@ int main(int argc, char** argv) {
   ros::removeROSArgs(argc, argv, args);
 
   if (args.size() != 2 && args.size() != 3) {
-    ROS_ERROR("Usage: waypoint_publisher <waypoint_file> [--multi_dof_joint_trajectory] "
+    ROS_ERROR("Usage: waypoint_publisher <waypoint_file>"
         "\nThe waypoint file should be structured as: space separated: wait_time [s] x[m] y[m] z[m] yaw[deg])");
     return -1;
-  }
-
-  bool use_multi_dof_joint_trajectory = false;
-  if (args.size() == 3) {
-    if (args[2] == "--multi_dof_joint_trajectory") {
-      use_multi_dof_joint_trajectory = true;
-    }
   }
 
   std::vector<WaypointWithTime> waypoints;
@@ -98,14 +91,9 @@ int main(int argc, char** argv) {
   // The IMU is used, to determine if the simulator is running or not.
   ros::Subscriber sub = nh.subscribe("imu", 10, &callback);
 
-  ros::Publisher wp_pub;
-  if (!use_multi_dof_joint_trajectory) {
-    wp_pub = nh.advertise<mav_msgs::CommandTrajectoryPositionYaw>("command/trajectory_position_yaw", 10);
-  }
-  else{
-    ROS_INFO("Using MultiDOFJointTrajectory message");
-    wp_pub = nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>("command/multi_dof_joint_trajectory", 1);
-  }
+  ros::Publisher wp_pub =
+      nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>(
+      mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
 
   ROS_INFO("Wait for simulation to become ready...");
 
@@ -120,40 +108,25 @@ int main(int argc, char** argv) {
   ros::Duration(30).sleep();
 
   ROS_INFO("Start publishing waypoints.");
-  if (!use_multi_dof_joint_trajectory) {
-    for (size_t i = 0; i < waypoints.size(); ++i) {
-      WaypointWithTime& wp = waypoints[i];
-      ROS_INFO("Publishing x=%f y=%f z=%f yaw=%f, and wait for %fs.", wp.wp.position.x, wp.wp.position.y,
-               wp.wp.position.z, wp.wp.yaw, wp.waiting_time);
-      wp.wp.header.stamp = ros::Time::now();
-      wp_pub.publish(wp.wp);
-      ros::Duration(wp.waiting_time).sleep();
-    }
+
+  trajectory_msgs::MultiDOFJointTrajectoryPtr msg(new trajectory_msgs::MultiDOFJointTrajectory);
+  msg->header.stamp = ros::Time::now();
+  msg->points.resize(waypoints.size());
+  msg->joint_names.push_back("base_link");
+  int64_t time_from_start_ns = 0;
+  for (size_t i = 0; i < waypoints.size(); ++i) {
+    WaypointWithTime& wp = waypoints[i];
+
+    mav_msgs::EigenTrajectoryPoint trajectory_point;
+    trajectory_point.position_W = wp.position;
+    trajectory_point.setFromYaw(wp.yaw);
+    trajectory_point.time_from_start_ns = time_from_start_ns;
+
+    time_from_start_ns += static_cast<int64_t>(wp.waiting_time * kNanoSecondsInSecond);
+
+    mav_msgs::msgMultiDofJointTrajectoryPointFromEigen(trajectory_point, &msg->points[i]);
   }
-  else {
-    trajectory_msgs::MultiDOFJointTrajectoryPtr msg(new trajectory_msgs::MultiDOFJointTrajectory);
-    msg->header.stamp = ros::Time::now();
-    msg->points.resize(waypoints.size());
-    ros::Duration time_from_start(0);
-    for (size_t i = 0; i < waypoints.size(); ++i) {
-      WaypointWithTime& wp = waypoints[i];
-
-      msg->points[i].transforms.resize(1);
-      msg->points[i].velocities.resize(1);
-      msg->points[i].accelerations.resize(1);
-
-      msg->points[i].transforms[0].translation = wp.wp.position;
-      msg->points[i].transforms[0].rotation.w = cos(wp.wp.yaw * 0.5);
-      msg->points[i].transforms[0].rotation.x = 0;
-      msg->points[i].transforms[0].rotation.y = 0;
-      msg->points[i].transforms[0].rotation.z = sin(wp.wp.yaw * 0.5);
-      // We don't need velocities and accelerations here. Their constructors initialize them to zero.
-
-      msg->points[i].time_from_start = time_from_start;
-      time_from_start += ros::Duration(wp.waiting_time);
-    }
-    wp_pub.publish(msg);
-  }
+  wp_pub.publish(msg);
 
   return 0;
 }

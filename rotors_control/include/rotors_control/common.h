@@ -24,20 +24,26 @@
 #include <assert.h>
 
 #include <mav_msgs/conversions.h>
+#include <mav_msgs/default_topics.h>
 #include <nav_msgs/Odometry.h>
 
 #include "rotors_control/parameters.h"
 
 namespace rotors_control {
 
-// Default values
+// Default values.
 static const std::string kDefaultNamespace = "";
-static const std::string kDefaultMotorSpeedTopic = "command/motor_speed";
-static const std::string kDefaultCommandTrajectoryPositionYawTopic = "command/trajectory_position_yaw";
-static const std::string kDefaultCommandMultiDofJointTrajectoryTopic = "command/multi_dof_joint_trajectory";
-static const std::string kDefaultCommandRollPitchYawrateThrustTopic = "command/roll_pitch_yawrate_thrust";
-static const std::string kDefaultImuTopic = "imu";
-static const std::string kDefaultOdometryTopic = "odometry";
+static const std::string kDefaultCommandMotorSpeedTopic =
+    mav_msgs::default_topics::COMMAND_ACTUATORS; // "command/motor_speed";
+static const std::string kDefaultCommandMultiDofJointTrajectoryTopic =
+    mav_msgs::default_topics::COMMAND_TRAJECTORY; // "command/trajectory"
+static const std::string kDefaultCommandRollPitchYawrateThrustTopic =
+    mav_msgs::default_topics::COMMAND_ROLL_PITCH_YAWRATE_THRUST;
+    // "command/roll_pitch_yawrate_thrust"
+static const std::string kDefaultImuTopic =
+    mav_msgs::default_topics::IMU; // "imu
+static const std::string kDefaultOdometryTopic =
+    mav_msgs::default_topics::ODOMETRY; // "odometry"
 
 struct EigenOdometry {
   EigenOdometry()

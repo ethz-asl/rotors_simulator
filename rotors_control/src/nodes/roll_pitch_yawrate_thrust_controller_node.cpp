@@ -30,12 +30,12 @@ RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustControllerNode() {
   ros::NodeHandle nh;
 
   cmd_roll_pitch_yawrate_thrust_sub_ = nh.subscribe(kDefaultCommandRollPitchYawrateThrustTopic, 10,
-                                     &RollPitchYawrateThrustControllerNode::CommandRollPitchYawrateThrustCallback, this);
+                                     &RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustCallback, this);
   odometry_sub_ = nh.subscribe(kDefaultOdometryTopic, 10,
                                &RollPitchYawrateThrustControllerNode::OdometryCallback, this);
 
-  motor_velocity_reference_pub_ = nh.advertise<mav_msgs::CommandMotorSpeed>(
-      kDefaultMotorSpeedTopic, 10);
+  motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(
+      kDefaultCommandMotorSpeedTopic, 10);
 }
 
 RollPitchYawrateThrustControllerNode::~RollPitchYawrateThrustControllerNode() { }
@@ -68,11 +68,11 @@ void RollPitchYawrateThrustControllerNode::InitializeParams() {
 void RollPitchYawrateThrustControllerNode::Publish() {
 }
 
-void RollPitchYawrateThrustControllerNode::CommandRollPitchYawrateThrustCallback(
-    const mav_msgs::CommandRollPitchYawrateThrustConstPtr& roll_pitch_yawrate_thrust_reference_msg) {
-  mav_msgs::EigenCommandRollPitchYawrateThrust roll_pitch_yawrate_thrust;
-  mav_msgs::eigenCommandRollPitchYawrateThrustFromMsg(*roll_pitch_yawrate_thrust_reference_msg, &roll_pitch_yawrate_thrust);
-  roll_pitch_yawrate_thrust_controller_.SetCommandRollPitchYawrateThrust(roll_pitch_yawrate_thrust);
+void RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustCallback(
+    const mav_msgs::RollPitchYawrateThrustConstPtr& roll_pitch_yawrate_thrust_reference_msg) {
+  mav_msgs::EigenRollPitchYawrateThrust roll_pitch_yawrate_thrust;
+  mav_msgs::eigenRollPitchYawrateThrustFromMsg(*roll_pitch_yawrate_thrust_reference_msg, &roll_pitch_yawrate_thrust);
+  roll_pitch_yawrate_thrust_controller_.SetRollPitchYawrateThrust(roll_pitch_yawrate_thrust);
 }
 
 
@@ -88,14 +88,14 @@ void RollPitchYawrateThrustControllerNode::OdometryCallback(const nav_msgs::Odom
   roll_pitch_yawrate_thrust_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
   // Todo(ffurrer): Do this in the conversions header.
-  mav_msgs::CommandMotorSpeedPtr turning_velocities_msg(new mav_msgs::CommandMotorSpeed);
+  mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
 
-  turning_velocities_msg->motor_speed.clear();
+  actuator_msg->angular_velocities.clear();
   for (int i = 0; i < ref_rotor_velocities.size(); i++)
-    turning_velocities_msg->motor_speed.push_back(ref_rotor_velocities[i]);
-  turning_velocities_msg->header.stamp = odometry_msg->header.stamp;
+    actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
+  actuator_msg->header.stamp = odometry_msg->header.stamp;
 
-  motor_velocity_reference_pub_.publish(turning_velocities_msg);
+  motor_velocity_reference_pub_.publish(actuator_msg);
 }
 
 }

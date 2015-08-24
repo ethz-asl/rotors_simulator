@@ -31,8 +31,6 @@
         <bagFileName>${bag_file}</bagFileName>
         <linkName>${namespace}/base_link</linkName>
         <frameId>${namespace}/base_link</frameId>
-        <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
-        <commandAttitudeThrustPubTopic>command/attitude</commandAttitudeThrustPubTopic>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
       </plugin>
     </gazebo>
@@ -52,7 +50,7 @@
       </collision>
       <xacro:if value="${enable_visual}">
         <visual>
-          <origin xyz="0 0 0" rpy="0 0 0" />
+          <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
           <geometry>
             <xacro:insert_block name="geometry" />
           </geometry>
@@ -384,8 +382,8 @@
       max_distance="30"
       noise_mean="0.0"
       noise_stddev="0.007"
-      enable_visual="false">
-      <cylinder length="0.01" radius="0.007" />
+      enable_visual="true">
+      <mesh filename="package://rotors_description/meshes/vi_camera.dae" scale="1 1 1" />
       <xacro:insert_block name="origin" />
     </xacro:camera_macro>
   </xacro:macro>

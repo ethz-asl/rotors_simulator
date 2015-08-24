@@ -19,6 +19,7 @@
  */
 
 #include <ros/ros.h>
+#include <mav_msgs/default_topics.h>
 
 #include "lee_position_controller_node.h"
 
@@ -31,19 +32,19 @@ LeePositionControllerNode::LeePositionControllerNode() {
 
   ros::NodeHandle nh;
 
-  cmd_trajectory_sub_ = nh.subscribe(kDefaultCommandTrajectoryPositionYawTopic, 10,
-                                     &LeePositionControllerNode::CommandTrajectoryPositionYawCallback,
-                                     this);
+  cmd_pose_sub_ = nh.subscribe(
+      mav_msgs::default_topics::COMMAND_POSE, 1,
+      &LeePositionControllerNode::CommandPoseCallback, this);
 
   cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(
-      kDefaultCommandMultiDofJointTrajectoryTopic, 1,
-      &LeePositionControllerNode::CommandMultiDofJointTrajectoryCallback, this);
+      mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
+      &LeePositionControllerNode::MultiDofJointTrajectoryCallback, this);
 
-  odometry_sub_ = nh.subscribe(kDefaultOdometryTopic, 10,
+  odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 10,
                                &LeePositionControllerNode::OdometryCallback, this);
 
-  motor_velocity_reference_pub_ = nh.advertise<mav_msgs::CommandMotorSpeed>(
-      kDefaultMotorSpeedTopic, 10);
+  motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(
+      mav_msgs::default_topics::COMMAND_ACTUATORS, 10);
 
   command_timer_ = nh.createTimer(ros::Duration(0), &LeePositionControllerNode::TimedCommandCallback, this,
                                   true, false);
@@ -97,19 +98,22 @@ void LeePositionControllerNode::InitializeParams() {
 void LeePositionControllerNode::Publish() {
 }
 
-void LeePositionControllerNode::CommandTrajectoryPositionYawCallback(
-    const mav_msgs::CommandTrajectoryPositionYawConstPtr& trajectory_reference_msg) {
+void LeePositionControllerNode::CommandPoseCallback(
+    const geometry_msgs::PoseStampedConstPtr& pose_msg) {
   // Clear all pending commands.
   command_timer_.stop();
   commands_.clear();
   command_waiting_times_.clear();
 
-  mav_msgs::EigenCommandTrajectoryPositionYaw trajectory;
-  mav_msgs::eigenCommandTrajectoryPositionYawFromMsg(*trajectory_reference_msg, &trajectory);
-  lee_position_controller_.SetCommandTrajectoryPositionYaw(trajectory);
+  mav_msgs::EigenTrajectoryPoint eigen_reference;
+  mav_msgs::eigenTrajectoryPointFromPoseMsg(*pose_msg, &eigen_reference);
+  commands_.push_front(eigen_reference);
+
+  lee_position_controller_.SetTrajectoryPoint(commands_.front());
+  commands_.pop_front();
 }
 
-void LeePositionControllerNode::CommandMultiDofJointTrajectoryCallback(
+void LeePositionControllerNode::MultiDofJointTrajectoryCallback(
     const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg) {
   // Clear all pending commands.
   command_timer_.stop();
@@ -123,24 +127,22 @@ void LeePositionControllerNode::CommandMultiDofJointTrajectoryCallback(
     return;
   }
 
-  mav_msgs::EigenCommandTrajectoryPositionYaw eigen_reference;
-  mav_msgs::eigenCommandTrajectoryPositionYawFromMultiDofJointTrajectoryPointMsg(msg->points.front(),
-                                                                                 &eigen_reference);
+  mav_msgs::EigenTrajectoryPoint eigen_reference;
+  mav_msgs::eigenTrajectoryPointFromMsg(msg->points.front(), &eigen_reference);
   commands_.push_front(eigen_reference);
 
   for (size_t i = 1; i < n_commands; ++i) {
     const trajectory_msgs::MultiDOFJointTrajectoryPoint& reference_before = msg->points[i-1];
     const trajectory_msgs::MultiDOFJointTrajectoryPoint& current_reference = msg->points[i];
 
-    mav_msgs::eigenCommandTrajectoryPositionYawFromMultiDofJointTrajectoryPointMsg(current_reference,
-                                                                                   &eigen_reference);
+    mav_msgs::eigenTrajectoryPointFromMsg(current_reference, &eigen_reference);
 
     commands_.push_back(eigen_reference);
     command_waiting_times_.push_back(current_reference.time_from_start - reference_before.time_from_start);
   }
 
   // We can trigger the first command immediately.
-  lee_position_controller_.SetCommandTrajectoryPositionYaw(commands_.front());
+  lee_position_controller_.SetTrajectoryPoint(commands_.front());
   commands_.pop_front();
 
   if (n_commands > 1) {
@@ -157,8 +159,8 @@ void LeePositionControllerNode::TimedCommandCallback(const ros::TimerEvent& e) {
     return;
   }
 
-  const mav_msgs::EigenCommandTrajectoryPositionYaw eigen_reference = commands_.front();
-  lee_position_controller_.SetCommandTrajectoryPositionYaw(commands_.front());
+  const mav_msgs::EigenTrajectoryPoint eigen_reference = commands_.front();
+  lee_position_controller_.SetTrajectoryPoint(commands_.front());
   commands_.pop_front();
   command_timer_.stop();
   if(!command_waiting_times_.empty()){
@@ -180,14 +182,14 @@ void LeePositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPt
   lee_position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
   // Todo(ffurrer): Do this in the conversions header.
-  mav_msgs::CommandMotorSpeedPtr turning_velocities_msg(new mav_msgs::CommandMotorSpeed);
+  mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
 
-  turning_velocities_msg->motor_speed.clear();
+  actuator_msg->angular_velocities.clear();
   for (int i = 0; i < ref_rotor_velocities.size(); i++)
-    turning_velocities_msg->motor_speed.push_back(ref_rotor_velocities[i]);
-  turning_velocities_msg->header.stamp = odometry_msg->header.stamp;
+    actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
+  actuator_msg->header.stamp = odometry_msg->header.stamp;
 
-  motor_velocity_reference_pub_.publish(turning_velocities_msg);
+  motor_velocity_reference_pub_.publish(actuator_msg);
 }
 
 }

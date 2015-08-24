@@ -23,7 +23,7 @@
   <!-- Included URDF Files -->
   <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro" />
   <!-- Properties  -->
-  <xacro:property name="namespace" value="asymmetric_quadrotor" />
+  <xacro:property name="namespace" value="$(arg mav_name)" />
   <xacro:property name="use_mesh_file" value="false" />
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <xacro:property name="mass_arm" value="0.01" /> <!-- [kg] -->
@@ -176,7 +176,9 @@
     motor_number="0"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
-    color="Red">
+    color="Red"
+    use_own_mesh="false"
+    mesh="">
     <origin xyz="${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
@@ -196,7 +198,9 @@
     motor_number="1"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
-    color="Blue">
+    color="Blue"
+    use_own_mesh="false"
+    mesh="">
     <origin xyz="${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
@@ -216,7 +220,9 @@
     motor_number="2"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
-    color="Yellow">
+    color="Yellow"
+    use_own_mesh="false"
+    mesh="">
     <origin xyz="${arm_length/3} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
@@ -236,7 +242,9 @@
     motor_number="3"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
-    color="Blue">
+    color="Blue"
+    use_own_mesh="false"
+    mesh="">
     <origin xyz="${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>

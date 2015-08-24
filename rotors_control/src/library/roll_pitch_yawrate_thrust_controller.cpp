@@ -68,7 +68,7 @@ void RollPitchYawrateThrustController::CalculateRotorVelocities(Eigen::VectorXd*
 
   Eigen::Vector4d angular_acceleration_thrust;
   angular_acceleration_thrust.block<3, 1>(0, 0) = angular_acceleration;
-  angular_acceleration_thrust(3) = command_roll_pitch_yawrate_thrust_.thrust;
+  angular_acceleration_thrust(3) = roll_pitch_yawrate_thrust_.thrust.z();
 
   *rotor_velocities = angular_acc_to_rotor_velocities_ * angular_acceleration_thrust;
   *rotor_velocities = rotor_velocities->cwiseMax(Eigen::VectorXd::Zero(rotor_velocities->rows()));
@@ -79,9 +79,9 @@ void RollPitchYawrateThrustController::SetOdometry(const EigenOdometry& odometry
   odometry_ = odometry;
 }
 
-void RollPitchYawrateThrustController::SetCommandRollPitchYawrateThrust(
-    const mav_msgs::EigenCommandRollPitchYawrateThrust& command_roll_pitch_yawrate_thrust) {
-  command_roll_pitch_yawrate_thrust_ = command_roll_pitch_yawrate_thrust;
+void RollPitchYawrateThrustController::SetRollPitchYawrateThrust(
+    const mav_msgs::EigenRollPitchYawrateThrust& roll_pitch_yawrate_thrust) {
+  roll_pitch_yawrate_thrust_ = roll_pitch_yawrate_thrust;
   controller_active_ = true;
 }
 
@@ -96,8 +96,8 @@ void RollPitchYawrateThrustController::ComputeDesiredAngularAcc(Eigen::Vector3d*
   // Get the desired rotation matrix.
   Eigen::Matrix3d R_des;
   R_des = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())  // yaw
-        * Eigen::AngleAxisd(command_roll_pitch_yawrate_thrust_.roll, Eigen::Vector3d::UnitX())  // roll
-        * Eigen::AngleAxisd(command_roll_pitch_yawrate_thrust_.pitch, Eigen::Vector3d::UnitY());  // pitch
+        * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.roll, Eigen::Vector3d::UnitX())  // roll
+        * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.pitch, Eigen::Vector3d::UnitY());  // pitch
 
   // Angle error according to lee et al.
   Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
@@ -106,7 +106,7 @@ void RollPitchYawrateThrustController::ComputeDesiredAngularAcc(Eigen::Vector3d*
 
   // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
-  angular_rate_des[2] = command_roll_pitch_yawrate_thrust_.yaw_rate;
+  angular_rate_des[2] = roll_pitch_yawrate_thrust_.yaw_rate;
 
   Eigen::Vector3d angular_rate_error = odometry_.angular_velocity - R_des.transpose() * R * angular_rate_des;
 

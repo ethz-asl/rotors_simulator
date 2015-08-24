@@ -1,6 +1,6 @@
 <package>
   <name>rotors_comm</name>
-  <version>1.1.6</version>
+  <version>2.0.1</version>
   <description>RotorS specific messages and services.</description>
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
@@ -12,8 +12,6 @@
   <author>Markus Achtelik</author>
 
   <license>ASL 2.0</license>
-
-  <buildtool_depend>catkin</buildtool_depend>
 
   <url type="website">https://github.com/ethz-asl/rotors_simulator</url>
   <url type="bugtracker">https://github.com/ethz-asl/rotors_simulator/issues</url>

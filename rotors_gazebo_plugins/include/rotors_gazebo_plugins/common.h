@@ -23,8 +23,13 @@
 
 #include <Eigen/Dense>
 #include <gazebo/gazebo.hh>
+#include <mav_msgs/default_topics.h>
 
 namespace gazebo {
+
+// Default values
+static const std::string kDefaultNamespace = "";
+static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
 
 /**
  * \brief Obtains a parameter from sdf.
@@ -50,8 +55,6 @@ bool getSdfParam(sdf::ElementPtr sdf, const std::string& name, T& param, const T
 }
 
 }
-
-
 
 template <typename T>
 class FirstOrderFilter {
