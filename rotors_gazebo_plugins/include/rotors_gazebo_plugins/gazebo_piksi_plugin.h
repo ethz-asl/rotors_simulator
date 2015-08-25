@@ -59,7 +59,6 @@
 
 namespace gazebo {
 // Default values
-static const std::string kDefaultNamespace = "";
 static const std::string kDefaultParentFrameId = "world";
 static const std::string kDefaultLinkName = "piksi_sensor_link";
 static const std::string kDefaultSPPPositionPubTopic = "spp_position";
