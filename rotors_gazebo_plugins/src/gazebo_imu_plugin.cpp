@@ -68,7 +68,8 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   frame_id_ = link_name_;
 
-  getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_, kDefaultImuTopic);
+  getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_,
+                           mav_msgs::default_topics::IMU);
   getSdfParam<double>(_sdf, "gyroscopeNoiseDensity",
                       imu_parameters_.gyroscope_noise_density,
                       imu_parameters_.gyroscope_noise_density);

@@ -1,0 +1,103 @@
+<launch>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="mav_name" default="firefly" />
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic.world"/>
+    <!-- <arg name="debug" value="true"/> -->
+    <arg name="paused" value="false"/>
+    <!-- <arg name="gui" value="false"/> -->
+  </include>
+
+  <group ns="$(arg mav_name)1">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)1" />
+      <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)1"/>
+      <arg name="y" value="-1.0"/>
+    </include>
+    <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_firefly.yaml" />
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/firefly.yaml" />
+      <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="0 -1 1 0 2"/>
+  </group>
+
+  <group ns="$(arg mav_name)2">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)2" />
+      <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)2"/>
+      <arg name="y" value="0.0"/>
+    </include>
+    <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_firefly.yaml" />
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/firefly.yaml" />
+      <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="0 0 1 0 4"/>
+  </group>
+
+  <group ns="$(arg mav_name)3">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)3" />
+      <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)3"/>
+      <arg name="y" value="1.0"/>
+    </include>
+    <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_firefly.yaml" />
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/firefly.yaml" />
+      <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="0 1 1 0 6"/>
+  </group>
+
+  <group ns="$(arg mav_name)4">
+    <rosparam param="wp_x">1</rosparam>
+    <rosparam param="wp_y">0</rosparam>
+    <rosparam param="wp_z">1</rosparam>
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)4" />
+      <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)4"/>
+      <arg name="y" value="-1.5"/>
+    </include>
+    <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_firefly.yaml" />
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/firefly.yaml" />
+      <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="1 0 1 0 8"/>
+  </group>
+
+  <group ns="$(arg mav_name)5">
+    <rosparam param="wp_x">-1</rosparam>
+    <rosparam param="wp_y">0</rosparam>
+    <rosparam param="wp_z">1</rosparam>
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name" value="$(arg mav_name)5" />
+      <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_generic_odometry_sensor.gazebo" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg mav_name)5"/>
+      <arg name="y" value="1.5"/>
+    </include>
+    <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_firefly.yaml" />
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/firefly.yaml" />
+      <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node>
+    <node name="waypoint_publisher" pkg="rotors_gazebo" type="waypoint_publisher" output="screen" args="-1 0 1 0 10"/>
+  </group>
+
+</launch>

@@ -3,11 +3,12 @@
   <arg name="enable_logging" default="false" />
   <arg name="enable_ground_truth" default="true" />
   <arg name="log_file" default="$(arg mav_name)" />
+  <arg name="paused" value="true"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic.world" />
     <!-- <arg name="debug" value="true"/> -->
-    <arg name="paused" value="true"/>
+    <arg name="paused" value="$(arg paused)"/>
     <!-- <arg name="gui" value="false"/> -->
   </include>
 

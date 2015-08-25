@@ -8,6 +8,7 @@ add_definitions(-DROS_ASSERT_ENABLED)
 
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
+  cv_bridge
   geometry_msgs
   mav_msgs
   octomap_msgs
@@ -16,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rotors_comm
   rotors_control
+  std_srvs
   tf
 )
 
@@ -30,7 +32,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
-  CATKIN_DEPENDS roscpp tf mav_msgs octomap_ros octomap_msgs rotors_comm geometry_msgs
+  CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf
   DEPENDS eigen gazebo octomap opencv
 )
 
@@ -39,6 +41,7 @@ include_directories(${Eigen_INCLUDE_DIRS})
 
 add_library(rotors_gazebo_motor_model src/gazebo_motor_model.cpp)
 target_link_libraries(rotors_gazebo_motor_model ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(rotors_gazebo_motor_model ${catkin_EXPORTED_TARGETS})
 
 add_library(rotors_gazebo_odometry_plugin src/gazebo_odometry_plugin.cpp)
 target_link_libraries(rotors_gazebo_odometry_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${OpenCV_LIBRARIES})
@@ -50,7 +53,6 @@ add_dependencies(rotors_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
 
 add_library(rotors_gazebo_controller_interface src/gazebo_controller_interface.cpp)
 target_link_libraries(rotors_gazebo_controller_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-
 add_dependencies(rotors_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})
 
 add_library(rotors_gazebo_bag_plugin src/gazebo_bag_plugin.cpp)
@@ -72,3 +74,17 @@ add_dependencies(rotors_gazebo_multirotor_base_plugin ${catkin_EXPORTED_TARGETS}
 add_library(rotors_gazebo_piksi_plugin src/gazebo_piksi_plugin.cpp)
 target_link_libraries(rotors_gazebo_piksi_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(rotors_gazebo_piksi_plugin ${catkin_EXPORTED_TARGETS})
+
+install(
+  TARGETS
+    rotors_gazebo_motor_model
+    rotors_gazebo_odometry_plugin
+    rotors_gazebo_imu_plugin
+    rotors_gazebo_controller_interface
+    rotors_gazebo_bag_plugin
+    rotors_gazebo_wind_plugin
+    rotors_gazebo_octomap_plugin
+    rotors_gazebo_multirotor_base_plugin
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)

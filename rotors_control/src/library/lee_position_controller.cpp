@@ -85,8 +85,8 @@ void LeePositionController::SetOdometry(const EigenOdometry& odometry) {
   odometry_ = odometry;
 }
 
-void LeePositionController::SetCommandTrajectoryPositionYaw(
-    const mav_msgs::EigenCommandTrajectoryPositionYaw& command_trajectory) {
+void LeePositionController::SetTrajectoryPoint(
+    const mav_msgs::EigenTrajectoryPoint& command_trajectory) {
   command_trajectory_ = command_trajectory;
   controller_active_ = true;
 }
@@ -95,19 +95,19 @@ void LeePositionController::ComputeDesiredAcceleration(Eigen::Vector3d* accelera
   assert(acceleration);
 
   Eigen::Vector3d position_error;
-  position_error = odometry_.position - command_trajectory_.position;
+  position_error = odometry_.position - command_trajectory_.position_W;
 
   // Transform velocity to world frame.
   const Eigen::Matrix3d R_W_I = odometry_.orientation.toRotationMatrix();
   Eigen::Vector3d velocity_W =  R_W_I * odometry_.velocity;
   Eigen::Vector3d velocity_error;
-  velocity_error = velocity_W - command_trajectory_.velocity;
+  velocity_error = velocity_W - command_trajectory_.velocity_W;
 
   Eigen::Vector3d e_3(Eigen::Vector3d::UnitZ());
 
   *acceleration = (position_error.cwiseProduct(controller_parameters_.position_gain_)
       + velocity_error.cwiseProduct(controller_parameters_.velocity_gain_)) / vehicle_parameters_.mass_
-      - vehicle_parameters_.gravity_ * e_3 - command_trajectory_.acceleration;
+      - vehicle_parameters_.gravity_ * e_3 - command_trajectory_.acceleration_W;
 }
 
 // Implementation from the T. Lee et al. paper
@@ -120,7 +120,8 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
 
   // Get the desired rotation matrix.
   Eigen::Vector3d b1_des;
-  b1_des << cos(command_trajectory_.yaw), sin(command_trajectory_.yaw), 0;
+  double yaw = command_trajectory_.getYaw();
+  b1_des << cos(yaw), sin(yaw), 0;
 
   Eigen::Vector3d b3_des;
   b3_des = -acceleration / acceleration.norm();
@@ -141,7 +142,7 @@ void LeePositionController::ComputeDesiredAngularAcc(const Eigen::Vector3d& acce
 
   // TODO(burrimi) include angular rate references at some point.
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
-  angular_rate_des[2] = command_trajectory_.yaw_rate;
+  angular_rate_des[2] = command_trajectory_.getYawRate();
 
   Eigen::Vector3d angular_rate_error = odometry_.angular_velocity - R_des.transpose() * R * angular_rate_des;
 
