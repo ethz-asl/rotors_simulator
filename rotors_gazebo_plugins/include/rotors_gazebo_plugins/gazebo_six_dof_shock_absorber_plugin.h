@@ -35,8 +35,6 @@
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
-// Default values
-static const std::string kDefaultNamespace = "";
 
 class GazeboShockAbsorber : public ModelPlugin
 {
