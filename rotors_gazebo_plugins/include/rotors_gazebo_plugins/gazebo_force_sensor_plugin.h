@@ -27,6 +27,8 @@
 #include <random>
 #include <stdio.h>
 
+#include <rotors_gazebo_plugins/common.h>
+
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
@@ -46,7 +48,7 @@
 
 namespace gazebo {
 // Default values
-static const std::string kDefaultNamespace = "";
+//static const std::string kDefaultNamespace = "";
 static const std::string kDefaultParentFrameId = "world";
 static const std::string kDefaultReferenceFrameId = "world";
 static const std::string kDefaultLinkName = "f2g_sensor_link";

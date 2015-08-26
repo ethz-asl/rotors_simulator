@@ -37,7 +37,6 @@
 
 namespace gazebo {
 // Default values
-static const std::string kDefaultNamespace = "";
 static const std::string kDefaultCommandSubTopic = "command/servo_position";
 static const double kDefaultKp = 10.0;
 static const double kDefaultKd = 0.05;
