@@ -52,6 +52,7 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
 
   wrench_queue_.clear();
 
+  namespace_.clear();
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
@@ -77,6 +78,7 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
 
   getSdfParam<std::string>(_sdf, "forceSensorTopic", force_sensor_pub_topic_, force_sensor_pub_topic_);
   getSdfParam<std::string>(_sdf, "forceSensorTruthTopic", force_sensor_truth_pub_topic_, force_sensor_truth_pub_topic_);
+  getSdfParam<std::string>(_sdf, "wrenchVectorTopic", wrench_vector_pub_topic_, wrench_vector_pub_topic_);
   getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
   getSdfParam<std::string>(_sdf, "referenceFrameId", reference_frame_id_, reference_frame_id_);
   getSdfParam<sdf::Vector3>(_sdf, "noiseNormalLinearForce", noise_normal_linear_force, zeros3);
@@ -88,6 +90,7 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
   getSdfParam<double>(_sdf, "unknownDelay", unknown_delay_, unknown_delay_);
   getSdfParam<bool>(_sdf, "linForceMeasEnabled", lin_force_meas_enabled_, lin_force_meas_enabled_);
   getSdfParam<bool>(_sdf, "torqueMeasEnabled", torque_meas_enabled_, torque_meas_enabled_);
+  getSdfParam<bool>(_sdf, "dispWrenchVector", disp_wrench_vector_, disp_wrench_vector_);
 
   parent_link_ = model_->GetLink(parent_frame_id_);
   if (parent_link_ == NULL && parent_frame_id_ != kDefaultParentFrameId) {
@@ -125,6 +128,11 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
     // Torques publisher
     ang_force_sensor_pub_ = node_handle_->advertise<geometry_msgs::Vector3Stamped>(force_sensor_pub_topic_+"/angular", 10);
     ang_force_sensor_truth_pub_ = node_handle_->advertise<geometry_msgs::Vector3Stamped>(force_sensor_truth_pub_topic_+"/angular", 10);
+  }
+
+  if (disp_wrench_vector_) {
+    // Wrench vector publisher for RViz visualization
+    wrench_vector_pub_ = node_handle_->advertise<geometry_msgs::WrenchStamped>(wrench_vector_pub_topic_, 10);
   }
 
   // Listen to the update event. This event is broadcast every simulation iteration.
@@ -195,6 +203,11 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // Is it time to publish the front element?
   if (gazebo_sequence_ == wrench_queue_.front().first) {
+    // Init wrench vector for RViz visualization purpose
+    const geometry_msgs::Vector3 zeros3;
+    wrench_msg_.wrench.force = zeros3;
+    wrench_msg_.wrench.torque = zeros3;
+
     if (lin_force_meas_enabled_) {
       // Init true and noisy linear force message.
       geometry_msgs::Vector3StampedPtr true_lin_forces(new geometry_msgs::Vector3Stamped);
@@ -218,12 +231,15 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
       noisy_lin_forces->vector.z = true_lin_forces->vector.z + linear_force_n[2];
 
       // Publish all the topics, for which the topic name is specified.
-      if (lin_force_sensor_pub_.getNumSubscribers() >= 0) {
+      if (lin_force_sensor_pub_.getNumSubscribers() > 0) {
         lin_force_sensor_pub_.publish(noisy_lin_forces);
       }
       if (lin_force_sensor_truth_pub_.getNumSubscribers() > 0) {
         lin_force_sensor_truth_pub_.publish(true_lin_forces);
       }
+
+      // Update wrench vector forces for possible future use.
+      wrench_msg_.wrench.force = noisy_lin_forces->vector;
     }
 
     if (torque_meas_enabled_) {
@@ -249,11 +265,23 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
       noisy_torques->vector.z = true_torques->vector.z + torque_n[2];
 
       // Publish all the topics, for which the topic name is specified.
-      if (ang_force_sensor_pub_.getNumSubscribers() >= 0) {
+      if (ang_force_sensor_pub_.getNumSubscribers() > 0) {
         ang_force_sensor_pub_.publish(noisy_torques);
       }
       if (ang_force_sensor_truth_pub_.getNumSubscribers() > 0) {
         ang_force_sensor_truth_pub_.publish(true_torques);
+      }
+
+      // Update wrench vector torques for possible future use.
+      wrench_msg_.wrench.torque = noisy_torques->vector;
+    }
+
+    if (disp_wrench_vector_) {
+      // Complete wrench message.
+      wrench_msg_.header = wrench_queue_.front().second.header;
+      // Publish all the topics, for which the topic name is specified.
+      if (wrench_vector_pub_.getNumSubscribers() > 0) {
+        wrench_vector_pub_.publish(wrench_msg_);
       }
     }
 

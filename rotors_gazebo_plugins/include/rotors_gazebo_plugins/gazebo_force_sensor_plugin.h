@@ -54,6 +54,7 @@ static const std::string kDefaultReferenceFrameId = "world";
 static const std::string kDefaultLinkName = "f2g_sensor_link";
 static const std::string kDefaultForceSensorPubTopic = "force_sensor";
 static const std::string kDefaultForceSensorTruthPubTopic = "force_sensor_truth";
+static const std::string kDefaultWrenchVectorPubTopic = "wrench_vector";
 
 static constexpr int kDefaultMeasurementDelay = 0;
 static constexpr int kDefaultMeasurementDivisor = 1;
@@ -62,6 +63,7 @@ static constexpr int kDefaultWrenchSequence = 0;
 static constexpr double kDefaultUnknownDelay = 0.0;
 static constexpr bool kDefaultLinforceMeasEnabled = true;
 static constexpr bool kDefaultTorqueMeasEnabled = true;
+static constexpr bool kDefaultDispWrenchVector = true;
 
 
 class GazeboForceSensorPlugin : public ModelPlugin {
@@ -79,11 +81,13 @@ class GazeboForceSensorPlugin : public ModelPlugin {
         link_name_(kDefaultLinkName),
         force_sensor_pub_topic_(kDefaultForceSensorPubTopic),
         force_sensor_truth_pub_topic_(kDefaultForceSensorTruthPubTopic),
+        wrench_vector_pub_topic_(kDefaultWrenchVectorPubTopic),
         measurement_delay_(kDefaultMeasurementDelay),
         measurement_divisor_(kDefaultMeasurementDivisor),
         unknown_delay_(kDefaultUnknownDelay),
         lin_force_meas_enabled_(kDefaultLinforceMeasEnabled),
         torque_meas_enabled_(kDefaultTorqueMeasEnabled),
+        disp_wrench_vector_(kDefaultDispWrenchVector),
         gazebo_sequence_(kDefaultGazeboSequence),
         wrench_sequence_(kDefaultWrenchSequence),
         node_handle_(NULL) {}
@@ -105,6 +109,7 @@ class GazeboForceSensorPlugin : public ModelPlugin {
   std::string namespace_;
   std::string force_sensor_pub_topic_;
   std::string force_sensor_truth_pub_topic_;
+  std::string wrench_vector_pub_topic_;
   std::string parent_frame_id_;
   std::string reference_frame_id_;
   std::string link_name_;
@@ -123,6 +128,7 @@ class GazeboForceSensorPlugin : public ModelPlugin {
   double unknown_delay_;
   bool lin_force_meas_enabled_;
   bool torque_meas_enabled_;
+  bool disp_wrench_vector_;
 
   std::random_device random_device_;
   std::mt19937 random_generator_;
@@ -132,6 +138,7 @@ class GazeboForceSensorPlugin : public ModelPlugin {
   ros::Publisher lin_force_sensor_truth_pub_;
   ros::Publisher ang_force_sensor_pub_;
   ros::Publisher ang_force_sensor_truth_pub_;
+  ros::Publisher wrench_vector_pub_;
 
   tf::Transform tf_;
   tf::TransformBroadcaster transform_broadcaster_;
