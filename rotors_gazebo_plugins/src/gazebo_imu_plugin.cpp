@@ -221,14 +221,19 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Pose T_W_I = link_->GetWorldPose(); //TODO(burrimi): Check tf.
   math::Quaternion C_W_I = T_W_I.rot;
 
+#if GAZEBO_MAJOR_VERSION < 5
   math::Vector3 velocity_current_W = link_->GetWorldLinearVel();
-
-  // link_->GetRelativeLinearAccel() does not work sometimes. Returns only 0.
-  // TODO For an accurate simulation, this might have to be fixed. Consider the
-  //      time delay introduced by this numerical derivative, for example.
+  // link_->GetRelativeLinearAccel() does not work sometimes with old gazebo versions.
+  // This issue is solved in gazebo 5.
   math::Vector3 acceleration = (velocity_current_W - velocity_prev_W_) / dt;
   math::Vector3 acceleration_I =
       C_W_I.RotateVectorReverse(acceleration - gravity_W_);
+
+  velocity_prev_W_ = velocity_current_W;
+#else
+  math::Vector3 acceleration_I = link_->GetRelativeLinearAccel() - C_W_I.RotateVectorReverse(gravity_W_);
+#endif
+
   math::Vector3 angular_vel_I = link_->GetRelativeAngularVel();
 
   Eigen::Vector3d linear_acceleration_I(acceleration_I.x,
@@ -263,7 +268,6 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   imu_pub_.publish(imu_message_);
 
-  velocity_prev_W_ = velocity_current_W;
 }
 
 
