@@ -233,7 +233,6 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   velocity_prev_W_ = velocity_current_W;
 #else
   math::Vector3 acceleration_I = link_->GetRelativeLinearAccel() - C_W_I.RotateVectorReverse(gravity_W_);
-  std::cout << "using new model" << std::endl;
 #endif
 
   math::Vector3 angular_vel_I = link_->GetRelativeAngularVel();
