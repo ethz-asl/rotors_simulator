@@ -59,8 +59,28 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
       boost::bind(&GazeboMultirotorBasePlugin::OnUpdate, this, _1));
 
   child_links_ = link_->GetChildJointsLinks();
+
+  double total_mass = 0;
+  math::Vector3 weighted_position = math::Vector3::Zero;
+  double mass = link_->GetInertial()->GetMass();
+  total_mass = mass;
+  weighted_position = link_->GetRelativePose().pos * mass;
+
+  std::cout << "[Multirotor base]: Calculating CoG" << std::endl;
+  std::cout << link_->GetScopedName() << " CoG: " << link_->GetRelativePose() << " Mass: ";
+  std::cout << link_->GetInertial()->GetMass() << std::endl;
+
   for (unsigned int i = 0; i < child_links_.size(); i++) {
     std::string link_name = child_links_[i]->GetScopedName();
+
+    math::Vector3 position = child_links_[i]->GetRelativePose().pos;
+    double mass = child_links_[i]->GetInertial()->GetMass();
+
+    weighted_position = weighted_position + position*mass;
+    total_mass += mass;
+
+    std::cout << link_name << " CoG: " << position << " Mass: ";
+    std::cout << mass << std::endl;
 
     // Check if link contains rotor_ in its name.
     int pos = link_name.find("rotor_");
@@ -72,6 +92,8 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
       motor_joints_.insert(MotorNumberToJointPair(motor_number, joint));
     }
   }
+
+  std::cout << "CoG full body: " << weighted_position/total_mass << " total mass: " << total_mass << std::endl;
 }
 
 // This gets called by the world update start event.
