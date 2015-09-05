@@ -20,6 +20,7 @@
 -->
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
+
   <xacro:property name="pi" value="3.14159265359" />
 
   <!-- Macro to add logging to a bag file. -->
@@ -658,35 +659,46 @@
 	<!-- Macro to add a generic force sensor. -->
   <xacro:macro name="force_sensor_plugin_macro" params="namespace force_sensor_suffix parent_link force_sensor_topic 			
 		force_sensor_truth_topic wrench_vector_pub_topic parent_frame_id reference_frame_id mass_force_sensor lin_force_meas_enabled 
-		torque_meas_enabled disp_wrench_vector measurement_divisor	measurement_delay unknown_delay noise_normal_linear_force 
+		torque_meas_enabled disp_wrench_vector measurement_divisor	measurement_delay unknown_delay cutoff_frequency noise_normal_linear_force 
 		noise_normal_torque noise_uniform_linear_force noise_uniform_torque *inertia *origin">
     <!-- force-to-ground link -->
-    <link name="${namespace}/force_sensor_${force_sensor_suffix}_link">
+    <link name="${namespace}/force_sensor_${force_sensor_suffix}">
 			<visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <cylinder length="0.01" radius="0.005" />
+          <cylinder length="0.05" radius="0.01" />
         </geometry>
       </visual>
+			<collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <cylinder length="0.05" radius="0.01" />
+        </geometry>
+      </collision>
       <inertial>
         <xacro:insert_block name="inertia" />
         <mass value="${mass_force_sensor}" />  <!-- [kg] -->
       </inertial>
     </link>
-		<gazebo reference="${namespace}/force_sensor_${force_sensor_suffix}_link">
+		<gazebo reference="${namespace}/force_sensor_${force_sensor_suffix}">
 			<material>Gazebo/Yellow</material>
 		</gazebo>
+
     <!-- force-to-ground joint -->
-    <joint name="${namespace}/force_sensor_${force_sensor_suffix}_joint" type="revolute">
+    <joint name="${namespace}/force_sensor_${force_sensor_suffix}" type="revolute">
       <parent link="${parent_link}" />
       <xacro:insert_block name="origin" />
-      <child link="${namespace}/force_sensor_${force_sensor_suffix}_link" />
+      <child link="${namespace}/force_sensor_${force_sensor_suffix}" />
       <limit upper="0" lower="0" effort="0" velocity="0" />
-    </joint>
+    </joint>		
+		<gazebo reference="${namespace}/force_sensor_${force_sensor_suffix}">
+	    <provideFeedback>true</provideFeedback>
+		</gazebo>
+
 		<!-- force-to-ground plugin -->
     <gazebo>
       <plugin filename="librotors_gazebo_force_sensor_plugin.so" name="force_sensor_${force_sensor_suffix}">
-        <linkName>${namespace}/force_sensor_${force_sensor_suffix}_link</linkName>
+        <linkName>${namespace}/force_sensor_${force_sensor_suffix}</linkName>
         <robotNamespace>${namespace}</robotNamespace>
         <forceSensorTopic>${force_sensor_topic}</forceSensorTopic>
         <forceSensorTruthTopic>${force_sensor_truth_topic}</forceSensorTruthTopic>
@@ -701,6 +713,7 @@
         <measurementDelay>${measurement_delay}</measurementDelay> 
 				<!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
         <unknownDelay>${unknown_delay}</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
+				<cutoffFrequency>${cutoff_frequency}</cutoffFrequency> <!-- cut-off frequency of first order filter [Hz] -->
         <noiseNormalLinearForce>${noise_normal_linear_force}</noiseNormalLinearForce> 
 				<!-- standard deviation of additive white gaussian noise [N] -->
         <noiseNormalTorque>${noise_normal_torque}</noiseNormalTorque> <!-- standard deviation of additive white gaussian noise [N*m] -->
@@ -711,15 +724,15 @@
   </xacro:macro>
 	
 	<!-- Macro to add a default force-to-ground sensor. -->
-  <xacro:macro name="default_force_sensor" params="namespace suffix link reference_frame">
+  <xacro:macro name="default_force_sensor" params="namespace suffix parent_link reference_frame">
 		<xacro:force_sensor_plugin_macro 
-			namespace="${namespace}/force_sensor_${suffix}" 
+			namespace="${namespace}" 
 			force_sensor_suffix="${suffix}" 
-			parent_link="${link}" 
+			parent_link="${parent_link}" 
 			force_sensor_topic="force_sensor" 
 			force_sensor_truth_topic="force_sensor_truth" 
 			wrench_vector_pub_topic="wrench_vector"
-			parent_frame_id="${link}" 
+			parent_frame_id="${parent_link}" 
 			reference_frame_id="${reference_frame}"	
 			mass_force_sensor="0.001"	
 			lin_force_meas_enabled="true"
@@ -728,6 +741,7 @@
 			measurement_divisor="1" 
 			measurement_delay="0"	
 			unknown_delay="0.0" 
+			cutoff_frequency="10.0"
 			noise_normal_linear_force="0 0 0"	
 			noise_normal_torque="0 0 0" 
 			noise_uniform_linear_force="0 0 0" 

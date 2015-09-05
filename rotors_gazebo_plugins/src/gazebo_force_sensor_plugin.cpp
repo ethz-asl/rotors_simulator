@@ -24,7 +24,6 @@
 #include <chrono>
 #include <iostream>
 
-#include <rotors_gazebo_plugins/common.h>
 
 namespace gazebo {
 
@@ -69,6 +68,10 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
   if (link_ == NULL)
     gzthrow("[gazebo_force_sensor_plugin] Couldn't find specified link \"" << link_name_ << "\".");
 
+  joint_ = model_->GetJoint(link_name_);
+  if (joint_ == NULL)
+    gzthrow("[gazebo_force_sensor_plugin] Couldn't find specified joint \"" << link_name_ << "\".");
+
   if (_sdf->HasElement("randomEngineSeed")) {
     random_generator_.seed(_sdf->GetElement("randomEngineSeed")->Get<unsigned int>());
   }
@@ -88,6 +91,7 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
   getSdfParam<int>(_sdf, "measurementDelay", measurement_delay_, measurement_delay_);
   getSdfParam<int>(_sdf, "measurementDivisor", measurement_divisor_, measurement_divisor_);
   getSdfParam<double>(_sdf, "unknownDelay", unknown_delay_, unknown_delay_);
+  getSdfParam<double>(_sdf, "cutoffFrequency", cutoff_frequency_, cutoff_frequency_);
   getSdfParam<bool>(_sdf, "linForceMeasEnabled", lin_force_meas_enabled_, lin_force_meas_enabled_);
   getSdfParam<bool>(_sdf, "torqueMeasEnabled", torque_meas_enabled_, torque_meas_enabled_);
   getSdfParam<bool>(_sdf, "dispWrenchVector", disp_wrench_vector_, disp_wrench_vector_);
@@ -147,6 +151,7 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // C denotes child frame, P parent frame, R reference frame and W world frame.
   // Further C_pose_W_P denotes pose of P wrt. W expressed in C.
   math::Pose W_pose_W_C = link_->GetWorldCoGPose();
+//  math::Pose W_pose_W_C = joint_->GetWorldPose();
   math::Pose gazebo_pose = W_pose_W_C;
   math::Pose gazebo_parent_pose = math::Pose::Zero;
   math::Pose gazebo_reference_pose = math::Pose::Zero;
@@ -154,7 +159,8 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Pose W_pose_W_R = math::Pose::Zero;
 
   if (parent_frame_id_ != kDefaultParentFrameId) {
-    W_pose_W_P = parent_link_->GetWorldCoGPose();
+//    W_pose_W_P = parent_link_->GetWorldCoGPose();
+    W_pose_W_P = model_->GetJoint(parent_frame_id_)->GetWorldPose();
     math::Pose C_pose_P_C = W_pose_W_C - W_pose_W_P;
     gazebo_pose = C_pose_P_C;
     gazebo_parent_pose = W_pose_W_P;
@@ -168,20 +174,36 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
   }
 
   /* FORCE PARSING */
-  // The wrench vectors represent the coordinates of the tip of a wrench arrow which starts from the origin of a
-  // frame centered in the parent link CoG with axes oriented according to inertial origin property specified in the
-  // .xacro file, where the parent link is defined. By default the orientation is the same as described by the standard
-  // DH approach, therefore parallel to the relative link frame as it appears in gazebo when showing joints frame.
+  // The wrench vectors consist of two vectors representing the internal resultant force and torque applied on force
+  // sensor joint by child link (i.e. force sensor itself). The values of the two 3D vectors are the coordinates in
+  // parent frame coordinates system of the tip of an arrow starting at the origin of parent frame.
 
   math::Vector3 torque;
   math::Vector3 force;
   bool publish_forces = true;
 
-  // Get force applied to body CoG wrt to body frame.
-  force = parent_link_->GetRelativeForce();
+  // Get internal forces and torques at force sensor joint.
+  joint_wrench_ = joint_->GetForceTorque(0u);
 
-  // Get torque applied to body CoG wrt to body frame.
-  torque = parent_link_->GetRelativeTorque();
+  // First order filter
+  if (prev_sim_time_ == 0.0) {
+    // Initialize the first order filter.
+    double time_constant_ = 1.0 / (2 * M_PI * cutoff_frequency_);
+    sensor_data_filter_.reset(new FirstOrderFilterJointWrench(time_constant_, time_constant_, joint_wrench_));
+  }
+  else {
+    // Smooth row data by first order filter.
+    sampling_time_ = _info.simTime.Double() - prev_sim_time_;
+    joint_wrench_ = sensor_data_filter_->updateFilter(joint_wrench_,sampling_time_);
+  }
+  prev_sim_time_ = _info.simTime.Double();
+
+
+  // Get forces applied to force sensor joint from child link (i.e. force sensor) in parent frame coordinates.
+  force = -joint_wrench_.body1Force;
+
+  // Get torques applied to sensor joint from child link (i.e. force sensor) in parent frame coordinates.
+  torque = -joint_wrench_.body1Torque;
 
   if (gazebo_sequence_ % measurement_divisor_ == 0) {
     // Copy data into wrench message.
@@ -289,7 +311,7 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
     tf::Quaternion tf_q_P_C(gazebo_pose.rot.x, gazebo_pose.rot.y, gazebo_pose.rot.z, gazebo_pose.rot.w);
     tf::Vector3 tf_p_P_C(gazebo_pose.pos.x, gazebo_pose.pos.y, gazebo_pose.pos.z);
     tf_ = tf::Transform(tf_q_P_C, tf_p_P_C);
-    transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, wrench_queue_.front().second.header.stamp, parent_frame_id_, namespace_));
+    transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, wrench_queue_.front().second.header.stamp, parent_frame_id_, link_name_));
     if (parent_frame_id_ != kDefaultParentFrameId && reference_frame_id_ != parent_frame_id_) {
       // Transformation between parent link and reference frame.
       tf::Quaternion tf_q_R_P(gazebo_parent_pose.rot.x, gazebo_parent_pose.rot.y, gazebo_parent_pose.rot.z, gazebo_parent_pose.rot.w);
@@ -314,6 +336,10 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
   ++gazebo_sequence_;
 }
 
+void GazeboForceSensorPlugin::PrintJointWrench(physics::JointWrench jw_){
+  ROS_INFO("[gazebo_force_sensor_plugin]\nJoint Wrench Forces:\n  Fx = %f  Fy = %f  Fz = %f\nJoint Wrench Torques:\n  Tx = %f  Ty = %f  Tz = %f\n",
+           jw_.body1Force.x, jw_.body1Force.y, jw_.body1Force.z, jw_.body1Torque.x, jw_.body1Torque.y, jw_.body1Torque.z);
+}
 
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboForceSensorPlugin);

@@ -18,13 +18,13 @@
           <cfm>0.0</cfm>
           <erp>0.2</erp>
           <split_impulse>true</split_impulse>
-          <split_impulse_penetration_threshold>-0.02</split_impulse_penetration_threshold>
-          <contact_surface_layer>0.001</contact_surface_layer>
+          <split_impulse_penetration_threshold>-0.002</split_impulse_penetration_threshold>
+          <contact_surface_layer>0.0001</contact_surface_layer>
         </constraints>
       </bullet>
-      <max_step_size>0.002</max_step_size>
+      <max_step_size>0.001</max_step_size>
       <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>500</real_time_update_rate>
+      <real_time_update_rate>1000</real_time_update_rate>
       <gravity>0 0 -9.8</gravity>
     </physics>
   </world>
