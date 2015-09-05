@@ -62,7 +62,7 @@ class FirstOrderFilter {
 This class can be used to apply a first order filter on a signal.
 It allows different acceleration and deceleration time constants.
 
-Short reveiw of discrete time implementation of firest order system:
+Short review of discrete time implementation of first order system:
 Laplace:
     X(s)/U(s) = 1/(tau*s + 1)
 continous time system:

@@ -53,13 +53,14 @@
 		measurement_divisor="1" 
 		measurement_delay="0"	
 		unknown_delay="0.0" 
+		cutoff_frequency="10.0"
 		noise_normal_linear_force="0 0 0"	
 		noise_normal_torque="0 0 0" 
 		noise_uniform_linear_force="0 0 0" 
 		noise_uniform_torque="0 0 0" >	
 		<inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
 		<!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
-		<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+		<origin xyz="0.04 0.1 -0.005" rpy="0.0 1.57 1.2"/>
 	</xacro:force_sensor_plugin_macro>
 
 </robot>

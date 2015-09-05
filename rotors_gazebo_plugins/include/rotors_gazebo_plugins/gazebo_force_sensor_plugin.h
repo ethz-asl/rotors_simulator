@@ -61,9 +61,53 @@ static constexpr int kDefaultMeasurementDivisor = 1;
 static constexpr int kDefaultGazeboSequence = 0;
 static constexpr int kDefaultWrenchSequence = 0;
 static constexpr double kDefaultUnknownDelay = 0.0;
+static constexpr double kDefaultCutOffFrequency = 10.0;
 static constexpr bool kDefaultLinforceMeasEnabled = true;
 static constexpr bool kDefaultTorqueMeasEnabled = true;
 static constexpr bool kDefaultDispWrenchVector = true;
+
+
+class FirstOrderFilterJointWrench {
+  public:
+    FirstOrderFilterJointWrench(double timeConstantUp, double timeConstantDown, physics::JointWrench initialState):
+      previousState_(initialState) {
+      // Initialize filters, one for each wrench element.
+      force_x_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Force.x));
+      force_y_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Force.y));
+      force_z_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Force.z));
+      torque_x_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Torque.x));
+      torque_y_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Torque.y));
+      torque_z_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Torque.z));
+    }
+
+    physics::JointWrench updateFilter(physics::JointWrench inputState, double samplingTime) {
+      /*
+      This method will apply a first order filter on each wrench element of the inputState.
+      */
+      physics::JointWrench outputState;
+
+      outputState.body1Force.x = force_x_filter_->updateFilter(inputState.body1Force.x,samplingTime);
+      outputState.body1Force.y = force_y_filter_->updateFilter(inputState.body1Force.y,samplingTime);
+      outputState.body1Force.z = force_z_filter_->updateFilter(inputState.body1Force.z,samplingTime);
+      outputState.body1Torque.x = torque_x_filter_->updateFilter(inputState.body1Torque.x,samplingTime);
+      outputState.body1Torque.y = torque_y_filter_->updateFilter(inputState.body1Torque.y,samplingTime);
+      outputState.body1Torque.z = torque_z_filter_->updateFilter(inputState.body1Torque.z,samplingTime);
+
+      previousState_ = outputState;
+      return outputState;
+    }
+
+    ~FirstOrderFilterJointWrench() {}
+
+  protected:
+      physics::JointWrench previousState_;
+      std::unique_ptr<FirstOrderFilter<double>>  force_x_filter_;
+      std::unique_ptr<FirstOrderFilter<double>>  force_y_filter_;
+      std::unique_ptr<FirstOrderFilter<double>>  force_z_filter_;
+      std::unique_ptr<FirstOrderFilter<double>>  torque_x_filter_;
+      std::unique_ptr<FirstOrderFilter<double>>  torque_y_filter_;
+      std::unique_ptr<FirstOrderFilter<double>>  torque_z_filter_;
+};
 
 
 class GazeboForceSensorPlugin : public ModelPlugin {
@@ -85,11 +129,14 @@ class GazeboForceSensorPlugin : public ModelPlugin {
         measurement_delay_(kDefaultMeasurementDelay),
         measurement_divisor_(kDefaultMeasurementDivisor),
         unknown_delay_(kDefaultUnknownDelay),
+        cutoff_frequency_(kDefaultCutOffFrequency),
         lin_force_meas_enabled_(kDefaultLinforceMeasEnabled),
         torque_meas_enabled_(kDefaultTorqueMeasEnabled),
         disp_wrench_vector_(kDefaultDispWrenchVector),
         gazebo_sequence_(kDefaultGazeboSequence),
         wrench_sequence_(kDefaultWrenchSequence),
+        prev_sim_time_(0.0),
+        sampling_time_(0.001),
         node_handle_(NULL) {}
 
   ~GazeboForceSensorPlugin();
@@ -101,6 +148,7 @@ class GazeboForceSensorPlugin : public ModelPlugin {
  protected:
   void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
   void OnUpdate(const common::UpdateInfo& /*_info*/);
+  void PrintJointWrench(physics::JointWrench jw_);
 
 
  private:
@@ -125,7 +173,10 @@ class GazeboForceSensorPlugin : public ModelPlugin {
   int measurement_divisor_;
   int gazebo_sequence_;
   int wrench_sequence_;
+  double prev_sim_time_;
+  double sampling_time_;
   double unknown_delay_;
+  double cutoff_frequency_;
   bool lin_force_meas_enabled_;
   bool torque_meas_enabled_;
   bool disp_wrench_vector_;
@@ -148,6 +199,10 @@ class GazeboForceSensorPlugin : public ModelPlugin {
   physics::LinkPtr link_;
   physics::LinkPtr parent_link_;
   physics::LinkPtr reference_link_;
+  physics::JointPtr joint_;
+  physics::JointWrench joint_wrench_;
+
+  std::unique_ptr<FirstOrderFilterJointWrench>  sensor_data_filter_;
 
   /// \brief Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
@@ -156,6 +211,7 @@ class GazeboForceSensorPlugin : public ModelPlugin {
 
   void QueueThread();
 };
+
 }
 
 #endif /* ROTORS_GAZEBO_PLUGINS_FORCE_SENSOR_PLUGIN_H */
