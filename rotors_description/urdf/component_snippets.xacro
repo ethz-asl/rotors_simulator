@@ -235,14 +235,14 @@
   </xacro:macro>
 
   <!-- Macro to add the controller interface. -->
-  <xacro:macro name="controller_plugin_macro" params="namespace imu_sub_topic">
+  <xacro:macro name="controller_plugin_macro" params="namespace">
     <gazebo>
       <plugin name="controller_interface" filename="librotors_gazebo_controller_interface.so">
         <robotNamespace>${namespace}</robotNamespace>
         <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
         <commandRateThrustSubTopic>command/rate</commandRateThrustSubTopic>
         <commandMotorSpeedSubTopic>command/motor_speed</commandMotorSpeedSubTopic>
-        <imuSubTopic>${imu_sub_topic}</imuSubTopic>
+        <imuSubTopic>imu</imuSubTopic>
         <motorSpeedCommandPubTopic>gazebo/command/motor_speed</motorSpeedCommandPubTopic>
       </plugin>
     </gazebo>
@@ -294,7 +294,7 @@
   <xacro:macro name="odometry_plugin_macro"
     params="
       namespace odometry_sensor_suffix parent_link pose_topic pose_with_covariance_topic
-      position_topic transform_topic odometry_topic parent_frame_id
+      position_topic transform_topic odometry_topic parent_frame_id child_frame_id
       mass_odometry_sensor measurement_divisor measurement_delay unknown_delay
       noise_normal_position noise_normal_quaternion noise_normal_linear_velocity
       noise_normal_angular_velocity noise_uniform_position
@@ -325,6 +325,7 @@
         <transformTopic>${transform_topic}</transformTopic>
         <odometryTopic>${odometry_topic}</odometryTopic>
         <parentFrameId>${parent_frame_id}</parentFrameId> <!-- Use the scoped link name here. e.g. Model::link. -->
+        <childFrameId>${child_frame_id}</childFrameId>
         <measurementDivisor>${measurement_divisor}</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
         <measurementDelay>${measurement_delay}</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
         <unknownDelay>${unknown_delay}</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
@@ -543,6 +544,7 @@
         transform_topic="transform"
         odometry_topic="odometry"
         parent_frame_id="world"
+        child_frame_id="${namespace}/odometry"
         mass_odometry_sensor="0.00001"
         measurement_divisor="1"
         measurement_delay="0"
@@ -614,6 +616,7 @@
       transform_topic="transform"
       odometry_topic="odometry"
       parent_frame_id="world"
+      child_frame_id="${namespace}/ground_truth"
       mass_odometry_sensor="0.00001"
       measurement_divisor="1"
       measurement_delay="0"
