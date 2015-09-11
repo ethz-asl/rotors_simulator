@@ -128,8 +128,6 @@ int main(int argc, char** argv) {
     mav_msgs::EigenTrajectoryPoint trajectory_point;
     trajectory_point.position_W = wp.position;
     trajectory_point.setFromRPY(wp.orientation.x(), wp.orientation.y(), wp.orientation.z());
-    std::cout << "w: " << trajectory_point.orientation_W_B.w() << ", x: " << trajectory_point.orientation_W_B.x() << ", y: " << trajectory_point.orientation_W_B.y() << ", z: " << trajectory_point.orientation_W_B.z() << std::endl;
-    std::cout << "debug: x: " << wp.orientation.x() << ", y: " << wp.orientation.y() << ", z: " << wp.orientation.z() << std::endl;
     trajectory_point.velocity_W = wp.velocity;
     trajectory_point.angular_velocity_W = wp.angular_velocity;
     trajectory_point.time_from_start_ns = time_from_start_ns;
