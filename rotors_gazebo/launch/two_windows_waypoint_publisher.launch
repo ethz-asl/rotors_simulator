@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<launch>
+  <node name="complete_waypoint_publisher_file_joystick" pkg="rotors_gazebo" type="complete_waypoint_publisher_file_joystick" ns="/firefly" respawn="false" output="screen">
+    <param name="nFiles" value="4" />
+    <param name="file0" value="$(find rotors_gazebo)/resource/two_windows/return_right.txt" />
+    <param name="file1" value="$(find rotors_gazebo)/resource/two_windows/go_right.txt" />
+    <param name="file2" value="$(find rotors_gazebo)/resource/two_windows/return_left.txt" />
+    <param name="file3" value="$(find rotors_gazebo)/resource/two_windows/go_left.txt" />
+  </node>
+</launch>

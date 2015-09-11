@@ -104,11 +104,12 @@ int main(int argc, char** argv) {
       mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
 
   ROS_INFO("Wait for simulation to become ready...");
-
+/*
   while (!sim_running && ros::ok()) {
     ros::spinOnce();
     ros::Duration(0.1).sleep();
   }
+*/
 
   ROS_INFO("...ok");
 
@@ -125,14 +126,14 @@ int main(int argc, char** argv) {
   for (size_t i = 0; i < waypoints.size(); ++i) {
     WaypointWithTime& wp = waypoints[i];
 
+    time_from_start_ns += static_cast<int64_t>(wp.waiting_time * kNanoSecondsInSecond);
+
     mav_msgs::EigenTrajectoryPoint trajectory_point;
     trajectory_point.position_W = wp.position;
     trajectory_point.setFromRPY(wp.orientation.x(), wp.orientation.y(), wp.orientation.z());
     trajectory_point.velocity_W = wp.velocity;
     trajectory_point.angular_velocity_W = wp.angular_velocity;
     trajectory_point.time_from_start_ns = time_from_start_ns;
-
-    time_from_start_ns += static_cast<int64_t>(wp.waiting_time * kNanoSecondsInSecond);
 
     mav_msgs::msgMultiDofJointTrajectoryPointFromEigen(trajectory_point, &msg->points[i]);
   }
