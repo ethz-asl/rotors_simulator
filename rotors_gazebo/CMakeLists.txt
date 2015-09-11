@@ -24,6 +24,10 @@ add_executable(waypoint_publisher_file src/waypoint_publisher_file.cpp)
 target_link_libraries(waypoint_publisher_file ${catkin_LIBRARIES})
 add_dependencies(waypoint_publisher_file ${catkin_EXPORTED_TARGETS})
 
+add_executable(complete_waypoint_publisher_file src/complete_waypoint_publisher_file.cpp)
+target_link_libraries(complete_waypoint_publisher_file ${catkin_LIBRARIES})
+add_dependencies(complete_waypoint_publisher_file ${catkin_EXPORTED_TARGETS})
+
 add_executable(hovering_example src/hovering_example.cpp)
 target_link_libraries(hovering_example ${catkin_LIBRARIES})
 add_dependencies(hovering_example ${catkin_EXPORTED_TARGETS})
