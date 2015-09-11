@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
   ROS_INFO("...ok");
 
   // Wait for 30s such that everything can settle and the mav flies to the initial position.
-  // ros::Duration(30).sleep();
+  ros::Duration(2).sleep();
 
   ROS_INFO("Start publishing waypoints.");
 
@@ -137,6 +137,6 @@ int main(int argc, char** argv) {
     mav_msgs::msgMultiDofJointTrajectoryPointFromEigen(trajectory_point, &msg->points[i]);
   }
   wp_pub.publish(msg);
-
+  ros::Duration(2).sleep();
   return 0;
 }
