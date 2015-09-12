@@ -110,7 +110,7 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   command_sub_ = node_handle_->subscribe(command_sub_topic_, 1, &GazeboMotorModel::VelocityCallback, this);
   wind_speed_sub_ = node_handle_->subscribe(wind_speed_sub_topic_, 1, &GazeboMotorModel::WindSpeedCallback, this);
-  motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_speed_pub_topic_, 10);
+  motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_speed_pub_topic_, 1);
 
   // Create the first order filter.
   rotor_velocity_filter_.reset(new FirstOrderFilter<double>(time_constant_up_, time_constant_down_, ref_motor_rot_vel_));
@@ -128,7 +128,7 @@ void GazeboMotorModel::VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_v
   ROS_ASSERT_MSG(rot_velocities->angular_velocities.size() > motor_number_,
                  "You tried to access index %d of the MotorSpeed message array which is of size %d.",
                  motor_number_, rot_velocities->angular_velocities.size());
-  ref_motor_rot_vel_ = std::min(rot_velocities->angular_velocities[motor_number_], static_cast<double>(max_rot_velocity_));
+  ref_motor_rot_vel_ = std::min(rot_velocities->angular_velocities[motor_number_], max_rot_velocity_);
 }
 
 void GazeboMotorModel::WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed) {
@@ -174,8 +174,9 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   rolling_moment = -std::abs(real_motor_velocity) * rolling_moment_coefficient_ * body_velocity_perpendicular;
   parent_links.at(0)->AddTorque(rolling_moment);
   // Apply the filter on the motor's velocity.
-  ref_motor_rot_vel_ = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
-  joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
+  double ref_motor_rot_vel;
+  ref_motor_rot_vel = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
+  joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel / rotor_velocity_slowdown_sim_);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMotorModel);
