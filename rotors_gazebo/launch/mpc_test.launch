@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+
+<launch>
+  <node name="complete_waypoint_publisher_file_joystick" pkg="rotors_gazebo" type="complete_waypoint_publisher_file_joystick" respawn="false" output="screen">
+    <param name="file_Start" value="$(find rotors_gazebo)/resource/mpc_test/hover.txt" />
+    <param name="file_Back" value="$(find rotors_gazebo)/resource/mpc_test/land.txt" />
+    <param name="file_LB" value="$(find rotors_gazebo)/resource/mpc_test/left.txt" />
+    <param name="file_RB" value="$(find rotors_gazebo)/resource/mpc_test/right.txt" />
+    <param name="file_B" value="$(find rotors_gazebo)/resource/mpc_test/rightRoll.txt" />
+  </node>
+</launch>
