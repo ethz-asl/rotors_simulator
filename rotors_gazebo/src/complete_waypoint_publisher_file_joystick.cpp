@@ -59,7 +59,10 @@ class WaypointWithTime {
   double waiting_time;
 };
 
-std::vector<std::vector<WaypointWithTime > > waypoints;
+std::vector<std::string> buttonNames = { "A", "B", "X", "Y", "LB", "RB", "Back", "Start", "LStick", "RStick" };
+
+std::map<int, std::vector<WaypointWithTime > > waypoints;
+std::map<int, std::string> filenames;
 
 void publishTrajectory(int index)
 {
@@ -85,36 +88,11 @@ void publishTrajectory(int index)
 	wp_pub.publish(msg);
 }
 
-void callback(const sensor_msgs::ImuPtr& /*msg*/) {
-  sim_running = true;
-}
-
-void joyCallback(const sensor_msgs::JoyPtr& msg) {
-  static ros::Time lastCallback(0);
-
-  double timePassed = (msg->header.stamp - lastCallback).toSec();
-
-  if (timePassed > 0.1)
-  {
-	  for (int i=0; i<msg->buttons.size(); i++)
-	  {
-		  if (msg->buttons[i] > 0)
-		  {
-			  if (i >= waypoints.size())
-				  ROS_WARN("Button %d pressed but no trajectory assigned.", i);
-
-			  ROS_INFO("Publishing trajectory %d", i);
-			  publishTrajectory(i);
-			  return;
-		  }
-	  }
-	  lastCallback = msg->header.stamp;
-  }
-}
-
 bool parseFile(const std::string& filename, int index)
 {
 	const float DEG_2_RAD = M_PI / 180.0;
+
+	waypoints[index].clear();
 
     std::ifstream wp_file(filename);
 
@@ -134,44 +112,82 @@ bool parseFile(const std::string& filename, int index)
     return true;
 }
 
+void callback(const sensor_msgs::ImuPtr& /*msg*/) {
+  sim_running = true;
+}
+
+void readAllFiles()
+{
+	const int nButtons = 10;
+
+	for (int i=0; i<nButtons; i++)
+	{
+		  std::string filename;
+		  if(!ros::param::get("~/file_"+buttonNames[i],filename))
+		  {
+			  ROS_WARN("No file assigned to button %s", buttonNames[i].c_str());
+			  continue;
+		  }
+
+		  filenames[i] = filename;
+
+		  ROS_INFO("Button %s is assigned to file %s", buttonNames[i].c_str(), filename.c_str());
+
+		  if (!parseFile(filename, i))
+		  {
+			  ROS_ERROR("Could not parse file %s", filename.c_str());
+		  }
+	}
+}
+
+void joyCallback(const sensor_msgs::JoyPtr& msg) {
+  static ros::Time lastCallback(0);
+
+  double timePassed = (msg->header.stamp - lastCallback).toSec();
+
+  if (msg->axes[2] < -0.5)
+  {
+	  readAllFiles();
+	  return;
+  }
+
+  if (timePassed > 0.1)
+  {
+	  for (int i=0; i<msg->buttons.size(); i++)
+	  {
+		  if (msg->buttons[i] > 0)
+		  {
+			  if (waypoints.find(i) == waypoints.end())
+			  {
+				  ROS_WARN("Button %s pressed but no trajectory assigned.", buttonNames[i].c_str());
+				  return;
+			  }
+
+			  ROS_INFO("Publishing trajectory %s", filenames[i].c_str());
+			  publishTrajectory(i);
+			  return;
+		  }
+	  }
+	  lastCallback = msg->header.stamp;
+  }
+}
+
 
 int main(int argc, char** argv) {
 
   ros::init(argc, argv, "waypoint_publisher");
   ros::NodeHandle nh;
-  ros::NodeHandle nhPrivate("~");
 
   ROS_INFO("Started waypoint_publisher.");
 
   ros::V_string args;
   ros::removeROSArgs(argc, argv, args);
 
-  int nFiles;
-  if(!nhPrivate.getParam("nFiles",nFiles))
-  {
-	  ROS_FATAL("Parameter nFiles not set");
-	  return -1;
-  }
-
-  waypoints.resize(nFiles);
-
-  for (int i=0; i<nFiles; i++)
-  {
-	  std::string filename;
-	  if(!nhPrivate.getParam("file"+std::to_string(i),filename))
-	  {
-		  ROS_FATAL("Could not get param file%d", i);
-		  return -1;
-	  }
-
-	  if (!parseFile(filename, i))
-		  return -1;
-  }
-
+  readAllFiles();
 
   // The IMU is used, to determine if the simulator is running or not.
   ros::Subscriber sub = nh.subscribe("imu", 10, &callback);
-  ros::Subscriber joy = nh.subscribe("/joy", 10, &joyCallback);
+  ros::Subscriber joy = nh.subscribe("joy", 10, &joyCallback);
 
   wp_pub =
       nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>(
