@@ -345,6 +345,36 @@
     </gazebo>
   </xacro:macro>
 
+  <!-- Macro to add a generic magnetometer sensor. -->
+    <xacro:macro name="magnetometer_plugin_macro"
+      params="
+        namespace magnetometer_sensor_suffix parent_link 
+          magnetometer_topic parent_frame_id mass_magnetometer_sensor
+ *inertia *origin">
+      <!-- magnetometer link -->
+      <link name="${namespace}/magnetometer_sensor${magnetometer_sensor_suffix}_link">
+        <inertial>
+          <xacro:insert_block name="inertia" />
+          <mass value="${mass_magnetometer_sensor}" />  <!-- [kg] -->
+        </inertial>
+      </link>
+      <!-- magnetometer joint -->
+      <joint name="${namespace}/magnetometer_sensor${magnetometer_sensor_suffix}_joint" type="revolute">
+        <parent link="${parent_link}" />
+        <xacro:insert_block name="origin" />
+        <child link="${namespace}/magnetometer_sensor${magnetometer_sensor_suffix}_link" />
+        <limit upper="0" lower="0" effort="0" velocity="0" />
+      </joint>
+      <gazebo>
+        <plugin filename="librotors_gazebo_magnetometer_plugin.so" name="magnetometer_sensor${magnetometer_sensor_suffix}">
+          <linkName>${namespace}/magnetometer_sensor${magnetometer_sensor_suffix}_link</linkName>
+          <robotNamespace>${namespace}</robotNamespace>
+          <magnetometerTopic>${magnetometer_topic}</magnetometerTopic>
+          <parentFrameId>${parent_frame_id}</parentFrameId>  <!-- Use the scoped link name here. e.g. Model::link. -->
+        </plugin>
+      </gazebo>
+    </xacro:macro>
+
   <!-- Macro to add the wind plugin. -->
   <xacro:macro name="wind_plugin_macro"
     params="namespace xyz_offset wind_direction wind_force_mean
