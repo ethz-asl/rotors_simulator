@@ -58,11 +58,11 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboControllerInterface::OnUpdate, this, _1));
 
-  cmd_motor_sub_ = node_handle_->subscribe(command_motor_speed_sub_topic_, 10,
+  cmd_motor_sub_ = node_handle_->subscribe(command_motor_speed_sub_topic_, 1,
                                            &GazeboControllerInterface::CommandMotorCallback,
                                            this);
 
-  motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::Actuators>(motor_velocity_reference_pub_topic_, 10);
+  motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::Actuators>(motor_velocity_reference_pub_topic_, 1);
 }
 
 // This gets called by the world update start event.
