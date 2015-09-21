@@ -25,6 +25,12 @@
   <!-- Instantiate firefly "mechanics" -->
   <xacro:include filename="$(find rotors_description)/urdf/firefly.xacro" />
 
+  <!-- Specify reference parameters for GNSS receiver. -->
+  <xacro:property name="referenceLatitude" value="47.3761890018" />
+  <xacro:property name="referenceLongitude" value="47.3761890018" />
+  <xacro:property name="referenceHeading" value="47.3761890018" />
+  <xacro:property name="referenceAltitude" value="47.3761890018" />  
+
   <!-- Instantiate a controller. -->
   <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />
 
@@ -37,10 +43,10 @@
 	<alwaysOn>true</alwaysOn>
 	<topicName>fix</topicName>
 	<velocityTopicName>fix_velocity</velocityTopicName>
-	<referenceLatitude>47.3761890018</referenceLatitude>
-	<referenceLongitude>8.546860995</referenceLongitude>
-	<referenceHeading>0.0</referenceHeading>
-	<referenceAltitude>0.0</referenceAltitude>
+	<referenceLatitude>${referenceLatitude}</referenceLatitude>
+	<referenceLongitude>${referenceLongitude}</referenceLongitude>
+	<referenceHeading>${referenceHeading}</referenceHeading>
+	<referenceAltitude>${referenceAltitude}</referenceAltitude>
     </plugin>
   </gazebo>
 
