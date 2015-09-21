@@ -27,9 +27,9 @@
 
   <!-- Specify reference parameters for GNSS receiver. -->
   <xacro:property name="referenceLatitude" value="47.3761890018" />
-  <xacro:property name="referenceLongitude" value="47.3761890018" />
-  <xacro:property name="referenceHeading" value="47.3761890018" />
-  <xacro:property name="referenceAltitude" value="47.3761890018" />  
+  <xacro:property name="referenceLongitude" value="8.546860995" />
+  <xacro:property name="referenceHeading" value="0" />
+  <xacro:property name="referenceAltitude" value="0" />  
 
   <!-- Instantiate a controller. -->
   <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />
