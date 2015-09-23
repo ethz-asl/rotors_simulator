@@ -28,9 +28,9 @@ class MotorModel
 {
   public:
     MotorModel()
-        : motor_rot_vel_(0),
-          ref_motor_rot_vel_(0),
-          prev_sim_time_(0),
+        : motor_rot_vel_(0.0),
+          ref_motor_rot_vel_(0.0),
+          prev_sim_time_(0.0),
           sampling_time_(0.01) {}
     virtual ~MotorModel() {}
     void GetMotorVelocity(double &result) const {
