@@ -31,6 +31,7 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <mav_msgs/Actuators.h>
+#include <mav_msgs/MotorStatus.h>
 #include <mav_msgs/default_topics.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
@@ -109,6 +110,9 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   double moment_constant_;
   double motor_constant_;
   double ref_motor_rot_vel_;
+
+  ros::Time ref_timestamp_;
+
   double rolling_moment_coefficient_;
   double rotor_drag_coefficient_;
   double rotor_velocity_slowdown_sim_;
@@ -121,6 +125,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   ros::Subscriber wind_speed_sub_;
 
   physics::ModelPtr model_;
+  physics::WorldPtr world_;
   physics::JointPtr joint_;
   physics::LinkPtr link_;
   /// \brief Pointer to the update event connection.
@@ -134,6 +139,11 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
 
   std::unique_ptr<FirstOrderFilter<double>>  rotor_velocity_filter_;
   math::Vector3 wind_speed_W_;
+
+  math::Vector3 total_force_B_;
+  math::Vector3 total_torque_B_;
+  math::Vector3 velocity_current_W_;
+
 };
 }
 

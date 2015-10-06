@@ -642,12 +642,12 @@
       parent_link="${parent_link}"
       imu_topic="imu"
       mass_imu_sensor="0.015"
-      gyroscope_noise_density="0.0003394"
-      gyroscopoe_random_walk="0.000038785"
+      gyroscope_noise_density="0.0013"
+      gyroscopoe_random_walk="0.000013"
       gyroscope_bias_correlation_time="1000.0"
       gyroscope_turn_on_bias_sigma="0.0087"
-      accelerometer_noise_density="0.004"
-      accelerometer_random_walk="0.006"
+      accelerometer_noise_density="0.0083"
+      accelerometer_random_walk="0.00083"
       accelerometer_bias_correlation_time="300.0"
       accelerometer_turn_on_bias_sigma="0.1960">
       <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />

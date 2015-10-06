@@ -34,12 +34,12 @@
   <xacro:property name="radius_rotor" value="0.1" /> <!-- [m] -->
   <xacro:property name="motor_constant" value="8.54858e-06" /> <!-- [kg m/s^2] -->
   <xacro:property name="moment_constant" value="0.016" /> <!-- [m] -->
-  <xacro:property name="time_constant_up" value="0.0125" /> <!-- [s] -->
+  <xacro:property name="time_constant_up" value="0.025" /> <!-- [s] -->
   <xacro:property name="time_constant_down" value="0.025" /> <!-- [s] -->
   <xacro:property name="max_rot_velocity" value="838" /> <!-- [rad/s] -->
   <xacro:property name="sin30" value="0.5" />
   <xacro:property name="cos30" value="0.866025403784" />
-  <xacro:property name="rotor_drag_coefficient" value="8.06428e-05" />
+  <xacro:property name="rotor_drag_coefficient" value="0.0176" />
   <xacro:property name="rolling_moment_coefficient" value="0.000001" />
 
   <!-- Property Blocks -->

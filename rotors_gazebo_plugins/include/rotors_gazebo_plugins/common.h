@@ -23,6 +23,9 @@
 
 #include <Eigen/Dense>
 #include <gazebo/gazebo.hh>
+#include <gazebo/math/Vector3.hh>
+#include <gazebo/math/Matrix3.hh>
+
 #include <mav_msgs/default_topics.h>
 
 namespace gazebo {
@@ -52,6 +55,16 @@ bool getSdfParam(sdf::ElementPtr sdf, const std::string& name, T& param, const T
       gzerr << "[rotors_gazebo_plugins] Please specify a value for parameter \"" << name << "\".\n";
   }
   return false;
+}
+
+void vector3ToEigen(const math::Vector3& in, Eigen::Vector3d* out) {
+  out->x() = in.x;
+  out->y() = in.y;
+  out->z() = in.z;
+}
+
+void matrix3ToEigen(const math::Matrix3& in, Eigen::Matrix3d* out) {
+  *out << in[0][0], in[0][1], in[0][2], in[1][0], in[1][1], in[1][2], in[2][0], in[2][1], in[2][2];
 }
 
 }
@@ -130,6 +143,12 @@ void copyPosition(const In& in, Out* out) {
   out->x = in.x;
   out->y = in.y;
   out->z = in.z;
+}
+
+void getSkewMatrix(const Eigen::Vector3d& in, Eigen::Matrix3d* out) {
+  *out << 0, -in.z(), in.y(),
+      in.z(), 0, -in.x(),
+      -in.y(), in.x(), 0;
 }
 
 #endif /* ROTORS_GAZEBO_PLUGINS_COMMON_H_ */

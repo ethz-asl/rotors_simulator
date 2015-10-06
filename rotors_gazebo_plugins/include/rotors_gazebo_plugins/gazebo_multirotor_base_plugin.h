@@ -66,6 +66,9 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
+
+  void getInertiaAtPosition(physics::LinkPtr link, math::Vector3 position_B_L, Eigen::Matrix3d* inertia_B);
+
   /// \brief Pointer to the update event connection.
   event::ConnectionPtr update_connection_;
   physics::WorldPtr world_;

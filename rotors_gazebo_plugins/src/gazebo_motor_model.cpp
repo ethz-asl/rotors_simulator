@@ -33,12 +33,35 @@ GazeboMotorModel::~GazeboMotorModel() {
 void GazeboMotorModel::InitializeParams() {}
 
 void GazeboMotorModel::Publish() {
-  turning_velocity_msg_.data = joint_->GetVelocity(0);
-  motor_velocity_pub_.publish(turning_velocity_msg_);
+  turning_velocity_msg_.data = motor_rot_vel_;// joint_->GetVelocity(0);
+  mav_msgs::MotorStatus msg;
+  msg.header.stamp.sec = (world_->GetSimTime()).sec;
+  msg.header.stamp.nsec = (world_->GetSimTime()).nsec;
+  msg.speed_command = ref_motor_rot_vel_;
+  msg.speed_measurement = std::fabs(motor_rot_vel_*rotor_velocity_slowdown_sim_);
+
+  msg.wind_velocity_W.x = wind_speed_W_.x;
+  msg.wind_velocity_W.y = wind_speed_W_.y;
+  msg.wind_velocity_W.z = wind_speed_W_.z;
+
+  msg.velocity_W.x = velocity_current_W_.x;
+  msg.velocity_W.y = velocity_current_W_.y;
+  msg.velocity_W.z = velocity_current_W_.z;
+
+  msg.force_B.x = total_force_B_.x;
+  msg.force_B.y = total_force_B_.y;
+  msg.force_B.z = total_force_B_.z;
+
+  msg.torque_B.x = total_torque_B_.x;
+  msg.torque_B.y = total_torque_B_.y;
+  msg.torque_B.z = total_torque_B_.z;
+
+  motor_velocity_pub_.publish(msg);
 }
 
 void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   model_ = _model;
+  world_ = model_->GetWorld();
 
   namespace_.clear();
 
@@ -110,7 +133,9 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   command_sub_ = node_handle_->subscribe(command_sub_topic_, 1, &GazeboMotorModel::VelocityCallback, this);
   wind_speed_sub_ = node_handle_->subscribe(wind_speed_sub_topic_, 1, &GazeboMotorModel::WindSpeedCallback, this);
-  motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_speed_pub_topic_, 10);
+  motor_velocity_pub_ = node_handle_->advertise<mav_msgs::MotorStatus>(motor_speed_pub_topic_, 10);
+
+
 
   // Create the first order filter.
   rotor_velocity_filter_.reset(new FirstOrderFilter<double>(time_constant_up_, time_constant_down_, ref_motor_rot_vel_));
@@ -129,6 +154,7 @@ void GazeboMotorModel::VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_v
                  "You tried to access index %d of the MotorSpeed message array which is of size %d.",
                  motor_number_, rot_velocities->angular_velocities.size());
   ref_motor_rot_vel_ = std::min(rot_velocities->angular_velocities[motor_number_], static_cast<double>(max_rot_velocity_));
+  ref_timestamp_ = rot_velocities->header.stamp;
 }
 
 void GazeboMotorModel::WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed) {
@@ -139,43 +165,68 @@ void GazeboMotorModel::WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& w
 }
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
-  motor_rot_vel_ = joint_->GetVelocity(0);
+  //motor_rot_vel_ = joint_->GetVelocity(0);
   if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_)) {
     gzerr << "Aliasing on motor [" << motor_number_ << "] might occur. Consider making smaller simulation time steps or raising the rotor_velocity_slowdown_sim_ param.\n";
   }
+
+  velocity_current_W_ = link_->GetWorldLinearVel();
+  math::Vector3 joint_axis = joint_->GetGlobalAxis(0);
+
   double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
-  double force = real_motor_velocity * real_motor_velocity * motor_constant_;
+  double thrust_force = real_motor_velocity * real_motor_velocity * motor_constant_;
   // Apply a force to the link.
-  link_->AddRelativeForce(math::Vector3(0, 0, force));
+
+  math::Vector3 thrust_force_B = math::Vector3(0, 0, thrust_force);
 
   // Forces from Philppe Martin's and Erwan Salaün's
   // 2010 IEEE Conference on Robotics and Automation paper
   // The True Role of Accelerometer Feedback in Quadrotor Control
   // - \omega * \lambda_1 * V_A^{\perp}
-  math::Vector3 joint_axis = joint_->GetGlobalAxis(0);
-  math::Vector3 body_velocity_W = link_->GetWorldLinearVel();
-  math::Vector3 relative_wind_velocity_W = body_velocity_W - wind_speed_W_;
+  math::Vector3 relative_wind_velocity_W = velocity_current_W_ - wind_speed_W_;
   math::Vector3 body_velocity_perpendicular = relative_wind_velocity_W - (relative_wind_velocity_W.Dot(joint_axis) * joint_axis);
   math::Vector3 air_drag = -std::abs(real_motor_velocity) * rotor_drag_coefficient_ * body_velocity_perpendicular;
   // Apply air_drag to link.
-  link_->AddForce(air_drag);
+ // link_->AddForce(air_drag);
+
+  math::Pose T_W_B = link_->GetWorldPose(); //TODO(burrimi): Check tf.
+  math::Quaternion q_W_B = T_W_B.rot;
+
+  math::Vector3 relative_velocity_W = velocity_current_W_ - wind_speed_W_;
+  math::Vector3 relative_velocity_B = q_W_B.RotateVectorReverse(relative_velocity_W);
+
+  math::Vector3 projected_velocity_B(relative_velocity_B[0],relative_velocity_B[1],0.0);
+  math::Vector3 air_drag_B = -thrust_force * rotor_drag_coefficient_ * projected_velocity_B;
+
+  total_force_B_ = air_drag_B + thrust_force_B;
+
+  math::Vector3 diff = air_drag_B - q_W_B.RotateVectorReverse(air_drag);
+
+  link_->AddRelativeForce(total_force_B_);
+
+
   // Moments
   // Getting the parent link, such that the resulting torques can be applied to it.
   physics::Link_V parent_links = link_->GetParentJointsLinks();
   // The tansformation from the parent_link to the link_.
   math::Pose pose_difference = link_->GetWorldCoGPose() - parent_links.at(0)->GetWorldCoGPose();
-  math::Vector3 drag_torque(0, 0, -turning_direction_ * force * moment_constant_);
-  // Transforming the drag torque into the parent frame to handle arbitrary rotor orientations.
-  math::Vector3 drag_torque_parent_frame = pose_difference.rot.RotateVector(drag_torque);
-  parent_links.at(0)->AddRelativeTorque(drag_torque_parent_frame);
+  math::Vector3 drag_torque(0, 0, -turning_direction_ * thrust_force * moment_constant_);
 
-  math::Vector3 rolling_moment;
+  total_torque_B_ = drag_torque;
+
+  // Transforming the drag torque into the parent frame to handle arbitrary rotor orientations.
+  math::Vector3 total_torque_parent_frame = pose_difference.rot.RotateVector(total_torque_B_);
+  parent_links.at(0)->AddRelativeTorque(total_torque_parent_frame);
+
+//  math::Vector3 rolling_moment;
   // - \omega * \mu_1 * V_A^{\perp}
-  rolling_moment = -std::abs(real_motor_velocity) * rolling_moment_coefficient_ * body_velocity_perpendicular;
-  parent_links.at(0)->AddTorque(rolling_moment);
+//  rolling_moment = -std::abs(real_motor_velocity) * rolling_moment_coefficient_ * body_velocity_perpendicular;
+//  parent_links.at(0)->AddTorque(rolling_moment);
   // Apply the filter on the motor's velocity.
-  ref_motor_rot_vel_ = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
-  joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
+  double motor_rot_vel = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
+  //joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
+  motor_rot_vel_ = turning_direction_ * motor_rot_vel / rotor_velocity_slowdown_sim_;
+
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMotorModel);
