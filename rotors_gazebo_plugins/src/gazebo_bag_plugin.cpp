@@ -28,12 +28,12 @@
 namespace gazebo {
 
 GazeboBagPlugin::~GazeboBagPlugin() {
+  bag_.close();
   event::Events::DisconnectWorldUpdateBegin(update_connection_);
   if (node_handle_) {
     node_handle_->shutdown();
     delete node_handle_;
   }
-  bag_.close();
 }
 
 // void GazeboBagPlugin::InitializeParams() {};
@@ -88,6 +88,7 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<std::string>(_sdf, "windTopic", wind_topic_, wind_topic_);
   getSdfParam<std::string>(_sdf, "waypointTopic", waypoint_topic_, waypoint_topic_);
   getSdfParam<std::string>(_sdf, "commandPoseTopic", command_pose_topic_, command_pose_topic_);
+  getSdfParam<std::string>(_sdf, "forceSensorTopic", force_sensor_topic_, force_sensor_topic_);
 
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_,
                       rotor_velocity_slowdown_sim_);
@@ -116,8 +117,11 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   // Open a bag file and store it in ~/.ros/<bag_filename_>.
   bag_.open(bag_filename_, rosbag::bagmode::Write);
+
+  // Get motor joints.
+  unsigned int i,j;
   child_links_ = link_->GetChildJointsLinks();
-  for (unsigned int i = 0; i < child_links_.size(); i++) {
+  for (i = 0; i < child_links_.size(); i++) {
     std::string link_name = child_links_[i]->GetScopedName();
 
     // Check if the link contains rotor_ in its name.
@@ -134,13 +138,13 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Get the contact manager.
   std::vector<std::string> collisions;
   contact_mgr_ = world_->GetPhysicsEngine()->GetContactManager();
-  for (unsigned int i = 0; i < link_->GetCollisions().size(); ++i) {
+  for (i = 0; i < link_->GetCollisions().size(); ++i) {
     physics::CollisionPtr collision = link_->GetCollision(i);
     collisions.push_back(collision->GetScopedName());
   }
-  for (unsigned int j = 0; j < child_links_.size(); ++j) {
+  for (j = 0; j < child_links_.size(); ++j) {
     unsigned int zero = 0;
-    for (unsigned int i = 0; i < child_links_[j]->GetCollisions().size(); ++i) {
+    for (i = 0; i < child_links_[j]->GetCollisions().size(); ++i) {
       collisions.push_back(child_links_[j]->GetCollision(i)->GetScopedName());
     }
   }
@@ -172,6 +176,27 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Subscriber to Control Rate Thrust Message.
   control_rate_thrust_sub_ = node_handle_->subscribe(control_rate_thrust_topic_, 10,
                                                      &GazeboBagPlugin::RateThrustCallback, this);
+
+  // Subscriber to Force Sensor Linear Forces Message.
+  force_sensor_lin_topic_ = force_sensor_topic_+"/linear";
+  force_sensor_lin_sub_ = node_handle_->subscribe(force_sensor_lin_topic_, 10, &GazeboBagPlugin::ForceSensorLinCallback, this);
+
+  // Subscriber to Force Sensor Torques Message.
+  force_sensor_ang_topic_ = force_sensor_topic_+"/angular";
+  force_sensor_ang_sub_ = node_handle_->subscribe(force_sensor_ang_topic_, 10, &GazeboBagPlugin::ForceSensorAngCallback, this);
+
+  // Get pointers to manipulator joints
+  for (i = 0; i < model_->GetJointCount(); i++) {
+    std::string joint_name = model_->GetJoints()[i]->GetName();
+
+    if (joint_name.find("pitching") != joint_name.npos)
+      manip_pitch_joint_ = model_->GetJoint(joint_name);
+    if (joint_name.find("left_1") != joint_name.npos)
+      manip_left_joint_ = model_->GetJoint(joint_name);
+    if (joint_name.find("right_1") != joint_name.npos)
+      manip_right_joint_ = model_->GetJoint(joint_name);
+  }
+
 }
 
 // This gets called by the world update start event.
@@ -181,6 +206,11 @@ void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
   LogWrenches(now);
   LogGroundTruth(now);
   LogMotorVelocities(now);
+  // This info are logged only when a delta_manipulator is attached to mav.
+  if ((manip_pitch_joint_==NULL) || (manip_left_joint_==NULL) || (manip_right_joint_==NULL))
+    ROS_INFO_ONCE("[gazebo_bag_plugin] No delta manipulator attached to spawned model.");
+  else
+    LogManipulatorState(now);
 }
 
 void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg) {
@@ -225,6 +255,18 @@ void GazeboBagPlugin::RateThrustCallback(const mav_msgs::RateThrustConstPtr& con
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(namespace_ + "/" + control_rate_thrust_topic_, ros_now, control_msg);
+}
+
+void GazeboBagPlugin::ForceSensorLinCallback(const geometry_msgs::Vector3StampedConstPtr& force_msg) {
+  common::Time now = world_->GetSimTime();
+  ros::Time ros_now = ros::Time(now.sec, now.nsec);
+  writeBag(namespace_ + "/" + force_sensor_lin_topic_, ros_now, force_msg);
+}
+
+void GazeboBagPlugin::ForceSensorAngCallback(const geometry_msgs::Vector3StampedConstPtr& torque_msg) {
+  common::Time now = world_->GetSimTime();
+  ros::Time ros_now = ros::Time(now.sec, now.nsec);
+  writeBag(namespace_ + "/" + force_sensor_ang_topic_, ros_now, torque_msg);
 }
 
 void GazeboBagPlugin::LogMotorVelocities(const common::Time now) {
@@ -307,6 +349,21 @@ void GazeboBagPlugin::LogWrenches(const common::Time now) {
 
     writeBag(namespace_ + "/" + wrench_topic_, ros_now, wrench_msg);
   }
+}
+
+void GazeboBagPlugin::LogManipulatorState(const common::Time now) {
+  ros::Time ros_now = ros::Time(now.sec, now.nsec);
+
+  geometry_msgs::Vector3Stamped joint_angles;
+
+  joint_angles.header.frame_id  = manip_pitch_joint_->GetParent()->GetScopedName();
+  joint_angles.header.stamp.sec = now.sec;
+  joint_angles.header.stamp.nsec = now.nsec;
+  joint_angles.vector.x = manip_pitch_joint_->GetAngle(0).Radian(); // --> q0
+  joint_angles.vector.y = manip_left_joint_->GetAngle(0).Radian();  // --> q1
+  joint_angles.vector.z = manip_right_joint_->GetAngle(0).Radian(); // --> q2
+
+  writeBag(namespace_ + "/" + manipulator_topic_, ros_now, joint_angles);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboBagPlugin);

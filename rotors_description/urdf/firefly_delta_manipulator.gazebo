@@ -33,7 +33,7 @@
     <origin xyz="0 0 -0.03" rpy="0.0 0.0 -1.57" />
   </xacro:closed_chain_macro>
 
-	<!-- Include force sensor plugin --> 
+	<!-- Include plugins --> 
 	<xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro"/>
 
 	<!-- Instantiate force sensor on end-effector -->
