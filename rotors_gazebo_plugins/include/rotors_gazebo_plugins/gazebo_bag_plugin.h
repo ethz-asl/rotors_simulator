@@ -32,6 +32,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/WrenchStamped.h>
+#include <geometry_msgs/Vector3Stamped.h>
 #include <mav_msgs/Actuators.h>
 #include <mav_msgs/AttitudeThrust.h>
 #include <mav_msgs/default_topics.h>
@@ -50,11 +51,15 @@ namespace gazebo {
 static const std::string kDefaultFrameId = "ground_truth_pose";
 static const std::string kDefaultLinkName = "base_link";
 static const std::string kDefaultBagFilename_ = "simulator.bag";
+static const std::string kDefaultForceSensorTopic = "delta_manipulator/force_sensor";
+static const std::string kDefaultManipulatorTopic = "delta_manipulator/joint_angles";
 
 /// \brief This plugin is used to create rosbag files from within gazebo.
 class GazeboBagPlugin : public ModelPlugin {
+
   typedef std::map<const unsigned int, const physics::JointPtr> MotorNumberToJointMap;
   typedef std::pair<const unsigned int, const physics::JointPtr> MotorNumberToJointPair;
+
  public:
   GazeboBagPlugin()
       : ModelPlugin(),
@@ -70,11 +75,16 @@ class GazeboBagPlugin : public ModelPlugin {
         wind_topic_(mav_msgs::default_topics::WIND),
         waypoint_topic_(mav_msgs::default_topics::COMMAND_TRAJECTORY),
         command_pose_topic_(mav_msgs::default_topics::COMMAND_POSE),
+        force_sensor_topic_(kDefaultForceSensorTopic),
+        manipulator_topic_(kDefaultManipulatorTopic),
         frame_id_(kDefaultFrameId),
         link_name_(kDefaultLinkName),
         bag_filename_(kDefaultBagFilename_),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
-        node_handle_(NULL) {}
+        node_handle_(NULL),
+        manip_pitch_joint_(NULL),
+        manip_left_joint_(NULL),
+        manip_right_joint_(NULL) {}
 
   virtual ~GazeboBagPlugin();
 
@@ -116,6 +126,14 @@ class GazeboBagPlugin : public ModelPlugin {
   /// \param[in] control_msg A RateThrust message from mav_msgs.
   void RateThrustCallback(const mav_msgs::RateThrustConstPtr& control_msg);
 
+  /// \brief Called when an force sensor message (linear forces) is received.
+  /// \param[in] force_msg A Vector3Stamped message from geometry_msgs.
+  void ForceSensorLinCallback(const geometry_msgs::Vector3StampedConstPtr& force_msg);
+
+  /// \brief Called when an force sensor message (torques) is received.
+  /// \param[in] torque_msg A Vector3Stamped message from geometry_msgs.
+  void ForceSensorAngCallback(const geometry_msgs::Vector3StampedConstPtr& torque_msg);
+
   /// \brief Log the ground truth pose and twist.
   /// \param[in] now The current gazebo common::Time
   void LogGroundTruth(const common::Time now);
@@ -128,6 +146,10 @@ class GazeboBagPlugin : public ModelPlugin {
   /// \param[in] now The current gazebo common::Time
   void LogWrenches(const common::Time now);
 
+  /// \brief Log manipulator joint angles.
+  /// \param[in] now The current gazebo common::Time
+  void LogManipulatorState(const common::Time now);
+
  private:
   /// \brief Pointer to the update event connection.
   event::ConnectionPtr update_connection_;
@@ -139,6 +161,11 @@ class GazeboBagPlugin : public ModelPlugin {
   physics::Link_V child_links_;
 
   MotorNumberToJointMap motor_joints_;
+
+  // Pointer to manipulator pitching and base joints
+  physics::JointPtr manip_pitch_joint_;
+  physics::JointPtr manip_left_joint_;
+  physics::JointPtr manip_right_joint_;
 
   /// \brief Pointer to the ContactManager to get all collisions of this
   /// link and its children
@@ -156,6 +183,10 @@ class GazeboBagPlugin : public ModelPlugin {
   std::string control_rate_thrust_topic_;
   std::string wrench_topic_;
   std::string motor_topic_;
+  std::string force_sensor_topic_;
+  std::string force_sensor_lin_topic_;
+  std::string force_sensor_ang_topic_;
+  std::string manipulator_topic_;
   std::string frame_id_;
   std::string link_name_;
   std::string bag_filename_;
@@ -175,6 +206,8 @@ class GazeboBagPlugin : public ModelPlugin {
   ros::Subscriber control_motor_speed_sub_;
   ros::Subscriber control_rate_thrust_sub_;
   ros::Subscriber command_pose_sub_;
+  ros::Subscriber force_sensor_lin_sub_;
+  ros::Subscriber force_sensor_ang_sub_;
 
   std::ofstream csvOut;
 
