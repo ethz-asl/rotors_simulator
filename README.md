@@ -8,6 +8,7 @@ There are simulated sensors coming with the simulator such as an IMU, a generic 
 
 This packages also contains some example controllers, basic worlds, a joystick interface, and example launch files.
 
+Below we provide the instructions necessary for getting started. See RotorS' wiki for more instructions and examples (https://github.com/ethz-asl/rotors_simulator/wiki).
 
 Installation Instructions
 -------------------------
