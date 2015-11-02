@@ -1,0 +1,127 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>RTW Report - rtwtypes.h</title>
+<script language="JavaScript" type="text/javascript" src="rtwreport_utils.js"></script>
+</head>
+<body bgcolor="#eeeeee" text="#1122aa" onload="try {if (top) { if (top.rtwFileOnLoad) top.rtwFileOnLoad(window.document); else local_onload();}} catch(err) {};">
+<p>
+<table border="0" cellspacing="0" cellpadding="6" width="100%%" height="100%%"><tr><td width="100%%" valign="top" bgcolor="#ffffff">
+<h4>File: <a href="../rtwtypes.h" target="rtwreport_document_frame" id="linkToText_plain">rtwtypes.h</a></h4>
+<pre id="RTWcode">
+<a name="1"><font color="#888888 "><i>    1   </i></font></a><font color="#992211">#</font><font color="#992211"><b>ifndef</b></font> __RTWTYPES_H__
+<a name="2"><font color="#888888 "><i>    2   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> __RTWTYPES_H__
+<a name="3"><font color="#888888 "><i>    3   </i></font></a><font color="#992211">#</font><font color="#992211"><b>ifndef</b></font> __TMWTYPES__
+<a name="4"><font color="#888888 "><i>    4   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> __TMWTYPES__
+<a name="5"><font color="#888888 "><i>    5   </i></font></a>
+<a name="6"><font color="#888888 "><i>    6   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>signed</b></font> <font color="#112266"><b>char</b></font> <a name="type_int8_T">int8_T</a>;
+<a name="7"><font color="#888888 "><i>    7   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>unsigned</b></font> <font color="#112266"><b>char</b></font> <a name="type_uint8_T">uint8_T</a>;
+<a name="8"><font color="#888888 "><i>    8   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>short</b></font> <a name="type_int16_T">int16_T</a>;
+<a name="9"><font color="#888888 "><i>    9   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>unsigned</b></font> <font color="#112266"><b>short</b></font> <a name="type_uint16_T">uint16_T</a>;
+<a name="10"><font color="#888888 "><i>   10   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>int</b></font> <a name="type_int32_T">int32_T</a>;
+<a name="11"><font color="#888888 "><i>   11   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>unsigned</b></font> <font color="#112266"><b>int</b></font> <a name="type_uint32_T">uint32_T</a>;
+<a name="12"><font color="#888888 "><i>   12   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>long</b></font> <a name="type_int64_T">int64_T</a>;
+<a name="13"><font color="#888888 "><i>   13   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>unsigned</b></font> <font color="#112266"><b>long</b></font> <a name="type_uint64_T">uint64_T</a>;
+<a name="14"><font color="#888888 "><i>   14   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>float</b></font> <a name="type_real32_T">real32_T</a>;
+<a name="15"><font color="#888888 "><i>   15   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>double</b></font> <a name="type_real64_T">real64_T</a>;
+<a name="16"><font color="#888888 "><i>   16   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>double</b></font> <a name="type_real_T">real_T</a>;
+<a name="17"><font color="#888888 "><i>   17   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>double</b></font> <a name="type_time_T">time_T</a>;
+<a name="18"><font color="#888888 "><i>   18   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>unsigned</b></font> <font color="#112266"><b>char</b></font> <a name="type_boolean_T">boolean_T</a>;
+<a name="19"><font color="#888888 "><i>   19   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>int</b></font> <a name="type_int_T">int_T</a>;
+<a name="20"><font color="#888888 "><i>   20   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>unsigned</b></font> <font color="#112266"><b>int</b></font> <a name="type_uint_T">uint_T</a>;
+<a name="21"><font color="#888888 "><i>   21   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>unsigned</b></font> <font color="#112266"><b>long</b></font> <a name="type_ulong_T">ulong_T</a>;
+<a name="22"><font color="#888888 "><i>   22   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>unsigned</b></font> <font color="#112266"><b>long</b></font> <font color="#112266"><b>long</b></font> <a name="type_ulonglong_T">ulonglong_T</a>;
+<a name="23"><font color="#888888 "><i>   23   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>char</b></font> <a name="type_char_T">char_T</a>;
+<a name="24"><font color="#888888 "><i>   24   </i></font></a><font color="#112266"><b>typedef</b></font> <a href="#type_char_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_char_T');" target="_self"><font color="#1122aa">char_T</font></a> <a name="type_byte_T">byte_T</a>;
+<a name="25"><font color="#888888 "><i>   25   </i></font></a>
+<a name="26"><font color="#888888 "><i>   26   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> CREAL_T
+<a name="27"><font color="#888888 "><i>   27   </i></font></a>
+<a name="28"><font color="#888888 "><i>   28   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>struct</b></font> <b>{</b>
+<a name="29"><font color="#888888 "><i>   29   </i></font></a>  <a href="#type_real32_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_real32_T');" target="_self"><font color="#1122aa">real32_T</font></a> re;
+<a name="30"><font color="#888888 "><i>   30   </i></font></a>  <a href="#type_real32_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_real32_T');" target="_self"><font color="#1122aa">real32_T</font></a> im;
+<a name="31"><font color="#888888 "><i>   31   </i></font></a><b>}</b> <a name="type_creal32_T">creal32_T</a>;
+<a name="32"><font color="#888888 "><i>   32   </i></font></a>
+<a name="33"><font color="#888888 "><i>   33   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>struct</b></font> <b>{</b>
+<a name="34"><font color="#888888 "><i>   34   </i></font></a>  <a href="#type_real64_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_real64_T');" target="_self"><font color="#1122aa">real64_T</font></a> re;
+<a name="35"><font color="#888888 "><i>   35   </i></font></a>  <a href="#type_real64_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_real64_T');" target="_self"><font color="#1122aa">real64_T</font></a> im;
+<a name="36"><font color="#888888 "><i>   36   </i></font></a><b>}</b> <a name="type_creal64_T">creal64_T</a>;
+<a name="37"><font color="#888888 "><i>   37   </i></font></a>
+<a name="38"><font color="#888888 "><i>   38   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>struct</b></font> <b>{</b>
+<a name="39"><font color="#888888 "><i>   39   </i></font></a>  <a href="#type_real_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_real_T');" target="_self"><font color="#1122aa">real_T</font></a> re;
+<a name="40"><font color="#888888 "><i>   40   </i></font></a>  <a href="#type_real_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_real_T');" target="_self"><font color="#1122aa">real_T</font></a> im;
+<a name="41"><font color="#888888 "><i>   41   </i></font></a><b>}</b> <a name="type_creal_T">creal_T</a>;
+<a name="42"><font color="#888888 "><i>   42   </i></font></a>
+<a name="43"><font color="#888888 "><i>   43   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>struct</b></font> <b>{</b>
+<a name="44"><font color="#888888 "><i>   44   </i></font></a>  <a href="#type_int8_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int8_T');" target="_self"><font color="#1122aa">int8_T</font></a> re;
+<a name="45"><font color="#888888 "><i>   45   </i></font></a>  <a href="#type_int8_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int8_T');" target="_self"><font color="#1122aa">int8_T</font></a> im;
+<a name="46"><font color="#888888 "><i>   46   </i></font></a><b>}</b> <a name="type_cint8_T">cint8_T</a>;
+<a name="47"><font color="#888888 "><i>   47   </i></font></a>
+<a name="48"><font color="#888888 "><i>   48   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>struct</b></font> <b>{</b>
+<a name="49"><font color="#888888 "><i>   49   </i></font></a>  <a href="#type_uint8_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint8_T');" target="_self"><font color="#1122aa">uint8_T</font></a> re;
+<a name="50"><font color="#888888 "><i>   50   </i></font></a>  <a href="#type_uint8_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint8_T');" target="_self"><font color="#1122aa">uint8_T</font></a> im;
+<a name="51"><font color="#888888 "><i>   51   </i></font></a><b>}</b> <a name="type_cuint8_T">cuint8_T</a>;
+<a name="52"><font color="#888888 "><i>   52   </i></font></a>
+<a name="53"><font color="#888888 "><i>   53   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>struct</b></font> <b>{</b>
+<a name="54"><font color="#888888 "><i>   54   </i></font></a>  <a href="#type_int16_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int16_T');" target="_self"><font color="#1122aa">int16_T</font></a> re;
+<a name="55"><font color="#888888 "><i>   55   </i></font></a>  <a href="#type_int16_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int16_T');" target="_self"><font color="#1122aa">int16_T</font></a> im;
+<a name="56"><font color="#888888 "><i>   56   </i></font></a><b>}</b> <a name="type_cint16_T">cint16_T</a>;
+<a name="57"><font color="#888888 "><i>   57   </i></font></a>
+<a name="58"><font color="#888888 "><i>   58   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>struct</b></font> <b>{</b>
+<a name="59"><font color="#888888 "><i>   59   </i></font></a>  <a href="#type_uint16_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint16_T');" target="_self"><font color="#1122aa">uint16_T</font></a> re;
+<a name="60"><font color="#888888 "><i>   60   </i></font></a>  <a href="#type_uint16_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint16_T');" target="_self"><font color="#1122aa">uint16_T</font></a> im;
+<a name="61"><font color="#888888 "><i>   61   </i></font></a><b>}</b> <a name="type_cuint16_T">cuint16_T</a>;
+<a name="62"><font color="#888888 "><i>   62   </i></font></a>
+<a name="63"><font color="#888888 "><i>   63   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>struct</b></font> <b>{</b>
+<a name="64"><font color="#888888 "><i>   64   </i></font></a>  <a href="#type_int32_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int32_T');" target="_self"><font color="#1122aa">int32_T</font></a> re;
+<a name="65"><font color="#888888 "><i>   65   </i></font></a>  <a href="#type_int32_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int32_T');" target="_self"><font color="#1122aa">int32_T</font></a> im;
+<a name="66"><font color="#888888 "><i>   66   </i></font></a><b>}</b> <a name="type_cint32_T">cint32_T</a>;
+<a name="67"><font color="#888888 "><i>   67   </i></font></a>
+<a name="68"><font color="#888888 "><i>   68   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>struct</b></font> <b>{</b>
+<a name="69"><font color="#888888 "><i>   69   </i></font></a>  <a href="#type_uint32_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint32_T');" target="_self"><font color="#1122aa">uint32_T</font></a> re;
+<a name="70"><font color="#888888 "><i>   70   </i></font></a>  <a href="#type_uint32_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint32_T');" target="_self"><font color="#1122aa">uint32_T</font></a> im;
+<a name="71"><font color="#888888 "><i>   71   </i></font></a><b>}</b> <a name="type_cuint32_T">cuint32_T</a>;
+<a name="72"><font color="#888888 "><i>   72   </i></font></a>
+<a name="73"><font color="#888888 "><i>   73   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>struct</b></font> <b>{</b>
+<a name="74"><font color="#888888 "><i>   74   </i></font></a>  <a href="#type_int64_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int64_T');" target="_self"><font color="#1122aa">int64_T</font></a> re;
+<a name="75"><font color="#888888 "><i>   75   </i></font></a>  <a href="#type_int64_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int64_T');" target="_self"><font color="#1122aa">int64_T</font></a> im;
+<a name="76"><font color="#888888 "><i>   76   </i></font></a><b>}</b> <a name="type_cint64_T">cint64_T</a>;
+<a name="77"><font color="#888888 "><i>   77   </i></font></a>
+<a name="78"><font color="#888888 "><i>   78   </i></font></a><font color="#112266"><b>typedef</b></font> <font color="#112266"><b>struct</b></font> <b>{</b>
+<a name="79"><font color="#888888 "><i>   79   </i></font></a>  <a href="#type_uint64_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint64_T');" target="_self"><font color="#1122aa">uint64_T</font></a> re;
+<a name="80"><font color="#888888 "><i>   80   </i></font></a>  <a href="#type_uint64_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint64_T');" target="_self"><font color="#1122aa">uint64_T</font></a> im;
+<a name="81"><font color="#888888 "><i>   81   </i></font></a><b>}</b> <a name="type_cuint64_T">cuint64_T</a>;
+<a name="82"><font color="#888888 "><i>   82   </i></font></a>
+<a name="83"><font color="#888888 "><i>   83   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MAX_int8_T                     ((<a href="#type_int8_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int8_T');" target="_self"><font color="#1122aa">int8_T</font></a>)(127))
+<a name="84"><font color="#888888 "><i>   84   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MIN_int8_T                     ((<a href="#type_int8_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int8_T');" target="_self"><font color="#1122aa">int8_T</font></a>)(-128))
+<a name="85"><font color="#888888 "><i>   85   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MAX_uint8_T                    ((<a href="#type_uint8_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint8_T');" target="_self"><font color="#1122aa">uint8_T</font></a>)(255))
+<a name="86"><font color="#888888 "><i>   86   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MIN_uint8_T                    ((<a href="#type_uint8_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint8_T');" target="_self"><font color="#1122aa">uint8_T</font></a>)(0))
+<a name="87"><font color="#888888 "><i>   87   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MAX_int16_T                    ((<a href="#type_int16_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int16_T');" target="_self"><font color="#1122aa">int16_T</font></a>)(32767))
+<a name="88"><font color="#888888 "><i>   88   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MIN_int16_T                    ((<a href="#type_int16_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int16_T');" target="_self"><font color="#1122aa">int16_T</font></a>)(-32768))
+<a name="89"><font color="#888888 "><i>   89   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MAX_uint16_T                   ((<a href="#type_uint16_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint16_T');" target="_self"><font color="#1122aa">uint16_T</font></a>)(65535))
+<a name="90"><font color="#888888 "><i>   90   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MIN_uint16_T                   ((<a href="#type_uint16_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint16_T');" target="_self"><font color="#1122aa">uint16_T</font></a>)(0))
+<a name="91"><font color="#888888 "><i>   91   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MAX_int32_T                    ((<a href="#type_int32_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int32_T');" target="_self"><font color="#1122aa">int32_T</font></a>)(2147483647))
+<a name="92"><font color="#888888 "><i>   92   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MIN_int32_T                    ((<a href="#type_int32_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int32_T');" target="_self"><font color="#1122aa">int32_T</font></a>)(-2147483647-1))
+<a name="93"><font color="#888888 "><i>   93   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MAX_uint32_T                   ((<a href="#type_uint32_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint32_T');" target="_self"><font color="#1122aa">uint32_T</font></a>)(0xFFFFFFFFU))
+<a name="94"><font color="#888888 "><i>   94   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MIN_uint32_T                   ((<a href="#type_uint32_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint32_T');" target="_self"><font color="#1122aa">uint32_T</font></a>)(0))
+<a name="95"><font color="#888888 "><i>   95   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MAX_int64_T                    ((<a href="#type_int64_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int64_T');" target="_self"><font color="#1122aa">int64_T</font></a>)(9223372036854775807L))
+<a name="96"><font color="#888888 "><i>   96   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MIN_int64_T                    ((<a href="#type_int64_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_int64_T');" target="_self"><font color="#1122aa">int64_T</font></a>)(-9223372036854775807L-1L))
+<a name="97"><font color="#888888 "><i>   97   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MAX_uint64_T                   ((<a href="#type_uint64_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint64_T');" target="_self"><font color="#1122aa">uint64_T</font></a>)(0xFFFFFFFFFFFFFFFFUL))
+<a name="98"><font color="#888888 "><i>   98   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> MIN_uint64_T                   ((<a href="#type_uint64_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_uint64_T');" target="_self"><font color="#1122aa">uint64_T</font></a>)(0UL))
+<a name="99"><font color="#888888 "><i>   99   </i></font></a><font color="#992211">#</font><font color="#992211"><b>if</b></font> !<font color="#992211"><b>defined</b></font>(__cplusplus) &amp;&amp; !<font color="#992211"><b>defined</b></font>(__true_false_are_keywords)
+<a name="100"><font color="#888888 "><i>  100   </i></font></a><font color="#992211">#</font>  <font color="#992211"><b>ifndef</b></font> false
+<a name="101"><font color="#888888 "><i>  101   </i></font></a><font color="#992211">#</font>   <font color="#992211"><b>define</b></font> false                       (0U)
+<a name="102"><font color="#888888 "><i>  102   </i></font></a><font color="#992211">#</font>  <font color="#992211"><b>endif</b></font>
+<a name="103"><font color="#888888 "><i>  103   </i></font></a>
+<a name="104"><font color="#888888 "><i>  104   </i></font></a><font color="#992211">#</font>  <font color="#992211"><b>ifndef</b></font> true
+<a name="105"><font color="#888888 "><i>  105   </i></font></a><font color="#992211">#</font>   <font color="#992211"><b>define</b></font> true                        (1U)
+<a name="106"><font color="#888888 "><i>  106   </i></font></a><font color="#992211">#</font>  <font color="#992211"><b>endif</b></font>
+<a name="107"><font color="#888888 "><i>  107   </i></font></a><font color="#992211">#</font><font color="#992211"><b>endif</b></font>
+<a name="108"><font color="#888888 "><i>  108   </i></font></a>
+<a name="109"><font color="#888888 "><i>  109   </i></font></a><font color="#992211">#</font><font color="#992211"><b>define</b></font> TMW_NAME_LENGTH_MAX            64
+<a name="110"><font color="#888888 "><i>  110   </i></font></a><font color="#992211">#</font><font color="#992211"><b>endif</b></font>
+<a name="111"><font color="#888888 "><i>  111   </i></font></a><font color="#992211">#</font><font color="#992211"><b>endif</b></font>
+<a name="112"><font color="#888888 "><i>  112   </i></font></a></pre>
+</td></tr></table>
+</p>
+</body>
+</html>
