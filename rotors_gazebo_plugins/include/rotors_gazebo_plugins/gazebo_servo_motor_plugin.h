@@ -30,6 +30,7 @@
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
 #include <manipulator_msgs/CommandPositionServoMotor.h>
+#include <manipulator_msgs/CommandTorqueServoMotor.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
 
@@ -37,7 +38,7 @@
 
 namespace gazebo {
 // Default values
-static const std::string kDefaultCommandSubTopic = "command/servo_position";
+static const std::string kDefaultCommandSubTopic = "command/servo";
 static const double kDefaultKp = 10.0;
 static const double kDefaultKd = 0.05;
 static const double kDefaultKi = 0.3;
@@ -50,7 +51,7 @@ class GazeboServoMotor : public ModelPlugin
  public:
   GazeboServoMotor()
       : ModelPlugin(),
-        command_position_sub_topic_(kDefaultCommandSubTopic),
+        command_sub_topic_(kDefaultCommandSubTopic),
         kp_(kDefaultKp),
         kd_(kDefaultKd),
         ki_(kDefaultKi),
@@ -58,7 +59,8 @@ class GazeboServoMotor : public ModelPlugin
         min_angle_(kDefaultMinAngle),
         angle_error_integral_(0.0),
         max_angle_error_integral_(kDefaultMaxAngleErrorIntegral),
-        received_first_command_(false)
+        received_first_command_(false),
+        position_control_(true)
   {
   }
 
@@ -69,17 +71,21 @@ class GazeboServoMotor : public ModelPlugin
 
  protected:
   virtual void UpdatePosition();
+  virtual void UpdateTorque();
   virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
   virtual void OnUpdate(const common::UpdateInfo & /*_info*/);
 
  private:
   std::string command_position_sub_topic_;
+  std::string command_torque_sub_topic_;
+  std::string command_sub_topic_;
   std::string joint_name_;
   std::string namespace_;
   std::string motor_model_;
 
   ros::NodeHandle* node_handle_;
   ros::Subscriber position_command_sub_;
+  ros::Subscriber torque_command_sub_;
 
   double sampling_time_;
 
@@ -96,8 +102,10 @@ class GazeboServoMotor : public ModelPlugin
   double ki_;
 
   bool received_first_command_;
+  bool position_control_;
 
   math::Angle angle_reference_;
+  double torque_reference_;
 
   double angle_error_integral_;
 
@@ -109,6 +117,7 @@ class GazeboServoMotor : public ModelPlugin
   boost::thread callback_queue_thread_;
   void QueueThread();
   void PositionCommandCallback(const manipulator_msgs::CommandPositionServoMotorConstPtr& msg);
+  void TorqueCommandCallback(const manipulator_msgs::CommandTorqueServoMotorConstPtr& msg);
 
 };
 }

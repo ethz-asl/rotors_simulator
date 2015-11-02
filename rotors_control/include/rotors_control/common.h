@@ -68,6 +68,18 @@ struct EigenOdometry {
   Eigen::Vector3d angular_velocity;
 };
 
+struct EigenJointsState {
+  EigenJointsState() {}
+  EigenJointsState(const Eigen::VectorXd& _angles,
+                   const Eigen::VectorXd& _angular_rates) {
+    angles = _angles;
+    angular_rates = _angular_rates;
+  }
+
+  Eigen::VectorXd angles;
+  Eigen::VectorXd angular_rates;
+};
+
 inline void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
                                  EigenOdometry* odometry) {
   odometry->position = mav_msgs::vector3FromPointMsg(msg->pose.pose.position);
@@ -116,6 +128,15 @@ inline void skewMatrixFromVector(Eigen::Vector3d& vector, Eigen::Matrix3d* skew_
 inline void vectorFromSkewMatrix(Eigen::Matrix3d& skew_matrix, Eigen::Vector3d* vector) {
   *vector << skew_matrix(2, 1), skew_matrix(0,2), skew_matrix(1, 0);
 }
+}
+
+inline Eigen::MatrixXd pseudoInv(const Eigen::MatrixXd matrix) {
+  if ( matrix.rows() < matrix.cols() )
+    return matrix.transpose()*(matrix*matrix.transpose()).inverse();
+  if ( matrix.rows() > matrix.cols() )
+    return (matrix*matrix.transpose()).inverse()*matrix.transpose();
+  // standard case: square matrix
+  return matrix.inverse();
 }
 
 #endif /* INCLUDE_ROTORS_CONTROL_COMMON_H_ */

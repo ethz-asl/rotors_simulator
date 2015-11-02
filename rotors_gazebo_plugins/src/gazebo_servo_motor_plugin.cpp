@@ -75,10 +75,8 @@ void GazeboServoMotor::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   else
     gzerr << "[gazebo_servo_motor] Please specify a noLoadSpeed.\n";
 
-  getSdfParam<double>(_sdf, "maxAngleErrorIntegral", max_angle_error_integral_,
-                      max_angle_error_integral_);
-  getSdfParam<std::string>(_sdf, "commandSubTopic", command_position_sub_topic_,
-                           command_position_sub_topic_);
+  getSdfParam<double>(_sdf, "maxAngleErrorIntegral", max_angle_error_integral_, max_angle_error_integral_);
+  getSdfParam<std::string>(_sdf, "commandSubTopic", command_sub_topic_, command_sub_topic_);
   getSdfParam<double>(_sdf, "Kp", kp_, kp_);
   getSdfParam<double>(_sdf, "Kd", kd_, kd_);
   getSdfParam<double>(_sdf, "Ki", ki_, ki_);
@@ -94,8 +92,13 @@ void GazeboServoMotor::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboServoMotor::OnUpdate, this, _1));
 
+  command_position_sub_topic_ = command_sub_topic_+"_position";
+  command_torque_sub_topic_ = command_sub_topic_+"_torque";
+
   position_command_sub_ = node_handle_->subscribe(command_position_sub_topic_, 100,
                                                   &GazeboServoMotor::PositionCommandCallback, this);
+  torque_command_sub_ = node_handle_->subscribe(command_torque_sub_topic_, 100,
+                                                  &GazeboServoMotor::TorqueCommandCallback, this);
 }
 
 // This gets called by the world update start event.
@@ -109,7 +112,10 @@ void GazeboServoMotor::OnUpdate(const common::UpdateInfo& _info)
   if (received_first_command_ == false)
     return;
 
-  UpdatePosition();
+  if (position_control_)
+    UpdatePosition();
+  else
+    UpdateTorque();
 }
 
 void GazeboServoMotor::PositionCommandCallback(
@@ -118,6 +124,15 @@ void GazeboServoMotor::PositionCommandCallback(
   double ref = msg->motor_angle;
   angle_reference_.SetFromRadian(ref);
   received_first_command_ = true;
+  position_control_ = true;
+}
+
+void GazeboServoMotor::TorqueCommandCallback(
+    const manipulator_msgs::CommandTorqueServoMotorConstPtr& msg)
+{
+  torque_reference_ = msg->torque;
+  received_first_command_ = true;
+  position_control_ = false;
 }
 
 void GazeboServoMotor::UpdatePosition()
@@ -140,6 +155,12 @@ void GazeboServoMotor::UpdatePosition()
 //      "\nintegral_error = \t" << angle_error_integral_ << std::endl;
 //  std::cout << "===============================" << std::endl;
 
+  joint_->SetForce(0, torque);
+}
+
+void GazeboServoMotor::UpdateTorque()
+{
+  double torque = limit(torque_reference_, max_torque_, -max_torque_);
   joint_->SetForce(0, torque);
 }
 
