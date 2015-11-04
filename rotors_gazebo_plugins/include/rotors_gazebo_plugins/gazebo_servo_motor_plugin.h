@@ -31,6 +31,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <manipulator_msgs/CommandPositionServoMotor.h>
 #include <manipulator_msgs/CommandTorqueServoMotor.h>
+#include <sensor_msgs/JointState.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
 
@@ -39,6 +40,7 @@
 namespace gazebo {
 // Default values
 static const std::string kDefaultCommandSubTopic = "command/servo";
+static const std::string kDefaultJointStatePubTopic = "joint_state";
 static const double kDefaultKp = 10.0;
 static const double kDefaultKd = 0.05;
 static const double kDefaultKi = 0.3;
@@ -52,6 +54,7 @@ class GazeboServoMotor : public ModelPlugin
   GazeboServoMotor()
       : ModelPlugin(),
         command_sub_topic_(kDefaultCommandSubTopic),
+        joint_state_pub_topic_(kDefaultJointStatePubTopic),
         kp_(kDefaultKp),
         kd_(kDefaultKd),
         ki_(kDefaultKi),
@@ -79,6 +82,7 @@ class GazeboServoMotor : public ModelPlugin
   std::string command_position_sub_topic_;
   std::string command_torque_sub_topic_;
   std::string command_sub_topic_;
+  std::string joint_state_pub_topic_;
   std::string joint_name_;
   std::string namespace_;
   std::string motor_model_;
@@ -86,6 +90,7 @@ class GazeboServoMotor : public ModelPlugin
   ros::NodeHandle* node_handle_;
   ros::Subscriber position_command_sub_;
   ros::Subscriber torque_command_sub_;
+  ros::Publisher joint_state_pub_;
 
   double sampling_time_;
 

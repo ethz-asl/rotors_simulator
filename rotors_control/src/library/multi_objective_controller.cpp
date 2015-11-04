@@ -66,8 +66,9 @@ void MultiObjectiveController::InitializeParameters() {
 }
 
 
-void MultiObjectiveController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) {
+void MultiObjectiveController::CalculateControlInputs(Eigen::VectorXd* rotor_velocities, Eigen::Vector3d* torques) {
   assert(rotor_velocities);
+  assert(torques);
   assert(initialized_params_);
 
   rotor_velocities->resize(vehicle_parameters_.rotor_configuration_.rotors.size());
@@ -88,6 +89,8 @@ void MultiObjectiveController::CalculateRotorVelocities(Eigen::VectorXd* rotor_v
   *rotor_velocities = torque_to_rotor_velocities_ * thrust_torque;
   *rotor_velocities = rotor_velocities->cwiseMax(Eigen::VectorXd::Zero(rotor_velocities->rows()));
   *rotor_velocities = rotor_velocities->cwiseSqrt();
+
+  *torques = minimizer_.tail(arm_dof_);
 }
 
 
@@ -96,12 +99,7 @@ void MultiObjectiveController::SetOdometry(const EigenOdometry& odometry) {
 }
 
 
-void MultiObjectiveController::SetOdometryEndEffector(const EigenOdometry& odometry) {
-  odometry_ee_ = odometry;
-}
-
-
-void MultiObjectiveController::SetArmJointsState(const EigenJointsState& joints_state) {
+void MultiObjectiveController::SetArmJointsState(const manipulator_msgs::EigenJointsState& joints_state) {
   joints_state_ = joints_state;
 }
 
@@ -109,6 +107,18 @@ void MultiObjectiveController::SetArmJointsState(const EigenJointsState& joints_
 void MultiObjectiveController::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory) {
   command_trajectory_ = command_trajectory;
   controller_active_ = true;
+}
+
+
+void MultiObjectiveController::SetEndEffTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory) {
+  command_trajectory_ee_ = command_trajectory;
+  controller_active_ = true;
+}
+
+
+
+void MultiObjectiveController::SetDesiredJointsAngle(const manipulator_msgs::EigenJointsState& joints_state) {
+  joints_angle_des_ = joints_state.angles;
 }
 
 
@@ -249,6 +259,11 @@ void MultiObjectiveController::UpdateLinearConstraints() {
   lower_bounds_.segment(mav_dof_,robot_dof_-1) = controller_parameters_.mu_arm_*(
                                         controller_parameters_.safe_range_*controller_parameters_.arm_joints_angle_min_ -
                                         joints_state_.angles );
+}
+
+
+void MultiObjectiveController::UpdateEndEffectorState() {
+
 }
 
 

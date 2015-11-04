@@ -37,6 +37,21 @@ void GazeboServoMotor::InitializeParams()
 
 void GazeboServoMotor::Publish()
 {
+  // Get the current simulation time.
+  common::Time now = model_->GetWorld()->GetSimTime();
+  ros::Time ros_now = ros::Time(now.sec, now.nsec);
+
+  sensor_msgs::JointState joint_state;
+
+  joint_state.header.frame_id  = joint_->GetParent()->GetScopedName();
+  joint_state.header.stamp.sec = now.sec;
+  joint_state.header.stamp.nsec = now.nsec;
+  joint_state.name.push_back(joint_name_);
+  joint_state.position.push_back(joint_->GetAngle(0).Radian());
+  joint_state.velocity.push_back(joint_->GetVelocity(0));
+  joint_state.effort.push_back(joint_->GetForce(0));
+
+  joint_state_pub_.publish(joint_state);
 }
 
 void GazeboServoMotor::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
@@ -77,6 +92,7 @@ void GazeboServoMotor::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   getSdfParam<double>(_sdf, "maxAngleErrorIntegral", max_angle_error_integral_, max_angle_error_integral_);
   getSdfParam<std::string>(_sdf, "commandSubTopic", command_sub_topic_, command_sub_topic_);
+  getSdfParam<std::string>(_sdf, "jointStatePubTopic", joint_state_pub_topic_, joint_state_pub_topic_);
   getSdfParam<double>(_sdf, "Kp", kp_, kp_);
   getSdfParam<double>(_sdf, "Kd", kd_, kd_);
   getSdfParam<double>(_sdf, "Ki", ki_, ki_);
@@ -99,6 +115,8 @@ void GazeboServoMotor::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
                                                   &GazeboServoMotor::PositionCommandCallback, this);
   torque_command_sub_ = node_handle_->subscribe(command_torque_sub_topic_, 100,
                                                   &GazeboServoMotor::TorqueCommandCallback, this);
+
+  joint_state_pub_ = node_handle_->advertise<sensor_msgs::JointState>(joint_state_pub_topic_, 10);
 }
 
 // This gets called by the world update start event.
@@ -109,13 +127,17 @@ void GazeboServoMotor::OnUpdate(const common::UpdateInfo& _info)
   prev_sim_time = _info.simTime.Double();
   sampling_time_ = limit(sampling_time_, 1.0, 0.001);
 
-  if (received_first_command_ == false)
+  if (received_first_command_ == false) {
+    Publish();
     return;
+  }
 
   if (position_control_)
     UpdatePosition();
   else
     UpdateTorque();
+
+  Publish();
 }
 
 void GazeboServoMotor::PositionCommandCallback(

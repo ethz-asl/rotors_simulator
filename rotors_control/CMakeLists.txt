@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   cmake_modules
+	message_filters
 )
 
 find_package(Eigen REQUIRED)
@@ -18,7 +19,7 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES lee_position_controller roll_pitch_yawrate_thrust_controller multi_objective_controller
-  CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs
+  CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs manipulator_msgs
   DEPENDS Eigen
 )
 

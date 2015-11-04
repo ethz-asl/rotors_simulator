@@ -29,26 +29,39 @@
 namespace rotors_control {
 
 MultiObjectiveControllerNode::MultiObjectiveControllerNode() {
-  InitializeParams();
 
-  ros::NodeHandle nh;
+      InitializeParams();
 
-  cmd_pose_sub_ = nh.subscribe(
-      mav_msgs::default_topics::COMMAND_POSE, 1,
-      &MultiObjectiveControllerNode::CommandPoseCallback, this);
+      cmd_pose_sub_ = nh_.subscribe(
+          mav_msgs::default_topics::COMMAND_POSE, 1,
+          &MultiObjectiveControllerNode::CommandPoseCallback, this);
 
-  cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(
-      mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
-      &MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback, this);
+      cmd_multi_dof_joint_trajectory_sub_ = nh_.subscribe(
+          mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
+          &MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback, this);
 
-  odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 10,
-                               &MultiObjectiveControllerNode::OdometryCallback, this);
+      odometry_sub_ = new message_filters::Subscriber<nav_msgs::Odometry>(nh_,mav_msgs::default_topics::ODOMETRY, 10);
+//      joint_state_sub_ = new message_filters::Subscriber<sensor_msgs::JointState>(nh_,"joint_State", 10);
+//      sync_ = new message_filters::Synchronizer<RobotSyncPolicy>(RobotSyncPolicy(10),*odometry_sub_,*joint_state_sub_);
 
-  motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(
-      mav_msgs::default_topics::COMMAND_ACTUATORS, 10);
+      joint_state_sub_.clear();
+      joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, "pitching", 10));
+      joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, "left", 10));
+      joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, "right", 10));
+      sync_ = new message_filters::Synchronizer<RobotSyncPolicy>(RobotSyncPolicy(10),*odometry_sub_,
+                                                                 *(joint_state_sub_[0]),*(joint_state_sub_[1]),*(joint_state_sub_[2]));
 
-  command_timer_ = nh.createTimer(ros::Duration(0), &MultiObjectiveControllerNode::TimedCommandCallback, this,
-                                  true, false);
+      sync_->registerCallback(boost::bind(&MultiObjectiveControllerNode::AerialManipulatorStateCallback, this, _1, _2, _3, _4));
+
+      motor_velocity_reference_pub_ = nh_.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 10);
+
+      std::string suffix = "command/servo_position";
+      pitch_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>("pitching"+suffix, 10);
+      left_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>("left"+suffix, 10);
+      right_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>("right"+suffix, 10);
+
+      command_timer_ = nh_.createTimer(ros::Duration(0), &MultiObjectiveControllerNode::TimedCommandCallback, this,
+                                       true, false);
 }
 
 
@@ -215,26 +228,42 @@ void MultiObjectiveControllerNode::TimedCommandCallback(const ros::TimerEvent& e
 }
 
 
-void MultiObjectiveControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg) {
+void MultiObjectiveControllerNode::AerialManipulatorStateCallback(const nav_msgs::OdometryConstPtr& odometry_msg,
+                                                                  const sensor_msgs::JointStateConstPtr& joint_state_msg0,
+                                                                  const sensor_msgs::JointStateConstPtr& joint_state_msg1,
+                                                                  const sensor_msgs::JointStateConstPtr& joint_state_msg2) {
 
   ROS_INFO_ONCE("MultiObjectiveController got first odometry message.");
 
+  // Update robot states
   EigenOdometry odometry;
   eigenOdometryFromMsg(odometry_msg, &odometry);
   multi_objective_controller_.SetOdometry(odometry);
+  manipulator_msgs::EigenJointsState joints_state;
+  std::vector<sensor_msgs::JointState> joint_state_msgs;
+  joint_state_msgs.push_back(*(joint_state_msg0.get()));
+  joint_state_msgs.push_back(*(joint_state_msg1.get()));
+  joint_state_msgs.push_back(*(joint_state_msg2.get()));
+  eigenJointsStateFromMsg(joint_state_msgs, &joints_state);
+  multi_objective_controller_.SetArmJointsState(joints_state);
 
+  // Run optimization and compute control inputs
   Eigen::VectorXd ref_rotor_velocities;
-  multi_objective_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
+  Eigen::Vector3d ref_torques;
+  multi_objective_controller_.CalculateControlInputs(&ref_rotor_velocities, &ref_torques);
 
   // Todo(ffurrer): Do this in the conversions header.
   mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
-
   actuator_msg->angular_velocities.clear();
   for (int i = 0; i < ref_rotor_velocities.size(); i++)
     actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
   actuator_msg->header.stamp = odometry_msg->header.stamp;
 
+  // Publish commands
   motor_velocity_reference_pub_.publish(actuator_msg);
+  pitch_motor_torque_ref_pub_.publish(ref_torques.x());
+  left_motor_torque_ref_pub_.publish(ref_torques.y());
+  right_motor_torque_ref_pub_.publish(ref_torques.z());
 }
 
 }

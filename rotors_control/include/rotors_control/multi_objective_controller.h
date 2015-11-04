@@ -26,6 +26,8 @@
 
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/eigen_mav_msgs.h>
+#include <manipulator_msgs/eigen_manipulator_msgs.h>
+#include <manipulator_msgs/conversions.h>
 
 #include "rotors_control/common.h"
 #include "rotors_control/parameters.h"
@@ -136,14 +138,17 @@ class MultiObjectiveController {
   ~MultiObjectiveController();
   void InitializeParameters();
 
-  void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities);
+  // Called after state update
+  void CalculateControlInputs(Eigen::VectorXd* rotor_velocities, Eigen::Vector3d* torques);
 
+  // Called on state update callback (synchronized)
   void SetOdometry(const EigenOdometry& odometry);
-  void SetOdometryEndEffector(const EigenOdometry& odometry);
-  void SetArmJointsState(const EigenJointsState& joints_state);
+  void SetArmJointsState(const manipulator_msgs::EigenJointsState& joints_state);
 
+  // Called asynchronously and independently (when new command is set)
   void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
-  // Todo: set desired reference for end effector and joints angle
+  void SetEndEffTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
+  void SetDesiredJointsAngle(const manipulator_msgs::EigenJointsState& joints_state);
 
   MultiObjectiveControllerParameters controller_parameters_;
   VehicleParameters vehicle_parameters_;
@@ -169,12 +174,12 @@ class MultiObjectiveController {
   Eigen::VectorXd upper_bounds_;
 
   mav_msgs::EigenTrajectoryPoint command_trajectory_;
-  Eigen::Vector3d ee_position_des_;
+  mav_msgs::EigenTrajectoryPoint command_trajectory_ee_;
   Eigen::VectorXd joints_angle_des_;
 
   EigenOdometry odometry_;
   EigenOdometry odometry_ee_;
-  EigenJointsState joints_state_;
+  manipulator_msgs::EigenJointsState joints_state_;
 
   DynamicModelTerms dyn_mdl_terms_;
 
@@ -195,7 +200,9 @@ class MultiObjectiveController {
 
   void UpdateLinearConstraints();
 
-  void UpdateDynamicModelTerms() ;
+  void UpdateEndEffectorState();
+
+  void UpdateDynamicModelTerms();
 
   void SetDynamicModelTerms(const Eigen::MatrixXd& _inertia_matrix,
                             const Eigen::MatrixXd& _coriolis_matrix,

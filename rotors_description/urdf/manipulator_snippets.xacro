@@ -125,6 +125,7 @@
                 <jointName>${actuated_joint}</jointName>
                 <motorModel>${motor_model}</motorModel>
                 <commandSubTopic>command/${motor_name}</commandSubTopic>
+                <jointStatePubTopic>${motor_name}_joint_state</jointStatePubTopic>
                 <maxTorque>${maxTorque}</maxTorque>
                 <noLoadSpeed>${noLoadSpeed}</noLoadSpeed>
                 <maxAngleIntegralError>1.0</maxAngleIntegralError>

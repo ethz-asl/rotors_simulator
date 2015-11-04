@@ -68,18 +68,6 @@ struct EigenOdometry {
   Eigen::Vector3d angular_velocity;
 };
 
-struct EigenJointsState {
-  EigenJointsState() {}
-  EigenJointsState(const Eigen::VectorXd& _angles,
-                   const Eigen::VectorXd& _angular_rates) {
-    angles = _angles;
-    angular_rates = _angular_rates;
-  }
-
-  Eigen::VectorXd angles;
-  Eigen::VectorXd angular_rates;
-};
-
 inline void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
                                  EigenOdometry* odometry) {
   odometry->position = mav_msgs::vector3FromPointMsg(msg->pose.pose.position);
