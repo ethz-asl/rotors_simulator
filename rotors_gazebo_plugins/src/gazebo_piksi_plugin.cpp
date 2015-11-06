@@ -247,6 +247,7 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // Calculate position distortions for RTK GPS.
   sol_rtk_.header.stamp = ros::Time().now();
+  sol_baseline_.header.stamp = ros::Time().now();
   if(mode_rtk_.data == "Float"){
     double dist_x = lon_to_m_*sol_gt_.longitude - baseline_.x;
     double dist_y = lat_to_m_*sol_gt_.latitude - baseline_.y;
@@ -303,7 +304,10 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
     sol_baseline_.mode_fixed = 0;
   }
   sol_piksi_rtk_.navsatfix = sol_rtk_;
-  sol_baseline_.baseline = baseline_;
+  // Scale Baseline message, and convert frem ENU to NED
+  sol_baseline_.baseline.x = baseline_.y*1000;
+  sol_baseline_.baseline.y = baseline_.x*1000;
+  sol_baseline_.baseline.z = -baseline_.z*1000;
 
   // Publish messages
   if (rtk_piksi_pub_.getNumSubscribers() > 0) {
