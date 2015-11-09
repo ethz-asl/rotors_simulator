@@ -125,30 +125,32 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   alt_start_ = gps_start_position_.z;
 
   // Calculate position scaling factors (m to lat/lon)
-  //lon_to_m_ = (M_PI*6367449*cos(lon_start_*M_PI/180))/180;
-  //lon_to_m_ = (6378137*cos(0.99664719*tan(lat_start_*M_PI/180)))*M_PI/180;
-  //lat_to_m_ = 111132.954 - 559.822*cos(2*lat_start_*M_PI/180) + 1.175*cos(4*lat_start_*M_PI/180);
-  lon_to_m_ = 111412.84 * cos(lat_start_*M_PI/180) - 93.5 * cos(3 * lat_start_ * M_PI/180) + 0.118 * cos(5 * lat_start_ * M_PI/180);
-  lat_to_m_ = 111132.954 - 559.822 * cos(2 * lat_start_ * M_PI/180) + 1.175 * cos(4 * lat_start_ * M_PI/180) - 0.0023 * cos(6 * lat_start_ * M_PI/180);
+  lon_to_m_ = 111412.84 * cos(lat_start_*M_PI/180)
+              - 93.5 * cos(3 * lat_start_ * M_PI/180)
+              + 0.118 * cos(5 * lat_start_ * M_PI/180);
+  lat_to_m_ = 111132.954
+              - 559.822 * cos(2 * lat_start_ * M_PI/180)
+              + 1.175 * cos(4 * lat_start_ * M_PI/180)
+              - 0.0023 * cos(6 * lat_start_ * M_PI/180);
   m_to_lat_ = 1/lat_to_m_;
   m_to_lon_ = 1/lon_to_m_;
 
-  // Start in Float Mode and initialize at random position
+  // Initialize in RTK Float or Fix mode
   if(start_fixed == "true")
     mode_rtk_.data = "Fixed";
   else {
     mode_rtk_.data = "Float";
     UniformDistribution rtk_initialize_u = UniformDistribution(-rtk_float_start_error_width_, rtk_float_start_error_width_);
+    // Determine random starting position
     sol_rtk_.latitude =  lat_start_ + rtk_initialize_u(random_generator_)*m_to_lat_;
     sol_rtk_.longitude = lon_start_ + rtk_initialize_u(random_generator_)*m_to_lon_;
     sol_rtk_.altitude =  alt_start_ + rtk_initialize_u(random_generator_)/10;
   }
 
-  // Define fixed attributes of the NavSatFixed messages
+  // Set constant attributes of the NavSatFix messages
   sol_spp_.header.frame_id = frame_id_;
   sol_spp_.status.status = sol_spp_.status.STATUS_FIX;
   sol_spp_.status.service = sol_spp_.status.SERVICE_GPS;
-  // TODO: Handle covariance properly!
   for(int i=0; i<=9; i++) {
     sol_spp_.position_covariance.elems[i] = spp_navsatfix_covariance_[i];
   }
@@ -157,7 +159,6 @@ void GazeboPiksiPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   sol_rtk_.header.frame_id = frame_id_;
   sol_rtk_.status.status = sol_rtk_.status.STATUS_GBAS_FIX;
   sol_rtk_.status.service = sol_rtk_.status.SERVICE_GPS;
-  // TODO: Handle covariance properly!
   for(int i=0; i<=9; i++) {
     sol_rtk_.position_covariance.elems[i] = rtk_navsatfix_covariance_[i];
   }
@@ -199,43 +200,12 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
     gazebo_pose = C_pose_P_C_;
   }
 
-  /*
-  nav_msgs::Odometry odometry;
-  odometry.header.frame_id = parent_frame_id_;
-  odometry.header.seq = odometry_sequence_++;
-  odometry.header.stamp.sec = (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec;
-  odometry.header.stamp.nsec = (world_->GetSimTime()).nsec + ros::Duration(unknown_delay_).nsec;
-  odometry.child_frame_id = namespace_;
-  copyPosition(gazebo_pose.pos, &odometry.pose.pose.position);
-  odometry.pose.pose.orientation.w = gazebo_pose.rot.w;
-  odometry.pose.pose.orientation.x = gazebo_pose.rot.x;
-  odometry.pose.pose.orientation.y = gazebo_pose.rot.y;
-  odometry.pose.pose.orientation.z = gazebo_pose.rot.z;
-  odometry.twist.twist.linear.x = gazebo_linear_velocity.x;
-  odometry.twist.twist.linear.y = gazebo_linear_velocity.y;
-  odometry.twist.twist.linear.z = gazebo_linear_velocity.z;
-  odometry.twist.twist.angular.x = gazebo_angular_velocity.x;
-  odometry.twist.twist.angular.y = gazebo_angular_velocity.y;
-  odometry.twist.twist.angular.z = gazebo_angular_velocity.z;
-  */
-
-  // Is it time to publish the front element?
-  /*
-  nav_msgs::OdometryPtr odometry(new nav_msgs::Odometry);
-  odometry->header = odometry_queue_.front().second.header;
-  odometry->child_frame_id = odometry_queue_.front().second.child_frame_id;
-  odometry->pose.pose = odometry_queue_.front().second.pose.pose;
-  odometry->twist.twist.linear = odometry_queue_.front().second.twist.twist.linear;
-  odometry->twist.twist.angular = odometry_queue_.front().second.twist.twist.angular;
-  odometry_queue_.pop_front();
-  */
-
-  // Calculate Ground Truth
+  // Calculate Ground Truth in LLA coordinates
   sol_gt_.longitude = lon_start_ + m_to_lon_ * gazebo_pose.pos.x;
   sol_gt_.latitude = lat_start_ + m_to_lat_ * gazebo_pose.pos.y;
   sol_gt_.altitude = alt_start_ + gazebo_pose.pos.z;
 
-  // Calculate position distortions for SPP GPS.
+  // Calculate position with errors for SPP GPS.
   Eigen::Vector3d spp_pos_n;
   spp_pos_n << spp_position_n_[0](random_generator_),
                spp_position_n_[1](random_generator_),
@@ -245,15 +215,15 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
   sol_spp_.altitude = alt_start_ + gazebo_pose.pos.z + offset_spp_.z + spp_pos_n.z();
   sol_spp_.header.stamp = ros::Time().now();
 
-  // Calculate position distortions for RTK GPS.
+  // Calculate position with errors for RTK GPS.
   sol_rtk_.header.stamp = ros::Time().now();
   sol_baseline_.header.stamp = ros::Time().now();
   if(mode_rtk_.data == "Float"){
+    // For RTK Float: Random walk towards actual position
     double dist_x = lon_to_m_*sol_gt_.longitude - baseline_.x;
     double dist_y = lat_to_m_*sol_gt_.latitude - baseline_.y;
     double dist_z = sol_gt_.altitude - baseline_.z;
 
-    // Random walk towards actual position
     double c_s = convergence_speed_/100;
     double step_x = NormalDistribution((c_s*sin(dist_x)+1.1*c_s)*dist_x, 0.01*abs(dist_x) + 0.005)(random_generator_);
     double step_y = NormalDistribution((c_s*cos(dist_y)+1.1*c_s)*dist_y, 0.01*abs(dist_y) + 0.005)(random_generator_);
@@ -270,6 +240,7 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
   }
   else if(mode_rtk_.data == "Fixed")
   {
+    // For RTK Fix: Augment ground truth with noise
     Eigen::Vector3d rtk_pos_n;
     rtk_pos_n << rtk_position_n_[0](random_generator_),
                  rtk_position_n_[1](random_generator_),
@@ -290,11 +261,13 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
     }
   }
 
-  // Use baseline to calculate RTK NavSatFix output
+  // Use baseline output to LLA coordinates
   sol_rtk_.longitude = lon_start_ + baseline_.x*m_to_lon_;
   sol_rtk_.latitude = lat_start_ + baseline_.y*m_to_lat_;
   sol_rtk_.altitude = alt_start_ + baseline_.z;
+  sol_piksi_rtk_.navsatfix = sol_rtk_;
 
+  // Set RTK fix/float status variables
   if(mode_rtk_.data == "Fixed") {
     sol_piksi_rtk_.mode_fixed = 1;
   	sol_baseline_.mode_fixed = 1;
@@ -303,7 +276,7 @@ void GazeboPiksiPlugin::OnUpdate(const common::UpdateInfo& _info) {
     sol_piksi_rtk_.mode_fixed = 0;
     sol_baseline_.mode_fixed = 0;
   }
-  sol_piksi_rtk_.navsatfix = sol_rtk_;
+
   // Scale Baseline message, and convert frem ENU to NED
   sol_baseline_.baseline.x = baseline_.y*1000;
   sol_baseline_.baseline.y = baseline_.x*1000;
