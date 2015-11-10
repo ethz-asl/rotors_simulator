@@ -19,11 +19,11 @@
  * limitations under the License.
  */
 
-#include <ros/ros.h>
-#include <mav_msgs/default_topics.h>
 
 #include "multi_objective_controller_node.h"
 
+#include <manipulator_msgs/default_topics_manipulator.h>
+#include <mav_msgs/default_topics.h>
 #include "rotors_control/parameters_ros.h"
 
 namespace rotors_control {
@@ -41,13 +41,11 @@ MultiObjectiveControllerNode::MultiObjectiveControllerNode() {
           &MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback, this);
 
       odometry_sub_ = new message_filters::Subscriber<nav_msgs::Odometry>(nh_,mav_msgs::default_topics::ODOMETRY, 10);
-//      joint_state_sub_ = new message_filters::Subscriber<sensor_msgs::JointState>(nh_,"joint_State", 10);
-//      sync_ = new message_filters::Synchronizer<RobotSyncPolicy>(RobotSyncPolicy(10),*odometry_sub_,*joint_state_sub_);
 
       joint_state_sub_.clear();
-      joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, "pitching", 10));
-      joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, "left", 10));
-      joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, "right", 10));
+      joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_PITCHING_JOINT_STATE, 10));
+      joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_LEFT_JOINT_STATE, 10));
+      joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_RIGHT_JOINT_STATE, 10));
       sync_ = new message_filters::Synchronizer<RobotSyncPolicy>(RobotSyncPolicy(10),*odometry_sub_,
                                                                  *(joint_state_sub_[0]),*(joint_state_sub_[1]),*(joint_state_sub_[2]));
 
@@ -55,13 +53,14 @@ MultiObjectiveControllerNode::MultiObjectiveControllerNode() {
 
       motor_velocity_reference_pub_ = nh_.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 10);
 
-      std::string suffix = "command/servo_position";
-      pitch_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>("pitching"+suffix, 10);
-      left_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>("left"+suffix, 10);
-      right_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>("right"+suffix, 10);
+      pitch_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_PITCHING_TORQUE, 10);
+      left_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_LEFT_TORQUE, 10);
+      right_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_RIGHT_TORQUE, 10);
 
       command_timer_ = nh_.createTimer(ros::Duration(0), &MultiObjectiveControllerNode::TimedCommandCallback, this,
-                                       true, false);
+                                             true, false);
+      command_arm_timer_ = nh_.createTimer(ros::Duration(0), &MultiObjectiveControllerNode::TimedCommandArmCallback, this,
+                                             true, false);
 }
 
 
@@ -144,14 +143,76 @@ void MultiObjectiveControllerNode::InitializeParams() {
   GetRosParameter(pnh, "arm_joint_ang_rate_gain/right",
                   multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.z());
+  GetRosParameter(pnh, "rpy_max/roll",
+                  multi_objective_controller_.controller_parameters_.rpy_max_.x(),
+                  &multi_objective_controller_.controller_parameters_.rpy_max_.x());
+  GetRosParameter(pnh, "rpy_max/pitch",
+                  multi_objective_controller_.controller_parameters_.rpy_max_.y(),
+                  &multi_objective_controller_.controller_parameters_.rpy_max_.y());
+  GetRosParameter(pnh, "rpy_max/yaw",
+                  multi_objective_controller_.controller_parameters_.rpy_max_.z(),
+                  &multi_objective_controller_.controller_parameters_.rpy_max_.z());
+  GetRosParameter(pnh, "rpy_min/roll",
+                  multi_objective_controller_.controller_parameters_.rpy_min_.x(),
+                  &multi_objective_controller_.controller_parameters_.rpy_min_.x());
+  GetRosParameter(pnh, "rpy_min/pitch",
+                  multi_objective_controller_.controller_parameters_.rpy_min_.y(),
+                  &multi_objective_controller_.controller_parameters_.rpy_min_.y());
+  GetRosParameter(pnh, "rpy_min/yaw",
+                  multi_objective_controller_.controller_parameters_.rpy_min_.z(),
+                  &multi_objective_controller_.controller_parameters_.rpy_min_.z());
+  GetRosParameter(pnh, "arm_joint_angle_max/pitch",
+                  multi_objective_controller_.controller_parameters_.arm_joints_angle_max_.x(),
+                  &multi_objective_controller_.controller_parameters_.arm_joints_angle_max_.x());
+  GetRosParameter(pnh, "arm_joint_angle_max/left",
+                  multi_objective_controller_.controller_parameters_.arm_joints_angle_max_.y(),
+                  &multi_objective_controller_.controller_parameters_.arm_joints_angle_max_.y());
+  GetRosParameter(pnh, "arm_joint_angle_max/right",
+                  multi_objective_controller_.controller_parameters_.arm_joints_angle_max_.z(),
+                  &multi_objective_controller_.controller_parameters_.arm_joints_angle_max_.z());
+  GetRosParameter(pnh, "arm_joint_angle_min/pitch",
+                  multi_objective_controller_.controller_parameters_.arm_joints_angle_min_.x(),
+                  &multi_objective_controller_.controller_parameters_.arm_joints_angle_min_.x());
+  GetRosParameter(pnh, "arm_joint_angle_min/left",
+                  multi_objective_controller_.controller_parameters_.arm_joints_angle_min_.y(),
+                  &multi_objective_controller_.controller_parameters_.arm_joints_angle_min_.y());
+  GetRosParameter(pnh, "arm_joint_angle_min/right",
+                  multi_objective_controller_.controller_parameters_.arm_joints_angle_min_.z(),
+                  &multi_objective_controller_.controller_parameters_.arm_joints_angle_min_.z());
+  GetRosParameter(pnh, "objectives_weight/att",
+                  multi_objective_controller_.controller_parameters_.objectives_weight_(0),
+                  &multi_objective_controller_.controller_parameters_.objectives_weight_(0));
+  GetRosParameter(pnh, "objectives_weight/yaw",
+                  multi_objective_controller_.controller_parameters_.objectives_weight_(1),
+                  &multi_objective_controller_.controller_parameters_.objectives_weight_(1));
+  GetRosParameter(pnh, "objectives_weight/hover",
+                  multi_objective_controller_.controller_parameters_.objectives_weight_(2),
+                  &multi_objective_controller_.controller_parameters_.objectives_weight_(2));
+  GetRosParameter(pnh, "objectives_weight/arm",
+                  multi_objective_controller_.controller_parameters_.objectives_weight_(3),
+                  &multi_objective_controller_.controller_parameters_.objectives_weight_(3));
+  GetRosParameter(pnh, "objectives_weight/ee",
+                  multi_objective_controller_.controller_parameters_.objectives_weight_(4),
+                  &multi_objective_controller_.controller_parameters_.objectives_weight_(4));
+  GetRosParameter(pnh, "objectives_weight/dead",
+                  multi_objective_controller_.controller_parameters_.objectives_weight_(5),
+                  &multi_objective_controller_.controller_parameters_.objectives_weight_(5));
+  GetRosParameter(pnh, "mu_attitude",
+                  multi_objective_controller_.controller_parameters_.mu_attitude_,
+                  &multi_objective_controller_.controller_parameters_.mu_attitude_);
+  GetRosParameter(pnh, "mu_arm",
+                  multi_objective_controller_.controller_parameters_.mu_arm_,
+                  &multi_objective_controller_.controller_parameters_.mu_arm_);
+  GetRosParameter(pnh, "safe_range",
+                  multi_objective_controller_.controller_parameters_.safe_range_,
+                  &multi_objective_controller_.controller_parameters_.safe_range_);
+
   GetVehicleParameters(pnh, &multi_objective_controller_.vehicle_parameters_);
+
   multi_objective_controller_.InitializeParameters();
 }
 
-
-void MultiObjectiveControllerNode::Publish() {
-}
-
+////// UAV CALLBACKS /////
 
 void MultiObjectiveControllerNode::CommandPoseCallback(
     const geometry_msgs::PoseStampedConstPtr& pose_msg) {
@@ -209,6 +270,102 @@ void MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback(
 }
 
 
+void MultiObjectiveControllerNode::CommandPoseEndEffCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg) {
+  // Clear all pending commands.
+  command_timer_.stop();
+  commands_ee_.clear();
+  commands_joints_.clear();
+  command_waiting_times_.clear();
+
+  mav_msgs::EigenTrajectoryPoint eigen_reference;
+  mav_msgs::eigenTrajectoryPointFromPoseMsg(*pose_msg, &eigen_reference);
+  commands_ee_.push_front(eigen_reference);
+
+  multi_objective_controller_.SetEndEffTrajectoryPoint(commands_ee_.front());
+  commands_ee_.pop_front();
+}
+
+///// MANIPULATOR CALLBACKS /////
+
+void MultiObjectiveControllerNode::MultiDofJointTrajectoryEndEffCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg) {
+  // Clear all pending commands.
+  command_arm_timer_.stop();
+  commands_ee_.clear();
+  commands_joints_.clear();
+  command_arm_waiting_times_.clear();
+
+  const size_t n_commands = msg->points.size();
+
+  if(n_commands < 1){
+    ROS_WARN_STREAM("Got end-effector MultiDOFJointTrajectory message, but message has no points.");
+    return;
+  }
+
+  mav_msgs::EigenTrajectoryPoint eigen_reference;
+  mav_msgs::eigenTrajectoryPointFromMsg(msg->points.front(), &eigen_reference);
+  commands_ee_.push_front(eigen_reference);
+
+  for (size_t i = 1; i < n_commands; ++i) {
+    const trajectory_msgs::MultiDOFJointTrajectoryPoint& reference_before = msg->points[i-1];
+    const trajectory_msgs::MultiDOFJointTrajectoryPoint& current_reference = msg->points[i];
+
+    mav_msgs::eigenTrajectoryPointFromMsg(current_reference, &eigen_reference);
+
+    commands_ee_.push_back(eigen_reference);
+    command_arm_waiting_times_.push_back(current_reference.time_from_start - reference_before.time_from_start);
+  }
+
+  // We can trigger the first command immediately.
+  multi_objective_controller_.SetEndEffTrajectoryPoint(commands_ee_.front());
+  commands_ee_.pop_front();
+
+  if (n_commands > 1) {
+    command_arm_timer_.setPeriod(command_arm_waiting_times_.front());
+    command_arm_waiting_times_.pop_front();
+    command_arm_timer_.start();
+  }
+}
+
+
+void MultiObjectiveControllerNode::JointTrajectoryCallback(const trajectory_msgs::JointTrajectoryConstPtr& trajectory_msg) {
+  // Clear all pending commands.
+  command_arm_timer_.stop();
+  commands_ee_.clear();
+  commands_joints_.clear();
+  command_arm_waiting_times_.clear();
+
+  const size_t n_commands = trajectory_msg->points.size();
+  if(n_commands < 1){
+    ROS_WARN_STREAM("Got JointTrajectory message, but message has no points.");
+    return;
+  }
+
+  manipulator_msgs::EigenJointTrajectoryPoint eigen_reference;
+  manipulator_msgs::eigenJointTrajectoryPointFromMsg(trajectory_msg->points.front(), &eigen_reference);
+  commands_joints_.push_front(eigen_reference);
+
+  for (size_t i = 1; i < n_commands; ++i) {
+    const trajectory_msgs::JointTrajectoryPoint& reference_before = trajectory_msg->points[i-1];
+    const trajectory_msgs::JointTrajectoryPoint& current_reference = trajectory_msg->points[i];
+
+    manipulator_msgs::eigenJointTrajectoryPointFromMsg(current_reference, &eigen_reference);
+
+    commands_joints_.push_back(eigen_reference);
+    command_arm_waiting_times_.push_back(current_reference.time_from_start - reference_before.time_from_start);
+  }
+
+  // We can trigger the first command immediately.
+  multi_objective_controller_.SetDesiredJointsAngle(commands_joints_.front());
+  commands_joints_.pop_front();
+  if (n_commands > 1) {
+    command_arm_timer_.setPeriod(command_arm_waiting_times_.front());
+    command_arm_waiting_times_.pop_front();
+    command_arm_timer_.start();
+  }
+}
+
+///// TIMERS CALLBACKS /////
+
 void MultiObjectiveControllerNode::TimedCommandCallback(const ros::TimerEvent& e) {
 
   if(commands_.empty()){
@@ -216,7 +373,7 @@ void MultiObjectiveControllerNode::TimedCommandCallback(const ros::TimerEvent& e
     return;
   }
 
-  const mav_msgs::EigenTrajectoryPoint eigen_reference = commands_.front();
+//  const mav_msgs::EigenTrajectoryPoint eigen_reference = commands_.front();
   multi_objective_controller_.SetTrajectoryPoint(commands_.front());
   commands_.pop_front();
   command_timer_.stop();
@@ -228,12 +385,44 @@ void MultiObjectiveControllerNode::TimedCommandCallback(const ros::TimerEvent& e
 }
 
 
+void MultiObjectiveControllerNode::TimedCommandArmCallback(const ros::TimerEvent& e) {
+
+  if (commands_ee_.empty() and commands_joints_.empty()) {
+    ROS_WARN("Manipulator commands empty, this should not happen here");
+    return;
+  }
+
+  if (commands_ee_.empty()) {
+    multi_objective_controller_.SetDesiredJointsAngle(commands_joints_.front());
+    commands_joints_.pop_front();
+  } else {
+    multi_objective_controller_.SetEndEffTrajectoryPoint(commands_ee_.front());
+    commands_ee_.pop_front();
+  }
+
+  command_arm_timer_.stop();
+  if(!command_arm_waiting_times_.empty()){
+    command_arm_timer_.setPeriod(command_arm_waiting_times_.front());
+    command_arm_waiting_times_.pop_front();
+    command_arm_timer_.start();
+  }
+}
+
+///// STATE UPDATE CALLBACK /////
+
 void MultiObjectiveControllerNode::AerialManipulatorStateCallback(const nav_msgs::OdometryConstPtr& odometry_msg,
                                                                   const sensor_msgs::JointStateConstPtr& joint_state_msg0,
                                                                   const sensor_msgs::JointStateConstPtr& joint_state_msg1,
                                                                   const sensor_msgs::JointStateConstPtr& joint_state_msg2) {
 
-  ROS_INFO_ONCE("MultiObjectiveController got first odometry message.");
+  ROS_INFO_ONCE("MultiObjectiveController got first odometry+joint states messages.");
+
+  //debug
+//  std::cout << "Robot state update at time:" << std::endl;
+//  std::cout << "\todometry_msg --> " << odometry_msg.get()->header.stamp.sec << " sec " << odometry_msg.get()->header.stamp.nsec << " nsec" <<  std::endl;
+//  std::cout << "\tjoint_state_msg0 --> " << joint_state_msg0.get()->header.stamp.sec << " sec " << joint_state_msg0.get()->header.stamp.nsec << " nsec" << std::endl;
+//  std::cout << "\tjoint_state_msg1 --> " << joint_state_msg1.get()->header.stamp.sec << " sec " << joint_state_msg1.get()->header.stamp.nsec << " nsec" <<  std::endl;
+//  std::cout << "\tjoint_state_msg2 --> " << joint_state_msg2.get()->header.stamp.sec << " sec " << joint_state_msg2.get()->header.stamp.nsec << " nsec" <<  std::endl;
 
   // Update robot states
   EigenOdometry odometry;
@@ -258,15 +447,23 @@ void MultiObjectiveControllerNode::AerialManipulatorStateCallback(const nav_msgs
   for (int i = 0; i < ref_rotor_velocities.size(); i++)
     actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
   actuator_msg->header.stamp = odometry_msg->header.stamp;
-
-  // Publish commands
   motor_velocity_reference_pub_.publish(actuator_msg);
-  pitch_motor_torque_ref_pub_.publish(ref_torques.x());
-  left_motor_torque_ref_pub_.publish(ref_torques.y());
-  right_motor_torque_ref_pub_.publish(ref_torques.z());
+
+  // Publish torque messages.
+  manipulator_msgs::CommandTorqueServoMotorPtr torque_msg(new manipulator_msgs::CommandTorqueServoMotor);
+  torque_msg->header.stamp = odometry_msg->header.stamp;
+  torque_msg->torque = ref_torques.x();
+  pitch_motor_torque_ref_pub_.publish(torque_msg);
+  torque_msg->torque = ref_torques.y();
+  left_motor_torque_ref_pub_.publish(torque_msg);
+  torque_msg->torque = ref_torques.z();
+  right_motor_torque_ref_pub_.publish(torque_msg);
 }
 
 }
+
+
+//////**************************** MAIN ********************************//////
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "multi_objective_controller_node");

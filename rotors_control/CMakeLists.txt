@@ -27,6 +27,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
+	~/catkin_ws/src/libigl/include
 )
 
 add_library(lee_position_controller
@@ -43,6 +44,8 @@ set(MATLAB_LIB
 		${MATLAB_LIB_DIR}/M_triu_fun/M_triu_fun.cpp
 		${MATLAB_LIB_DIR}/G_fun/G_fun.cpp
 		${MATLAB_LIB_DIR}/C_fun/C_fun.cpp
+		${MATLAB_LIB_DIR}/J_e_fun/J_e_fun.cpp
+		${MATLAB_LIB_DIR}/J_e_dot_fun/J_e_dot_fun.cpp
 		${MATLAB_LIB_DIR}/G_fun/rt_nonfinite.cpp
 		${MATLAB_LIB_DIR}/G_fun/rtGetNaN.cpp
 		${MATLAB_LIB_DIR}/G_fun/rtGetInf.cpp )

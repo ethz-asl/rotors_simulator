@@ -29,9 +29,8 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <mav_msgs/Actuators.h>
+#include <mav_msgs/default_topics2.h>
 #include <ros/ros.h>
-#include <mav_msgs/default_topics.h>
-
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {

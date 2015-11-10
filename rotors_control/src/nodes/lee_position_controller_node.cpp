@@ -19,10 +19,9 @@
  */
 
 #include <ros/ros.h>
-#include <mav_msgs/default_topics.h>
-
 #include "lee_position_controller_node.h"
 
+#include <mav_msgs/default_topics.h>
 #include "rotors_control/parameters_ros.h"
 
 namespace rotors_control {

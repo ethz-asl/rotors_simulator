@@ -44,7 +44,7 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/TwistWithCovariance.h>
 #include <geometry_msgs/TwistWithCovarianceStamped.h>
-#include <mav_msgs/default_topics.h>
+#include <mav_msgs/default_topics2.h>
 #include <nav_msgs/Odometry.h>
 #include <opencv2/core/core.hpp>
 #include <ros/callback_queue.h>

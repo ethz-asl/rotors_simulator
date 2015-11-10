@@ -22,42 +22,46 @@
 #ifndef ROTORS_CONTROL_MULTI_OBJECTIVE_CONTROLLER_NODE_H
 #define ROTORS_CONTROL_MULTI_OBJECTIVE_CONTROLLER_NODE_H
 
-#include <boost/bind.hpp>
-#include <Eigen/Eigen>
 #include <stdio.h>
-
-#include <geometry_msgs/PoseStamped.h>
-#include <mav_msgs/Actuators.h>
-#include <mav_msgs/AttitudeThrust.h>
-#include <mav_msgs/eigen_mav_msgs.h>
-#include <manipulator_msgs/CommandTorqueServoMotor.h>
-#include <manipulator_msgs/eigen_manipulator_msgs.h>
-#include <manipulator_msgs/conversions.h>
-#include <nav_msgs/Odometry.h>
+#include <Eigen/Eigen>
+#include <boost/bind.hpp>
 #include <ros/callback_queue.h>
-#include <trajectory_msgs/MultiDOFJointTrajectory.h>
-#include <sensor_msgs/JointState.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
-#include "rotors_control/common.h"
+#include <geometry_msgs/PoseStamped.h>
+#include <nav_msgs/Odometry.h>
+#include <trajectory_msgs/MultiDOFJointTrajectory.h>
+#include <trajectory_msgs/JointTrajectory.h>
+#include <trajectory_msgs/JointTrajectoryPoint.h>
+#include <sensor_msgs/JointState.h>
+#include <mav_msgs/Actuators.h>
+#include <mav_msgs/AttitudeThrust.h>
+#include <manipulator_msgs/CommandTorqueServoMotor.h>
+
 #include "rotors_control/multi_objective_controller.h"
 
+
 //typedef message_filters::sync_policies::ApproximateTime<nav_msgs::Odometry, sensor_msgs::JointState> RobotSyncPolicy;
-typedef message_filters::sync_policies::ApproximateTime<nav_msgs::Odometry, sensor_msgs::JointState, sensor_msgs::JointState, sensor_msgs::JointState> RobotSyncPolicy;
+typedef message_filters::sync_policies::ExactTime<nav_msgs::Odometry, sensor_msgs::JointState, sensor_msgs::JointState, sensor_msgs::JointState> RobotSyncPolicy;
+
+
 
 namespace rotors_control {
 
 class MultiObjectiveControllerNode {
+
  public:
+
   MultiObjectiveControllerNode();
   ~MultiObjectiveControllerNode();
 
   void InitializeParams();
-  void Publish();
+  void Publish() {};
+
 
  private:
 
@@ -68,16 +72,17 @@ class MultiObjectiveControllerNode {
   ros::NodeHandle nh_;
 
   // subscribers
-  ros::Subscriber cmd_trajectory_sub_;
   ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
   ros::Subscriber cmd_pose_sub_;
+  ros::Subscriber cmd_multi_dof_joint_trajectory_ee_sub_;
+  ros::Subscriber cmd_pose_ee_sub_;
+  ros::Subscriber cmd_joints_trajectory_sub_;
   message_filters::Subscriber<nav_msgs::Odometry> *odometry_sub_;
 //  message_filters::Subscriber<sensor_msgs::JointState> *joint_state_sub_;
   std::vector<message_filters::Subscriber<sensor_msgs::JointState>*> joint_state_sub_;
 
   // synchronizer
   message_filters::Synchronizer<RobotSyncPolicy> *sync_;
-//                                    sensor_msgs::JointState,sensor_msgs::JointState> sync_;
 
   // publishers
   ros::Publisher motor_velocity_reference_pub_;
@@ -85,20 +90,31 @@ class MultiObjectiveControllerNode {
   ros::Publisher left_motor_torque_ref_pub_;
   ros::Publisher right_motor_torque_ref_pub_;
 
+  // commands
   mav_msgs::EigenTrajectoryPointDeque commands_;
+  mav_msgs::EigenTrajectoryPointDeque commands_ee_;
+  manipulator_msgs::EigenJointTrajectoryPointDeque commands_joints_;
+
+  // timers
   std::deque<ros::Duration> command_waiting_times_;
   ros::Timer command_timer_;
+  std::deque<ros::Duration> command_arm_waiting_times_;
+  ros::Timer command_arm_timer_;
 
+  // timers callsback
   void TimedCommandCallback(const ros::TimerEvent& e);
+  void TimedCommandArmCallback(const ros::TimerEvent& e);
 
-  void MultiDofJointTrajectoryCallback(
-      const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
+  // UAV trajectories callbacks
+  void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
+  void CommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg);
 
-  void CommandPoseCallback(
-      const geometry_msgs::PoseStampedConstPtr& pose_msg);
+  // Manipulator trajectories callbacks
+  void MultiDofJointTrajectoryEndEffCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
+  void CommandPoseEndEffCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg);
+  void JointTrajectoryCallback(const trajectory_msgs::JointTrajectoryConstPtr& trajectory_reference_msg);
 
-  // ToDo manipulator callbacks
-
+  // Aerial manipulator state update callback
   void AerialManipulatorStateCallback(const nav_msgs::OdometryConstPtr& odometry_msg,
                                       const sensor_msgs::JointStateConstPtr& joint_state_msg0,
                                       const sensor_msgs::JointStateConstPtr& joint_state_msg1,

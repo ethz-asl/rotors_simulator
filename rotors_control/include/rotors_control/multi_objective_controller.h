@@ -33,13 +33,14 @@
 #include "rotors_control/parameters.h"
 
 #include <Eigen/Dense>
+#include <igl/slice.h>
 
 #include "rotors_control/dynamic_terms_fun/q34_12_fun/q34_12_fun.h"
 #include "rotors_control/dynamic_terms_fun/M_triu_fun/M_triu_fun.h"
 #include "rotors_control/dynamic_terms_fun/G_fun/G_fun.h"
 #include "rotors_control/dynamic_terms_fun/C_fun/C_fun.h"
-//#include "rotors_control/dynamic_terms_fun/J_e_fun/J_e_fun.h"
-//#include "rotors_control/dynamic_terms_fun/J_e_dot_fun/J_e_dot_fun.h"
+#include "rotors_control/dynamic_terms_fun/J_e_fun/J_e_fun.h"
+#include "rotors_control/dynamic_terms_fun/J_e_dot_fun/J_e_dot_fun.h"
 
 
 namespace rotors_control {
@@ -57,7 +58,7 @@ static const Eigen::Vector3d kDefaultRPYMax = Eigen::Vector3d(M_PI/2, M_PI/2., 2
 static const Eigen::Vector3d kDefaultRPYMin = Eigen::Vector3d(-M_PI/2, -M_PI/2., -2*M_PI);
 static const Eigen::Vector3d kDefaultArmJointsAngleMax = Eigen::Vector3d(0., M_PI, 0.5556*M_PI);
 static const Eigen::Vector3d kDefaultArmJointsAngleMin = Eigen::Vector3d(-M_PI/2, 0.4444*M_PI, 0.);
-static const Eigen::Vector2d kDefaultObjectivesWeight = Eigen::Vector2d(0.5, 0.5);
+static const Eigen::VectorXd kDefaultObjectivesWeight = Eigen::VectorXd::Zero(6);
 static const unsigned int kDefaultMavDof = 6;
 static const unsigned int kDefaultArmDof = 3;
 static const unsigned int kDefaultMuAttidute = 1000;
@@ -103,9 +104,9 @@ class MultiObjectiveControllerParameters {
   Eigen::Vector3d rpy_min_;
   Eigen::Vector3d arm_joints_angle_max_;
   Eigen::Vector3d arm_joints_angle_min_;
-  Eigen::Vector2d objectives_weight_;
-  unsigned int mu_attitude_;
-  unsigned int mu_arm_;
+  Eigen::VectorXd objectives_weight_;
+  int mu_attitude_;
+  int mu_arm_;
   double safe_range_;
   RotorConfiguration rotor_configuration_;
 };
@@ -124,10 +125,55 @@ struct DynamicModelTerms {
     gravity_vector = _gravity_vector;
   };
 
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   Eigen::MatrixXd inertia_matrix;
   Eigen::MatrixXd coriolis_matrix;
   Eigen::MatrixXd damping_matrix;
   Eigen::VectorXd gravity_vector;
+
+  inline void setAll(const Eigen::MatrixXd& _inertia_matrix,
+                     const Eigen::MatrixXd& _coriolis_matrix,
+                     const Eigen::MatrixXd& _damping_matrix,
+                     const Eigen::VectorXd& _gravity_vector) {
+    inertia_matrix = _inertia_matrix;
+    coriolis_matrix = _coriolis_matrix;
+    damping_matrix = _damping_matrix;
+    gravity_vector = _gravity_vector;
+
+    //debug
+//    std::cout << "inertia_matrix\n" << inertia_matrix<< std::endl;
+//    std::cout << "coriolis_matrix\n" << coriolis_matrix<< std::endl;
+//    std::cout << "damping_matrix\n" << damping_matrix<< std::endl;
+//    std::cout << "gravity_vector\n" << gravity_vector<< std::endl;
+  }
+};
+
+
+struct EigenEndEffector {
+  EigenEndEffector() {};
+
+  EigenEndEffector(const EigenOdometry& _odometry,
+                   const Eigen::MatrixXd& _jacobian,
+                   const Eigen::MatrixXd& _jacobian_dot) {
+    odometry = _odometry;
+    jacobian_W = _jacobian;
+    jacobian_dot_W = _jacobian_dot;
+  };
+
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  EigenOdometry odometry;
+  Eigen::MatrixXd jacobian_W;
+  Eigen::MatrixXd jacobian_dot_W;
+
+  inline void setPosJac(const Eigen::Vector3d& _position,
+                            const Eigen::MatrixXd& _jacobian,
+                            const Eigen::MatrixXd& _jacobian_dot) {
+    odometry.position = _position;
+    jacobian_W = _jacobian;
+    jacobian_dot_W = _jacobian_dot;
+  }
 };
 
 
@@ -148,7 +194,7 @@ class MultiObjectiveController {
   // Called asynchronously and independently (when new command is set)
   void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
   void SetEndEffTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
-  void SetDesiredJointsAngle(const manipulator_msgs::EigenJointsState& joints_state);
+  void SetDesiredJointsAngle(const manipulator_msgs::EigenJointTrajectoryPoint& joints_state);
 
   MultiObjectiveControllerParameters controller_parameters_;
   VehicleParameters vehicle_parameters_;
@@ -162,14 +208,14 @@ class MultiObjectiveController {
   unsigned int robot_dof_;
   unsigned int mav_dof_;
   unsigned int arm_dof_;
-  unsigned int minimizer_sz;
+  unsigned int minimizer_sz_;
 
   Eigen::MatrixX4d torque_to_rotor_velocities_;
 
   Eigen::MatrixXd Aeq_;
   Eigen::Matrix2Xd Aineq_;
-  Eigen::Vector2d Beq_;
-  Eigen::VectorXd Bineq_;
+  Eigen::VectorXd Beq_;
+  Eigen::Vector2d Bineq_;
   Eigen::VectorXd lower_bounds_;
   Eigen::VectorXd upper_bounds_;
 
@@ -178,7 +224,7 @@ class MultiObjectiveController {
   Eigen::VectorXd joints_angle_des_;
 
   EigenOdometry odometry_;
-  EigenOdometry odometry_ee_;
+  EigenEndEffector end_effector_;
   manipulator_msgs::EigenJointsState joints_state_;
 
   DynamicModelTerms dyn_mdl_terms_;
@@ -192,9 +238,15 @@ class MultiObjectiveController {
                             Eigen::VectorXd* c) const;
 
   void GetAttitudeSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
-  void GetPositionSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
-  void GetOrientationSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
+  void GetYawSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
+  void GetFreeHoverSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
+  void GetPositionSetPtObjective(const Eigen::Vector3d& _position_ref,
+                                 Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
+  void GetOrientationSetPtObjective(const Eigen::Vector3d& _orientation_ref,
+                                    Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
   void GetManipulatorSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
+  void GetDeadArmSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
+  void GetEndEffectorSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c);
 
   Eigen::VectorXd GetRobotVelocities() const;
 
