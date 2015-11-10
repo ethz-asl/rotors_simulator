@@ -8,7 +8,7 @@
     <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic_bullet.world" />
     <!-- <arg name="debug" value="true"/> -->
     <arg name="paused" value="true"/>
-    <arg name="gui" value="true"/>
+    <arg name="gui" value="false"/>
   </include>
 
   <group ns="$(arg mav_name)">

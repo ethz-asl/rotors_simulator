@@ -168,11 +168,16 @@ struct EigenEndEffector {
   Eigen::MatrixXd jacobian_dot_W;
 
   inline void setPosJac(const Eigen::Vector3d& _position,
-                            const Eigen::MatrixXd& _jacobian,
-                            const Eigen::MatrixXd& _jacobian_dot) {
+                        const Eigen::MatrixXd& _jacobian,
+                        const Eigen::MatrixXd& _jacobian_dot) {
     odometry.position = _position;
     jacobian_W = _jacobian;
     jacobian_dot_W = _jacobian_dot;
+
+    //debug
+    std::cout << "odometry.position\n" << odometry.position << std::endl;
+    std::cout << "jacobian_W\n" << jacobian_W << std::endl;
+    std::cout << "jacobian_dot_W\n" << jacobian_dot_W << std::endl;
   }
 };
 
@@ -196,6 +201,8 @@ class MultiObjectiveController {
   void SetEndEffTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
   void SetDesiredJointsAngle(const manipulator_msgs::EigenJointTrajectoryPoint& joints_state);
 
+  void SetObjectiveFunctionsWeight(const Eigen::VectorXd& objectives_weight);
+
   MultiObjectiveControllerParameters controller_parameters_;
   VehicleParameters vehicle_parameters_;
 
@@ -204,6 +211,9 @@ class MultiObjectiveController {
  private:
   bool initialized_params_;
   bool controller_active_;
+  bool mav_trajectory_received_;
+  bool arm_trajectory_received_;
+  bool ee_trajectory_received_;
 
   unsigned int robot_dof_;
   unsigned int mav_dof_;

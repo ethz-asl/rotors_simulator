@@ -27,6 +27,9 @@ namespace rotors_control {
 MultiObjectiveController::MultiObjectiveController()
     : initialized_params_(false),
       controller_active_(false),
+      mav_trajectory_received_(false),
+      arm_trajectory_received_(false),
+      ee_trajectory_received_(false),
       mav_dof_(kDefaultMavDof),
       arm_dof_(kDefaultArmDof) {
 
@@ -119,6 +122,8 @@ void MultiObjectiveController::SetArmJointsState(const manipulator_msgs::EigenJo
 void MultiObjectiveController::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory) {
   command_trajectory_ = command_trajectory;
   ROS_INFO_ONCE("MultiObjectiveController got first helicopter trajectory point.");
+
+  mav_trajectory_received_ = true;
   controller_active_ = true;
 }
 
@@ -126,6 +131,8 @@ void MultiObjectiveController::SetTrajectoryPoint(const mav_msgs::EigenTrajector
 void MultiObjectiveController::SetEndEffTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory) {
   command_trajectory_ee_ = command_trajectory;
   ROS_INFO_ONCE("MultiObjectiveController got first end-effector trajectory point.");
+
+  ee_trajectory_received_ = true;
   controller_active_ = true;
 }
 
@@ -133,9 +140,16 @@ void MultiObjectiveController::SetEndEffTrajectoryPoint(const mav_msgs::EigenTra
 void MultiObjectiveController::SetDesiredJointsAngle(const manipulator_msgs::EigenJointTrajectoryPoint& joints_state) {
   joints_angle_des_ = joints_state.angles;
   ROS_INFO_ONCE("MultiObjectiveController got first joints angle trajectory point.");
+
+  arm_trajectory_received_ = true;
   controller_active_ = true;
 }
 
+
+void MultiObjectiveController::SetObjectiveFunctionsWeight(const Eigen::VectorXd& objectives_weight) {
+  controller_parameters_.objectives_weight_.resizeLike(objectives_weight);
+  controller_parameters_.objectives_weight_ = objectives_weight;
+}
 
 /////////////////////// PRIVATE METHODs //////////////////////
 
@@ -145,12 +159,24 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization(Eigen::VectorXd* 
   Eigen::MatrixXd Q_sum = Eigen::MatrixXd::Zero(minimizer_sz_,minimizer_sz_);
   Eigen::VectorXd c_sum = Eigen::VectorXd::Zero(minimizer_sz_);
   static Eigen::VectorXd f = Eigen::VectorXd::Ones(minimizer_sz_)*(-Eigen::Infinity);
+  static Eigen::VectorXd weights_normalized = controller_parameters_.objectives_weight_.normalized();
 
   UpdateLinearConstraints();
 //  ROS_INFO("CHECK POINT after UpdateLinearConstraints");  //debug
 
-  for (unsigned int i=0; i<controller_parameters_.objectives_weight_.size(); i++) {
-    if (controller_parameters_.objectives_weight_(i) == 0)
+  Eigen::VectorXd current_weights = weights_normalized;
+  if (!mav_trajectory_received_) {
+    current_weights << 0, 0, 2, controller_parameters_.objectives_weight_.tail<3>();
+    current_weights.normalize();
+  }
+  if (!(arm_trajectory_received_ or ee_trajectory_received_)) {
+    current_weights << controller_parameters_.objectives_weight_.head<3>(), 0, 0, 2;
+    current_weights.normalize();
+  }
+
+
+  for (unsigned int i=0; i<current_weights.size(); i++) {
+    if (current_weights(i) == 0)
       continue;
 
     switch (i) {
@@ -170,12 +196,15 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization(Eigen::VectorXd* 
         break;
 
       case (3):
-        joints_angle_des_ = joints_state_.angles; //debug
+        if (!arm_trajectory_received_)
+          continue;
         GetManipulatorSetPtObjective(&Q,&c);
 //        ROS_INFO("CHECK POINT after GetManipulatorSetPtObjective");  //debug
         break;
 
       case (4):
+        if (!ee_trajectory_received_)
+          continue;
         GetEndEffectorSetPtObjective(&Q,&c);
 //        ROS_INFO("CHECK POINT after GetEndEffectorSetPtObjective");  //debug
         break;
@@ -190,8 +219,8 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization(Eigen::VectorXd* 
         c.fill(0.0);
     }
 
-    Q_sum += controller_parameters_.objectives_weight_(i) * Q;
-    c_sum += controller_parameters_.objectives_weight_(i) * c;
+    Q_sum += current_weights(i) * Q;
+    c_sum += current_weights(i) * c;
   }
 
   //TODO
@@ -224,6 +253,9 @@ void MultiObjectiveController::GetSetPointObjective(const Eigen::VectorXd& g, co
 
 
 void MultiObjectiveController::GetAttitudeSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const {
+
+  assert(mav_trajectory_received_);
+
   Eigen::MatrixXd Q_pos;
   Eigen::MatrixXd Q_orient;
   Eigen::VectorXd c_pos;
@@ -240,6 +272,9 @@ void MultiObjectiveController::GetAttitudeSetPtObjective(Eigen::MatrixXd* _Q, Ei
 
 
 void MultiObjectiveController::GetYawSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const {
+
+  assert(mav_trajectory_received_);
+
   Eigen::MatrixXd Q_pos;
   Eigen::MatrixXd Q_orient;
   Eigen::VectorXd c_pos;
@@ -302,6 +337,9 @@ void MultiObjectiveController::GetOrientationSetPtObjective(const Eigen::Vector3
 void MultiObjectiveController::GetManipulatorSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const {
   static Eigen::MatrixXd Jac_ = Eigen::MatrixXd::Zero(arm_dof_,robot_dof_);
   static Eigen::MatrixXd Jac_dot_ = Jac_;
+
+  assert(arm_trajectory_received_);
+
   Jac_.topRightCorner(arm_dof_,arm_dof_) = Eigen::MatrixXd::Identity(arm_dof_,arm_dof_);
 
   Eigen::VectorXd robot_vel = GetRobotVelocities();
@@ -324,6 +362,9 @@ void MultiObjectiveController::GetDeadArmSetPtObjective(Eigen::MatrixXd* _Q, Eig
 
 
 void MultiObjectiveController::GetEndEffectorSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) {
+
+  assert(ee_trajectory_received_);
+
   UpdateEndEffectorState();
 
   Eigen::VectorXd robot_vel = GetRobotVelocities();
@@ -403,35 +444,35 @@ void MultiObjectiveController::UpdateEndEffectorState() {
 
   double q_in[2];
   double q34_12[2];
-  Eigen::Vector2d q_in_eig = q_eig.tail<2>();
-  Eigen::Map<Eigen::Vector2d>(q_in,2,1) = q_in_eig; // q1,q2
+  Eigen::Vector2d::Map(q_in) = q_eig.tail<2>(); // q1,q2
   q34_12_fun(q_in,q34_12);
+  Eigen::Map<Eigen::Vector2d> q34_12_map(q34_12);
 
-  Eigen::VectorXd X_eig(2*robot_dof_);
-  X_eig << q_eig, q34_12[0], q34_12[1], GetRobotVelocities();
+  Eigen::VectorXd X_eig(2*robot_dof_+2);
+  X_eig << q_eig, q34_12_map, GetRobotVelocities();
 
-  double J_e[54];
+  double J_e[6*robot_dof_];
   double q_in_J_e[8];
-  Eigen::VectorXd::Map(q_in_J_e, 8, 1) = X_eig.segment<8>(3);
+  Eigen::VectorXd::Map(q_in_J_e, 8) = X_eig.segment<8>(3);
   J_e_fun(q_in_J_e,J_e);
 
-  double J_e_dot[54];
-  double q_in_J_e_dot[14];
-  q_in_eig.resize(J_e_dot_idx.size());
+  double J_e_dot[6*robot_dof_];
+  double q_in_J_e_dot[J_e_dot_idx.size()];
+  Eigen::VectorXd q_in_eig(J_e_dot_idx.size());
   igl::slice(X_eig, J_e_dot_idx, q_in_eig);
-  Eigen::VectorXd::Map(q_in_J_e_dot, 14, 1) = q_in_eig;
+  Eigen::VectorXd::Map(q_in_J_e_dot, J_e_dot_idx.size()) = q_in_eig;
   J_e_dot_fun(q_in_J_e_dot,J_e_dot);
 
   double p_ee[6];
-  double q_in_p_ee[9];
+  double q_in_p_ee[p_ee_idx.size()];
   q_in_eig.resize(p_ee_idx.size());
   igl::slice(X_eig, J_e_dot_idx, q_in_eig);
-  Eigen::VectorXd::Map(q_in_p_ee, 9, 1) = q_in_eig;
+  Eigen::VectorXd::Map(q_in_p_ee, p_ee_idx.size()) = q_in_eig;
   p_ee_fun(q_in_p_ee,p_ee);
 
-  Eigen::MatrixXd J_e_eig = Eigen::MatrixXd::Map(J_e, 6, robot_dof_);
-  Eigen::MatrixXd J_e_dot_eig = Eigen::MatrixXd::Map(J_e_dot, 6, robot_dof_);
-  Eigen::VectorXd p_ee_eig = Eigen::VectorXd::Map(p_ee, 6);
+  Eigen::Map<Eigen::MatrixXd> J_e_eig(J_e, 6, robot_dof_);
+  Eigen::Map<Eigen::MatrixXd> J_e_dot_eig(J_e_dot, 6, robot_dof_);
+  Eigen::Map<Eigen::VectorXd> p_ee_eig(p_ee, 6);
 
   end_effector_.setPosJac(p_ee_eig, J_e_eig, J_e_dot_eig);
 }
