@@ -203,6 +203,8 @@ class MultiObjectiveController {
 
   void SetObjectiveFunctionsWeight(const Eigen::VectorXd& objectives_weight);
 
+  void SetExternalForces(const Eigen::Vector3d& forces);
+
   MultiObjectiveControllerParameters controller_parameters_;
   VehicleParameters vehicle_parameters_;
 
@@ -236,6 +238,8 @@ class MultiObjectiveController {
   EigenOdometry odometry_;
   EigenEndEffector end_effector_;
   manipulator_msgs::EigenJointsState joints_state_;
+
+  Eigen::Vector3d ext_forces_;
 
   DynamicModelTerms dyn_mdl_terms_;
 

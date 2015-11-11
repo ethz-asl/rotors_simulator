@@ -33,6 +33,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Vector3Stamped.h>
 #include <nav_msgs/Odometry.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 #include <trajectory_msgs/JointTrajectory.h>
@@ -77,8 +78,8 @@ class MultiObjectiveControllerNode {
   ros::Subscriber cmd_multi_dof_joint_trajectory_ee_sub_;
   ros::Subscriber cmd_pose_ee_sub_;
   ros::Subscriber cmd_joints_trajectory_sub_;
+  ros::Subscriber force_sensor_sub_;
   message_filters::Subscriber<nav_msgs::Odometry> *odometry_sub_;
-//  message_filters::Subscriber<sensor_msgs::JointState> *joint_state_sub_;
   std::vector<message_filters::Subscriber<sensor_msgs::JointState>*> joint_state_sub_;
 
   // synchronizer
@@ -119,6 +120,9 @@ class MultiObjectiveControllerNode {
                                       const sensor_msgs::JointStateConstPtr& joint_state_msg0,
                                       const sensor_msgs::JointStateConstPtr& joint_state_msg1,
                                       const sensor_msgs::JointStateConstPtr& joint_state_msg2);
+
+  // Force sensor callback
+  void ForceSensorCallback(const geometry_msgs::Vector3StampedConstPtr& force_msg);
 };
 }
 

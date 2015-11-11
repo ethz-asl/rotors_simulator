@@ -40,6 +40,8 @@ MultiObjectiveControllerNode::MultiObjectiveControllerNode() {
           mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
           &MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback, this);
 
+      force_sensor_sub_ = nh_.subscribe(manipulator_msgs::default_topics::FORCE_SENSOR_LINEAR, 1, &MultiObjectiveControllerNode::ForceSensorCallback, this);
+
       odometry_sub_ = new message_filters::Subscriber<nav_msgs::Odometry>(nh_,mav_msgs::default_topics::ODOMETRY, 10);
 
       joint_state_sub_.clear();
@@ -458,6 +460,13 @@ void MultiObjectiveControllerNode::AerialManipulatorStateCallback(const nav_msgs
   left_motor_torque_ref_pub_.publish(torque_msg);
   torque_msg->torque = ref_torques.z();
   right_motor_torque_ref_pub_.publish(torque_msg);
+}
+
+////// FORCE SENSOR CALLBACK //////
+
+void MultiObjectiveControllerNode::ForceSensorCallback(const geometry_msgs::Vector3StampedConstPtr& force_msg) {
+  Eigen::Vector3d eigen_forces = mav_msgs::vector3FromMsg(force_msg->vector);
+  multi_objective_controller_.SetExternalForces(eigen_forces);
 }
 
 }

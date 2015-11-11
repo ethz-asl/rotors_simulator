@@ -151,6 +151,12 @@ void MultiObjectiveController::SetObjectiveFunctionsWeight(const Eigen::VectorXd
   controller_parameters_.objectives_weight_ = objectives_weight;
 }
 
+
+void MultiObjectiveController::SetExternalForces(const Eigen::Vector3d& forces) {
+  //Todo : ignore small forces (just noise)
+  ext_forces_ = forces;
+}
+
 /////////////////////// PRIVATE METHODs //////////////////////
 
 void MultiObjectiveController::SolveMultiObjectiveOptimization(Eigen::VectorXd* _minimizer) {
