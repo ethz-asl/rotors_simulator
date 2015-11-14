@@ -42,14 +42,13 @@ MultiObjectiveController::~MultiObjectiveController() {}
 
 
 void MultiObjectiveController::InitializeParameters() {
-
   calculateAllocationMatrix(vehicle_parameters_.rotor_configuration_, &(controller_parameters_.allocation_matrix_));
   torque_to_rotor_velocities_.resize(vehicle_parameters_.rotor_configuration_.rotors.size(), 4);
   torque_to_rotor_velocities_ = pseudoInv(controller_parameters_.allocation_matrix_);
 
   // Initialize linear contraints
   Aeq_ = Eigen::MatrixXd::Zero(robot_dof_+2,minimizer_sz_);
-  Aeq_.block(robot_dof_,robot_dof_,0,robot_dof_) = Eigen::MatrixXd::Identity(robot_dof_,robot_dof_);
+  Aeq_.block(0,robot_dof_,robot_dof_,robot_dof_) = Eigen::MatrixXd::Identity(robot_dof_,robot_dof_);
   Beq_ = Eigen::VectorXd::Zero(robot_dof_+2);
   Aineq_ = Eigen::Matrix2Xd::Zero(2,minimizer_sz_);
   Bineq_.resize(2);

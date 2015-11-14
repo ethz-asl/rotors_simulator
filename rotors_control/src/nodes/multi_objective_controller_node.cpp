@@ -30,39 +30,39 @@ namespace rotors_control {
 
 MultiObjectiveControllerNode::MultiObjectiveControllerNode() {
 
-      InitializeParams();
+  InitializeParams();
 
-      cmd_pose_sub_ = nh_.subscribe(
-          mav_msgs::default_topics::COMMAND_POSE, 1,
-          &MultiObjectiveControllerNode::CommandPoseCallback, this);
+  cmd_pose_sub_ = nh_.subscribe(
+      mav_msgs::default_topics::COMMAND_POSE, 1,
+      &MultiObjectiveControllerNode::CommandPoseCallback, this);
 
-      cmd_multi_dof_joint_trajectory_sub_ = nh_.subscribe(
-          mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
-          &MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback, this);
+  cmd_multi_dof_joint_trajectory_sub_ = nh_.subscribe(
+      mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
+      &MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback, this);
 
-      force_sensor_sub_ = nh_.subscribe(manipulator_msgs::default_topics::FORCE_SENSOR_LINEAR, 1, &MultiObjectiveControllerNode::ForceSensorCallback, this);
+  force_sensor_sub_ = nh_.subscribe(manipulator_msgs::default_topics::FORCE_SENSOR_LINEAR, 1, &MultiObjectiveControllerNode::ForceSensorCallback, this);
 
-      odometry_sub_ = new message_filters::Subscriber<nav_msgs::Odometry>(nh_,mav_msgs::default_topics::ODOMETRY, 10);
+  odometry_sub_ = new message_filters::Subscriber<nav_msgs::Odometry>(nh_,mav_msgs::default_topics::ODOMETRY, 10);
 
-      joint_state_sub_.clear();
-      joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_PITCHING_JOINT_STATE, 10));
-      joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_LEFT_JOINT_STATE, 10));
-      joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_RIGHT_JOINT_STATE, 10));
-      sync_ = new message_filters::Synchronizer<RobotSyncPolicy>(RobotSyncPolicy(10),*odometry_sub_,
-                                                                 *(joint_state_sub_[0]),*(joint_state_sub_[1]),*(joint_state_sub_[2]));
+  joint_state_sub_.clear();
+  joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_PITCHING_JOINT_STATE, 10));
+  joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_LEFT_JOINT_STATE, 10));
+  joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_RIGHT_JOINT_STATE, 10));
+  sync_ = new message_filters::Synchronizer<RobotSyncPolicy>(RobotSyncPolicy(10),*odometry_sub_,
+                                                             *(joint_state_sub_[0]),*(joint_state_sub_[1]),*(joint_state_sub_[2]));
 
-      sync_->registerCallback(boost::bind(&MultiObjectiveControllerNode::AerialManipulatorStateCallback, this, _1, _2, _3, _4));
+  sync_->registerCallback(boost::bind(&MultiObjectiveControllerNode::AerialManipulatorStateCallback, this, _1, _2, _3, _4));
 
-      motor_velocity_reference_pub_ = nh_.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 10);
+  motor_velocity_reference_pub_ = nh_.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 10);
 
-      pitch_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_PITCHING_TORQUE, 10);
-      left_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_LEFT_TORQUE, 10);
-      right_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_RIGHT_TORQUE, 10);
+  pitch_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_PITCHING_TORQUE, 10);
+  left_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_LEFT_TORQUE, 10);
+  right_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_RIGHT_TORQUE, 10);
 
-      command_timer_ = nh_.createTimer(ros::Duration(0), &MultiObjectiveControllerNode::TimedCommandCallback, this,
-                                             true, false);
-      command_arm_timer_ = nh_.createTimer(ros::Duration(0), &MultiObjectiveControllerNode::TimedCommandArmCallback, this,
-                                             true, false);
+  command_timer_ = nh_.createTimer(ros::Duration(0), &MultiObjectiveControllerNode::TimedCommandCallback, this,
+                                         true, false);
+  command_arm_timer_ = nh_.createTimer(ros::Duration(0), &MultiObjectiveControllerNode::TimedCommandArmCallback, this,
+                                         true, false);
 }
 
 
