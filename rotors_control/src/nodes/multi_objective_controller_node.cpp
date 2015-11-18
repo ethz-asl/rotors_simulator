@@ -199,15 +199,24 @@ void MultiObjectiveControllerNode::InitializeParams() {
   GetRosParameter(pnh, "objectives_weight/dead",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(5),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(5));
+  GetRosParameter(pnh, "thrust_lim/min",
+                  multi_objective_controller_.controller_parameters_.thrust_limits_.x(),
+                  &multi_objective_controller_.controller_parameters_.thrust_limits_.x());
+  GetRosParameter(pnh, "thrust_lim/max",
+                  multi_objective_controller_.controller_parameters_.thrust_limits_.y(),
+                  &multi_objective_controller_.controller_parameters_.thrust_limits_.y());
   GetRosParameter(pnh, "mu_attitude",
                   multi_objective_controller_.controller_parameters_.mu_attitude_,
                   &multi_objective_controller_.controller_parameters_.mu_attitude_);
   GetRosParameter(pnh, "mu_arm",
                   multi_objective_controller_.controller_parameters_.mu_arm_,
                   &multi_objective_controller_.controller_parameters_.mu_arm_);
-  GetRosParameter(pnh, "safe_range",
-                  multi_objective_controller_.controller_parameters_.safe_range_,
-                  &multi_objective_controller_.controller_parameters_.safe_range_);
+  GetRosParameter(pnh, "safe_range_rpy",
+                  multi_objective_controller_.controller_parameters_.safe_range_rpy_,
+                  &multi_objective_controller_.controller_parameters_.safe_range_rpy_);
+  GetRosParameter(pnh, "safe_range_joints",
+                  multi_objective_controller_.controller_parameters_.safe_range_joints_,
+                  &multi_objective_controller_.controller_parameters_.safe_range_joints_);
 
   GetVehicleParameters(pnh, &multi_objective_controller_.vehicle_parameters_);
 

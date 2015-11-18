@@ -34,6 +34,7 @@
 
 #include <Eigen/Dense>
 #include <igl/slice.h>
+#include <ooqp_eigen_interface/OoqpEigenInterface.hpp>
 
 #include "rotors_control/dynamic_terms_fun/q34_12_fun/q34_12_fun.h"
 #include "rotors_control/dynamic_terms_fun/M_triu_fun/M_triu_fun.h"
@@ -41,6 +42,9 @@
 #include "rotors_control/dynamic_terms_fun/C_fun/C_fun.h"
 #include "rotors_control/dynamic_terms_fun/J_e_fun/J_e_fun.h"
 #include "rotors_control/dynamic_terms_fun/J_e_dot_fun/J_e_dot_fun.h"
+
+
+typedef Eigen::SparseMatrix<double, Eigen::RowMajor> SpMatrixXd;
 
 
 namespace rotors_control {
@@ -58,6 +62,7 @@ static const Eigen::Vector3d kDefaultRPYMax = Eigen::Vector3d(M_PI/2, M_PI/2., 2
 static const Eigen::Vector3d kDefaultRPYMin = Eigen::Vector3d(-M_PI/2, -M_PI/2., -2*M_PI);
 static const Eigen::Vector3d kDefaultArmJointsAngleMax = Eigen::Vector3d(0., M_PI, 0.5556*M_PI);
 static const Eigen::Vector3d kDefaultArmJointsAngleMin = Eigen::Vector3d(-M_PI/2, 0.4444*M_PI, 0.);
+static const Eigen::Vector2d kDefaultThrustLimits = Eigen::Vector2d(0., 54.);
 static const Eigen::VectorXd kDefaultObjectivesWeight = Eigen::VectorXd::Zero(6);
 static const unsigned int kDefaultMavDof = 6;
 static const unsigned int kDefaultArmDof = 3;
@@ -84,10 +89,12 @@ class MultiObjectiveControllerParameters {
         rpy_min_(kDefaultRPYMin),
         arm_joints_angle_max_(kDefaultArmJointsAngleMax),
         arm_joints_angle_min_(kDefaultArmJointsAngleMin),
+        thrust_limits_(kDefaultThrustLimits),
         objectives_weight_(kDefaultObjectivesWeight),
         mu_attitude_(kDefaultMuAttidute),
         mu_arm_(kDefaultMuArm),
-        safe_range_(kDefaultSafeRange) {
+        safe_range_rpy_(kDefaultSafeRange),
+        safe_range_joints_(kDefaultSafeRange) {
     calculateAllocationMatrix(rotor_configuration_, &allocation_matrix_);
   }
 
@@ -104,10 +111,12 @@ class MultiObjectiveControllerParameters {
   Eigen::Vector3d rpy_min_;
   Eigen::Vector3d arm_joints_angle_max_;
   Eigen::Vector3d arm_joints_angle_min_;
+  Eigen::Vector2d thrust_limits_;
   Eigen::VectorXd objectives_weight_;
   int mu_attitude_;
   int mu_arm_;
-  double safe_range_;
+  double safe_range_rpy_;
+  double safe_range_joints_;
   RotorConfiguration rotor_configuration_;
 };
 
@@ -224,12 +233,17 @@ class MultiObjectiveController {
 
   Eigen::MatrixX4d torque_to_rotor_velocities_;
 
-  Eigen::MatrixXd Aeq_;
-  Eigen::Matrix2Xd Aineq_;
-  Eigen::VectorXd Beq_;
-  Eigen::Vector2d Bineq_;
-  Eigen::VectorXd lower_bounds_;
-  Eigen::VectorXd upper_bounds_;
+  // Solve min 1/2 x' Q x + c' x, such that A x = b, d <= Cx <= f, and l <= x <= u.
+  SpMatrixXd Q_;
+  Eigen::VectorXd c_;
+  SpMatrixXd A_;
+  Eigen::VectorXd b_;
+  Eigen::VectorXd d_;
+  SpMatrixXd C_;
+  Eigen::VectorXd f_;
+  Eigen::VectorXd l_;
+  Eigen::VectorXd u_;
+  Eigen::VectorXd x_;
 
   mav_msgs::EigenTrajectoryPoint command_trajectory_;
   mav_msgs::EigenTrajectoryPoint command_trajectory_ee_;
@@ -243,7 +257,7 @@ class MultiObjectiveController {
 
   DynamicModelTerms dyn_mdl_terms_;
 
-  void SolveMultiObjectiveOptimization(Eigen::VectorXd* _minimizer) ;
+  void SolveMultiObjectiveOptimization() ;
 
   void GetSetPointObjective(const Eigen::VectorXd& g, const Eigen::VectorXd& g_ref,
                             const Eigen::VectorXd& kp, const Eigen::VectorXd& kv,
@@ -269,11 +283,6 @@ class MultiObjectiveController {
   void UpdateEndEffectorState();
 
   void UpdateDynamicModelTerms();
-
-  void SetDynamicModelTerms(const Eigen::MatrixXd& _inertia_matrix,
-                            const Eigen::MatrixXd& _coriolis_matrix,
-                            const Eigen::MatrixXd& _damping_matrix,
-                            const Eigen::VectorXd& _gravity_vector);
 
 };
 

@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   cmake_modules
 	message_filters
+	ooqp_eigen_interface
 )
 
 find_package(Eigen REQUIRED)
@@ -19,7 +20,7 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES lee_position_controller roll_pitch_yawrate_thrust_controller multi_objective_controller
-  CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs manipulator_msgs
+  CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs manipulator_msgs 
   DEPENDS Eigen
 )
 
@@ -28,6 +29,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
 	~/catkin_ws/src/libigl/include
+	~/catkin_ws/src/ooqp_eigen_interface/include
 )
 
 add_library(lee_position_controller
@@ -40,15 +42,15 @@ add_library(roll_pitch_yawrate_thrust_controller
 
 set(MATLAB_LIB_DIR include/${PROJECT_NAME}/dynamic_terms_fun)
 set(MATLAB_LIB
-		${MATLAB_LIB_DIR}/q34_12_fun/q34_12_fun.cpp
-		${MATLAB_LIB_DIR}/M_triu_fun/M_triu_fun.cpp
-		${MATLAB_LIB_DIR}/G_fun/G_fun.cpp
-		${MATLAB_LIB_DIR}/C_fun/C_fun.cpp
-		${MATLAB_LIB_DIR}/J_e_fun/J_e_fun.cpp
-		${MATLAB_LIB_DIR}/J_e_dot_fun/J_e_dot_fun.cpp
-		${MATLAB_LIB_DIR}/G_fun/rt_nonfinite.cpp
-		${MATLAB_LIB_DIR}/G_fun/rtGetNaN.cpp
-		${MATLAB_LIB_DIR}/G_fun/rtGetInf.cpp )
+	${MATLAB_LIB_DIR}/q34_12_fun/q34_12_fun.cpp
+	${MATLAB_LIB_DIR}/M_triu_fun/M_triu_fun.cpp
+	${MATLAB_LIB_DIR}/G_fun/G_fun.cpp
+	${MATLAB_LIB_DIR}/C_fun/C_fun.cpp
+	${MATLAB_LIB_DIR}/J_e_fun/J_e_fun.cpp
+	${MATLAB_LIB_DIR}/J_e_dot_fun/J_e_dot_fun.cpp
+	${MATLAB_LIB_DIR}/G_fun/rt_nonfinite.cpp
+	${MATLAB_LIB_DIR}/G_fun/rtGetNaN.cpp
+	${MATLAB_LIB_DIR}/G_fun/rtGetInf.cpp )
 		
 add_library(multi_objective_controller
   src/library/multi_objective_controller.cpp ${MATLAB_LIB})

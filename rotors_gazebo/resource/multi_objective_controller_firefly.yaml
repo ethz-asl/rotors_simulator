@@ -7,11 +7,13 @@ ee_position_gain: {x: 200, y: 200, z: 200}
 ee_velocity_gain: {x: 300, y: 300, z: 300}
 arm_joint_angle_gain: {pitch: 30, left: 30, right: 30}
 arm_joint_ang_rate_gain: {pitch: 10, left: 10, right: 10}
-rpy_max: {roll: rad(pi), pitch: rad(0.5*pi), yaw: rad(2*pi)}
+rpy_max: {roll: rad(0.5*pi), pitch: rad(0.5*pi), yaw: rad(2*pi)}
 rpy_min: {roll: rad(-0.5*pi), pitch: rad(-0.5*pi), yaw: rad(-2*pi)}
-arm_joint_angle_max: {pitch: 0, left: rad(pi), right: rad(100)}
-arm_joint_angle_min: {pitch: rad(-0.5*pi), left: rad(80), right: 0}
+arm_joint_angle_max: {pitch: rad(pi/6), left: rad(pi), right: rad(0.5*pi)}
+arm_joint_angle_min: {pitch: rad(-0.5*pi), left: rad(0.5*pi), right: 0}
+thrust_lim: {min: 0, max: 54}
 objectives_weight: {att: 1, yaw: 0, hover: 0, arm: 1, ee: 0, dead: 0}
-mu_attitude: 1000
-mu_arm: 2000
-safe_range: 0.9
+mu_attitude: 100
+mu_arm: 50
+safe_range_rpy: 0.8
+safe_range_joints: 0.8
