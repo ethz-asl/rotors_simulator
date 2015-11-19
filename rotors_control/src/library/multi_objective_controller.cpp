@@ -25,6 +25,8 @@ using namespace Eigen;
 
 namespace rotors_control {
 
+#define LIM_MAX 100000000;
+
 MultiObjectiveController::MultiObjectiveController()
     : initialized_params_(false),
       controller_active_(false),
@@ -46,6 +48,9 @@ void MultiObjectiveController::InitializeParameters() {
   calculateAllocationMatrix(vehicle_parameters_.rotor_configuration_, &(controller_parameters_.allocation_matrix_));
   torque_to_rotor_velocities_.resize(vehicle_parameters_.rotor_configuration_.rotors.size(), 4);
   torque_to_rotor_velocities_ = pseudoInv(controller_parameters_.allocation_matrix_);
+//  torque_to_rotor_velocities_ = controller_parameters_.allocation_matrix_.transpose()
+//                                * (controller_parameters_.allocation_matrix_
+//                                * controller_parameters_.allocation_matrix_.transpose()).inverse();
 
   // Initialize linear constraints
   // Solve min 1/2 x' Q x + c' x, such that A x = b, d <= Cx <= f, and l <= x <= u.
@@ -53,10 +58,7 @@ void MultiObjectiveController::InitializeParameters() {
   Q_.setZero();
   c_ = VectorXd::Zero(minimizer_sz_);
   A_.resize(robot_dof_+2,minimizer_sz_);
-  MatrixXd A_temp(robot_dof_+2,minimizer_sz_);
-  A_temp.setZero();
-  A_temp.topRightCorner(robot_dof_,robot_dof_).setIdentity();
-  A_ = A_temp.sparseView();
+  A_.setZero();
   b_ = VectorXd::Zero(robot_dof_+2);
   C_.resize(1,minimizer_sz_);
   C_.setZero();
@@ -65,9 +67,9 @@ void MultiObjectiveController::InitializeParameters() {
   f_.resize(1);
   f_(0) = controller_parameters_.thrust_limits_.y();
   u_.resize(minimizer_sz_);
-  u_ << Vector3d::Ones()*std::numeric_limits<double>::max(),
+  u_ << Vector3d::Ones()*100000,
         VectorXd::Zero(robot_dof_-3),
-        Vector3d::Ones()*std::numeric_limits<double>::max(),
+        Vector3d::Ones()*100000,
         Vector3d::Ones(),
         VectorXd::Ones(arm_dof_)*2;
   l_.resize(minimizer_sz_);
@@ -77,8 +79,9 @@ void MultiObjectiveController::InitializeParameters() {
   initialized_params_ = true;
 
   //debug
+//  std::cout << "Torque to rotor velocities :\n" << torque_to_rotor_velocities_.transpose() << std::endl << std::endl;
 //  std::cout << robot_dof_ << std::endl;
-//  std::cout << "A_ : " << A_.size() << " = " << A_.rows() << "x" << A_.cols() << std::endl;
+//  std::cout << "A_ : " << A_.size() << " = " << A_.rows() << "x" << A_.cols() << "\n" << A_ << std::endl;
 //  std::cout << "b_ : " << b_.size() << " = " << b_.rows() << "x" << b_.cols() << std::endl;
 //  std::cout << "C_ : " << C_.size() << " = " << C_.rows() << "x" << C_.cols() << std::endl;
 //  std::cout << "d_ : " << d_.size() << " = " << d_.rows() << "x" << d_.cols() << std::endl;
@@ -104,20 +107,37 @@ void MultiObjectiveController::CalculateControlInputs(VectorXd* rotor_velocities
 //  ROS_INFO("CHECK POINT after SolveMultiObjectiveOptimization");  //debug
 
   // Extract thrust force from aerodynamic forces given in world frame and current UAV orientation
-  double thrust = (odometry_.orientation.toRotationMatrix().transpose() * x_.segment<3>(robot_dof_)).tail<1>()(0);
-  Vector4d thrust_torque;
-  thrust_torque << thrust, x_.segment<3>(robot_dof_+3);
+  double thrust = (odometry_.orientation_W_B.inverse() * x_.segment<3>(robot_dof_)).tail<1>()(0);
+//  double thrust = (odometry_.orientation_W_B.toRotationMatrix().transpose() * x_.segment<3>(robot_dof_)).tail<1>()(0);
+  Vector4d torque_thrust;
+  torque_thrust << x_.segment<3>(robot_dof_+3), thrust;
 
-  *rotor_velocities = torque_to_rotor_velocities_ * thrust_torque;
+  *rotor_velocities = torque_to_rotor_velocities_ * torque_thrust;
   *rotor_velocities = rotor_velocities->cwiseMax(VectorXd::Zero(rotor_velocities->rows()));
   *rotor_velocities = rotor_velocities->cwiseSqrt();
 
   *torques = x_.tail(arm_dof_);
+
+  //debug
+//  std::cout << "torques to rotor velocities :\n" << torque_to_rotor_velocities_ << std::endl;
+//  std::cout << "Global force vector :\t" << x_.segment<3>(robot_dof_).transpose() << std::endl;
+//  std::cout << "Aero torques & thrust:\t" << torque_thrust.transpose() << std::endl;
+//  std::cout << "Joint torques :\t" << torques->transpose() << std::endl;
+//  std::cout << "Rotors velocities :\t" << rotor_velocities->transpose() << std::endl;
+
+  //dummy
+  torques->setZero();
 }
 
 
-void MultiObjectiveController::SetOdometry(const EigenOdometry& odometry) {
+void MultiObjectiveController::SetOdometry(const mav_msgs::EigenOdometry& odometry) {
   odometry_ = odometry;
+
+  //debug
+//  std::cout << "UAV position :\t" << odometry_.position_W.transpose() << std::endl;
+//  std::cout << "UAV orientation (quaternion) :\t" << odometry_.orientation_W_B.coeffs().transpose() << std::endl;
+//  std::cout << "UAV orientation (RPY) [degrees] :\t" << odometry_.getRPY().transpose() * 180/M_PI << std::endl;
+//  std::cout << "UAV orientation (rotation matrix) :\n" << odometry_.orientation_W_B.toRotationMatrix() << std::endl;
 }
 
 
@@ -125,7 +145,7 @@ void MultiObjectiveController::SetArmJointsState(const manipulator_msgs::EigenJo
   joints_state_ = joints_state;
 
   //debug
-//  std::cout << "Joints state position vector :\t" << joints_state_.angles.transpose() << std::endl;
+//  std::cout << "Joints state position vector [degrees] :\t" << joints_state_.angles.transpose() * 180/M_PI << std::endl;
 //  std::cout << "Joints state velocity vector :\t" << joints_state_.angular_rates.transpose() << std::endl;
 }
 
@@ -189,9 +209,11 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
     current_weights.normalize();
   }
   if (!(arm_trajectory_received_ or ee_trajectory_received_)) {
-    current_weights << controller_parameters_.objectives_weight_.head<3>(), 0, 0, 2;
+    current_weights << controller_parameters_.objectives_weight_.head<3>(), 0, 0, 1;
     current_weights.normalize();
   }
+
+//  std::cout << "current weights :\t" << current_weights.transpose() << std::endl;
 
 
   for (unsigned int i=0; i<current_weights.size(); i++) {
@@ -251,11 +273,6 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
     }
   }
 
-  if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, l_, u_, x_)) {
-    ROS_INFO("[multi_objective_controller] Optimization failed.");
-    return;
-  }
-
   // debug
 //  std::cout << "Q_ : " << Q_.toDense() << std::endl;
 //  std::cout << "c_ : " << c_.transpose() << std::endl;
@@ -266,6 +283,14 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
 //  std::cout << "f_ : " << f_.transpose() << std::endl;
 //  std::cout << "u_ : " << u_.transpose() << std::endl;
 //  std::cout << "l_ : " << l_.transpose() << std::endl;
+
+//  if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, l_, u_, x_)) {
+  if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, x_)) {
+    ROS_INFO("[multi_objective_controller] Optimization failed.");
+    return;
+  }
+
+  //debug
 //  std::cout << "x_ : " << x_.transpose() << std::endl << std::endl;
 }
 
@@ -275,10 +300,10 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
  * servo the task 'g' around a given reference value 'g_ref'.
 */
 void MultiObjectiveController::GetSetPointObjective(const VectorXd& g, const VectorXd& g_ref,
-                                                   const VectorXd& kp, const VectorXd& kv,
-                                                   const MatrixXd& Jg, const MatrixXd& Jg_dot,
-                                                   const VectorXd& q_dot, MatrixXd* Q,
-                                                   VectorXd* c) const {
+                                                    const VectorXd& kp, const VectorXd& kv,
+                                                    const MatrixXd& Jg, const MatrixXd& Jg_dot,
+                                                    const VectorXd& q_dot, MatrixXd* Q,
+                                                    VectorXd* c) const {
 
   *Q = MatrixXd::Zero(minimizer_sz_,minimizer_sz_);
   (*Q).topLeftCorner(robot_dof_,robot_dof_) = Jg.transpose() * Jg;
@@ -316,7 +341,7 @@ void MultiObjectiveController::GetYawSetPtObjective(MatrixXd* _Q, VectorXd* _c) 
   VectorXd c_pos;
   VectorXd c_orient;
 
-  GetPositionSetPtObjective(odometry_.position, &Q_pos, &c_pos);
+  GetPositionSetPtObjective(odometry_.position_W, &Q_pos, &c_pos);
 
   Vector3d rpy_des(0,0,command_trajectory_.getYaw());
   GetOrientationSetPtObjective(rpy_des, &Q_orient, &c_orient);
@@ -332,9 +357,9 @@ void MultiObjectiveController::GetFreeHoverSetPtObjective(MatrixXd* _Q, VectorXd
   VectorXd c_pos;
   VectorXd c_orient;
 
-  GetPositionSetPtObjective(odometry_.position, &Q_pos, &c_pos);
+  GetPositionSetPtObjective(odometry_.position_W, &Q_pos, &c_pos);
 
-  Vector3d rpy_des(0,0,odometry_.orientation.toRotationMatrix().eulerAngles(0,1,2)(2));
+  Vector3d rpy_des(0,0,odometry_.getRPY().z());
   GetOrientationSetPtObjective(rpy_des, &Q_orient, &c_orient);
 
   *_Q = Q_pos + Q_orient;
@@ -342,28 +367,34 @@ void MultiObjectiveController::GetFreeHoverSetPtObjective(MatrixXd* _Q, VectorXd
 }
 
 
-void MultiObjectiveController::GetPositionSetPtObjective(const Vector3d& _position_ref,
-                                                         MatrixXd* _Q, VectorXd* _c) const {
-  static Matrix3Xd Jac_ = Matrix3Xd::Zero(3,robot_dof_);
-  static Matrix3Xd Jac_dot_ = Jac_;
-  Jac_.topLeftCorner(3,3) = Matrix3d::Identity();
+void MultiObjectiveController::GetPositionSetPtObjective(const Vector3d& _position_ref, MatrixXd* _Q, VectorXd* _c) const {
+  static Matrix3Xd Jac_ = [&] {
+      Matrix3Xd tmp(3,robot_dof_);
+      tmp.setZero();
+      tmp.topLeftCorner(3,3) = Matrix3d::Identity();
+      return tmp;
+  }();
+  static Matrix3Xd Jac_dot_ = Matrix3Xd::Zero(3,robot_dof_);
 
   VectorXd robot_vel = GetRobotVelocities();
 
-  GetSetPointObjective(odometry_.position, _position_ref, controller_parameters_.mav_position_gain_,
+  GetSetPointObjective(odometry_.position_W, _position_ref, controller_parameters_.mav_position_gain_,
                        controller_parameters_.mav_velocity_gain_, Jac_, Jac_dot_, robot_vel, _Q, _c);
 }
 
 
-void MultiObjectiveController::GetOrientationSetPtObjective(const Vector3d& _orientation_ref,
-                                                            MatrixXd* _Q, VectorXd* _c) const {
-  static Matrix3Xd Jac_ = Matrix3Xd::Zero(3,robot_dof_);
-  static Matrix3Xd Jac_dot_ = Jac_;
-  Jac_.block<3,3>(0,3) = Matrix3d::Identity();
+void MultiObjectiveController::GetOrientationSetPtObjective(const Vector3d& _orientation_ref, MatrixXd* _Q, VectorXd* _c) const {
+  static Matrix3Xd Jac_ = [&] {
+      Matrix3Xd tmp(3,robot_dof_);
+      tmp.setZero();
+      tmp.block<3,3>(0,3) = Matrix3d::Identity();
+      return tmp;
+  }();
+  static Matrix3Xd Jac_dot_ = Matrix3Xd::Zero(3,robot_dof_);
 
   VectorXd robot_vel = GetRobotVelocities();
 
-  Vector3d rpy = odometry_.orientation.toRotationMatrix().eulerAngles(0,1,2);
+  Vector3d rpy = odometry_.getRPY();
 
   GetSetPointObjective(rpy, _orientation_ref, controller_parameters_.mav_attitude_gain_,
                        controller_parameters_.mav_angular_rate_gain_, Jac_, Jac_dot_, robot_vel, _Q, _c);
@@ -371,8 +402,13 @@ void MultiObjectiveController::GetOrientationSetPtObjective(const Vector3d& _ori
 
 
 void MultiObjectiveController::GetManipulatorSetPtObjective(MatrixXd* _Q, VectorXd* _c) const {
-  static MatrixXd Jac_ = MatrixXd::Zero(arm_dof_,robot_dof_);
-  static MatrixXd Jac_dot_ = Jac_;
+  static MatrixXd Jac_ = [&] {
+      MatrixXd tmp(arm_dof_,robot_dof_);
+      tmp.setZero();
+      tmp.topRightCorner(arm_dof_,arm_dof_) = MatrixXd::Identity(arm_dof_,arm_dof_);
+      return tmp;
+  }();
+  static MatrixXd Jac_dot_ = MatrixXd::Zero(arm_dof_,robot_dof_);
 
   assert(arm_trajectory_received_);
 
@@ -386,9 +422,13 @@ void MultiObjectiveController::GetManipulatorSetPtObjective(MatrixXd* _Q, Vector
 
 
 void MultiObjectiveController::GetDeadArmSetPtObjective(MatrixXd* _Q, VectorXd* _c) const {
-  static MatrixXd Jac_ = MatrixXd::Zero(arm_dof_,robot_dof_);
-  static MatrixXd Jac_dot_ = Jac_;
-  Jac_.topRightCorner(arm_dof_,arm_dof_) = MatrixXd::Identity(arm_dof_,arm_dof_);
+  static MatrixXd Jac_ = [&] {
+      MatrixXd tmp(arm_dof_,robot_dof_);
+      tmp.setZero();
+      tmp.topRightCorner(arm_dof_,arm_dof_) = MatrixXd::Identity(arm_dof_,arm_dof_);
+      return tmp;
+  }();
+  static MatrixXd Jac_dot_ = MatrixXd::Zero(arm_dof_,robot_dof_);
 
   VectorXd robot_vel = GetRobotVelocities();
 
@@ -411,13 +451,28 @@ void MultiObjectiveController::GetEndEffectorSetPtObjective(MatrixXd* _Q, Vector
 
 
 VectorXd MultiObjectiveController::GetRobotVelocities() const {
+  // Transform velocities to world frame.
+  Eigen::Vector3d velocity_W =  odometry_.getVelocityWorld();
+  Eigen::Vector3d ang_velocity_W =  AngVelBody2World(odometry_.angular_velocity_B);
+
   VectorXd robot_vel(robot_dof_);
-  robot_vel.head(3) = odometry_.velocity;
-  //TODO : convert ang.vel. from body frame to world frame!!
-  robot_vel.segment<3>(3) = odometry_.angular_velocity;
+
+  robot_vel.head(3) = velocity_W;
+  robot_vel.segment<3>(3) = ang_velocity_W;
   robot_vel.tail(arm_dof_) = joints_state_.angular_rates;
 
   return robot_vel;
+}
+
+
+Vector3d MultiObjectiveController::AngVelBody2World(const Vector3d& angular_rates) const {
+  Vector3d rpy = odometry_.getRPY();
+  Matrix3d Jv_inv;
+  Jv_inv << 1, sin(rpy.x())*tan(rpy.y()), cos(rpy.x())*tan(rpy.y()),
+            0, cos(rpy.x()) , -sin(rpy.x()),
+            0, sin(rpy.x())/cos(rpy.y()), cos(rpy.x())/cos(rpy.y());
+
+  return Jv_inv*angular_rates;
 }
 
 
@@ -441,7 +496,7 @@ void MultiObjectiveController::UpdateLinearConstraints() {
 //  std::cout << "arm_joints_angle_max = " << arm_joints_angle_max.transpose() << std::endl;
 //  std::cout << "arm_joints_angle_min = " << arm_joints_angle_min.transpose() << std::endl;
 
-  Matrix3d Rot_w2v = odometry_.orientation.toRotationMatrix().transpose();
+  Matrix3d Rot_w2v = odometry_.orientation_W_B.toRotationMatrix().transpose();
 
   UpdateDynamicModelTerms();
 //  ROS_INFO("CHECK POINT after UpdateDynamicModelTerms");  //debug
@@ -449,6 +504,7 @@ void MultiObjectiveController::UpdateLinearConstraints() {
   MatrixXd A_temp(robot_dof_+2,minimizer_sz_);
   A_temp.setZero();
   A_temp.topLeftCorner(robot_dof_,robot_dof_) = dyn_mdl_terms_.inertia_matrix;
+  A_temp.topRightCorner(robot_dof_,robot_dof_) = -MatrixXd::Identity(robot_dof_,robot_dof_);
   A_temp.block<2,3>(robot_dof_,robot_dof_) = Rot_w2v.topRows(2);
   A_ = A_temp.sparseView();
 
@@ -460,15 +516,11 @@ void MultiObjectiveController::UpdateLinearConstraints() {
   C_temp.block<1,3>(0,robot_dof_) = Rot_w2v.bottomRows(1);
   C_ = C_temp.sparseView();
 
-  u_.segment<3>(3) = controller_parameters_.mu_attitude_*(rpy_max -
-                                  odometry_.orientation.toRotationMatrix().eulerAngles(0,1,2) );
-  u_.segment<3>(6) = controller_parameters_.mu_arm_*(arm_joints_angle_max -
-                                  joints_state_.angles );
+  u_.segment<3>(3) = controller_parameters_.mu_attitude_*(rpy_max - odometry_.getRPY() );
+  u_.segment<3>(6) = controller_parameters_.mu_arm_*(arm_joints_angle_max - joints_state_.angles );
 
-  l_.segment<3>(3) = controller_parameters_.mu_attitude_*(rpy_min -
-                                  odometry_.orientation.toRotationMatrix().eulerAngles(0,1,2) );
-  l_.segment<3>(6) = controller_parameters_.mu_arm_*(arm_joints_angle_min -
-                                  joints_state_.angles );
+  l_.segment<3>(3) = controller_parameters_.mu_attitude_*(rpy_min - odometry_.getRPY() );
+  l_.segment<3>(6) = controller_parameters_.mu_arm_*(arm_joints_angle_min - joints_state_.angles );
 }
 
 
@@ -487,7 +539,7 @@ void MultiObjectiveController::UpdateEndEffectorState() {
   }();
 
   VectorXd q_eig(robot_dof_);
-  q_eig << odometry_.position, odometry_.orientation.toRotationMatrix().eulerAngles(0,1,2), joints_state_.angles;
+  q_eig << odometry_.position_W, odometry_.getRPY(), joints_state_.angles;
 
   double q_in[2];
   double q34_12[2];
@@ -540,7 +592,7 @@ void MultiObjectiveController::UpdateDynamicModelTerms() {
   }();
 
   VectorXd q_eig(robot_dof_);
-  q_eig << odometry_.position, odometry_.orientation.toRotationMatrix().eulerAngles(0,1,2), joints_state_.angles;
+  q_eig << odometry_.position_W, odometry_.getRPY(), joints_state_.angles;
 
   double q_in[2];
   double q34_12[2];
@@ -551,17 +603,23 @@ void MultiObjectiveController::UpdateDynamicModelTerms() {
   VectorXd X_eig(2*robot_dof_+2);
   X_eig << q_eig, q34_12_map, GetRobotVelocities();
 
+  //debug
+//  std::cout << "X :\t" << X_eig.transpose() << std::endl;
+
   double C_[robot_dof_*robot_dof_];
   double q_in_C[C_idx.rows()];
   VectorXd q_in_eig(C_idx.rows());
   igl::slice(X_eig, C_idx, q_in_eig);
   VectorXd::Map(q_in_C, q_in_eig.rows()) = q_in_eig;
   C_fun(q_in_C,C_);
+  Map<MatrixXd> C_eig(C_, robot_dof_, robot_dof_);
 
   double M_triu_[robot_dof_*robot_dof_];
   double q_in_M[5+arm_dof_];
   VectorXd::Map(q_in_M, 5+arm_dof_) = q_in_eig.head(5+arm_dof_);
   M_triu_fun(q_in_M,M_triu_);
+  Map<MatrixXd> M_eig(M_triu_, robot_dof_, robot_dof_);
+  M_eig.triangularView<StrictlyLower>() = M_eig.transpose();
 
   double G_[robot_dof_];
   double q_in_G[G_idx.size()];
@@ -569,12 +627,10 @@ void MultiObjectiveController::UpdateDynamicModelTerms() {
   igl::slice(X_eig, G_idx, q_in_eig);
   VectorXd::Map(q_in_G, q_in_eig.rows()) = q_in_eig;
   G_fun(q_in_G,G_);
-
-  Map<MatrixXd> M_eig(M_triu_, robot_dof_, robot_dof_);
-  M_eig.triangularView<StrictlyLower>() = M_eig.transpose();
-  Map<MatrixXd> C_eig(C_, robot_dof_, robot_dof_);
   Map<VectorXd> G_eig(G_, robot_dof_);
-  MatrixXd D_eig = MatrixXd::Identity(robot_dof_, robot_dof_) * 0.01;
+
+  MatrixXd D_eig = MatrixXd::Identity(robot_dof_, robot_dof_) * 0.001;
+  D_eig.bottomRightCorner(arm_dof_, arm_dof_) = Matrix3d::Identity() * 0.1;
 
   dyn_mdl_terms_.setAll(M_eig,C_eig,D_eig,G_eig);
 }

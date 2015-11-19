@@ -24,10 +24,10 @@
   </xacro:property>
 
   <xacro:property name="r3_inertial">
-    <mass value="0.002"/>
-    <inertia ixx="0.0031" ixy="0.0" ixz="0.0"
-    iyy="0.0061" iyz="0.0"
-    izz="0.0081"/>
+    <mass value="0.001"/>
+    <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+    iyy="0.0001" iyz="0.0"
+    izz="0.0001"/>
   </xacro:property>
 
   <xacro:property name="r3_geometry">
@@ -45,10 +45,10 @@
   </xacro:property>
 
   <xacro:property name="r2_inertial">
-    <mass value="0.0025"/>
-    <inertia ixx="0.0021" ixy="0.0" ixz="0.0"
-    iyy="0.0031" iyz="0.0"
-    izz="0.0081"/>
+    <mass value="0.0015"/>
+    <inertia ixx="0.00000229511" ixy="0.0" ixz="0.00000000098"
+    iyy="0.00018644679" iyz="0.0"
+    izz="0.00018419229"/>
   </xacro:property>
 
   <xacro:property name="r2_geometry">
@@ -66,10 +66,10 @@
   </xacro:property>
 
   <xacro:property name="r1_inertial">
-    <mass value="0.0025"/>
-    <inertia ixx="0.0031" ixy="0.0" ixz="0.0"
-    iyy="0.0031" iyz="0.0"
-    izz="0.0081"/>
+    <mass value="0.0012"/>
+    <inertia ixx="0.00000948062" ixy="0.0" ixz="-0.00001716204"
+    iyy="0.0000730949" iyz="0.0"
+    izz="0.00006364922"/>
   </xacro:property>
 
   <xacro:property name="r1_geometry">
@@ -87,10 +87,10 @@
   </xacro:property>
 
   <xacro:property name="end_effector_inertial">
-    <mass value="0.02"/>
-    <inertia ixx="0.0031" ixy="0.0" ixz="0.0"
-    iyy="0.0051" iyz="0.0"
-    izz="0.0081"/>
+    <mass value="0.001"/>
+    <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+    iyy="0.0001" iyz="0.0"
+    izz="0.0001"/>
   </xacro:property>
 
   <xacro:property name="end_effector_geometry">
@@ -375,7 +375,8 @@
     effort_limit="1000">
   </xacro:gazebo_revolute_joint_macro>
 
-  <xacro:revolute_joint_macro
+<!--
+	<xacro:revolute_joint_macro
     namespace="${namespace}"
     joint_name="${namespace}/end_effector"
     parent_link="${namespace}/r2_left"
@@ -385,12 +386,20 @@
     damping="0.1">
     <origin xyz="${r2_length} 0 0" rpy="0 0 0"/>
   </xacro:revolute_joint_macro>
+-->
+  <xacro:fixed_joint_macro
+    namespace="${namespace}"
+    joint_name="${namespace}/end_effector"
+    parent_link="${namespace}/r2_left"
+    child_link="${namespace}/end_effector">
+    <origin xyz="${r2_length} 0 0" rpy="0 0 0"/>
+	</xacro:fixed_joint_macro>
 
   <!-- Attach actuators -->
 
   <xacro:property name="generic_servo_inertial">
     <inertial>
-    <mass value="0.02"/>
+    <mass value="0.070"/>
     <inertia ixx="0.001" ixy="0.0" ixz="0.0"
     iyy="0.001" iyz="0.0"
     izz="0.001"/>
@@ -437,6 +446,7 @@
    <xacro:insert_block name="generic_servo_inertial"/>
  </xacro:servo_motor_macro>
 
+<!--
  <xacro:servo_motor_macro
    namespace="${namespace}"
    motor_name="motor_end_effector"
@@ -456,6 +466,7 @@
    <origin xyz="${r2_length} 0 0.02" rpy="-1.57 0 0"/>
    <xacro:insert_block name="generic_servo_inertial"/>
  </xacro:servo_motor_macro>
+-->
 
 
  >

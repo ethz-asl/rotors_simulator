@@ -16,4 +16,4 @@ objectives_weight: {att: 1, yaw: 0, hover: 0, arm: 1, ee: 0, dead: 0}
 mu_attitude: 100
 mu_arm: 50
 safe_range_rpy: 0.8
-safe_range_joints: 0.8
+safe_range_joints: 0.9

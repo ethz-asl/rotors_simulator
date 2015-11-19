@@ -280,6 +280,7 @@ void MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback(
   }
 }
 
+///// MANIPULATOR CALLBACKS /////
 
 void MultiObjectiveControllerNode::CommandPoseEndEffCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg) {
   // Clear all pending commands.
@@ -296,7 +297,6 @@ void MultiObjectiveControllerNode::CommandPoseEndEffCallback(const geometry_msgs
   commands_ee_.pop_front();
 }
 
-///// MANIPULATOR CALLBACKS /////
 
 void MultiObjectiveControllerNode::MultiDofJointTrajectoryEndEffCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg) {
   // Clear all pending commands.
@@ -435,40 +435,49 @@ void MultiObjectiveControllerNode::AerialManipulatorStateCallback(const nav_msgs
 //  std::cout << "\tjoint_state_msg1 --> " << joint_state_msg1.get()->header.stamp.sec << " sec " << joint_state_msg1.get()->header.stamp.nsec << " nsec" <<  std::endl;
 //  std::cout << "\tjoint_state_msg2 --> " << joint_state_msg2.get()->header.stamp.sec << " sec " << joint_state_msg2.get()->header.stamp.nsec << " nsec" <<  std::endl;
 
-  // Update robot states
-  EigenOdometry odometry;
-  eigenOdometryFromMsg(odometry_msg, &odometry);
-  multi_objective_controller_.SetOdometry(odometry);
-  manipulator_msgs::EigenJointsState joints_state;
-  std::vector<sensor_msgs::JointState> joint_state_msgs;
-  joint_state_msgs.push_back(*(joint_state_msg0.get()));
-  joint_state_msgs.push_back(*(joint_state_msg1.get()));
-  joint_state_msgs.push_back(*(joint_state_msg2.get()));
-  eigenJointsStateFromMsg(joint_state_msgs, &joints_state);
-  multi_objective_controller_.SetArmJointsState(joints_state);
+  static unsigned int counter = 0;
 
-  // Run optimization and compute control inputs
-  Eigen::VectorXd ref_rotor_velocities;
-  Eigen::Vector3d ref_torques;
-  multi_objective_controller_.CalculateControlInputs(&ref_rotor_velocities, &ref_torques);
+//  if ((counter < 5) and multi_objective_controller_.controller_active_) {
+  if (multi_objective_controller_.controller_active_) {
 
-  // Todo(ffurrer): Do this in the conversions header.
-  mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
-  actuator_msg->angular_velocities.clear();
-  for (int i = 0; i < ref_rotor_velocities.size(); i++)
-    actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
-  actuator_msg->header.stamp = odometry_msg->header.stamp;
-  motor_velocity_reference_pub_.publish(actuator_msg);
+    // Update robot states
+    mav_msgs::EigenOdometry odometry;
+    mav_msgs::eigenOdometryFromMsg(*(odometry_msg.get()), &odometry);
+    multi_objective_controller_.SetOdometry(odometry);
+    manipulator_msgs::EigenJointsState joints_state;
+    std::vector<sensor_msgs::JointState> joint_state_msgs;
+    joint_state_msgs.push_back(*(joint_state_msg0.get()));
+    joint_state_msgs.push_back(*(joint_state_msg1.get()));
+    joint_state_msgs.push_back(*(joint_state_msg2.get()));
+    eigenJointsStateFromMsg(joint_state_msgs, &joints_state);
+    multi_objective_controller_.SetArmJointsState(joints_state);
 
-  // Publish torque messages.
-  manipulator_msgs::CommandTorqueServoMotorPtr torque_msg(new manipulator_msgs::CommandTorqueServoMotor);
-  torque_msg->header.stamp = odometry_msg->header.stamp;
-  torque_msg->torque = ref_torques.x();
-  pitch_motor_torque_ref_pub_.publish(torque_msg);
-  torque_msg->torque = ref_torques.y();
-  left_motor_torque_ref_pub_.publish(torque_msg);
-  torque_msg->torque = ref_torques.z();
-  right_motor_torque_ref_pub_.publish(torque_msg);
+    // Run optimization and compute control inputs
+    Eigen::VectorXd ref_rotor_velocities;
+    Eigen::Vector3d ref_torques;
+    multi_objective_controller_.CalculateControlInputs(&ref_rotor_velocities, &ref_torques);
+
+    // Todo(ffurrer): Do this in the conversions header.
+    mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
+    actuator_msg->angular_velocities.clear();
+    for (int i = 0; i < ref_rotor_velocities.size(); i++)
+      actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
+    actuator_msg->header.stamp = odometry_msg->header.stamp;
+    motor_velocity_reference_pub_.publish(actuator_msg);
+
+    // Publish torque messages.
+    manipulator_msgs::CommandTorqueServoMotorPtr torque_msg(new manipulator_msgs::CommandTorqueServoMotor);
+    torque_msg->header.stamp = odometry_msg->header.stamp;
+    torque_msg->torque = ref_torques.x();
+    pitch_motor_torque_ref_pub_.publish(torque_msg);
+    torque_msg->torque = ref_torques.y();
+    left_motor_torque_ref_pub_.publish(torque_msg);
+    torque_msg->torque = ref_torques.z();
+    right_motor_torque_ref_pub_.publish(torque_msg);
+
+    std::cout << "" << std::endl;
+    counter++;
+  }
 }
 
 ////// FORCE SENSOR CALLBACK //////

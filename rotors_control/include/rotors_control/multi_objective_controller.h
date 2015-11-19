@@ -44,26 +44,28 @@
 #include "rotors_control/dynamic_terms_fun/J_e_dot_fun/J_e_dot_fun.h"
 
 
-typedef Eigen::SparseMatrix<double, Eigen::RowMajor> SpMatrixXd;
+using namespace Eigen;
+
+typedef SparseMatrix<double, RowMajor> SpMatrixXd;
 
 
 namespace rotors_control {
 
 // Default values for the multi objective controller and the Asctec Neo+Delta manipulator.
-static const Eigen::Vector3d kDefaultMavPositionGain = Eigen::Vector3d(400., 400., 150.);
-static const Eigen::Vector3d kDefaultMavVelocityGain = Eigen::Vector3d(600., 600., 150.);
-static const Eigen::Vector3d kDefaultMavAttitudeGain = Eigen::Vector3d(40., 40., 40.);
-static const Eigen::Vector3d kDefaultMavAngularRateGain = Eigen::Vector3d(10., 10., 10.);
-static const Eigen::Vector3d kDefaultEePositionGain = Eigen::Vector3d(200., 200., 200.);
-static const Eigen::Vector3d kDefaultEeVelocityGain = Eigen::Vector3d(300., 300., 300.);
-static const Eigen::Vector3d kDefaultJointAngleGain = Eigen::Vector3d(30., 30., 30.);
-static const Eigen::Vector3d kDefaultJointAngRateGain = Eigen::Vector3d(10., 10., 10.);
-static const Eigen::Vector3d kDefaultRPYMax = Eigen::Vector3d(M_PI/2, M_PI/2., 2*M_PI);
-static const Eigen::Vector3d kDefaultRPYMin = Eigen::Vector3d(-M_PI/2, -M_PI/2., -2*M_PI);
-static const Eigen::Vector3d kDefaultArmJointsAngleMax = Eigen::Vector3d(0., M_PI, 0.5556*M_PI);
-static const Eigen::Vector3d kDefaultArmJointsAngleMin = Eigen::Vector3d(-M_PI/2, 0.4444*M_PI, 0.);
-static const Eigen::Vector2d kDefaultThrustLimits = Eigen::Vector2d(0., 54.);
-static const Eigen::VectorXd kDefaultObjectivesWeight = Eigen::VectorXd::Zero(6);
+static const Vector3d kDefaultMavPositionGain = Vector3d(400., 400., 150.);
+static const Vector3d kDefaultMavVelocityGain = Vector3d(600., 600., 150.);
+static const Vector3d kDefaultMavAttitudeGain = Vector3d(40., 40., 40.);
+static const Vector3d kDefaultMavAngularRateGain = Vector3d(10., 10., 10.);
+static const Vector3d kDefaultEePositionGain = Vector3d(200., 200., 200.);
+static const Vector3d kDefaultEeVelocityGain = Vector3d(300., 300., 300.);
+static const Vector3d kDefaultJointAngleGain = Vector3d(30., 30., 30.);
+static const Vector3d kDefaultJointAngRateGain = Vector3d(10., 10., 10.);
+static const Vector3d kDefaultRPYMax = Vector3d(M_PI/2, M_PI/2., 2*M_PI);
+static const Vector3d kDefaultRPYMin = Vector3d(-M_PI/2, -M_PI/2., -2*M_PI);
+static const Vector3d kDefaultArmJointsAngleMax = Vector3d(0., M_PI, 0.5556*M_PI);
+static const Vector3d kDefaultArmJointsAngleMin = Vector3d(-M_PI/2, 0.4444*M_PI, 0.);
+static const Vector2d kDefaultThrustLimits = Vector2d(0., 54.);
+static const VectorXd kDefaultObjectivesWeight = VectorXd::Zero(6);
 static const unsigned int kDefaultMavDof = 6;
 static const unsigned int kDefaultArmDof = 3;
 static const unsigned int kDefaultMuAttidute = 1000;
@@ -98,21 +100,21 @@ class MultiObjectiveControllerParameters {
     calculateAllocationMatrix(rotor_configuration_, &allocation_matrix_);
   }
 
-  Eigen::Matrix4Xd allocation_matrix_;
-  Eigen::Vector3d mav_position_gain_;
-  Eigen::Vector3d mav_velocity_gain_;
-  Eigen::Vector3d mav_attitude_gain_;
-  Eigen::Vector3d mav_angular_rate_gain_;
-  Eigen::Vector3d ee_position_gain_;
-  Eigen::Vector3d ee_velocity_gain_;
-  Eigen::Vector3d arm_joints_angle_gain_;
-  Eigen::Vector3d arm_joints_ang_rate_gain_;
-  Eigen::Vector3d rpy_max_;
-  Eigen::Vector3d rpy_min_;
-  Eigen::Vector3d arm_joints_angle_max_;
-  Eigen::Vector3d arm_joints_angle_min_;
-  Eigen::Vector2d thrust_limits_;
-  Eigen::VectorXd objectives_weight_;
+  Matrix4Xd allocation_matrix_;
+  Vector3d mav_position_gain_;
+  Vector3d mav_velocity_gain_;
+  Vector3d mav_attitude_gain_;
+  Vector3d mav_angular_rate_gain_;
+  Vector3d ee_position_gain_;
+  Vector3d ee_velocity_gain_;
+  Vector3d arm_joints_angle_gain_;
+  Vector3d arm_joints_ang_rate_gain_;
+  Vector3d rpy_max_;
+  Vector3d rpy_min_;
+  Vector3d arm_joints_angle_max_;
+  Vector3d arm_joints_angle_min_;
+  Vector2d thrust_limits_;
+  VectorXd objectives_weight_;
   int mu_attitude_;
   int mu_arm_;
   double safe_range_rpy_;
@@ -124,10 +126,10 @@ class MultiObjectiveControllerParameters {
 struct DynamicModelTerms {
   DynamicModelTerms() {};
 
-  DynamicModelTerms(const Eigen::MatrixXd& _inertia_matrix,
-                    const Eigen::MatrixXd& _coriolis_matrix,
-                    const Eigen::MatrixXd& _damping_matrix,
-                    const Eigen::VectorXd& _gravity_vector) {
+  DynamicModelTerms(const MatrixXd& _inertia_matrix,
+                    const MatrixXd& _coriolis_matrix,
+                    const MatrixXd& _damping_matrix,
+                    const VectorXd& _gravity_vector) {
     inertia_matrix = _inertia_matrix;
     coriolis_matrix = _coriolis_matrix;
     damping_matrix = _damping_matrix;
@@ -136,15 +138,15 @@ struct DynamicModelTerms {
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  Eigen::MatrixXd inertia_matrix;
-  Eigen::MatrixXd coriolis_matrix;
-  Eigen::MatrixXd damping_matrix;
-  Eigen::VectorXd gravity_vector;
+  MatrixXd inertia_matrix;
+  MatrixXd coriolis_matrix;
+  MatrixXd damping_matrix;
+  VectorXd gravity_vector;
 
-  inline void setAll(const Eigen::MatrixXd& _inertia_matrix,
-                     const Eigen::MatrixXd& _coriolis_matrix,
-                     const Eigen::MatrixXd& _damping_matrix,
-                     const Eigen::VectorXd& _gravity_vector) {
+  inline void setAll(const MatrixXd& _inertia_matrix,
+                     const MatrixXd& _coriolis_matrix,
+                     const MatrixXd& _damping_matrix,
+                     const VectorXd& _gravity_vector) {
     inertia_matrix = _inertia_matrix;
     coriolis_matrix = _coriolis_matrix;
     damping_matrix = _damping_matrix;
@@ -163,8 +165,8 @@ struct EigenEndEffector {
   EigenEndEffector() {};
 
   EigenEndEffector(const EigenOdometry& _odometry,
-                   const Eigen::MatrixXd& _jacobian,
-                   const Eigen::MatrixXd& _jacobian_dot) {
+                   const MatrixXd& _jacobian,
+                   const MatrixXd& _jacobian_dot) {
     odometry = _odometry;
     jacobian_W = _jacobian;
     jacobian_dot_W = _jacobian_dot;
@@ -173,12 +175,12 @@ struct EigenEndEffector {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   EigenOdometry odometry;
-  Eigen::MatrixXd jacobian_W;
-  Eigen::MatrixXd jacobian_dot_W;
+  MatrixXd jacobian_W;
+  MatrixXd jacobian_dot_W;
 
-  inline void setPosJac(const Eigen::Vector3d& _position,
-                        const Eigen::MatrixXd& _jacobian,
-                        const Eigen::MatrixXd& _jacobian_dot) {
+  inline void setPosJac(const Vector3d& _position,
+                        const MatrixXd& _jacobian,
+                        const MatrixXd& _jacobian_dot) {
     odometry.position = _position;
     jacobian_W = _jacobian;
     jacobian_dot_W = _jacobian_dot;
@@ -199,10 +201,10 @@ class MultiObjectiveController {
   void InitializeParameters();
 
   // Called after state update
-  void CalculateControlInputs(Eigen::VectorXd* rotor_velocities, Eigen::Vector3d* torques);
+  void CalculateControlInputs(VectorXd* rotor_velocities, Vector3d* torques);
 
   // Called on state update callback (synchronized)
-  void SetOdometry(const EigenOdometry& odometry);
+  void SetOdometry(const mav_msgs::EigenOdometry& odometry);
   void SetArmJointsState(const manipulator_msgs::EigenJointsState& joints_state);
 
   // Called asynchronously and independently (when new command is set)
@@ -210,18 +212,19 @@ class MultiObjectiveController {
   void SetEndEffTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
   void SetDesiredJointsAngle(const manipulator_msgs::EigenJointTrajectoryPoint& joints_state);
 
-  void SetObjectiveFunctionsWeight(const Eigen::VectorXd& objectives_weight);
+  void SetObjectiveFunctionsWeight(const VectorXd& objectives_weight);
 
-  void SetExternalForces(const Eigen::Vector3d& forces);
+  void SetExternalForces(const Vector3d& forces);
 
   MultiObjectiveControllerParameters controller_parameters_;
   VehicleParameters vehicle_parameters_;
+
+  bool controller_active_; //Todo move to private after debugging
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
  private:
   bool initialized_params_;
-  bool controller_active_;
   bool mav_trajectory_received_;
   bool arm_trajectory_received_;
   bool ee_trajectory_received_;
@@ -231,52 +234,52 @@ class MultiObjectiveController {
   unsigned int arm_dof_;
   unsigned int minimizer_sz_;
 
-  Eigen::MatrixX4d torque_to_rotor_velocities_;
+  MatrixX4d torque_to_rotor_velocities_;
 
   // Solve min 1/2 x' Q x + c' x, such that A x = b, d <= Cx <= f, and l <= x <= u.
   SpMatrixXd Q_;
-  Eigen::VectorXd c_;
+  VectorXd c_;
   SpMatrixXd A_;
-  Eigen::VectorXd b_;
-  Eigen::VectorXd d_;
+  VectorXd b_;
+  VectorXd d_;
   SpMatrixXd C_;
-  Eigen::VectorXd f_;
-  Eigen::VectorXd l_;
-  Eigen::VectorXd u_;
-  Eigen::VectorXd x_;
+  VectorXd f_;
+  VectorXd l_;
+  VectorXd u_;
+  VectorXd x_;
 
   mav_msgs::EigenTrajectoryPoint command_trajectory_;
   mav_msgs::EigenTrajectoryPoint command_trajectory_ee_;
-  Eigen::VectorXd joints_angle_des_;
+  VectorXd joints_angle_des_;
 
-  EigenOdometry odometry_;
+  mav_msgs::EigenOdometry odometry_;
   EigenEndEffector end_effector_;
   manipulator_msgs::EigenJointsState joints_state_;
 
-  Eigen::Vector3d ext_forces_;
+  Vector3d ext_forces_;
 
   DynamicModelTerms dyn_mdl_terms_;
 
   void SolveMultiObjectiveOptimization() ;
 
-  void GetSetPointObjective(const Eigen::VectorXd& g, const Eigen::VectorXd& g_ref,
-                            const Eigen::VectorXd& kp, const Eigen::VectorXd& kv,
-                            const Eigen::MatrixXd& Jg, const Eigen::MatrixXd& Jg_dot,
-                            const Eigen::VectorXd& q_dot, Eigen::MatrixXd* Q,
-                            Eigen::VectorXd* c) const;
+  void GetSetPointObjective(const VectorXd& g, const VectorXd& g_ref,
+                            const VectorXd& kp, const VectorXd& kv,
+                            const MatrixXd& Jg, const MatrixXd& Jg_dot,
+                            const VectorXd& q_dot, MatrixXd* Q,
+                            VectorXd* c) const;
 
-  void GetAttitudeSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
-  void GetYawSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
-  void GetFreeHoverSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
-  void GetPositionSetPtObjective(const Eigen::Vector3d& _position_ref,
-                                 Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
-  void GetOrientationSetPtObjective(const Eigen::Vector3d& _orientation_ref,
-                                    Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
-  void GetManipulatorSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
-  void GetDeadArmSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c) const;
-  void GetEndEffectorSetPtObjective(Eigen::MatrixXd* _Q, Eigen::VectorXd* _c);
+  void GetAttitudeSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
+  void GetYawSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
+  void GetFreeHoverSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
+  void GetPositionSetPtObjective(const Vector3d& _position_ref, MatrixXd* _Q, VectorXd* _c) const;
+  void GetOrientationSetPtObjective(const Vector3d& _orientation_ref, MatrixXd* _Q, VectorXd* _c) const;
+  void GetManipulatorSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
+  void GetDeadArmSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
+  void GetEndEffectorSetPtObjective(MatrixXd* _Q, VectorXd* _c);
 
-  Eigen::VectorXd GetRobotVelocities() const;
+  VectorXd GetRobotVelocities() const;
+
+  Vector3d AngVelBody2World(const Vector3d& angular_rates) const;
 
   void UpdateLinearConstraints();
 
