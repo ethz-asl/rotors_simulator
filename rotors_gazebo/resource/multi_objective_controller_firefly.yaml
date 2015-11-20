@@ -1,14 +1,14 @@
 # Multi-objective controller parameters
-mav_position_gain: {x: 400, y: 400, z: 150}
-mav_velocity_gain: {x: 600, y: 600, z: 150}
+mav_position_gain: {x: 100, y: 100, z: 600}
+mav_velocity_gain: {x: 20, y: 20, z: 40}
 mav_attitude_gain: {x: 40, y: 40, z: 40}
 mav_angular_rate_gain: {x: 10, y: 10, z: 10}
 ee_position_gain: {x: 200, y: 200, z: 200}
 ee_velocity_gain: {x: 300, y: 300, z: 300}
 arm_joint_angle_gain: {pitch: 30, left: 30, right: 30}
-arm_joint_ang_rate_gain: {pitch: 10, left: 10, right: 10}
-rpy_max: {roll: rad(0.5*pi), pitch: rad(0.5*pi), yaw: rad(2*pi)}
-rpy_min: {roll: rad(-0.5*pi), pitch: rad(-0.5*pi), yaw: rad(-2*pi)}
+arm_joint_ang_rate_gain: {pitch: 100, left: 100, right: 100}
+rpy_max: {roll: deg(25), pitch: deg(25), yaw: deg(180)}
+rpy_min: {roll: deg(-25), pitch: deg(-25), yaw: deg(-180)}
 arm_joint_angle_max: {pitch: rad(pi/6), left: rad(pi), right: rad(0.5*pi)}
 arm_joint_angle_min: {pitch: rad(-0.5*pi), left: rad(0.5*pi), right: 0}
 thrust_lim: {min: 0, max: 54}

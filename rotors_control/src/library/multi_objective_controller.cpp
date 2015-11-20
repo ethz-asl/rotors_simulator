@@ -113,6 +113,7 @@ void MultiObjectiveController::CalculateControlInputs(VectorXd* rotor_velocities
   torque_thrust << x_.segment<3>(robot_dof_+3), thrust;
 
   *rotor_velocities = torque_to_rotor_velocities_ * torque_thrust;
+//  std::cout << "Rotors velocities before saturation :\t" << rotor_velocities->transpose() << std::endl;
   *rotor_velocities = rotor_velocities->cwiseMax(VectorXd::Zero(rotor_velocities->rows()));
   *rotor_velocities = rotor_velocities->cwiseSqrt();
 
@@ -120,13 +121,13 @@ void MultiObjectiveController::CalculateControlInputs(VectorXd* rotor_velocities
 
   //debug
 //  std::cout << "torques to rotor velocities :\n" << torque_to_rotor_velocities_ << std::endl;
+//  std::cout << "Rotors velocities after saturation :\t" << rotor_velocities->transpose() << std::endl;
 //  std::cout << "Global force vector :\t" << x_.segment<3>(robot_dof_).transpose() << std::endl;
 //  std::cout << "Aero torques & thrust:\t" << torque_thrust.transpose() << std::endl;
 //  std::cout << "Joint torques :\t" << torques->transpose() << std::endl;
-//  std::cout << "Rotors velocities :\t" << rotor_velocities->transpose() << std::endl;
 
   //dummy
-  torques->setZero();
+//  torques->setZero();
 }
 
 
@@ -284,9 +285,9 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
 //  std::cout << "u_ : " << u_.transpose() << std::endl;
 //  std::cout << "l_ : " << l_.transpose() << std::endl;
 
-//  if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, l_, u_, x_)) {
-  if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, x_)) {
-    ROS_INFO("[multi_objective_controller] Optimization failed.");
+  if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, l_, u_, x_)) {
+//  if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, x_)) {
+    ROS_WARN_THROTTLE(1,"[multi_objective_controller] Optimization failed.");
     return;
   }
 

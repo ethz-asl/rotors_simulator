@@ -46,9 +46,7 @@
 #include "rotors_control/multi_objective_controller.h"
 
 
-//typedef message_filters::sync_policies::ApproximateTime<nav_msgs::Odometry, sensor_msgs::JointState> RobotSyncPolicy;
 typedef message_filters::sync_policies::ExactTime<nav_msgs::Odometry, sensor_msgs::JointState, sensor_msgs::JointState, sensor_msgs::JointState> RobotSyncPolicy;
-
 
 
 namespace rotors_control {

@@ -32,13 +32,11 @@ MultiObjectiveControllerNode::MultiObjectiveControllerNode() {
 
   InitializeParams();
 
-  cmd_pose_sub_ = nh_.subscribe(
-      mav_msgs::default_topics::COMMAND_POSE, 1,
-      &MultiObjectiveControllerNode::CommandPoseCallback, this);
+  cmd_pose_sub_ = nh_.subscribe(mav_msgs::default_topics::COMMAND_POSE, 1, &MultiObjectiveControllerNode::CommandPoseCallback, this);
 
-  cmd_multi_dof_joint_trajectory_sub_ = nh_.subscribe(
-      mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
-      &MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback, this);
+  cmd_multi_dof_joint_trajectory_sub_ = nh_.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1, &MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback, this);
+
+  cmd_joints_trajectory_sub_ = nh_.subscribe(manipulator_msgs::default_topics::COMMAND_JOINT_TRAJECTORY, 1, &MultiObjectiveControllerNode::JointTrajectoryCallback, this);
 
   force_sensor_sub_ = nh_.subscribe(manipulator_msgs::default_topics::FORCE_SENSOR_LINEAR, 1, &MultiObjectiveControllerNode::ForceSensorCallback, this);
 
@@ -475,7 +473,7 @@ void MultiObjectiveControllerNode::AerialManipulatorStateCallback(const nav_msgs
     torque_msg->torque = ref_torques.z();
     right_motor_torque_ref_pub_.publish(torque_msg);
 
-    std::cout << "" << std::endl;
+//    std::cout << "" << std::endl;
     counter++;
   }
 }

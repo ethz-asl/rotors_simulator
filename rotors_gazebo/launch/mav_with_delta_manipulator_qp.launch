@@ -1,4 +1,9 @@
 <launch>
+	<!--
+	<env name="ROSCONSOLE_CONFIG_FILE" 
+	   value="$(find rotors_gazebo)/config/rosconsole.conf"/>
+	-->
+
   <arg name="mav_name" default="firefly"/>
   <arg name="enable_logging" default="false" />
   <arg name="enable_ground_truth" default="true" />
@@ -9,10 +14,11 @@
     <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic_bullet.world" />
     <!-- <arg name="debug" value="true"/> -->
     <arg name="paused" value="true"/>
-    <arg name="gui" value="true"/>
+    <arg name="gui" value="false"/>
   </include>
 
-  <group ns="$(arg mav_name)">
+  <group ns="$(arg mav_name)">		
+
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
       <arg name="mav_name" value="$(arg mav_name)" />
       <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_qp_delta_manipulator.gazebo" />
@@ -28,7 +34,7 @@
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
 
-    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
+    <node name="hovering_example_qp" pkg="rotors_gazebo" type="hovering_example_qp" output="screen"/>
     
   </group>
 </launch>
