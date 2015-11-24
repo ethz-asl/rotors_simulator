@@ -64,13 +64,14 @@ static const Vector3d kDefaultRPYMax = Vector3d(M_PI/2, M_PI/2., 2*M_PI);
 static const Vector3d kDefaultRPYMin = Vector3d(-M_PI/2, -M_PI/2., -2*M_PI);
 static const Vector3d kDefaultArmJointsAngleMax = Vector3d(0., M_PI, 0.5556*M_PI);
 static const Vector3d kDefaultArmJointsAngleMin = Vector3d(-M_PI/2, 0.4444*M_PI, 0.);
-static const Vector2d kDefaultThrustLimits = Vector2d(0., 54.);
+static const Vector2d kDefaultArmJointsTorqueLimits = Vector2d(-2., 2.);
 static const VectorXd kDefaultObjectivesWeight = VectorXd::Zero(6);
 static const unsigned int kDefaultMavDof = 6;
 static const unsigned int kDefaultArmDof = 3;
 static const unsigned int kDefaultMuAttidute = 1000;
 static const unsigned int kDefaultMuArm = 2000;
 static const double kDefaultSafeRange = 0.9;
+static const double kDefaultMaxRotVelocity = 838;
 
 
 
@@ -91,7 +92,8 @@ class MultiObjectiveControllerParameters {
         rpy_min_(kDefaultRPYMin),
         arm_joints_angle_max_(kDefaultArmJointsAngleMax),
         arm_joints_angle_min_(kDefaultArmJointsAngleMin),
-        thrust_limits_(kDefaultThrustLimits),
+        arm_joint_torque_lim_(kDefaultArmJointsTorqueLimits),
+        max_rot_velocity_(kDefaultMaxRotVelocity),
         objectives_weight_(kDefaultObjectivesWeight),
         mu_attitude_(kDefaultMuAttidute),
         mu_arm_(kDefaultMuArm),
@@ -113,12 +115,13 @@ class MultiObjectiveControllerParameters {
   Vector3d rpy_min_;
   Vector3d arm_joints_angle_max_;
   Vector3d arm_joints_angle_min_;
-  Vector2d thrust_limits_;
+  Vector2d arm_joint_torque_lim_;
   VectorXd objectives_weight_;
   int mu_attitude_;
   int mu_arm_;
   double safe_range_rpy_;
   double safe_range_joints_;
+  double max_rot_velocity_;
   RotorConfiguration rotor_configuration_;
 };
 
@@ -236,7 +239,7 @@ class MultiObjectiveController {
 
   MatrixX4d torque_to_rotor_velocities_;
 
-  // Solve min 1/2 x' Q x + c' x, such that A x = b, d <= Cx <= f, and l <= x <= u.
+  // Solve min 1/2 x' Q x + c' x, such that A x = b, d <= Cx <= f.
   SpMatrixXd Q_;
   VectorXd c_;
   SpMatrixXd A_;
@@ -244,8 +247,6 @@ class MultiObjectiveController {
   VectorXd d_;
   SpMatrixXd C_;
   VectorXd f_;
-  VectorXd l_;
-  VectorXd u_;
   VectorXd x_;
 
   mav_msgs::EigenTrajectoryPoint command_trajectory_;

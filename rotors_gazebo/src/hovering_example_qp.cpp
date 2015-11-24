@@ -46,12 +46,12 @@ int main(int argc, char** argv){
   unsigned int i = 0;
 
   // Wait for 5 seconds to let the Gazebo GUI show up.
-//  ros::Duration(5.0).sleep();
+//  ros::Duration(1.0).sleep();
 
   // Trying to unpause Gazebo for 10 seconds.
   while (i <= 10 && !unpaused) {
     ROS_INFO("Wait for 1 second before trying to unpause Gazebo again.");
-    std::this_thread::sleep_for(std::chrono::seconds(21));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     unpaused = ros::service::call("/gazebo/unpause_physics", srv);
     ++i;
   }

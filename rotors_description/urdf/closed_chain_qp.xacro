@@ -5,11 +5,11 @@
 
   <xacro:property name="r1_width" value="0.04"/>
   <xacro:property name="r1_height" value="0.008"/>
-  <xacro:property name="r1_length" value="0.24"/> <!-- 0.35 -->
+  <xacro:property name="r1_length" value="0.35"/> <!-- 0.24 vs 0.35 -->
 
   <xacro:property name="r2_width" value="0.04"/>
   <xacro:property name="r2_height" value="0.008"/>
-  <xacro:property name="r2_length" value="0.35"/> <!-- 0.40 -->
+  <xacro:property name="r2_length" value="0.40"/> <!-- 0.35 vs 0.40 -->
 
   <xacro:property name="r3_width" value="0.04"/>
   <xacro:property name="r3_height" value="0.0015"/>

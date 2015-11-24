@@ -197,12 +197,15 @@ void MultiObjectiveControllerNode::InitializeParams() {
   GetRosParameter(pnh, "objectives_weight/dead",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(5),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(5));
-  GetRosParameter(pnh, "thrust_lim/min",
-                  multi_objective_controller_.controller_parameters_.thrust_limits_.x(),
-                  &multi_objective_controller_.controller_parameters_.thrust_limits_.x());
-  GetRosParameter(pnh, "thrust_lim/max",
-                  multi_objective_controller_.controller_parameters_.thrust_limits_.y(),
-                  &multi_objective_controller_.controller_parameters_.thrust_limits_.y());
+  GetRosParameter(pnh, "arm_joint_torque_lim/min",
+                  multi_objective_controller_.controller_parameters_.arm_joint_torque_lim_.x(),
+                  &multi_objective_controller_.controller_parameters_.arm_joint_torque_lim_.x());
+  GetRosParameter(pnh, "arm_joint_torque_lim/max",
+                  multi_objective_controller_.controller_parameters_.arm_joint_torque_lim_.y(),
+                  &multi_objective_controller_.controller_parameters_.arm_joint_torque_lim_.y());
+  GetRosParameter(pnh, "max_rot_velocity",
+                  multi_objective_controller_.controller_parameters_.max_rot_velocity_,
+                  &multi_objective_controller_.controller_parameters_.max_rot_velocity_);
   GetRosParameter(pnh, "mu_attitude",
                   multi_objective_controller_.controller_parameters_.mu_attitude_,
                   &multi_objective_controller_.controller_parameters_.mu_attitude_);

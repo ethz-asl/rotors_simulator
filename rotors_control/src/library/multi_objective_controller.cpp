@@ -52,48 +52,50 @@ MultiObjectiveController::~MultiObjectiveController() {}
 
 void MultiObjectiveController::InitializeParameters() {
   calculateAllocationMatrix(vehicle_parameters_.rotor_configuration_, &(controller_parameters_.allocation_matrix_));
-  torque_to_rotor_velocities_.resize(vehicle_parameters_.rotor_configuration_.rotors.size(), 4);
+  size_t rotors_sz = vehicle_parameters_.rotor_configuration_.rotors.size();
+  size_t ineq_no = 3+arm_dof_*2+rotors_sz;
+  torque_to_rotor_velocities_.resize(rotors_sz, 4);
   torque_to_rotor_velocities_ = pseudoInv(controller_parameters_.allocation_matrix_);
-//  torque_to_rotor_velocities_ = controller_parameters_.allocation_matrix_.transpose()
-//                                * (controller_parameters_.allocation_matrix_
-//                                * controller_parameters_.allocation_matrix_.transpose()).inverse();
 
   // Initialize linear constraints
-  // Solve min 1/2 x' Q x + c' x, such that A x = b, d <= Cx <= f, and l <= x <= u.
+  // Solve min 1/2 x' Q x + c' x, such that A x = b, d <= Cx <= f.
   Q_.resize(minimizer_sz_,minimizer_sz_);
   Q_.setZero();
   c_ = VectorXd::Zero(minimizer_sz_);
   A_.resize(robot_dof_+2,minimizer_sz_);
   A_.setZero();
   b_ = VectorXd::Zero(robot_dof_+2);
-  C_.resize(1,minimizer_sz_);
+  C_.resize(ineq_no, minimizer_sz_);
   C_.setZero();
-  d_.resize(1);
-  d_(0) = controller_parameters_.thrust_limits_.x();
-  f_.resize(1);
-  f_(0) = controller_parameters_.thrust_limits_.y();
-  u_.resize(minimizer_sz_);
-  u_ << Vector3d::Ones()*LIM_MAX,
-        VectorXd::Zero(robot_dof_-3),
-        Vector3d::Ones()*LIM_MAX,
-        Vector3d::Ones(),
-        VectorXd::Ones(arm_dof_)*2;
-  l_.resize(minimizer_sz_);
-  l_ = -u_;
+  MatrixXd C_temp = MatrixXd::Zero(ineq_no,minimizer_sz_);
+  C_temp.block(0,3,3+arm_dof_,3+arm_dof_) = MatrixXd::Identity(3+arm_dof_,3+arm_dof_);
+  C_temp.bottomRightCorner(arm_dof_,arm_dof_) = MatrixXd::Identity(arm_dof_,arm_dof_);
+  C_ = C_temp.sparseView();
+  d_.resize(ineq_no);
+  d_.setZero();
+  d_.segment(3+arm_dof_,rotors_sz) = VectorXd::Zero(rotors_sz);
+  d_.tail(arm_dof_) = VectorXd::Constant(arm_dof_,controller_parameters_.arm_joint_torque_lim_.x());
+  f_.resize(ineq_no);
+  f_.setZero();
+  f_.segment(3+arm_dof_,rotors_sz) = VectorXd::Constant(rotors_sz,pow(controller_parameters_.max_rot_velocity_,2));
+  f_.tail(arm_dof_) = VectorXd::Constant(arm_dof_,controller_parameters_.arm_joint_torque_lim_.y());
   x_ = VectorXd::Zero(minimizer_sz_);
 
   initialized_params_ = true;
 
   //debug
-//  std::cout << "Torque to rotor velocities :\n" << torque_to_rotor_velocities_.transpose() << std::endl << std::endl;
+//  std::cout << "to_rotor_vel_ = " << torque_to_rotor_velocities_.format(MatlabMatrixFmt) << std::endl << std::endl;
 //  std::cout << robot_dof_ << std::endl;
 //  std::cout << "A_ : " << A_.size() << " = " << A_.rows() << "x" << A_.cols() << "\n" << A_ << std::endl;
 //  std::cout << "b_ : " << b_.size() << " = " << b_.rows() << "x" << b_.cols() << std::endl;
 //  std::cout << "C_ : " << C_.size() << " = " << C_.rows() << "x" << C_.cols() << std::endl;
 //  std::cout << "d_ : " << d_.size() << " = " << d_.rows() << "x" << d_.cols() << std::endl;
 //  std::cout << "f_ : " << f_.size() << " = " << f_.rows() << "x" << f_.cols() << std::endl;
-//  std::cout << "u_ : " << u_.size() << " = " << u_.rows() << "x" << u_.cols() << std::endl;
-//  std::cout << "l_ : " << l_.size() << " = " << l_.rows() << "x" << l_.cols() << std::endl;
+//  std::cout << "A_ = " << A_.toDense().format(MatlabMatrixFmt) << std::endl;
+//  std::cout << "b_ = " << b_.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "C_ = " << C_.toDense().format(MatlabMatrixFmt) << std::endl;
+//  std::cout << "d_ = " << d_.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "f_ = " << f_.format(MatlabVectorFmt) << std::endl;
 }
 
 
@@ -268,14 +270,13 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
     c_ += current_weights(i) * c;
   }
 
-  for (unsigned int i = 3; i<9; i++) {
-    if (u_(i)<l_(i)) {
-      ROS_WARN_THROTTLE(1, "[multi_objective_controller] Constraints on %i-th element of x are inconsistent.", i);
+  for (unsigned int i = 0; i<6; i++) {
+    if (f_(i)<d_(i)) {
+      ROS_WARN_THROTTLE(1, "[multi_objective_controller] Constraints on %i-th inequality are inconsistent.", i);
     }
   }
 
-  if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, l_, u_, x_)) {
-//  if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, x_)) {
+  if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, x_)) {
     ROS_WARN_THROTTLE(1,"[multi_objective_controller] Optimization failed.");
 //    return;
   }
@@ -484,6 +485,7 @@ void MultiObjectiveController::UpdateLinearConstraints() {
   static Vector3d arm_joints_angle_min = controller_parameters_.safe_range_joints_*
                             (controller_parameters_.arm_joints_angle_min_ - controller_parameters_.arm_joints_angle_max_) +
                             controller_parameters_.arm_joints_angle_max_;
+  static size_t rotors_sz = vehicle_parameters_.rotor_configuration_.rotors.size();
 
   Matrix3d Rot_w2v = odometry_.orientation_W_B.toRotationMatrix().transpose();
 
@@ -499,16 +501,17 @@ void MultiObjectiveController::UpdateLinearConstraints() {
   b_.head(robot_dof_) = -(dyn_mdl_terms_.coriolis_matrix + dyn_mdl_terms_.damping_matrix)*GetRobotVelocities()
                           - dyn_mdl_terms_.gravity_vector;
 
-  MatrixXd C_temp(1,minimizer_sz_);
+  MatrixXd C_temp(rotors_sz,minimizer_sz_);
   C_temp.setZero();
-  C_temp.block<1,3>(0,robot_dof_) = Rot_w2v.bottomRows(1);
-  C_ = C_temp.sparseView();
+  C_temp.block(0,robot_dof_,rotors_sz,3) = torque_to_rotor_velocities_.rightCols<1>() * Rot_w2v.bottomRows<1>();
+  C_temp.block(0,robot_dof_+3,rotors_sz,3) = torque_to_rotor_velocities_.leftCols<3>();
+  C_.middleRows(3+arm_dof_,rotors_sz) = C_temp.sparseView();
 
-  u_.segment<3>(3) = controller_parameters_.mu_attitude_*(rpy_max - odometry_.getRPY() );
-  u_.segment<3>(6) = controller_parameters_.mu_arm_*(arm_joints_angle_max - joints_state_.angles );
+  d_.head<3>() = controller_parameters_.mu_attitude_*(rpy_min - odometry_.getRPY() );
+  d_.segment(3,arm_dof_) = controller_parameters_.mu_arm_*(arm_joints_angle_min - joints_state_.angles );
 
-  l_.segment<3>(3) = controller_parameters_.mu_attitude_*(rpy_min - odometry_.getRPY() );
-  l_.segment<3>(6) = controller_parameters_.mu_arm_*(arm_joints_angle_min - joints_state_.angles );
+  f_.head<3>() = controller_parameters_.mu_attitude_*(rpy_max - odometry_.getRPY() );
+  f_.segment(3,arm_dof_) = controller_parameters_.mu_arm_*(arm_joints_angle_max - joints_state_.angles );
 
   //debug
 //  std::cout << "rpy_max = " << rpy_max.format(MatlabVectorFmt) << std::endl;
@@ -520,8 +523,6 @@ void MultiObjectiveController::UpdateLinearConstraints() {
 //  std::cout << "C_ = " << C_.toDense().format(MatlabMatrixFmt) << std::endl;
 //  std::cout << "d_ = " << d_.format(MatlabVectorFmt) << std::endl;
 //  std::cout << "f_ = " << f_.format(MatlabVectorFmt) << std::endl;
-//  std::cout << "u_ = " << u_.format(MatlabVectorFmt) << std::endl;
-//  std::cout << "l_ = " << l_.format(MatlabVectorFmt) << std::endl;
 }
 
 
