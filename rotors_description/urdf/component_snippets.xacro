@@ -199,6 +199,13 @@
       <xacro:insert_block name="geometry" />
     </xacro:camera_joint_macro>
 
+    <link name="${namespace}/camera_left_optical_link" />
+    <joint name="${namespace}/camera_left_optical_joint" type="fixed" >
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+      <parent link="${namespace}/camera_left_link" />
+      <child link="${namespace}/camera_left_optical_link" />
+    </joint>
+
     <!-- Both cameras in the pair are anchored off the left camera frame. -->
     <gazebo reference="${namespace}/camera_left_link">
       <sensor type="multicamera" name="${namespace}_stereo_camera">
