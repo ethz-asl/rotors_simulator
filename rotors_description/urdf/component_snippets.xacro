@@ -68,6 +68,12 @@
       <parent link="${parent_link}" />
       <child link="${namespace}/camera_${camera_suffix}_link" />
     </joint>
+    <link name="${namespace}/camera_${camera_suffix}_optical_link" />
+    <joint name="${namespace}/camera_${camera_suffix}_optical_joint" type="fixed" >
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+      <parent link="${namespace}/camera_${camera_suffix}_link" />
+      <child link="${namespace}/camera_${camera_suffix}_optical_link" />
+    </joint>
     <gazebo reference="${namespace}/camera_${camera_suffix}_link">
       <sensor type="camera" name="${namespace}_camera_${camera_suffix}">
         <update_rate>${frame_rate}</update_rate>
@@ -192,6 +198,13 @@
       <origin xyz="${origin_offset_x} ${-baseline_y/2} ${origin_offset_z}" rpy="0 0 0" />
       <xacro:insert_block name="geometry" />
     </xacro:camera_joint_macro>
+
+    <link name="${namespace}/camera_left_optical_link" />
+    <joint name="${namespace}/camera_left_optical_joint" type="fixed" >
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+      <parent link="${namespace}/camera_left_link" />
+      <child link="${namespace}/camera_left_optical_link" />
+    </joint>
 
     <!-- Both cameras in the pair are anchored off the left camera frame. -->
     <gazebo reference="${namespace}/camera_left_link">
