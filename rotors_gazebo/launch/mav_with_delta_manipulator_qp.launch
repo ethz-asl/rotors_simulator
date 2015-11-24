@@ -14,7 +14,7 @@
     <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic_bullet.world" />
     <!-- <arg name="debug" value="true"/> -->
     <arg name="paused" value="true"/>
-    <arg name="gui" value="false"/>
+    <arg name="gui" value="true"/>
   </include>
 
   <group ns="$(arg mav_name)">		
@@ -28,8 +28,16 @@
 			<arg name="z" value="$(arg z)"/>
     </include>
 
+<!--
     <node name="multi_objective_controller_node" pkg="rotors_control" type="multi_objective_controller_node" output="screen">
       <rosparam command="load" file="$(find rotors_gazebo)/resource/multi_objective_controller_$(arg mav_name).yaml" />
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name)_qp.yaml" />
+      <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node>		
+-->
+
+    <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_$(arg mav_name).yaml" />
       <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name)_qp.yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>

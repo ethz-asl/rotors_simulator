@@ -375,7 +375,6 @@
     effort_limit="1000">
   </xacro:gazebo_revolute_joint_macro>
 
-<!--
 	<xacro:revolute_joint_macro
     namespace="${namespace}"
     joint_name="${namespace}/end_effector"
@@ -386,7 +385,8 @@
     damping="0.1">
     <origin xyz="${r2_length} 0 0" rpy="0 0 0"/>
   </xacro:revolute_joint_macro>
--->
+
+<!--
   <xacro:fixed_joint_macro
     namespace="${namespace}"
     joint_name="${namespace}/end_effector"
@@ -394,6 +394,7 @@
     child_link="${namespace}/end_effector">
     <origin xyz="${r2_length} 0 0" rpy="0 0 0"/>
 	</xacro:fixed_joint_macro>
+-->
 
   <!-- Attach actuators -->
 
@@ -446,7 +447,6 @@
    <xacro:insert_block name="generic_servo_inertial"/>
  </xacro:servo_motor_macro>
 
-<!--
  <xacro:servo_motor_macro
    namespace="${namespace}"
    motor_name="motor_end_effector"
@@ -466,7 +466,6 @@
    <origin xyz="${r2_length} 0 0.02" rpy="-1.57 0 0"/>
    <xacro:insert_block name="generic_servo_inertial"/>
  </xacro:servo_motor_macro>
--->
 
 
  >

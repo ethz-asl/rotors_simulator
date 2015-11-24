@@ -473,7 +473,7 @@ void MultiObjectiveControllerNode::AerialManipulatorStateCallback(const nav_msgs
     torque_msg->torque = ref_torques.z();
     right_motor_torque_ref_pub_.publish(torque_msg);
 
-//    std::cout << "" << std::endl;
+//    std::cout << "\n-----------------------------------------------------------------------------------\n" << std::endl;
     counter++;
   }
 }

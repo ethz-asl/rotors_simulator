@@ -21,11 +21,17 @@
 #include "rotors_control/multi_objective_controller.h"
 #include <stdlib.h>
 
+#define LIM_MAX std::numeric_limits<double>::infinity()
+#define PRECISION 7 //StreamPrecision FullPrecision
+
 using namespace Eigen;
+
+IOFormat MatlabMatrixFmt(PRECISION, 0, ", ", ";\n", "", "", "[", "]");
+IOFormat MatlabVectorFmt(PRECISION, DontAlignCols, ", ", "; ", "", "", "[ ", " ]");
+IOFormat MatlabVector2Fmt(PRECISION, DontAlignCols, ", ", "; ", "", "", " ", " ");
 
 namespace rotors_control {
 
-#define LIM_MAX 100000000;
 
 MultiObjectiveController::MultiObjectiveController()
     : initialized_params_(false),
@@ -67,9 +73,9 @@ void MultiObjectiveController::InitializeParameters() {
   f_.resize(1);
   f_(0) = controller_parameters_.thrust_limits_.y();
   u_.resize(minimizer_sz_);
-  u_ << Vector3d::Ones()*100000,
+  u_ << Vector3d::Ones()*LIM_MAX,
         VectorXd::Zero(robot_dof_-3),
-        Vector3d::Ones()*100000,
+        Vector3d::Ones()*LIM_MAX,
         Vector3d::Ones(),
         VectorXd::Ones(arm_dof_)*2;
   l_.resize(minimizer_sz_);
@@ -202,7 +208,6 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
   x_.setZero();
 
   UpdateLinearConstraints();
-//  ROS_INFO("CHECK POINT after UpdateLinearConstraints");  //debug
 
   VectorXd current_weights = weights_normalized;
   if (!mav_trajectory_received_) {
@@ -213,9 +218,6 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
     current_weights << controller_parameters_.objectives_weight_.head<3>(), 0, 0, 1;
     current_weights.normalize();
   }
-
-//  std::cout << "current weights :\t" << current_weights.transpose() << std::endl;
-
 
   for (unsigned int i=0; i<current_weights.size(); i++) {
     if (current_weights(i) == 0)
@@ -268,31 +270,23 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
 
   for (unsigned int i = 3; i<9; i++) {
     if (u_(i)<l_(i)) {
-      std::cout << "boundaries on " << i << "-th elements are inconsistent." << std::endl;
-//      std::cout << "u_ : " << u_.transpose() << std::endl;
-//      std::cout << "l_ : " << l_.transpose() << std::endl;
+      ROS_WARN_THROTTLE(1, "[multi_objective_controller] Constraints on %i-th element of x are inconsistent.", i);
     }
   }
-
-  // debug
-//  std::cout << "Q_ : " << Q_.toDense() << std::endl;
-//  std::cout << "c_ : " << c_.transpose() << std::endl;
-//  std::cout << "A_ : " << A_.toDense() << std::endl;
-//  std::cout << "b_ : " << b_.transpose() << std::endl;
-//  std::cout << "C_ : " << C_.toDense() << std::endl;
-//  std::cout << "d_ : " << d_.transpose() << std::endl;
-//  std::cout << "f_ : " << f_.transpose() << std::endl;
-//  std::cout << "u_ : " << u_.transpose() << std::endl;
-//  std::cout << "l_ : " << l_.transpose() << std::endl;
 
   if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, l_, u_, x_)) {
 //  if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, x_)) {
     ROS_WARN_THROTTLE(1,"[multi_objective_controller] Optimization failed.");
-    return;
+//    return;
   }
 
   //debug
-//  std::cout << "x_ : " << x_.transpose() << std::endl << std::endl;
+//  std::cout << "weights = " << current_weights.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "gq_ref = [ " << command_trajectory_.position_W.format(MatlabVector2Fmt) << "; 0 ; 0 ;" << command_trajectory_.getYaw() << ";"
+//            << joints_angle_des_.format(MatlabVector2Fmt) << " ]" << std::endl;
+//  std::cout << "Q_ = " << Q_.toDense().format(MatlabMatrixFmt) << std::endl;
+//  std::cout << "c_ = " << c_.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "x_ = " << x_.format(MatlabVectorFmt) << std::endl;
 }
 
 
@@ -491,16 +485,9 @@ void MultiObjectiveController::UpdateLinearConstraints() {
                             (controller_parameters_.arm_joints_angle_min_ - controller_parameters_.arm_joints_angle_max_) +
                             controller_parameters_.arm_joints_angle_max_;
 
-  //debug
-//  std::cout << "rpy_max = " << rpy_max.transpose() << std::endl;
-//  std::cout << "rpy_min = " << rpy_min.transpose() << std::endl;
-//  std::cout << "arm_joints_angle_max = " << arm_joints_angle_max.transpose() << std::endl;
-//  std::cout << "arm_joints_angle_min = " << arm_joints_angle_min.transpose() << std::endl;
-
   Matrix3d Rot_w2v = odometry_.orientation_W_B.toRotationMatrix().transpose();
 
   UpdateDynamicModelTerms();
-//  ROS_INFO("CHECK POINT after UpdateDynamicModelTerms");  //debug
 
   MatrixXd A_temp(robot_dof_+2,minimizer_sz_);
   A_temp.setZero();
@@ -522,6 +509,19 @@ void MultiObjectiveController::UpdateLinearConstraints() {
 
   l_.segment<3>(3) = controller_parameters_.mu_attitude_*(rpy_min - odometry_.getRPY() );
   l_.segment<3>(6) = controller_parameters_.mu_arm_*(arm_joints_angle_min - joints_state_.angles );
+
+  //debug
+//  std::cout << "rpy_max = " << rpy_max.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "rpy_min = " << rpy_min.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "arm_joints_angle_max = " << arm_joints_angle_max.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "arm_joints_angle_min = " << arm_joints_angle_min.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "A_ = " << A_.toDense().format(MatlabMatrixFmt) << std::endl;
+//  std::cout << "b_ = " << b_.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "C_ = " << C_.toDense().format(MatlabMatrixFmt) << std::endl;
+//  std::cout << "d_ = " << d_.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "f_ = " << f_.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "u_ = " << u_.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "l_ = " << l_.format(MatlabVectorFmt) << std::endl;
 }
 
 
@@ -605,7 +605,8 @@ void MultiObjectiveController::UpdateDynamicModelTerms() {
   X_eig << q_eig, q34_12_map, GetRobotVelocities();
 
   //debug
-//  std::cout << "X :\t" << X_eig.transpose() << std::endl;
+//  std::cout << "X :\t" << X_eig.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "X = [" << X_eig.head(robot_dof_).format(MatlabVector2Fmt) << ";" << X_eig.tail(robot_dof_).format(MatlabVector2Fmt) << "]" << std::endl;
 
   double C_[robot_dof_*robot_dof_];
   double q_in_C[C_idx.rows()];

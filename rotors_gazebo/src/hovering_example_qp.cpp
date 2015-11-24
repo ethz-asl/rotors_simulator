@@ -45,10 +45,13 @@ int main(int argc, char** argv){
   bool unpaused = ros::service::call("/gazebo/unpause_physics", srv);
   unsigned int i = 0;
 
+  // Wait for 5 seconds to let the Gazebo GUI show up.
+//  ros::Duration(5.0).sleep();
+
   // Trying to unpause Gazebo for 10 seconds.
   while (i <= 10 && !unpaused) {
     ROS_INFO("Wait for 1 second before trying to unpause Gazebo again.");
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(21));
     unpaused = ros::service::call("/gazebo/unpause_physics", srv);
     ++i;
   }
@@ -60,9 +63,6 @@ int main(int argc, char** argv){
   else {
     ROS_INFO("Unpaused the Gazebo simulation.");
   }
-
-  // Wait for 2 seconds to let the Gazebo GUI show up.
-  ros::Duration(2.0).sleep();
 
   // Publish waypoint for helicopter
   trajectory_msgs::MultiDOFJointTrajectory trajectory_msg;
@@ -83,7 +83,7 @@ int main(int argc, char** argv){
   trajectory_msgs::JointTrajectory joint_trajectory_msg;
   joint_trajectory_msg.header.stamp = ros::Time::now();
   Eigen::VectorXd desired_joints_angle(3);
-  desired_joints_angle << 0.0, 2*M_PI/3, M_PI/3;
+  desired_joints_angle << -M_PI/6, 2*M_PI/3, M_PI/3;
   manipulator_msgs::msgJointTrajectoryFromAngles(desired_joints_angle, &joint_trajectory_msg);
 
   ROS_INFO("Publishing manipulator joints waypoint on namespace %s: [%f, %f, %f].",
