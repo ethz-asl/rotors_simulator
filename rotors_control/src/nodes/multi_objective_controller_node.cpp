@@ -32,35 +32,41 @@ MultiObjectiveControllerNode::MultiObjectiveControllerNode() {
 
   InitializeParams();
 
+  // UAV command subscribers
   cmd_pose_sub_ = nh_.subscribe(mav_msgs::default_topics::COMMAND_POSE, 1, &MultiObjectiveControllerNode::CommandPoseCallback, this);
-
   cmd_multi_dof_joint_trajectory_sub_ = nh_.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1, &MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback, this);
 
+  // Manipulator subscribers
   cmd_joints_trajectory_sub_ = nh_.subscribe(manipulator_msgs::default_topics::COMMAND_JOINT_TRAJECTORY, 1, &MultiObjectiveControllerNode::JointTrajectoryCallback, this);
+  cmd_joints_angle_sub_ = nh_.subscribe(manipulator_msgs::default_topics::COMMAND_JOINT_ANGLES, 1, &MultiObjectiveControllerNode::JointCommandAngleCallback, this);
+  cmd_ee_multi_dof_joint_trajectory_sub_ = nh_.subscribe(manipulator_msgs::default_topics::COMMAND_EE_TRAJECTORY, 1, &MultiObjectiveControllerNode::EndEffMultiDofJointTrajectoryCallback, this);
+  cmd_ee_pose_sub_ = nh_.subscribe(manipulator_msgs::default_topics::COMMAND_EE_POSE, 1, &MultiObjectiveControllerNode::EndEffCommandPoseCallback, this);
 
+  // Exteroceptive sensors subscribers
   force_sensor_sub_ = nh_.subscribe(manipulator_msgs::default_topics::FORCE_SENSOR_LINEAR, 1, &MultiObjectiveControllerNode::ForceSensorCallback, this);
 
+  // Robot state subscribers
   odometry_sub_ = new message_filters::Subscriber<nav_msgs::Odometry>(nh_,mav_msgs::default_topics::ODOMETRY, 10);
-
   joint_state_sub_.clear();
   joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_PITCHING_JOINT_STATE, 10));
   joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_LEFT_JOINT_STATE, 10));
   joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_RIGHT_JOINT_STATE, 10));
-  sync_ = new message_filters::Synchronizer<RobotSyncPolicy>(RobotSyncPolicy(10),*odometry_sub_,
-                                                             *(joint_state_sub_[0]),*(joint_state_sub_[1]),*(joint_state_sub_[2]));
 
+  // Synchronizer
+  sync_ = new message_filters::Synchronizer<RobotSyncPolicy>(RobotSyncPolicy(10),*odometry_sub_, *(joint_state_sub_[0]),*(joint_state_sub_[1]),*(joint_state_sub_[2]));
   sync_->registerCallback(boost::bind(&MultiObjectiveControllerNode::AerialManipulatorStateCallback, this, _1, _2, _3, _4));
 
+  // Rotors velocity publisher
   motor_velocity_reference_pub_ = nh_.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 10);
 
+  // Manipulator actuators publishers
   pitch_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_PITCHING_TORQUE, 10);
   left_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_LEFT_TORQUE, 10);
   right_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_RIGHT_TORQUE, 10);
 
-  command_timer_ = nh_.createTimer(ros::Duration(0), &MultiObjectiveControllerNode::TimedCommandCallback, this,
-                                         true, false);
-  command_arm_timer_ = nh_.createTimer(ros::Duration(0), &MultiObjectiveControllerNode::TimedCommandArmCallback, this,
-                                         true, false);
+  // Timers
+  command_timer_ = nh_.createTimer(ros::Duration(0), &MultiObjectiveControllerNode::TimedCommandCallback, this, true, false);
+  command_arm_timer_ = nh_.createTimer(ros::Duration(0), &MultiObjectiveControllerNode::TimedCommandArmCallback, this, true, false);
 }
 
 
@@ -283,7 +289,7 @@ void MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback(
 
 ///// MANIPULATOR CALLBACKS /////
 
-void MultiObjectiveControllerNode::CommandPoseEndEffCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg) {
+void MultiObjectiveControllerNode::EndEffCommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg) {
   // Clear all pending commands.
   command_timer_.stop();
   commands_ee_.clear();
@@ -299,7 +305,7 @@ void MultiObjectiveControllerNode::CommandPoseEndEffCallback(const geometry_msgs
 }
 
 
-void MultiObjectiveControllerNode::MultiDofJointTrajectoryEndEffCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg) {
+void MultiObjectiveControllerNode::EndEffMultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg) {
   // Clear all pending commands.
   command_arm_timer_.stop();
   commands_ee_.clear();
@@ -374,6 +380,22 @@ void MultiObjectiveControllerNode::JointTrajectoryCallback(const trajectory_msgs
     command_arm_waiting_times_.pop_front();
     command_arm_timer_.start();
   }
+}
+
+
+void MultiObjectiveControllerNode::JointCommandAngleCallback(const geometry_msgs::Vector3StampedConstPtr& vector3_msg) {
+  // Clear all pending commands.
+  command_arm_timer_.stop();
+  commands_ee_.clear();
+  commands_joints_.clear();
+  command_arm_waiting_times_.clear();
+
+  manipulator_msgs::EigenJointTrajectoryPoint eigen_reference;
+  manipulator_msgs::eigenJointTrajectoryPointFromVector3(vector3_msg->vector, &eigen_reference);
+  commands_joints_.push_front(eigen_reference);
+
+  multi_objective_controller_.SetDesiredJointsAngle(commands_joints_.front());
+  commands_joints_.pop_front();
 }
 
 ///// TIMERS CALLBACKS /////

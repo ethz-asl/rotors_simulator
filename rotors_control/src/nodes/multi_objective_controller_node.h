@@ -73,9 +73,10 @@ class MultiObjectiveControllerNode {
   // subscribers
   ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
   ros::Subscriber cmd_pose_sub_;
-  ros::Subscriber cmd_multi_dof_joint_trajectory_ee_sub_;
-  ros::Subscriber cmd_pose_ee_sub_;
+  ros::Subscriber cmd_ee_multi_dof_joint_trajectory_sub_;
+  ros::Subscriber cmd_ee_pose_sub_;
   ros::Subscriber cmd_joints_trajectory_sub_;
+  ros::Subscriber cmd_joints_angle_sub_;
   ros::Subscriber force_sensor_sub_;
   message_filters::Subscriber<nav_msgs::Odometry> *odometry_sub_;
   std::vector<message_filters::Subscriber<sensor_msgs::JointState>*> joint_state_sub_;
@@ -109,9 +110,10 @@ class MultiObjectiveControllerNode {
   void CommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg);
 
   // Manipulator trajectories callbacks
-  void MultiDofJointTrajectoryEndEffCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
-  void CommandPoseEndEffCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg);
+  void EndEffMultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
+  void EndEffCommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg);
   void JointTrajectoryCallback(const trajectory_msgs::JointTrajectoryConstPtr& trajectory_reference_msg);
+  void JointCommandAngleCallback(const geometry_msgs::Vector3StampedConstPtr& vector3_msg);
 
   // Aerial manipulator state update callback
   void AerialManipulatorStateCallback(const nav_msgs::OdometryConstPtr& odometry_msg,

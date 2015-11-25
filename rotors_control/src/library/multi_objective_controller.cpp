@@ -21,7 +21,7 @@
 #include "rotors_control/multi_objective_controller.h"
 #include <stdlib.h>
 
-#define LIM_MAX std::numeric_limits<double>::infinity()
+
 #define PRECISION 7 //StreamPrecision FullPrecision
 
 using namespace Eigen;
@@ -116,16 +116,15 @@ void MultiObjectiveController::CalculateControlInputs(VectorXd* rotor_velocities
 
   // Extract thrust force from aerodynamic forces given in world frame and current UAV orientation
   double thrust = (odometry_.orientation_W_B.inverse() * x_.segment<3>(robot_dof_)).tail<1>()(0);
-//  double thrust = (odometry_.orientation_W_B.toRotationMatrix().transpose() * x_.segment<3>(robot_dof_)).tail<1>()(0);
   Vector4d torque_thrust;
   torque_thrust << x_.segment<3>(robot_dof_+3), thrust;
 
   *rotor_velocities = torque_to_rotor_velocities_ * torque_thrust;
-//  std::cout << "Rotors velocities before saturation :\t" << rotor_velocities->transpose() << std::endl;
   *rotor_velocities = rotor_velocities->cwiseMax(VectorXd::Zero(rotor_velocities->rows()));
   *rotor_velocities = rotor_velocities->cwiseSqrt();
 
   *torques = x_.tail(arm_dof_);
+  //  torques->setZero();   //dummy ouput
 
   //debug
 //  std::cout << "torques to rotor velocities :\n" << torque_to_rotor_velocities_ << std::endl;
@@ -133,9 +132,6 @@ void MultiObjectiveController::CalculateControlInputs(VectorXd* rotor_velocities
 //  std::cout << "Global force vector :\t" << x_.segment<3>(robot_dof_).transpose() << std::endl;
 //  std::cout << "Aero torques & thrust:\t" << torque_thrust.transpose() << std::endl;
 //  std::cout << "Joint torques :\t" << torques->transpose() << std::endl;
-
-  //dummy
-//  torques->setZero();
 }
 
 
