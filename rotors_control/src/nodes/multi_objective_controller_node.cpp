@@ -238,9 +238,7 @@ void MultiObjectiveControllerNode::InitializeParams() {
 
 
 void MultiObjectiveControllerNode::ParamsDynReconfigureCallback(rotors_control::MultiObjectiveControllerConfig& config, uint32_t level) {
-//  ROS_INFO("Reconfigure Request: %d %f %d",
-//            config.mav_position_gain_x, config.safe_range_rpy,
-//            config.mav_objective_function);
+  ROS_INFO("[multi_objective_controller_node] Controller parameters reconfigured.");
 
   multi_objective_controller_.controller_parameters_.mav_position_gain_.x() = config.mav_position_gain_x;
   multi_objective_controller_.controller_parameters_.mav_position_gain_.y() = config.mav_position_gain_y;

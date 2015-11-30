@@ -182,12 +182,6 @@ void MultiObjectiveController::SetDesiredJointsAngle(const manipulator_msgs::Eig
 }
 
 
-void MultiObjectiveController::SetObjectiveFunctionsWeight(const VectorXd& objectives_weight) {
-  controller_parameters_.objectives_weight_.resizeLike(objectives_weight);
-  controller_parameters_.objectives_weight_ = objectives_weight;
-}
-
-
 void MultiObjectiveController::SetExternalForces(const Vector3d& forces) {
   //Todo : ignore small forces (just noise)
   ext_forces_ = forces;
@@ -196,7 +190,6 @@ void MultiObjectiveController::SetExternalForces(const Vector3d& forces) {
 /////////////////////// PRIVATE METHODs //////////////////////
 
 void MultiObjectiveController::SolveMultiObjectiveOptimization() {
-  static VectorXd weights_normalized = controller_parameters_.objectives_weight_.normalized();
   MatrixXd Q(minimizer_sz_,minimizer_sz_);
   VectorXd c(minimizer_sz_);
 
@@ -207,15 +200,17 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
 
   UpdateLinearConstraints();
 
-  VectorXd current_weights = weights_normalized;
+  VectorXd current_weights = controller_parameters_.objectives_weight_;
   if (!mav_trajectory_received_) {
     current_weights << 0, 0, 2, controller_parameters_.objectives_weight_.tail<3>();
-    current_weights.normalize();
   }
   if (!(arm_trajectory_received_ or ee_trajectory_received_)) {
     current_weights << controller_parameters_.objectives_weight_.head<3>(), 0, 0, 1;
-    current_weights.normalize();
   }
+  current_weights.normalize();
+
+  // debug
+//  std::cout << "current_weights = " << current_weights.format(MatlabVectorFmt) << std::endl;
 
   for (unsigned int i=0; i<current_weights.size(); i++) {
     if (current_weights(i) == 0)
@@ -238,22 +233,26 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
         break;
 
       case (3):
-        if (!arm_trajectory_received_)
+        if (!arm_trajectory_received_) {
+          current_weights << controller_parameters_.objectives_weight_.head<3>(), 0, 0, controller_parameters_.objectives_weight_.tail<3>().maxCoeff();
           continue;
+        }
         GetManipulatorSetPtObjective(&Q,&c);
-//        ROS_INFO("CHECK POINT after GetManipulatorSetPtObjective");  //debug
+//        ROS_INFO_THROTTLE(1, "CHECK POINT after GetManipulatorSetPtObjective");  //debug
         break;
 
       case (4):
-        if (!ee_trajectory_received_)
+        if (!ee_trajectory_received_) {
+          current_weights << controller_parameters_.objectives_weight_.head<3>(), 0, 0, controller_parameters_.objectives_weight_.tail<3>().maxCoeff();
           continue;
+        }
         GetEndEffectorSetPtObjective(&Q,&c);
-//        ROS_INFO("CHECK POINT after GetEndEffectorSetPtObjective");  //debug
+//        ROS_INFO_THROTTLE(1, "CHECK POINT after GetEndEffectorSetPtObjective");  //debug
         break;
 
       case (5):
         GetDeadArmSetPtObjective(&Q,&c);
-//        ROS_INFO("CHECK POINT after GetDeadArmSetPtObjective");  //debug
+//        ROS_INFO_THROTTLE(1, "CHECK POINT after GetDeadArmSetPtObjective");  //debug
         break;
 
       default:
@@ -438,7 +437,7 @@ void MultiObjectiveController::GetEndEffectorSetPtObjective(MatrixXd* _Q, Vector
   VectorXd robot_vel = GetRobotVelocities();
 
   GetSetPointObjective(end_effector_.odometry.position, command_trajectory_ee_.position_W, controller_parameters_.ee_position_gain_,
-                       controller_parameters_.ee_velocity_gain_, end_effector_.jacobian_W, end_effector_.jacobian_dot_W, robot_vel, _Q, _c);
+                       controller_parameters_.ee_velocity_gain_, end_effector_.jacobian_W.topRows(3), end_effector_.jacobian_dot_W.topRows(3), robot_vel, _Q, _c);
 }
 
 
@@ -548,10 +547,14 @@ void MultiObjectiveController::UpdateEndEffectorState() {
   VectorXd X_eig(2*robot_dof_+2);
   X_eig << q_eig, q34_12_map, GetRobotVelocities();
 
+  //debug
+//  std::cout << "X_eig = " << X_eig.format(MatlabVectorFmt) << std::endl;
+
   double J_e[6*robot_dof_];
   double q_in_J_e[8];
   VectorXd::Map(q_in_J_e, 8) = X_eig.segment<8>(3);
   J_e_fun(q_in_J_e,J_e);
+  Map<MatrixXd> J_e_eig(J_e, 6, robot_dof_);
 
   double J_e_dot[6*robot_dof_];
   double q_in_J_e_dot[J_e_dot_idx.size()];
@@ -559,17 +562,20 @@ void MultiObjectiveController::UpdateEndEffectorState() {
   igl::slice(X_eig, J_e_dot_idx, q_in_eig);
   VectorXd::Map(q_in_J_e_dot, J_e_dot_idx.size()) = q_in_eig;
   J_e_dot_fun(q_in_J_e_dot,J_e_dot);
+  Map<MatrixXd> J_e_dot_eig(J_e_dot, 6, robot_dof_);
 
-  double p_ee[6];
+  double p_ee[3];
   double q_in_p_ee[p_ee_idx.size()];
   q_in_eig.resize(p_ee_idx.size());
-  igl::slice(X_eig, J_e_dot_idx, q_in_eig);
+  igl::slice(X_eig, p_ee_idx, q_in_eig);
   VectorXd::Map(q_in_p_ee, p_ee_idx.size()) = q_in_eig;
   p_ee_fun(q_in_p_ee,p_ee);
+  Map<VectorXd> p_ee_eig(p_ee, 3);
 
-  Map<MatrixXd> J_e_eig(J_e, 6, robot_dof_);
-  Map<MatrixXd> J_e_dot_eig(J_e_dot, 6, robot_dof_);
-  Map<VectorXd> p_ee_eig(p_ee, 6);
+  //debug
+//  std::cout << "J_e_eig = " << J_e_eig.format(MatlabMatrixFmt) << std::endl;
+//  std::cout << "J_e_dot_eig = " << J_e_dot_eig.format(MatlabMatrixFmt) << std::endl;
+//  std::cout << "p_ee_eig = " << p_ee_eig.format(MatlabVectorFmt) << std::endl;
 
   end_effector_.setPosJac(p_ee_eig, J_e_eig, J_e_dot_eig);
 }

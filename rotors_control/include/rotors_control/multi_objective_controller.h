@@ -190,9 +190,9 @@ struct EigenEndEffector {
     jacobian_dot_W = _jacobian_dot;
 
     //debug
-    std::cout << "odometry.position\n" << odometry.position << std::endl;
-    std::cout << "jacobian_W\n" << jacobian_W << std::endl;
-    std::cout << "jacobian_dot_W\n" << jacobian_dot_W << std::endl;
+//    std::cout << "odometry.position\n" << odometry.position << std::endl;
+//    std::cout << "jacobian_W\n" << jacobian_W << std::endl;
+//    std::cout << "jacobian_dot_W\n" << jacobian_dot_W << std::endl;
   }
 };
 
@@ -215,8 +215,6 @@ class MultiObjectiveController {
   void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
   void SetEndEffTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
   void SetDesiredJointsAngle(const manipulator_msgs::EigenJointTrajectoryPoint& joints_state);
-
-  void SetObjectiveFunctionsWeight(const VectorXd& objectives_weight);
 
   void SetExternalForces(const Vector3d& forces);
 
