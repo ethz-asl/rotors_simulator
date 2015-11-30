@@ -6,15 +6,15 @@ mav_angular_rate_gain: {x: 10, y: 10, z: 10}
 ee_position_gain: {x: 200, y: 200, z: 200}
 ee_velocity_gain: {x: 300, y: 300, z: 300}
 arm_joint_angle_gain: {pitch: 10, left: 10, right: 10}
-arm_joint_ang_rate_gain: {pitch: 30, left: 30, right: 30}
+arm_joint_ang_rate_gain: {pitch: 10, left: 10, right: 10}
 rpy_max: {roll: deg(90), pitch: deg(90), yaw: deg(180)}
 rpy_min: {roll: deg(-90), pitch: deg(-90), yaw: deg(-180)}
 arm_joint_angle_max: {pitch: deg(30), left: deg(180), right: deg(90)}
 arm_joint_angle_min: {pitch: deg(-100), left: deg(90), right: 0}
 arm_joint_torque_lim: {min: -2, max: 2}
 max_rot_velocity: 838
-objectives_weight: {att: 1, yaw: 0, hover: 0, arm: 1, ee: 0, dead: 0}
+objectives_weight: {att: 1, yaw: 0, hover: 0, arm: 0, ee: 0, dead: 1}
 mu_attitude: 100
 mu_arm: 50
 safe_range_rpy: 0.8
-safe_range_joints: 0.8
+safe_range_joints: 0.9

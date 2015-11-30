@@ -13,9 +13,14 @@ find_package(catkin REQUIRED COMPONENTS
   cmake_modules
 	message_filters
 	ooqp_eigen_interface
+	dynamic_reconfigure
 )
 
 find_package(Eigen REQUIRED)
+
+generate_dynamic_reconfigure_options(
+	cfg/multi_objective_controller.cfg
+)
 
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
@@ -48,6 +53,7 @@ set(MATLAB_LIB
 	${MATLAB_LIB_DIR}/C_fun/C_fun.cpp
 	${MATLAB_LIB_DIR}/J_e_fun/J_e_fun.cpp
 	${MATLAB_LIB_DIR}/J_e_dot_fun/J_e_dot_fun.cpp
+	${MATLAB_LIB_DIR}/p_ee_fun/p_ee_fun.cpp
 	${MATLAB_LIB_DIR}/G_fun/rt_nonfinite.cpp
 	${MATLAB_LIB_DIR}/G_fun/rtGetNaN.cpp
 	${MATLAB_LIB_DIR}/G_fun/rtGetInf.cpp )
@@ -77,6 +83,7 @@ target_link_libraries(roll_pitch_yawrate_thrust_controller_node
 
 add_executable(multi_objective_controller_node src/nodes/multi_objective_controller_node.cpp)
 add_dependencies(multi_objective_controller_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(multi_objective_controller_node ${PROJECT_NAME}_gencfg)
 target_link_libraries(multi_objective_controller_node
   multi_objective_controller ${catkin_LIBRARIES})
 

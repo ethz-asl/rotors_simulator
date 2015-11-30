@@ -120,12 +120,12 @@ static void info_helper(const mxArray **info)
   const mxArray *rhs51 = NULL;
   const mxArray *lhs51 = NULL;
   emlrtAddField(*info, emlrt_marshallOut(
-    "[E]/home/comaris/Dropbox/ETH/Master_Thesis/arw_model/C_fun.m"), "context",
-                0);
+    "[E]C:/Users/Simone/Dropbox/ETH/Master_Thesis/arw_model/Model/NEO2/matlab_functions/C_fun.m"),
+                "context", 0);
   emlrtAddField(*info, emlrt_marshallOut("cos"), "name", 0);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 0);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/cos.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/cos.m"),
                 "resolved", 0);
   emlrtAddField(*info, b_emlrt_marshallOut(1419313828U), "fileTimeLo", 0);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 0);
@@ -136,12 +136,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs0), "rhs", 0);
   emlrtAddField(*info, emlrtAliasP(lhs0), "lhs", 0);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/cos.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/cos.m"),
                 "context", 1);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.scalar.cos"), "name", 1);
   emlrtAddField(*info, emlrt_marshallOut(""), "dominantType", 1);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/+scalar/cos.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/+scalar/cos.m"),
                 "resolved", 1);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907914U), "fileTimeLo", 1);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 1);
@@ -152,13 +152,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs1), "rhs", 1);
   emlrtAddField(*info, emlrtAliasP(lhs1), "lhs", 1);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/cos.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/cos.m"),
                 "context", 2);
   emlrtAddField(*info, emlrt_marshallOut(
     "coder.internal.applyScalarFunctionInPlace"), "name", 2);
   emlrtAddField(*info, emlrt_marshallOut("function_handle"), "dominantType", 2);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunctionInPlace.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunctionInPlace.m"),
                 "resolved", 2);
   emlrtAddField(*info, b_emlrt_marshallOut(1422884200U), "fileTimeLo", 2);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 2);
@@ -169,12 +169,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs2), "rhs", 2);
   emlrtAddField(*info, emlrtAliasP(lhs2), "lhs", 2);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunctionInPlace.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunctionInPlace.m"),
                 "context", 3);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.scalar.cos"), "name", 3);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 3);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/+scalar/cos.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/+scalar/cos.m"),
                 "resolved", 3);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907914U), "fileTimeLo", 3);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 3);
@@ -185,12 +185,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs3), "rhs", 3);
   emlrtAddField(*info, emlrtAliasP(lhs3), "lhs", 3);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[E]/home/comaris/Dropbox/ETH/Master_Thesis/arw_model/C_fun.m"), "context",
-                4);
+    "[E]C:/Users/Simone/Dropbox/ETH/Master_Thesis/arw_model/Model/NEO2/matlab_functions/C_fun.m"),
+                "context", 4);
   emlrtAddField(*info, emlrt_marshallOut("sin"), "name", 4);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 4);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/sin.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/sin.m"),
                 "resolved", 4);
   emlrtAddField(*info, b_emlrt_marshallOut(1419313828U), "fileTimeLo", 4);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 4);
@@ -201,12 +201,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs4), "rhs", 4);
   emlrtAddField(*info, emlrtAliasP(lhs4), "lhs", 4);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/sin.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/sin.m"),
                 "context", 5);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.scalar.sin"), "name", 5);
   emlrtAddField(*info, emlrt_marshallOut(""), "dominantType", 5);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/+scalar/sin.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/+scalar/sin.m"),
                 "resolved", 5);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907914U), "fileTimeLo", 5);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 5);
@@ -217,13 +217,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs5), "rhs", 5);
   emlrtAddField(*info, emlrtAliasP(lhs5), "lhs", 5);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/sin.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/sin.m"),
                 "context", 6);
   emlrtAddField(*info, emlrt_marshallOut(
     "coder.internal.applyScalarFunctionInPlace"), "name", 6);
   emlrtAddField(*info, emlrt_marshallOut("function_handle"), "dominantType", 6);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunctionInPlace.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunctionInPlace.m"),
                 "resolved", 6);
   emlrtAddField(*info, b_emlrt_marshallOut(1422884200U), "fileTimeLo", 6);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 6);
@@ -234,12 +234,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs6), "rhs", 6);
   emlrtAddField(*info, emlrtAliasP(lhs6), "lhs", 6);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunctionInPlace.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunctionInPlace.m"),
                 "context", 7);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.scalar.sin"), "name", 7);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 7);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/+scalar/sin.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/+scalar/sin.m"),
                 "resolved", 7);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907914U), "fileTimeLo", 7);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 7);
@@ -250,12 +250,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs7), "rhs", 7);
   emlrtAddField(*info, emlrtAliasP(lhs7), "lhs", 7);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[E]/home/comaris/Dropbox/ETH/Master_Thesis/arw_model/C_fun.m"), "context",
-                8);
+    "[E]C:/Users/Simone/Dropbox/ETH/Master_Thesis/arw_model/Model/NEO2/matlab_functions/C_fun.m"),
+                "context", 8);
   emlrtAddField(*info, emlrt_marshallOut("rdivide"), "name", 8);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 8);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/rdivide.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/rdivide.m"),
                 "resolved", 8);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907940U), "fileTimeLo", 8);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 8);
@@ -266,13 +266,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs8), "rhs", 8);
   emlrtAddField(*info, emlrtAliasP(lhs8), "lhs", 8);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/rdivide.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/rdivide.m"),
                 "context", 9);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.isBuiltInNumeric"),
                 "name", 9);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 9);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isBuiltInNumeric.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isBuiltInNumeric.m"),
                 "resolved", 9);
   emlrtAddField(*info, b_emlrt_marshallOut(1395931856U), "fileTimeLo", 9);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 9);
@@ -283,13 +283,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs9), "rhs", 9);
   emlrtAddField(*info, emlrtAliasP(lhs9), "lhs", 9);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/rdivide.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/rdivide.m"),
                 "context", 10);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.scalexpCompatible"),
                 "name", 10);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 10);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalexpCompatible.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalexpCompatible.m"),
                 "resolved", 10);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907916U), "fileTimeLo", 10);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 10);
@@ -300,12 +300,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs10), "rhs", 10);
   emlrtAddField(*info, emlrtAliasP(lhs10), "lhs", 10);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/rdivide.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/rdivide.m"),
                 "context", 11);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.div"), "name", 11);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 11);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/div.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/div.m"),
                 "resolved", 11);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907914U), "fileTimeLo", 11);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 11);
@@ -316,12 +316,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs11), "rhs", 11);
   emlrtAddField(*info, emlrtAliasP(lhs11), "lhs", 11);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[E]/home/comaris/Dropbox/ETH/Master_Thesis/arw_model/C_fun.m"), "context",
-                12);
+    "[E]C:/Users/Simone/Dropbox/ETH/Master_Thesis/arw_model/Model/NEO2/matlab_functions/C_fun.m"),
+                "context", 12);
   emlrtAddField(*info, emlrt_marshallOut("power"), "name", 12);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 12);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m"),
                 "resolved", 12);
   emlrtAddField(*info, b_emlrt_marshallOut(1419313830U), "fileTimeLo", 12);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 12);
@@ -332,13 +332,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs12), "rhs", 12);
   emlrtAddField(*info, emlrtAliasP(lhs12), "lhs", 12);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m"),
                 "context", 13);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.isBuiltInNumeric"),
                 "name", 13);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 13);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isBuiltInNumeric.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isBuiltInNumeric.m"),
                 "resolved", 13);
   emlrtAddField(*info, b_emlrt_marshallOut(1395931856U), "fileTimeLo", 13);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 13);
@@ -349,12 +349,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs13), "rhs", 13);
   emlrtAddField(*info, emlrtAliasP(lhs13), "lhs", 13);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m!fltpower"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m!fltpower"),
                 "context", 14);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.scalarEg"), "name", 14);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 14);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m"),
                 "resolved", 14);
   emlrtAddField(*info, b_emlrt_marshallOut(1430216768U), "fileTimeLo", 14);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 14);
@@ -365,12 +365,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs14), "rhs", 14);
   emlrtAddField(*info, emlrtAliasP(lhs14), "lhs", 14);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m"),
                 "context", 15);
   emlrtAddField(*info, emlrt_marshallOut("isnumerictype"), "name", 15);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 15);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/fixedpoint/isnumerictype.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/fixedpoint/isnumerictype.m"),
                 "resolved", 15);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907924U), "fileTimeLo", 15);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 15);
@@ -381,12 +381,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs15), "rhs", 15);
   emlrtAddField(*info, emlrtAliasP(lhs15), "lhs", 15);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m"),
                 "context", 16);
   emlrtAddField(*info, emlrt_marshallOut("isfimath"), "name", 16);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 16);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/fixedpoint/isfimath.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/fixedpoint/isfimath.m"),
                 "resolved", 16);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907924U), "fileTimeLo", 16);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 16);
@@ -397,13 +397,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs16), "rhs", 16);
   emlrtAddField(*info, emlrtAliasP(lhs16), "lhs", 16);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m!firstfi"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m!firstfi"),
                 "context", 17);
   emlrtAddField(*info, emlrt_marshallOut("eml_int_forloop_overflow_check"),
                 "name", 17);
   emlrtAddField(*info, emlrt_marshallOut(""), "dominantType", 17);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/eml/eml_int_forloop_overflow_check.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/eml/eml_int_forloop_overflow_check.m"),
                 "resolved", 17);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907934U), "fileTimeLo", 17);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 17);
@@ -414,13 +414,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs17), "rhs", 17);
   emlrtAddField(*info, emlrtAliasP(lhs17), "lhs", 17);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/eml/eml_int_forloop_overflow_check.m!eml_int_forloop_overflow_check_helper"),
-                "context", 18);
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/eml/eml_int_forloop_overflow_check.m!eml_int_forloop_overflow_check_"
+    "helper"), "context", 18);
   emlrtAddField(*info, emlrt_marshallOut("isfi"), "name", 18);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.indexInt"),
                 "dominantType", 18);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/fixedpoint/isfi.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/fixedpoint/isfi.m"),
                 "resolved", 18);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907924U), "fileTimeLo", 18);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 18);
@@ -431,12 +431,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs18), "rhs", 18);
   emlrtAddField(*info, emlrtAliasP(lhs18), "lhs", 18);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/fixedpoint/isfi.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/fixedpoint/isfi.m"),
                 "context", 19);
   emlrtAddField(*info, emlrt_marshallOut("isnumerictype"), "name", 19);
   emlrtAddField(*info, emlrt_marshallOut("char"), "dominantType", 19);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/fixedpoint/isnumerictype.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/fixedpoint/isnumerictype.m"),
                 "resolved", 19);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907924U), "fileTimeLo", 19);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 19);
@@ -447,12 +447,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs19), "rhs", 19);
   emlrtAddField(*info, emlrtAliasP(lhs19), "lhs", 19);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/eml/eml_int_forloop_overflow_check.m!eml_int_forloop_overflow_check_helper"),
-                "context", 20);
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/eml/eml_int_forloop_overflow_check.m!eml_int_forloop_overflow_check_"
+    "helper"), "context", 20);
   emlrtAddField(*info, emlrt_marshallOut("intmax"), "name", 20);
   emlrtAddField(*info, emlrt_marshallOut("char"), "dominantType", 20);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmax.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmax.m"),
                 "resolved", 20);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907932U), "fileTimeLo", 20);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 20);
@@ -463,12 +463,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs20), "rhs", 20);
   emlrtAddField(*info, emlrtAliasP(lhs20), "lhs", 20);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/eml/eml_int_forloop_overflow_check.m!eml_int_forloop_overflow_check_helper"),
-                "context", 21);
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/eml/eml_int_forloop_overflow_check.m!eml_int_forloop_overflow_check_"
+    "helper"), "context", 21);
   emlrtAddField(*info, emlrt_marshallOut("intmin"), "name", 21);
   emlrtAddField(*info, emlrt_marshallOut("char"), "dominantType", 21);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmin.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmin.m"),
                 "resolved", 21);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907932U), "fileTimeLo", 21);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 21);
@@ -479,12 +479,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs21), "rhs", 21);
   emlrtAddField(*info, emlrtAliasP(lhs21), "lhs", 21);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m!firstfi"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m!firstfi"),
                 "context", 22);
   emlrtAddField(*info, emlrt_marshallOut("isfi"), "name", 22);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 22);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/fixedpoint/isfi.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/fixedpoint/isfi.m"),
                 "resolved", 22);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907924U), "fileTimeLo", 22);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 22);
@@ -495,13 +495,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs22), "rhs", 22);
   emlrtAddField(*info, emlrtAliasP(lhs22), "lhs", 22);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m!fltpower"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m!fltpower"),
                 "context", 23);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.applyScalarFunction"),
                 "name", 23);
   emlrtAddField(*info, emlrt_marshallOut("function_handle"), "dominantType", 23);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunction.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunction.m"),
                 "resolved", 23);
   emlrtAddField(*info, b_emlrt_marshallOut(1422884302U), "fileTimeLo", 23);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 23);
@@ -512,13 +512,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs23), "rhs", 23);
   emlrtAddField(*info, emlrtAliasP(lhs23), "lhs", 23);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunction.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunction.m"),
                 "context", 24);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.scalexpAlloc"), "name",
                 24);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 24);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalexpAlloc.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalexpAlloc.m"),
                 "resolved", 24);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907916U), "fileTimeLo", 24);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 24);
@@ -529,13 +529,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs24), "rhs", 24);
   emlrtAddField(*info, emlrtAliasP(lhs24), "lhs", 24);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalexpAlloc.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalexpAlloc.m"),
                 "context", 25);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.scalexpAllocNoCheck"),
                 "name", 25);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 25);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalexpAllocNoCheck.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalexpAllocNoCheck.m"),
                 "resolved", 25);
   emlrtAddField(*info, b_emlrt_marshallOut(1410437090U), "fileTimeLo", 25);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 25);
@@ -546,12 +546,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs25), "rhs", 25);
   emlrtAddField(*info, emlrtAliasP(lhs25), "lhs", 25);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m!scalar_float_power"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m!scalar_float_power"),
                 "context", 26);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.scalarEg"), "name", 26);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 26);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m"),
                 "resolved", 26);
   emlrtAddField(*info, b_emlrt_marshallOut(1430216768U), "fileTimeLo", 26);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 26);
@@ -562,12 +562,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs26), "rhs", 26);
   emlrtAddField(*info, emlrtAliasP(lhs26), "lhs", 26);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m!fltpower_domain_error"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m!fltpower_domain_error"),
                 "context", 27);
   emlrtAddField(*info, emlrt_marshallOut("isnan"), "name", 27);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 27);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/isnan.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/isnan.m"),
                 "resolved", 27);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907932U), "fileTimeLo", 27);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 27);
@@ -578,13 +578,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs27), "rhs", 27);
   emlrtAddField(*info, emlrtAliasP(lhs27), "lhs", 27);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/isnan.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/isnan.m"),
                 "context", 28);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.isBuiltInNumeric"),
                 "name", 28);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 28);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isBuiltInNumeric.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isBuiltInNumeric.m"),
                 "resolved", 28);
   emlrtAddField(*info, b_emlrt_marshallOut(1395931856U), "fileTimeLo", 28);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 28);
@@ -595,12 +595,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs28), "rhs", 28);
   emlrtAddField(*info, emlrtAliasP(lhs28), "lhs", 28);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m!fltpower_domain_error"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m!fltpower_domain_error"),
                 "context", 29);
   emlrtAddField(*info, emlrt_marshallOut("floor"), "name", 29);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 29);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/floor.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/floor.m"),
                 "resolved", 29);
   emlrtAddField(*info, b_emlrt_marshallOut(1419313828U), "fileTimeLo", 29);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 29);
@@ -611,13 +611,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs29), "rhs", 29);
   emlrtAddField(*info, emlrtAliasP(lhs29), "lhs", 29);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/floor.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/floor.m"),
                 "context", 30);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.isBuiltInNumeric"),
                 "name", 30);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 30);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isBuiltInNumeric.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isBuiltInNumeric.m"),
                 "resolved", 30);
   emlrtAddField(*info, b_emlrt_marshallOut(1395931856U), "fileTimeLo", 30);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 30);
@@ -628,13 +628,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs30), "rhs", 30);
   emlrtAddField(*info, emlrtAliasP(lhs30), "lhs", 30);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/floor.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/floor.m"),
                 "context", 31);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.scalar.floor"), "name",
                 31);
   emlrtAddField(*info, emlrt_marshallOut(""), "dominantType", 31);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/+scalar/floor.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/+scalar/floor.m"),
                 "resolved", 31);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907914U), "fileTimeLo", 31);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 31);
@@ -645,13 +645,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs31), "rhs", 31);
   emlrtAddField(*info, emlrtAliasP(lhs31), "lhs", 31);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/floor.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/floor.m"),
                 "context", 32);
   emlrtAddField(*info, emlrt_marshallOut(
     "coder.internal.applyScalarFunctionInPlace"), "name", 32);
   emlrtAddField(*info, emlrt_marshallOut("function_handle"), "dominantType", 32);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunctionInPlace.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunctionInPlace.m"),
                 "resolved", 32);
   emlrtAddField(*info, b_emlrt_marshallOut(1422884200U), "fileTimeLo", 32);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 32);
@@ -662,13 +662,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs32), "rhs", 32);
   emlrtAddField(*info, emlrtAliasP(lhs32), "lhs", 32);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunctionInPlace.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/applyScalarFunctionInPlace.m"),
                 "context", 33);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.scalar.floor"), "name",
                 33);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 33);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/+scalar/floor.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/+scalar/floor.m"),
                 "resolved", 33);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907914U), "fileTimeLo", 33);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 33);
@@ -679,12 +679,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs33), "rhs", 33);
   emlrtAddField(*info, emlrtAliasP(lhs33), "lhs", 33);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m!fltpower"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/ops/power.m!fltpower"),
                 "context", 34);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.error"), "name", 34);
   emlrtAddField(*info, emlrt_marshallOut("char"), "dominantType", 34);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/error.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/error.m"),
                 "resolved", 34);
   emlrtAddField(*info, b_emlrt_marshallOut(1435845494U), "fileTimeLo", 34);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 34);
@@ -695,12 +695,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs34), "rhs", 34);
   emlrtAddField(*info, emlrtAliasP(lhs34), "lhs", 34);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[E]/home/comaris/Dropbox/ETH/Master_Thesis/arw_model/C_fun.m"), "context",
-                35);
+    "[E]C:/Users/Simone/Dropbox/ETH/Master_Thesis/arw_model/Model/NEO2/matlab_functions/C_fun.m"),
+                "context", 35);
   emlrtAddField(*info, emlrt_marshallOut("reshape"), "name", 35);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 35);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/reshape.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/reshape.m"),
                 "resolved", 35);
   emlrtAddField(*info, b_emlrt_marshallOut(1430228888U), "fileTimeLo", 35);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 35);
@@ -711,12 +711,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs35), "rhs", 35);
   emlrtAddField(*info, emlrtAliasP(lhs35), "lhs", 35);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/reshape.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/reshape.m"),
                 "context", 36);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.narginchk"), "name", 36);
   emlrtAddField(*info, emlrt_marshallOut(""), "dominantType", 36);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/shared/coder/coder/+coder/+internal/narginchk.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/shared/coder/coder/+coder/+internal/narginchk.m"),
                 "resolved", 36);
   emlrtAddField(*info, b_emlrt_marshallOut(1363714558U), "fileTimeLo", 36);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 36);
@@ -727,12 +727,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs36), "rhs", 36);
   emlrtAddField(*info, emlrtAliasP(lhs36), "lhs", 36);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/shared/coder/coder/+coder/+internal/narginchk.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/shared/coder/coder/+coder/+internal/narginchk.m"),
                 "context", 37);
   emlrtAddField(*info, emlrt_marshallOut("floor"), "name", 37);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 37);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/floor.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elfun/floor.m"),
                 "resolved", 37);
   emlrtAddField(*info, b_emlrt_marshallOut(1419313828U), "fileTimeLo", 37);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 37);
@@ -743,13 +743,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs37), "rhs", 37);
   emlrtAddField(*info, emlrtAliasP(lhs37), "lhs", 37);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/reshape.m!reshape_varargin_to_size"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/reshape.m!reshape_varargin_to_size"),
                 "context", 38);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.assertValidSizeArg"),
                 "name", 38);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 38);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m"),
                 "resolved", 38);
   emlrtAddField(*info, b_emlrt_marshallOut(1427209022U), "fileTimeLo", 38);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 38);
@@ -760,13 +760,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs38), "rhs", 38);
   emlrtAddField(*info, emlrtAliasP(lhs38), "lhs", 38);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m"),
                 "context", 39);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.isBuiltInNumeric"),
                 "name", 39);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 39);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isBuiltInNumeric.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isBuiltInNumeric.m"),
                 "resolved", 39);
   emlrtAddField(*info, b_emlrt_marshallOut(1395931856U), "fileTimeLo", 39);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 39);
@@ -777,12 +777,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs39), "rhs", 39);
   emlrtAddField(*info, emlrtAliasP(lhs39), "lhs", 39);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m!isintegral"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m!isintegral"),
                 "context", 40);
   emlrtAddField(*info, emlrt_marshallOut("isinf"), "name", 40);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 40);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/isinf.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/isinf.m"),
                 "resolved", 40);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907932U), "fileTimeLo", 40);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 40);
@@ -793,13 +793,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs40), "rhs", 40);
   emlrtAddField(*info, emlrtAliasP(lhs40), "lhs", 40);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/isinf.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/isinf.m"),
                 "context", 41);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.isBuiltInNumeric"),
                 "name", 41);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 41);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isBuiltInNumeric.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isBuiltInNumeric.m"),
                 "resolved", 41);
   emlrtAddField(*info, b_emlrt_marshallOut(1395931856U), "fileTimeLo", 41);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 41);
@@ -810,13 +810,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs41), "rhs", 41);
   emlrtAddField(*info, emlrtAliasP(lhs41), "lhs", 41);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m!isinbounds"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m!isinbounds"),
                 "context", 42);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.isIntegerClass"),
                 "name", 42);
   emlrtAddField(*info, emlrt_marshallOut("char"), "dominantType", 42);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isIntegerClass.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/isIntegerClass.m"),
                 "resolved", 42);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907914U), "fileTimeLo", 42);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 42);
@@ -827,12 +827,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs42), "rhs", 42);
   emlrtAddField(*info, emlrtAliasP(lhs42), "lhs", 42);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m!isinbounds"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m!isinbounds"),
                 "context", 43);
   emlrtAddField(*info, emlrt_marshallOut("intmax"), "name", 43);
   emlrtAddField(*info, emlrt_marshallOut("char"), "dominantType", 43);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmax.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmax.m"),
                 "resolved", 43);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907932U), "fileTimeLo", 43);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 43);
@@ -843,12 +843,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs43), "rhs", 43);
   emlrtAddField(*info, emlrtAliasP(lhs43), "lhs", 43);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m!isinbounds"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m!isinbounds"),
                 "context", 44);
   emlrtAddField(*info, emlrt_marshallOut("intmin"), "name", 44);
   emlrtAddField(*info, emlrt_marshallOut("char"), "dominantType", 44);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmin.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmin.m"),
                 "resolved", 44);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907932U), "fileTimeLo", 44);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 44);
@@ -859,13 +859,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs44), "rhs", 44);
   emlrtAddField(*info, emlrtAliasP(lhs44), "lhs", 44);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m!isinbounds"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m!isinbounds"),
                 "context", 45);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.indexIntRelop"), "name",
                 45);
   emlrtAddField(*info, emlrt_marshallOut(""), "dominantType", 45);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/shared/coder/coder/+coder/+internal/indexIntRelop.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/shared/coder/coder/+coder/+internal/indexIntRelop.m"),
                 "resolved", 45);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907946U), "fileTimeLo", 45);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 45);
@@ -876,13 +876,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs45), "rhs", 45);
   emlrtAddField(*info, emlrtAliasP(lhs45), "lhs", 45);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/shared/coder/coder/+coder/+internal/indexIntRelop.m!float_class_contains_indexIntClass"),
-                "context", 46);
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/shared/coder/coder/+coder/+internal/indexIntRelop.m!float_class_contains_indexIntCl"
+    "ass"), "context", 46);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.floatModel"), "name",
                 46);
   emlrtAddField(*info, emlrt_marshallOut("char"), "dominantType", 46);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/floatModel.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/floatModel.m"),
                 "resolved", 46);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907914U), "fileTimeLo", 46);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 46);
@@ -893,12 +893,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs46), "rhs", 46);
   emlrtAddField(*info, emlrtAliasP(lhs46), "lhs", 46);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/shared/coder/coder/+coder/+internal/indexIntRelop.m!is_signed_indexIntClass"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/shared/coder/coder/+coder/+internal/indexIntRelop.m!is_signed_indexIntClass"),
                 "context", 47);
   emlrtAddField(*info, emlrt_marshallOut("intmin"), "name", 47);
   emlrtAddField(*info, emlrt_marshallOut("char"), "dominantType", 47);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmin.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmin.m"),
                 "resolved", 47);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907932U), "fileTimeLo", 47);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 47);
@@ -909,12 +909,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs47), "rhs", 47);
   emlrtAddField(*info, emlrtAliasP(lhs47), "lhs", 47);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m"),
                 "context", 48);
   emlrtAddField(*info, emlrt_marshallOut("intmin"), "name", 48);
   emlrtAddField(*info, emlrt_marshallOut("char"), "dominantType", 48);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmin.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmin.m"),
                 "resolved", 48);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907932U), "fileTimeLo", 48);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 48);
@@ -925,12 +925,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs48), "rhs", 48);
   emlrtAddField(*info, emlrtAliasP(lhs48), "lhs", 48);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/assertValidSizeArg.m"),
                 "context", 49);
   emlrtAddField(*info, emlrt_marshallOut("intmax"), "name", 49);
   emlrtAddField(*info, emlrt_marshallOut("char"), "dominantType", 49);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmax.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/intmax.m"),
                 "resolved", 49);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907932U), "fileTimeLo", 49);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 49);
@@ -941,12 +941,12 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs49), "rhs", 49);
   emlrtAddField(*info, emlrtAliasP(lhs49), "lhs", 49);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/reshape.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/reshape.m"),
                 "context", 50);
   emlrtAddField(*info, emlrt_marshallOut("coder.internal.scalarEg"), "name", 50);
   emlrtAddField(*info, emlrt_marshallOut("double"), "dominantType", 50);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/eml/+coder/+internal/scalarEg.m"),
                 "resolved", 50);
   emlrtAddField(*info, b_emlrt_marshallOut(1430216768U), "fileTimeLo", 50);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 50);
@@ -957,13 +957,13 @@ static void info_helper(const mxArray **info)
   emlrtAddField(*info, emlrtAliasP(rhs50), "rhs", 50);
   emlrtAddField(*info, emlrtAliasP(lhs50), "lhs", 50);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/reshape.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/elmat/reshape.m"),
                 "context", 51);
   emlrtAddField(*info, emlrt_marshallOut("eml_int_forloop_overflow_check"),
                 "name", 51);
   emlrtAddField(*info, emlrt_marshallOut(""), "dominantType", 51);
   emlrtAddField(*info, emlrt_marshallOut(
-    "[ILXE]/usr/local/MATLAB/R2015b/toolbox/eml/lib/matlab/eml/eml_int_forloop_overflow_check.m"),
+    "[ILXE]C:/Program Files/MATLAB/R2015b/toolbox/eml/lib/matlab/eml/eml_int_forloop_overflow_check.m"),
                 "resolved", 51);
   emlrtAddField(*info, b_emlrt_marshallOut(1415907934U), "fileTimeLo", 51);
   emlrtAddField(*info, b_emlrt_marshallOut(0U), "fileTimeHi", 51);

@@ -15,7 +15,5 @@ extern void J_e_dot_fun_atexit(void);
 extern void J_e_dot_fun_initialize(void);
 extern void J_e_dot_fun_terminate(void);
 extern void J_e_dot_fun_xil_terminate(void);
-extern void p_ee_fun(real_T in1[9], real_T A[3]);
-extern void p_ee_fun_api(const mxArray *prhs[1], const mxArray *plhs[1]);
 
 #endif

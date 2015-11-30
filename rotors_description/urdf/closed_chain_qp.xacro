@@ -5,16 +5,16 @@
 
   <xacro:property name="r1_width" value="0.04"/>
   <xacro:property name="r1_height" value="0.008"/>
-  <xacro:property name="r1_length" value="0.35"/> <!-- 0.24 vs 0.35 -->
+  <xacro:property name="r1_length" value="0.24"/> <!-- 0.24 vs 0.35 -->
 
   <xacro:property name="r2_width" value="0.04"/>
   <xacro:property name="r2_height" value="0.008"/>
-  <xacro:property name="r2_length" value="0.40"/> <!-- 0.35 vs 0.40 -->
+  <xacro:property name="r2_length" value="0.35"/> <!-- 0.35 vs 0.40 -->
 
   <xacro:property name="r3_width" value="0.04"/>
   <xacro:property name="r3_height" value="0.0015"/>
   <xacro:property name="r3_length" value="0.14"/>
-  <xacro:property name="center_to_center_length" value="0.12"/>
+  <xacro:property name="center_to_center_length" value="0.10"/> <!-- 0.10 vs 0.12 -->
 
   <xacro:property name="end_effector_length" value="0.12"/>
   <xacro:property name="end_effector_radius" value="0.03"/>
@@ -529,9 +529,9 @@
 				<initial_configuration>
 					<config joint_name="pitching" initial_position="0.0"/>
 					<config joint_name="left_1"  initial_position="2.488"/>
-					<config joint_name="left_2"  initial_position="-1.676"/>
+					<config joint_name="left_2"  initial_position="${0.8127-2.488}"/>
 					<config joint_name="right_1" initial_position="0.653"/>
-					<config joint_name="right_2" initial_position="1.676"/>
+					<config joint_name="right_2" initial_position="${2.3284-0.653}"/>
 				</initial_configuration>
 				<loop_closure_joints>
 					<joint joint_name="closing"/>

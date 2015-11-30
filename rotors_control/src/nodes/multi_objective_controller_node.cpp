@@ -26,11 +26,17 @@
 #include <mav_msgs/default_topics.h>
 #include "rotors_control/parameters_ros.h"
 
+
 namespace rotors_control {
 
 MultiObjectiveControllerNode::MultiObjectiveControllerNode() {
 
   InitializeParams();
+
+  // Params server
+  dynamic_reconfigure::Server<rotors_control::MultiObjectiveControllerConfig>::CallbackType f;
+  f = boost::bind(&MultiObjectiveControllerNode::ParamsDynReconfigureCallback, this, _1, _2);
+  params_server_.setCallback(f);
 
   // UAV command subscribers
   cmd_pose_sub_ = nh_.subscribe(mav_msgs::default_topics::COMMAND_POSE, 1, &MultiObjectiveControllerNode::CommandPoseCallback, this);
@@ -228,6 +234,47 @@ void MultiObjectiveControllerNode::InitializeParams() {
   GetVehicleParameters(pnh, &multi_objective_controller_.vehicle_parameters_);
 
   multi_objective_controller_.InitializeParameters();
+}
+
+
+void MultiObjectiveControllerNode::ParamsDynReconfigureCallback(rotors_control::MultiObjectiveControllerConfig& config, uint32_t level) {
+//  ROS_INFO("Reconfigure Request: %d %f %d",
+//            config.mav_position_gain_x, config.safe_range_rpy,
+//            config.mav_objective_function);
+
+  multi_objective_controller_.controller_parameters_.mav_position_gain_.x() = config.mav_position_gain_x;
+  multi_objective_controller_.controller_parameters_.mav_position_gain_.y() = config.mav_position_gain_y;
+  multi_objective_controller_.controller_parameters_.mav_position_gain_.z() = config.mav_position_gain_z;
+
+  multi_objective_controller_.controller_parameters_.mav_velocity_gain_.x() = config.mav_velocity_gain_x;
+  multi_objective_controller_.controller_parameters_.mav_velocity_gain_.y() = config.mav_velocity_gain_y;
+  multi_objective_controller_.controller_parameters_.mav_velocity_gain_.z() = config.mav_velocity_gain_z;
+
+  multi_objective_controller_.controller_parameters_.mav_attitude_gain_.x() = config.mav_attitude_gain_roll;
+  multi_objective_controller_.controller_parameters_.mav_attitude_gain_.y() = config.mav_attitude_gain_pitch;
+  multi_objective_controller_.controller_parameters_.mav_attitude_gain_.z() = config.mav_attitude_gain_yaw;
+
+  multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.x() = config.mav_angular_rate_gain_roll;
+  multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.y() = config.mav_angular_rate_gain_pitch;
+  multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.z() = config.mav_angular_rate_gain_yaw;
+
+  multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.x() = config.arm_joints_angle_gain_pitch;
+  multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.y() = config.arm_joints_angle_gain_left;
+  multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.z() = config.arm_joints_angle_gain_right;
+
+  multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.x() = config.arm_joints_ang_rate_gain_pitch;
+  multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.y() = config.arm_joints_ang_rate_gain_left;
+  multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.z() = config.arm_joints_ang_rate_gain_right;
+
+  multi_objective_controller_.controller_parameters_.mu_attitude_ = config.mu_attitude;
+  multi_objective_controller_.controller_parameters_.mu_arm_ = config.mu_arm;
+
+  multi_objective_controller_.controller_parameters_.safe_range_rpy_ = config.safe_range_rpy;
+  multi_objective_controller_.controller_parameters_.safe_range_joints_ = config.safe_range_joints;
+
+  multi_objective_controller_.controller_parameters_.objectives_weight_.setZero(6);
+  multi_objective_controller_.controller_parameters_.objectives_weight_(config.mav_objective_function) = config.value_mav;
+  multi_objective_controller_.controller_parameters_.objectives_weight_(config.manipulator_objective_function) = config.value_arm;
 }
 
 ////// UAV CALLBACKS /////

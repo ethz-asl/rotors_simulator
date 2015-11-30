@@ -11,6 +11,5 @@
 extern void J_e_dot_fun(const double in1[14], double A[54]);
 extern void J_e_dot_fun_initialize();
 extern void J_e_dot_fun_terminate();
-extern void p_ee_fun(const double in1[9], double A[3]);
 
 #endif

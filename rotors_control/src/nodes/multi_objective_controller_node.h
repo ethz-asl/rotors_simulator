@@ -45,6 +45,9 @@
 
 #include "rotors_control/multi_objective_controller.h"
 
+#include <dynamic_reconfigure/server.h>
+#include <rotors_control/MultiObjectiveControllerConfig.h>
+
 
 typedef message_filters::sync_policies::ExactTime<nav_msgs::Odometry, sensor_msgs::JointState, sensor_msgs::JointState, sensor_msgs::JointState> RobotSyncPolicy;
 
@@ -69,6 +72,9 @@ class MultiObjectiveControllerNode {
   std::string namespace_;
 
   ros::NodeHandle nh_;
+
+  // dynamic_reconfigure
+  dynamic_reconfigure::Server<rotors_control::MultiObjectiveControllerConfig> params_server_;
 
   // subscribers
   ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
@@ -100,6 +106,9 @@ class MultiObjectiveControllerNode {
   ros::Timer command_timer_;
   std::deque<ros::Duration> command_arm_waiting_times_;
   ros::Timer command_arm_timer_;
+
+  // params dynamic reconfigure callback
+  void ParamsDynReconfigureCallback(rotors_control::MultiObjectiveControllerConfig& config, uint32_t level);
 
   // timers callsback
   void TimedCommandCallback(const ros::TimerEvent& e);

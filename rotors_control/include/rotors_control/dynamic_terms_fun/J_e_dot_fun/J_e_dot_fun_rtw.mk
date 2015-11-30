@@ -2,7 +2,7 @@
 ## Makefile generated for MATLAB file/project 'J_e_dot_fun'. 
 ## 
 ## Makefile     : J_e_dot_fun_rtw.mk
-## Generated on : Fri Nov 06 17:07:15 2015
+## Generated on : Fri Nov 27 16:21:27 2015
 ## MATLAB Coder version: 3.0 (R2015b)
 ## 
 ## Build Info:
@@ -23,20 +23,20 @@
 
 PRODUCT_NAME              = J_e_dot_fun
 MAKEFILE                  = J_e_dot_fun_rtw.mk
-COMPUTER                  = GLNXA64
-MATLAB_ROOT               = /usr/local/MATLAB/R2015b
-MATLAB_BIN                = /usr/local/MATLAB/R2015b/bin
-MATLAB_ARCH_BIN           = /usr/local/MATLAB/R2015b/bin/glnxa64
+COMPUTER                  = PCWIN64
+MATLAB_ROOT               = C:/PROGRA~1/MATLAB/R2015b
+MATLAB_BIN                = C:/PROGRA~1/MATLAB/R2015b/bin
+MATLAB_ARCH_BIN           = C:/PROGRA~1/MATLAB/R2015b/bin/win64
 MASTER_ANCHOR_DIR         = 
-START_DIR                 = /home/comaris/Dropbox/ETH/Master_Thesis/arw_model
-ARCH                      = glnxa64
+START_DIR                 = C:/Users/Simone/Dropbox/ETH/Master_Thesis/arw_model/Model/NEO2
+ARCH                      = win64
 RELATIVE_PATH_TO_ANCHOR   = .
 
 ###########################################################################
 ## TOOLCHAIN SPECIFICATIONS
 ###########################################################################
 
-# Toolchain Name:          Catkin v1.0 | gmake (64-bit Linux)
+# Toolchain Name:          Catkin v1.0 | gmake (64-bit Windows)
 # Supported Version(s):    
 # ToolchainInfo Version:   R2015b
 # Specification Revision:  1.0
@@ -111,9 +111,9 @@ OUTPUT_FLAG         = -o
 ARDEBUG             =
 STATICLIB_OUTPUT_FLAG =
 MEX_DEBUG           = -g
-RM                  = @rm -f
+RM                  = @del /F
 ECHO                = @echo
-MV                  = @mv
+MV                  = @move
 RUN                 =
 
 #--------------------------------------
@@ -154,7 +154,7 @@ CPP_EXT             = .cpp
 EXE_EXT             =
 SHAREDLIB_EXT       = .so
 STATICLIB_EXT       = .lib
-MEX_EXT             = .mexa64
+MEX_EXT             = .mexw64
 MAKE_EXT            = .mk
 
 
@@ -170,7 +170,7 @@ BUILD_TYPE = "Static Library"
 ## INCLUDE PATHS
 ###########################################################################
 
-INCLUDES_BUILDINFO = -I$(START_DIR) -I$(START_DIR)/codegen/lib/J_e_dot_fun -I$(MATLAB_ROOT)/extern/include -I$(MATLAB_ROOT)/simulink/include -I$(MATLAB_ROOT)/rtw/c/src -I$(MATLAB_ROOT)/rtw/c/src/ext_mode/common -I$(MATLAB_ROOT)/rtw/c/ert
+INCLUDES_BUILDINFO = -I$(START_DIR) -I$(START_DIR)/librotors/J_e_dot_fun -I$(MATLAB_ROOT)/extern/include -I$(MATLAB_ROOT)/simulink/include -I$(MATLAB_ROOT)/rtw/c/src -I$(MATLAB_ROOT)/rtw/c/src/ext_mode/common -I$(MATLAB_ROOT)/rtw/c/ert
 
 INCLUDES = $(INCLUDES_BUILDINFO)
 
@@ -178,7 +178,7 @@ INCLUDES = $(INCLUDES_BUILDINFO)
 ## DEFINES
 ###########################################################################
 
-DEFINES_STANDARD = -DMODEL=J_e_dot_fun -DHAVESTDIO -DUSE_RTMODEL -DUNIX
+DEFINES_STANDARD = -DMODEL=J_e_dot_fun -DHAVESTDIO -DUSE_RTMODEL
 
 DEFINES = $(DEFINES_STANDARD)
 
@@ -186,7 +186,7 @@ DEFINES = $(DEFINES_STANDARD)
 ## SOURCE FILES
 ###########################################################################
 
-SRCS = $(START_DIR)/codegen/lib/J_e_dot_fun/J_e_dot_fun.cpp $(START_DIR)/codegen/lib/J_e_dot_fun/rt_nonfinite.cpp $(START_DIR)/codegen/lib/J_e_dot_fun/rtGetNaN.cpp $(START_DIR)/codegen/lib/J_e_dot_fun/rtGetInf.cpp
+SRCS = $(START_DIR)/librotors/J_e_dot_fun/J_e_dot_fun.cpp $(START_DIR)/librotors/J_e_dot_fun/rt_nonfinite.cpp $(START_DIR)/librotors/J_e_dot_fun/rtGetNaN.cpp $(START_DIR)/librotors/J_e_dot_fun/rtGetInf.cpp
 
 ALL_SRCS = $(SRCS)
 
@@ -305,18 +305,6 @@ $(PRODUCT) : $(OBJS) $(PREBUILT_OBJS)
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 
-%.c.o : $(MATLAB_ROOT)/rtw/c/src/%.c
-	$(CC) $(CFLAGS) -o "$@" "$<"
-
-
-%.s.o : $(MATLAB_ROOT)/rtw/c/src/%.s
-	$(AS) $(ASFLAGS) -o "$@" "$<"
-
-
-%.cpp.o : $(MATLAB_ROOT)/rtw/c/src/%.cpp
-	$(CPP) $(CPPFLAGS) -o "$@" "$<"
-
-
 %.c.o : $(START_DIR)/%.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
@@ -329,15 +317,27 @@ $(PRODUCT) : $(OBJS) $(PREBUILT_OBJS)
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 
-%.c.o : $(START_DIR)/codegen/lib/J_e_dot_fun/%.c
+%.c.o : $(START_DIR)/librotors/J_e_dot_fun/%.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
-%.s.o : $(START_DIR)/codegen/lib/J_e_dot_fun/%.s
+%.s.o : $(START_DIR)/librotors/J_e_dot_fun/%.s
 	$(AS) $(ASFLAGS) -o "$@" "$<"
 
 
-%.cpp.o : $(START_DIR)/codegen/lib/J_e_dot_fun/%.cpp
+%.cpp.o : $(START_DIR)/librotors/J_e_dot_fun/%.cpp
+	$(CPP) $(CPPFLAGS) -o "$@" "$<"
+
+
+%.c.o : $(MATLAB_ROOT)/rtw/c/src/%.c
+	$(CC) $(CFLAGS) -o "$@" "$<"
+
+
+%.s.o : $(MATLAB_ROOT)/rtw/c/src/%.s
+	$(AS) $(ASFLAGS) -o "$@" "$<"
+
+
+%.cpp.o : $(MATLAB_ROOT)/rtw/c/src/%.cpp
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 
@@ -381,8 +381,8 @@ info :
 
 clean : 
 	$(ECHO) "### Deleting all derived files..."
-	$(RM) $(PRODUCT)
-	$(RM) $(ALL_OBJS)
+	$(RM) $(subst /,\,$(PRODUCT))
+	$(RM) $(subst /,\,$(ALL_OBJS))
 	$(RM) *Object
 	$(ECHO) "### Deleted all derived files."
 

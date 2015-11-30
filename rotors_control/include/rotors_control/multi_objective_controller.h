@@ -42,6 +42,7 @@
 #include "rotors_control/dynamic_terms_fun/C_fun/C_fun.h"
 #include "rotors_control/dynamic_terms_fun/J_e_fun/J_e_fun.h"
 #include "rotors_control/dynamic_terms_fun/J_e_dot_fun/J_e_dot_fun.h"
+#include "rotors_control/dynamic_terms_fun/p_ee_fun/p_ee_fun.h"
 
 
 using namespace Eigen;
