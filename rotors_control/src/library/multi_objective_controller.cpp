@@ -202,10 +202,10 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
 
   VectorXd current_weights = controller_parameters_.objectives_weight_;
   if (!mav_trajectory_received_) {
-    current_weights << 0, 0, 2, controller_parameters_.objectives_weight_.tail<3>();
+    current_weights << 0, 0, 0, 2, controller_parameters_.objectives_weight_.tail<3>();
   }
   if (!(arm_trajectory_received_ or ee_trajectory_received_)) {
-    current_weights << controller_parameters_.objectives_weight_.head<3>(), 0, 0, 1;
+    current_weights << controller_parameters_.objectives_weight_.head<4>(), 0, 0, 1;
   }
   current_weights.normalize();
 
@@ -219,38 +219,43 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
     switch (i) {
       case (0):
         GetAttitudeSetPtObjective(&Q,&c);
-//        ROS_INFO("CHECK POINT after GetAttitudeSetPtObjective");  //debug
+//        ROS_INFO_THROTTLE(1, "CHECK POINT after GetAttitudeSetPtObjective");  //debug
         break;
 
       case (1):
-        GetYawSetPtObjective(&Q,&c);
-//        ROS_INFO("CHECK POINT after GetYawSetPtObjective");  //debug
+        GetPoseSetPtObjective(&Q,&c);
+//        ROS_INFO_THROTTLE(1, "CHECK POINT after GetPoseSetPtObjective");  //debug
         break;
 
       case (2):
-        GetFreeHoverSetPtObjective(&Q,&c);
-//        ROS_INFO("CHECK POINT after GetFreeHoverSetPtObjective");  //debug
+        GetYawSetPtObjective(&Q,&c);
+//        ROS_INFO_THROTTLE(1, "CHECK POINT after GetYawSetPtObjective");  //debug
         break;
 
       case (3):
+        GetFreeHoverSetPtObjective(&Q,&c);
+//        ROS_INFO_THROTTLE(1, "CHECK POINT after GetFreeHoverSetPtObjective");  //debug
+        break;
+
+      case (4):
         if (!arm_trajectory_received_) {
-          current_weights << controller_parameters_.objectives_weight_.head<3>(), 0, 0, controller_parameters_.objectives_weight_.tail<3>().maxCoeff();
+          current_weights << controller_parameters_.objectives_weight_.head<4>(), 0, 0, controller_parameters_.objectives_weight_.tail<3>().maxCoeff();
           continue;
         }
         GetManipulatorSetPtObjective(&Q,&c);
 //        ROS_INFO_THROTTLE(1, "CHECK POINT after GetManipulatorSetPtObjective");  //debug
         break;
 
-      case (4):
+      case (5):
         if (!ee_trajectory_received_) {
-          current_weights << controller_parameters_.objectives_weight_.head<3>(), 0, 0, controller_parameters_.objectives_weight_.tail<3>().maxCoeff();
+          current_weights << controller_parameters_.objectives_weight_.head<4>(), 0, 0, controller_parameters_.objectives_weight_.tail<3>().maxCoeff();
           continue;
         }
         GetEndEffectorSetPtObjective(&Q,&c);
 //        ROS_INFO_THROTTLE(1, "CHECK POINT after GetEndEffectorSetPtObjective");  //debug
         break;
 
-      case (5):
+      case (6):
         GetDeadArmSetPtObjective(&Q,&c);
 //        ROS_INFO_THROTTLE(1, "CHECK POINT after GetDeadArmSetPtObjective");  //debug
         break;
@@ -323,6 +328,27 @@ void MultiObjectiveController::GetAttitudeSetPtObjective(MatrixXd* _Q, VectorXd*
 }
 
 
+void MultiObjectiveController::GetPoseSetPtObjective(MatrixXd* _Q, VectorXd* _c) const {
+
+  assert(mav_trajectory_received_);
+
+  MatrixXd Q_pos;
+  MatrixXd Q_orient;
+  VectorXd c_pos;
+  VectorXd c_orient;
+
+  GetPositionSetPtObjective(command_trajectory_.position_W, &Q_pos, &c_pos);
+
+  Vector3d rpy_des(0,0,odometry_.getYaw());
+  if (ee_trajectory_received_ and (controller_parameters_.objectives_weight_(5)>0) )
+    rpy_des.z() = GetYawFromEndEffector();
+  GetOrientationSetPtObjective(rpy_des, &Q_orient, &c_orient);
+
+  *_Q = Q_pos + Q_orient;
+  *_c = c_pos + c_orient;
+}
+
+
 void MultiObjectiveController::GetYawSetPtObjective(MatrixXd* _Q, VectorXd* _c) const {
 
   assert(mav_trajectory_received_);
@@ -350,7 +376,9 @@ void MultiObjectiveController::GetFreeHoverSetPtObjective(MatrixXd* _Q, VectorXd
 
   GetPositionSetPtObjective(odometry_.position_W, &Q_pos, &c_pos);
 
-  Vector3d rpy_des(0,0,odometry_.getRPY().z());
+  Vector3d rpy_des(0,0,odometry_.getYaw());
+  if (ee_trajectory_received_ and (controller_parameters_.objectives_weight_(5)>0) )
+    rpy_des.z() = GetYawFromEndEffector();
   GetOrientationSetPtObjective(rpy_des, &Q_orient, &c_orient);
 
   *_Q = Q_pos + Q_orient;
@@ -456,6 +484,17 @@ VectorXd MultiObjectiveController::GetRobotVelocities() const {
 }
 
 
+double MultiObjectiveController::GetYawFromEndEffector() const {
+
+  assert(ee_trajectory_received_);
+
+  Vector3d p_ee_V = odometry_.orientation_W_B.inverse() * (command_trajectory_ee_.position_W - odometry_.position_W);
+  double ro = p_ee_V.norm();
+
+  return asin(p_ee_V.y()/(ro*sqrt(1-pow((p_ee_V.z()/ro),2)))) + odometry_.getYaw();
+}
+
+
 Vector3d MultiObjectiveController::AngVelBody2World(const Vector3d& angular_rates) const {
   Vector3d rpy = odometry_.getRPY();
   Matrix3d Jv_inv;
@@ -526,7 +565,7 @@ void MultiObjectiveController::UpdateEndEffectorState() {
 
   static VectorXi p_ee_idx = [] {
       VectorXi tmp(9);
-      tmp << 0, 1, 2, 3, 4, 6, 7, 8, 10; // x, y, z, roll, pitch, yaw, q0, q1, q3
+      tmp << 0, 1, 2, 3, 4, 5, 6, 7, 9; // x, y, z, roll, pitch, yaw, q0, q1, q3
       return tmp;
   }();
   static VectorXi J_e_dot_idx = [] {
@@ -549,6 +588,7 @@ void MultiObjectiveController::UpdateEndEffectorState() {
 
   //debug
 //  std::cout << "X_eig = " << X_eig.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "X = [" << X_eig.head(robot_dof_).format(MatlabVector2Fmt) << ";" << X_eig.tail(robot_dof_).format(MatlabVector2Fmt) << "]" << std::endl;
 
   double J_e[6*robot_dof_];
   double q_in_J_e[8];
@@ -573,9 +613,9 @@ void MultiObjectiveController::UpdateEndEffectorState() {
   Map<VectorXd> p_ee_eig(p_ee, 3);
 
   //debug
-//  std::cout << "J_e_eig = " << J_e_eig.format(MatlabMatrixFmt) << std::endl;
-//  std::cout << "J_e_dot_eig = " << J_e_dot_eig.format(MatlabMatrixFmt) << std::endl;
-//  std::cout << "p_ee_eig = " << p_ee_eig.format(MatlabVectorFmt) << std::endl;
+//  std::cout << "J_e_ = " << J_e_eig.format(MatlabMatrixFmt) << std::endl;
+//  std::cout << "J_e_dot_ = " << J_e_dot_eig.format(MatlabMatrixFmt) << std::endl;
+//  std::cout << "p_ee_ = " << p_ee_eig.format(MatlabVectorFmt) << std::endl;
 
   end_effector_.setPosJac(p_ee_eig, J_e_eig, J_e_dot_eig);
 }

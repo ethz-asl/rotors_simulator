@@ -132,6 +132,12 @@ class MultiObjectiveControllerNode {
 
   // Force sensor callback
   void ForceSensorCallback(const geometry_msgs::Vector3StampedConstPtr& force_msg);
+
+  // miscellaneous
+  template<class T>
+  inline void PrintParam(const std::string& param_str, const T& value) {
+    std::cout << " * " << namespace_.c_str() << "/" << param_str.c_str() << ": " << value << std::endl;
+  }
 };
 }
 

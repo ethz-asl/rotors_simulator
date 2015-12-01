@@ -66,7 +66,7 @@ static const Vector3d kDefaultRPYMin = Vector3d(-M_PI/2, -M_PI/2., -2*M_PI);
 static const Vector3d kDefaultArmJointsAngleMax = Vector3d(0., M_PI, 0.5556*M_PI);
 static const Vector3d kDefaultArmJointsAngleMin = Vector3d(-M_PI/2, 0.4444*M_PI, 0.);
 static const Vector2d kDefaultArmJointsTorqueLimits = Vector2d(-2., 2.);
-static const VectorXd kDefaultObjectivesWeight = VectorXd::Zero(6);
+static const VectorXd kDefaultObjectivesWeight = VectorXd::Zero(7);
 static const unsigned int kDefaultMavDof = 6;
 static const unsigned int kDefaultArmDof = 3;
 static const unsigned int kDefaultMuAttidute = 1000;
@@ -269,6 +269,7 @@ class MultiObjectiveController {
                             VectorXd* c) const;
 
   void GetAttitudeSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
+  void GetPoseSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
   void GetYawSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
   void GetFreeHoverSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
   void GetPositionSetPtObjective(const Vector3d& _position_ref, MatrixXd* _Q, VectorXd* _c) const;
@@ -278,6 +279,8 @@ class MultiObjectiveController {
   void GetEndEffectorSetPtObjective(MatrixXd* _Q, VectorXd* _c);
 
   VectorXd GetRobotVelocities() const;
+
+  double GetYawFromEndEffector() const;
 
   Vector3d AngVelBody2World(const Vector3d& angular_rates) const;
 

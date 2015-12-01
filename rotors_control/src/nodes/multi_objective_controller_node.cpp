@@ -82,6 +82,8 @@ MultiObjectiveControllerNode::~MultiObjectiveControllerNode() { }
 void MultiObjectiveControllerNode::InitializeParams() {
   ros::NodeHandle pnh("~");
 
+  namespace_ = pnh.getNamespace();
+
   // Read parameters from rosparam.
   GetRosParameter(pnh, "mav_position_gain/x",
                   multi_objective_controller_.controller_parameters_.mav_position_gain_.x(),
@@ -194,21 +196,24 @@ void MultiObjectiveControllerNode::InitializeParams() {
   GetRosParameter(pnh, "objectives_weight/att",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(0),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(0));
-  GetRosParameter(pnh, "objectives_weight/yaw",
+  GetRosParameter(pnh, "objectives_weight/pos",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(1),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(1));
-  GetRosParameter(pnh, "objectives_weight/hover",
+  GetRosParameter(pnh, "objectives_weight/yaw",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(2),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(2));
-  GetRosParameter(pnh, "objectives_weight/arm",
+  GetRosParameter(pnh, "objectives_weight/hover",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(3),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(3));
-  GetRosParameter(pnh, "objectives_weight/ee",
+  GetRosParameter(pnh, "objectives_weight/arm",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(4),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(4));
-  GetRosParameter(pnh, "objectives_weight/dead",
+  GetRosParameter(pnh, "objectives_weight/ee",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(5),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(5));
+  GetRosParameter(pnh, "objectives_weight/dead",
+                  multi_objective_controller_.controller_parameters_.objectives_weight_(6),
+                  &multi_objective_controller_.controller_parameters_.objectives_weight_(6));
   GetRosParameter(pnh, "arm_joint_torque_lim/min",
                   multi_objective_controller_.controller_parameters_.arm_joint_torque_lim_.x(),
                   &multi_objective_controller_.controller_parameters_.arm_joint_torque_lim_.x());
@@ -238,7 +243,6 @@ void MultiObjectiveControllerNode::InitializeParams() {
 
 
 void MultiObjectiveControllerNode::ParamsDynReconfigureCallback(rotors_control::MultiObjectiveControllerConfig& config, uint32_t level) {
-  ROS_INFO("[multi_objective_controller_node] Controller parameters reconfigured.");
 
   multi_objective_controller_.controller_parameters_.mav_position_gain_.x() = config.mav_position_gain_x;
   multi_objective_controller_.controller_parameters_.mav_position_gain_.y() = config.mav_position_gain_y;
@@ -264,15 +268,63 @@ void MultiObjectiveControllerNode::ParamsDynReconfigureCallback(rotors_control::
   multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.y() = config.arm_joints_ang_rate_gain_left;
   multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.z() = config.arm_joints_ang_rate_gain_right;
 
+  multi_objective_controller_.controller_parameters_.ee_position_gain_.x() = config.ee_position_gain_x;
+  multi_objective_controller_.controller_parameters_.ee_position_gain_.y() = config.ee_position_gain_y;
+  multi_objective_controller_.controller_parameters_.ee_position_gain_.z() = config.ee_position_gain_z;
+
+  multi_objective_controller_.controller_parameters_.ee_velocity_gain_.x() = config.ee_velocity_gain_x;
+  multi_objective_controller_.controller_parameters_.ee_velocity_gain_.y() = config.ee_velocity_gain_y;
+  multi_objective_controller_.controller_parameters_.ee_velocity_gain_.z() = config.ee_velocity_gain_z;
+
   multi_objective_controller_.controller_parameters_.mu_attitude_ = config.mu_attitude;
   multi_objective_controller_.controller_parameters_.mu_arm_ = config.mu_arm;
 
   multi_objective_controller_.controller_parameters_.safe_range_rpy_ = config.safe_range_rpy;
   multi_objective_controller_.controller_parameters_.safe_range_joints_ = config.safe_range_joints;
 
-  multi_objective_controller_.controller_parameters_.objectives_weight_.setZero(6);
+  multi_objective_controller_.controller_parameters_.objectives_weight_.setZero();
   multi_objective_controller_.controller_parameters_.objectives_weight_(config.mav_objective_function) = config.value_mav;
   multi_objective_controller_.controller_parameters_.objectives_weight_(config.manipulator_objective_function) = config.value_arm;
+
+
+  ROS_INFO("[multi_objective_controller_node] Controller parameters reconfigured.");
+  std::cout << "SUMMARY\n========\n\nPARAMETERS" << std::endl;
+  PrintParam("mav_position_gain/x", config.mav_position_gain_x);
+  PrintParam("mav_position_gain/y", config.mav_position_gain_y);
+  PrintParam("mav_position_gain/z", config.mav_position_gain_z);
+  PrintParam("mav_velocity_gain/x", config.mav_velocity_gain_x);
+  PrintParam("mav_velocity_gain/y", config.mav_velocity_gain_y);
+  PrintParam("mav_velocity_gain/z", config.mav_velocity_gain_z);
+  PrintParam("mav_attitude_gain/roll", config.mav_attitude_gain_roll);
+  PrintParam("mav_attitude_gain/pitch", config.mav_attitude_gain_pitch);
+  PrintParam("mav_attitude_gain/yaw", config.mav_attitude_gain_yaw);
+  PrintParam("mav_angular_rate_gain/roll", config.mav_angular_rate_gain_roll);
+  PrintParam("mav_angular_rate_gain/pitch", config.mav_angular_rate_gain_pitch);
+  PrintParam("mav_angular_rate_gain/yaw", config.mav_angular_rate_gain_yaw);
+  PrintParam("arm_joints_angle_gain/pitch", config.arm_joints_angle_gain_pitch);
+  PrintParam("arm_joints_angle_gain/left", config.arm_joints_angle_gain_left);
+  PrintParam("arm_joints_angle_gain/right", config.arm_joints_angle_gain_right);
+  PrintParam("arm_joints_ang_rate_gain/pitch", config.arm_joints_ang_rate_gain_pitch);
+  PrintParam("arm_joints_ang_rate_gain/left", config.arm_joints_ang_rate_gain_left);
+  PrintParam("arm_joints_ang_rate_gain/right", config.arm_joints_ang_rate_gain_right);
+  PrintParam("ee_position_gain/x", config.ee_position_gain_x);
+  PrintParam("ee_position_gain/y", config.ee_position_gain_y);
+  PrintParam("ee_position_gain/z", config.ee_position_gain_z);
+  PrintParam("ee_velocity_gain/x", config.ee_velocity_gain_x);
+  PrintParam("ee_velocity_gain/y", config.ee_velocity_gain_y);
+  PrintParam("ee_velocity_gain/z", config.ee_velocity_gain_z);
+  PrintParam("mu_attitude", config.mu_attitude);
+  PrintParam("mu_arm", config.mu_arm);
+  PrintParam("safe_range_rpy", config.safe_range_rpy);
+  PrintParam("safe_range_joints", config.safe_range_joints);
+  PrintParam("objectives_weight/att", multi_objective_controller_.controller_parameters_.objectives_weight_(0));
+  PrintParam("objectives_weight/pos", multi_objective_controller_.controller_parameters_.objectives_weight_(1));
+  PrintParam("objectives_weight/yaw", multi_objective_controller_.controller_parameters_.objectives_weight_(2));
+  PrintParam("objectives_weight/hover", multi_objective_controller_.controller_parameters_.objectives_weight_(3));
+  PrintParam("objectives_weight/arm", multi_objective_controller_.controller_parameters_.objectives_weight_(4));
+  PrintParam("objectives_weight/ee", multi_objective_controller_.controller_parameters_.objectives_weight_(5));
+  PrintParam("objectives_weight/dead", multi_objective_controller_.controller_parameters_.objectives_weight_(6));
+  std::cout << std::endl;
 }
 
 ////// UAV CALLBACKS /////

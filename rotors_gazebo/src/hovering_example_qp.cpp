@@ -61,7 +61,7 @@ int main(int argc, char** argv){
     ROS_INFO("Unpaused the Gazebo simulation.");
   }
 
-  // Wait for 5 seconds to let the Gazebo GUI show up.
+  // Wait for 3 seconds to let the Gazebo GUI show up.
   ros::Duration(3.0).sleep();
 
   // Publish waypoint for helicopter
