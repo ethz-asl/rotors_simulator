@@ -66,7 +66,7 @@ Basic Usage
 Launch the simulator with a hex-rotor helicopter model, in our case, the AscTec Firefly.
 
 ```
-$ roslaunch rotors_gazebo firefly_empty_world.launch
+$ roslaunch rotors_gazebo mav_empty_world.launch mav_name:=firefly
 ```
 
 > **Note** The first run of gazebo might take considerably long, as it will download some models from an online database.
@@ -107,7 +107,7 @@ You should see (if you unpaused the simulator and you have a multicopter in it),
 You can let the helicopter hover with ground truth odometry (perfect state estimation), by launching:
 
 ```
-$ roslaunch rotors_gazebo firefly_hovering_example.launch
+$ roslaunch rotors_gazebo firefly_hovering_example.launch mav_name:=firefly
 ```
 
 #### Create an attitude controller
