@@ -53,7 +53,7 @@ MultiObjectiveController::~MultiObjectiveController() {}
 void MultiObjectiveController::InitializeParameters() {
   calculateAllocationMatrix(vehicle_parameters_.rotor_configuration_, &(controller_parameters_.allocation_matrix_));
   size_t rotors_sz = vehicle_parameters_.rotor_configuration_.rotors.size();
-  size_t ineq_no = 3+arm_dof_*2+rotors_sz;
+  size_t ineq_no = 2+arm_dof_*2+rotors_sz;
   torque_to_rotor_velocities_.resize(rotors_sz, 4);
   torque_to_rotor_velocities_ = pseudoInv(controller_parameters_.allocation_matrix_);
 
@@ -68,16 +68,17 @@ void MultiObjectiveController::InitializeParameters() {
   C_.resize(ineq_no, minimizer_sz_);
   C_.setZero();
   MatrixXd C_temp = MatrixXd::Zero(ineq_no,minimizer_sz_);
-  C_temp.block(0,3,3+arm_dof_,3+arm_dof_) = MatrixXd::Identity(3+arm_dof_,3+arm_dof_);
+  C_temp.block<2,2>(0,3) = Matrix2d::Identity();
+  C_temp.block(2,robot_dof_,arm_dof_,arm_dof_) = MatrixXd::Identity(arm_dof_,arm_dof_);
   C_temp.bottomRightCorner(arm_dof_,arm_dof_) = MatrixXd::Identity(arm_dof_,arm_dof_);
   C_ = C_temp.sparseView();
   d_.resize(ineq_no);
   d_.setZero();
-  d_.segment(3+arm_dof_,rotors_sz) = VectorXd::Zero(rotors_sz);
+  d_.segment(2+arm_dof_,rotors_sz) = VectorXd::Zero(rotors_sz);
   d_.tail(arm_dof_) = VectorXd::Constant(arm_dof_,controller_parameters_.arm_joint_torque_lim_.x());
   f_.resize(ineq_no);
   f_.setZero();
-  f_.segment(3+arm_dof_,rotors_sz) = VectorXd::Constant(rotors_sz,pow(controller_parameters_.max_rot_velocity_,2));
+  f_.segment(2+arm_dof_,rotors_sz) = VectorXd::Constant(rotors_sz,pow(controller_parameters_.max_rot_velocity_,2));
   f_.tail(arm_dof_) = VectorXd::Constant(arm_dof_,controller_parameters_.arm_joint_torque_lim_.y());
   x_ = VectorXd::Zero(minimizer_sz_);
 
@@ -507,16 +508,16 @@ Vector3d MultiObjectiveController::AngVelBody2World(const Vector3d& angular_rate
 
 
 void MultiObjectiveController::UpdateLinearConstraints() {
-  static Vector3d rpy_max = controller_parameters_.safe_range_rpy_*
+  static Vector2d rpy_max = controller_parameters_.safe_range_rpy_*
                             (controller_parameters_.rpy_max_ - controller_parameters_.rpy_min_) +
                             controller_parameters_.rpy_min_;
-  static Vector3d rpy_min = controller_parameters_.safe_range_rpy_*
+  static Vector2d rpy_min = controller_parameters_.safe_range_rpy_*
                             (controller_parameters_.rpy_min_ - controller_parameters_.rpy_max_) +
                             controller_parameters_.rpy_max_;
-  static Vector3d arm_joints_angle_max = controller_parameters_.safe_range_joints_*
+  static VectorXd arm_joints_angle_max = controller_parameters_.safe_range_joints_*
                             (controller_parameters_.arm_joints_angle_max_ - controller_parameters_.arm_joints_angle_min_) +
                             controller_parameters_.arm_joints_angle_min_;
-  static Vector3d arm_joints_angle_min = controller_parameters_.safe_range_joints_*
+  static VectorXd arm_joints_angle_min = controller_parameters_.safe_range_joints_*
                             (controller_parameters_.arm_joints_angle_min_ - controller_parameters_.arm_joints_angle_max_) +
                             controller_parameters_.arm_joints_angle_max_;
   static size_t rotors_sz = vehicle_parameters_.rotor_configuration_.rotors.size();
@@ -535,17 +536,17 @@ void MultiObjectiveController::UpdateLinearConstraints() {
   b_.head(robot_dof_) = -(dyn_mdl_terms_.coriolis_matrix + dyn_mdl_terms_.damping_matrix)*GetRobotVelocities()
                           - dyn_mdl_terms_.gravity_vector;
 
-  MatrixXd C_temp(rotors_sz,minimizer_sz_);
-  C_temp.setZero();
-  C_temp.block(0,robot_dof_,rotors_sz,3) = torque_to_rotor_velocities_.rightCols<1>() * Rot_w2v.bottomRows<1>();
-  C_temp.block(0,robot_dof_+3,rotors_sz,3) = torque_to_rotor_velocities_.leftCols<3>();
-  C_.middleRows(3+arm_dof_,rotors_sz) = C_temp.sparseView();
+  MatrixXd C_rows_temp(rotors_sz,minimizer_sz_);
+  C_rows_temp.setZero();
+  C_rows_temp.block(0,robot_dof_,rotors_sz,3) = torque_to_rotor_velocities_.rightCols<1>() * Rot_w2v.bottomRows<1>();
+  C_rows_temp.block(0,robot_dof_+3,rotors_sz,3) = torque_to_rotor_velocities_.leftCols<3>();
+  C_.middleRows(2+arm_dof_,rotors_sz) = C_rows_temp.sparseView();
 
-  d_.head<3>() = controller_parameters_.mu_attitude_*(rpy_min - odometry_.getRPY() );
-  d_.segment(3,arm_dof_) = controller_parameters_.mu_arm_*(arm_joints_angle_min - joints_state_.angles );
+  d_.head<2>() = controller_parameters_.mu_attitude_*(rpy_min - odometry_.getRPY().head<2>() );
+  d_.segment(2,arm_dof_) = controller_parameters_.mu_arm_*(arm_joints_angle_min - joints_state_.angles );
 
-  f_.head<3>() = controller_parameters_.mu_attitude_*(rpy_max - odometry_.getRPY() );
-  f_.segment(3,arm_dof_) = controller_parameters_.mu_arm_*(arm_joints_angle_max - joints_state_.angles );
+  f_.head<2>() = controller_parameters_.mu_attitude_*(rpy_max - odometry_.getRPY().head<2>() );
+  f_.segment(2,arm_dof_) = controller_parameters_.mu_arm_*(arm_joints_angle_max - joints_state_.angles );
 
   //debug
 //  std::cout << "rpy_max = " << rpy_max.format(MatlabVectorFmt) << std::endl;

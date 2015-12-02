@@ -48,7 +48,7 @@
   </group>
 
 	<!-- USER INTERFACE 
-	-->
 	<node name="rqt_publisher" pkg="rqt_publisher" type="rqt_publisher" output="screen"/>
 	<node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen"/>
+	-->
 </launch>

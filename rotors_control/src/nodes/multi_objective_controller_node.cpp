@@ -85,76 +85,76 @@ void MultiObjectiveControllerNode::InitializeParams() {
   namespace_ = pnh.getNamespace();
 
   // Read parameters from rosparam.
-  GetRosParameter(pnh, "mav_position_gain/x",
+  GetRosParameter(pnh, "mav_position_gain_x",
                   multi_objective_controller_.controller_parameters_.mav_position_gain_.x(),
                   &multi_objective_controller_.controller_parameters_.mav_position_gain_.x());
-  GetRosParameter(pnh, "mav_position_gain/y",
+  GetRosParameter(pnh, "mav_position_gain_y",
                   multi_objective_controller_.controller_parameters_.mav_position_gain_.y(),
                   &multi_objective_controller_.controller_parameters_.mav_position_gain_.y());
-  GetRosParameter(pnh, "mav_position_gain/z",
+  GetRosParameter(pnh, "mav_position_gain_z",
                   multi_objective_controller_.controller_parameters_.mav_position_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.mav_position_gain_.z());
-  GetRosParameter(pnh, "mav_velocity_gain/x",
+  GetRosParameter(pnh, "mav_velocity_gain_x",
                   multi_objective_controller_.controller_parameters_.mav_velocity_gain_.x(),
                   &multi_objective_controller_.controller_parameters_.mav_velocity_gain_.x());
-  GetRosParameter(pnh, "mav_velocity_gain/y",
+  GetRosParameter(pnh, "mav_velocity_gain_y",
                   multi_objective_controller_.controller_parameters_.mav_velocity_gain_.y(),
                   &multi_objective_controller_.controller_parameters_.mav_velocity_gain_.y());
-  GetRosParameter(pnh, "mav_velocity_gain/z",
+  GetRosParameter(pnh, "mav_velocity_gain_z",
                   multi_objective_controller_.controller_parameters_.mav_velocity_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.mav_velocity_gain_.z());
-  GetRosParameter(pnh, "mav_attitude_gain/x",
+  GetRosParameter(pnh, "mav_attitude_gain_x",
                   multi_objective_controller_.controller_parameters_.mav_attitude_gain_.x(),
                   &multi_objective_controller_.controller_parameters_.mav_attitude_gain_.x());
-  GetRosParameter(pnh, "mav_attitude_gain/y",
+  GetRosParameter(pnh, "mav_attitude_gain_y",
                   multi_objective_controller_.controller_parameters_.mav_attitude_gain_.y(),
                   &multi_objective_controller_.controller_parameters_.mav_attitude_gain_.y());
-  GetRosParameter(pnh, "mav_attitude_gain/z",
+  GetRosParameter(pnh, "mav_attitude_gain_z",
                   multi_objective_controller_.controller_parameters_.mav_attitude_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.mav_attitude_gain_.z());
-  GetRosParameter(pnh, "mav_angular_rate_gain/x",
+  GetRosParameter(pnh, "mav_angular_rate_gain_x",
                   multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.x(),
                   &multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.x());
-  GetRosParameter(pnh, "mav_angular_rate_gain/y",
+  GetRosParameter(pnh, "mav_angular_rate_gain_y",
                   multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.y(),
                   &multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.y());
-  GetRosParameter(pnh, "mav_angular_rate_gain/z",
+  GetRosParameter(pnh, "mav_angular_rate_gain_z",
                   multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.z());
-  GetRosParameter(pnh, "ee_position_gain/x",
+  GetRosParameter(pnh, "ee_position_gain_x",
                   multi_objective_controller_.controller_parameters_.ee_position_gain_.x(),
                   &multi_objective_controller_.controller_parameters_.ee_position_gain_.x());
-  GetRosParameter(pnh, "ee_position_gain/y",
+  GetRosParameter(pnh, "ee_position_gain_y",
                   multi_objective_controller_.controller_parameters_.ee_position_gain_.y(),
                   &multi_objective_controller_.controller_parameters_.ee_position_gain_.y());
-  GetRosParameter(pnh, "ee_position_gain/z",
+  GetRosParameter(pnh, "ee_position_gain_z",
                   multi_objective_controller_.controller_parameters_.ee_position_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.ee_position_gain_.z());
-  GetRosParameter(pnh, "ee_velocity_gain/x",
+  GetRosParameter(pnh, "ee_velocity_gain_x",
                   multi_objective_controller_.controller_parameters_.ee_velocity_gain_.x(),
                   &multi_objective_controller_.controller_parameters_.ee_velocity_gain_.x());
-  GetRosParameter(pnh, "ee_velocity_gain/y",
+  GetRosParameter(pnh, "ee_velocity_gain_y",
                   multi_objective_controller_.controller_parameters_.ee_velocity_gain_.y(),
                   &multi_objective_controller_.controller_parameters_.ee_velocity_gain_.y());
-  GetRosParameter(pnh, "ee_velocity_gain/z",
+  GetRosParameter(pnh, "ee_velocity_gain_z",
                   multi_objective_controller_.controller_parameters_.ee_velocity_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.ee_velocity_gain_.z());
-  GetRosParameter(pnh, "arm_joint_angle_gain/pitch",
+  GetRosParameter(pnh, "arm_joint_angle_gain_pitch",
                   multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.x(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.x());
-  GetRosParameter(pnh, "arm_joint_angle_gain/left",
+  GetRosParameter(pnh, "arm_joint_angle_gain_left",
                   multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.y(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.y());
-  GetRosParameter(pnh, "arm_joint_angle_gain/right",
+  GetRosParameter(pnh, "arm_joint_angle_gain_right",
                   multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.z());
-  GetRosParameter(pnh, "arm_joint_ang_rate_gain/pitch",
+  GetRosParameter(pnh, "arm_joint_ang_rate_gain_pitch",
                   multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.x(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.x());
-  GetRosParameter(pnh, "arm_joint_ang_rate_gain/left",
+  GetRosParameter(pnh, "arm_joint_ang_rate_gain_left",
                   multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.y(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.y());
-  GetRosParameter(pnh, "arm_joint_ang_rate_gain/right",
+  GetRosParameter(pnh, "arm_joint_ang_rate_gain_right",
                   multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.z());
   GetRosParameter(pnh, "rpy_max/roll",
@@ -163,18 +163,12 @@ void MultiObjectiveControllerNode::InitializeParams() {
   GetRosParameter(pnh, "rpy_max/pitch",
                   multi_objective_controller_.controller_parameters_.rpy_max_.y(),
                   &multi_objective_controller_.controller_parameters_.rpy_max_.y());
-  GetRosParameter(pnh, "rpy_max/yaw",
-                  multi_objective_controller_.controller_parameters_.rpy_max_.z(),
-                  &multi_objective_controller_.controller_parameters_.rpy_max_.z());
   GetRosParameter(pnh, "rpy_min/roll",
                   multi_objective_controller_.controller_parameters_.rpy_min_.x(),
                   &multi_objective_controller_.controller_parameters_.rpy_min_.x());
   GetRosParameter(pnh, "rpy_min/pitch",
                   multi_objective_controller_.controller_parameters_.rpy_min_.y(),
                   &multi_objective_controller_.controller_parameters_.rpy_min_.y());
-  GetRosParameter(pnh, "rpy_min/yaw",
-                  multi_objective_controller_.controller_parameters_.rpy_min_.z(),
-                  &multi_objective_controller_.controller_parameters_.rpy_min_.z());
   GetRosParameter(pnh, "arm_joint_angle_max/pitch",
                   multi_objective_controller_.controller_parameters_.arm_joints_angle_max_.x(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_angle_max_.x());
@@ -193,25 +187,25 @@ void MultiObjectiveControllerNode::InitializeParams() {
   GetRosParameter(pnh, "arm_joint_angle_min/right",
                   multi_objective_controller_.controller_parameters_.arm_joints_angle_min_.z(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_angle_min_.z());
-  GetRosParameter(pnh, "objectives_weight/att",
+  GetRosParameter(pnh, "objectives_weight_att",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(0),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(0));
-  GetRosParameter(pnh, "objectives_weight/pos",
+  GetRosParameter(pnh, "objectives_weight_pos",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(1),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(1));
-  GetRosParameter(pnh, "objectives_weight/yaw",
+  GetRosParameter(pnh, "objectives_weight_yaw",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(2),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(2));
-  GetRosParameter(pnh, "objectives_weight/hover",
+  GetRosParameter(pnh, "objectives_weight_hover",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(3),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(3));
-  GetRosParameter(pnh, "objectives_weight/arm",
+  GetRosParameter(pnh, "objectives_weight_arm",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(4),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(4));
-  GetRosParameter(pnh, "objectives_weight/ee",
+  GetRosParameter(pnh, "objectives_weight_ee",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(5),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(5));
-  GetRosParameter(pnh, "objectives_weight/dead",
+  GetRosParameter(pnh, "objectives_weight_dead",
                   multi_objective_controller_.controller_parameters_.objectives_weight_(6),
                   &multi_objective_controller_.controller_parameters_.objectives_weight_(6));
   GetRosParameter(pnh, "arm_joint_torque_lim/min",

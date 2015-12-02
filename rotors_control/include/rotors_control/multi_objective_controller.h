@@ -61,16 +61,16 @@ static const Vector3d kDefaultEePositionGain = Vector3d(200., 200., 200.);
 static const Vector3d kDefaultEeVelocityGain = Vector3d(300., 300., 300.);
 static const Vector3d kDefaultJointAngleGain = Vector3d(30., 30., 30.);
 static const Vector3d kDefaultJointAngRateGain = Vector3d(10., 10., 10.);
-static const Vector3d kDefaultRPYMax = Vector3d(M_PI/2, M_PI/2., 2*M_PI);
-static const Vector3d kDefaultRPYMin = Vector3d(-M_PI/2, -M_PI/2., -2*M_PI);
+static const Vector2d kDefaultRollPitchMax = Vector2d(M_PI/2, M_PI/2);
+static const Vector2d kDefaultRollPitchMin = Vector2d(-M_PI/2, -M_PI/2);
 static const Vector3d kDefaultArmJointsAngleMax = Vector3d(0., M_PI, 0.5556*M_PI);
 static const Vector3d kDefaultArmJointsAngleMin = Vector3d(-M_PI/2, 0.4444*M_PI, 0.);
 static const Vector2d kDefaultArmJointsTorqueLimits = Vector2d(-2., 2.);
 static const VectorXd kDefaultObjectivesWeight = VectorXd::Zero(7);
 static const unsigned int kDefaultMavDof = 6;
 static const unsigned int kDefaultArmDof = 3;
-static const unsigned int kDefaultMuAttidute = 1000;
-static const unsigned int kDefaultMuArm = 2000;
+static const unsigned int kDefaultMuAttidute = 100;
+static const unsigned int kDefaultMuArm = 50;
 static const double kDefaultSafeRange = 0.9;
 static const double kDefaultMaxRotVelocity = 838;
 
@@ -89,8 +89,8 @@ class MultiObjectiveControllerParameters {
         ee_velocity_gain_(kDefaultEeVelocityGain),
         arm_joints_angle_gain_(kDefaultJointAngleGain),
         arm_joints_ang_rate_gain_(kDefaultJointAngRateGain),
-        rpy_max_(kDefaultRPYMax),
-        rpy_min_(kDefaultRPYMin),
+        rpy_max_(kDefaultRollPitchMax),
+        rpy_min_(kDefaultRollPitchMin),
         arm_joints_angle_max_(kDefaultArmJointsAngleMax),
         arm_joints_angle_min_(kDefaultArmJointsAngleMin),
         arm_joint_torque_lim_(kDefaultArmJointsTorqueLimits),
@@ -112,8 +112,8 @@ class MultiObjectiveControllerParameters {
   Vector3d ee_velocity_gain_;
   Vector3d arm_joints_angle_gain_;
   Vector3d arm_joints_ang_rate_gain_;
-  Vector3d rpy_max_;
-  Vector3d rpy_min_;
+  Vector2d rpy_max_;
+  Vector2d rpy_min_;
   Vector3d arm_joints_angle_max_;
   Vector3d arm_joints_angle_min_;
   Vector2d arm_joint_torque_lim_;
