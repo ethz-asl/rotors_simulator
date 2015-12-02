@@ -69,7 +69,7 @@ void MultiObjectiveController::InitializeParameters() {
   C_.setZero();
   MatrixXd C_temp = MatrixXd::Zero(ineq_no,minimizer_sz_);
   C_temp.block<2,2>(0,3) = Matrix2d::Identity();
-  C_temp.block(2,robot_dof_,arm_dof_,arm_dof_) = MatrixXd::Identity(arm_dof_,arm_dof_);
+  C_temp.block(2,mav_dof_,arm_dof_,arm_dof_) = MatrixXd::Identity(arm_dof_,arm_dof_);
   C_temp.bottomRightCorner(arm_dof_,arm_dof_) = MatrixXd::Identity(arm_dof_,arm_dof_);
   C_ = C_temp.sparseView();
   d_.resize(ineq_no);
@@ -109,6 +109,7 @@ void MultiObjectiveController::CalculateControlInputs(VectorXd* rotor_velocities
   // Return 0 velocities on all rotors, until the first command is received.
   if (!controller_active_) {
     *rotor_velocities = VectorXd::Zero(rotor_velocities->rows());
+    torques->setZero();
     return;
   }
 
@@ -125,7 +126,7 @@ void MultiObjectiveController::CalculateControlInputs(VectorXd* rotor_velocities
   *rotor_velocities = rotor_velocities->cwiseSqrt();
 
   *torques = x_.tail(arm_dof_);
-  //  torques->setZero();   //dummy ouput
+//  torques->setZero();   //dummy ouput
 
   //debug
 //  std::cout << "torques to rotor velocities :\n" << torque_to_rotor_velocities_ << std::endl;
@@ -133,6 +134,7 @@ void MultiObjectiveController::CalculateControlInputs(VectorXd* rotor_velocities
 //  std::cout << "Global force vector :\t" << x_.segment<3>(robot_dof_).transpose() << std::endl;
 //  std::cout << "Aero torques & thrust:\t" << torque_thrust.transpose() << std::endl;
 //  std::cout << "Joint torques :\t" << torques->transpose() << std::endl;
+//  std::cout << "\n-----------------------------------------------------------------------------------\n" << std::endl;
 }
 
 

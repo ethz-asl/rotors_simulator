@@ -33,11 +33,6 @@ MultiObjectiveControllerNode::MultiObjectiveControllerNode() {
 
   InitializeParams();
 
-  // Params server
-  dynamic_reconfigure::Server<rotors_control::MultiObjectiveControllerConfig>::CallbackType f;
-  f = boost::bind(&MultiObjectiveControllerNode::ParamsDynReconfigureCallback, this, _1, _2);
-  params_server_.setCallback(f);
-
   // UAV command subscribers
   cmd_pose_sub_ = nh_.subscribe(mav_msgs::default_topics::COMMAND_POSE, 1, &MultiObjectiveControllerNode::CommandPoseCallback, this);
   cmd_multi_dof_joint_trajectory_sub_ = nh_.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1, &MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback, this);
@@ -84,6 +79,9 @@ void MultiObjectiveControllerNode::InitializeParams() {
 
   namespace_ = pnh.getNamespace();
 
+  // Params server subscriber.
+  params_server_.setCallback(boost::bind(&MultiObjectiveControllerNode::ParamsDynReconfigureCallback, this, _1, _2));
+
   // Read parameters from rosparam.
   GetRosParameter(pnh, "mav_position_gain_x",
                   multi_objective_controller_.controller_parameters_.mav_position_gain_.x(),
@@ -103,22 +101,22 @@ void MultiObjectiveControllerNode::InitializeParams() {
   GetRosParameter(pnh, "mav_velocity_gain_z",
                   multi_objective_controller_.controller_parameters_.mav_velocity_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.mav_velocity_gain_.z());
-  GetRosParameter(pnh, "mav_attitude_gain_x",
+  GetRosParameter(pnh, "mav_attitude_gain_roll",
                   multi_objective_controller_.controller_parameters_.mav_attitude_gain_.x(),
                   &multi_objective_controller_.controller_parameters_.mav_attitude_gain_.x());
-  GetRosParameter(pnh, "mav_attitude_gain_y",
+  GetRosParameter(pnh, "mav_attitude_gain_pitch",
                   multi_objective_controller_.controller_parameters_.mav_attitude_gain_.y(),
                   &multi_objective_controller_.controller_parameters_.mav_attitude_gain_.y());
-  GetRosParameter(pnh, "mav_attitude_gain_z",
+  GetRosParameter(pnh, "mav_attitude_gain_yaw",
                   multi_objective_controller_.controller_parameters_.mav_attitude_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.mav_attitude_gain_.z());
-  GetRosParameter(pnh, "mav_angular_rate_gain_x",
+  GetRosParameter(pnh, "mav_angular_rate_gain_roll",
                   multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.x(),
                   &multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.x());
-  GetRosParameter(pnh, "mav_angular_rate_gain_y",
+  GetRosParameter(pnh, "mav_angular_rate_gain_pitch",
                   multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.y(),
                   &multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.y());
-  GetRosParameter(pnh, "mav_angular_rate_gain_z",
+  GetRosParameter(pnh, "mav_angular_rate_gain_yaw",
                   multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.mav_angular_rate_gain_.z());
   GetRosParameter(pnh, "ee_position_gain_x",
@@ -139,22 +137,22 @@ void MultiObjectiveControllerNode::InitializeParams() {
   GetRosParameter(pnh, "ee_velocity_gain_z",
                   multi_objective_controller_.controller_parameters_.ee_velocity_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.ee_velocity_gain_.z());
-  GetRosParameter(pnh, "arm_joint_angle_gain_pitch",
+  GetRosParameter(pnh, "arm_joints_angle_gain_pitch",
                   multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.x(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.x());
-  GetRosParameter(pnh, "arm_joint_angle_gain_left",
+  GetRosParameter(pnh, "arm_joints_angle_gain_left",
                   multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.y(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.y());
-  GetRosParameter(pnh, "arm_joint_angle_gain_right",
+  GetRosParameter(pnh, "arm_joints_angle_gain_right",
                   multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_angle_gain_.z());
-  GetRosParameter(pnh, "arm_joint_ang_rate_gain_pitch",
+  GetRosParameter(pnh, "arm_joints_ang_rate_gain_pitch",
                   multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.x(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.x());
-  GetRosParameter(pnh, "arm_joint_ang_rate_gain_left",
+  GetRosParameter(pnh, "arm_joints_ang_rate_gain_left",
                   multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.y(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.y());
-  GetRosParameter(pnh, "arm_joint_ang_rate_gain_right",
+  GetRosParameter(pnh, "arm_joints_ang_rate_gain_right",
                   multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.z(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_ang_rate_gain_.z());
   GetRosParameter(pnh, "rpy_max/roll",
@@ -549,49 +547,41 @@ void MultiObjectiveControllerNode::AerialManipulatorStateCallback(const nav_msgs
 //  std::cout << "\tjoint_state_msg1 --> " << joint_state_msg1.get()->header.stamp.sec << " sec " << joint_state_msg1.get()->header.stamp.nsec << " nsec" <<  std::endl;
 //  std::cout << "\tjoint_state_msg2 --> " << joint_state_msg2.get()->header.stamp.sec << " sec " << joint_state_msg2.get()->header.stamp.nsec << " nsec" <<  std::endl;
 
-  static unsigned int counter = 0;
+  // Update robot states
+  mav_msgs::EigenOdometry odometry;
+  mav_msgs::eigenOdometryFromMsg(*(odometry_msg.get()), &odometry);
+  multi_objective_controller_.SetOdometry(odometry);
+  manipulator_msgs::EigenJointsState joints_state;
+  std::vector<sensor_msgs::JointState> joint_state_msgs;
+  joint_state_msgs.push_back(*(joint_state_msg0.get()));
+  joint_state_msgs.push_back(*(joint_state_msg1.get()));
+  joint_state_msgs.push_back(*(joint_state_msg2.get()));
+  eigenJointsStateFromMsg(joint_state_msgs, &joints_state);
+  multi_objective_controller_.SetArmJointsState(joints_state);
 
-//  if ((counter < 5) and multi_objective_controller_.controller_active_) {
-  if (multi_objective_controller_.controller_active_) {
+  // Run optimization and compute control inputs
+  Eigen::VectorXd ref_rotor_velocities;
+  Eigen::Vector3d ref_torques;
+  multi_objective_controller_.CalculateControlInputs(&ref_rotor_velocities, &ref_torques);
 
-    // Update robot states
-    mav_msgs::EigenOdometry odometry;
-    mav_msgs::eigenOdometryFromMsg(*(odometry_msg.get()), &odometry);
-    multi_objective_controller_.SetOdometry(odometry);
-    manipulator_msgs::EigenJointsState joints_state;
-    std::vector<sensor_msgs::JointState> joint_state_msgs;
-    joint_state_msgs.push_back(*(joint_state_msg0.get()));
-    joint_state_msgs.push_back(*(joint_state_msg1.get()));
-    joint_state_msgs.push_back(*(joint_state_msg2.get()));
-    eigenJointsStateFromMsg(joint_state_msgs, &joints_state);
-    multi_objective_controller_.SetArmJointsState(joints_state);
+  // Todo(ffurrer): Do this in the conversions header.
+  mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
+  actuator_msg->angular_velocities.clear();
+  for (int i = 0; i < ref_rotor_velocities.size(); i++)
+    actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
+  actuator_msg->header.stamp = odometry_msg->header.stamp;
+  motor_velocity_reference_pub_.publish(actuator_msg);
 
-    // Run optimization and compute control inputs
-    Eigen::VectorXd ref_rotor_velocities;
-    Eigen::Vector3d ref_torques;
-    multi_objective_controller_.CalculateControlInputs(&ref_rotor_velocities, &ref_torques);
+  // Publish torque messages.
+  manipulator_msgs::CommandTorqueServoMotorPtr torque_msg(new manipulator_msgs::CommandTorqueServoMotor);
+  torque_msg->header.stamp = odometry_msg->header.stamp;
+  torque_msg->torque = ref_torques.x();
+  pitch_motor_torque_ref_pub_.publish(torque_msg);
+  torque_msg->torque = ref_torques.y();
+  left_motor_torque_ref_pub_.publish(torque_msg);
+  torque_msg->torque = ref_torques.z();
+  right_motor_torque_ref_pub_.publish(torque_msg);
 
-    // Todo(ffurrer): Do this in the conversions header.
-    mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
-    actuator_msg->angular_velocities.clear();
-    for (int i = 0; i < ref_rotor_velocities.size(); i++)
-      actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
-    actuator_msg->header.stamp = odometry_msg->header.stamp;
-    motor_velocity_reference_pub_.publish(actuator_msg);
-
-    // Publish torque messages.
-    manipulator_msgs::CommandTorqueServoMotorPtr torque_msg(new manipulator_msgs::CommandTorqueServoMotor);
-    torque_msg->header.stamp = odometry_msg->header.stamp;
-    torque_msg->torque = ref_torques.x();
-    pitch_motor_torque_ref_pub_.publish(torque_msg);
-    torque_msg->torque = ref_torques.y();
-    left_motor_torque_ref_pub_.publish(torque_msg);
-    torque_msg->torque = ref_torques.z();
-    right_motor_torque_ref_pub_.publish(torque_msg);
-
-//    std::cout << "\n-----------------------------------------------------------------------------------\n" << std::endl;
-    counter++;
-  }
 }
 
 ////// FORCE SENSOR CALLBACK //////

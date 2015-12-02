@@ -221,8 +221,6 @@ class MultiObjectiveController {
   MultiObjectiveControllerParameters controller_parameters_;
   VehicleParameters vehicle_parameters_;
 
-  bool controller_active_; //Todo move to private after debugging
-
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
  private:
@@ -230,6 +228,7 @@ class MultiObjectiveController {
   bool mav_trajectory_received_;
   bool arm_trajectory_received_;
   bool ee_trajectory_received_;
+  bool controller_active_;
 
   unsigned int robot_dof_;
   unsigned int mav_dof_;
