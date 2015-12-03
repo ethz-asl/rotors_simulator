@@ -1,0 +1,42 @@
+# Multi-objective controller parameters
+mav_position_gain_x: 35
+mav_position_gain_y: 40
+mav_position_gain_z: 6
+mav_velocity_gain_x: 22
+mav_velocity_gain_y: 25
+mav_velocity_gain_z: 4
+mav_attitude_gain_roll: 8
+mav_attitude_gain_pitch: 12
+mav_attitude_gain_yaw: 2
+mav_angular_rate_gain_roll: 4
+mav_angular_rate_gain_pitch: 5
+mav_angular_rate_gain_yaw: 2
+ee_position_gain_x: 6
+ee_position_gain_y: 8
+ee_position_gain_z: 10
+ee_velocity_gain_x: 50
+ee_velocity_gain_y: 50
+ee_velocity_gain_z: 25
+arm_joints_angle_gain_pitch: 17
+arm_joints_angle_gain_left: 30
+arm_joints_angle_gain_right: 30
+arm_joints_ang_rate_gain_pitch: 10
+arm_joints_ang_rate_gain_left: 41
+arm_joints_ang_rate_gain_right: 41
+rpy_max: {roll: deg(90), pitch: deg(90)}
+rpy_min: {roll: deg(-90), pitch: deg(-90)}
+arm_joint_angle_max: {pitch: deg(30), left: deg(180), right: deg(90)}
+arm_joint_angle_min: {pitch: deg(-100), left: deg(90), right: 0}
+arm_joint_torque_lim: {min: -2, max: 2}
+max_rot_velocity: 838
+objectives_weight_att: 1
+objectives_weight_pos: 0
+objectives_weight_yaw: 0
+objectives_weight_hover: 0
+objectives_weight_arm: 1
+objectives_weight_ee: 0
+objectives_weight_dead: 0
+mu_attitude: 30
+mu_arm: 10
+safe_range_rpy: 0.7
+safe_range_joints: 0.9

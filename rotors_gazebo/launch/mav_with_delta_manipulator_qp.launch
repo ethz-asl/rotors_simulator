@@ -41,14 +41,15 @@
       <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name)_qp.yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
-		<node name="waypoint_publisher_file" pkg="rotors_gazebo" type="waypoint_publisher_file" output="screen" args="$(find rotors_gazebo)/resource/multi_objective_waypoints.txt"/>
+
+		<node name="waypoint_publisher_file_qp" pkg="rotors_gazebo" type="waypoint_publisher_file_qp" output="screen" args="$(find rotors_gazebo)/resource/multi_objective_waypoints.txt"/>
 -->
     <node name="hovering_example_qp" pkg="rotors_gazebo" type="hovering_example_qp" output="screen"/>
     
   </group>
 
-	<!-- USER INTERFACE 
-	-->
-	<node name="rqt_publisher" pkg="rqt_publisher" type="rqt_publisher" output="screen"/>
+	<!-- USER INTERFACE -->
 	<node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen"/>
+	<node name="rqt_publisher" pkg="rqt_publisher" type="rqt_publisher" output="screen"/>
+
 </launch>

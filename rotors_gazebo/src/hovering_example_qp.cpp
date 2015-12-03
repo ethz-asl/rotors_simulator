@@ -83,7 +83,7 @@ int main(int argc, char** argv){
   trajectory_msgs::JointTrajectory joint_trajectory_msg;
   joint_trajectory_msg.header.stamp = ros::Time::now();
   Eigen::VectorXd desired_joints_angle(3);
-  desired_joints_angle << -M_PI/6, 3*M_PI/4, M_PI/4;
+  desired_joints_angle << 0, 3*M_PI/4, M_PI/4;
   manipulator_msgs::msgJointTrajectoryFromAngles(desired_joints_angle, &joint_trajectory_msg);
 
   ROS_INFO("Publishing manipulator joints waypoint on namespace %s: [%f, %f, %f].",
