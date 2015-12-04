@@ -205,7 +205,7 @@ class MultiObjectiveController {
   void InitializeParameters();
 
   // Called after state update
-  void CalculateControlInputs(VectorXd* rotor_velocities, Vector3d* torques);
+  bool CalculateControlInputs(VectorXd* rotor_velocities, Vector3d* torques);
 
   // Called on state update callback (synchronized)
   void SetOdometry(const mav_msgs::EigenOdometry& odometry);
@@ -259,7 +259,7 @@ class MultiObjectiveController {
 
   DynamicModelTerms dyn_mdl_terms_;
 
-  void SolveMultiObjectiveOptimization() ;
+  bool SolveMultiObjectiveOptimization() ;
 
   void GetSetPointObjective(const VectorXd& g, const VectorXd& g_ref,
                             const VectorXd& kp, const VectorXd& kv,

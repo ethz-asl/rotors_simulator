@@ -559,10 +559,11 @@ void MultiObjectiveControllerNode::AerialManipulatorStateCallback(const nav_msgs
   eigenJointsStateFromMsg(joint_state_msgs, &joints_state);
   multi_objective_controller_.SetArmJointsState(joints_state);
 
-  // Run optimization and compute control inputs
+  // Run optimization and compute control inputs. Publish nothing if optimization fails.
   Eigen::VectorXd ref_rotor_velocities;
   Eigen::Vector3d ref_torques;
-  multi_objective_controller_.CalculateControlInputs(&ref_rotor_velocities, &ref_torques);
+  if (!multi_objective_controller_.CalculateControlInputs(&ref_rotor_velocities, &ref_torques))
+    return;
 
   // Todo(ffurrer): Do this in the conversions header.
   mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);

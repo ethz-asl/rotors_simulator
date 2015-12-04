@@ -100,7 +100,7 @@ void MultiObjectiveController::InitializeParameters() {
 }
 
 
-void MultiObjectiveController::CalculateControlInputs(VectorXd* rotor_velocities, Vector3d* torques) {
+bool MultiObjectiveController::CalculateControlInputs(VectorXd* rotor_velocities, Vector3d* torques) {
   assert(rotor_velocities);
   assert(torques);
   assert(initialized_params_);
@@ -110,11 +110,12 @@ void MultiObjectiveController::CalculateControlInputs(VectorXd* rotor_velocities
   if (!controller_active_) {
     *rotor_velocities = VectorXd::Zero(rotor_velocities->rows());
     torques->setZero();
-    return;
+    return true;
   }
 
-  SolveMultiObjectiveOptimization();
-//  ROS_INFO("CHECK POINT after SolveMultiObjectiveOptimization");  //debug
+  // Return error if optimization fails.
+  if (!SolveMultiObjectiveOptimization())
+    return false;
 
   // Extract thrust force from aerodynamic forces given in world frame and current UAV orientation
   double thrust = (odometry_.orientation_W_B.inverse() * x_.segment<3>(robot_dof_)).tail<1>()(0);
@@ -135,6 +136,8 @@ void MultiObjectiveController::CalculateControlInputs(VectorXd* rotor_velocities
 //  std::cout << "Aero torques & thrust:\t" << torque_thrust.transpose() << std::endl;
 //  std::cout << "Joint torques :\t" << torques->transpose() << std::endl;
 //  std::cout << "\n-----------------------------------------------------------------------------------\n" << std::endl;
+
+  return true;
 }
 
 
@@ -192,7 +195,7 @@ void MultiObjectiveController::SetExternalForces(const Vector3d& forces) {
 
 /////////////////////// PRIVATE METHODs //////////////////////
 
-void MultiObjectiveController::SolveMultiObjectiveOptimization() {
+bool MultiObjectiveController::SolveMultiObjectiveOptimization() {
   MatrixXd Q(minimizer_sz_,minimizer_sz_);
   VectorXd c(minimizer_sz_);
 
@@ -276,12 +279,13 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
   for (unsigned int i = 0; i<6; i++) {
     if (f_(i)<d_(i)) {
       ROS_WARN_THROTTLE(1, "[multi_objective_controller] Constraints on %i-th inequality are inconsistent.", i);
+      return false;
     }
   }
 
   if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, x_)) {
     ROS_WARN_THROTTLE(1,"[multi_objective_controller] Optimization failed.");
-//    return;
+    return false;
   }
 
   //debug
@@ -291,6 +295,8 @@ void MultiObjectiveController::SolveMultiObjectiveOptimization() {
 //  std::cout << "Q_ = " << Q_.toDense().format(MatlabMatrixFmt) << std::endl;
 //  std::cout << "c_ = " << c_.format(MatlabVectorFmt) << std::endl;
 //  std::cout << "x_ = " << x_.format(MatlabVectorFmt) << std::endl;
+
+  return true;
 }
 
 
