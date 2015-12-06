@@ -420,6 +420,15 @@
    Ki="0.40"
    minAngle="${-PI}"
    maxAngle="${PI}"
+	 measurement_divisor="1"
+	 measurement_delay="0"
+	 unknown_delay="0.0"
+	 noise_normal_angle="0.0"
+	 noise_normal_angular_velocity="0.0"
+ 	 noise_normal_torque="0.0"
+	 noise_uniform_angle="0.0"
+	 noise_uniform_angular_velocity="0.0"
+	 noise_uniform_torque="0.0"
    enable_visual="true"
    visual_scale="1"
    color="Blue">
@@ -440,6 +449,15 @@
    Ki="0.40"
    minAngle="${-PI}"
    maxAngle="${PI}"
+	 measurement_divisor="1"
+	 measurement_delay="0"
+	 unknown_delay="0.0"
+	 noise_normal_angle="0.0"
+	 noise_normal_angular_velocity="0.0"
+ 	 noise_normal_torque="0.0"
+	 noise_uniform_angle="0.0"
+	 noise_uniform_angular_velocity="0.0"
+	 noise_uniform_torque="0.0"
    enable_visual="true"
    visual_scale="1"
    color="Red">
@@ -460,6 +478,15 @@
    Ki="0.40"
    minAngle="${-PI}"
    maxAngle="${PI}"
+	 measurement_divisor="1"
+	 measurement_delay="0"
+	 unknown_delay="0.0"
+	 noise_normal_angle="0.0"
+	 noise_normal_angular_velocity="0.0"
+ 	 noise_normal_torque="0.0"
+	 noise_uniform_angle="0.0"
+	 noise_uniform_angular_velocity="0.0"
+	 noise_uniform_torque="0.0"
    enable_visual="false"
    visual_scale="1"
    color="Red">
@@ -467,8 +494,6 @@
    <xacro:insert_block name="generic_servo_inertial"/>
  </xacro:servo_motor_macro>
 
-
- >
 
  <xacro:servo_motor_macro
    namespace="${namespace}"
@@ -483,6 +508,15 @@
    Ki="0.40"
    minAngle="${-PI}"
    maxAngle="${PI}"
+	 measurement_divisor="1"
+	 measurement_delay="0"
+	 unknown_delay="0.0"
+	 noise_normal_angle="0.0"
+	 noise_normal_angular_velocity="0.0"
+ 	 noise_normal_torque="0.0"
+	 noise_uniform_angle="0.0"
+	 noise_uniform_angular_velocity="0.0"
+	 noise_uniform_torque="0.0"
    enable_visual="true"
    visual_scale="1"
    color="Red">

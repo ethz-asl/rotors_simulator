@@ -40,6 +40,7 @@
 #include <ros/ros.h>
 #include <rosbag/bag.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/JointState.h>
 #include <std_msgs/Float32.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
@@ -52,7 +53,7 @@ static const std::string kDefaultFrameId = "ground_truth_pose";
 static const std::string kDefaultLinkName = "base_link";
 static const std::string kDefaultBagFilename_ = "simulator.bag";
 static const std::string kDefaultForceSensorTopic = "delta_manipulator/force_sensor";
-static const std::string kDefaultManipulatorTopic = "delta_manipulator/joint_angles";
+static const std::string kDefaultManipulatorTopic = "delta_manipulator/joints_state";
 
 /// \brief This plugin is used to create rosbag files from within gazebo.
 class GazeboBagPlugin : public ModelPlugin {
@@ -81,10 +82,7 @@ class GazeboBagPlugin : public ModelPlugin {
         link_name_(kDefaultLinkName),
         bag_filename_(kDefaultBagFilename_),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
-        node_handle_(NULL),
-        manip_pitch_joint_(NULL),
-        manip_left_joint_(NULL),
-        manip_right_joint_(NULL) {}
+        node_handle_(NULL) {}
 
   virtual ~GazeboBagPlugin();
 
@@ -162,10 +160,8 @@ class GazeboBagPlugin : public ModelPlugin {
 
   MotorNumberToJointMap motor_joints_;
 
-  // Pointer to manipulator pitching and base joints
-  physics::JointPtr manip_pitch_joint_;
-  physics::JointPtr manip_left_joint_;
-  physics::JointPtr manip_right_joint_;
+  // Vector of pointers to manipulator pitching and base joints
+  physics::Joint_V manip_joints_;
 
   /// \brief Pointer to the ContactManager to get all collisions of this
   /// link and its children

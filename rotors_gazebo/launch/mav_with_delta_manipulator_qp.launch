@@ -8,7 +8,7 @@
   <arg name="enable_logging" default="false" />
   <arg name="enable_ground_truth" default="true" />
   <arg name="log_file" default="$(arg mav_name)_delta_manipulator" />
-  <arg name="gui" value="true"/>
+  <arg name="gui" default="true"/>
 	<arg name="z" default="0.1" />
 	<arg name="world" default="basic_bullet" />
 	<arg name="std_ctrller" default="true" />

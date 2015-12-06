@@ -186,15 +186,15 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   force_sensor_ang_sub_ = node_handle_->subscribe(force_sensor_ang_topic_, 10, &GazeboBagPlugin::ForceSensorAngCallback, this);
 
   // Get pointers to manipulator joints
+  manip_joints_.clear();
   for (i = 0; i < model_->GetJointCount(); i++) {
     std::string joint_name = model_->GetJoints()[i]->GetName();
 
-    if (joint_name.find("pitching") != joint_name.npos)
-      manip_pitch_joint_ = model_->GetJoint(joint_name);
-    if (joint_name.find("left_1") != joint_name.npos)
-      manip_left_joint_ = model_->GetJoint(joint_name);
-    if (joint_name.find("right_1") != joint_name.npos)
-      manip_right_joint_ = model_->GetJoint(joint_name);
+    //Todo : move joints name to urdf file and parse them as sdf params.
+    if ((joint_name.find("/pitching") != joint_name.npos) or
+        (joint_name.find("/left_1") != joint_name.npos) or
+        (joint_name.find("/right_1") != joint_name.npos))
+      manip_joints_.push_back(model_->GetJoint(joint_name));
   }
 
 }
@@ -207,7 +207,7 @@ void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
   LogGroundTruth(now);
   LogMotorVelocities(now);
   // This info are logged only when a delta_manipulator is attached to mav.
-  if ((manip_pitch_joint_==NULL) || (manip_left_joint_==NULL) || (manip_right_joint_==NULL))
+  if (manip_joints_.empty())
     ROS_INFO_ONCE("[gazebo_bag_plugin] No delta manipulator attached to spawned model.");
   else
     LogManipulatorState(now);
@@ -354,16 +354,19 @@ void GazeboBagPlugin::LogWrenches(const common::Time now) {
 void GazeboBagPlugin::LogManipulatorState(const common::Time now) {
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
 
-  geometry_msgs::Vector3Stamped joint_angles;
+  sensor_msgs::JointState joints_state;
 
-  joint_angles.header.frame_id  = manip_pitch_joint_->GetParent()->GetScopedName();
-  joint_angles.header.stamp.sec = now.sec;
-  joint_angles.header.stamp.nsec = now.nsec;
-  joint_angles.vector.x = manip_pitch_joint_->GetAngle(0).Radian(); // --> q0
-  joint_angles.vector.y = manip_left_joint_->GetAngle(0).Radian();  // --> q1
-  joint_angles.vector.z = manip_right_joint_->GetAngle(0).Radian(); // --> q2
+  joints_state.header.frame_id  = manip_joints_.front()->GetParent()->GetScopedName();
+  joints_state.header.stamp.sec = now.sec;
+  joints_state.header.stamp.nsec = now.nsec;
+  for (auto joint : manip_joints_) {
+    joints_state.name.push_back(joint->GetName());
+    joints_state.position.push_back(joint->GetAngle(0).Radian());
+    joints_state.velocity.push_back(joint->GetVelocity(0));
+    joints_state.effort.push_back(joint->GetForce(0));
+  }
 
-  writeBag(namespace_ + "/" + manipulator_topic_, ros_now, joint_angles);
+  writeBag(namespace_ + "/" + manipulator_topic_, ros_now, joints_state);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboBagPlugin);

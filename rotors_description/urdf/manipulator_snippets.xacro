@@ -94,11 +94,12 @@
 
   <xacro:macro name="servo_motor_macro"
     params="namespace motor_name parent_link actuated_joint motor_model maxTorque noLoadSpeed
-            Kp Kd Ki maxAngle minAngle enable_visual visual_scale color *origin *inertial">
+            Kp Kd Ki maxAngle minAngle measurement_divisor measurement_delay unknown_delay  
+						noise_normal_angle noise_normal_angular_velocity noise_normal_torque noise_uniform_angle 
+						noise_uniform_angular_velocity noise_uniform_torque enable_visual visual_scale color *origin *inertial">
 
             <link name="${namespace}/${motor_name}">
               <xacro:insert_block name="inertial" />
-
               <xacro:if value="${enable_visual}">
                 <visual>
                   <geometry>
@@ -119,6 +120,7 @@
               <xacro:insert_block name="origin" />
               <limit upper="0" lower="0" effort="0" velocity="0" />
             </joint>
+
             <gazebo>
               <plugin name="${namespace}/${motor_name}" filename="librotors_gazebo_servo_motor_plugin.so">
                 <robotNamespace>${namespace}</robotNamespace>
@@ -131,6 +133,18 @@
                 <maxAngleIntegralError>1.0</maxAngleIntegralError>
                 <maxAngle>${maxAngle}</maxAngle>
                 <minAngle>${minAngle}</minAngle>
+								<measurementDivisor>${measurement_divisor}</measurementDivisor>
+								<!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
+								<measurementDelay>${measurement_delay}</measurementDelay>
+								<!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
+								<unknownDelay>${unknown_delay}</unknownDelay>
+								<!-- additional delay, that just gets added to the timestamp [s] -->
+								<noiseNormalAngle>${noise_normal_angle}</noiseNormalAngle>
+								<noiseNormalAngularVelocity>${noise_normal_angular_velocity}</noiseNormalAngularVelocity>
+								<noiseNormalTorque>${noise_normal_torque}</noiseNormalTorque>
+								<noiseUniformAngle>${noise_uniform_angle}</noiseUniformAngle>
+								<noiseUniformAngularVelocity>${noise_uniform_angular_velocity}</noiseUniformAngularVelocity>
+								<noiseUniformTorque>${noise_uniform_torque}</noiseUniformTorque>
                 <Kp>${Kp}</Kp>
                 <Kd>${Kd}</Kd>
                 <Ki>${Ki}</Ki>

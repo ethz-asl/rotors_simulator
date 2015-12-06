@@ -47,12 +47,22 @@ static const double kDefaultKi = 0.3;
 static const double kDefaultMaxAngle = 1e+16;
 static const double kDefaultMinAngle = -1e+16;
 static const double kDefaultMaxAngleErrorIntegral = 1.0;
+static constexpr int kDefaultMeasurementDelay = 0;
+static constexpr int kDefaultMeasurementDivisor = 1;
+static constexpr int kDefaultGazeboSequence = 0;
+static constexpr double kDefaultUnknownDelay = 0.0;
+
 
 class GazeboServoMotor : public ModelPlugin
 {
  public:
+  typedef std::normal_distribution<> NormalDistribution;
+  typedef std::uniform_real_distribution<> UniformDistribution;
+  typedef std::deque<std::pair<int, sensor_msgs::JointState> > JointStateQueue;
+
   GazeboServoMotor()
       : ModelPlugin(),
+        random_generator_(random_device_()),
         command_sub_topic_(kDefaultCommandSubTopic),
         joint_state_pub_topic_(kDefaultJointStatePubTopic),
         kp_(kDefaultKp),
@@ -60,12 +70,19 @@ class GazeboServoMotor : public ModelPlugin
         ki_(kDefaultKi),
         max_angle_(kDefaultMaxAngle),
         min_angle_(kDefaultMinAngle),
+        measurement_delay_(kDefaultMeasurementDelay),
+        measurement_divisor_(kDefaultMeasurementDivisor),
+        unknown_delay_(kDefaultUnknownDelay),
+        gazebo_sequence_(kDefaultGazeboSequence),
         angle_error_integral_(0.0),
+        sampling_time_(0.0),
+        no_load_speed_(0.0),
+        max_torque_(0.0),
+        torque_reference_(0.0),
         max_angle_error_integral_(kDefaultMaxAngleErrorIntegral),
         received_first_command_(false),
-        position_control_(true)
-  {
-  }
+        position_control_(true),
+        node_handle_(NULL) {}
 
   virtual ~GazeboServoMotor();
 
@@ -94,6 +111,9 @@ class GazeboServoMotor : public ModelPlugin
 
   double sampling_time_;
 
+  std::random_device random_device_;
+  std::mt19937 random_generator_;
+
   // motor parameters
   double max_torque_;
   double max_angle_error_integral_;
@@ -105,6 +125,21 @@ class GazeboServoMotor : public ModelPlugin
   double kp_;
   double kd_;
   double ki_;
+
+  // measurements parameters
+  int measurement_delay_;
+  int measurement_divisor_;
+  int gazebo_sequence_;
+  double unknown_delay_;
+
+  NormalDistribution position_n_;
+  NormalDistribution velocity_n_;
+  NormalDistribution effort_n_;
+  UniformDistribution position_u_;
+  UniformDistribution velocity_u_;
+  UniformDistribution effort_u_;
+
+  JointStateQueue joint_state_queue_;
 
   bool received_first_command_;
   bool position_control_;

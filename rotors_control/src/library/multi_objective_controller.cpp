@@ -20,6 +20,7 @@
 
 #include "rotors_control/multi_objective_controller.h"
 #include <stdlib.h>
+#include <ctime>
 
 
 #define PRECISION 7 //StreamPrecision FullPrecision
@@ -196,6 +197,8 @@ void MultiObjectiveController::SetExternalForces(const Vector3d& forces) {
 /////////////////////// PRIVATE METHODs //////////////////////
 
 bool MultiObjectiveController::SolveMultiObjectiveOptimization() {
+  std::clock_t startcputime = std::clock();
+
   MatrixXd Q(minimizer_sz_,minimizer_sz_);
   VectorXd c(minimizer_sz_);
 
@@ -205,6 +208,8 @@ bool MultiObjectiveController::SolveMultiObjectiveOptimization() {
   x_.setZero();
 
   UpdateLinearConstraints();
+
+  std::clock_t after_update_cpu_time = std::clock();
 
   VectorXd current_weights = controller_parameters_.objectives_weight_;
   if (!mav_trajectory_received_) {
@@ -283,6 +288,8 @@ bool MultiObjectiveController::SolveMultiObjectiveOptimization() {
     }
   }
 
+  std::clock_t after_cost_cpu_time = std::clock();
+
   if (!ooqpei::OoqpEigenInterface::solve(Q_, c_, A_, b_, C_, d_, f_, x_)) {
     ROS_WARN_THROTTLE(1,"[multi_objective_controller] Optimization failed.");
     return false;
@@ -295,6 +302,13 @@ bool MultiObjectiveController::SolveMultiObjectiveOptimization() {
 //  std::cout << "Q_ = " << Q_.toDense().format(MatlabMatrixFmt) << std::endl;
 //  std::cout << "c_ = " << c_.format(MatlabVectorFmt) << std::endl;
 //  std::cout << "x_ = " << x_.format(MatlabVectorFmt) << std::endl;
+
+  // Time performance evaluation
+//  double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+//  double cpu_duration_update = (after_update_cpu_time - startcputime) / (double)CLOCKS_PER_SEC;
+//  double cpu_duration_cost = (after_cost_cpu_time - after_update_cpu_time) / (double)CLOCKS_PER_SEC;
+//  ROS_INFO_STREAM_THROTTLE(1, "Finished in " << cpu_duration << " seconds [CPU Clock] ");
+//  std::cout << cpu_duration_update << "\t" << cpu_duration_cost << "\t" << cpu_duration << std::endl;
 
   return true;
 }
