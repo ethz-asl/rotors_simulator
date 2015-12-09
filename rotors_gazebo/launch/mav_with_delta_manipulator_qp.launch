@@ -16,6 +16,7 @@
 	<arg name="hovering_ex" default="true" />
 	<arg name="rqt_reconfigure" default="true" />
 	<arg name="rqt_publisher" default="true" />
+	<arg name="yaml" default="" />
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world).world" />
@@ -37,7 +38,7 @@
 
 		<group if="$(arg std_ctrller)">
 		  <node name="multi_objective_controller_node" pkg="rotors_control" type="multi_objective_controller_node" output="screen">
-		    <rosparam command="load" file="$(find rotors_gazebo)/resource/multi_objective_controller_$(arg mav_name).yaml" />
+		    <rosparam command="load" file="$(find rotors_gazebo)/resource/multi_objective_controller_$(arg mav_name)$(arg yaml).yaml" />
 		    <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name)_qp.yaml" />
 		    <remap from="odometry" to="odometry_sensor1/odometry" />
 		  </node>		

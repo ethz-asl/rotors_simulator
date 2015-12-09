@@ -40,6 +40,7 @@ MultiObjectiveController::MultiObjectiveController()
       mav_trajectory_received_(false),
       arm_trajectory_received_(false),
       ee_trajectory_received_(false),
+      set_frozen_joints_angle_des_(false),
       mav_dof_(kDefaultMavDof),
       arm_dof_(kDefaultArmDof) {
 
@@ -154,7 +155,18 @@ void MultiObjectiveController::SetOdometry(const mav_msgs::EigenOdometry& odomet
 
 
 void MultiObjectiveController::SetArmJointsState(const manipulator_msgs::EigenJointsState& joints_state) {
+  static Vector3d dangerous_range = (1-controller_parameters_.safe_range_joints_) * (controller_parameters_.arm_joints_angle_max_ - controller_parameters_.arm_joints_angle_min_);
+  static Vector3d arm_joints_angle_min = controller_parameters_.arm_joints_angle_min_ + dangerous_range;
+  static Vector3d arm_joints_angle_max = controller_parameters_.arm_joints_angle_max_ - dangerous_range;
   joints_state_ = joints_state;
+
+  if (set_frozen_joints_angle_des_) {
+    frozen_joints_angle_des_ = joints_state.angles;
+    // Clip between joints angle limits
+    frozen_joints_angle_des_ = frozen_joints_angle_des_.cwiseMax(arm_joints_angle_min);
+    frozen_joints_angle_des_ = frozen_joints_angle_des_.cwiseMin(arm_joints_angle_max);
+    set_frozen_joints_angle_des_ = false;
+  }
 
   //debug
 //  std::cout << "Joints state position vector [degrees] :\t" << joints_state_.angles.transpose() * 180/M_PI << std::endl;
@@ -189,6 +201,11 @@ void MultiObjectiveController::SetDesiredJointsAngle(const manipulator_msgs::Eig
 }
 
 
+void MultiObjectiveController::SetDesiredFrozenJointsAngle() {
+  set_frozen_joints_angle_des_ = true;
+}
+
+
 void MultiObjectiveController::SetExternalForces(const Vector3d& forces) {
   //Todo : ignore small forces (just noise)
   ext_forces_ = forces;
@@ -213,7 +230,7 @@ bool MultiObjectiveController::SolveMultiObjectiveOptimization() {
 
   VectorXd current_weights = controller_parameters_.objectives_weight_;
   if (!mav_trajectory_received_) {
-    current_weights << 0, 0, 0, 2, controller_parameters_.objectives_weight_.tail<3>();
+    current_weights << 0, 0, 0, 1, controller_parameters_.objectives_weight_.tail<3>();
   }
   if (!(arm_trajectory_received_ or ee_trajectory_received_)) {
     current_weights << controller_parameters_.objectives_weight_.head<4>(), 0, 0, 1;
@@ -244,8 +261,8 @@ bool MultiObjectiveController::SolveMultiObjectiveOptimization() {
         break;
 
       case (3):
-        GetFreeHoverSetPtObjective(&Q,&c);
-//        ROS_INFO_THROTTLE(1, "CHECK POINT after GetFreeHoverSetPtObjective");  //debug
+        GetZeroVelSetPtObjective(&Q,&c);
+//        ROS_INFO_THROTTLE(1, "CHECK POINT after GetZeroVelSetPtObjective");  //debug
         break;
 
       case (4):
@@ -267,8 +284,8 @@ bool MultiObjectiveController::SolveMultiObjectiveOptimization() {
         break;
 
       case (6):
-        GetDeadArmSetPtObjective(&Q,&c);
-//        ROS_INFO_THROTTLE(1, "CHECK POINT after GetDeadArmSetPtObjective");  //debug
+        GetFrozenArmSetPtObjective(&Q,&c);
+//        ROS_INFO_THROTTLE(1, "CHECK POINT after GetFrozenArmSetPtObjective");  //debug
         break;
 
       default:
@@ -391,7 +408,7 @@ void MultiObjectiveController::GetYawSetPtObjective(MatrixXd* _Q, VectorXd* _c) 
 }
 
 
-void MultiObjectiveController::GetFreeHoverSetPtObjective(MatrixXd* _Q, VectorXd* _c) const {
+void MultiObjectiveController::GetZeroVelSetPtObjective(MatrixXd* _Q, VectorXd* _c) const {
   MatrixXd Q_pos;
   MatrixXd Q_orient;
   VectorXd c_pos;
@@ -463,7 +480,7 @@ void MultiObjectiveController::GetManipulatorSetPtObjective(MatrixXd* _Q, Vector
 }
 
 
-void MultiObjectiveController::GetDeadArmSetPtObjective(MatrixXd* _Q, VectorXd* _c) const {
+void MultiObjectiveController::GetFrozenArmSetPtObjective(MatrixXd* _Q, VectorXd* _c) const {
   static MatrixXd Jac_ = [&] {
       MatrixXd tmp(arm_dof_,robot_dof_);
       tmp.setZero();
@@ -474,7 +491,7 @@ void MultiObjectiveController::GetDeadArmSetPtObjective(MatrixXd* _Q, VectorXd* 
 
   VectorXd robot_vel = GetRobotVelocities();
 
-  GetSetPointObjective(joints_state_.angles, joints_state_.angles, controller_parameters_.arm_joints_angle_gain_,
+  GetSetPointObjective(joints_state_.angles, frozen_joints_angle_des_, controller_parameters_.arm_joints_angle_gain_,
                        controller_parameters_.arm_joints_ang_rate_gain_, Jac_, Jac_dot_, robot_vel, _Q, _c);
 }
 

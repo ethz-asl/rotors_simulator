@@ -28,10 +28,10 @@
           <contact_surface_layer>0.0001</contact_surface_layer>
         </constraints>
       </bullet>
-      <max_step_size>0.001</max_step_size>
-      <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>1000</real_time_update_rate>
-      <gravity>0 0 -9.8</gravity>
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>0.5</real_time_factor>
+      <real_time_update_rate>250</real_time_update_rate>
+      <gravity>0 0 -9.81</gravity>
     </physics>
     <plugin name='gazebo_octomap' filename='librotors_gazebo_octomap_plugin.so'/>
     <scene>
@@ -46,6 +46,26 @@
       <elevation>0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
+		<model name='pole'>
+		  <pose>0.4 0 0 0 0 0</pose>
+		  <link name='Pole'>
+		    <visual name='Wall_1_Visual'>
+		      <geometry>
+		        <cylinder>
+		          <radius>0.03</radius>
+		          <length>8</length>
+		        </cylinder>
+		      </geometry>
+		      <material>
+		        <script>
+		          <uri>file://media/materials/scripts/gazebo.material</uri>
+		          <name>Gazebo/RustySteel</name>
+		        </script>
+		      </material>
+		    </visual>
+		  </link>
+		  <static>1</static>
+		</model>
     <model name='powerplant'>
       <static>1</static>
       <link name='link'>

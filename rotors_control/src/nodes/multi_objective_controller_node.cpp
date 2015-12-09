@@ -82,6 +82,8 @@ void MultiObjectiveControllerNode::InitializeParams() {
   // Params server subscriber.
   params_server_.setCallback(boost::bind(&MultiObjectiveControllerNode::ParamsDynReconfigureCallback, this, _1, _2));
 
+  int mav_objective_function_idx, manipulator_objective_function_idx;
+
   // Read parameters from rosparam.
   GetRosParameter(pnh, "mav_position_gain_x",
                   multi_objective_controller_.controller_parameters_.mav_position_gain_.x(),
@@ -185,27 +187,14 @@ void MultiObjectiveControllerNode::InitializeParams() {
   GetRosParameter(pnh, "arm_joint_angle_min/right",
                   multi_objective_controller_.controller_parameters_.arm_joints_angle_min_.z(),
                   &multi_objective_controller_.controller_parameters_.arm_joints_angle_min_.z());
-  GetRosParameter(pnh, "objectives_weight_att",
-                  multi_objective_controller_.controller_parameters_.objectives_weight_(0),
-                  &multi_objective_controller_.controller_parameters_.objectives_weight_(0));
-  GetRosParameter(pnh, "objectives_weight_pos",
-                  multi_objective_controller_.controller_parameters_.objectives_weight_(1),
-                  &multi_objective_controller_.controller_parameters_.objectives_weight_(1));
-  GetRosParameter(pnh, "objectives_weight_yaw",
-                  multi_objective_controller_.controller_parameters_.objectives_weight_(2),
-                  &multi_objective_controller_.controller_parameters_.objectives_weight_(2));
-  GetRosParameter(pnh, "objectives_weight_hover",
-                  multi_objective_controller_.controller_parameters_.objectives_weight_(3),
-                  &multi_objective_controller_.controller_parameters_.objectives_weight_(3));
-  GetRosParameter(pnh, "objectives_weight_arm",
-                  multi_objective_controller_.controller_parameters_.objectives_weight_(4),
-                  &multi_objective_controller_.controller_parameters_.objectives_weight_(4));
-  GetRosParameter(pnh, "objectives_weight_ee",
-                  multi_objective_controller_.controller_parameters_.objectives_weight_(5),
-                  &multi_objective_controller_.controller_parameters_.objectives_weight_(5));
-  GetRosParameter(pnh, "objectives_weight_dead",
-                  multi_objective_controller_.controller_parameters_.objectives_weight_(6),
-                  &multi_objective_controller_.controller_parameters_.objectives_weight_(6));
+  GetRosParameter(pnh, "mav_objective_function", 0,
+                  &mav_objective_function_idx);
+  GetRosParameter(pnh, "manipulator_objective_function", 4,
+                  &manipulator_objective_function_idx);
+  GetRosParameter(pnh, "value_mav", multi_objective_controller_.controller_parameters_.objectives_weight_.head<4>().maxCoeff(),
+                  &multi_objective_controller_.controller_parameters_.objectives_weight_(mav_objective_function_idx));
+  GetRosParameter(pnh, "value_arm", multi_objective_controller_.controller_parameters_.objectives_weight_.tail<3>().maxCoeff(),
+                  &multi_objective_controller_.controller_parameters_.objectives_weight_(manipulator_objective_function_idx));
   GetRosParameter(pnh, "arm_joint_torque_lim/min",
                   multi_objective_controller_.controller_parameters_.arm_joint_torque_lim_.x(),
                   &multi_objective_controller_.controller_parameters_.arm_joint_torque_lim_.x());
@@ -231,6 +220,14 @@ void MultiObjectiveControllerNode::InitializeParams() {
   GetVehicleParameters(pnh, &multi_objective_controller_.vehicle_parameters_);
 
   multi_objective_controller_.InitializeParameters();
+
+  multi_objective_controller_.SetDesiredFrozenJointsAngle();
+
+  //Todo: Workaround to update objective functions in rqt_reconfigure from yaml default
+//  rotors_control::MultiObjectiveControllerConfig config;
+//  params_server_.getConfigDefault(config);
+//  config.value_arm = multi_objective_controller_.controller_parameters_.objectives_weight_.tail<3>().maxCoeff();
+//  params_server_.updateConfig(config);
 }
 
 
@@ -277,6 +274,7 @@ void MultiObjectiveControllerNode::ParamsDynReconfigureCallback(rotors_control::
   multi_objective_controller_.controller_parameters_.objectives_weight_.setZero();
   multi_objective_controller_.controller_parameters_.objectives_weight_(config.mav_objective_function) = config.value_mav;
   multi_objective_controller_.controller_parameters_.objectives_weight_(config.manipulator_objective_function) = config.value_arm;
+  multi_objective_controller_.SetDesiredFrozenJointsAngle();
 
 
   ROS_INFO("[multi_objective_controller_node] Controller parameters reconfigured.");
@@ -312,10 +310,10 @@ void MultiObjectiveControllerNode::ParamsDynReconfigureCallback(rotors_control::
   PrintParam("objectives_weight/att", multi_objective_controller_.controller_parameters_.objectives_weight_(0));
   PrintParam("objectives_weight/pos", multi_objective_controller_.controller_parameters_.objectives_weight_(1));
   PrintParam("objectives_weight/yaw", multi_objective_controller_.controller_parameters_.objectives_weight_(2));
-  PrintParam("objectives_weight/hover", multi_objective_controller_.controller_parameters_.objectives_weight_(3));
+  PrintParam("objectives_weight/vel", multi_objective_controller_.controller_parameters_.objectives_weight_(3));
   PrintParam("objectives_weight/arm", multi_objective_controller_.controller_parameters_.objectives_weight_(4));
   PrintParam("objectives_weight/ee", multi_objective_controller_.controller_parameters_.objectives_weight_(5));
-  PrintParam("objectives_weight/dead", multi_objective_controller_.controller_parameters_.objectives_weight_(6));
+  PrintParam("objectives_weight/frozen", multi_objective_controller_.controller_parameters_.objectives_weight_(6));
   std::cout << std::endl;
 }
 

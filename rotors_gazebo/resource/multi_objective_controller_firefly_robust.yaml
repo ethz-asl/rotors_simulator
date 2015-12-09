@@ -29,13 +29,14 @@ arm_joint_angle_max: {pitch: deg(30), left: deg(180), right: deg(90)}
 arm_joint_angle_min: {pitch: deg(-100), left: deg(90), right: 0}
 arm_joint_torque_lim: {min: -2, max: 2}
 max_rot_velocity: 838
-objectives_weight_att: 0
-objectives_weight_pos: 1
-objectives_weight_yaw: 0
-objectives_weight_hover: 0
-objectives_weight_arm: 0
-objectives_weight_ee: 1
-objectives_weight_dead: 0
+# 0: att, 1: pos, 2: yaw, 3: vel 
+mav_objective_function: 0
+# 4: arm, 5: e-e, 6: frozen
+manipulator_objective_function: 4
+# from 1-5
+value_mav: 2
+# from 1-5		
+value_arm: 1
 mu_attitude: 100
 mu_arm: 50
 safe_range_rpy: 0.7

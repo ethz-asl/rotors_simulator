@@ -216,6 +216,7 @@ class MultiObjectiveController {
   void SetEndEffTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
   void SetDesiredJointsAngle(const manipulator_msgs::EigenJointTrajectoryPoint& joints_state);
 
+  void SetDesiredFrozenJointsAngle();
   void SetExternalForces(const Vector3d& forces);
 
   MultiObjectiveControllerParameters controller_parameters_;
@@ -229,6 +230,7 @@ class MultiObjectiveController {
   bool arm_trajectory_received_;
   bool ee_trajectory_received_;
   bool controller_active_;
+  bool set_frozen_joints_angle_des_;
 
   unsigned int robot_dof_;
   unsigned int mav_dof_;
@@ -250,6 +252,7 @@ class MultiObjectiveController {
   mav_msgs::EigenTrajectoryPoint command_trajectory_;
   mav_msgs::EigenTrajectoryPoint command_trajectory_ee_;
   VectorXd joints_angle_des_;
+  VectorXd frozen_joints_angle_des_;
 
   mav_msgs::EigenOdometry odometry_;
   EigenEndEffector end_effector_;
@@ -270,11 +273,11 @@ class MultiObjectiveController {
   void GetAttitudeSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
   void GetPoseSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
   void GetYawSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
-  void GetFreeHoverSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
+  void GetZeroVelSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
   void GetPositionSetPtObjective(const Vector3d& _position_ref, MatrixXd* _Q, VectorXd* _c) const;
   void GetOrientationSetPtObjective(const Vector3d& _orientation_ref, MatrixXd* _Q, VectorXd* _c) const;
   void GetManipulatorSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
-  void GetDeadArmSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
+  void GetFrozenArmSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
   void GetEndEffectorSetPtObjective(MatrixXd* _Q, VectorXd* _c);
 
   VectorXd GetRobotVelocities() const;
