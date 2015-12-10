@@ -28,9 +28,9 @@
           <contact_surface_layer>0.0001</contact_surface_layer>
         </constraints>
       </bullet>
-      <max_step_size>0.004</max_step_size>
-      <real_time_factor>0.5</real_time_factor>
-      <real_time_update_rate>250</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
       <gravity>0 0 -9.81</gravity>
     </physics>
     <plugin name='gazebo_octomap' filename='librotors_gazebo_octomap_plugin.so'/>
@@ -59,7 +59,7 @@
 		      <material>
 		        <script>
 		          <uri>file://media/materials/scripts/gazebo.material</uri>
-		          <name>Gazebo/RustySteel</name>
+		          <name>Gazebo/WoodPallet</name>
 		        </script>
 		      </material>
 		    </visual>

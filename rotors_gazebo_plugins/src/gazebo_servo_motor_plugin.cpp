@@ -49,7 +49,7 @@ void GazeboServoMotor::Publish()
   joint_state->velocity = joint_state_queue_.front().second.velocity;
   joint_state->effort = joint_state_queue_.front().second.effort;
 
-  joint_state_queue_.pop_back();
+  joint_state_queue_.pop_front();
 
   // Apply distortions
   joint_state->position[0] += position_n_(random_generator_) + position_u_(random_generator_);
@@ -177,6 +177,7 @@ void GazeboServoMotor::OnUpdate(const common::UpdateInfo& _info)
     sensor_msgs::JointState joint_state;
 
     joint_state.header.frame_id  = joint_->GetParent()->GetScopedName();
+    joint_state.header.seq = motor_sequence_++;
     joint_state.header.stamp.sec = now.sec + ros::Duration(unknown_delay_).sec;
     joint_state.header.stamp.nsec = now.nsec + ros::Duration(unknown_delay_).nsec;
     joint_state.name.push_back(joint_name_);

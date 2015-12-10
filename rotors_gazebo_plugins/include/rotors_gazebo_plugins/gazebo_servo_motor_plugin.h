@@ -130,6 +130,7 @@ class GazeboServoMotor : public ModelPlugin
   int measurement_delay_;
   int measurement_divisor_;
   int gazebo_sequence_;
+  int motor_sequence_;
   double unknown_delay_;
 
   NormalDistribution position_n_;

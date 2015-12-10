@@ -155,7 +155,7 @@ void MultiObjectiveController::SetOdometry(const mav_msgs::EigenOdometry& odomet
 
 
 void MultiObjectiveController::SetArmJointsState(const manipulator_msgs::EigenJointsState& joints_state) {
-  static Vector3d dangerous_range = (1-controller_parameters_.safe_range_joints_) * (controller_parameters_.arm_joints_angle_max_ - controller_parameters_.arm_joints_angle_min_);
+  static Vector3d dangerous_range = (1-controller_parameters_.safe_range_joints_)/2 * (controller_parameters_.arm_joints_angle_max_ - controller_parameters_.arm_joints_angle_min_);
   static Vector3d arm_joints_angle_min = controller_parameters_.arm_joints_angle_min_ + dangerous_range;
   static Vector3d arm_joints_angle_max = controller_parameters_.arm_joints_angle_max_ - dangerous_range;
   joints_state_ = joints_state;

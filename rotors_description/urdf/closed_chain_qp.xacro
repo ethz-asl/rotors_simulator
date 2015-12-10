@@ -2,6 +2,8 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find rotors_description)/urdf/manipulator_snippets.xacro" />
 
+	<xacro:property name="meas_delay" value="0"/>
+	<xacro:property name="angle_noise" value="0.0"/>
 
   <xacro:property name="r1_width" value="0.04"/>
   <xacro:property name="r1_height" value="0.008"/>
@@ -454,9 +456,9 @@
 			minAngle="${-PI}"
 			maxAngle="${PI}"
     	measurement_divisor="1"
-    	measurement_delay="0"
+    	measurement_delay="${meas_delay}"
     	unknown_delay="0.0"
-		  noise_normal_angle="0.0"
+		  noise_normal_angle="${angle_noise}"
 		  noise_normal_angular_velocity="0.0"
 		  noise_normal_torque="0.0"
 		  noise_uniform_angle="0.0"
@@ -483,9 +485,9 @@
 			minAngle="${-PI}"
 			maxAngle="${PI}"
     	measurement_divisor="1"
-    	measurement_delay="0"
+    	measurement_delay="${meas_delay}"
     	unknown_delay="0.0"
-		  noise_normal_angle="0.0"
+		  noise_normal_angle="${angle_noise}"
 		  noise_normal_angular_velocity="0.0"
 		  noise_normal_torque="0.0"
 		  noise_uniform_angle="0.0"
@@ -512,9 +514,9 @@
 			minAngle="${-PI}"
 			maxAngle="${PI}"
     	measurement_divisor="1"
-    	measurement_delay="0"
+    	measurement_delay="${meas_delay}"
     	unknown_delay="0.0"
-		  noise_normal_angle="0.0"
+		  noise_normal_angle="${angle_noise}"
 		  noise_normal_angular_velocity="0.0"
 		  noise_normal_torque="0.0"
 		  noise_uniform_angle="0.0"
