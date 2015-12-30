@@ -133,4 +133,14 @@ void copyPosition(const In& in, Out* out) {
   out->z = in.z;
 }
 
+template<typename T>
+inline T limit(T value, T max, T min){
+  if(value > max)
+    return max;
+  if(value < min)
+    return min;
+
+  return value;
+}
+
 #endif /* ROTORS_GAZEBO_PLUGINS_COMMON_H_ */
