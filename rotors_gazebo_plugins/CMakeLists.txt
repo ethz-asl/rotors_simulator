@@ -71,6 +71,22 @@ add_library(rotors_gazebo_multirotor_base_plugin src/gazebo_multirotor_base_plug
 target_link_libraries(rotors_gazebo_multirotor_base_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(rotors_gazebo_multirotor_base_plugin ${catkin_EXPORTED_TARGETS})
 
+add_library(rotors_gazebo_force_sensor_plugin src/gazebo_force_sensor_plugin.cpp)
+target_link_libraries(rotors_gazebo_force_sensor_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(rotors_gazebo_force_sensor_plugin ${catkin_EXPORTED_TARGETS})
+
+add_library(rotors_gazebo_servo_motor_plugin src/gazebo_servo_motor_plugin.cpp)
+target_link_libraries(rotors_gazebo_servo_motor_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(rotors_gazebo_servo_motor_plugin ${catkin_EXPORTED_TARGETS})
+
+add_library(rotors_gazebo_robot_initial_configuration_plugin src/gazebo_robot_initial_configuration_plugin.cpp)
+target_link_libraries(rotors_gazebo_robot_initial_configuration_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(rotors_gazebo_robot_initial_configuration_plugin ${catkin_EXPORTED_TARGETS})
+
+add_library(rotors_gazebo_six_dof_shock_absorber_plugin src/gazebo_six_dof_shock_absorber_plugin.cpp)
+target_link_libraries(rotors_gazebo_six_dof_shock_absorber_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(rotors_gazebo_six_dof_shock_absorber_plugin ${catkin_EXPORTED_TARGETS})
+
 install(
   TARGETS
     rotors_gazebo_motor_model
@@ -81,6 +97,10 @@ install(
     rotors_gazebo_wind_plugin
     rotors_gazebo_octomap_plugin
     rotors_gazebo_multirotor_base_plugin
+    rotors_gazebo_servo_motor_plugin
+    rotors_gazebo_robot_initial_configuration_plugin
+    rotors_gazebo_force_sensor_plugin
+    rotors_gazebo_six_dof_shock_absorber_plugin
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
