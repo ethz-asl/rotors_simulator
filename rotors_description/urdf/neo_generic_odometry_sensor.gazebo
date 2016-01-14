@@ -5,6 +5,7 @@
   Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
   Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
   Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Simone Comari, ASL, ETH Zurich, Switzerland
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,10 +20,10 @@
   limitations under the License.
 -->
 
-<robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="neo" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- Instantiate default firefly-->
-  <xacro:include filename="$(find rotors_description)/urdf/firefly_qp_base.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/neo_base.xacro" />
 
   <!-- Mount a generic odometry sensor without odometry map (working everywhere). -->
   <xacro:odometry_plugin_macro

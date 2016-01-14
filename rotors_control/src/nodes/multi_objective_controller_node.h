@@ -49,6 +49,7 @@
 #include <rotors_control/MultiObjectiveControllerConfig.h>
 
 
+// Here we define the synchronization policy (see Sec.7 @ http://wiki.ros.org/message_filters)
 typedef message_filters::sync_policies::ExactTime<nav_msgs::Odometry, sensor_msgs::JointState, sensor_msgs::JointState, sensor_msgs::JointState> RobotSyncPolicy;
 
 
@@ -73,52 +74,62 @@ class MultiObjectiveControllerNode {
 
   ros::NodeHandle nh_;
 
-  // dynamic_reconfigure
+  // Dynamic reconfigure server (for rqt_reconfigure)
   dynamic_reconfigure::Server<rotors_control::MultiObjectiveControllerConfig> params_server_;
 
-  // subscribers
+  /***************/
+  /* Subscribers */
+  /***************/
+  // UAV related commands
   ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
   ros::Subscriber cmd_pose_sub_;
+  // Manipulator related commands
   ros::Subscriber cmd_ee_multi_dof_joint_trajectory_sub_;
   ros::Subscriber cmd_ee_pose_sub_;
   ros::Subscriber cmd_joints_trajectory_sub_;
   ros::Subscriber cmd_joints_angle_sub_;
+  // Force sensor subscriber
   ros::Subscriber force_sensor_sub_;
+  // Robot state subscribers (synchronized)
   message_filters::Subscriber<nav_msgs::Odometry> *odometry_sub_;
   std::vector<message_filters::Subscriber<sensor_msgs::JointState>*> joint_state_sub_;
 
-  // synchronizer
+  // Synchronizer
   message_filters::Synchronizer<RobotSyncPolicy> *sync_;
 
-  // publishers
+  /**************/
+	/* Publishers */
+	/**************/
+  // Rotors velocity publisher
   ros::Publisher motor_velocity_reference_pub_;
+  // Manipulator actuated joints torque publishers
   ros::Publisher pitch_motor_torque_ref_pub_;
   ros::Publisher left_motor_torque_ref_pub_;
   ros::Publisher right_motor_torque_ref_pub_;
 
-  // commands
+  // Commands deques
   mav_msgs::EigenTrajectoryPointDeque commands_;
   mav_msgs::EigenTrajectoryPointDeque commands_ee_;
   manipulator_msgs::EigenJointTrajectoryPointDeque commands_joints_;
 
-  // timers
+  // Timers
   std::deque<ros::Duration> command_waiting_times_;
   ros::Timer command_timer_;
   std::deque<ros::Duration> command_arm_waiting_times_;
   ros::Timer command_arm_timer_;
 
-  // params dynamic reconfigure callback
+  // Parameters dynamic reconfigure callback
   void ParamsDynReconfigureCallback(rotors_control::MultiObjectiveControllerConfig& config, uint32_t level);
 
-  // timers callsback
+  // Timers callsback (UAV & DM)
   void TimedCommandCallback(const ros::TimerEvent& e);
   void TimedCommandArmCallback(const ros::TimerEvent& e);
 
-  // UAV trajectories callbacks
+  // UAV trajectories callsback
   void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
   void CommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg);
 
-  // Manipulator trajectories callbacks
+  // Manipulator trajectories callsback
   void EndEffMultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
   void EndEffCommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg);
   void JointTrajectoryCallback(const trajectory_msgs::JointTrajectoryConstPtr& trajectory_reference_msg);
@@ -133,7 +144,7 @@ class MultiObjectiveControllerNode {
   // Force sensor callback
   void ForceSensorCallback(const geometry_msgs::Vector3StampedConstPtr& force_msg);
 
-  // miscellaneous
+  // Miscellaneous
   template<class T>
   inline void PrintParam(const std::string& param_str, const T& value) {
     std::cout << " * " << namespace_.c_str() << "/" << param_str.c_str() << ": " << value << std::endl;

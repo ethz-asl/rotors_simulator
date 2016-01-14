@@ -1,5 +1,5 @@
-# Firefly vehicle parameters
-mass: 2.8
+# Neo vehicle parameters
+mass: 3 # UAV->2.8, DM->~0.2
 inertia: {xx: 0.0331, xy: 0.0, xz: 0.0, yy: 0.0350, yz: 0.0, zz: 0.0605}
 
 # angle should be expressed in rad

@@ -4,6 +4,7 @@
  * Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Simone Comari, ASL, ETH Zurich, Switzerland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,6 +166,12 @@ void GazeboServoMotor::OnUpdate(const common::UpdateInfo& _info)
   prev_sim_time = _info.simTime.Double();
   sampling_time_ = limit(sampling_time_, 1.0, 0.001);
 
+  /* The operating mode of the actuator is not defined by any flag, but rather by the current
+   * command passed to it. In particular a position command will trigger the servo-motor mode,
+   * while a torque command the other one. Because the plugin holds no memory of previous
+   * reference, the user must take care not to supply different types of commands at the same
+   * time or very close to each other.
+   */
   if (received_first_command_)
     if (position_control_)
       UpdatePosition();
@@ -197,8 +204,7 @@ void GazeboServoMotor::OnUpdate(const common::UpdateInfo& _info)
 }
 
 
-void GazeboServoMotor::PositionCommandCallback(
-    const manipulator_msgs::CommandPositionServoMotorConstPtr& msg)
+void GazeboServoMotor::PositionCommandCallback(const manipulator_msgs::CommandPositionServoMotorConstPtr& msg)
 {
   double ref = msg->motor_angle;
   angle_reference_.SetFromRadian(ref);
@@ -207,8 +213,7 @@ void GazeboServoMotor::PositionCommandCallback(
 }
 
 
-void GazeboServoMotor::TorqueCommandCallback(
-    const manipulator_msgs::CommandTorqueServoMotorConstPtr& msg)
+void GazeboServoMotor::TorqueCommandCallback(const manipulator_msgs::CommandTorqueServoMotorConstPtr& msg)
 {
   torque_reference_ = msg->torque;
   received_first_command_ = true;
@@ -217,31 +222,23 @@ void GazeboServoMotor::TorqueCommandCallback(
 
 
 void GazeboServoMotor::UpdatePosition()
-{
+{// PID controller for angle position control.
   double angle_error = (angle_reference_ - joint_->GetAngle(0)).Radian();
   double omega = joint_->GetVelocity(0);
+
   angle_error_integral_ += angle_error * sampling_time_;
   angle_error_integral_ = limit(angle_error_integral_, max_angle_error_integral_,
                                 -max_angle_error_integral_);
+
   double torque = kp_ * angle_error - kd_ * omega + ki_ * angle_error_integral_;
   torque = limit(torque, max_torque_, -max_torque_);
-
-  ///debug
-//  std::cout << "joint name = " << joint_->GetName() << std::endl;
-//  std::cout << "reference = " << angle_reference_.Degree() << std::endl;
-//  std::cout << "angle = " << joint_->GetAngle(0).Degree() << std::endl;
-//  std::cout << "torque = \t" << torque <<
-//      "\nangle error = \t" << angle_error <<
-//      "\nomega = \t" << omega <<
-//      "\nintegral_error = \t" << angle_error_integral_ << std::endl;
-//  std::cout << "===============================" << std::endl;
 
   joint_->SetForce(0, torque);
 }
 
 
 void GazeboServoMotor::UpdateTorque()
-{
+{//TODO : implement motor dynamics instead of propagating unfiltered reference torque.
   double torque = limit(torque_reference_, max_torque_, -max_torque_);
   joint_->SetForce(0, torque);
 }

@@ -33,9 +33,12 @@
 #include "rotors_control/parameters.h"
 
 #include <Eigen/Dense>
+// This lib is used for efficient slicing of vector when need elements are not consecutive
 #include <igl/slice.h>
+// This is the eigen interface for OOQP solver used in this implementation
 #include <ooqp_eigen_interface/OoqpEigenInterface.hpp>
 
+// These are the matlab-generated C++ funcntion which robot resemble dynamic model
 #include "rotors_control/dynamic_terms_fun/q34_12_fun/q34_12_fun.h"
 #include "rotors_control/dynamic_terms_fun/M_triu_fun/M_triu_fun.h"
 #include "rotors_control/dynamic_terms_fun/G_fun/G_fun.h"
@@ -73,7 +76,6 @@ static const unsigned int kDefaultMuAttidute = 100;
 static const unsigned int kDefaultMuArm = 50;
 static const double kDefaultSafeRange = 0.9;
 static const double kDefaultMaxRotVelocity = 838;
-
 
 
 
@@ -127,6 +129,7 @@ class MultiObjectiveControllerParameters {
 };
 
 
+
 struct DynamicModelTerms {
   DynamicModelTerms() {};
 
@@ -155,14 +158,9 @@ struct DynamicModelTerms {
     coriolis_matrix = _coriolis_matrix;
     damping_matrix = _damping_matrix;
     gravity_vector = _gravity_vector;
-
-    //debug
-//    std::cout << "inertia_matrix\n" << inertia_matrix<< std::endl;
-//    std::cout << "coriolis_matrix\n" << coriolis_matrix<< std::endl;
-//    std::cout << "damping_matrix\n" << damping_matrix<< std::endl;
-//    std::cout << "gravity_vector\n" << gravity_vector<< std::endl;
   }
 };
+
 
 
 struct EigenEndEffector {
@@ -188,13 +186,9 @@ struct EigenEndEffector {
     odometry.position = _position;
     jacobian_W = _jacobian;
     jacobian_dot_W = _jacobian_dot;
-
-    //debug
-//    std::cout << "odometry.position\n" << odometry.position << std::endl;
-//    std::cout << "jacobian_W\n" << jacobian_W << std::endl;
-//    std::cout << "jacobian_dot_W\n" << jacobian_dot_W << std::endl;
   }
 };
+
 
 
 class MultiObjectiveController {
@@ -202,21 +196,26 @@ class MultiObjectiveController {
  public:
   MultiObjectiveController();
   ~MultiObjectiveController();
+
+  // Also load controller and robot parameters from yaml file if given.
   void InitializeParameters();
 
-  // Called after state update
+  // Called after state update.
   bool CalculateControlInputs(VectorXd* rotor_velocities, Vector3d* torques);
 
-  // Called on state update callback (synchronized)
+  // Called on (synchronized) state update callback.
   void SetOdometry(const mav_msgs::EigenOdometry& odometry);
   void SetArmJointsState(const manipulator_msgs::EigenJointsState& joints_state);
 
-  // Called asynchronously and independently (when new command is set)
+  // Called asynchronously and independently (when new command is received).
   void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
   void SetEndEffTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
   void SetDesiredJointsAngle(const manipulator_msgs::EigenJointTrajectoryPoint& joints_state);
 
+  // Called on objective weights update and initialization.
   void SetDesiredFrozenJointsAngle();
+
+  // Called asynchronously whenever new force sensor data are received.
   void SetExternalForces(const Vector3d& forces);
 
   MultiObjectiveControllerParameters controller_parameters_;
@@ -239,7 +238,11 @@ class MultiObjectiveController {
 
   MatrixX4d torque_to_rotor_velocities_;
 
-  // Solve min 1/2 x' Q x + c' x, such that A x = b, d <= Cx <= f.
+  /* Solve QP problem:
+   *           min    1/2 x' Q x + c' x ,
+   *           s.t.       A x = b ,
+   *                  d <= Cx <= f .
+   */
   SpMatrixXd Q_;
   VectorXd c_;
   SpMatrixXd A_;
@@ -249,48 +252,61 @@ class MultiObjectiveController {
   VectorXd f_;
   VectorXd x_;
 
+  // Reference inputs.
   mav_msgs::EigenTrajectoryPoint command_trajectory_;
   mav_msgs::EigenTrajectoryPoint command_trajectory_ee_;
   VectorXd joints_angle_des_;
   VectorXd frozen_joints_angle_des_;
 
+  // Robot state variables.
   mav_msgs::EigenOdometry odometry_;
   EigenEndEffector end_effector_;
   manipulator_msgs::EigenJointsState joints_state_;
+  VectorXd robot_vel_;
+  VectorXd q_eig_;
+  VectorXd X_eig_;
 
+  // Current external forces vector.
   Vector3d ext_forces_;
 
+  // Current dynamic model terms.
   DynamicModelTerms dyn_mdl_terms_;
 
+  // This is the main routine which implements a full optimization step.
   bool SolveMultiObjectiveOptimization() ;
 
+  // Called at the beginning of every optimization step.
+  void UpdateLinearConstraints();
+  // Called when linear constraints are updated.
+  void UpdateDynamicModelTerms();
+  // Called only when end-effector objective is active.
+  void UpdateEndEffectorState();
+  // Called after linear constraints update.
+  void ComputeCostFunction();
+
+  // Template for generic set-point objective.
   void GetSetPointObjective(const VectorXd& g, const VectorXd& g_ref,
                             const VectorXd& kp, const VectorXd& kv,
                             const MatrixXd& Jg, const MatrixXd& Jg_dot,
                             const VectorXd& q_dot, MatrixXd* Q,
                             VectorXd* c) const;
 
-  void GetAttitudeSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
+  // Aerial delta-manipulator objectives.
+  void GetFlatStateSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
   void GetPoseSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
   void GetYawSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
   void GetZeroVelSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
-  void GetPositionSetPtObjective(const Vector3d& _position_ref, MatrixXd* _Q, VectorXd* _c) const;
-  void GetOrientationSetPtObjective(const Vector3d& _orientation_ref, MatrixXd* _Q, VectorXd* _c) const;
   void GetManipulatorSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
   void GetFrozenArmSetPtObjective(MatrixXd* _Q, VectorXd* _c) const;
   void GetEndEffectorSetPtObjective(MatrixXd* _Q, VectorXd* _c);
+  // UAV related sub-objectives used by top four objectives.
+  void GetPositionSetPtObjective(const Vector3d& _position_ref, MatrixXd* _Q, VectorXd* _c) const;
+  void GetOrientationSetPtObjective(const Vector3d& _orientation_ref, MatrixXd* _Q, VectorXd* _c) const;
 
-  VectorXd GetRobotVelocities() const;
-
+  // Ancillary methods.
+  void UpdateRobotVelocities();
   double GetYawFromEndEffector() const;
-
   Vector3d AngVelBody2World(const Vector3d& angular_rates) const;
-
-  void UpdateLinearConstraints();
-
-  void UpdateEndEffectorState();
-
-  void UpdateDynamicModelTerms();
 
 };
 

@@ -33,21 +33,29 @@ MultiObjectiveControllerNode::MultiObjectiveControllerNode() {
 
   InitializeParams();
 
-  // UAV command subscribers
+  // UAV commands subscribers
   cmd_pose_sub_ = nh_.subscribe(mav_msgs::default_topics::COMMAND_POSE, 1, &MultiObjectiveControllerNode::CommandPoseCallback, this);
   cmd_multi_dof_joint_trajectory_sub_ = nh_.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1, &MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback, this);
 
-  // Manipulator subscribers
+  /************************************/
+  /* Manipulator commands subscribers */
+  /************************************/
+  // DM commands for direct joints angle control
   cmd_joints_trajectory_sub_ = nh_.subscribe(manipulator_msgs::default_topics::COMMAND_JOINT_TRAJECTORY, 1, &MultiObjectiveControllerNode::JointTrajectoryCallback, this);
   cmd_joints_angle_sub_ = nh_.subscribe(manipulator_msgs::default_topics::COMMAND_JOINT_ANGLES, 1, &MultiObjectiveControllerNode::JointCommandAngleCallback, this);
+  // DM commands for joints angle control via end-effector reference position
   cmd_ee_multi_dof_joint_trajectory_sub_ = nh_.subscribe(manipulator_msgs::default_topics::COMMAND_EE_TRAJECTORY, 1, &MultiObjectiveControllerNode::EndEffMultiDofJointTrajectoryCallback, this);
   cmd_ee_pose_sub_ = nh_.subscribe(manipulator_msgs::default_topics::COMMAND_EE_POSE, 1, &MultiObjectiveControllerNode::EndEffCommandPoseCallback, this);
 
-  // Exteroceptive sensors subscribers
+  // Force sensor subscriber
   force_sensor_sub_ = nh_.subscribe(manipulator_msgs::default_topics::FORCE_SENSOR_LINEAR, 1, &MultiObjectiveControllerNode::ForceSensorCallback, this);
 
-  // Robot state subscribers
+  /****************************************************************************/
+  /* Robot state subscribers (synchronized via message_filter implementation) */
+  /****************************************************************************/
+  // UAV odometry
   odometry_sub_ = new message_filters::Subscriber<nav_msgs::Odometry>(nh_,mav_msgs::default_topics::ODOMETRY, 10);
+  // DM joints state (3D vector)
   joint_state_sub_.clear();
   joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_PITCHING_JOINT_STATE, 10));
   joint_state_sub_.push_back(new message_filters::Subscriber<sensor_msgs::JointState>(nh_, manipulator_msgs::default_topics::MOTOR_LEFT_JOINT_STATE, 10));
@@ -60,7 +68,7 @@ MultiObjectiveControllerNode::MultiObjectiveControllerNode() {
   // Rotors velocity publisher
   motor_velocity_reference_pub_ = nh_.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 10);
 
-  // Manipulator actuators publishers
+  // Manipulator actuators publishers (one for each DM motor)
   pitch_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_PITCHING_TORQUE, 10);
   left_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_LEFT_TORQUE, 10);
   right_motor_torque_ref_pub_ = nh_.advertise<manipulator_msgs::CommandTorqueServoMotor>(manipulator_msgs::default_topics::COMMAND_MOTOR_RIGHT_TORQUE, 10);
@@ -75,16 +83,22 @@ MultiObjectiveControllerNode::~MultiObjectiveControllerNode() { }
 
 
 void MultiObjectiveControllerNode::InitializeParams() {
+/* Here we load parameters from 'multi_objective_controller_*.yaml' file, where * contains information about
+ * robot model and parameters set defined either by the user or selected by default. An example of this file
+ * and editable parameters can be found in 'rotors_gazebo/resource' folder. Possibly updated parameters are
+ * then used to initialize 'multi_objective_controller_' object.
+ */
+
   ros::NodeHandle pnh("~");
 
   namespace_ = pnh.getNamespace();
 
-  // Params server subscriber.
+  // Parameters server subscriber
   params_server_.setCallback(boost::bind(&MultiObjectiveControllerNode::ParamsDynReconfigureCallback, this, _1, _2));
 
   int mav_objective_function_idx, manipulator_objective_function_idx;
 
-  // Read parameters from rosparam.
+  // Read parameters from rosparam
   GetRosParameter(pnh, "mav_position_gain_x",
                   multi_objective_controller_.controller_parameters_.mav_position_gain_.x(),
                   &multi_objective_controller_.controller_parameters_.mav_position_gain_.x());
@@ -223,7 +237,7 @@ void MultiObjectiveControllerNode::InitializeParams() {
 
   multi_objective_controller_.SetDesiredFrozenJointsAngle();
 
-  //Todo: Workaround to update objective functions in rqt_reconfigure from yaml default
+  //Todo: Workaround to update objective functions weight in rqt_reconfigure from yaml default
 //  rotors_control::MultiObjectiveControllerConfig config;
 //  params_server_.getConfigDefault(config);
 //  config.value_arm = multi_objective_controller_.controller_parameters_.objectives_weight_.tail<3>().maxCoeff();
@@ -232,6 +246,9 @@ void MultiObjectiveControllerNode::InitializeParams() {
 
 
 void MultiObjectiveControllerNode::ParamsDynReconfigureCallback(rotors_control::MultiObjectiveControllerConfig& config, uint32_t level) {
+/* Configuration file for dynamic reconfigure tool can be found in 'rotors_control/cfg' folder. For more details about
+ * how to edit or create a new .CFG file, visit http://wiki.ros.org/dynamic_reconfigure/Tutorials/HowToWriteYourFirstCfgFile.
+ */
 
   multi_objective_controller_.controller_parameters_.mav_position_gain_.x() = config.mav_position_gain_x;
   multi_objective_controller_.controller_parameters_.mav_position_gain_.y() = config.mav_position_gain_y;
@@ -317,10 +334,11 @@ void MultiObjectiveControllerNode::ParamsDynReconfigureCallback(rotors_control::
   std::cout << std::endl;
 }
 
-////// UAV CALLBACKS /////
+/***********************************************************************************************************************/
+/******  UAV CALLSBACK  ******/
+/***********************************************************************************************************************/
 
-void MultiObjectiveControllerNode::CommandPoseCallback(
-    const geometry_msgs::PoseStampedConstPtr& pose_msg) {
+void MultiObjectiveControllerNode::CommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg) {
   // Clear all pending commands.
   command_timer_.stop();
   commands_.clear();
@@ -335,8 +353,7 @@ void MultiObjectiveControllerNode::CommandPoseCallback(
 }
 
 
-void MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback(
-    const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg) {
+void MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg) {
   // Clear all pending commands.
   command_timer_.stop();
   commands_.clear();
@@ -374,10 +391,15 @@ void MultiObjectiveControllerNode::MultiDofJointTrajectoryCallback(
   }
 }
 
-///// MANIPULATOR CALLBACKS /////
+/***********************************************************************************************************************/
+/******  MANIPULATOR CALLSBACK  ******/
+/***********************************************************************************************************************/
 
 void MultiObjectiveControllerNode::EndEffCommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg) {
-  // Clear all pending commands.
+  /* Clear all pending commands. Notice that only one kind of trajectory for DM can be parsed at a time (joints angle or e.e.).
+   * Hence, whenever a new manipulator related set of commands is received, all pending trajectory points from previous trajectory
+   * (if any) are cleared, no matter if they were the same type or not.
+   */
   command_timer_.stop();
   commands_ee_.clear();
   commands_joints_.clear();
@@ -393,7 +415,10 @@ void MultiObjectiveControllerNode::EndEffCommandPoseCallback(const geometry_msgs
 
 
 void MultiObjectiveControllerNode::EndEffMultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg) {
-  // Clear all pending commands.
+  /* Clear all pending commands. Notice that only one kind of trajectory for DM can be parsed at a time (joints angle or e.e.).
+   * Hence, whenever a new manipulator related set of commands is received, all pending trajectory points from previous trajectory
+   * (if any) are cleared, no matter if they were the same type or not.
+   */
   command_arm_timer_.stop();
   commands_ee_.clear();
   commands_joints_.clear();
@@ -433,7 +458,10 @@ void MultiObjectiveControllerNode::EndEffMultiDofJointTrajectoryCallback(const t
 
 
 void MultiObjectiveControllerNode::JointTrajectoryCallback(const trajectory_msgs::JointTrajectoryConstPtr& trajectory_msg) {
-  // Clear all pending commands.
+  /* Clear all pending commands. Notice that only one kind of trajectory for DM can be parsed at a time (joints angle or e.e.).
+   * Hence, whenever a new manipulator related set of commands is received, all pending trajectory points from previous trajectory
+   * (if any) are cleared, no matter if they were the same type or not.
+   */
   command_arm_timer_.stop();
   commands_ee_.clear();
   commands_joints_.clear();
@@ -471,7 +499,10 @@ void MultiObjectiveControllerNode::JointTrajectoryCallback(const trajectory_msgs
 
 
 void MultiObjectiveControllerNode::JointCommandAngleCallback(const geometry_msgs::Vector3StampedConstPtr& vector3_msg) {
-  // Clear all pending commands.
+  /* Clear all pending commands. Notice that only one kind of trajectory for DM can be parsed at a time (joints angle or e.e.).
+   * Hence, whenever a new manipulator related set of commands is received, all pending trajectory points from previous trajectory
+   * (if any) are cleared, no matter if they were the same type or not.
+   */
   command_arm_timer_.stop();
   commands_ee_.clear();
   commands_joints_.clear();
@@ -485,7 +516,9 @@ void MultiObjectiveControllerNode::JointCommandAngleCallback(const geometry_msgs
   commands_joints_.pop_front();
 }
 
-///// TIMERS CALLBACKS /////
+/***********************************************************************************************************************/
+/******  TIMERS CALLSBACK  ******/
+/***********************************************************************************************************************/
 
 void MultiObjectiveControllerNode::TimedCommandCallback(const ros::TimerEvent& e) {
 
@@ -494,9 +527,9 @@ void MultiObjectiveControllerNode::TimedCommandCallback(const ros::TimerEvent& e
     return;
   }
 
-//  const mav_msgs::EigenTrajectoryPoint eigen_reference = commands_.front();
   multi_objective_controller_.SetTrajectoryPoint(commands_.front());
   commands_.pop_front();
+
   command_timer_.stop();
   if(!command_waiting_times_.empty()){
     command_timer_.setPeriod(command_waiting_times_.front());
@@ -529,23 +562,18 @@ void MultiObjectiveControllerNode::TimedCommandArmCallback(const ros::TimerEvent
   }
 }
 
-///// STATE UPDATE CALLBACK /////
+/***********************************************************************************************************************/
+/******  STATE UPDATE CALLSBACK  ******/
+/***********************************************************************************************************************/
 
 void MultiObjectiveControllerNode::AerialManipulatorStateCallback(const nav_msgs::OdometryConstPtr& odometry_msg,
                                                                   const sensor_msgs::JointStateConstPtr& joint_state_msg0,
                                                                   const sensor_msgs::JointStateConstPtr& joint_state_msg1,
                                                                   const sensor_msgs::JointStateConstPtr& joint_state_msg2) {
 
-  ROS_INFO_ONCE("MultiObjectiveController got first odometry+joint states messages.");
+  ROS_INFO_ONCE("MultiObjectiveController got first synchronized odometry+joint states messages.");
 
-  //debug
-//  std::cout << "Robot state update at time:" << std::endl;
-//  std::cout << "\todometry_msg --> " << odometry_msg.get()->header.stamp.sec << " sec " << odometry_msg.get()->header.stamp.nsec << " nsec" <<  std::endl;
-//  std::cout << "\tjoint_state_msg0 --> " << joint_state_msg0.get()->header.stamp.sec << " sec " << joint_state_msg0.get()->header.stamp.nsec << " nsec" << std::endl;
-//  std::cout << "\tjoint_state_msg1 --> " << joint_state_msg1.get()->header.stamp.sec << " sec " << joint_state_msg1.get()->header.stamp.nsec << " nsec" <<  std::endl;
-//  std::cout << "\tjoint_state_msg2 --> " << joint_state_msg2.get()->header.stamp.sec << " sec " << joint_state_msg2.get()->header.stamp.nsec << " nsec" <<  std::endl;
-
-  // Update robot states
+  // Update robot state (first UAV, then DM)
   mav_msgs::EigenOdometry odometry;
   mav_msgs::eigenOdometryFromMsg(*(odometry_msg.get()), &odometry);
   multi_objective_controller_.SetOdometry(odometry);
@@ -563,6 +591,7 @@ void MultiObjectiveControllerNode::AerialManipulatorStateCallback(const nav_msgs
   if (!multi_objective_controller_.CalculateControlInputs(&ref_rotor_velocities, &ref_torques))
     return;
 
+  // Publish rotors speed messages.
   // Todo(ffurrer): Do this in the conversions header.
   mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
   actuator_msg->angular_velocities.clear();
@@ -592,8 +621,9 @@ void MultiObjectiveControllerNode::ForceSensorCallback(const geometry_msgs::Vect
 
 }
 
-
+/****************************************************************************/
 //////**************************** MAIN ********************************//////
+/****************************************************************************/
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "multi_objective_controller_node");

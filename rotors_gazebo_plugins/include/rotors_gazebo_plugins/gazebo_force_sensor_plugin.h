@@ -48,7 +48,6 @@
 
 namespace gazebo {
 // Default values
-//static const std::string kDefaultNamespace = "";
 static const std::string kDefaultParentFrameId = "world";
 static const std::string kDefaultReferenceFrameId = "world";
 static const std::string kDefaultLinkName = "f2g_sensor_link";
@@ -81,9 +80,7 @@ class FirstOrderFilterJointWrench {
     }
 
     physics::JointWrench updateFilter(physics::JointWrench inputState, double samplingTime) {
-      /*
-      This method will apply a first order filter on each wrench element of the inputState.
-      */
+      // This method will apply a first order filter on each wrench element of the inputState.
       physics::JointWrench outputState;
 
       outputState.body1Force.x = force_x_filter_->updateFilter(inputState.body1Force.x,samplingTime);
@@ -148,7 +145,7 @@ class GazeboForceSensorPlugin : public ModelPlugin {
  protected:
   void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
   void OnUpdate(const common::UpdateInfo& /*_info*/);
-  void PrintJointWrench(physics::JointWrench jw_);
+  void PrintJointWrench(physics::JointWrench jw_);    // for debug purposes
 
 
  private:

@@ -39,7 +39,7 @@ GazeboForceSensorPlugin::~GazeboForceSensorPlugin() {
 // void GazeboForceSensorPlugin::Publish() {};
 
 void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
-  // Store the pointer to the model
+  // Store the pointer to the model.
   model_ = _model;
   world_ = model_->GetWorld();
 
@@ -115,7 +115,7 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
     linear_force_u_[1] = UniformDistribution(-noise_uniform_linear_force.y, noise_uniform_linear_force.y);
     linear_force_u_[2] = UniformDistribution(-noise_uniform_linear_force.z, noise_uniform_linear_force.z);
 
-    // Linear forces publisher
+    // Linear forces publisher.
     lin_force_sensor_pub_ = node_handle_->advertise<geometry_msgs::Vector3Stamped>(force_sensor_pub_topic_+"/linear", 10);
     lin_force_sensor_truth_pub_ = node_handle_->advertise<geometry_msgs::Vector3Stamped>(force_sensor_truth_pub_topic_+"/linear", 10);
   }
@@ -135,7 +135,7 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
   }
 
   if (disp_wrench_vector_) {
-    // Wrench vector publisher for RViz visualization
+    // Wrench vector publisher for RViz visualization.
     wrench_vector_pub_ = node_handle_->advertise<geometry_msgs::WrenchStamped>(wrench_vector_pub_topic_, 10);
   }
 
@@ -151,7 +151,6 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // C denotes child frame, P parent frame, R reference frame and W world frame.
   // Further C_pose_W_P denotes pose of P wrt. W expressed in C.
   math::Pose W_pose_W_C = link_->GetWorldCoGPose();
-//  math::Pose W_pose_W_C = joint_->GetWorldPose();
   math::Pose gazebo_pose = W_pose_W_C;
   math::Pose gazebo_parent_pose = math::Pose::Zero;
   math::Pose gazebo_reference_pose = math::Pose::Zero;
@@ -159,7 +158,6 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Pose W_pose_W_R = math::Pose::Zero;
 
   if (parent_frame_id_ != kDefaultParentFrameId) {
-//    W_pose_W_P = parent_link_->GetWorldCoGPose();
     W_pose_W_P = model_->GetJoint(parent_frame_id_)->GetWorldPose();
     math::Pose C_pose_P_C = W_pose_W_C - W_pose_W_P;
     gazebo_pose = C_pose_P_C;
@@ -185,7 +183,7 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Get internal forces and torques at force sensor joint.
   joint_wrench_ = joint_->GetForceTorque(0u);
 
-  // First order filter
+  // First order filter.
   if (prev_sim_time_ == 0.0) {
     // Initialize the first order filter.
     double time_constant_ = 1.0 / (2 * M_PI * cutoff_frequency_);
@@ -225,7 +223,7 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // Is it time to publish the front element?
   if (gazebo_sequence_ == wrench_queue_.front().first) {
-    // Init wrench vector for RViz visualization purpose
+    // Initialize wrench vector for RViz visualization purpose.
     const geometry_msgs::Vector3 zeros3;
     wrench_msg_.wrench.force = zeros3;
     wrench_msg_.wrench.torque = zeros3;

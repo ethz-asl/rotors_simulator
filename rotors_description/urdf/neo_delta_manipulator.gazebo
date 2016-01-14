@@ -5,6 +5,7 @@
   Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
   Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
   Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Simone Comari, ASL, ETH Zurich, Switzerland
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,11 +20,11 @@
   limitations under the License.
 -->
 
-<robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="neo" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- Instantiate firefly with a generic odometry sensor. -->
-  <xacro:include filename="$(find rotors_description)/urdf/firefly_qp_generic_odometry_sensor.gazebo" />
-  <xacro:include filename="$(find rotors_description)/urdf/closed_chain_qp.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/neo_generic_odometry_sensor.gazebo" />
+  <xacro:include filename="$(find rotors_description)/urdf/closed_chain.xacro" />
 
   <!-- <link name="world"/> -->
   <!-- Mount a closed chain arm on the belly of the Firefly. -->
@@ -36,8 +37,9 @@
 	<!-- Include plugins --> 
 	<xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro"/>
 
-	<!-- Instantiate force sensor on end-effector 
-	<xacro:force_sensor_plugin_macro 
+	<!-- Instantiate force sensor on end-effector -->
+<!--
+		<xacro:force_sensor_plugin_macro 
 		namespace="${namespace}/delta_manipulator" 
 		force_sensor_suffix="ee" 
 		parent_link="${namespace}/delta_manipulator/end_effector" 

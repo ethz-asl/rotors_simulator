@@ -1,32 +1,61 @@
 <launch>
-  <arg name="mav_name" default="firefly"/>
+
+  <arg name="mav_name" default="neo"/>
   <arg name="enable_logging" default="false" />
   <arg name="enable_ground_truth" default="true" />
   <arg name="log_file" default="$(arg mav_name)_delta_manipulator" />
+  <arg name="gui" default="true"/>
+	<arg name="z" default="0.1" />
+	<arg name="world" default="basic_bullet" />
+	<arg name="std_ctrller" default="true" />
+	<arg name="waypoint" default="false" />
+	<arg name="waypoint_file" default="multi_objective_waypoints_example" />
+	<arg name="hovering_ex" default="true" />
+	<arg name="rqt_reconfigure" default="false" />
+	<arg name="rqt_publisher" default="false" />
+	<arg name="yaml" default="" />
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic_bullet.world" />
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world).world" />
     <!-- <arg name="debug" value="true"/> -->
     <arg name="paused" value="true"/>
-    <!-- <arg name="gui" value="false"/> -->
+    <arg name="gui" value="$(arg gui)"/>
   </include>
 
-  <group ns="$(arg mav_name)">
+  <group ns="$(arg mav_name)">		
+
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
       <arg name="mav_name" value="$(arg mav_name)" />
       <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_delta_manipulator.gazebo" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
       <arg name="log_file" value="$(arg log_file)"/>
+			<arg name="z" value="$(arg z)"/>
     </include>
 
-    <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
-      <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_$(arg mav_name).yaml" />
-      <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name).yaml" />
-      <remap from="odometry" to="odometry_sensor1/odometry" />
-    </node>
+		<group if="$(arg std_ctrller)">
+		  <node name="multi_objective_controller_node" pkg="rotors_control" type="multi_objective_controller_node" output="screen">
+		    <rosparam command="load" file="$(find rotors_gazebo)/resource/multi_objective_controller_$(arg mav_name)$(arg yaml).yaml" />
+		    <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name).yaml" />
+		    <remap from="odometry" to="odometry_sensor1/odometry" />
+		  </node>		
+		</group>
 
-    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
+		<group unless="$(arg std_ctrller)">
+		  <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
+		    <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_$(arg mav_name).yaml" />
+		    <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name).yaml" />
+		    <remap from="odometry" to="odometry_sensor1/odometry" />
+		  </node>	
+		</group>
+		
+		<node name="waypoint_publisher_file" pkg="rotors_gazebo" type="waypoint_publisher_file" output="screen" args="$(find rotors_gazebo)/resource/$(arg waypoint_file).txt" if="$(arg waypoint)" />
+    <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen" if="$(arg hovering_ex)" />
     
   </group>
+
+	<!-- USER INTERFACE -->
+	<node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen" if="$(arg rqt_reconfigure)" />
+	<node name="rqt_publisher" pkg="rqt_publisher" type="rqt_publisher" output="screen" if="$(arg rqt_publisher)" />
+
 </launch>
