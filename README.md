@@ -10,6 +10,19 @@ This packages also contains some example controllers, basic worlds, a joystick i
 
 Below we provide the instructions necessary for getting started. See RotorS' wiki for more instructions and examples (https://github.com/ethz-asl/rotors_simulator/wiki).
 
+If you are using this simulator within the research for your publication, please cite:
+```bibtex
+@ARTICLE {rotors:2016,
+  author  = "Fadri Furrer and Michael Burri and Markus Achtelik and Roland Siegwart",
+  title   = "Robot Operating System (ROS)",
+  journal = "Studies Comp.Intelligence Volume Number:625",
+  year    = "2016",
+  volume  = "The Complete Reference (Volume 1)",
+  number  = "978-3-319-26052-5",
+  pages   = "Chapter 23",
+  note    = "ISBN:978-3-319-26052-5"
+}
+```
 Installation Instructions
 -------------------------
 
