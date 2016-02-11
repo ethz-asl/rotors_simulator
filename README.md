@@ -12,15 +12,21 @@ Below we provide the instructions necessary for getting started. See RotorS' wik
 
 If you are using this simulator within the research for your publication, please cite:
 ```bibtex
-@ARTICLE {rotors:2016,
-  author  = "Fadri Furrer and Michael Burri and Markus Achtelik and Roland Siegwart",
-  title   = "Robot Operating System (ROS)",
-  journal = "Studies Comp.Intelligence Volume Number:625",
-  year    = "2016",
-  volume  = "The Complete Reference (Volume 1)",
-  number  = "978-3-319-26052-5",
-  pages   = "Chapter 23",
-  note    = "ISBN:978-3-319-26052-5"
+@Inbook{Furrer2016,
+author="Furrer, Fadri
+and Burri, Michael
+and Achtelik, Markus
+and Siegwart, Roland",
+editor="Koubaa, Anis",
+chapter="RotorS---A Modular Gazebo MAV Simulator Framework",
+title="Robot Operating System (ROS): The Complete Reference (Volume 1)",
+year="2016",
+publisher="Springer International Publishing",
+address="Cham",
+pages="595--625",
+isbn="978-3-319-26054-9",
+doi="10.1007/978-3-319-26054-9_23",
+url="http://dx.doi.org/10.1007/978-3-319-26054-9_23"
 }
 ```
 Installation Instructions
