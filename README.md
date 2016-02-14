@@ -6,7 +6,7 @@ It provides some multirotor models such as the [AscTec Hummingbird](http://www.a
 
 There are simulated sensors coming with the simulator such as an IMU, a generic odometry sensor, and the [VI-Sensor](http://wiki.ros.org/vi_sensor), which can be mounted on the multirotor.
 
-This packages also contains some example controllers, basic worlds, a joystick interface, and example launch files.
+This package also contains some example controllers, basic worlds, a joystick interface, and example launch files.
 
 Below we provide the instructions necessary for getting started. See RotorS' wiki for more instructions and examples (https://github.com/ethz-asl/rotors_simulator/wiki).
 
