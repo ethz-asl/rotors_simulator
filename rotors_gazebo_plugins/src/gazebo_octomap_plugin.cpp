@@ -196,6 +196,14 @@ void OctomapFromGazeboWorld::CreateOctomap(const rotors_comm::Octomap::Request& 
   }
   octomap_->prune();
   octomap_->updateInnerOccupancy();
+
+  math::Vector3 seed_point(bounding_box_origin.x + bounding_box_lengths.x/2 - leaf_size/2,
+    )
+  FloodFill(math::Vector3(bounding_box_origin.x + bounding_box_lengths.x/2 - leaf_size/2,
+    bounding_box_origin.y + bounding_box_lengths.y/2 - leaf_size/2,
+    bounding_box_origin.z + bounding_box_lengths.z/2 - leaf_size/2),
+    bounding_box_origin, bounding_box_lengths, leaf_size);
+
 }
 
 // Register this plugin with the simulator
