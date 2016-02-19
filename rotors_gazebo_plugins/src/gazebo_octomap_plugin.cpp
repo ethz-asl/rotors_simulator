@@ -195,9 +195,10 @@ void OctomapFromGazeboWorld::CreateOctomap(
                   - bounding_box_lengths.x / 2;
        x < bounding_box_origin.x + bounding_box_lengths.x / 2;
        x += leaf_size) {
+    int progress = round(100 * (x + bounding_box_lengths.x / 2 
+                         - bounding_box_origin.x) / bounding_box_lengths.x);
     std::cout << "\rPlacing model edges into octomap... "
-              << 100 * (x + bounding_box_lengths.x / 2 - bounding_box_origin.x)
-                 / bounding_box_lengths.x << "%%                 ";
+              << progress << "%                 ";
 
     for (double y = leaf_size / 2 + bounding_box_origin.y
                     - bounding_box_lengths.y / 2;
@@ -240,9 +241,9 @@ void OctomapFromGazeboWorld::CreateOctomap(
                   - bounding_box_lengths.x / 2;
        x < bounding_box_origin.x + bounding_box_lengths.x / 2;
        x += leaf_size) {
-    std::cout << "\rFilling closed spaces... " 
-              << 100 * (x + bounding_box_lengths.x / 2 - bounding_box_origin.x)
-                 / bounding_box_lengths.x << "%%                 ";
+    int progress = round(100 * (x + bounding_box_lengths.x / 2 
+                         - bounding_box_origin.x) / bounding_box_lengths.x);
+    std::cout << "\rFilling closed spaces... " << progress << "%              ";
 
     for (double y = leaf_size / 2 + bounding_box_origin.y 
                     - bounding_box_lengths.y / 2;
