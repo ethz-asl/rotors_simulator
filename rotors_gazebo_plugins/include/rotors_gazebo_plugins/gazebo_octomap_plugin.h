@@ -49,8 +49,13 @@ class OctomapFromGazeboWorld : public WorldPlugin {
   /// \param[in] _parent Pointer to the world that loaded this plugin.
   /// \param[in] _sdf SDF element that describes the plugin.
   void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf);
-  bool CheckIfInterests(const math::Vector3& central_point, gazebo::physics::RayShapePtr ray, const double leaf_size);
-  void FloodFill(const math::Vector3& seed_point, const math::Vector3& bounding_box_origin, const math::Vector3& bounding_box_lengths, const double leaf_size);
+  bool CheckIfInterest(const math::Vector3& central_point, 
+                      gazebo::physics::RayShapePtr ray,
+                      const double leaf_size);
+  void FloodFill(const math::Vector3& seed_point, 
+                const math::Vector3& bounding_box_origin, 
+                const math::Vector3& bounding_box_lengths, 
+                const double leaf_size);
   void CreateOctomap(const rotors_comm::Octomap::Request& msg);
 
  private:
@@ -58,7 +63,8 @@ class OctomapFromGazeboWorld : public WorldPlugin {
   ros::NodeHandle node_handle_;
   ros::ServiceServer srv_;
   octomap::OcTree* octomap_;
-  bool ServiceCallback(rotors_comm::Octomap::Request& req, rotors_comm::Octomap::Response& res);
+  bool ServiceCallback(rotors_comm::Octomap::Request& req, 
+                      rotors_comm::Octomap::Response& res);
 };
 
 }
