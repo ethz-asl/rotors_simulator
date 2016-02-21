@@ -299,9 +299,11 @@ void OctomapFromGazeboWorld::CreateOctomap(const rotors_comm::Octomap::Request& 
 
       // garbage collector
       for (std::map<std::string, bool>::iterator it = objects_in_collision.begin();
-           it != objects_in_collision.end(); it++) {
+           it != objects_in_collision.end(); ) {
         if (!CheckIfInsideObjectInX(it->first, start, ray)) {
-          objects_in_collision.erase(it);
+          it = objects_in_collision.erase(it);
+        } else {
+          ++it;
         }
       }
 

@@ -137,7 +137,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   void VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_velocities);
   void WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed);
 
-  std::unique_ptr<FirstOrderFilter<double>>  rotor_velocity_filter_;
+  std::unique_ptr<FirstOrderFilter<double>> rotor_velocity_filter_;
   math::Vector3 wind_speed_W_;
 
   math::Vector3 total_force_B_;

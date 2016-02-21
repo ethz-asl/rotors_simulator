@@ -2,13 +2,33 @@ RotorS
 ===============
 
 RotorS is a MAV gazebo simulator.
-It provides some multirotor models such as the [AscTec Hummingbird](http://www.asctec.de/en/uav-uas-drone-products/asctec-hummingbird/), the [AscTec Pelican](http://www.asctec.de/en/uav-uas-drone-products/asctec-pelican/), the [AscTec Firefly](http://www.asctec.de/en/uav-uas-drone-products/asctec-firefly/), but the simulator is not limited for the use with these multicopters.
+It provides some multirotor models such as the [AscTec Hummingbird](http://www.asctec.de/en/uav-uas-drone-products/asctec-hummingbird/), the [AscTec Pelican](http://www.asctec.de/en/uav-uas-drone-products/asctec-pelican/), or the [AscTec Firefly](http://www.asctec.de/en/uav-uas-drone-products/asctec-firefly/), but the simulator is not limited for the use with these multicopters.
 
 There are simulated sensors coming with the simulator such as an IMU, a generic odometry sensor, and the [VI-Sensor](http://wiki.ros.org/vi_sensor), which can be mounted on the multirotor.
 
-This packages also contains some example controllers, basic worlds, a joystick interface, and example launch files.
+This package also contains some example controllers, basic worlds, a joystick interface, and example launch files.
 
+Below we provide the instructions necessary for getting started. See RotorS' wiki for more instructions and examples (https://github.com/ethz-asl/rotors_simulator/wiki).
 
+If you are using this simulator within the research for your publication, please cite:
+```bibtex
+@Inbook{Furrer2016,
+author="Furrer, Fadri
+and Burri, Michael
+and Achtelik, Markus
+and Siegwart, Roland",
+editor="Koubaa, Anis",
+chapter="RotorS---A Modular Gazebo MAV Simulator Framework",
+title="Robot Operating System (ROS): The Complete Reference (Volume 1)",
+year="2016",
+publisher="Springer International Publishing",
+address="Cham",
+pages="595--625",
+isbn="978-3-319-26054-9",
+doi="10.1007/978-3-319-26054-9_23",
+url="http://dx.doi.org/10.1007/978-3-319-26054-9_23"
+}
+```
 Installation Instructions
 -------------------------
 

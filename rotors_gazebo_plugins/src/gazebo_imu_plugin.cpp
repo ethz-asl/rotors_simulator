@@ -105,7 +105,7 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboImuPlugin::OnUpdate, this, _1));
 
-  imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 10);
+  imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
 
   // Fill imu message.
   imu_message_.header.frame_id = frame_id_;

@@ -68,6 +68,12 @@
       <parent link="${parent_link}" />
       <child link="${namespace}/camera_${camera_suffix}_link" />
     </joint>
+    <link name="${namespace}/camera_${camera_suffix}_optical_link" />
+    <joint name="${namespace}/camera_${camera_suffix}_optical_joint" type="fixed" >
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+      <parent link="${namespace}/camera_${camera_suffix}_link" />
+      <child link="${namespace}/camera_${camera_suffix}_optical_link" />
+    </joint>
     <gazebo reference="${namespace}/camera_${camera_suffix}_link">
       <sensor type="camera" name="${namespace}_camera_${camera_suffix}">
         <update_rate>${frame_rate}</update_rate>
@@ -193,6 +199,13 @@
       <xacro:insert_block name="geometry" />
     </xacro:camera_joint_macro>
 
+    <link name="${namespace}/camera_left_optical_link" />
+    <joint name="${namespace}/camera_left_optical_joint" type="fixed" >
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+      <parent link="${namespace}/camera_left_link" />
+      <child link="${namespace}/camera_left_optical_link" />
+    </joint>
+
     <!-- Both cameras in the pair are anchored off the left camera frame. -->
     <gazebo reference="${namespace}/camera_left_link">
       <sensor type="multicamera" name="${namespace}_stereo_camera">
@@ -294,7 +307,7 @@
   <xacro:macro name="odometry_plugin_macro"
     params="
       namespace odometry_sensor_suffix parent_link pose_topic pose_with_covariance_topic
-      position_topic transform_topic odometry_topic parent_frame_id
+      position_topic transform_topic odometry_topic parent_frame_id child_frame_id
       mass_odometry_sensor measurement_divisor measurement_delay unknown_delay
       noise_normal_position noise_normal_quaternion noise_normal_linear_velocity
       noise_normal_angular_velocity noise_uniform_position
@@ -325,6 +338,7 @@
         <transformTopic>${transform_topic}</transformTopic>
         <odometryTopic>${odometry_topic}</odometryTopic>
         <parentFrameId>${parent_frame_id}</parentFrameId> <!-- Use the scoped link name here. e.g. Model::link. -->
+        <childFrameId>${child_frame_id}</childFrameId>
         <measurementDivisor>${measurement_divisor}</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
         <measurementDelay>${measurement_delay}</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
         <unknownDelay>${unknown_delay}</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
@@ -506,7 +520,7 @@
         <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
       </inertial>
     </link>
-    <joint name="{namespace}_vi_sensor_joint" type="fixed">
+    <joint name="${namespace}_vi_sensor_joint" type="fixed">
       <xacro:insert_block name="origin" />
       <parent link="${parent_link}" />
       <child link="${namespace}/vi_sensor_link" />
@@ -543,6 +557,7 @@
         transform_topic="transform"
         odometry_topic="odometry"
         parent_frame_id="world"
+        child_frame_id="${namespace}/base_link"
         mass_odometry_sensor="0.00001"
         measurement_divisor="1"
         measurement_delay="0"
@@ -605,15 +620,16 @@
 
     <!-- Mount a generic odometry sensor providing ground truth. -->
     <xacro:odometry_plugin_macro
-      namespace="${namespace}/ground_truth"
+      namespace="${namespace}"
       odometry_sensor_suffix="gt"
       parent_link="${parent_link}"
-      pose_topic="pose"
-      pose_with_covariance_topic="pose_with_covariance"
-      position_topic="position"
-      transform_topic="transform"
-      odometry_topic="odometry"
+      pose_topic="ground_truth/pose"
+      pose_with_covariance_topic="ground_truth/pose_with_covariance"
+      position_topic="ground_truth/position"
+      transform_topic="ground_truth/transform"
+      odometry_topic="ground_truth/odometry"
       parent_frame_id="world"
+      child_frame_id="${namespace}/base_link"
       mass_odometry_sensor="0.00001"
       measurement_divisor="1"
       measurement_delay="0"
