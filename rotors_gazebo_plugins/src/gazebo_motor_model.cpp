@@ -210,7 +210,7 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   physics::Link_V parent_links = link_->GetParentJointsLinks();
   // The tansformation from the parent_link to the link_.
   math::Pose pose_difference = link_->GetWorldCoGPose() - parent_links.at(0)->GetWorldCoGPose();
-  math::Vector3 drag_torque(0, 0, -turning_direction_ * thrust_force * moment_constant_);
+  math::Vector3 drag_torque(0, 0, -turning_direction_ * moment_constant_ * real_motor_velocity * real_motor_velocity);
 
   total_torque_B_ = drag_torque;
 
