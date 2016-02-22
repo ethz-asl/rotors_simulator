@@ -54,6 +54,22 @@ class OctomapFromGazeboWorld : public WorldPlugin {
                  const math::Vector3& bounding_box_origin,
                  const math::Vector3& bounding_box_lengths,
                  const double leaf_size);
+  /*! \brief Creates octomap by floodfilling freespace.
+  *
+  * Creates an octomap of the environment in 3 steps:
+  *   -# Casts rays along the central X,Y and Z axis of each cell. Marks any 
+  *     cell where a ray intersects a mesh as occupied
+  *   -# Floodfills the area from the top and bottom marking all connected
+  *     space that has not been set to occupied as free.
+  *   -# Labels all remaining unknown space as occupied.
+  *
+  * Can give incorrect results in the following situations:
+  *   -# The top central cell or bottom central cell are either occupied or
+  *     completely enclosed by occupied cells.
+  *   -# A completely enclosed hollow space will be marked as occupied.
+  *   -# Cells containing a mesh that does not intersect its central axes will
+  *     be marked as unoccupied
+  */
   void CreateOctomap(const rotors_comm::Octomap::Request& msg);
 
  private:
