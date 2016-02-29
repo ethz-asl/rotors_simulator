@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Link for the vtol wing attached to the multicopter frame -->
+	<xacro:macro name="vtol_wing_macro"
+		params="namespace">
+
+		<link name="wing_neutral_point"</link>
+
+  		<joint name="wing_neutral_point_base_joint" type="fixed">
+      		<origin xyz="0 0 0" rpy="0 0 0" />
+      		<parent link="base_link" />
+      		<child link="wing_neutral_point" />
+  		</joint>
+  		<gazebo>
+	      	<plugin name="gazebo_wing_model_plugin" filename="librotors_gazebo_wing_model_plugin.so">
+	      		<robotNamespace>${namespace}</robotNamespace>
+		        <linkName>base_link</linkName>
+		        <commandTopic>vtol/motor_vel_ref</commandTopic>
+		    </plugin>
+    	</gazebo>
+
+
+	</xacro:macro>
+</robot>
