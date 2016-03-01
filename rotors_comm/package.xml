@@ -1,0 +1,30 @@
+<package>
+  <name>rotors_comm</name>
+  <version>2.0.1</version>
+  <description>RotorS specific messages and services.</description>
+
+  <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
+
+  <author>Fadri Furrer</author>
+  <author>Michael Burri</author>
+  <author>Mina Kamel</author>
+  <author>Janosch Nikolic</author>
+  <author>Markus Achtelik</author>
+
+  <license>ASL 2.0</license>
+
+  <url type="website">https://github.com/ethz-asl/rotors_simulator</url>
+  <url type="bugtracker">https://github.com/ethz-asl/rotors_simulator/issues</url>
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Dependencies needed to compile this package. -->
+  <build_depend>message_generation</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>octomap_msgs</build_depend>
+  <build_depend>cmake_modules</build_depend>
+
+  <!-- Dependencies needed after this package is compiled. -->
+  <run_depend>message_runtime</run_depend>
+</package>

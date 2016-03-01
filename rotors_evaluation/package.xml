@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package>
+  <name>rotors_evaluation</name>
+  <version>2.0.1</version>
+  <description>The dataset evaluation package for the RotorS simulator.</description>
+
+  <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
+  <author>Fadri Furrer</author>
+  <author>Michael Burri</author>
+  <author>Mina Kamel</author>
+  <author>Janosch Nikolic</author>
+  <author>Markus Achtelik</author>
+
+  <license>ASL 2.0</license>
+
+  <url type="website">https://github.com/ethz-asl/rotors_simulator</url>
+  <url type="bugtracker">https://github.com/ethz-asl/rotors_simulator/issues</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rospy</build_depend>
+
+  <run_depend>rospy</run_depend>
+</package>

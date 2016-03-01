@@ -1,0 +1,5 @@
+- git: {local-name: asctec_mav_framework, uri: 'https://github.com/ethz-asl/asctec_mav_framework.git'}
+- git: {local-name: ethzasl_msf, uri: 'https://github.com/ethz-asl/ethzasl_msf.git'}
+- git: {local-name: mav_comm, uri: 'https://github.com/ethz-asl/mav_comm.git'}
+- git: {local-name: rotors_simulator, uri: 'https://github.com/ethz-asl/rotors_simulator.git'}
+- git: {local-name: rotors_simulator_demos, uri: 'https://github.com/ethz-asl/rotors_simulator_demos.git'}

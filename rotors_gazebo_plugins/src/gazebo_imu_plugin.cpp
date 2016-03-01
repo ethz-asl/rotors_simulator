@@ -32,10 +32,7 @@ namespace gazebo {
 GazeboImuPlugin::GazeboImuPlugin()
     : ModelPlugin(),
       node_handle_(0),
-      velocity_prev_W_(0,0,0)
-{
-  InitGlogHelper::instance().initGlog();
-}
+      velocity_prev_W_(0, 0, 0) {}
 
 GazeboImuPlugin::~GazeboImuPlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
@@ -71,7 +68,8 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   frame_id_ = link_name_;
 
-  getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_, kDefaultImuTopic);
+  getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_,
+                           mav_msgs::default_topics::IMU);
   getSdfParam<double>(_sdf, "gyroscopeNoiseDensity",
                       imu_parameters_.gyroscope_noise_density,
                       imu_parameters_.gyroscope_noise_density);
@@ -107,7 +105,7 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboImuPlugin::OnUpdate, this, _1));
 
-  imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 10);
+  imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
 
   // Fill imu message.
   imu_message_.header.frame_id = frame_id_;
@@ -162,9 +160,9 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
                                Eigen::Vector3d* angular_velocity,
                                const double dt) {
-  CHECK(linear_acceleration);
-  CHECK(angular_velocity);
-  CHECK(dt > 0.0);
+  ROS_ASSERT(linear_acceleration != nullptr);
+  ROS_ASSERT(angular_velocity != nullptr);
+  ROS_ASSERT(dt > 0.0);
 
   // Gyrosocpe
   double tau_g = imu_parameters_.gyroscope_bias_correlation_time;
@@ -223,14 +221,19 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Pose T_W_I = link_->GetWorldPose(); //TODO(burrimi): Check tf.
   math::Quaternion C_W_I = T_W_I.rot;
 
+#if GAZEBO_MAJOR_VERSION < 5
   math::Vector3 velocity_current_W = link_->GetWorldLinearVel();
-
-  // link_->GetRelativeLinearAccel() does not work sometimes. Returns only 0.
-  // TODO For an accurate simulation, this might have to be fixed. Consider the
-  //      time delay introduced by this numerical derivative, for example.
+  // link_->GetRelativeLinearAccel() does not work sometimes with old gazebo versions.
+  // This issue is solved in gazebo 5.
   math::Vector3 acceleration = (velocity_current_W - velocity_prev_W_) / dt;
   math::Vector3 acceleration_I =
       C_W_I.RotateVectorReverse(acceleration - gravity_W_);
+
+  velocity_prev_W_ = velocity_current_W;
+#else
+  math::Vector3 acceleration_I = link_->GetRelativeLinearAccel() - C_W_I.RotateVectorReverse(gravity_W_);
+#endif
+
   math::Vector3 angular_vel_I = link_->GetRelativeAngularVel();
 
   Eigen::Vector3d linear_acceleration_I(acceleration_I.x,
@@ -265,7 +268,6 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   imu_pub_.publish(imu_message_);
 
-  velocity_prev_W_ = velocity_current_W;
 }
 
 

@@ -6,10 +6,10 @@ add_definitions(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   mav_msgs
+  nav_msgs
   roscpp
   sensor_msgs
   cmake_modules
-  glog_catkin
 )
 
 find_package(Eigen REQUIRED)
@@ -17,8 +17,8 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES lee_position_controller roll_pitch_yawrate_thrust_controller
-  CATKIN_DEPENDS geometry_msgs mav_msgs roscpp sensor_msgs
-  DEPENDS Eigen glog_catkin
+  CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs
+  DEPENDS Eigen
 )
 
 include_directories(
@@ -51,3 +51,19 @@ add_executable(roll_pitch_yawrate_thrust_controller_node
 add_dependencies(roll_pitch_yawrate_thrust_controller_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(roll_pitch_yawrate_thrust_controller_node
   roll_pitch_yawrate_thrust_controller ${catkin_LIBRARIES})
+
+install(TARGETS lee_position_controller roll_pitch_yawrate_thrust_controller
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(TARGETS lee_position_controller_node roll_pitch_yawrate_thrust_controller_node
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(
+  DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+)

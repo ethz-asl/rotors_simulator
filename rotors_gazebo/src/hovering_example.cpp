@@ -21,14 +21,19 @@
 #include <thread>
 #include <chrono>
 
+#include <Eigen/Core>
+#include <mav_msgs/conversions.h>
+#include <mav_msgs/default_topics.h>
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
-#include <mav_msgs/CommandTrajectory.h>
+#include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "hovering_example");
   ros::NodeHandle nh;
-  ros::Publisher trajectory_pub = nh.advertise<mav_msgs::CommandTrajectory>("command/trajectory", 10);
+  ros::Publisher trajectory_pub =
+      nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>(
+      mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
   ROS_INFO("Started hovering example.");
 
   std_srvs::Empty srv;
@@ -54,19 +59,19 @@ int main(int argc, char** argv){
   // Wait for 5 seconds to let the Gazebo GUI show up.
   ros::Duration(5.0).sleep();
 
-  mav_msgs::CommandTrajectory trajectory_msg;
+  trajectory_msgs::MultiDOFJointTrajectory trajectory_msg;
+  trajectory_msg.header.stamp = ros::Time::now();
+  Eigen::Vector3d desired_position(0.0, 0.0, 1.0);
+  double desired_yaw = 0.0;
+  mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(desired_position,
+      desired_yaw, &trajectory_msg);
 
-  while (ros::ok()) {
-    nh.param<double>("wp_x", trajectory_msg.position.x, 0.0);
-    nh.param<double>("wp_y", trajectory_msg.position.y, 0.0);
-    nh.param<double>("wp_z", trajectory_msg.position.z, 1.0);
-    ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
-             nh.getNamespace().c_str(),
-             trajectory_msg.position.x,
-             trajectory_msg.position.y,
-             trajectory_msg.position.z);
-    trajectory_msg.header.stamp = ros::Time::now();
-    trajectory_pub.publish(trajectory_msg);
-    ros::Duration(1.0).sleep();
-  }
+  ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
+           nh.getNamespace().c_str(),
+           desired_position.x(),
+           desired_position.y(),
+           desired_position.z());
+  trajectory_pub.publish(trajectory_msg);
+
+  ros::spin();
 }

@@ -26,15 +26,16 @@
 
   <!-- Mount a generic odometry sensor without odometry map (working everywhere). -->
   <xacro:odometry_plugin_macro
-    namespace="${namespace}/odometry_sensor1"
+    namespace="${namespace}"
     odometry_sensor_suffix="1"
-    parent_link="base_link"
-    pose_topic="pose"
-    pose_with_covariance_topic="pose_with_covariance"
-    position_topic="position"
-    transform_topic="transform"
-    odometry_topic="odometry"
+    parent_link="${namespace}/base_link"
+    pose_topic="odometry_sensor1/pose"
+    pose_with_covariance_topic="odometry_sensor1/pose_with_covariance"
+    position_topic="odometry_sensor1/position"
+    transform_topic="odometry_sensor1/transform"
+    odometry_topic="odometry_sensor1/odometry"
     parent_frame_id="world"
+    child_frame_id="${namespace}/odometry_sensor1"
     mass_odometry_sensor="0.00001"
     measurement_divisor="1"
     measurement_delay="0"
@@ -49,10 +50,8 @@
     noise_uniform_angular_velocity="0 0 0"
     enable_odometry_map="false"
     odometry_map=""
-    image_scale=""
-  >
+    image_scale="">
     <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
   </xacro:odometry_plugin_macro>
 </robot>
-

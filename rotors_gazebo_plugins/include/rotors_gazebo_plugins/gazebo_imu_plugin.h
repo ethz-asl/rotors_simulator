@@ -28,6 +28,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
+#include <mav_msgs/default_topics.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
@@ -54,8 +55,6 @@ static constexpr double kDefaultAdisAccelerometerTurnOnBiasSigma =
     20.0e-3 * 9.8;
 // Earth's gravity in Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84)
 static constexpr double kDefaultGravityMagnitude = 9.8068;
-
-static const std::string kDefaultImuTopic = "imu";
 
 // A description of the parameters:
 // https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics

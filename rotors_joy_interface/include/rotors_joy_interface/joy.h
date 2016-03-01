@@ -23,7 +23,7 @@
 #define ROTORS_JOY_INTERFACE_JOY_H_
 
 #include <geometry_msgs/PoseStamped.h>
-#include <mav_msgs/CommandRollPitchYawrateThrust.h>
+#include <mav_msgs/RollPitchYawrateThrust.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 
@@ -66,7 +66,7 @@ class Joy {
   Axes axes_;
   Buttons buttons_;
 
-  mav_msgs::CommandRollPitchYawrateThrust control_msg_;
+  mav_msgs::RollPitchYawrateThrust control_msg_;
   geometry_msgs::PoseStamped pose_;
   sensor_msgs::Joy current_joy_;
 
