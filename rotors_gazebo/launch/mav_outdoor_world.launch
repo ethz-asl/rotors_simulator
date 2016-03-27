@@ -4,7 +4,7 @@
   <arg name="enable_ground_truth" default="true"/>
   <arg name="log_file" default="iris"/>
 
-  <env name="GAZEBO_MODEL_PATH" value="$(find drcsim_model_resources)/gazebo_models"/>
+  <!--<env name="GAZEBO_MODEL_PATH" value="$(find drcsim_model_resources)/gazebo_models"/>-->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find rotors_gazebo)/worlds/outdoor.world"/>
     <!-- <arg name="debug" value="true" /> -->
