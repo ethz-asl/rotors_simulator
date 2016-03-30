@@ -72,8 +72,10 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
 
 
   std::cout << "[Multirotor base]: Calculating CoG" << std::endl;
-  std::cout << link_->GetScopedName() << " CoG: " << position_eigen << " Mass: ";
-  std::cout << mass << " inertia: ";
+  std::cout << link_->GetScopedName() << " CoG: ";
+  std::cout << "[" <<  position_eigen.transpose() << "]" << std::endl;
+  std::cout << "Mass: " << mass << "kg" << std::endl;
+  std::cout << "Inertia: " << std::endl;
 
   Eigen::Matrix3d inertia_B;
   getInertiaAtPosition(link_, position, &inertia_B);
@@ -90,8 +92,10 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
     vector3ToEigen(position, &position_eigen);
     double mass = child_links_[i]->GetInertial()->GetMass();
 
-    std::cout << link_name << " CoG: " << position_eigen << " Mass: ";
-    std::cout << mass << "inertia: ";
+    std::cout << link_name << " CoG: ";
+    std::cout << "[" << position_eigen.transpose() << "]" << std::endl;
+    std::cout << "Mass: " << mass << "kg" << std::endl;
+    std::cout << "Inertia:" << std::endl;
 
     Eigen::Matrix3d inertia_B;
     getInertiaAtPosition(child_links_[i], position, &inertia_B);
@@ -112,9 +116,14 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   }
 
   Eigen::Vector3d position_B_C = 1/total_mass * weighted_position;
-  std::cout << "weighted mass: " << weighted_position << std::endl;
-  std::cout << "CoG full body: " << position_B_C << " total mass: " << total_mass << std::endl;
-  std::cout << "Total inertia at B: " << total_inertia_B << std::endl;
+  std::cout << "[Multirotor base]: Total inertia" << std::endl;
+  std::cout << "Weighted position: ";
+  std::cout << "[" << weighted_position.transpose() << "]" << std::endl;
+  std::cout << "CoG full body: ";
+  std::cout << "[" << position_B_C.transpose() << "]" << std::endl;
+  std::cout << "Total mass: " << total_mass << "kg" << std::endl;
+  std::cout << "Total inertia at B: " << std::endl;
+  std::cout << total_inertia_B << std::endl;
 
   Eigen::Matrix3d total_inertia_C;
   Eigen::Matrix3d position_B_C_skew;
@@ -123,7 +132,8 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
 
   total_inertia_C = total_inertia_B - total_mass*position_B_C_skew*position_B_C_skew.transpose();
 
-  std::cout << "Total inertia at C: " << total_inertia_C << std::endl;
+  std::cout << "Total inertia at C:" << std::endl;
+  std::cout << total_inertia_C << std::endl;
 
 }
 
@@ -146,7 +156,10 @@ void GazeboMultirotorBasePlugin::getInertiaAtPosition(physics::LinkPtr link, mat
 
   *inertia_B = inertia_L_eigen + mass * position_B_L_skew * position_B_L_skew.transpose();
 
-  std::cout << "inertia in B" << *inertia_B << "gazebo inertia B: " << inertia_B_gazebo << std::endl;
+  std::cout << "Inertia in B:" << std::endl;
+  std::cout << *inertia_B << std::endl;
+  std::cout << "Gazebo inertia B:" << std::endl;
+  std::cout << inertia_B_gazebo << std::endl;
 }
 
 // This gets called by the world update start event.
