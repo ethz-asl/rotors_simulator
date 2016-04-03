@@ -56,7 +56,7 @@
 
   <!-- Mount a second generic pose sensor with a pose map (working only at some parts). -->
   <xacro:odometry_plugin_macro
-    namespace="${namespace}/odometry_sensor2"
+    namespace="${namespace}"
     odometry_sensor_suffix="2"
     parent_link="${namespace}/base_link"
     pose_topic="odometry_sensor2/pose"
