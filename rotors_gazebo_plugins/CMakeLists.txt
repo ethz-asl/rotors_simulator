@@ -98,10 +98,6 @@ add_library(rotors_gazebo_multirotor_base_plugin src/gazebo_multirotor_base_plug
 target_link_libraries(rotors_gazebo_multirotor_base_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(rotors_gazebo_multirotor_base_plugin ${catkin_EXPORTED_TARGETS})
 
-add_library(rotors_gazebo_wing_model_plugin src/gazebo_wing_model_plugin.cpp)
-target_link_libraries(rotors_gazebo_wing_model_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-add_dependencies(rotors_gazebo_wing_model_plugin ${catkin_EXPORTED_TARGETS})
-
 if (BUILD_MAVLINK_INTERFACE)
   add_library(rotors_gazebo_mavlink_interface src/gazebo_mavlink_interface.cpp)
   target_link_libraries(rotors_gazebo_mavlink_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${mavros_LIBRARIES})
@@ -119,7 +115,6 @@ install(
     rotors_gazebo_wind_plugin
     rotors_gazebo_octomap_plugin
     rotors_gazebo_multirotor_base_plugin
-    rotors_gazebo_wing_model_plugin
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
