@@ -19,10 +19,10 @@
   limitations under the License.
 -->
 
-<robot name="hummingbird" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="$(arg mav_name)" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <!-- Instantiate default hummingbird-->
-  <xacro:include filename="$(find rotors_description)/urdf/hummingbird_base.xacro" />
+  <!-- Instantiate the mav-->
+  <xacro:include filename="$(find rotors_description)/urdf/$(arg mav_name)_base.xacro" />
 
   <!-- Mount a generic odometry sensor without odometry map (working everywhere). -->
   <xacro:odometry_plugin_macro
@@ -55,3 +55,4 @@
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
   </xacro:odometry_plugin_macro>
 </robot>
+

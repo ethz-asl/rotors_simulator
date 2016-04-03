@@ -19,19 +19,19 @@
   limitations under the License.
 -->
 
-<robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="$(arg mav_name)" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Instantiate the mav with a generic pose sensor. -->
+  <xacro:include filename="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
 
-  <!-- Instantiate firefly with a generic odometry sensor. -->
-  <xacro:include filename="$(find rotors_description)/urdf/firefly_generic_odometry_sensor.gazebo" />
-
-  <!-- Mount a VI-sensor in front of the Firefly. -->
-  <xacro:vi_sensor_macro
-    namespace="${namespace}/vi_sensor"
-    parent_link="${namespace}/base_link"
-    enable_cameras="true"
-    enable_depth="true"
-    enable_ground_truth="true"
-  >
-    <origin xyz="0.1 0.0 -0.03" rpy="0.0 0.1 0.0" />
-  </xacro:vi_sensor_macro>
+  <!-- Add a wind gust starting at 40s and lasting for 2s. -->
+  <xacro:wind_plugin_macro
+    namespace="${namespace}"
+    xyz_offset="0 0 0"
+    wind_direction="1 0 0"
+    wind_force_mean="0"
+    wind_gust_direction="1 1 0"
+    wind_gust_duration="2"
+    wind_gust_start="40"
+    wind_gust_force_mean="5">
+  </xacro:wind_plugin_macro>
 </robot>
