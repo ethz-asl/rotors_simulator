@@ -3,7 +3,7 @@
   <version>2.0.1</version>
   <description>The rotors_gazebo_plugins package</description>
 
-  <maintainer email="markus.achtelik_devel@mavt.ethz.ch">Markus Achtelik</maintainer>
+  <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
 
   <author>Fadri Furrer</author>
   <author>Michael Burri</author>
@@ -24,7 +24,6 @@
   <build_depend>gazebo</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>mav_msgs</build_depend>
-  <build_depend>octomap_ros</build_depend>
   <build_depend>octomap</build_depend>
   <build_depend>octomap_msgs</build_depend>
   <build_depend>octomap_ros</build_depend>
@@ -40,7 +39,6 @@
   <run_depend>gazebo_ros</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>mav_msgs</run_depend>
-  <run_depend>octomap_ros</run_depend>
   <run_depend>octomap</run_depend>
   <run_depend>octomap_msgs</run_depend>
   <run_depend>octomap_ros</run_depend>

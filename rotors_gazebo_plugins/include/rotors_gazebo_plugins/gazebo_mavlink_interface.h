@@ -18,7 +18,6 @@
  * limitations under the License.
  */
 
-
 #ifndef ROTORS_GAZEBO_PLUGINS_MAVLINK_INTERFACE_H
 #define ROTORS_GAZEBO_PLUGINS_MAVLINK_INTERFACE_H
 
@@ -28,85 +27,57 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-#include <mav_msgs/CommandMotorSpeed.h>
-#include <mav_msgs/MotorSpeed.h>
-#include <ros/callback_queue.h>
+#include <mavros_msgs/mavlink_convert.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
-#include <stdio.h>
 
 #include "rotors_gazebo_plugins/common.h"
-#include <mavros_msgs/mavlink_convert.h>
 
 namespace gazebo {
+// Constants
+static constexpr double kEarthRadius = 6378137.0;
 
 // Default values
-static const std::string kDefaultNamespace = "";
-
-// This just proxies the motor commands from command/motor_speed to the single motors via internal
-// ConsPtr passing, such that the original commands don't have to go n_motors-times over the wire.
-static const std::string kDefaultMotorVelocityReferencePubTopic = "gazebo/command/motor_speed";
-static const std::string kDefaultMavlinkControlSubTopic = "mavlink/to";
-
-static const std::string kDefaultImuTopic = "imu";
 static const std::string kDefaultMavlinkHilSensorPubTopic = "mavlink/from";
+static constexpr double kDefaultGpsUpdateFreq = 5.0;
+
+// Default reference magnetic field values (in Gauss), obtained from World
+// Magnetic Model: (https://www.ngdc.noaa.gov/geomag/WMM/calculators.shtml) for
+// Zurich: lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84
+static constexpr double kDefaultRefMagNorth = 0.21475;
+static constexpr double kDefaultRefMagEast = 0.00797;
+static constexpr double kDefaultRefMagDown = 0.42817;
+
+// Default reference values (Zurich: lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84)
+static constexpr double kDefaultRefLat = 47.3667;
+static constexpr double kDefaultRefLon = 8.5500;
+static constexpr double kDefaultRefAlt = 500.0;
 
 class GazeboMavlinkInterface : public ModelPlugin {
  public:
-  GazeboMavlinkInterface()
-      : ModelPlugin(),
-        received_first_referenc_(false),
-        namespace_(kDefaultNamespace),
-        motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferencePubTopic),
-        hil_sensor_mavlink_pub_topic_(kDefaultMavlinkHilSensorPubTopic),
-        imu_sub_topic_(kDefaultImuTopic),
-        mavlink_control_sub_topic_(kDefaultMavlinkControlSubTopic),
-        node_handle_(NULL){}
+  GazeboMavlinkInterface();
   ~GazeboMavlinkInterface();
 
   void Publish();
 
  protected:
   void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
-  void OnUpdate(const common::UpdateInfo& /*_info*/);
+  void OnUpdate(const common::UpdateInfo&);
 
  private:
-
-  bool received_first_referenc_;
-  Eigen::VectorXd input_reference_;
-
   std::string namespace_;
-  std::string motor_velocity_reference_pub_topic_;
-  std::string mavlink_control_sub_topic_;
-  std::string link_name_;
+  std::string imu_sub_topic_;
+  std::string hil_sensor_mavlink_pub_topic_;
 
   ros::NodeHandle* node_handle_;
-  ros::Publisher motor_velocity_reference_pub_;
-  ros::Subscriber mav_control_sub_;
-
-  physics::ModelPtr model_;
-  physics::WorldPtr world_;
-
-  /// \brief Pointer to the update event connection.
-  event::ConnectionPtr updateConnection_;
-
-  boost::thread callback_queue_thread_;
-  void QueueThread();
-  void CommandMotorMavros(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg);
-  void MavlinkControlCallback(const mavros_msgs::Mavlink::ConstPtr &rmsg);
-  void ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg);
-
-
-  unsigned _rotor_count;
-  struct {
-    float control[8];
-  } inputs; 
-
   ros::Subscriber imu_sub_;
   ros::Publisher hil_sensor_pub_;
 
-  std::string hil_sensor_mavlink_pub_topic_;
-  std::string imu_sub_topic_;
+  physics::ModelPtr model_;
+  physics::WorldPtr world_;
+  event::ConnectionPtr updateConnection_;
+
+  void ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg);
   
   common::Time last_time_;
   common::Time last_gps_time_;
@@ -117,7 +88,11 @@ class GazeboMavlinkInterface : public ModelPlugin {
 
   math::Vector3 gravity_W_;
   math::Vector3 velocity_prev_W_;
-  math::Vector3 mag_W_; 
+  math::Vector3 mag_W_;
+
+  double ref_lat_;
+  double ref_lon_;
+  double ref_alt_;
 };
 }
 

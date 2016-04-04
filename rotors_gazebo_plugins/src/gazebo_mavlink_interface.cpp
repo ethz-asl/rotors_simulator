@@ -18,10 +18,13 @@
  * limitations under the License.
  */
 
-
 #include "rotors_gazebo_plugins/gazebo_mavlink_interface.h"
 
 namespace gazebo {
+
+GazeboMavlinkInterface::GazeboMavlinkInterface()
+    : ModelPlugin(),
+      node_handle_(0) {}
 
 GazeboMavlinkInterface::~GazeboMavlinkInterface() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
@@ -34,101 +37,83 @@ GazeboMavlinkInterface::~GazeboMavlinkInterface() {
 void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Store the pointer to the model.
   model_ = _model;
-
   world_ = model_->GetWorld();
 
+  // Default params
   namespace_.clear();
 
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_mavlink_interface] Please specify a robotNamespace.\n";
-
   node_handle_ = new ros::NodeHandle(namespace_);
 
-  getSdfParam<std::string>(_sdf, "motorSpeedCommandPubTopic", motor_velocity_reference_pub_topic_,
-                           motor_velocity_reference_pub_topic_);
+  double gps_freq;
+  double ref_mag_north;
+  double ref_mag_east;
+  double ref_mag_down;
+
+  getSdfParam<std::string>(_sdf, "imuSubTopic", imu_sub_topic_,
+                           mav_msgs::default_topics::IMU);
+  getSdfParam<std::string>(_sdf, "mavlinkHilSensorPubTopic",
+                           hil_sensor_mavlink_pub_topic_,
+                           kDefaultMavlinkHilSensorPubTopic);
+  getSdfParam<double>(_sdf, "gpsUpdateFreq", gps_freq, kDefaultGpsUpdateFreq);
+  getSdfParam<double>(_sdf, "referenceMagNorth", ref_mag_north, kDefaultRefMagNorth);
+  getSdfParam<double>(_sdf, "referenceMagEast", ref_mag_east, kDefaultRefMagEast);
+  getSdfParam<double>(_sdf, "referenceMagDown", ref_mag_down, kDefaultRefMagDown);
+  getSdfParam<double>(_sdf, "referenceLatitude", ref_lat_, kDefaultRefLat);
+  getSdfParam<double>(_sdf, "referenceLongitude", ref_lon_, kDefaultRefLon);
+  getSdfParam<double>(_sdf, "referenceAltitude", ref_alt_, kDefaultRefAlt);
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  updateConnection_ = event::Events::ConnectWorldUpdateBegin(
-      boost::bind(&GazeboMavlinkInterface::OnUpdate, this, _1));
+  this->updateConnection_ =
+      event::Events::ConnectWorldUpdateBegin(
+          boost::bind(&GazeboMavlinkInterface::OnUpdate, this, _1));
 
-  mav_control_sub_ = node_handle_->subscribe(mavlink_control_sub_topic_, 10,
-                                           &GazeboMavlinkInterface::MavlinkControlCallback,
-                                           this);
-  // Subscriber to IMU sensor_msgs::Imu Message.
   imu_sub_ = node_handle_->subscribe(imu_sub_topic_, 10, &GazeboMavlinkInterface::ImuCallback, this);
-  
-  motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::CommandMotorSpeed>(motor_velocity_reference_pub_topic_, 10);
+
   hil_sensor_pub_ = node_handle_->advertise<mavros_msgs::Mavlink>(hil_sensor_mavlink_pub_topic_, 10);
 
-  _rotor_count = 4;
   last_time_ = world_->GetSimTime();
   last_gps_time_ = world_->GetSimTime();
-  double gps_update_interval_ = 200*1000000;  // nanoseconds for 5Hz
+  gps_update_interval_ = 1000000000.0 / gps_freq;  // Nanoseconds
 
   gravity_W_ = world_->GetPhysicsEngine()->GetGravity();
-
-  // Magnetic field data for Zurich from WMM2015 (10^5xnanoTesla (N, E, D))
-  mag_W_ = {0.21523, 0.00771, 0.42741};
-
+  mag_W_ = math::Vector3(ref_mag_north, ref_mag_east, ref_mag_down);
 }
 
 // This gets called by the world update start event.
-void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
-  gzerr << "[gazebo_mavlink_interface] Please specify a robotNamespace.\n";
-  if(!received_first_referenc_)
-    return;
+void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& _info) {
+  common::Time current_time = world_->GetSimTime();
 
-  common::Time now = world_->GetSimTime();
-
-  mav_msgs::CommandMotorSpeedPtr turning_velocities_msg(new mav_msgs::CommandMotorSpeed);
-
-  for (int i = 0; i < input_reference_.size(); i++)
-  turning_velocities_msg->motor_speed.push_back(input_reference_[i]);
-  turning_velocities_msg->header.stamp.sec = now.sec;
-  turning_velocities_msg->header.stamp.nsec = now.nsec;
-
-  motor_velocity_reference_pub_.publish(turning_velocities_msg);
-  turning_velocities_msg.reset();
-
-  //send gps
-  common::Time current_time  = now;
-  double dt = (current_time - last_time_).Double();
   last_time_ = current_time;
-  double t = current_time.Double();
 
   math::Pose T_W_I = model_->GetWorldPose(); //TODO(burrimi): Check tf.
   math::Vector3 pos_W_I = T_W_I.pos;  // Use the models' world position for GPS and pressure alt.
 
   math::Vector3 velocity_current_W = model_->GetWorldLinearVel();  // Use the models' world position for GPS velocity.
-
   math::Vector3 velocity_current_W_xy = velocity_current_W;
   velocity_current_W_xy.z = 0.0;
-
-  // TODO: Remove GPS message from IMU plugin. Added gazebo GPS plugin. This is temp here.
-  float lat_zurich = 47.3667;  // deg
-  float long_zurich = 8.5500;  // deg
-  float earth_radius = 6353000;  // m
   
   common::Time gps_update(gps_update_interval_);
 
-  if(current_time - last_gps_time_ > gps_update){  // 5Hz
+  if (current_time - last_gps_time_ > gps_update) {
     mavlink_message_t gps_mmsg;
 
-    hil_gps_msg_.time_usec = current_time.nsec*1000;
+    hil_gps_msg_.time_usec = current_time.nsec * 1000;
     hil_gps_msg_.fix_type = 3;
-    hil_gps_msg_.lat = (lat_zurich + (pos_W_I.x/earth_radius)*180/3.1416) * 10000000;
-    hil_gps_msg_.lon = (long_zurich + (-pos_W_I.y/earth_radius)*180/3.1416) * 10000000;
-    hil_gps_msg_.alt = pos_W_I.z * 1000;
+    hil_gps_msg_.lat = (ref_lat_ + (pos_W_I.x / kEarthRadius) * 180 / M_PI) * 10000000;
+    hil_gps_msg_.lon = (ref_lon_ + (-pos_W_I.y / kEarthRadius) * 180 / M_PI) * 10000000;
+    hil_gps_msg_.alt = (ref_alt_ + pos_W_I.z) * 1000;
     hil_gps_msg_.eph = 100;
     hil_gps_msg_.epv = 100;
     hil_gps_msg_.vel = velocity_current_W_xy.GetLength() * 100;
     hil_gps_msg_.vn = velocity_current_W.x * 100;
     hil_gps_msg_.ve = -velocity_current_W.y * 100;
     hil_gps_msg_.vd = -velocity_current_W.z * 100;
-    hil_gps_msg_.cog = atan2(hil_gps_msg_.ve, hil_gps_msg_.vn) * 180.0/3.1416 * 100.0;
+    hil_gps_msg_.cog = atan2(hil_gps_msg_.ve, hil_gps_msg_.vn) * 180.0 / M_PI * 100.0;
     hil_gps_msg_.satellites_visible = 10;
            
     mavlink_hil_gps_t* hil_gps_msg = &hil_gps_msg_;
@@ -141,52 +126,6 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
     hil_sensor_pub_.publish(gps_rmsg);
 
     last_gps_time_ = current_time;
-  }
-}
-
-void GazeboMavlinkInterface::CommandMotorMavros(const mav_msgs::CommandMotorSpeedPtr& input_reference_msg) {
-  input_reference_.resize(input_reference_msg->motor_speed.size());
-  for (int i = 0; i < input_reference_msg->motor_speed.size(); ++i) {
-    input_reference_[i] = input_reference_msg->motor_speed[i];
-  }
-  received_first_referenc_ = true;
-}
-
-
-void GazeboMavlinkInterface::MavlinkControlCallback(const mavros_msgs::Mavlink::ConstPtr &rmsg) {
-  mavlink_message_t mmsg;
-
-  if(mavros_msgs::mavlink::convert(*rmsg, mmsg)){
-    mavlink_hil_controls_t act_msg;
-
-    mavlink_message_t* msg = &mmsg;
-
-    mavlink_msg_hil_controls_decode(msg, &act_msg);
-
-    inputs.control[0] =(double)act_msg.roll_ailerons;
-    inputs.control[1] =(double)act_msg.pitch_elevator;
-    inputs.control[2] =(double)act_msg.yaw_rudder;
-    inputs.control[3] =(double)act_msg.throttle;
-    inputs.control[4] =(double)act_msg.aux1;
-    inputs.control[5] =(double)act_msg.aux2;
-    inputs.control[6] =(double)act_msg.aux3;
-    inputs.control[7] =(double)act_msg.aux4;
-
-    // publish message
-    double scaling = 150;
-    double offset = 600;
-
-    mav_msgs::CommandMotorSpeedPtr turning_velocities_msg(new mav_msgs::CommandMotorSpeed);
-
-    for (int i = 0; i < _rotor_count; i++) {
-      turning_velocities_msg->motor_speed.push_back(inputs.control[i] * scaling + offset);
-    }
-
-    CommandMotorMavros(turning_velocities_msg);
-    turning_velocities_msg.reset();
-
-  } else{
-    std::cout << "incorrect mavlink data" <<"\n";
   }
 }
 
@@ -229,7 +168,6 @@ void GazeboMavlinkInterface::ImuCallback(const sensor_msgs::ImuConstPtr& imu_mes
   mavros_msgs::mavlink::convert(*msg, *rmsg);
 
   hil_sensor_pub_.publish(rmsg);
-
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMavlinkInterface);

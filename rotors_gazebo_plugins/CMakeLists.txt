@@ -41,6 +41,7 @@ find_package(catkin REQUIRED COMPONENTS
 if (BUILD_MAVLINK_INTERFACE)
   find_package(mavros)
   find_package(mavros_msgs)
+  find_package(libmavconn)
   message(STATUS "Added mavros dependency")
 endif()
 
@@ -54,6 +55,7 @@ include_directories(${GAZEBO_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 if (BUILD_MAVLINK_INTERFACE)
   include_directories(${mavros_msgs_INCLUDE_DIRS})
+  include_directories(${libmavconn_INCLUDE_DIRS})
 endif()
 
 catkin_package(
