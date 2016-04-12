@@ -88,7 +88,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
   hil_sensor_pub_ = node_handle_->advertise<mavros_msgs::Mavlink>(hil_sensor_mavlink_pub_topic, 10);
 
-  motor_speeds_pub_ = node_handle->advertise<mav_msgs::Actuators>(motor_speeds_pub_topic, 10);
+  motor_speeds_pub_ = node_handle_->advertise<mav_msgs::Actuators>(motor_speeds_pub_topic, 10);
 
   last_time_ = world_->GetSimTime();
   last_gps_time_ = world_->GetSimTime();
@@ -161,7 +161,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& _info) {
 
 void GazeboMavlinkInterface::MavlinkControlCallback(const mavros_msgs::Mavlink::ConstPtr &rmsg) {
   if (rmsg->msgid == MAVLINK_MSG_ID_HIL_CONTROLS) {
-    mavlink_message_t* mmsg;
+    mavlink_message_t* mmsg(new mavlink_message_t);
 
     if (mavros_msgs::mavlink::convert(*rmsg, *mmsg)) {
       mavlink_hil_controls_t act_msg;
@@ -181,7 +181,7 @@ void GazeboMavlinkInterface::MavlinkControlCallback(const mavros_msgs::Mavlink::
       ros::Time current_time = ros::Time::now();
 
       for (int i = 0; i < rotor_count_; i++) {
-        motor_speeds_msg->angular_velocities.push_back(inputs[i] * kMotorSpeedScaling + kMotorSpeedOffset);
+        motor_speeds_msg.angular_velocities.push_back(inputs[i] * kMotorSpeedScaling + kMotorSpeedOffset);
       }
 
       motor_speeds_msg.header.stamp.sec = current_time.sec;
@@ -192,6 +192,8 @@ void GazeboMavlinkInterface::MavlinkControlCallback(const mavros_msgs::Mavlink::
     else {
       gzerr << "[gazebo_mavlink_interface] Incorrect mavlink data.\n";
     }
+
+    delete mmsg;
   }
 }
 

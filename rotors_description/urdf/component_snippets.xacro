@@ -706,7 +706,7 @@
       mavlink_sub_topic="/mavlink/from"
       imu_sub_topic="${imu_sub_topic}"
       mavlink_pub_topic="/mavlink/to"
-      motors_speeds_pub_topic="command/motor_speed"
+      motors_speeds_pub_topic="gazebo/command/motor_speed"
       gps_update_freq="5.0"
       rotor_count="${rotor_count}"
       reference_magnetic_field_north="0.21475"

@@ -44,7 +44,7 @@ static constexpr int kAllFieldsUpdated = 4095;
 // Default values
 static const std::string kDefaultMavlinkControlSubTopic = "/mavlink/from";
 static const std::string kDefaultMavlinkHilSensorPubTopic = "/mavlink/to";
-static const std::string kDefaultMotorSpeedsPubTopic = "command/motor_speed";
+static const std::string kDefaultMotorSpeedsPubTopic = "gazebo/command/motor_speed";
 static constexpr double kDefaultGpsUpdateFreq = 5.0;
 static constexpr int kDefaultRotorCount = 4;
 
