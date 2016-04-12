@@ -27,6 +27,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
+#include <mav_msgs/Actuators.h>
 #include <mavros_msgs/mavlink_convert.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
@@ -36,10 +37,16 @@
 namespace gazebo {
 // Constants
 static constexpr double kEarthRadius = 6378137.0;
+static constexpr double kMotorSpeedOffset = 600.0;
+static constexpr double kMotorSpeedScaling = 150.0;
+static constexpr int kAllFieldsUpdated = 4095;
 
 // Default values
-static const std::string kDefaultMavlinkHilSensorPubTopic = "mavlink/from";
+static const std::string kDefaultMavlinkControlSubTopic = "/mavlink/from";
+static const std::string kDefaultMavlinkHilSensorPubTopic = "/mavlink/to";
+static const std::string kDefaultMotorSpeedsPubTopic = "command/motor_speed";
 static constexpr double kDefaultGpsUpdateFreq = 5.0;
+static constexpr int kDefaultRotorCount = 4;
 
 // Default reference magnetic field values (in Gauss), obtained from World
 // Magnetic Model: (https://www.ngdc.noaa.gov/geomag/WMM/calculators.shtml) for
@@ -66,22 +73,23 @@ class GazeboMavlinkInterface : public ModelPlugin {
 
  private:
   std::string namespace_;
-  std::string imu_sub_topic_;
-  std::string hil_sensor_mavlink_pub_topic_;
-
   ros::NodeHandle* node_handle_;
+  ros::Subscriber mav_control_sub_;
   ros::Subscriber imu_sub_;
   ros::Publisher hil_sensor_pub_;
+  ros::Publisher motor_speeds_pub_;
 
   physics::ModelPtr model_;
   physics::WorldPtr world_;
   event::ConnectionPtr updateConnection_;
 
+  void MavlinkControlCallback(const mavros_msgs::Mavlink::ConstPtr &rmsg);
   void ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg);
   
   common::Time last_time_;
   common::Time last_gps_time_;
   double gps_update_interval_;
+  int rotor_count_;
 
   mavlink_hil_sensor_t hil_sensor_msg_;
   mavlink_hil_gps_t hil_gps_msg_;
