@@ -1,0 +1,3 @@
+# Roll pitch yawrate thrust controller parameters
+attitude_gain: {x: 2, y: 2.3, z: 0.035}
+angular_rate_gain: {x: 0.4, y: 0.52, z: 0.025}

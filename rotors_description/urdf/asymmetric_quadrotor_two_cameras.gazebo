@@ -22,7 +22,7 @@
 <robot name="asymmetric_quadrotor" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- Instantiate asymmetric_quadrotor with odometry sensor-->
-  <xacro:include filename="$(find rotors_description)/urdf/asymmetric_quadrotor_generic_odometry_sensor.gazebo" />
+  <xacro:include filename="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
 
   <xacro:property name="frame_rate" value="30.0" />
 
