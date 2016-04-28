@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   geometry_msgs
   mav_msgs
+  nav_msgs
   sensor_msgs
   trajectory_msgs
 )
@@ -24,6 +25,17 @@ add_dependencies(rotors_joy_interface ${catkin_EXPORTED_TARGETS})
 target_link_libraries(rotors_joy_interface ${catkin_LIBRARIES})
 
 install(TARGETS rotors_joy_interface
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+
+add_executable(rotors_keyboard_interface src/keyboard.cpp)
+add_dependencies(rotors_keyboard_interface ${catkin_EXPORTED_TARGETS})
+target_link_libraries(rotors_keyboard_interface ${catkin_LIBRARIES})
+
+install(TARGETS rotors_keyboard_interface
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
