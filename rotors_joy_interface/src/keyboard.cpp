@@ -93,8 +93,11 @@ int main(int argc, char** argv) {
       control_msg.header.stamp = ros::Time::now();
       
       Eigen::Vector3d target_position; 
-      target_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z; // current xy-position, reference altitude
-      double target_yaw = tf::getYaw(odom.pose.pose.orientation); // current yaw, counter-clockwise positive 
+      target_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z; 
+      // current position
+      
+      double target_yaw = tf::getYaw(odom.pose.pose.orientation); 
+      // current yaw, counter-clockwise positive 
       
       if (c == 'W') {
         target_position.x() += 0.5;
@@ -138,11 +141,11 @@ int main(int argc, char** argv) {
     rate.sleep();
   }
   
-  kbd_thread.join();
-  
   
   // restore the former settings 
   tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
-
+  
+  kbd_thread.join();
+   
   return 0;
 }
