@@ -1,0 +1,7 @@
+<launch>
+  <group ns="firefly">
+    <node name="rotors_kbd_control" pkg="rotors_joy_interface" type="rotors_keyboard_interface" output="screen">
+          <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node>
+  </group>
+</launch>
