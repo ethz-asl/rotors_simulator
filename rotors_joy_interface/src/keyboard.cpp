@@ -53,6 +53,117 @@ void odom_callback(const nav_msgs::OdometryConstPtr& odometry_msg) {
   got_odom = true;
 }
 
+void send_to_lee_position_controller(nav_msgs::Odometry& odom, ros::Publisher& ctrl_pub) {
+  trajectory_msgs::MultiDOFJointTrajectory control_msg;
+  control_msg.header.stamp = ros::Time::now();
+      
+  Eigen::Vector3d target_position; 
+  target_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z; 
+  // current position
+      
+  double target_yaw = tf::getYaw(odom.pose.pose.orientation); 
+  // current yaw, counter-clockwise positive 
+      
+  if (c == 'W') {
+    target_position.x() += 0.5;
+    mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
+        
+  } else if (c == 'E') {
+    target_position.x() -= 0.5;
+    mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
+      
+  } else if (c == 'A') {
+    target_position.y() += 0.5;
+    mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
+      
+  } else if (c == 'F') {
+    target_position.y() -= 0.5;
+    mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
+      
+  } else if (c == 'Q') {
+    target_position.z() += 0.5;
+    mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
+      
+  } else if (c == 'R') {
+    target_position.z() -= 0.5;
+    mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
+      
+  } else if (c == 'S') {
+    target_yaw += 30*M_PI/180;
+    mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
+        
+  } else if (c == 'D') {
+    target_yaw -= 30*M_PI/180;
+    mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
+  }
+  
+  ctrl_pub.publish(control_msg);
+}
+
+
+void send_to_lee_altitude_and_velocity_controller(nav_msgs::Odometry& odom, ros::Publisher& ctrl_pub, double& reference_altitude) {
+  trajectory_msgs::MultiDOFJointTrajectory control_msg;
+      
+  mav_msgs::EigenTrajectoryPoint target;
+  target.position_W << odom.pose.pose.position.x, 
+                       odom.pose.pose.position.y, 
+                       reference_altitude;  // current xy-position, reference altitude
+
+  target.orientation_W_B = mav_msgs::quaternionFromMsg(odom.pose.pose.orientation);
+  Eigen::Matrix3d R_W_B = target.orientation_W_B.toRotationMatrix();
+  
+  target.angular_velocity_W.setZero();
+
+  target.velocity_W.setZero();
+  target.acceleration_W.setZero();
+  target.snap_W.setZero();
+  target.jerk_W.setZero();
+  
+  
+  if (c == 'W') {
+    Eigen::Vector3d velocity_body(0.5, 0, 0); 
+    target.velocity_W = R_W_B * velocity_body;
+    mav_msgs::msgMultiDofJointTrajectoryFromEigen(target, &control_msg);
+          
+  } else if (c == 'E') {
+    Eigen::Vector3d velocity_body(-0.5, 0, 0); 
+    target.velocity_W = R_W_B * velocity_body;
+    mav_msgs::msgMultiDofJointTrajectoryFromEigen(target, &control_msg);
+    
+  } else if (c == 'A') {
+    Eigen::Vector3d velocity_body(0, 0.5, 0); 
+    target.velocity_W = R_W_B * velocity_body;
+    mav_msgs::msgMultiDofJointTrajectoryFromEigen(target, &control_msg);
+    
+  } else if (c == 'F') {
+    Eigen::Vector3d velocity_body(0, -0.5, 0); 
+    target.velocity_W = R_W_B * velocity_body;
+    mav_msgs::msgMultiDofJointTrajectoryFromEigen(target, &control_msg);
+          
+  } else if (c == 'Q') {
+    reference_altitude += 0.5;
+    target.position_W.z() = reference_altitude;  
+    mav_msgs::msgMultiDofJointTrajectoryFromEigen(target, &control_msg);
+  
+  } else if (c == 'R') {
+    reference_altitude -= 0.5;
+    target.position_W.z() = reference_altitude;  
+    mav_msgs::msgMultiDofJointTrajectoryFromEigen(target, &control_msg);
+    
+  } else if (c == 'S') {
+    target.angular_velocity_W.z() = 30*M_PI/180.0; // 30 deg/sec 
+    mav_msgs::msgMultiDofJointTrajectoryFromEigen(target, &control_msg);
+    
+  } else if (c == 'D') {
+    target.angular_velocity_W.z() = -30*M_PI/180.0; 
+    mav_msgs::msgMultiDofJointTrajectoryFromEigen(target, &control_msg);
+  }
+  
+  control_msg.header.stamp = ros::Time::now();
+  ctrl_pub.publish(control_msg);
+}
+
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "rotors_keyboard_interface");
   ros::NodeHandle nh;
@@ -86,55 +197,10 @@ int main(int argc, char** argv) {
   std::thread kbd_thread(kbd_listener);
   
   while (ros::ok()) {
-    
     if (has_new_kbd_input) {
-      
-      trajectory_msgs::MultiDOFJointTrajectory control_msg;
-      control_msg.header.stamp = ros::Time::now();
-      
-      Eigen::Vector3d target_position; 
-      target_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z; 
-      // current position
-      
-      double target_yaw = tf::getYaw(odom.pose.pose.orientation); 
-      // current yaw, counter-clockwise positive 
-      
-      if (c == 'W') {
-        target_position.x() += 0.5;
-        mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
-        
-      } else if (c == 'E') {
-        target_position.x() -= 0.5;
-        mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
-      
-      } else if (c == 'A') {
-        target_position.y() += 0.5;
-        mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
-      
-      } else if (c == 'F') {
-        target_position.y() -= 0.5;
-        mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
-      
-      } else if (c == 'Q') {
-        target_position.z() += 0.5;
-        mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
-      
-      } else if (c == 'R') {
-        target_position.z() -= 0.5;
-        mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
-      
-      } else if (c == 'S') {
-        target_yaw += 30*M_PI/180;
-        mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
-        
-      } else if (c == 'D') {
-        target_yaw -= 30*M_PI/180;
-        mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(target_position, target_yaw, &control_msg);
-      }
-  
+      //send_to_lee_position_controller(odom, ctrl_pub);
+      send_to_lee_altitude_and_velocity_controller(odom, ctrl_pub, ref_pose.position.z);
       has_new_kbd_input = false;
-      
-      ctrl_pub.publish(control_msg);
     }
     
     ros::spinOnce();
