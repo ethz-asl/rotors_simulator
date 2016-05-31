@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="visualize_scan" default="false"/>
+  <arg name="horizontal_res" default="0.10"/>
+  <arg name="update_rate" default="5.0"/>
+  <arg name="velodyne_suffix" default="0"/>
+  <param name="robot_description"
+    command="$(find xacro)/xacro.py '$(find rotors_description)/urdf/velodyne_puck_sensor_base.xacro'
+    visualize_scan:=$(arg visualize_scan)
+    horizontal_res:=$(arg horizontal_res)
+    update_rate:=$(arg update_rate)
+    velodyne_suffix:=$(arg velodyne_suffix)"
+  />
+
+  <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="spawn_robot" pkg="gazebo_ros" type="spawn_model"
+   args="-param robot_description
+         -urdf
+         -x 0
+         -y 0
+         -z 0.5
+         -model velodyne_puck_sensor"
+   respawn="false" output="screen">
+  </node>
+
+  <!-- Combine joint values -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher"/>
+</launch>
