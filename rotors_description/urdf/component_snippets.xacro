@@ -36,6 +36,183 @@
     </gazebo>
   </xacro:macro>
 
+  <!-- Macro to add a Velodyne Puck -->
+  <xacro:macro name="velodyne_puck_sensor_macro" 
+    params="namespace parent_link horizontal_res visualize_scan velodyne_suffix update_rate *origin">
+   
+    <!-- BASE LINK DEFINITION -->
+    <link name="${namespace}/base_link">
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <cylinder radius="0.05165" length="0.0188" />
+        </geometry>
+      </collision>
+
+      <visual>
+        <origin xyz="0 0 -0.0094" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://rotors_description/meshes/VLP16_base.dae" scale="1 1 1" />
+        </geometry>
+      </visual>
+
+      <inertial>
+        <mass value="0.05" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="0.000030623" ixy="0" ixz="0" iyy="0.000030623" iyz="0" izz="0.000091036" />
+      </inertial>
+    </link>
+
+    <!-- SCANNER SCREEN LINK DEFINITION -->
+    <link name="${namespace}/scan_link">
+      <pose>0 0 0.028 0 0 0</pose>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <cylinder radius="0.005165" length="0.0392" />
+        </geometry>
+      </collision>
+
+      <visual>
+        <origin xyz="0 0 -0.040" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://rotors_description/meshes/VLP16_scan.dae" scale="1 1 1" />
+        </geometry>
+      </visual>
+
+      <inertial>
+        <!-- mass ~ 0.730g. However firefly cannot hover with that mass -->
+        <mass value="0.00730" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="0.000090623" ixy="0" ixz="0" iyy="0.000090623" iyz="0" izz="0.000091036" />
+      </inertial>
+    </link>
+
+    <!-- TOP LINK DEFINITION -->
+    <link name="${namespace}/top_link">
+      <pose>0 0 0.056 0 0 0</pose>
+      
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <cylinder radius="0.0005165" length="0.0147" />
+        </geometry>
+      </collision>
+
+      <visual>
+        <origin xyz="0 0 -0.068" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://rotors_description/meshes/VLP16_top.dae" scale="1 1 1" />
+        </geometry>
+      </visual>
+
+      <inertial>
+        <mass value="0.05" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="0.000030623" ixy="0" ixz="0" iyy="0.000030623" iyz="0" izz="0.000031036" />
+      </inertial>
+    </link>
+
+    <!-- JOINT DEFINITIONS -->
+    <joint name="${parent_link}_to_${namespace}_base" type="fixed">
+      <parent link="${parent_link}"/>
+      <child link="${namespace}/base_link"/>
+      <xacro:insert_block name="origin" />
+    </joint>
+
+    <joint name="${namespace}_base_to_${namespace}_scan" type="fixed">
+      <parent link="${namespace}/base_link"/>
+      <child link="${namespace}/scan_link"/>
+      <origin xyz="0 0 0.030"  />
+    </joint>
+
+    <joint name="${namespace}_scan_to_${namespace}_top" type="fixed">
+      <parent link="${namespace}/scan_link"/>
+      <child link="${namespace}/top_link"/>
+      <origin xyz="0 0 0.027"  />
+    </joint>
+
+    <xacro:block_laser_macro
+      namespace="${namespace}"
+      parent_link="${namespace}/scan_link"
+      visualize_scan="${visualize_scan}"
+      horizontal_fov_min="0"
+      horizontal_fov_max="${2 * pi}"
+      horizontal_samples="900"
+      horizontal_res="${horizontal_res}"
+      vertical_fov_min="${-15 / 360 *  pi}"
+      vertical_fov_max="${ 15 / 360 *  pi}"
+      vertical_samples="16"
+      vertical_res="1.0"
+      update_rate="${update_rate}"
+      range_min="0.10"
+      range_max="100.0"
+      range_res="0.02"
+      topic_name="${namespace}/velodyne_puck${velodyne_suffix}/scan"
+      frame_name="velodyne_puck${velodyne_suffix}"
+      always_on="true"
+      gaussian_noise="0.0009">
+      <origin xyz="0.0 0.0 -0.004645" rpy="0 0 0" />
+    </xacro:block_laser_macro>
+  </xacro:macro>
+
+  <!-- Macro to add a block laser -->
+  <xacro:macro name="block_laser_macro"
+    params="namespace  parent_link visualize_scan horizontal_fov_min 
+    horizontal_fov_max horizontal_samples horizontal_res vertical_fov_min 
+    vertical_fov_max vertical_samples vertical_res update_rate range_min 
+    range_max range_res topic_name frame_name always_on gaussian_noise *origin">
+    <!-- This model has 3 links : scan, base, top
+         Each has separate visuals and collision blocks as well as inertias.
+         Finally the sensor 'ray' is connected to the 'scan' link.
+    -->
+    <gazebo reference="${parent_link}">
+      <sensor type="ray" name="${namespace}_${frame_name}">
+        <pose>0 0 -0.004645 0 0 0</pose>
+        <always_on>true</always_on>
+        <visualize>${visualize_scan}</visualize>
+        <update_rate>${update_rate}</update_rate>
+        <ray>
+          <!-- Noise is added in the plugin -->
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.000</stddev>
+          </noise>
+          <scan>
+            <vertical>
+              <samples>${vertical_samples}</samples>
+              <resolution>1</resolution>
+              <min_angle>${vertical_fov_min}</min_angle>
+              <max_angle>${vertical_fov_max}</max_angle>
+            </vertical>
+            <horizontal>
+              <samples>${horizontal_samples}</samples>
+              <resolution>${horizontal_res}</resolution>
+              <min_angle>${horizontal_fov_min}</min_angle>
+              <max_angle>${horizontal_fov_max}</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>${range_min}</min>
+            <max>${range_max}</max>
+            <resolution>${range_res}</resolution>
+          </range>
+        </ray>
+        <!-- The plugin declarion should be inside the sensor tag for proper driver behavior -->
+        <plugin name="gazebo_ros_${frame_name}_controller" filename="libgazebo_ros_block_laser.so">
+          <robotNamespace>${namespace}</robotNamespace>
+          <alwaysOn>${always_on}</alwaysOn>
+          <updateRate>${update_rate}</updateRate>
+          <topicName>${topic_name}</topicName>
+          <frameName>${frame_name}</frameName>
+          <gaussianNoise>${gaussian_noise}</gaussianNoise>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
   <!-- Macro to add a camera. -->
   <xacro:macro name="camera_macro"
     params="namespace parent_link camera_suffix frame_rate
