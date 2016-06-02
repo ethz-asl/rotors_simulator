@@ -22,7 +22,9 @@
       <arg name="log_file" value="$(arg log_file)"/>
     </include>
     <node name="joy_node" pkg="joy" type="joy_node" />
-    <node name="rotors_joy_interface" pkg="rotors_joy_interface" type="rotors_joy_interface" />
+    <node name="rotors_joy_interface" pkg="rotors_joy_interface" type="rotors_joy_interface" >
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/logitech_f710.yaml" />
+    </node>
     <node name="roll_pitch_yawrate_thrust_controller_node" pkg="rotors_control" type="roll_pitch_yawrate_thrust_controller_node" output="screen">
       <rosparam
         command="load" file="$(find rotors_gazebo)/resource/roll_pitch_yawrate_thrust_controller_$(arg mav_name).yaml" />
