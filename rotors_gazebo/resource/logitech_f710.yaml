@@ -1,10 +1,12 @@
-axis_roll_: 3
-axis_pitch_ : 4
+axis_roll_   : 3
+axis_pitch_  : 4
 axis_thrust_ : 1
+axis_yaw_    : 0
     
-axis_direction_roll : -1
-axis_direction_pitch : 1
-axis_direction_thrust : 1
+axis_direction_roll_   : 1
+axis_direction_pitch_  : 1
+axis_direction_yaw_    : 1
+axis_direction_thrust_ :  1
 
 button_yaw_left_: 4
 button_yaw_right_: 5
