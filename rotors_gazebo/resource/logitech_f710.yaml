@@ -1,0 +1,14 @@
+axis_roll_: 3
+axis_pitch_ : 4
+axis_thrust_ : 1
+    
+axis_direction_roll : -1
+axis_direction_pitch : 1
+axis_direction_thrust : 1
+
+button_yaw_left_: 4
+button_yaw_right_: 5
+button_ctrl_enable_: 2
+button_ctrl_mode_: 1
+button_takeoff_: 3
+button_land_: 0
