@@ -92,7 +92,14 @@ void odom_callback(const nav_msgs::OdometryConstPtr& msg){
     Eigen::Affine3d eigen_affine;
     tf::poseMsgToEigen(odom_msg.pose.pose, eigen_affine);
     init_position = eigen_affine.matrix().topRightCorner<3, 1>();
-    init_yaw = eigen_affine.matrix().topLeftCorner<3, 3>().eulerAngles(0, 1, 2)(2);
+    //init_yaw = eigen_affine.matrix().topLeftCorner<3, 3>().eulerAngles(0, 1, 2)(2);
+    // Direct cosine matrix, a.k.a. rotation matrix
+    Eigen::Matrix3d dcm = eigen_affine.matrix().topLeftCorner<3, 3>();
+    double phi = asin(dcm(2, 1));
+    double cosphi = cos(phi);
+    double the = atan2(-dcm(2, 0) / cosphi, dcm(2, 2) / cosphi);
+    double psi = atan2(-dcm(0, 1) / cosphi, dcm(1, 1) / cosphi);
+    init_yaw = psi;
     init_pose_set = true;
   }
 
