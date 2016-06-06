@@ -7,6 +7,9 @@
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
   <arg name="z" default="0.1"/>
+  <arg name="R" default="0.0"/>
+  <arg name="P" default="0.0"/>
+  <arg name="Y" default="0.0"/>
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
   <arg name="log_file" default="$(arg mav_name)"/>
@@ -30,6 +33,9 @@
          -x $(arg x)
          -y $(arg y)
          -z $(arg z)
+         -R $(arg R)
+         -P $(arg P)
+         -Y $(arg Y)
          -model $(arg mav_name)"
    respawn="false" output="screen">
   </node>
