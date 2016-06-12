@@ -261,6 +261,35 @@
     </gazebo>
   </xacro:macro>
 
+  <!-- Macro to add the mavlink interface. -->
+  <xacro:macro name="mavlink_interface_macro" 
+    params="namespace mavlink_sub_topic imu_sub_topic mavlink_pub_topic 
+      motors_speeds_pub_topic gps_update_freq rotor_count reference_magnetic_field_north 
+      reference_magnetic_field_east reference_magnetic_field_down reference_latitude 
+      reference_longitude reference_altitude">
+    <gazebo>
+      <plugin name="mavlink_interface" filename="librotors_gazebo_mavlink_interface.so">
+        <robotNamespace>${namespace}</robotNamespace>
+	<mavlinkControlSubTopic>${mavlink_sub_topic}</mavlinkControlSubTopic>
+        <imuSubTopic>${imu_sub_topic}</imuSubTopic>
+        <mavlinkHilSensorPubTopic>${mavlink_pub_topic}</mavlinkHilSensorPubTopic>
+	<motorSpeedsPubTopic>${motors_speeds_pub_topic}</motorSpeedsPubTopic>
+	<gpsUpdateFreq>${gps_update_freq}</gpsUpdateFreq> <!-- Frequency of HIL GPS messages [Hz] -->
+	<rotorCount>${rotor_count}</rotorCount>
+        <!-- [Gauss] Below are the North, East, and Down components of the Earth's magnetic field at the reference location.
+             The default reference location is Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84).
+	     You can obtain the magnetic field strength for your location using the World Magnetic Model: 
+             https://www.ngdc.noaa.gov/geomag/WMM/calculators.shtml -->
+        <referenceMagNorth>${reference_magnetic_field_north}</referenceMagNorth>
+        <referenceMagEast>${reference_magnetic_field_east}</referenceMagEast>
+        <referenceMagDown>${reference_magnetic_field_down}</referenceMagDown>
+	<referenceLatitude>${reference_latitude}</referenceLatitude> <!-- the initial latitude [degrees [-90, 90]] -->
+        <referenceLongitude>${reference_longitude}</referenceLongitude> <!-- the initial longitude [degrees [-180, 180]] -->
+        <referenceAltitude>${reference_altitude}</referenceAltitude> <!-- the initial altitude [m] -->
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
   <!-- Macro to add an IMU. -->
   <xacro:macro name="imu_plugin_macro"
     params="namespace imu_suffix parent_link imu_topic
@@ -669,6 +698,24 @@
       <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:imu_plugin_macro>
+  </xacro:macro>
+
+  <xacro:macro name="default_mavlink_interface" params="namespace imu_sub_topic rotor_count">
+    <xacro:mavlink_interface_macro
+      namespace="${namespace}"
+      mavlink_sub_topic="/mavlink/from"
+      imu_sub_topic="${imu_sub_topic}"
+      mavlink_pub_topic="/mavlink/to"
+      motors_speeds_pub_topic="gazebo/command/motor_speed"
+      gps_update_freq="5.0"
+      rotor_count="${rotor_count}"
+      reference_magnetic_field_north="0.21475"
+      reference_magnetic_field_east="0.00797"
+      reference_magnetic_field_down="0.42817"
+      reference_latitude="47.3667"
+      reference_longitude="8.5500"
+      reference_altitude="500.0">
+    </xacro:mavlink_interface_macro>
   </xacro:macro>
 
 </robot>

@@ -39,9 +39,7 @@ namespace gazebo {
 class OctomapFromGazeboWorld : public WorldPlugin {
  public:
   OctomapFromGazeboWorld()
-      : WorldPlugin(),
-        node_handle_(kDefaultNamespace),
-        octomap_(NULL) {}
+      : WorldPlugin(), node_handle_(kDefaultNamespace), octomap_(NULL) {}
   virtual ~OctomapFromGazeboWorld();
 
  protected:
@@ -49,8 +47,29 @@ class OctomapFromGazeboWorld : public WorldPlugin {
   /// \param[in] _parent Pointer to the world that loaded this plugin.
   /// \param[in] _sdf SDF element that describes the plugin.
   void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf);
-  bool CheckIfInsideObject(const std::string& name, const math::Vector3& central_point, gazebo::physics::RayShapePtr ray);
-  bool CheckIfInsideObjectInX(const std::string& name, const math::Vector3& central_point, gazebo::physics::RayShapePtr ray);
+  bool CheckIfInterest(const math::Vector3& central_point,
+                       gazebo::physics::RayShapePtr ray,
+                       const double leaf_size);
+  void FloodFill(const math::Vector3& seed_point,
+                 const math::Vector3& bounding_box_origin,
+                 const math::Vector3& bounding_box_lengths,
+                 const double leaf_size);
+  /*! \brief Creates octomap by floodfilling freespace.
+  *
+  * Creates an octomap of the environment in 3 steps:
+  *   -# Casts rays along the central X,Y and Z axis of each cell. Marks any 
+  *     cell where a ray intersects a mesh as occupied
+  *   -# Floodfills the area from the top and bottom marking all connected
+  *     space that has not been set to occupied as free.
+  *   -# Labels all remaining unknown space as occupied.
+  *
+  * Can give incorrect results in the following situations:
+  *   -# The top central cell or bottom central cell are either occupied or
+  *     completely enclosed by occupied cells.
+  *   -# A completely enclosed hollow space will be marked as occupied.
+  *   -# Cells containing a mesh that does not intersect its central axes will
+  *     be marked as unoccupied
+  */
   void CreateOctomap(const rotors_comm::Octomap::Request& msg);
 
  private:
@@ -58,9 +77,9 @@ class OctomapFromGazeboWorld : public WorldPlugin {
   ros::NodeHandle node_handle_;
   ros::ServiceServer srv_;
   octomap::OcTree* octomap_;
-  bool ServiceCallback(rotors_comm::Octomap::Request& req, rotors_comm::Octomap::Response& res);
+  bool ServiceCallback(rotors_comm::Octomap::Request& req,
+                       rotors_comm::Octomap::Response& res);
 };
-
 }
 
-#endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H
+#endif  // ROTORS_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H

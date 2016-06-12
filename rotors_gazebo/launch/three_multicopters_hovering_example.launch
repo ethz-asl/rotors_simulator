@@ -1,10 +1,12 @@
 <launch>
+  <arg name="world_name" default="basic"/>
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
   <arg name="paused" value="false"/>
 
+  <env name="GAZEBO_MODEL_PATH" value="$(find rotors_gazebo)/models"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find rotors_gazebo)/worlds/basic.world"/>
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
     <!-- <arg name="debug" value="true"/> -->
     <arg name="paused" value="$(arg paused)"/>
     <!-- <arg name="gui" value="false"/> -->

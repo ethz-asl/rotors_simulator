@@ -54,3 +54,4 @@
     <origin xyz="0.03 -0.07 0.1" rpy="0.2 -0.1 0.3" />
   </xacro:odometry_plugin_macro>
 </robot>
+
