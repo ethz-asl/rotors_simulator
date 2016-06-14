@@ -187,6 +187,9 @@ void GazeboMultirotorBasePlugin::ApplyForceOnMainBody() {
 void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Get the current simulation time.
   common::Time now = world_->GetSimTime();
+
+  ApplyForceOnMainBody();
+
   mav_msgs::ActuatorsPtr msg(new mav_msgs::Actuators);
   msg->angular_velocities.resize(motor_joints_.size());
   sensor_msgs::JointStatePtr joint_state_msg(new sensor_msgs::JointState);
