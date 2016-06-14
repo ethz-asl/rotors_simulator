@@ -31,6 +31,7 @@
 #include <mav_msgs/Actuators.h>
 #include <mav_msgs/default_topics.h>
 #include <ros/ros.h>
+#include <rotors_comm/WindSpeed.h>
 #include <sensor_msgs/JointState.h>
 
 #include "rotors_gazebo_plugins/common.h"
@@ -40,6 +41,7 @@ namespace gazebo {
 static const std::string kDefaultLinkName = "base_link";
 static const std::string kDefaultFrameId = "base_link";
 static const std::string kDefaultJointStatePubTopic = "joint_states";
+static const std::string kDefaultWindSpeedSubTopic = "gazebo/wind_speed";
 
 /// \brief This plugin publishes the motor speeds of your multirotor model.
 class GazeboMultirotorBasePlugin : public ModelPlugin {
@@ -54,7 +56,8 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
         link_name_(kDefaultLinkName),
         frame_id_(kDefaultFrameId),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
-        node_handle_(NULL) {}
+        node_handle_(NULL),
+        wind_speed_sub_topic_(kDefaultWindSpeedSubTopic) {}
 
   virtual ~GazeboMultirotorBasePlugin();
 
@@ -72,6 +75,12 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
 
   void getInertiaAtPosition(physics::LinkPtr link, math::Vector3 position_B_L, Eigen::Matrix3d* inertia_B);
 
+  void WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed);
+
+  void ApplyForceOnMainBody();
+
+  math::Vector3 wind_speed_W_;
+  math::Vector3 main_body_drag_coefficient_;
   /// \brief Pointer to the update event connection.
   event::ConnectionPtr update_connection_;
   physics::WorldPtr world_;
@@ -85,12 +94,16 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   std::string namespace_;
   std::string joint_state_pub_topic_;
   std::string motor_pub_topic_;
+  std::string wind_speed_sub_topic_;
   std::string link_name_;
   std::string frame_id_;
   double rotor_velocity_slowdown_sim_;
 
   ros::Publisher motor_pub_;
   ros::Publisher joint_state_pub_;
+
+  ros::Subscriber wind_speed_sub_;
+
   ros::NodeHandle *node_handle_;
 };
 }

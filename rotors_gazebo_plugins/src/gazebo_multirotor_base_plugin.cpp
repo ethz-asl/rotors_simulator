@@ -38,16 +38,26 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   model_ = _model;
   world_ = model_->GetWorld();
   namespace_.clear();
+  wind_speed_W_ = math::Vector3::Zero;
+  const sdf::Vector3 zeros3_sdf(0.0, 0.0, 0.0);
+  sdf::Vector3 main_body_drag_sdf;
 
   getSdfParam<std::string>(_sdf, "robotNamespace", namespace_, namespace_, true);
   getSdfParam<std::string>(_sdf, "linkName", link_name_, link_name_, true);
   getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, motor_pub_topic_);
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_,
                       rotor_velocity_slowdown_sim_);
+  getSdfParam<std::string>(_sdf, "windSpeedSubTopic", wind_speed_sub_topic_, wind_speed_sub_topic_);
+
+  getSdfParam<sdf::Vector3>(_sdf, "mainBodyDragCoefficient", main_body_drag_sdf, zeros3_sdf);
+  main_body_drag_coefficient_ = math::Vector3(main_body_drag_sdf.x, main_body_drag_sdf.y, main_body_drag_sdf.z);
 
   node_handle_ = new ros::NodeHandle(namespace_);
   motor_pub_ = node_handle_->advertise<mav_msgs::Actuators>(motor_pub_topic_, 10);
   joint_state_pub_ = node_handle_->advertise<sensor_msgs::JointState>(joint_state_pub_topic_, 1);
+
+  wind_speed_sub_ = node_handle_->subscribe(wind_speed_sub_topic_, 1, &GazeboMultirotorBasePlugin::WindSpeedCallback, this);
+
   frame_id_ = link_name_;
 
   link_ = model_->GetLink(link_name_);
@@ -147,6 +157,30 @@ void GazeboMultirotorBasePlugin::getInertiaAtPosition(physics::LinkPtr link, mat
   *inertia_B = inertia_L_eigen + mass * position_B_L_skew * position_B_L_skew.transpose();
 
   std::cout << "inertia in B" << *inertia_B << "gazebo inertia B: " << inertia_B_gazebo << std::endl;
+}
+
+void GazeboMultirotorBasePlugin::WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed) {
+  // TODO(burrimi): Transform velocity to world frame if frame_id is set to something else.
+  wind_speed_W_.x = wind_speed->velocity.x;
+  wind_speed_W_.y = wind_speed->velocity.y;
+  wind_speed_W_.z = wind_speed->velocity.z;
+}
+
+void GazeboMultirotorBasePlugin::ApplyForceOnMainBody() {
+  math::Vector3 total_force_B(0, 0, 0);
+
+  math::Vector3 velocity_current_W = link_->GetWorldLinearVel();
+  math::Pose T_W_B = link_->GetWorldPose(); //TODO(burrimi): Check tf.
+  math::Quaternion q_W_B = T_W_B.rot;
+
+  // Calculate main body drag.
+  math::Vector3 relative_velocity_W = velocity_current_W - wind_speed_W_;
+  math::Vector3 relative_velocity_B = q_W_B.RotateVectorReverse(relative_velocity_W);
+  math::Vector3 main_body_drag_force_B = main_body_drag_coefficient_*relative_velocity_W.GetAbs()*relative_velocity_W;
+  // Subtract main body drag force from total forces on body.
+  total_force_B -= main_body_drag_force_B;
+
+  link_->AddRelativeForce(total_force_B);
 }
 
 // This gets called by the world update start event.

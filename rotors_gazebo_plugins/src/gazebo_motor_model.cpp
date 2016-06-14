@@ -135,7 +135,7 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   wind_speed_sub_ = node_handle_->subscribe(wind_speed_sub_topic_, 1, &GazeboMotorModel::WindSpeedCallback, this);
   motor_velocity_pub_ = node_handle_->advertise<mav_msgs::MotorStatus>(motor_speed_pub_topic_, 10);
 
-
+  wind_speed_W_ = math::Vector3::Zero;
 
   // Create the first order filter.
   rotor_velocity_filter_.reset(new FirstOrderFilter<double>(time_constant_up_, time_constant_down_, ref_motor_rot_vel_));
