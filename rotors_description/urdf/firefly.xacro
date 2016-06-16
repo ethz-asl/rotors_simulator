@@ -41,6 +41,9 @@
   <xacro:property name="cos30" value="0.866025403784" />
   <xacro:property name="rotor_drag_coefficient" value="0.0176" />
   <xacro:property name="rolling_moment_coefficient" value="0.000001" />
+  <xacro:property name="main_body_drag_coefficient" value="0.002 0.002 0.0" />
+
+
 
   <!-- Property Blocks -->
   <xacro:property name="body_inertia">
@@ -58,6 +61,7 @@
   <!-- Instantiate multirotor_base_macro once -->
   <xacro:multirotor_base_macro
     robot_namespace="${namespace}"
+    main_body_drag_coefficient="${main_body_drag_coefficient}"
     mass="${mass}"
     body_width="${body_width}"
     body_height="${body_height}"

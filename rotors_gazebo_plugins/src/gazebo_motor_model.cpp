@@ -224,7 +224,7 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
 //  parent_links.at(0)->AddTorque(rolling_moment);
   // Apply the filter on the motor's velocity.
   double motor_rot_vel = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
-  //joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
+  joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
   motor_rot_vel_ = turning_direction_ * motor_rot_vel / rotor_velocity_slowdown_sim_;
 
 }

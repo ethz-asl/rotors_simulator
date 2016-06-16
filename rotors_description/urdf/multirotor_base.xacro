@@ -38,7 +38,7 @@
 
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro"
-    params="robot_namespace mass body_width body_height use_mesh_file mesh_file *inertia">
+    params="robot_namespace main_body_drag_coefficient mass body_width body_height use_mesh_file mesh_file *inertia">
     <link name="${robot_namespace}/base_link"></link>
 
     <joint name="${robot_namespace}/base_joint" type="fixed">
@@ -80,6 +80,7 @@
         <robotNamespace>${robot_namespace}</robotNamespace>
         <linkName>${robot_namespace}/base_link</linkName>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+        <mainBodyDragCoefficient>${main_body_drag_coefficient}</mainBodyDragCoefficient>
       </plugin>
     </gazebo>
   </xacro:macro>
