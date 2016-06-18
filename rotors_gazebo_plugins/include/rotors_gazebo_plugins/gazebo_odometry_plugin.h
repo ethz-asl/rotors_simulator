@@ -71,6 +71,12 @@ class GazeboOdometryPlugin : public ModelPlugin {
   typedef std::uniform_real_distribution<> UniformDistribution;
   typedef std::deque<std::pair<int, nav_msgs::Odometry> > OdometryQueue;
 
+#if SDF_MAJOR_VERSION >= 3
+  typedef ignition::math::Vector3d Vector3;
+#else
+  typedef sdf::Vector3 Vector3;
+#endif
+
   GazeboOdometryPlugin()
       : ModelPlugin(),
         random_generator_(random_device_()),

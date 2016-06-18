@@ -47,15 +47,15 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   model_ = _model;
   world_ = model_->GetWorld();
 
-  sdf::Vector3 noise_normal_position;
-  sdf::Vector3 noise_normal_quaternion;
-  sdf::Vector3 noise_normal_linear_velocity;
-  sdf::Vector3 noise_normal_angular_velocity;
-  sdf::Vector3 noise_uniform_position;
-  sdf::Vector3 noise_uniform_quaternion;
-  sdf::Vector3 noise_uniform_linear_velocity;
-  sdf::Vector3 noise_uniform_angular_velocity;
-  const sdf::Vector3 zeros3(0.0, 0.0, 0.0);
+  Vector3 noise_normal_position;
+  Vector3 noise_normal_quaternion;
+  Vector3 noise_normal_linear_velocity;
+  Vector3 noise_normal_angular_velocity;
+  Vector3 noise_uniform_position;
+  Vector3 noise_uniform_quaternion;
+  Vector3 noise_uniform_linear_velocity;
+  Vector3 noise_uniform_angular_velocity;
+  const Vector3 zeros3(0.0, 0.0, 0.0);
 
   odometry_queue_.clear();
 
@@ -95,14 +95,14 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   getSdfParam<std::string>(_sdf, "odometryTopic", odometry_pub_topic_, odometry_pub_topic_);
   getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
   getSdfParam<std::string>(_sdf, "childFrameId", child_frame_id_, child_frame_id_);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalPosition", noise_normal_position, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalQuaternion", noise_normal_quaternion, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalLinearVelocity", noise_normal_linear_velocity, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalAngularVelocity", noise_normal_angular_velocity, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformPosition", noise_uniform_position, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformQuaternion", noise_uniform_quaternion, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformLinearVelocity", noise_uniform_linear_velocity, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformAngularVelocity", noise_uniform_angular_velocity, zeros3);
+  getSdfParam<Vector3>(_sdf, "noiseNormalPosition", noise_normal_position, zeros3);
+  getSdfParam<Vector3>(_sdf, "noiseNormalQuaternion", noise_normal_quaternion, zeros3);
+  getSdfParam<Vector3>(_sdf, "noiseNormalLinearVelocity", noise_normal_linear_velocity, zeros3);
+  getSdfParam<Vector3>(_sdf, "noiseNormalAngularVelocity", noise_normal_angular_velocity, zeros3);
+  getSdfParam<Vector3>(_sdf, "noiseUniformPosition", noise_uniform_position, zeros3);
+  getSdfParam<Vector3>(_sdf, "noiseUniformQuaternion", noise_uniform_quaternion, zeros3);
+  getSdfParam<Vector3>(_sdf, "noiseUniformLinearVelocity", noise_uniform_linear_velocity, zeros3);
+  getSdfParam<Vector3>(_sdf, "noiseUniformAngularVelocity", noise_uniform_angular_velocity, zeros3);
   getSdfParam<int>(_sdf, "measurementDelay", measurement_delay_, measurement_delay_);
   getSdfParam<int>(_sdf, "measurementDivisor", measurement_divisor_, measurement_divisor_);
   getSdfParam<double>(_sdf, "unknownDelay", unknown_delay_, unknown_delay_);
@@ -112,6 +112,64 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   if (parent_link_ == NULL && parent_frame_id_ != kDefaultParentFrameId) {
     gzthrow("[gazebo_odometry_plugin] Couldn't find specified parent link \"" << parent_frame_id_ << "\".");
   }
+
+#if SDF_MAJOR_VERSION >= 3
+  position_n_[0] = NormalDistribution(0, noise_normal_position.X());
+  position_n_[1] = NormalDistribution(0, noise_normal_position.Y());
+  position_n_[2] = NormalDistribution(0, noise_normal_position.Z());
+
+  attitude_n_[0] = NormalDistribution(0, noise_normal_quaternion.X());
+  attitude_n_[1] = NormalDistribution(0, noise_normal_quaternion.Y());
+  attitude_n_[2] = NormalDistribution(0, noise_normal_quaternion.Z());
+
+  linear_velocity_n_[0] = NormalDistribution(0, noise_normal_linear_velocity.X());
+  linear_velocity_n_[1] = NormalDistribution(0, noise_normal_linear_velocity.Y());
+  linear_velocity_n_[2] = NormalDistribution(0, noise_normal_linear_velocity.Z());
+
+  angular_velocity_n_[0] = NormalDistribution(0, noise_normal_angular_velocity.X());
+  angular_velocity_n_[1] = NormalDistribution(0, noise_normal_angular_velocity.Y());
+  angular_velocity_n_[2] = NormalDistribution(0, noise_normal_angular_velocity.Z());
+
+  position_u_[0] = UniformDistribution(-noise_uniform_position.X(), noise_uniform_position.X());
+  position_u_[1] = UniformDistribution(-noise_uniform_position.Y(), noise_uniform_position.Y());
+  position_u_[2] = UniformDistribution(-noise_uniform_position.Z(), noise_uniform_position.Z());
+
+  attitude_u_[0] = UniformDistribution(-noise_uniform_quaternion.X(), noise_uniform_quaternion.X());
+  attitude_u_[1] = UniformDistribution(-noise_uniform_quaternion.Y(), noise_uniform_quaternion.Y());
+  attitude_u_[2] = UniformDistribution(-noise_uniform_quaternion.Z(), noise_uniform_quaternion.Z());
+
+  linear_velocity_u_[0] = UniformDistribution(-noise_uniform_linear_velocity.X(), noise_uniform_linear_velocity.X());
+  linear_velocity_u_[1] = UniformDistribution(-noise_uniform_linear_velocity.Y(), noise_uniform_linear_velocity.Y());
+  linear_velocity_u_[2] = UniformDistribution(-noise_uniform_linear_velocity.Z(), noise_uniform_linear_velocity.Z());
+
+  angular_velocity_u_[0] = UniformDistribution(-noise_uniform_angular_velocity.X(), noise_uniform_angular_velocity.X());
+  angular_velocity_u_[1] = UniformDistribution(-noise_uniform_angular_velocity.Y(), noise_uniform_angular_velocity.Y());
+  angular_velocity_u_[2] = UniformDistribution(-noise_uniform_angular_velocity.Z(), noise_uniform_angular_velocity.Z());
+
+  // Fill in covariance. We omit uniform noise here.
+  Eigen::Map<Eigen::Matrix<double, 6, 6> > pose_covariance(pose_covariance_matrix_.data());
+  Eigen::Matrix<double, 6, 1> pose_covd;
+
+  pose_covd << noise_normal_position.X() * noise_normal_position.X(),
+               noise_normal_position.Y() * noise_normal_position.Y(),
+               noise_normal_position.Z() * noise_normal_position.Z(),
+               noise_normal_quaternion.X() * noise_normal_quaternion.X(),
+               noise_normal_quaternion.Y() * noise_normal_quaternion.Y(),
+               noise_normal_quaternion.Z() * noise_normal_quaternion.Z();
+  pose_covariance = pose_covd.asDiagonal();
+
+  // Fill in covariance. We omit uniform noise here.
+  Eigen::Map<Eigen::Matrix<double, 6, 6> > twist_covariance(twist_covariance_matrix_.data());
+  Eigen::Matrix<double, 6, 1> twist_covd;
+
+  twist_covd << noise_normal_linear_velocity.X() * noise_normal_linear_velocity.X(),
+                noise_normal_linear_velocity.Y() * noise_normal_linear_velocity.Y(),
+                noise_normal_linear_velocity.Z() * noise_normal_linear_velocity.Z(),
+                noise_normal_angular_velocity.X() * noise_normal_angular_velocity.X(),
+                noise_normal_angular_velocity.Y() * noise_normal_angular_velocity.Y(),
+                noise_normal_angular_velocity.Z() * noise_normal_angular_velocity.Z();
+  twist_covariance = twist_covd.asDiagonal();
+#else
   position_n_[0] = NormalDistribution(0, noise_normal_position.x);
   position_n_[1] = NormalDistribution(0, noise_normal_position.y);
   position_n_[2] = NormalDistribution(0, noise_normal_position.z);
@@ -167,6 +225,7 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
                 noise_normal_angular_velocity.y * noise_normal_angular_velocity.y,
                 noise_normal_angular_velocity.z * noise_normal_angular_velocity.z;
   twist_covariance = twist_covd.asDiagonal();
+#endif
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
