@@ -62,7 +62,7 @@ class FirstOrderFilter {
 This class can be used to apply a first order filter on a signal.
 It allows different acceleration and deceleration time constants.
 
-Short reveiw of discrete time implementation of firest order system:
+Short reveiw of discrete time implementation of first order system:
 Laplace:
     X(s)/U(s) = 1/(tau*s + 1)
 continous time system:
@@ -106,7 +106,28 @@ discretized system (ZoH):
     T previousState_;
 };
 
+class SdfVector3 : public sdf::Vector3 {
+/*
+A wrapper class for deprecated sdf::Vector3 class to provide the same accessor
+functions as in the newer ignition::math::Vector3 class.
+*/
 
+  public:
+    using sdf::Vector3::Vector3;
+    virtual ~SdfVector3() {}
+
+    /// \brief Get the x value
+    /// \return the x value
+    double X() { return this->x; }
+
+    /// \brief Get the y value
+    /// \return the y value
+    double Y() { return this->y; }
+
+    /// \brief Get the z value
+    /// \return the z value
+    double Z() { return this->z; }
+};
 
 /// Computes a quaternion from the 3-element small angle approximation theta.
 template<class Derived>
