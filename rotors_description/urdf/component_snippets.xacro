@@ -24,7 +24,7 @@
 
   <!-- Macro to add logging to a bag file. -->
   <xacro:macro name="bag_plugin_macro"
-    params="namespace bag_file rotor_velocity_slowdown_sim">
+    params="namespace bag_file rotor_velocity_slowdown_sim wait_to_record_bag">
     <gazebo>
       <plugin filename="librotors_gazebo_bag_plugin.so" name="rosbag">
         <robotNamespace>${namespace}</robotNamespace>
@@ -32,6 +32,7 @@
         <linkName>${namespace}/base_link</linkName>
         <frameId>${namespace}/base_link</frameId>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+	<waitToRecordBag>${wait_to_record_bag}</waitToRecordBag>
       </plugin>
     </gazebo>
   </xacro:macro>
