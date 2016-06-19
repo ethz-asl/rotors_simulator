@@ -10,7 +10,6 @@
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
   <arg name="log_file" default="$(arg mav_name)"/>
-  <arg name="wait_to_record_bag" default="true"/>
   <arg name="enable_mavlink_interface" default="false"/>
 
   <!-- send the robot XML to param server -->
@@ -20,7 +19,6 @@
     enable_ground_truth:=$(arg enable_ground_truth)
     enable_mavlink_interface:=$(arg enable_mavlink_interface)
     log_file:=$(arg log_file)
-    wait_to_record_bag:=$(arg wait_to_record_bag)
     mav_name:=$(arg mav_name)"
   />
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />

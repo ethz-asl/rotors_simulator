@@ -1,4 +1,0 @@
-# Whether to record the rosbag or not
-bool record
----
-bool success
