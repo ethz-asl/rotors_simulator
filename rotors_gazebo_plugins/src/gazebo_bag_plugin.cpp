@@ -88,34 +88,18 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<std::string>(_sdf, "windTopic", wind_topic_, wind_topic_);
   getSdfParam<std::string>(_sdf, "waypointTopic", waypoint_topic_, waypoint_topic_);
   getSdfParam<std::string>(_sdf, "commandPoseTopic", command_pose_topic_, command_pose_topic_);
+  getSdfParam<std::string>(_sdf, "recordingServiceName", recording_service_name_, recording_service_name_);
 
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_,
                       rotor_velocity_slowdown_sim_);
 
-  // Listen to the update event. This event is broadcast every
-  // simulation iteration.
-  update_connection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboBagPlugin::OnUpdate,
-                                                                          this, _1));
+  getSdfParam<bool>(_sdf, "waitToRecordBag", wait_to_record_, wait_to_record_);
 
-  time_t rawtime;
-  struct tm *timeinfo;
-  char buffer[80];
+  recording_service_ = node_handle_->advertiseService(recording_service_name_,
+                                                      &GazeboBagPlugin::RecordingServiceCallback,
+                                                      this);
 
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
-
-  strftime(buffer, 80, "%Y-%m-%d-%H-%M-%S", timeinfo);
-  std::string date_time_str(buffer);
-
-  std::string key(".bag");
-  size_t pos = bag_filename_.rfind(key);
-  if (pos != std::string::npos) {
-    bag_filename_.erase(pos, key.length());
-  }
-  bag_filename_ = bag_filename_ + "_" + date_time_str + ".bag";
-
-  // Open a bag file and store it in ~/.ros/<bag_filename_>.
-  bag_.open(bag_filename_, rosbag::bagmode::Write);
+  // Get the motor joints.
   child_links_ = link_->GetChildJointsLinks();
   for (unsigned int i = 0; i < child_links_.size(); i++) {
     std::string link_name = child_links_[i]->GetScopedName();
@@ -149,6 +133,41 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     contact_mgr_->CreateFilter(link_->GetName(), collisions);
   }
 
+  // If we do not need to wait for user command, we start recording right away
+  if (!wait_to_record_)
+    StartRecording();
+}
+
+// This gets called by the world update start event.
+void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
+  // Get the current simulation time.
+  common::Time now = world_->GetSimTime();
+  LogWrenches(now);
+  LogGroundTruth(now);
+  LogMotorVelocities(now);
+}
+
+void GazeboBagPlugin::StartRecording() {
+  time_t rawtime;
+  struct tm *timeinfo;
+  char buffer[80];
+
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+
+  strftime(buffer, 80, "%Y-%m-%d-%H-%M-%S", timeinfo);
+  std::string date_time_str(buffer);
+
+  std::string key(".bag");
+  size_t pos = bag_filename_.rfind(key);
+  if (pos != std::string::npos) {
+    bag_filename_.erase(pos, key.length());
+  }
+  std::string full_bag_filename = bag_filename_ + "_" + date_time_str + ".bag";
+
+  // Open a bag file and store it in ~/.ros/<full_bag_filename>.
+  bag_.open(full_bag_filename, rosbag::bagmode::Write);
+
   // Subscriber to IMU sensor_msgs::Imu Message.
   imu_sub_ = node_handle_->subscribe(imu_topic_, 10, &GazeboBagPlugin::ImuCallback, this);
 
@@ -163,24 +182,47 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   // Subscriber to Control Attitude Thrust Message.
   control_attitude_thrust_sub_ = node_handle_->subscribe(control_attitude_thrust_topic_, 10,
-                                                         &GazeboBagPlugin::AttitudeThrustCallback, this);
+                                                           &GazeboBagPlugin::AttitudeThrustCallback, this);
 
   // Subscriber to Control Motor Speed Message.
   control_motor_speed_sub_ = node_handle_->subscribe(control_motor_speed_topic_, 10,
-                                                     &GazeboBagPlugin::ActuatorsCallback, this);
+                                                       &GazeboBagPlugin::ActuatorsCallback, this);
 
   // Subscriber to Control Rate Thrust Message.
   control_rate_thrust_sub_ = node_handle_->subscribe(control_rate_thrust_topic_, 10,
-                                                     &GazeboBagPlugin::RateThrustCallback, this);
+                                                       &GazeboBagPlugin::RateThrustCallback, this);
+
+  // Listen to the update event. This event is broadcast every
+  // simulation iteration.
+  update_connection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboBagPlugin::OnUpdate,
+                                                                          this, _1));
+
+  // Set the flag that we are actively recording.
+  is_recording_ = true;
+
+  ROS_INFO("GazeboBagPlugin START recording bagfile %s", full_bag_filename.c_str());
 }
 
-// This gets called by the world update start event.
-void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
-  // Get the current simulation time.
-  common::Time now = world_->GetSimTime();
-  LogWrenches(now);
-  LogGroundTruth(now);
-  LogMotorVelocities(now);
+void GazeboBagPlugin::StopRecording() {
+  // Close the bag.
+  bag_.close();
+
+  // Shutdown all the subscribers.
+  imu_sub_.shutdown();
+  wind_sub_.shutdown();
+  waypoint_sub_.shutdown();
+  command_pose_sub_.shutdown();
+  control_attitude_thrust_sub_.shutdown();
+  control_motor_speed_sub_.shutdown();
+  control_rate_thrust_sub_.shutdown();
+
+  // Disconnect the update event.
+  event::Events::DisconnectWorldUpdateBegin(update_connection_);
+
+  // Clear the flag to show that we are not actively recording
+  is_recording_ = false;
+
+  ROS_INFO("GazeboBagPlugin STOP recording bagfile");
 }
 
 void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg) {
@@ -307,6 +349,28 @@ void GazeboBagPlugin::LogWrenches(const common::Time now) {
 
     writeBag(namespace_ + "/" + wrench_topic_, ros_now, wrench_msg);
   }
+}
+
+bool GazeboBagPlugin::RecordingServiceCallback(rotors_comm::RecordRosbag::Request& req,
+                                               rotors_comm::RecordRosbag::Response& res) {
+  if (req.record && !is_recording_) {
+    StartRecording();
+    res.success = true;
+  }
+  else if (req.record && is_recording_) {
+    gzwarn << "[gazebo_bag_plugin] Already recording rosbag, ignoring start command.\n";
+    res.success = false;
+  }
+  else if (!req.record && is_recording_) {
+    StopRecording();
+    res.success = true;
+  }
+  else if (!req.record && !is_recording_) {
+    gzwarn << "[gazebo_bag_plugin] Already not recording rosbag, ignoring stop command.\n";
+    res.success = false;
+  }
+
+  return res.success;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboBagPlugin);
