@@ -63,6 +63,12 @@ void vector3ToEigen(const math::Vector3& in, Eigen::Vector3d* out) {
   out->z() = in.z;
 }
 
+void eigenToVector3(const Eigen::Vector3d& in, math::Vector3* out) {
+  out->x = in.x();
+  out->y = in.y();
+  out->z = in.z();
+}
+
 void matrix3ToEigen(const math::Matrix3& in, Eigen::Matrix3d* out) {
   *out << in[0][0], in[0][1], in[0][2], in[1][0], in[1][1], in[1][2], in[2][0], in[2][1], in[2][2];
 }

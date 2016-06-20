@@ -41,6 +41,9 @@
   <xacro:property name="cos30" value="0.866025403784" />
   <xacro:property name="rotor_drag_coefficient" value="0.0176" />
   <xacro:property name="rolling_moment_coefficient" value="0.000001" />
+  <xacro:property name="forces_noise_density" value="0.01 0.01 0.01" />
+  <xacro:property name="moments_noise_density" value="0.004 0.004 0.002" />
+
   <xacro:property name="main_body_drag_coefficient" value="0.002 0.002 0.0" />
 
 
@@ -87,6 +90,8 @@
     motor_number="0"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
+    forces_noise_density="${forces_noise_density}"
+    moments_noise_density="${moments_noise_density}"
     color="Red"
     use_own_mesh="false"
     mesh="">
@@ -109,6 +114,8 @@
     motor_number="1"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
+    forces_noise_density="${forces_noise_density}"
+    moments_noise_density="${moments_noise_density}"
     color="Blue"
     use_own_mesh="false"
     mesh="">
@@ -130,6 +137,8 @@
     motor_number="2"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
+    forces_noise_density="${forces_noise_density}"
+    moments_noise_density="${moments_noise_density}"
     color="Blue"
     use_own_mesh="false"
     mesh="">
@@ -151,6 +160,8 @@
     motor_number="3"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
+    forces_noise_density="${forces_noise_density}"
+    moments_noise_density="${moments_noise_density}"
     color="Blue"
     use_own_mesh="false"
     mesh="">
@@ -173,6 +184,8 @@
     motor_number="4"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
+    forces_noise_density="${forces_noise_density}"
+    moments_noise_density="${moments_noise_density}"
     color="Blue"
     use_own_mesh="false"
     mesh="">
@@ -195,6 +208,8 @@
     motor_number="5"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
+    forces_noise_density="${forces_noise_density}"
+    moments_noise_density="${moments_noise_density}"
     color="Red"
     use_own_mesh="false"
     mesh="">

@@ -22,6 +22,7 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_MOTOR_MODELS_H
 #define ROTORS_GAZEBO_PLUGINS_MOTOR_MODELS_H
 
+#include <random>
 #include <stdio.h>
 
 #include <boost/bind.hpp>
@@ -137,12 +138,23 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   void VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_velocities);
   void WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed);
 
+  void AddNoise(math::Vector3* force, math::Vector3* torque);
+
+  void ApplyForceAndTorqueBody(math::Vector3& total_force_B,
+                               math::Vector3& total_torque_B);
+
   std::unique_ptr<FirstOrderFilter<double>> rotor_velocity_filter_;
   math::Vector3 wind_speed_W_;
 
   math::Vector3 total_force_B_;
   math::Vector3 total_torque_B_;
   math::Vector3 velocity_current_W_;
+
+  std::default_random_engine random_generator_;
+  std::normal_distribution<double> standard_normal_distribution_;
+
+  math::Vector3 forces_noise_density_;
+  math::Vector3 moments_noise_density_;
 
 };
 }

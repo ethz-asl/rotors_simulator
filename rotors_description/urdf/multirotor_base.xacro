@@ -87,7 +87,7 @@
 
   <!-- Rotor joint and link -->
   <xacro:macro name="vertical_rotor"
-    params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant_up time_constant_down max_rot_velocity motor_number rotor_drag_coefficient rolling_moment_coefficient color use_own_mesh mesh *origin *inertia">
+    params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant_up time_constant_down max_rot_velocity motor_number rotor_drag_coefficient rolling_moment_coefficient forces_noise_density moments_noise_density color use_own_mesh mesh *origin *inertia">
     <joint name="${robot_namespace}/rotor_${motor_number}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
@@ -138,6 +138,8 @@
         <rollingMomentCoefficient>${rolling_moment_coefficient}</rollingMomentCoefficient>
         <motorSpeedPubTopic>motor_speed/${motor_number}</motorSpeedPubTopic>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+        <forcesNoiseDensity>${forces_noise_density}</forcesNoiseDensity>
+        <momentsNoiseDensity>${moments_noise_density}</momentsNoiseDensity>
       </plugin>
     </gazebo>
     <gazebo reference="${robot_namespace}/rotor_${motor_number}">

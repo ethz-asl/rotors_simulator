@@ -107,6 +107,18 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   else
     gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'ccw').\n";
 
+
+  if (_sdf->HasElement("randomEngineSeed")) {
+    random_generator_.seed(_sdf->GetElement("randomEngineSeed")->Get<unsigned int>());
+  }
+  else {
+    random_generator_.seed(std::chrono::system_clock::now().time_since_epoch().count());
+  }
+
+  const sdf::Vector3 zeros3_sdf(0.0, 0.0, 0.0);
+  sdf::Vector3 forces_noise_density_sdf;
+  sdf::Vector3 moments_noise_density_sdf;
+
   getSdfParam<std::string>(_sdf, "commandSubTopic", command_sub_topic_, command_sub_topic_);
   getSdfParam<std::string>(_sdf, "windSpeedSubTopic", wind_speed_sub_topic_, wind_speed_sub_topic_);
   getSdfParam<std::string>(_sdf, "motorSpeedPubTopic", motor_speed_pub_topic_,
@@ -122,6 +134,11 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<double>(_sdf, "timeConstantUp", time_constant_up_, time_constant_up_);
   getSdfParam<double>(_sdf, "timeConstantDown", time_constant_down_, time_constant_down_);
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
+
+  getSdfParam<sdf::Vector3>(_sdf, "forcesNoiseDensity", forces_noise_density_sdf, zeros3_sdf);
+  forces_noise_density_ = math::Vector3(forces_noise_density_sdf.x, forces_noise_density_sdf.y, forces_noise_density_sdf.z);
+  getSdfParam<sdf::Vector3>(_sdf, "momentsNoiseDensity", moments_noise_density_sdf, zeros3_sdf);
+  moments_noise_density_ = math::Vector3(moments_noise_density_sdf.x, moments_noise_density_sdf.y, moments_noise_density_sdf.z);
 
   // Set the maximumForce on the joint. This is deprecated from V5 on, and the joint won't move.
 #if GAZEBO_MAJOR_VERSION < 5
@@ -186,8 +203,6 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   math::Vector3 relative_wind_velocity_W = velocity_current_W_ - wind_speed_W_;
   math::Vector3 body_velocity_perpendicular = relative_wind_velocity_W - (relative_wind_velocity_W.Dot(joint_axis) * joint_axis);
   math::Vector3 air_drag = -std::abs(real_motor_velocity) * rotor_drag_coefficient_ * body_velocity_perpendicular;
-  // Apply air_drag to link.
- // link_->AddForce(air_drag);
 
   math::Pose T_W_B = link_->GetWorldPose(); //TODO(burrimi): Check tf.
   math::Quaternion q_W_B = T_W_B.rot;
@@ -202,31 +217,66 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
 
   math::Vector3 diff = air_drag_B - q_W_B.RotateVectorReverse(air_drag);
 
-  link_->AddRelativeForce(total_force_B_);
 
+  // Torque
+  total_torque_B_ = math::Vector3::Zero;
 
-  // Moments
-  // Getting the parent link, such that the resulting torques can be applied to it.
-  physics::Link_V parent_links = link_->GetParentJointsLinks();
-  // The tansformation from the parent_link to the link_.
-  math::Pose pose_difference = link_->GetWorldCoGPose() - parent_links.at(0)->GetWorldCoGPose();
   math::Vector3 drag_torque(0, 0, -turning_direction_ * moment_constant_ * real_motor_velocity * real_motor_velocity);
+  total_torque_B_ += drag_torque;
 
-  total_torque_B_ = drag_torque;
-
-  // Transforming the drag torque into the parent frame to handle arbitrary rotor orientations.
-  math::Vector3 total_torque_parent_frame = pose_difference.rot.RotateVector(total_torque_B_);
-  parent_links.at(0)->AddRelativeTorque(total_torque_parent_frame);
+  ApplyForceAndTorqueBody(total_force_B_, total_torque_B_);
 
 //  math::Vector3 rolling_moment;
   // - \omega * \mu_1 * V_A^{\perp}
 //  rolling_moment = -std::abs(real_motor_velocity) * rolling_moment_coefficient_ * body_velocity_perpendicular;
 //  parent_links.at(0)->AddTorque(rolling_moment);
+
   // Apply the filter on the motor's velocity.
   double motor_rot_vel = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
   joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
   motor_rot_vel_ = turning_direction_ * motor_rot_vel / rotor_velocity_slowdown_sim_;
 
+}
+
+void GazeboMotorModel::AddNoise(math::Vector3* force, math::Vector3* torque) {
+  
+  Eigen::Vector3d force_noise_eigen;
+  Eigen::Vector3d moment_noise_eigen;
+
+  // Simulate noise on force and torque
+  for (int i = 0; i < 3; ++i) {
+    double sigma_f = forces_noise_density_[i];
+    double sigma_m = moments_noise_density_[i];
+    
+    force_noise_eigen[i] = sigma_f * standard_normal_distribution_(random_generator_);
+    moment_noise_eigen[i] = sigma_m * standard_normal_distribution_(random_generator_);
+  }
+
+  math::Vector3 force_noise;
+  eigenToVector3(force_noise_eigen, &force_noise);
+  math::Vector3 moment_noise;
+  eigenToVector3(moment_noise_eigen, &moment_noise);
+
+  *force += force_noise;
+  *torque += moment_noise;
+}
+
+void GazeboMotorModel::ApplyForceAndTorqueBody(math::Vector3& total_force_B,
+                                               math::Vector3& total_torque_B) {
+  total_force_B.x=0.1;
+  AddNoise(&total_force_B, &total_torque_B);
+  
+  // Apply force.
+  link_->AddRelativeForce(total_force_B);
+
+  // Apply torque.
+  // Getting the parent link, such that the resulting torques can be applied to it.
+  physics::Link_V parent_links = link_->GetParentJointsLinks();
+  // The tansformation from the parent_link to the link_.
+  math::Pose pose_difference = link_->GetWorldCoGPose() - parent_links.at(0)->GetWorldCoGPose();
+  // Transforming the total torque into the parent frame to handle arbitrary rotor orientations.
+  math::Vector3 total_torque_parent_frame = pose_difference.rot.RotateVector(total_torque_B);
+  parent_links.at(0)->AddRelativeTorque(total_torque_parent_frame);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMotorModel);
