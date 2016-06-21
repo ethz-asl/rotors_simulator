@@ -50,6 +50,7 @@
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
 #include <rotors_gazebo_plugins/common.h>
+#include <rotors_gazebo_plugins/sdf_api_wrapper.hpp>
 #include <tf/transform_broadcaster.h>
 
 namespace gazebo {
