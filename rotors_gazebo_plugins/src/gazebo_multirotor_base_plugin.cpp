@@ -52,8 +52,6 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   getSdfParam<sdf::Vector3>(_sdf, "mainBodyDragCoefficient", main_body_drag_sdf, zeros3_sdf);
   main_body_drag_coefficient_ = math::Vector3(main_body_drag_sdf.x, main_body_drag_sdf.y, main_body_drag_sdf.z);
 
-  std::cout << "[mainBodyDragCoefficient]: " << main_body_drag_coefficient_ << std::endl;
-
   node_handle_ = new ros::NodeHandle(namespace_);
   motor_pub_ = node_handle_->advertise<mav_msgs::Actuators>(motor_pub_topic_, 10);
   joint_state_pub_ = node_handle_->advertise<sensor_msgs::JointState>(joint_state_pub_topic_, 1);
@@ -123,7 +121,7 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
 
   Eigen::Vector3d position_B_C = 1/total_mass * weighted_position;
 
-  std::cout << "[Multirotor base]: Total inertia" << std::endl;
+  std::cout << "[Multirotor base]:" << std::endl;
   std::cout << "CoG full body: ";
   std::cout << "[" << position_B_C.transpose() << "]" << std::endl;
   std::cout << "Total mass: " << total_mass << "kg" << std::endl;
