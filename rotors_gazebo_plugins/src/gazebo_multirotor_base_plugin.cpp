@@ -54,7 +54,6 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
 
   std::cout << "[mainBodyDragCoefficient]: " << main_body_drag_coefficient_ << std::endl;
 
-
   node_handle_ = new ros::NodeHandle(namespace_);
   motor_pub_ = node_handle_->advertise<mav_msgs::Actuators>(motor_pub_topic_, 10);
   joint_state_pub_ = node_handle_->advertise<sensor_msgs::JointState>(joint_state_pub_topic_, 1);
@@ -79,17 +78,14 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   Eigen::Matrix3d total_inertia_B = Eigen::Matrix3d::Zero();
 
   double mass = link_->GetInertial()->GetMass();
-  math::Vector3 position = link_->GetRelativePose().pos;
+  math::Pose T_WB = link_->GetRelativePose();
+  math::Pose T_BC = link_->GetInertial()->GetPose(); // Get CoG relative to link.
+  math::Pose T_WC = T_WB + T_BC;
   Eigen::Vector3d position_eigen;
-  vector3ToEigen(position, &position_eigen);
-
-
-  std::cout << "[Multirotor base]: Calculating CoG" << std::endl;
-  std::cout << link_->GetScopedName() << " CoG: " << position_eigen << " Mass: ";
-  std::cout << mass << " inertia: ";
+  vector3ToEigen(T_WC.pos, &position_eigen);
 
   Eigen::Matrix3d inertia_B;
-  getInertiaAtPosition(link_, position, &inertia_B);
+  getInertiaAtPosition(link_, T_WC.pos, &inertia_B);
 
   total_mass = mass;
   weighted_position = weighted_position + mass * position_eigen;
@@ -98,13 +94,14 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   for (unsigned int i = 0; i < child_links_.size(); i++) {
     std::string link_name = child_links_[i]->GetScopedName();
 
-    math::Vector3 position = child_links_[i]->GetRelativePose().pos;
+    math::Pose T_BL = child_links_[i]->GetRelativePose();
+    math::Pose T_LC = child_links_[i]->GetInertial()->GetPose(); // Get CoG relative to link.
+    math::Pose T_BC = T_BL + T_LC;
+
+    math::Vector3 position = T_BC.pos;
     Eigen::Vector3d position_eigen;
     vector3ToEigen(position, &position_eigen);
     double mass = child_links_[i]->GetInertial()->GetMass();
-
-    std::cout << link_name << " CoG: " << position_eigen << " Mass: ";
-    std::cout << mass << "inertia: ";
 
     Eigen::Matrix3d inertia_B;
     getInertiaAtPosition(child_links_[i], position, &inertia_B);
@@ -125,9 +122,13 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   }
 
   Eigen::Vector3d position_B_C = 1/total_mass * weighted_position;
-  std::cout << "weighted mass: " << weighted_position << std::endl;
-  std::cout << "CoG full body: " << position_B_C << " total mass: " << total_mass << std::endl;
-  std::cout << "Total inertia at B: " << total_inertia_B << std::endl;
+
+  std::cout << "[Multirotor base]: Total inertia" << std::endl;
+  std::cout << "CoG full body: ";
+  std::cout << "[" << position_B_C.transpose() << "]" << std::endl;
+  std::cout << "Total mass: " << total_mass << "kg" << std::endl;
+  std::cout << "Total inertia at B: " << std::endl;
+  std::cout << total_inertia_B << std::endl;
 
   Eigen::Matrix3d total_inertia_C;
   Eigen::Matrix3d position_B_C_skew;
@@ -136,18 +137,19 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
 
   total_inertia_C = total_inertia_B - total_mass*position_B_C_skew*position_B_C_skew.transpose();
 
-  std::cout << "Total inertia at C: " << total_inertia_C << std::endl;
+  std::cout << "Total inertia at C:" << std::endl;
+  std::cout << total_inertia_C << std::endl;
 
 }
 
 void GazeboMultirotorBasePlugin::getInertiaAtPosition(physics::LinkPtr link, math::Vector3 position_B_L, Eigen::Matrix3d* inertia_B) {
 
   math::Matrix3 inertia_L = link->GetInertial()->GetMOI(link->GetInertial()->GetPose());
-  math::Matrix3 inertia_B_gazebo = link->GetInertial()->GetMOI(link->GetRelativePose());
+  // Gazebo also provides a function to shift inertia. Not sure if this works on old gazebo though.
+  // TODO(burrimi) Check and switch back.
+  // math::Matrix3 inertia_B_gazebo = link->GetInertial()->GetMOI(link->GetRelativePose());
 
   double mass = link->GetInertial()->GetMass();
-
-  std::cout << inertia_L << std::endl;
 
   Eigen::Matrix3d inertia_L_eigen;
   Eigen::Vector3d position_B_L_eigen;
@@ -158,8 +160,6 @@ void GazeboMultirotorBasePlugin::getInertiaAtPosition(physics::LinkPtr link, mat
   getSkewMatrix(position_B_L_eigen, &position_B_L_skew);
 
   *inertia_B = inertia_L_eigen + mass * position_B_L_skew * position_B_L_skew.transpose();
-
-  std::cout << "inertia in B" << *inertia_B << "gazebo inertia B: " << inertia_B_gazebo << std::endl;
 }
 
 void GazeboMultirotorBasePlugin::WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed) {
@@ -179,7 +179,7 @@ void GazeboMultirotorBasePlugin::ApplyForceOnMainBody() {
   // Calculate main body drag.
   math::Vector3 relative_velocity_W = velocity_current_W - wind_speed_W_;
   math::Vector3 relative_velocity_B = q_W_B.RotateVectorReverse(relative_velocity_W);
-  math::Vector3 main_body_drag_force_B = main_body_drag_coefficient_*relative_velocity_W.GetAbs()*relative_velocity_W;
+  math::Vector3 main_body_drag_force_B = main_body_drag_coefficient_*relative_velocity_B.GetAbs()*relative_velocity_B;
   // Subtract main body drag force from total forces on body.
   total_force_B -= main_body_drag_force_B;
 
@@ -211,6 +211,7 @@ void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
   msg->header.stamp.sec = now.sec;
   msg->header.stamp.nsec = now.nsec;
   msg->header.frame_id = frame_id_;
+  // TODO(burrimi): Add a flag to publish rotor joint state.
   joint_state_pub_.publish(joint_state_msg);
   motor_pub_.publish(msg);
 }

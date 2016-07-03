@@ -217,7 +217,6 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
 
   math::Vector3 diff = air_drag_B - q_W_B.RotateVectorReverse(air_drag);
 
-
   // Torque
   total_torque_B_ = math::Vector3::Zero;
 
@@ -263,7 +262,6 @@ void GazeboMotorModel::AddNoise(math::Vector3* force, math::Vector3* torque) {
 
 void GazeboMotorModel::ApplyForceAndTorqueBody(math::Vector3& total_force_B,
                                                math::Vector3& total_torque_B) {
-  total_force_B.x=0.1;
   AddNoise(&total_force_B, &total_torque_B);
   
   // Apply force.

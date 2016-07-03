@@ -27,6 +27,15 @@
       izz="${0.0833333 * mass * (x*x + y*y)}" />
   </xacro:macro>
 
+  <!-- Macro for the rotor inertia, we approximate it with a cylinder of zero height.
+  Because the angular velocity slow down of the rotor speed mainly has an influence
+  on the inertia in z we adapt the inertia -->
+  <xacro:macro name="rotor_disk_inertia" params="rotor_velocity_slowdown_sim radius mass">
+    <inertia ixx="${0.25 * mass * (radius*radius)}" ixy="0.0" ixz="0.0"
+      iyy="${0.25 * mass * (radius*radius)}" iyz="0.0"
+      izz="${0.5 * mass * (radius*radius)*rotor_velocity_slowdown_sim}" />
+  </xacro:macro>
+
   <!-- Macro for the inertial properties of a box -->
   <xacro:macro name="box_inertial" params="x y z mass *origin">
     <inertial>
