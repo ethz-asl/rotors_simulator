@@ -53,6 +53,7 @@ static const std::string kDefaultLinkName = "base_link";
 static const std::string kDefaultBagFilename_ = "simulator.bag";
 static const std::string kDefaultRecordingServiceName = "record_rosbag";
 static constexpr bool kDefaultWaitToRecord = false;
+static constexpr bool kDefaultIsRecording = false;
 
 /// \brief This plugin is used to create rosbag files from within gazebo.
 class GazeboBagPlugin : public ModelPlugin {
@@ -79,7 +80,7 @@ class GazeboBagPlugin : public ModelPlugin {
         recording_service_name_(kDefaultRecordingServiceName),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
         wait_to_record_(kDefaultWaitToRecord),
-        is_recording_(false),
+        is_recording_(kDefaultIsRecording),
         node_handle_(NULL) {}
 
   virtual ~GazeboBagPlugin();
@@ -180,7 +181,7 @@ class GazeboBagPlugin : public ModelPlugin {
   std::string recording_service_name_;
   double rotor_velocity_slowdown_sim_;
 
-  /// \brief Mutex lock for thread safty of writing bag files
+  /// \brief Mutex lock for thread safety of writing bag files
   boost::mutex mtx_;
 
   /// \brief Whether the plugin should wait for user command to start recording
