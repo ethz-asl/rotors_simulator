@@ -15,7 +15,7 @@
   <group ns="hummingbird">
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
       <arg name="mav_name" value="hummingbird" />
-      <arg name="model" value="$(find rotors_description)/urdf/hummingbird_generic_odometry_sensor.gazebo" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
       <arg name="log_file" value="hummingbird"/>
@@ -34,7 +34,7 @@
   <group ns="pelican">
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
       <arg name="mav_name" value="pelican" />
-      <arg name="model" value="$(find rotors_description)/urdf/pelican_generic_odometry_sensor.gazebo" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
       <arg name="log_file" value="pelican"/>
@@ -53,7 +53,7 @@
   <group ns="firefly">
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
       <arg name="mav_name" value="firefly" />
-      <arg name="model" value="$(find rotors_description)/urdf/firefly_generic_odometry_sensor.gazebo" />
+      <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
       <arg name="log_file" value="firefly"/>

@@ -2,6 +2,7 @@
 
 <launch>
   <arg name="mav_name" default="firefly"/>
+  <arg name="namespace" default="$(arg mav_name)"/>
   <arg name="model" default="$(find rotors_description)/urdf/$(arg mav_name)_base.xacro"/>
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
   <arg name="x" default="0.0"/>
@@ -21,18 +22,19 @@
     enable_mavlink_interface:=$(arg enable_mavlink_interface)
     log_file:=$(arg log_file)
     wait_to_record_bag:=$(arg wait_to_record_bag)
-    mav_name:=$(arg mav_name)"
+    mav_name:=$(arg mav_name)
+    namespace:=$(arg namespace)"
   />
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
-  <node name="spawn_$(arg mav_name)" pkg="gazebo_ros" type="spawn_model"
+  <node name="spawn_$(arg namespace)" pkg="gazebo_ros" type="spawn_model"
    args="-param robot_description
          -urdf
          -x $(arg x)
          -y $(arg y)
          -z $(arg z)
-         -model $(arg mav_name)"
+         -model $(arg namespace)"
    respawn="false" output="screen">
   </node>
 </launch>
