@@ -390,10 +390,8 @@
 
   <!-- Macro to add a magnetometer. -->
   <xacro:macro name="magnetometer_plugin_macro"
-    params="namespace magnetometer_suffix parent_link update_rate magnetometer_topic
-      mass_magnetometer_sensor noise_normal_mag_x noise_normal_mag_bias_x
-      noise_normal_mag_y noise_normal_mag_bias_y noise_normal_mag_z
-      noise_normal_mag_bias_z *inertia *origin">
+    params="namespace magnetometer_suffix parent_link magnetometer_topic mass_magnetometer_sensor
+      ref_mag_field noise_normal noise_uniform_initial_bias *inertia *origin">
     <!-- Magnetometer link -->
     <link name="${namespace}/magnetometer${magnetometer_suffix}_link">
       <inertial>
@@ -409,44 +407,19 @@
       <child link="${namespace}/magnetometer${magnetometer_suffix}_link" />
       <limit upper="0" lower="0" effort="0" velocity="0" />
     </joint>
-    <gazebo reference="${namespace}/magnetometer${magnetometer_suffix}_link">
-      <sensor type="magnetometer" name="${namespace}/magnetometer${magnetometer_suffix}">
-        <pose>0 0 0 0 0 0</pose>
-        <visualize>0</visualize>
-        <always_on>1</always_on>
-        <update_rate>${update_rate}</update_rate>
-        <magnetometer>
-          <x>
-            <noise type="gaussian">
-              <mean>0.0</mean>
-              <stddev>${noise_normal_mag_x}</stddev>
-              <bias_mean>0.0</bias_mean>
-              <bias_stddev>${noise_normal_mag_bias_x}</bias_stddev>
-            </noise>
-          </x>
-          <y>
-            <noise type="gaussian">
-              <mean>0.0</mean>
-              <stddev>${noise_normal_mag_y}</stddev>
-              <bias_mean>0.0</bias_mean>
-              <bias_stddev>${noise_normal_mag_bias_y}</bias_stddev>
-            </noise>
-          </y>
-          <z>
-            <noise type="gaussian">
-              <mean>0.0</mean>
-              <stddev>${noise_normal_mag_z}</stddev>
-              <bias_mean>0.0</bias_mean>
-              <bias_stddev>${noise_normal_mag_bias_z}</bias_stddev>
-            </noise>
-          </z>
-        </magnetometer>
-        <plugin filename="librotors_gazebo_magnetometer_plugin.so" name="rotors_gazebo_magnetometer${magnetometer_suffix}_plugin">
-          <robotNamespace>${namespace}</robotNamespace> <!-- (string, required): ros namespace in which the messages are published -->
-          <linkName>${namespace}/magnetometer${magnetometer_suffix}_link</linkName> <!-- (string, required): name of the body which holds the magnetometer sensor -->
-          <magnetometerTopic>${magnetometer_topic}</magnetometerTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to magnetic_field) -->
-        </plugin>
-      </sensor>
+    <gazebo>
+      <plugin filename="librotors_gazebo_magnetometer_plugin.so" name="rotors_gazebo_magnetometer${magnetometer_suffix}_plugin">
+        <robotNamespace>${namespace}</robotNamespace> <!-- (string, required): ros namespace in which the messages are published -->
+        <linkName>${namespace}/magnetometer${magnetometer_suffix}_link</linkName> <!-- (string, required): name of the body which holds the magnetometer -->
+        <magnetometerTopic>${magnetometer_topic}</magnetometerTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to 'magnetic_field') -->
+        <!-- [Tesla] Below is the reference Earth's magnetic field at the reference location in NED frame.
+             The default reference location is Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84).
+	     You can obtain the magnetic field strength for your location using the World Magnetic Model: 
+             https://www.ngdc.noaa.gov/geomag/WMM/calculators.shtml -->
+        <refMagField>${ref_mag_field}</refMagField>
+        <noiseNormal>${noise_normal}</noiseNormal> <!-- standard deviation of additive white gaussian noise [Tesla] -->
+        <noiseUniformInitialBias>${noise_uniform_initial_bias}</noiseUniformInitialBias> <!-- symmetric bounds of uniform noise for initial sensor bias [Tesla] -->
+      </plugin>
     </gazebo>
   </xacro:macro>
 
@@ -769,15 +742,11 @@
       namespace="${namespace}"
       magnetometer_suffix=""
       parent_link="${parent_link}"
-      update_rate="25.0"
       magnetometer_topic="magnetic_field"
       mass_magnetometer_sensor="0.015"
-      noise_normal_mag_x="0.000000080"
-      noise_normal_mag_bias_x="0.000000133"
-      noise_normal_mag_y="0.000000080"
-      noise_normal_mag_bias_y="0.000000133"
-      noise_normal_mag_z="0.000000080"
-      noise_normal_mag_bias_z="0.000000133">
+      ref_mag_field="0.000021493 0.000000815 0.000042795"
+      noise_normal="0.000000080 0.000000080 0.000000080"
+      noise_uniform_initial_bias="0.000000400 0.000000400 0.000000400">
       <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:magnetometer_plugin_macro>
