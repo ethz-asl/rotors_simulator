@@ -333,7 +333,7 @@
     </gazebo>
   </xacro:macro>
 
-<!-- Macro to add a generic odometry sensor. -->
+  <!-- Macro to add a generic odometry sensor. -->
   <xacro:macro name="odometry_plugin_macro"
     params="
       namespace odometry_sensor_suffix parent_link pose_topic pose_with_covariance_topic
@@ -385,6 +385,67 @@
           <covarianceImageScale>${image_scale}</covarianceImageScale> <!-- the scale of the image in the gazebo world, if set to 1.0, 1 pixel in the image corresponds to 1 meter in the world -->
         </xacro:if>
       </plugin>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Macro to add a magnetometer. -->
+  <xacro:macro name="magnetometer_plugin_macro"
+    params="namespace magnetometer_suffix parent_link magnetometer_topic
+      mass_magnetometer_sensor noise_normal_mag_x noise_normal_mag_bias_x
+      noise_normal_mag_y noise_normal_mag_bias_y noise_normal_mag_z
+      noise_normal_mag_bias_z *inertia *origin">
+    <!-- Magnetometer link -->
+    <link name="${namespace}/magnetometer${magnetometer_suffix}_link">
+      <inertial>
+        <xacro:insert_block name="inertia" />
+        <mass value="${mass_magnetometer_sensor}" />  <!-- [kg] -->
+        <origin xyz="0 0 0" rpy="0 0 0" />
+      </inertial>
+    </link>
+    <!-- Magnetometer joint -->
+    <joint name="${namespace}/magnetometer${magnetometer_suffix}_joint" type="revolute">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/magnetometer${magnetometer_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+    <gazebo reference="${namespace}/magnetometer${magnetometer_suffix}_link">
+      <sensor type="magnetometer" name="${namespace}/magnetometer${magnetometer_suffix}">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>0</visualize>
+        <always_on>1</always_on>
+        <magnetometer>
+          <x>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>${noise_normal_mag_x}</stddev>
+              <bias_mean>0.0</bias_mean>
+              <bias_stddev>${noise_normal_mag_bias_x}</bias_stddev>
+            </noise>
+          </x>
+          <y>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>${noise_normal_mag_y}</stddev>
+              <bias_mean>0.0</bias_mean>
+              <bias_stddev>${noise_normal_mag_bias_y}</bias_stddev>
+            </noise>
+          </y>
+          <z>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>${noise_normal_mag_z}</stddev>
+              <bias_mean>0.0</bias_mean>
+              <bias_stddev>${noise_normal_mag_bias_z}</bias_stddev>
+            </noise>
+          </z>
+        </magnetometer>
+        <plugin filename="librotors_gazebo_magnetometer_plugin.so" name="rotors_gazebo_magnetometer${magnetometer_suffix}_plugin">
+          <robotNamespace>${namespace}</robotNamespace> <!-- (string, required): ros namespace in which the messages are published -->
+          <linkName>${namespace}/magnetometer${magnetometer_suffix}_link</linkName> <!-- (string, required): name of the body which holds the magnetometer sensor -->
+          <magnetometerTopic>${magnetometer_topic}</magnetometerTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to magnetic_field) -->
+        </plugin>
+      </sensor>
     </gazebo>
   </xacro:macro>
 
@@ -699,6 +760,24 @@
       <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:imu_plugin_macro>
+  </xacro:macro>
+
+  <xacro:macro name="default_magnetometer" params="namespace parent_link">
+    <xacro:magnetometer_plugin_macro
+      namespace="${namespace}"
+      magnetometer_suffix=""
+      parent_link="${parent_link}"
+      magnetometer_topic="magnetic_field"
+      mass_magnetometer_sensor="0.015"
+      noise_normal_mag_x="0.0"
+      noise_normal_mag_bias_x="0.0"
+      noise_normal_mag_y="0.0"
+      noise_normal_mag_bias_y="0.0"
+      noise_normal_mag_z="0.0"
+      noise_normal_mag_bias_z="0.0">
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </xacro:magnetometer_plugin_macro>
   </xacro:macro>
 
   <xacro:macro name="default_mavlink_interface" params="namespace imu_sub_topic rotor_count">
