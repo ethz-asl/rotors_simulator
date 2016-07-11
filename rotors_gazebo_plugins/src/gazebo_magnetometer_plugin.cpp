@@ -10,7 +10,6 @@
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
-
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,99 +22,116 @@
 namespace gazebo {
 
 GazeboMagnetometerPlugin::GazeboMagnetometerPlugin()
-    : SensorPlugin(),
-      node_handle_(0) {}
+    : ModelPlugin(),
+      node_handle_(0),
+      random_generator_(random_device_()) {
+}
 
 GazeboMagnetometerPlugin::~GazeboMagnetometerPlugin() {
-  this->parent_sensor_->DisconnectUpdated(this->updateConnection_);
+  event::Events::DisconnectWorldUpdateBegin(updateConnection_);
   if (node_handle_) {
     node_handle_->shutdown();
     delete node_handle_;
   }
 }
 
-void GazeboMagnetometerPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
-  // Store the pointer to the parent sensor
-  parent_sensor_ = std::dynamic_pointer_cast<sensors::MagnetometerSensor>(_sensor);
+void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+  // Store the pointer to the model and the world
+  model_ = _model;
+  world_ = model_->GetWorld();
 
-  // Retrieve the necessary parameters
+  // Use the robot namespace to create the node handle
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_magnetometer_plugin] Please specify a robotNamespace.\n";
   node_handle_ = new ros::NodeHandle(namespace_);
 
+  // Use the link name as the frame id
+  std::string link_name;
   if (_sdf->HasElement("linkName"))
-    link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
+    link_name = _sdf->GetElement("linkName")->Get<std::string>();
   else
     gzerr << "[gazebo_magnetometer_plugin] Please specify a linkName.\n";
+  // Get the pointer to the link
+  link_ = model_->GetLink(link_name);
+  if (link_ == NULL)
+    gzthrow("[gazebo_magnetometer_plugin] Couldn't find specified link \"" << link_name << "\".");
 
-  frame_id_ = link_name_;
+  frame_id_ = link_name;
 
+  SdfVector3 ref_mag_field;
+  SdfVector3 noise_normal;
+  SdfVector3 noise_uniform_initial_bias;
+  const SdfVector3 zeros3(0.0, 0.0, 0.0);
+
+  // Retrieve the rest of the SDF parameters
   getSdfParam<std::string>(_sdf, "magnetometerTopic", magnetometer_topic_,
-                             mav_msgs::default_topics::MAGNETIC_FIELD);
+                           mav_msgs::default_topics::MAGNETIC_FIELD);
+  getSdfParam<SdfVector3>(_sdf, "refMagField", ref_mag_field, kDefaultRefMagField);
+  getSdfParam<SdfVector3>(_sdf, "noiseNormal", noise_normal, zeros3);
+  getSdfParam<SdfVector3>(_sdf, "noiseUniformInitialBias", noise_uniform_initial_bias, zeros3);
 
-  // Connect to the sensor update event.
+  // Listen to the update event. This event is broadcast every simulation iteration.
   this->updateConnection_ =
-      this->parent_sensor_->ConnectUpdated(
-          boost::bind(&GazeboMagnetometerPlugin::OnUpdate, this));
+      event::Events::ConnectWorldUpdateBegin(
+          boost::bind(&GazeboMagnetometerPlugin::OnUpdate, this, _1));
 
-  // Make sure the parent sensor is active.
-  parent_sensor_->SetActive(true);
-
-  // Initialize the ROS publisher for sending magnetic field messages.
   magnetometer_pub_ = node_handle_->advertise<sensor_msgs::MagneticField>(magnetometer_topic_, 1);
 
-  // Get the sensor noise in case it is known.
-  double std_dev_mag_x = 0.0;
-  double std_dev_mag_y = 0.0;
-  double std_dev_mag_z = 0.0;
+  // Create the normal noise distributions
+  noise_n_[0] = NormalDistribution(0, noise_normal.X());
+  noise_n_[1] = NormalDistribution(0, noise_normal.Y());
+  noise_n_[2] = NormalDistribution(0, noise_normal.Z());
 
-  sensors::NoisePtr mag_x_noise = this->parent_sensor_->Noise(sensors::SensorNoiseType::MAGNETOMETER_X_NOISE_TESLA);
-  sensors::NoisePtr mag_y_noise = this->parent_sensor_->Noise(sensors::SensorNoiseType::MAGNETOMETER_Y_NOISE_TESLA);
-  sensors::NoisePtr mag_z_noise = this->parent_sensor_->Noise(sensors::SensorNoiseType::MAGNETOMETER_Z_NOISE_TESLA);
+  // Create the uniform noise distribution for initial bias
+  UniformDistribution initial_bias[3];
+  initial_bias[0] = UniformDistribution(-noise_uniform_initial_bias.X(),
+                                        noise_uniform_initial_bias.X());
+  initial_bias[1] = UniformDistribution(-noise_uniform_initial_bias.Y(),
+                                        noise_uniform_initial_bias.Y());
+  initial_bias[2] = UniformDistribution(-noise_uniform_initial_bias.Z(),
+                                        noise_uniform_initial_bias.Z());
 
-  if (mag_x_noise->GetNoiseType() == sensors::Noise::GAUSSIAN) {
-    sensors::GaussianNoiseModelPtr mag_x_gaussian_noise =
-        std::dynamic_pointer_cast<sensors::GaussianNoiseModel>(mag_x_noise);
-    std_dev_mag_x = mag_x_gaussian_noise->GetStdDev();
-  }
+  // Initialize the reference magnetic field vector in world frame, taking into
+  // account the initial bias
+  mag_W_ = math::Vector3(ref_mag_field.X() + initial_bias[0](random_generator_),
+                         ref_mag_field.Y() + initial_bias[1](random_generator_),
+                         ref_mag_field.Z() + initial_bias[2](random_generator_));
 
-  if (mag_y_noise->GetNoiseType() == sensors::Noise::GAUSSIAN) {
-    sensors::GaussianNoiseModelPtr mag_y_gaussian_noise =
-        std::dynamic_pointer_cast<sensors::GaussianNoiseModel>(mag_y_noise);
-    std_dev_mag_y = mag_y_gaussian_noise->GetStdDev();
-  }
-
-  if (mag_z_noise->GetNoiseType() == sensors::Noise::GAUSSIAN) {
-    sensors::GaussianNoiseModelPtr mag_z_gaussian_noise =
-        std::dynamic_pointer_cast<sensors::GaussianNoiseModel>(mag_z_noise);
-    std_dev_mag_z = mag_z_gaussian_noise->GetStdDev();
-  }
-
-  // Fill the magnetic field message.
-  magnetic_field_message_.header.frame_id = frame_id_;
-  magnetic_field_message_.magnetic_field_covariance[0] = std_dev_mag_x * std_dev_mag_x;
-  magnetic_field_message_.magnetic_field_covariance[4] = std_dev_mag_y * std_dev_mag_y;
-  magnetic_field_message_.magnetic_field_covariance[8] = std_dev_mag_z * std_dev_mag_z;
+  // Fill the magnetometer message
+  mag_message_.header.frame_id = frame_id_;
+  mag_message_.magnetic_field.x = mag_W_.x;
+  mag_message_.magnetic_field.y = mag_W_.y;
+  mag_message_.magnetic_field.z = mag_W_.z;
+  mag_message_.magnetic_field_covariance[0] = noise_normal.X() * noise_normal.X();
+  mag_message_.magnetic_field_covariance[4] = noise_normal.Y() * noise_normal.Y();
+  mag_message_.magnetic_field_covariance[8] = noise_normal.Z() * noise_normal.Z();
 }
 
-void GazeboMagnetometerPlugin::OnUpdate() {
-  common::Time current_time = parent_sensor_->LastMeasurementTime();
+void GazeboMagnetometerPlugin::OnUpdate(const common::UpdateInfo& _info) {
+  // Get the current pose and time from Gazebo
+  math::Pose world_pose = link_->GetWorldPose();
+  common::Time current_time  = world_->GetSimTime();
 
-  // Retrieve the latest magnetic field measurement
-  ignition::math::Vector3d magnetic_field = parent_sensor_->MagneticField();
-  magnetic_field_message_.magnetic_field.x = magnetic_field.X();
-  magnetic_field_message_.magnetic_field.y = magnetic_field.Y();
-  magnetic_field_message_.magnetic_field.z = magnetic_field.Z();
+  // Calculate the magnetic field noise.
+  math::Vector3 mag_noise(noise_n_[0](random_generator_),
+                          noise_n_[1](random_generator_),
+                          noise_n_[2](random_generator_));
 
-  // Update the message header.
-  magnetic_field_message_.header.stamp.sec = current_time.sec;
-  magnetic_field_message_.header.stamp.nsec = current_time.nsec;
+  // Rotate the earth magnetic field into the inertial frame
+  math::Vector3 field = world_pose.rot.RotateVectorReverse(mag_W_ + mag_noise);
 
-  // Publish the magnetic field message.
-  magnetometer_pub_.publish(magnetic_field_message_);
+  // Fill the magnetic field message
+  mag_message_.header.stamp.sec = current_time.sec;
+  mag_message_.header.stamp.nsec = current_time.nsec;
+  mag_message_.magnetic_field.x = field.x;
+  mag_message_.magnetic_field.y = field.y;
+  mag_message_.magnetic_field.z = field.z;
+
+  // Publish the message
+  magnetometer_pub_.publish(mag_message_);
 }
 
-GZ_REGISTER_SENSOR_PLUGIN(GazeboMagnetometerPlugin);
+GZ_REGISTER_MODEL_PLUGIN(GazeboMagnetometerPlugin);
 }
