@@ -27,6 +27,11 @@
       <real_time_update_rate>100</real_time_update_rate>
       <gravity>0 0 -9.8</gravity>
     </physics>
+    <!-- Magnetic field [Tesla] at default location of Zurich:
+         lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84
+         obtained from World Magnetic Model:
+         http://www.ngdc.noaa.gov/geomag-web/#igrfwmm -->
+    <magnetic_field>0.000021493 0.000000815 0.000042795</magnetic_field>
     <!-- Laser Scans -->
     <plugin name="gazebo_octomap" filename="librotors_gazebo_octomap_plugin.so"/>
   </world>

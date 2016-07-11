@@ -38,6 +38,11 @@
       <background>0.7 0.7 0.7 1</background>
       <shadows>1</shadows>
     </scene>
+    <!-- Magnetic field [Tesla] at default location of Zurich:
+         lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84
+         obtained from World Magnetic Model:
+         http://www.ngdc.noaa.gov/geomag-web/#igrfwmm -->
+    <magnetic_field>0.000021493 0.000000815 0.000042795</magnetic_field>
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
       <latitude_deg>0</latitude_deg>
