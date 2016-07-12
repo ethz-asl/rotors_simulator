@@ -31,7 +31,7 @@
   <xacro:property name="mass_rudder" value="0.1" /> <!-- [kg] -->
   <xacro:property name="mass_propeller" value="0.1" /> <!-- [kg] -->
 
-  <!-- Fuselage properties -->
+  <!-- Main body properties -->
   <xacro:property name="body_length" value="1.088" /> <!-- [m] -->
   <xacro:property name="body_width" value="2.591" /> <!-- [m] -->
   <xacro:property name="body_height" value="0.303" /> <!-- [m] -->
@@ -59,15 +59,17 @@
   <xacro:property name="rudder_height" value="0.241" />
   <xacro:property name="rudder_min_angle" value="-0.349066" />
   <xacro:property name="rudder_max_angle" value="0.349066" />
+  <xacro:property name="rudder_color" value="Orange" />
 
   <!-- Propeller properties -->
   <xacro:property name="propeller_direction" value="cw" />
   <xacro:property name="propeller_radius" value="0.1" />
   <xacro:property name="propeller_height" value="0.003" />
+  <xacro:property name="propeller_color" value="Gray" />
 
-  <!-- Inertia of the fuselage -->
+  <!-- Inertia of the main body -->
   <xacro:property name="body_inertia">
-    <xacro:box_inertia x="${body_length}" y="${body_width}" z="${body_height}" mass="${mass_fuselage}" />
+    <inertia ixx="0.16632" ixy="0.0" ixz="0.0755" iyy="0.3899" iyz="0.0" izz="0.5243" />
   </xacro:property>
 
   <!-- Inertia of the aileron, assuming it is a cuboid -->
@@ -85,7 +87,7 @@
     <xacro:box_inertia x="${rudder_length}" y="${rudder_width}" z="${rudder_height}" mass="${mass_rudder}" />
   </xacro:property>
 
-  <!-- Inertia of the propeller, assuming it is a cuboid -->
+  <!-- Inertia of the propeller, assuming it is a cylinder -->
   <xacro:property name="propeller_inertia">
     <xacro:cylinder_inertia r="${propeller_radius}" h="${propeller_height}" mass="${mass_propeller*rotor_velocity_slowdown_sim}" />
   </xacro:property>
@@ -102,11 +104,9 @@
     height="${body_height}"
     color="${body_color}"
     use_mesh_file="${use_mesh}"
-    mesh_file="package://rotors_description/meshes/techpod/techpod_body.dae"
-    reset_model_service_name="reset_model">
-    <origin xyz="0 0 0" rpy="3.1415926535897931 0 0" />
-    <inertia ixx="${0.1512 * 1.1}" ixy="0.0" ixz="0.0755" iyy="${0.2785 * 1.4}" iyz="0.0" izz="${0.3745 * 1.4}" />
-    <!--<xacro:insert_block name="body_inertia" />-->
+    mesh_file="package://rotors_description/meshes/techpod/techpod_body.dae">
+    <origin xyz="0 0 0" rpy="${PI} 0 0" />
+    <xacro:insert_block name="body_inertia" />
   </xacro:fixed_wing_base_macro>
 
   <!-- Instantiate the ailerons -->
@@ -176,15 +176,15 @@
     mass_surface="${mass_rudder}"
     min_angle="${rudder_min_angle}"
     max_angle="${rudder_max_angle}"
-    color="Orange"
+    color="${rudder_color}"
     use_mesh_file="${use_mesh}"
     mesh_file="package://rotors_description/meshes/techpod/techpod_rudder.dae"
     surface_length="${rudder_length}"
     surface_width="${rudder_width}"
     surface_height="${rudder_height}">
-    <axis xyz="0 0 1" />
-    <origin xyz="-0.428 0.0 0.0" rpy="0.0 0.25 0.0" />
-    <origin xyz="0.0 0.0 0.0" rpy="${PI} -0.25 0.0" />
+    <axis xyz="0 0 1" />   <!-- Joint axis -->
+    <origin xyz="-0.428 0.0 0.0" rpy="0.0 0.25 0.0" />   <!-- Joint origin -->
+    <origin xyz="0.0 0.0 0.0" rpy="${PI} -0.25 0.0" />   <!-- Link origin -->
     <xacro:insert_block name="rudder_inertia" />
   </xacro:control_surface>
 
@@ -195,10 +195,10 @@
     parent="${namespace}/base_link"
     mass_propeller="${mass_propeller}"
     propeller_radius="${propeller_radius}"
-    color="Green"
+    color="${propeller_color}"
     use_mesh_file="${use_mesh}"
     mesh_file="package://rotors_description/meshes/propeller_${propeller_direction}.dae">
-    <origin xyz="-0.025 0.0 -0.15" rpy="0.0 ${0.5*PI} 0.0" />
+    <origin xyz="-0.025 0.0 -0.15" rpy="0.0 ${-0.5*PI} 0.0" />
     <xacro:insert_block name="propeller_inertia" />
   </xacro:propeller>
 
