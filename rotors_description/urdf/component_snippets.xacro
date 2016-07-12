@@ -390,8 +390,9 @@
 
   <!-- Macro to add a magnetometer. -->
   <xacro:macro name="magnetometer_plugin_macro"
-    params="namespace magnetometer_suffix parent_link magnetometer_topic mass_magnetometer_sensor
-      ref_mag_field noise_normal noise_uniform_initial_bias *inertia *origin">
+    params="namespace magnetometer_suffix parent_link magnetometer_topic
+      mass_magnetometer_sensor ref_mag_north ref_mag_east ref_mag_down 
+      noise_normal noise_uniform_initial_bias *inertia *origin">
     <!-- Magnetometer link -->
     <link name="${namespace}/magnetometer${magnetometer_suffix}_link">
       <inertial>
@@ -415,8 +416,10 @@
         <!-- [Tesla] Below is the reference Earth's magnetic field at the reference location in NED frame.
              The default reference location is Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84).
 	     You can obtain the magnetic field strength for your location using the World Magnetic Model: 
-             https://www.ngdc.noaa.gov/geomag/WMM/calculators.shtml -->
-        <refMagField>${ref_mag_field}</refMagField>
+             http://www.ngdc.noaa.gov/geomag-web/#igrfwmm -->
+        <refMagNorth>${ref_mag_north}</refMagNorth>
+        <refMagEast>${ref_mag_east}</refMagEast>
+        <refMagDown>${ref_mag_down}</refMagDown>
         <noiseNormal>${noise_normal}</noiseNormal> <!-- standard deviation of additive white gaussian noise [Tesla] -->
         <noiseUniformInitialBias>${noise_uniform_initial_bias}</noiseUniformInitialBias> <!-- symmetric bounds of uniform noise for initial sensor bias [Tesla] -->
       </plugin>
@@ -744,7 +747,9 @@
       parent_link="${parent_link}"
       magnetometer_topic="magnetic_field"
       mass_magnetometer_sensor="0.015"
-      ref_mag_field="0.000021493 0.000000815 0.000042795"
+      ref_mag_north="0.000021493"
+      ref_mag_east="0.000000815"
+      ref_mag_down="0.000042795"
       noise_normal="0.000000080 0.000000080 0.000000080"
       noise_uniform_initial_bias="0.000000400 0.000000400 0.000000400">
       <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />

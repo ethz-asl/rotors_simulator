@@ -1,9 +1,5 @@
 /*
- * Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
- * Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
- * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
- * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
- * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Pavel Vechersky, ASL, ETH Zurich, Switzerland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +33,9 @@ namespace gazebo {
 // Default magnetic field [Tesla] in NED frame, obtained from World Magnetic
 // Model: (http://www.ngdc.noaa.gov/geomag-web/#igrfwmm) for Zurich:
 // lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84
-static const SdfVector3 kDefaultRefMagField(0.000021493, 0.000000815, 0.000042795);
+static constexpr double kDefaultRefMagNorth = 0.000021493;
+static constexpr double kDefaultRefMagEast = 0.000000815;
+static constexpr double kDefaultRefMagDown = 0.000042795;
 
 class GazeboMagnetometerPlugin : public ModelPlugin {
  public:

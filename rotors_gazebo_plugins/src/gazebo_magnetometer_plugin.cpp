@@ -1,9 +1,5 @@
 /*
- * Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
- * Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
- * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
- * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
- * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Pavel Vechersky, ASL, ETH Zurich, Switzerland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +56,9 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
   frame_id_ = link_name;
 
-  SdfVector3 ref_mag_field;
+  double ref_mag_north;
+  double ref_mag_east;
+  double ref_mag_down;
   SdfVector3 noise_normal;
   SdfVector3 noise_uniform_initial_bias;
   const SdfVector3 zeros3(0.0, 0.0, 0.0);
@@ -68,7 +66,9 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   // Retrieve the rest of the SDF parameters
   getSdfParam<std::string>(_sdf, "magnetometerTopic", magnetometer_topic_,
                            mav_msgs::default_topics::MAGNETIC_FIELD);
-  getSdfParam<SdfVector3>(_sdf, "refMagField", ref_mag_field, kDefaultRefMagField);
+  getSdfParam<double>(_sdf, "refMagNorth", ref_mag_north, kDefaultRefMagNorth);
+  getSdfParam<double>(_sdf, "refMagEast", ref_mag_east, kDefaultRefMagEast);
+  getSdfParam<double>(_sdf, "refMagDown", ref_mag_down, kDefaultRefMagDown);
   getSdfParam<SdfVector3>(_sdf, "noiseNormal", noise_normal, zeros3);
   getSdfParam<SdfVector3>(_sdf, "noiseUniformInitialBias", noise_uniform_initial_bias, zeros3);
 
@@ -95,15 +95,12 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
   // Initialize the reference magnetic field vector in world frame, taking into
   // account the initial bias
-  mag_W_ = math::Vector3(ref_mag_field.X() + initial_bias[0](random_generator_),
-                         ref_mag_field.Y() + initial_bias[1](random_generator_),
-                         ref_mag_field.Z() + initial_bias[2](random_generator_));
+  mag_W_ = math::Vector3(ref_mag_north + initial_bias[0](random_generator_),
+                         ref_mag_east + initial_bias[1](random_generator_),
+                         ref_mag_down + initial_bias[2](random_generator_));
 
   // Fill the magnetometer message
   mag_message_.header.frame_id = frame_id_;
-  mag_message_.magnetic_field.x = mag_W_.x;
-  mag_message_.magnetic_field.y = mag_W_.y;
-  mag_message_.magnetic_field.z = mag_W_.z;
   mag_message_.magnetic_field_covariance[0] = noise_normal.X() * noise_normal.X();
   mag_message_.magnetic_field_covariance[4] = noise_normal.Y() * noise_normal.Y();
   mag_message_.magnetic_field_covariance[8] = noise_normal.Z() * noise_normal.Z();
@@ -111,7 +108,7 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
 void GazeboMagnetometerPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Get the current pose and time from Gazebo
-  math::Pose world_pose = link_->GetWorldPose();
+  math::Pose T_W_B = link_->GetWorldPose();
   common::Time current_time  = world_->GetSimTime();
 
   // Calculate the magnetic field noise.
@@ -120,14 +117,14 @@ void GazeboMagnetometerPlugin::OnUpdate(const common::UpdateInfo& _info) {
                           noise_n_[2](random_generator_));
 
   // Rotate the earth magnetic field into the inertial frame
-  math::Vector3 field = world_pose.rot.RotateVectorReverse(mag_W_ + mag_noise);
+  math::Vector3 field_B = T_W_B.rot.RotateVectorReverse(mag_W_ + mag_noise);
 
   // Fill the magnetic field message
   mag_message_.header.stamp.sec = current_time.sec;
   mag_message_.header.stamp.nsec = current_time.nsec;
-  mag_message_.magnetic_field.x = field.x;
-  mag_message_.magnetic_field.y = field.y;
-  mag_message_.magnetic_field.z = field.z;
+  mag_message_.magnetic_field.x = field_B.x;
+  mag_message_.magnetic_field.y = field_B.y;
+  mag_message_.magnetic_field.z = field_B.z;
 
   // Publish the message
   magnetometer_pub_.publish(mag_message_);
