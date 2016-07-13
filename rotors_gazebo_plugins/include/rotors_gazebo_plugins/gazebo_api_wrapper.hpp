@@ -43,6 +43,10 @@ namespace gazebo {
     /// \brief Get the last measurement time
     /// \return the last measurement time
     common::Time LastMeasurementTime() { return this->GetLastMeasurementTime(); }
+
+    /// \brief Get the Gazebo world name
+    /// \return the world name
+    std::string WorldName() { return this->GetWorldName(); }
   };
 #else
   class GazeboGpsSensor : public sensors::GpsSensor {
@@ -70,6 +74,10 @@ namespace gazebo {
     /// \brief Get the last measurement time
     /// \return the last measurement time
     common::Time LastMeasurementTime() { return this->GetLastMeasurementTime(); }
+
+    /// \brief Get the Gazebo world name
+    /// \return the world name
+    std::string WorldName() { return this->GetWorldName(); }
   };
 #endif
 
