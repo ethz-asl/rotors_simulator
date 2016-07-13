@@ -388,6 +388,84 @@
     </gazebo>
   </xacro:macro>
 
+  <!-- Macro to add a GPS sensor. -->
+  <xacro:macro name="gps_plugin_macro"
+    params="namespace gps_suffix parent_link gps_topic ground_speed_topic
+      mass_gps_sensor horizontal_pos_std_dev vertical_pos_std_dev
+      horizontal_vel_std_dev vertical_vel_std_dev *inertia *origin">
+    <!-- GPS link -->
+    <link name="${namespace}/gps${gps_suffix}_link">
+      <inertial>
+        <xacro:insert_block name="inertia" />
+        <mass value="${mass_gps_sensor}" />  <!-- [kg] -->
+        <origin xyz="0 0 0" rpy="0 0 0" />
+      </inertial>
+    </link>
+    <!-- GPS joint -->
+    <joint name="${namespace}/gps${gps_suffix}_joint" type="revolute">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/gps${gps_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+    <gazebo reference="${namespace}/gps${gps_suffix}_link">
+      <sensor type="gps" name="${namespace}_gps${gps_suffix}">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>0</visualize>
+        <always_on>1</always_on>
+        <update_rate>5</update_rate>
+        <gps>
+          <position_sensing>
+            <horizontal>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>${horizontal_pos_std_dev}</stddev>
+                <bias_mean>0.0</bias_mean>
+                <bias_stddev>0.0</bias_stddev>
+              </noise>
+            </horizontal>
+            <vertical>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>${vertical_pos_std_dev}</stddev>
+                <bias_mean>0.0</bias_mean>
+                <bias_stddev>0.0</bias_stddev>
+              </noise>
+            </vertical>
+          </position_sensing>
+          <velocity_sensing>
+            <horizontal>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>${horizontal_vel_std_dev}</stddev>
+                <bias_mean>0.0</bias_mean>
+                <bias_stddev>0.0</bias_stddev>
+              </noise>
+            </horizontal>
+            <vertical>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>${vertical_vel_std_dev}</stddev>
+                <bias_mean>0.0</bias_mean>
+                <bias_stddev>0.0</bias_stddev>
+              </noise>
+            </vertical>
+          </velocity_sensing>
+        </gps>
+        <plugin filename="librotors_gazebo_gps_plugin.so" name="rotors_gazebo_gps${gps_suffix}_plugin">
+          <robotNamespace>${namespace}</robotNamespace> <!-- (string, required): ros namespace in which the messages are published -->
+          <linkName>${namespace}/gps${gps_suffix}_link</linkName> <!-- (string, required): name of the body which holds the GPS sensor -->
+          <gpsTopic>${gps_topic}</gpsTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to 'gps') -->
+          <groundSpeedTopic>${ground_speed_topic}</groundSpeedTopic> <!-- (string): name of the ground speed output topic (defaults to 'ground_speed') -->
+          <horPosStdDev>${horizontal_pos_std_dev}</horPosStdDev> <!-- standard deviation for horizontal position noise [m] -->
+          <verPosStdDev>${vertical_pos_std_dev}</verPosStdDev> <!-- standard deviation for vertical position noise [m] -->
+          <horVelStdDev>${horizontal_vel_std_dev}</horVelStdDev> <!-- standard deviation for horizontal speed noise [m/s] -->
+          <verVelStdDev>${vertical_vel_std_dev}</verVelStdDev> <!-- standard deviation for vertical speed noise [m/s] -->
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
   <!-- Macro to add a magnetometer. -->
   <xacro:macro name="magnetometer_plugin_macro"
     params="namespace magnetometer_suffix parent_link magnetometer_topic
@@ -737,6 +815,24 @@
       <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:imu_plugin_macro>
+  </xacro:macro>
+
+  <xacro:macro name="default_gps" params="namespace parent_link">
+    <!-- Default GPS. -->
+    <xacro:gps_plugin_macro
+      namespace="${namespace}"
+      gps_suffix=""
+      parent_link="${parent_link}"
+      gps_topic="gps"
+      ground_speed_topic="ground_speed"
+      mass_gps_sensor="0.015"
+      horizontal_pos_std_dev="3.0"
+      vertical_pos_std_dev="6.0"
+      horizontal_vel_std_dev="0.1"
+      vertical_vel_std_dev="0.1">
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </xacro:gps_plugin_macro>
   </xacro:macro>
 
   <xacro:macro name="default_magnetometer" params="namespace parent_link">

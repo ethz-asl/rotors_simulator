@@ -23,6 +23,9 @@
   <!-- Mount an ADIS16448 IMU. -->
   <xacro:default_imu namespace="${namespace}" parent_link="${namespace}/base_link" />
 
+  <!-- Mount a GPS. -->
+  <xacro:default_gps namespace="${namespace}" parent_link="${namespace}/base_link" />
+
   <!-- Mount a magnetometer. -->
   <xacro:default_magnetometer namespace="${namespace}" parent_link="${namespace}/base_link" />
 
