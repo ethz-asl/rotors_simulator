@@ -19,13 +19,14 @@
 
 #include <random>
 
+#include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
+#include <gazebo/sensors/sensors.hh>
 #include <geometry_msgs/Vector3Stamped.h>
 #include <ros/ros.h>
 #include <sensor_msgs/NavSatFix.h>
 
 #include "rotors_gazebo_plugins/common.h"
-#include "rotors_gazebo_plugins/gazebo_api_wrapper.hpp"
 
 namespace gazebo {
 // Default values
@@ -56,7 +57,10 @@ class GazeboGpsPlugin : public SensorPlugin {
   std::string ground_speed_topic_;
 
   // Pointer to the parent sensor
-  GazeboGpsSensorPtr parent_sensor_;
+  sensors::GpsSensorPtr parent_sensor_;
+
+  // Pointer to the world
+  physics::WorldPtr world_;
 
   // Pointer to the sensor link
   physics::LinkPtr link_;

@@ -35,8 +35,10 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   // Store the pointer to the parent sensor.
 #if GAZEBO_MAJOR_VERSION > 6
   parent_sensor_ = std::dynamic_pointer_cast<sensors::GpsSensor>(_sensor);
+  world_ = physics::get_world(parent_sensor_->WorldName());
 #else
   parent_sensor_ = boost::dynamic_pointer_cast<sensors::GpsSensor>(_sensor);
+  world_ = physics::get_world(parent_sensor_->GetWorldName());
 #endif
 
   // Retrieve the necessary parameters.
@@ -57,8 +59,7 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   std::string frame_id = link_name;
 
   // Get the pointer to the link that holds the sensor
-  physics::WorldPtr world = physics::get_world(parent_sensor_->WorldName());
-  link_ = boost::dynamic_pointer_cast<physics::Link>(world->GetByName(link_name));
+  link_ = boost::dynamic_pointer_cast<physics::Link>(world_->GetByName(link_name));
   if (link_ == NULL)
     gzerr << "[gazebo_gps_plugin] Couldn't find specified link \"" << link_name << "\"\n";
 
@@ -111,7 +112,6 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
 void GazeboGpsPlugin::OnUpdate() {
   // Get the time of the last measurement.
   common::Time current_time;
-  current_time = parent_sensor_->LastMeasurementTime();
 
   // Get the linear velocity in the world frame.
   math::Vector3 W_ground_speed_W_L = link_->GetWorldLinearVel();
@@ -122,9 +122,19 @@ void GazeboGpsPlugin::OnUpdate() {
           ground_speed_n_[2](random_generator_));
 
   // Fill the GPS message.
+#if GAZEBO_MAJOR_VERSION > 6
+  current_time = parent_sensor_->LastMeasurementTime();
+
   gps_message_.latitude = parent_sensor_->Latitude().Degree();
   gps_message_.longitude = parent_sensor_->Longitude().Degree();
   gps_message_.altitude = parent_sensor_->Altitude();
+#else
+  current_time = parent_sensor_->GetLastMeasurementTime();
+
+  gps_message_.latitude = parent_sensor_->GetLatitude().Degree();
+  gps_message_.longitude = parent_sensor_->GetLongitude().Degree();
+  gps_message_.altitude = parent_sensor_->GetAltitude();
+#endif
   gps_message_.header.stamp.sec = current_time.sec;
   gps_message_.header.stamp.nsec = current_time.nsec;
 
