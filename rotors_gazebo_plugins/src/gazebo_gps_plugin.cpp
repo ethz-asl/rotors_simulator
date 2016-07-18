@@ -88,8 +88,7 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
 
   // Initialize the ROS publisher for sending gps location and ground speed.
   gps_pub_ = node_handle_->advertise<sensor_msgs::NavSatFix>(gps_topic_, 1);
-  ground_speed_pub_ =
-          node_handle_->advertise<geometry_msgs::Vector3Stamped>(ground_speed_topic_, 1);
+  ground_speed_pub_ = node_handle_->advertise<geometry_msgs::TwistStamped>(ground_speed_topic_, 1);
 
   // Initialize the normal distributions for ground speed.
   ground_speed_n_[0] = NormalDistribution(0, hor_vel_std_dev);
@@ -139,9 +138,9 @@ void GazeboGpsPlugin::OnUpdate() {
   gps_message_.header.stamp.nsec = current_time.nsec;
 
   // Fill the ground speed message.
-  ground_speed_message_.vector.x = W_ground_speed_W_L.x;
-  ground_speed_message_.vector.y = W_ground_speed_W_L.y;
-  ground_speed_message_.vector.z = W_ground_speed_W_L.z;
+  ground_speed_message_.twist.linear.x = W_ground_speed_W_L.x;
+  ground_speed_message_.twist.linear.y = W_ground_speed_W_L.y;
+  ground_speed_message_.twist.linear.z = W_ground_speed_W_L.z;
   ground_speed_message_.header.stamp.sec = current_time.sec;
   ground_speed_message_.header.stamp.nsec = current_time.nsec;
 

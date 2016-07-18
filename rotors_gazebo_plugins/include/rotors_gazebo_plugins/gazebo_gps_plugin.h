@@ -22,7 +22,7 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/sensors/sensors.hh>
-#include <geometry_msgs/Vector3Stamped.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <ros/ros.h>
 #include <sensor_msgs/NavSatFix.h>
 
@@ -72,7 +72,7 @@ class GazeboGpsPlugin : public SensorPlugin {
   sensor_msgs::NavSatFix gps_message_;
 
   // Ground speed message to be publised on sensor update
-  geometry_msgs::Vector3Stamped ground_speed_message_;
+  geometry_msgs::TwistStamped ground_speed_message_;
 
   // Normal distributions for ground speed noise in x, y, and z directions
   NormalDistribution ground_speed_n_[3];
