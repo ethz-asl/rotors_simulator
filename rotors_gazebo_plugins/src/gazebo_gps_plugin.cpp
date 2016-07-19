@@ -58,7 +58,7 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
 
   std::string frame_id = link_name;
 
-  // Get the pointer to the link that holds the sensor
+  // Get the pointer to the link that holds the sensor.
   link_ = boost::dynamic_pointer_cast<physics::Link>(world_->GetByName(link_name));
   if (link_ == NULL)
     gzerr << "[gazebo_gps_plugin] Couldn't find specified link \"" << link_name << "\"\n";

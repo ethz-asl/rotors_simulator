@@ -49,7 +49,7 @@ class GazeboGpsPlugin : public SensorPlugin {
   void OnUpdate();
 
  private:
-  // ROS interface.
+  // ROS interface
   ros::NodeHandle* node_handle_;
   ros::Publisher gps_pub_;
   ros::Publisher ground_speed_pub_;
