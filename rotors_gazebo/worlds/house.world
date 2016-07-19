@@ -15,6 +15,13 @@
       <uri>model://house_2</uri>
         <pose>-7 0 0 0 -0 -1.5707</pose>
     </include>
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>47.3667</latitude_deg>
+      <longitude_deg>8.5500</longitude_deg>
+      <elevation>500.0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
     <physics type='ode'>
       <ode>
         <solver>
