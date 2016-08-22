@@ -62,12 +62,7 @@
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <xacro:if value="${use_mesh_file}">
-            <mesh filename="${mesh_file}" scale="1 1 1" />
-          </xacro:if>
-          <xacro:unless value="${use_mesh_file}">
-            <box size="${length} ${width} ${height}" />
-          </xacro:unless>
+          <box size="${length} ${width} ${height}" />
         </geometry>
       </collision>
     </link>
