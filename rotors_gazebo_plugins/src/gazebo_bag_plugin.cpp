@@ -204,9 +204,6 @@ void GazeboBagPlugin::StartRecording() {
 }
 
 void GazeboBagPlugin::StopRecording() {
-  // Close the bag.
-  bag_.close();
-
   // Shutdown all the subscribers.
   imu_sub_.shutdown();
   wind_sub_.shutdown();
@@ -218,6 +215,9 @@ void GazeboBagPlugin::StopRecording() {
 
   // Disconnect the update event.
   event::Events::DisconnectWorldUpdateBegin(update_connection_);
+
+  // Close the bag.
+  bag_.close();
 
   // Clear the flag to show that we are not actively recording
   is_recording_ = false;
