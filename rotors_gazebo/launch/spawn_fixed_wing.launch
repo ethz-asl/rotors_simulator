@@ -8,7 +8,7 @@
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
   <arg name="z" default="0.1"/>
-  <arg name="R" default="3.1415926535897931"/>
+  <arg name="R" default="0.0"/>
   <arg name="P" default="0.0"/>
   <arg name="Y" default="0.0"/>
   <arg name="enable_logging" default="false"/>
