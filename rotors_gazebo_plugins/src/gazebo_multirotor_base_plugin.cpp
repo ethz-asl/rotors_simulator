@@ -210,7 +210,7 @@ void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
   msg->header.stamp.nsec = now.nsec;
   msg->header.frame_id = frame_id_;
   // TODO(burrimi): Add a flag to publish rotor joint state.
-  joint_state_pub_.publish(joint_state_msg);
+  //joint_state_pub_.publish(joint_state_msg);
   motor_pub_.publish(msg);
 }
 

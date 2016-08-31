@@ -244,11 +244,11 @@ void GazeboMotorModel::AddNoise(math::Vector3* force, math::Vector3* torque) {
 
   // Simulate noise on force and torque
   for (int i = 0; i < 3; ++i) {
-    double sigma_f = forces_noise_density_[i];
-    double sigma_m = moments_noise_density_[i];
+    double sigma_f_d = 1 / sqrt(sampling_time_) * forces_noise_density_[i];
+    double sigma_m_d = 1 / sqrt(sampling_time_) * moments_noise_density_[i];
     
-    force_noise_eigen[i] = sigma_f * standard_normal_distribution_(random_generator_);
-    moment_noise_eigen[i] = sigma_m * standard_normal_distribution_(random_generator_);
+    force_noise_eigen[i] = sigma_f_d * standard_normal_distribution_(random_generator_);
+    moment_noise_eigen[i] = sigma_m_d * standard_normal_distribution_(random_generator_);
   }
 
   math::Vector3 force_noise;

@@ -39,8 +39,8 @@
     measurement_divisor="1"
     measurement_delay="0"
     unknown_delay="0.0"
-    noise_normal_position="0.0005 0.0005 0.0005"
-    noise_normal_quaternion="0.005 0.005 0.005"
+    noise_normal_position="0.0001 0.0001 0.0001"
+    noise_normal_quaternion="0.008 0.008 0.008"
     noise_normal_linear_velocity="0 0 0"
     noise_normal_angular_velocity="0 0 0"
     noise_uniform_position="0 0 0"
@@ -51,6 +51,6 @@
     odometry_map=""
     image_scale="">
     <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+    <origin xyz="0.01 -0.02 0.03" rpy="0.1 -0.2 0.3" />
   </xacro:odometry_plugin_macro>
 </robot>
