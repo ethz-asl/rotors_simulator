@@ -42,12 +42,11 @@
   <xacro:property name="rotor_drag_coefficient" value="0.0176" />
   <xacro:property name="rolling_moment_coefficient" value="0.000001" />
   <!--xacro:property name="forces_noise_density" value="0.01 0.01 0.01" /> -->
-  <!--xacro:property name="moments_noise_density" value="0.001 0.001 0.001" /> -->
-  <xacro:property name="forces_noise_density" value="0.0 0.0 0.0" />
-  <xacro:property name="moments_noise_density" value="0.0 0.0 0.0" />
+  <!--xacro:property name="moments_noise_density" value="0.004 0.004 0.002" /> -->
+  <xacro:property name="forces_noise_density" value="0.01 0.01 0.01" />
+  <xacro:property name="moments_noise_density" value="0.001 0.001 0.001" />
 
-  <!--xacro:property name="main_body_drag_coefficient" value="0.0189 0.0189 0.0" /> -->
-  <xacro:property name="main_body_drag_coefficient" value="0.0 0.0 0.0" />
+  <xacro:property name="main_body_drag_coefficient" value="0.0189 0.0189 0.0" />
 
 
 
@@ -58,8 +57,8 @@
 
   <!-- inertia of a single rotor, assuming it is a cuboid. Height=3mm, width=15mm -->
   <xacro:property name="rotor_inertia">
-    <xacro:box_inertia x="${2 * radius_rotor}" y="0.015" z="0.003" mass="${mass_rotor*rotor_velocity_slowdown_sim}" />
-  <!--   <xacro:rotor_disk_inertia rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}" radius="${radius_rotor}" mass="${mass_rotor}" /> -->
+    <!-- <xacro:box_inertia x="${2 * radius_rotor}" y="0.015" z="0.003" mass="${mass_rotor*rotor_velocity_slowdown_sim}" /> -->
+    <xacro:rotor_disk_inertia rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}" radius="${radius_rotor}" mass="${mass_rotor}" />
   </xacro:property>
 
   <!-- Included URDF Files -->
