@@ -105,7 +105,7 @@
           <cameraName>camera_${camera_suffix}</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>camera_${camera_suffix}_link</frameName>
+          <frameName>camera_${camera_suffix}_optical_link</frameName>
           <hackBaseline>0.0</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
@@ -236,7 +236,7 @@
           <cameraName>${camera_name}</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>${camera_name}/camera_left_link</frameName>
+          <frameName>${camera_name}/camera_left_optical_link</frameName>
           <hackBaseline>${baseline_y}</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
