@@ -3,6 +3,12 @@ project(rotors_hil_interface)
 
 add_definitions(-std=c++11)
 
+find_package(Mavlink QUIET)
+
+if(NOT DEFINED Mavlink_DIR)
+  return()
+endif()
+
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   geometry_msgs
