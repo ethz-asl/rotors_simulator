@@ -5,7 +5,10 @@ add_definitions(-std=c++11)
 
 find_package(Mavlink QUIET)
 
-if(NOT DEFINED Mavlink_DIR)
+if(Mavlink_DIR)
+  message(STATUS "BUILDING HIL_INTERFACE PACKAGE")
+else()
+  message(STATUS "SKIPPING HIL_INTERFACE PACKAGE")
   return()
 endif()
 
