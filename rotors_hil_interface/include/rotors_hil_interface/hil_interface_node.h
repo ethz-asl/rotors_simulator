@@ -29,8 +29,8 @@ static constexpr double kDefaultBodyToSensorsRoll = M_PI;
 static constexpr double kDefaultBodyToSensorsPitch = 0.0;
 static constexpr double kDefaultBodyToSensorsYaw = 0.0;
 static const std::string kDefaultActuatorsPubTopic = "gazebo/command/motor_speed";
-static const std::string kDefaultMavlinkPubTopic = "/mavlink/to";
-static const std::string kDefaultHilControlsSubTopic = "/mavros/hil_controls/hil_controls";
+static const std::string kDefaultMavlinkPubTopic = "mavlink/to";
+static const std::string kDefaultHilControlsSubTopic = "mavros/hil_controls/hil_controls";
 
 class HilInterfaceNode {
  public:

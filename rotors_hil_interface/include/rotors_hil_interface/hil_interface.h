@@ -38,13 +38,16 @@ static const std::string kDefaultPressureSubTopic = "air_pressure";
 /// \param[in] rostime Time, in ROS format, to be converted.
 /// \return Time in microseconds.
 inline u_int64_t RosTimeToMicroseconds(const ros::Time& rostime) {
-  return (static_cast<u_int64_t>(rostime.nsec) * 1e-3 +
-          static_cast<u_int64_t>(rostime.sec) * 1e6);
+  return (static_cast<u_int64_t>(rostime.nsec * 1e-3) +
+          static_cast<u_int64_t>(rostime.sec * 1e6));
 }
 
 class HilInterface {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  /// \brief Destructor
+  virtual ~HilInterface() {};
 
   /// \brief Gather data collected from ROS messages into MAVLINK messages.
   /// \return Vector of MAVLINK messages (in MAVROS format) to be publised.
@@ -92,7 +95,7 @@ class HilSensorLevelInterface : public HilInterface {
  public:
   /// \brief Constructor
   /// \param[in] q_S_B Quaternion rotation from body frame to NED frame.
-  HilSensorLevelInterface(const Eigen::Quaterniond q_S_B);
+  HilSensorLevelInterface(const Eigen::Quaterniond& q_S_B);
 
   /// \brief Destructor
   virtual ~HilSensorLevelInterface();
@@ -107,17 +110,17 @@ class HilSensorLevelInterface : public HilInterface {
   mavlink_hil_sensor_t hil_sensor_msg_;
 
   /// Interval between outgoing HIL_GPS messages.
-  u_int32_t gps_interval_nsec_;
+  u_int64_t gps_interval_nsec_;
 
   /// Nanosecond portion of the last HIL_GPS message timestamp.
-  u_int32_t last_gps_pub_time_nsec_;
+  u_int64_t last_gps_pub_time_nsec_;
 };
 
 class HilStateLevelInterface : public HilInterface {
  public:
   /// \brief Constructor
   /// \param[in] q_S_B Quaternion rotation from body frame to NED frame.
-  HilStateLevelInterface(const Eigen::Quaterniond q_S_B);
+  HilStateLevelInterface(const Eigen::Quaterniond &q_S_B);
 
   /// \brief Destructor
   virtual ~HilStateLevelInterface();

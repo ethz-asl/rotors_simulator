@@ -18,7 +18,7 @@
 
 namespace rotors_hil {
 
-HilSensorLevelInterface::HilSensorLevelInterface(const Eigen::Quaterniond q_S_B) {
+HilSensorLevelInterface::HilSensorLevelInterface(const Eigen::Quaterniond& q_S_B) {
   ros::NodeHandle pnh("~");
 
   // Retrieve the necessary parameters.
@@ -39,7 +39,7 @@ HilSensorLevelInterface::HilSensorLevelInterface(const Eigen::Quaterniond q_S_B)
   pnh.param("pressure_topic", pressure_sub_topic, kDefaultPressureSubTopic);
 
   // Compute the desired interval between published GPS messages.
-  gps_interval_nsec_ = kSecToNsec / gps_freq;
+  gps_interval_nsec_ = static_cast<u_int64_t>(kSecToNsec / gps_freq);
 
   // Compute the rotation matrix to rotate data into NED frame
   q_S_B_ = q_S_B;

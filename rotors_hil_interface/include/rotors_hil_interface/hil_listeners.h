@@ -56,11 +56,12 @@ struct HilData {
       eph(kHDOP),
       epv(kVDOP),
       cog(kUnknown),
+      ind_airspeed(0),
       satellites_visible(kSatellitesVisible) {}
 
   Eigen::Quaterniond att;      // Attitude quaternion
   Eigen::Vector3f acc;         // Linear acceleration (m/s^2)
-  Eigen::Vector3f gyro;        // Angular speed in body frame (rad / sec)
+  Eigen::Vector3f gyro;        // Angular rate in body frame (rad / sec)
   Eigen::Vector3f mag;         // Magnetic field (Gauss)
   Eigen::Vector3i gps_vel;     // GPS velocity in cm/s in earth-fixed NED frame
   float pressure_abs;          // Absolute pressure in millibar
@@ -92,6 +93,8 @@ class HilListeners {
                         HilData* hil_data) {
     boost::mutex::scoped_lock lock(mtx_);
 
+    ROS_ASSERT(hil_data);
+
     Eigen::Vector3d air_velocity(air_speed_msg->twist.linear.x,
                                  air_speed_msg->twist.linear.y,
                                  air_speed_msg->twist.linear.z);
@@ -112,6 +115,8 @@ class HilListeners {
                    HilData* hil_data) {
     boost::mutex::scoped_lock lock(mtx_);
 
+    ROS_ASSERT(hil_data);
+
     // MAVLINK HIL_GPS message measures latitude and longitude in degrees * 1e7
     // while altitude is reported in mm.
     hil_data->lat = gps_msg->latitude * kDegreesToHil;
@@ -130,6 +135,8 @@ class HilListeners {
                            HilData* hil_data) {
     boost::mutex::scoped_lock lock(mtx_);
 
+    ROS_ASSERT(hil_data);
+
     // MAVLINK HIL_GPS message measures GPS velocity in cm/s
     hil_data->gps_vel = Eigen::Vector3i(ground_speed_msg->twist.linear.x,
                                         ground_speed_msg->twist.linear.y,
@@ -144,6 +151,8 @@ class HilListeners {
   void ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg,
                    HilData* hil_data) {
     boost::mutex::scoped_lock lock(mtx_);
+
+    ROS_ASSERT(hil_data);
 
     hil_data->acc = Eigen::Vector3f(imu_msg->linear_acceleration.x,
                                     imu_msg->linear_acceleration.y,
@@ -166,6 +175,8 @@ class HilListeners {
                    HilData* hil_data) {
     boost::mutex::scoped_lock lock(mtx_);
 
+    ROS_ASSERT(hil_data);
+
     // ROS magnetic field sensor message is in Tesla, while
     // MAVLINK HIL_SENSOR message measures magnetic field in Gauss.
     // 1 Tesla = 10000 Gauss
@@ -180,6 +191,8 @@ class HilListeners {
   void PressureCallback(const sensor_msgs::FluidPressureConstPtr &pressure_msg,
                         HilData* hil_data) {
     boost::mutex::scoped_lock lock(mtx_);
+
+    ROS_ASSERT(hil_data);
 
     // ROS fluid pressure sensor message is in Pascals, while
     // MAVLINK HIL_SENSOR message measures fluid pressure in millibar.

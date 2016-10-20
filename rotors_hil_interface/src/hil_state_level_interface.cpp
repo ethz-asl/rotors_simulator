@@ -18,7 +18,7 @@
 
 namespace rotors_hil {
 
-HilStateLevelInterface::HilStateLevelInterface(const Eigen::Quaterniond q_S_B) {
+HilStateLevelInterface::HilStateLevelInterface(const Eigen::Quaterniond& q_S_B) {
   ros::NodeHandle pnh("~");
 
   // Retrieve the necessary parameters.
@@ -71,7 +71,7 @@ std::vector<mavros_msgs::Mavlink> HilStateLevelInterface::CollectData() {
   std::vector<mavros_msgs::Mavlink> hil_msgs;
 
   // Rotate the attitude into NED frame
-  Eigen::Quaterniond att = hil_data_.att * q_S_B_;
+  Eigen::Quaterniond att = q_S_B_ * hil_data_.att;
 
   // Rotate gyroscope, accelerometer, and ground speed data into NED frame
   Eigen::Vector3f gyro = R_S_B_ * hil_data_.gyro;
