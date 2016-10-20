@@ -23,7 +23,13 @@ add_executable(rotors_joy_interface src/joy.cpp)
 add_dependencies(rotors_joy_interface ${catkin_EXPORTED_TARGETS})
 target_link_libraries(rotors_joy_interface ${catkin_LIBRARIES})
 
-install(TARGETS rotors_joy_interface
+add_executable(rotors_key_interface src/key_teleop.cpp)
+add_dependencies(rotors_key_interface ${catkin_EXPORTED_TARGETS})
+target_link_libraries(rotors_key_interface ${catkin_LIBRARIES})
+
+install(TARGETS
+    rotors_joy_interface
+    rotors_key_interface
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
