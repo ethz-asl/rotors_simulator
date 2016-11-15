@@ -75,6 +75,8 @@ class Joy {
   double current_yaw_vel_;
   double v_yaw_step_;
 
+  bool is_fixed_wing_;
+
   void StopMav();
 
   void JoyCallback(const sensor_msgs::JoyConstPtr& msg);
