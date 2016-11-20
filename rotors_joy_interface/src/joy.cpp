@@ -53,6 +53,8 @@ Joy::Joy() {
 
   pnh.param("v_yaw_step", v_yaw_step_, 0.05);  // [rad/s]
 
+  pnh.param("is_fixed_wing", is_fixed_wing_, false);
+
   pnh.param("button_yaw_left_", buttons_.yaw_left, 3);
   pnh.param("button_yaw_right_", buttons_.yaw_right, 4);
   pnh.param("button_ctrl_enable_", buttons_.ctrl_enable, 5);
@@ -88,7 +90,15 @@ void Joy::JoyCallback(const sensor_msgs::JoyConstPtr& msg) {
     current_yaw_vel_ = 0;
   }
   control_msg_.yaw_rate = current_yaw_vel_;
-  control_msg_.thrust.z = (msg->axes[axes_.thrust] + 1) * max_.thrust / 2.0 * axes_.thrust_direction;
+
+  if (is_fixed_wing_) {
+    double thrust = msg->axes[axes_.thrust] * axes_.thrust_direction;
+    control_msg_.thrust.x = (thrust >= 0.0) ? thrust : 0.0;
+  }
+  else {
+    control_msg_.thrust.z = (msg->axes[axes_.thrust] + 1) * max_.thrust / 2.0 * axes_.thrust_direction;
+  }
+
   ros::Time update_time = ros::Time::now();
   control_msg_.header.stamp = update_time;
   control_msg_.header.frame_id = "rotors_joy_frame";
