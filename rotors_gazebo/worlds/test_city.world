@@ -1,3 +1,4 @@
+<?xml version="1.0" ?>
 <sdf version='1.4'>
   <world name='default'>
     <plugin name="gazebo_octomap" filename="librotors_gazebo_octomap_plugin.so"/>
