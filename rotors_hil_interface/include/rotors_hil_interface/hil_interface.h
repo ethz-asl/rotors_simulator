@@ -30,8 +30,6 @@ static constexpr int kAllFieldsUpdated = 4095;
 
 // Default values
 static constexpr double kDefaultGpsFrequency = 5.0;
-static const std::string kDefaultAirSpeedSubTopic = "air_speed";
-static const std::string kDefaultGroundSpeedSubTopic = "ground_speed";
 static const std::string kDefaultPressureSubTopic = "air_pressure";
 
 /// \brief Convert ros::Time into single value in microseconds.

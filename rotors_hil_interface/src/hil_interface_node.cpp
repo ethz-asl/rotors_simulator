@@ -36,7 +36,7 @@ HilInterfaceNode::HilInterfaceNode() :
   pnh.param("body_to_sensor_roll", S_B_roll, kDefaultBodyToSensorsRoll);
   pnh.param("body_to_sensor_pitch", S_B_pitch, kDefaultBodyToSensorsPitch);
   pnh.param("body_to_sensor_yaw", S_B_yaw, kDefaultBodyToSensorsYaw);
-  pnh.param("actuators_pub_topic", actuators_pub_topic, kDefaultActuatorsPubTopic);
+  pnh.param("actuators_pub_topic", actuators_pub_topic, std::string(mav_msgs::default_topics::COMMAND_ACTUATORS));
   pnh.param("mavlink_pub_topic", mavlink_pub_topic, kDefaultMavlinkPubTopic);
   pnh.param("hil_controls_sub_topic", hil_controls_sub_topic, kDefaultHilControlsSubTopic);
 
