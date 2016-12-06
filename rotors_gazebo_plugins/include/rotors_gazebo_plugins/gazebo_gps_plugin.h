@@ -29,6 +29,7 @@
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
+  
 // Default values
 static const std::string kDefaultGroundSpeedPubTopic = "ground_speed";
 static constexpr double kDefaultHorPosStdDev = 3.0;
@@ -81,6 +82,7 @@ class GazeboGpsPlugin : public SensorPlugin {
   std::random_device random_device_;
   std::mt19937 random_generator_;
 };
-}
+
+} // namespace gazebo 
 
 #endif // ROTORS_GAZEBO_PLUGINS_GPS_PLUGIN_H
