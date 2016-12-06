@@ -374,4 +374,5 @@ bool GazeboBagPlugin::RecordingServiceCallback(rotors_comm::RecordRosbag::Reques
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboBagPlugin);
-}
+
+} // namespace gazebo

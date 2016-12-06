@@ -65,7 +65,12 @@ class GazeboControllerInterface : public ModelPlugin {
 
  private:
 
+  // Gets set to true the first time a motor command is received.
+  // OnUpdate() will not do anything until this is true.
   bool received_first_reference_;
+
+  // This gets populated (including resizing if needed) when CommandMotorCallback() is
+  // called.
   Eigen::VectorXd input_reference_;
 
   std::string namespace_;
@@ -85,6 +90,7 @@ class GazeboControllerInterface : public ModelPlugin {
   void QueueThread();
   void CommandMotorCallback(const mav_msgs::ActuatorsConstPtr& input_reference_msg);
 };
-}
+
+} // namespace gazebo
 
 #endif // ROTORS_GAZEBO_PLUGINS_CONTROLLER_INTERFACE_H

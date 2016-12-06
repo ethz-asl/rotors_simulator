@@ -131,4 +131,5 @@ void GazeboMagnetometerPlugin::OnUpdate(const common::UpdateInfo& _info) {
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMagnetometerPlugin);
-}
+
+} // namespace gazebo

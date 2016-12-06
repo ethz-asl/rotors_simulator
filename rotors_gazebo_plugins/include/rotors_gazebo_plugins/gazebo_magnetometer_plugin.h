@@ -30,6 +30,7 @@
 #include "rotors_gazebo_plugins/sdf_api_wrapper.hpp"
 
 namespace gazebo {
+
 // Default magnetic field [Tesla] in NED frame, obtained from World Magnetic
 // Model: (http://www.ngdc.noaa.gov/geomag-web/#igrfwmm) for Zurich:
 // lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84
@@ -38,6 +39,7 @@ static constexpr double kDefaultRefMagEast = 0.000000815;
 static constexpr double kDefaultRefMagDown = 0.000042795;
 
 class GazeboMagnetometerPlugin : public ModelPlugin {
+  
  public:
   typedef std::normal_distribution<> NormalDistribution;
   typedef std::uniform_real_distribution<> UniformDistribution;
@@ -74,6 +76,7 @@ class GazeboMagnetometerPlugin : public ModelPlugin {
   std::random_device random_device_;
   std::mt19937 random_generator_;
 };
-}
+
+} // namespace gazebo
 
 #endif // ROTORS_GAZEBO_PLUGINS_MAGNETOMETER_PLUGIN_H

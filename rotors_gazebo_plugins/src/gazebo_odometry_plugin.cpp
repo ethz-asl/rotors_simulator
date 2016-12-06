@@ -363,4 +363,5 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboOdometryPlugin);
-}
+
+} // namespace gazebo

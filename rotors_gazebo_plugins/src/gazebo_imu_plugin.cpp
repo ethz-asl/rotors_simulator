@@ -51,6 +51,10 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // default params
   namespace_.clear();
 
+  //==============================================//
+  //========== READ IN PARAMS FROM SDF ===========//
+  //==============================================//
+
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
@@ -67,7 +71,7 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     gzthrow("[gazebo_imu_plugin] Couldn't find specified link \"" << link_name_ << "\".");
 
   frame_id_ = link_name_;
-
+  
   getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_,
                            mav_msgs::default_topics::IMU);
   getSdfParam<double>(_sdf, "gyroscopeNoiseDensity",
@@ -105,7 +109,12 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboImuPlugin::OnUpdate, this, _1));
 
+
+  // Existing imy_pub_ code
   imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
+
+  // imu_pub_ from PX4 code
+  //imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>("~/" + model_->GetName() + imu_topic_, 1);
 
   // Fill imu message.
   imu_message_.header.frame_id = frame_id_;
@@ -155,8 +164,7 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   accelerometer_bias_.setZero();
 }
 
-/// \brief This function adds noise to acceleration and angular rates for
-///        accelerometer and gyroscope measurement simulation.
+
 void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
                                Eigen::Vector3d* angular_velocity,
                                const double dt) {
@@ -211,7 +219,7 @@ void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
 
 }
 
-// This gets called by the world update start event.
+
 void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   common::Time current_time  = world_->GetSimTime();
   double dt = (current_time - last_time_).Double();
@@ -272,4 +280,5 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboImuPlugin);
-}
+
+} // namespace gazebo
