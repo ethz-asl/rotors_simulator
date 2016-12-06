@@ -36,6 +36,7 @@
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
+
 // Default values
 static const std::string kDefaultLinkName = "base_link";
 static const std::string kDefaultFrameId = "base_link";
@@ -90,6 +91,7 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   ros::Publisher joint_state_pub_;
   ros::NodeHandle *node_handle_;
 };
-}
+
+} // namespace gazebo
 
 #endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H

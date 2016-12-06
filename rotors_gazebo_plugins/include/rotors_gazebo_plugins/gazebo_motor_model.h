@@ -43,9 +43,10 @@
 namespace turning_direction {
 const static int CCW = 1;
 const static int CW = -1;
-}
+} // namespace turning_direction
 
 namespace gazebo {
+
 // Default values
 static const std::string kDefaultCommandSubTopic = "gazebo/command/motor_speed";
 static const std::string kDefaultWindSpeedSubTopic = "gazebo/wind_speed";
@@ -61,6 +62,7 @@ static constexpr double kDefaultRotorDragCoefficient = 1.0e-4;
 static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
 
 class GazeboMotorModel : public MotorModel, public ModelPlugin {
+
  public:
   GazeboMotorModel()
       : ModelPlugin(),
@@ -135,6 +137,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   std::unique_ptr<FirstOrderFilter<double>> rotor_velocity_filter_;
   math::Vector3 wind_speed_W_;
 };
-}
+
+} // namespace gazebo {
 
 #endif // ROTORS_GAZEBO_PLUGINS_MOTOR_MODELS_H

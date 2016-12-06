@@ -90,6 +90,9 @@ void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::ActuatorsCo
   for (int i = 0; i < input_reference_msg->angular_velocities.size(); ++i) {
     input_reference_[i] = input_reference_msg->angular_velocities[i];
   }
+
+  // We have received a motor command reference (it may not be the first, but this
+  // does not matter)
   received_first_reference_ = true;
 }
 

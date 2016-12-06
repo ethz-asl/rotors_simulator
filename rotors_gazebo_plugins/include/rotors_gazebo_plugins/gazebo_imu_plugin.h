@@ -36,6 +36,7 @@
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
+
 // Default values for use with ADIS16448 IMU
 static constexpr double kDefaultAdisGyroscopeNoiseDensity =
     2.0 * 35.0 / 3600.0 / 180.0 * M_PI;
@@ -106,11 +107,14 @@ class GazeboImuPlugin : public ModelPlugin {
  protected:
   void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
+  /// @brief This function adds noise to acceleration and angular rates for
+  ///        accelerometer and gyroscope measurement simulation.
   void addNoise(
       Eigen::Vector3d* linear_acceleration,
       Eigen::Vector3d* angular_velocity,
       const double dt);
 
+  /// @brief  This gets called by the world update start event.
   void OnUpdate(const common::UpdateInfo&);
 
  private:
@@ -148,6 +152,7 @@ class GazeboImuPlugin : public ModelPlugin {
 
   ImuParameters imu_parameters_;
 };
-}
+
+}  // namespace gazebo
 
 #endif // ROTORS_GAZEBO_PLUGINS_IMU_PLUGIN_H

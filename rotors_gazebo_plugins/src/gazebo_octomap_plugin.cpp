@@ -256,4 +256,5 @@ void OctomapFromGazeboWorld::CreateOctomap(
 
 // Register this plugin with the simulator
 GZ_REGISTER_WORLD_PLUGIN(OctomapFromGazeboWorld)
-}
+
+} // namespace gazebo

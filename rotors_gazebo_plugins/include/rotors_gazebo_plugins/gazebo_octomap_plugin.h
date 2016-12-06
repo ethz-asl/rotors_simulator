@@ -43,6 +43,7 @@ class OctomapFromGazeboWorld : public WorldPlugin {
   virtual ~OctomapFromGazeboWorld();
 
  protected:
+
   /// \brief Load the plugin.
   /// \param[in] _parent Pointer to the world that loaded this plugin.
   /// \param[in] _sdf SDF element that describes the plugin.
@@ -54,6 +55,7 @@ class OctomapFromGazeboWorld : public WorldPlugin {
                  const math::Vector3& bounding_box_origin,
                  const math::Vector3& bounding_box_lengths,
                  const double leaf_size);
+  
   /*! \brief Creates octomap by floodfilling freespace.
   *
   * Creates an octomap of the environment in 3 steps:
@@ -81,6 +83,7 @@ class OctomapFromGazeboWorld : public WorldPlugin {
   bool ServiceCallback(rotors_comm::Octomap::Request& req,
                        rotors_comm::Octomap::Response& res);
 };
-}
+
+} // namespace gazebo
 
 #endif  // ROTORS_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H

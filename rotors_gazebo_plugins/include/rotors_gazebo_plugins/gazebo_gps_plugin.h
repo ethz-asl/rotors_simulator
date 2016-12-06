@@ -29,7 +29,7 @@
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
-  
+
 // Default values
 static const std::string kDefaultGroundSpeedPubTopic = "ground_speed";
 static constexpr double kDefaultHorPosStdDev = 3.0;

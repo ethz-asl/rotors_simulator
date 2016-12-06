@@ -246,6 +246,7 @@ class GazeboBagPlugin : public ModelPlugin {
   }
 
 };
-}
+
+} // namespace gazebo
 
 #endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H

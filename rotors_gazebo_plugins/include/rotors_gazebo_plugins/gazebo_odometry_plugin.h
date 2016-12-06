@@ -54,6 +54,7 @@
 #include <tf/transform_broadcaster.h>
 
 namespace gazebo {
+
 // Default values
 static const std::string kDefaultParentFrameId = "world";
 static const std::string kDefaultChildFrameId = "odometry_sensor";
@@ -157,6 +158,7 @@ class GazeboOdometryPlugin : public ModelPlugin {
   boost::thread callback_queue_thread_;
   void QueueThread();
 };
-}
+
+} // namespace gazebo
 
 #endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_ODOMETRY_PLUGIN_H

@@ -35,6 +35,7 @@
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
+  
 // Constants
 static constexpr double kEarthRadius = 6378137.0;
 static constexpr double kMotorSpeedOffset = 600.0;
