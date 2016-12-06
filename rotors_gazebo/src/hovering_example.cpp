@@ -34,7 +34,7 @@ int main(int argc, char** argv){
   ros::Publisher trajectory_pub =
       nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>(
       mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
-  ROS_INFO("Started hovering example.");
+  ROS_INFO("Started hovering example (px4_merge branch).");
 
   std_srvs::Empty srv;
   bool unpaused = ros::service::call("/gazebo/unpause_physics", srv);
