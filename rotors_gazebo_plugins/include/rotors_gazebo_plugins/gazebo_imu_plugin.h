@@ -114,14 +114,22 @@ class GazeboImuPlugin : public ModelPlugin {
       Eigen::Vector3d* angular_velocity,
       const double dt);
 
-  /// @brief  This gets called by the world update start event.
+  /// @brief  	This gets called by the world update start event.
+  /// @details	Calculates IMU parameters and then publishes one IMU message.
   void OnUpdate(const common::UpdateInfo&);
 
  private:
   std::string namespace_;
   std::string imu_topic_;
-  ros::NodeHandle* node_handle_;
-  ros::Publisher imu_pub_;
+
+  /// Handle for the Gazebo node.
+  //ros::NodeHandle* node_handle_;
+  transport::NodePtr node_handle_;
+
+  // Old (ROS)
+  //ros::Publisher imu_pub_;
+  transport::PublicationPtr imu_pub_;
+
   std::string frame_id_;
   std::string link_name_;
 
@@ -139,6 +147,8 @@ class GazeboImuPlugin : public ModelPlugin {
 
   common::Time last_time_;
 
+  // IMU message. This is modified everytime OnUpdate() is called,
+  // and then published onto a topic
   sensor_msgs::Imu imu_message_;
 
   math::Vector3 gravity_W_;
