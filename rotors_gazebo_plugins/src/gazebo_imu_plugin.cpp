@@ -36,10 +36,12 @@ GazeboImuPlugin::GazeboImuPlugin()
 
 GazeboImuPlugin::~GazeboImuPlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
-  if (node_handle_) {
-    node_handle_->shutdown();
-    delete node_handle_;
-  }
+//  if (node_handle_) {
+//    //node_handle_->shutdown();
+//	  // Should we be doing this? ASL code called shutdown() then delete for ROS publisher,
+//	  // but PX4 code does not touch Gazebo publisher in destructor
+//    delete node_handle_;
+//  }
 }
 
 
@@ -59,7 +61,11 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_imu_plugin] Please specify a robotNamespace.\n";
-  node_handle_ = new ros::NodeHandle(namespace_);
+
+  // Get node handle
+  //node_handle_ = new ros::NodeHandle(namespace_);
+  node_handle_ = transport::NodePtr(new transport::Node());
+  node_handle_->Init(namespace_);
 
   if (_sdf->HasElement("linkName"))
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
@@ -109,14 +115,14 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboImuPlugin::OnUpdate, this, _1));
 
+  // Create publisher
+  //imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
+  imu_pub_ = node_handle_->Advertise<sensor_msgs::Imu>("~/" + model_->GetName() + imu_topic_, 1);
 
-  // Existing imy_pub_ code
-  imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
+  //==============================================//
+  //====== POPULATE STATIS PARTS OF IMU MSG ======//
+  //==============================================//
 
-  // imu_pub_ from PX4 code
-  //imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>("~/" + model_->GetName() + imu_topic_, 1);
-
-  // Fill imu message.
   imu_message_.header.frame_id = frame_id_;
   // We assume uncorrelated noise on the 3 channels -> only set diagonal
   // elements. Only the broadband noise component is considered, specified as a
@@ -274,7 +280,8 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   imu_message_.angular_velocity.y = angular_velocity_I[1];
   imu_message_.angular_velocity.z = angular_velocity_I[2];
 
-  imu_pub_.publish(imu_message_);
+  // Publish the IMU message
+  imu_pub_->Publish(imu_message_);
 
 }
 

@@ -1,0 +1,14 @@
+syntax = "proto2";
+package sensor_msgs.msgs;
+import "quaternion.proto";
+import "vector3d.proto";
+
+message Imu
+{
+  required gazebo.msgs.Quaternion orientation = 1;
+  repeated float   orientation_covariance = 2 [packed=true];
+  required gazebo.msgs.Vector3d angular_velocity = 3;
+  repeated float   angular_velocity_covariance = 4 [packed=true];
+  required gazebo.msgs.Vector3d linear_acceleration = 5;
+  repeated float   linear_acceleration_covariance = 6 [packed=true];
+}
