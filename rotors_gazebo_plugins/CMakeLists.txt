@@ -107,8 +107,6 @@ set (msgs
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${msgs})
 add_library(mav_msgs SHARED ${PROTO_SRCS})
 
-
-
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS} ${CATKIN_DEVEL_PREFIX}/include/${PACKAGE_NAME}
   LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
@@ -197,3 +195,5 @@ endif()
 # Copy over all converted protobuf files (*.pb.h and *.pb.c) from the src directory to
 # the devel directory. This is required so that you can include the protobuf header files from other C++ files.
 file(COPY ${CMAKE_CURRENT_BINARY_DIR}/ DESTINATION ${CATKIN_DEVEL_PREFIX}/include/${PACKAGE_NAME} FILES_MATCHING PATTERN "*.pb.*")
+
+#message(FATAL_ERROR "Reached EOF.")

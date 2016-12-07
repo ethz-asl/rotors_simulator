@@ -133,7 +133,7 @@ class GazeboImuPlugin : public ModelPlugin {
 
   // Old (ROS)
   //ros::Publisher imu_pub_;
-  transport::PublicationPtr imu_pub_;
+  transport::PublisherPtr imu_pub_;
 
   std::string frame_id_;
   std::string link_name_;
