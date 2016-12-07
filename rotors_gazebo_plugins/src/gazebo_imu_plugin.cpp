@@ -124,6 +124,7 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   //==============================================//
 
   imu_message_.header.frame_id = frame_id_;
+
   // We assume uncorrelated noise on the 3 channels -> only set diagonal
   // elements. Only the broadband noise component is considered, specified as a
   // continuous-time density (two-sided spectrum); not the true covariance of
