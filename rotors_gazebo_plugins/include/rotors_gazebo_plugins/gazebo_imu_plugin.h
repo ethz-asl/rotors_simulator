@@ -33,6 +33,9 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 
+#include "gazebo/msgs/msgs.hh"
+#include "./SensorImu.pb.h"
+
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
@@ -122,6 +125,8 @@ class GazeboImuPlugin : public ModelPlugin {
   std::string namespace_;
   std::string imu_topic_;
 
+
+
   /// Handle for the Gazebo node.
   //ros::NodeHandle* node_handle_;
   transport::NodePtr node_handle_;
@@ -149,7 +154,8 @@ class GazeboImuPlugin : public ModelPlugin {
 
   // IMU message. This is modified everytime OnUpdate() is called,
   // and then published onto a topic
-  sensor_msgs::Imu imu_message_;
+  //sensor_msgs::Imu imu_message_;
+  gazebo::msgs::IMU imu_message_;
 
   math::Vector3 gravity_W_;
   math::Vector3 velocity_prev_W_;
