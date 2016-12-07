@@ -105,7 +105,15 @@ set (msgs
 
 # Finally, generate the .cpp files from the .proto files
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${msgs})
+
+# Create a shared library of protobuf messages (.so extension on Linux platforms)
 add_library(mav_msgs SHARED ${PROTO_SRCS})
+target_link_libraries(mav_msgs ${PROTOBUF_LIBRARY})
+
+# This causes mav_msgs to be linked with every created library in this file from this
+# point forward.
+# NOTE: This is deprecated, should be using target_link_libraries instead
+link_libraries(mav_msgs)
 
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS} ${CATKIN_DEVEL_PREFIX}/include/${PACKAGE_NAME}
