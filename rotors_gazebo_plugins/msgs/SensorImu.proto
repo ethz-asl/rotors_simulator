@@ -5,10 +5,26 @@ import "vector3d.proto";
 
 message Imu
 {
+  // Header sub-message was added to support ASL rotors system.
+  // PX4 does not use this header.
+  message Header {
+  
+  	message Stamp {
+      required float sec = 1;
+      required float nsec = 2;
+    }
+  
+    required string frame_id = 1;
+    required Stamp stamp = 2;
+    
+  }
+
   required gazebo.msgs.Quaternion orientation = 1;
   repeated float   orientation_covariance = 2 [packed=true];
   required gazebo.msgs.Vector3d angular_velocity = 3;
   repeated float   angular_velocity_covariance = 4 [packed=true];
   required gazebo.msgs.Vector3d linear_acceleration = 5;
   repeated float   linear_acceleration_covariance = 6 [packed=true];
+  
+  optional Header header = 7;
 }

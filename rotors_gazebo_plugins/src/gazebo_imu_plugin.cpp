@@ -117,40 +117,63 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   // Create publisher
   //imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
-  imu_pub_ = node_handle_->Advertise<sensor_msgs::Imu>("~/" + model_->GetName() + imu_topic_, 1);
+  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>("~/" + model_->GetName() + imu_topic_, 1);
 
   //==============================================//
   //====== POPULATE STATIS PARTS OF IMU MSG ======//
   //==============================================//
 
-  imu_message_.header.frame_id = frame_id_;
+//  imu_message_.header.frame_id = frame_id_;
+  imu_message_.mutable_header()->set_frame_id(frame_id_);
 
   // We assume uncorrelated noise on the 3 channels -> only set diagonal
   // elements. Only the broadband noise component is considered, specified as a
   // continuous-time density (two-sided spectrum); not the true covariance of
   // the measurements.
   // Angular velocity measurement covariance.
-  imu_message_.angular_velocity_covariance[0] =
-      imu_parameters_.gyroscope_noise_density *
-      imu_parameters_.gyroscope_noise_density;
-  imu_message_.angular_velocity_covariance[4] =
-      imu_parameters_.gyroscope_noise_density *
-      imu_parameters_.gyroscope_noise_density;
-  imu_message_.angular_velocity_covariance[8] =
-      imu_parameters_.gyroscope_noise_density *
-      imu_parameters_.gyroscope_noise_density;
+//  imu_message_.angular_velocity_covariance[0] =
+//      imu_parameters_.gyroscope_noise_density *
+//      imu_parameters_.gyroscope_noise_density;
+  imu_message_.set_angular_velocity_covariance(0, imu_parameters_.gyroscope_noise_density *
+	      imu_parameters_.gyroscope_noise_density);
+
+//  imu_message_.angular_velocity_covariance[4] =
+//      imu_parameters_.gyroscope_noise_density *
+//      imu_parameters_.gyroscope_noise_density;
+  imu_message_.set_angular_velocity_covariance(4, imu_parameters_.gyroscope_noise_density *
+  	      imu_parameters_.gyroscope_noise_density);
+
+//  imu_message_.angular_velocity_covariance[8] =
+//      imu_parameters_.gyroscope_noise_density *
+//      imu_parameters_.gyroscope_noise_density;
+  imu_message_.set_angular_velocity_covariance(8, imu_parameters_.gyroscope_noise_density *
+  	      imu_parameters_.gyroscope_noise_density);
+
   // Linear acceleration measurement covariance.
-  imu_message_.linear_acceleration_covariance[0] =
+//  imu_message_.linear_acceleration_covariance[0] =
+//      imu_parameters_.accelerometer_noise_density *
+//      imu_parameters_.accelerometer_noise_density;
+  imu_message_.set_linear_acceleration_covariance(0,
       imu_parameters_.accelerometer_noise_density *
-      imu_parameters_.accelerometer_noise_density;
-  imu_message_.linear_acceleration_covariance[4] =
-      imu_parameters_.accelerometer_noise_density *
-      imu_parameters_.accelerometer_noise_density;
-  imu_message_.linear_acceleration_covariance[8] =
-      imu_parameters_.accelerometer_noise_density *
-      imu_parameters_.accelerometer_noise_density;
+      imu_parameters_.accelerometer_noise_density);
+
+//  imu_message_.linear_acceleration_covariance[4] =
+//      imu_parameters_.accelerometer_noise_density *
+//      imu_parameters_.accelerometer_noise_density;
+  imu_message_.set_linear_acceleration_covariance(4,
+        imu_parameters_.accelerometer_noise_density *
+        imu_parameters_.accelerometer_noise_density);
+
+//  imu_message_.linear_acceleration_covariance[8] =
+//      imu_parameters_.accelerometer_noise_density *
+//      imu_parameters_.accelerometer_noise_density;
+  imu_message_.set_linear_acceleration_covariance(8,
+        imu_parameters_.accelerometer_noise_density *
+        imu_parameters_.accelerometer_noise_density);
+
   // Orientation estimate covariance (no estimate provided).
-  imu_message_.orientation_covariance[0] = -1.0;
+//  imu_message_.orientation_covariance[0] = -1.0;
+  imu_message_.set_orientation_covariance(0, -1.0);
 
   gravity_W_ = world_->GetPhysicsEngine()->GetGravity();
   imu_parameters_.gravity_magnitude = gravity_W_.GetLength();
@@ -261,25 +284,49 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   addNoise(&linear_acceleration_I, &angular_velocity_I, dt);
 
   // Fill IMU message.
-  imu_message_.header.stamp.sec = current_time.sec;
-  imu_message_.header.stamp.nsec = current_time.nsec;
+//  imu_message_.header.stamp.sec = current_time.sec;
+  imu_message_.mutable_header()->mutable_stamp()->set_sec(current_time.sec);
+
+//  imu_message_.header.stamp.nsec = current_time.nsec;
+  imu_message_.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
 
   // TODO(burrimi): Add orientation estimator.
-  imu_message_.orientation.w = 1;
-  imu_message_.orientation.x = 0;
-  imu_message_.orientation.y = 0;
-  imu_message_.orientation.z = 0;
+//  imu_message_.orientation.w = 1;
+//  imu_message_.orientation.x = 0;
+//  imu_message_.orientation.y = 0;
+//  imu_message_.orientation.z = 0;
+
+  gazebo::msgs::Quaternion* orientation = new gazebo::msgs::Quaternion();
+  orientation->set_x(0);
+  orientation->set_y(0);
+  orientation->set_z(0);
+  orientation->set_w(1);
+  imu_message_.set_allocated_orientation(orientation);
+
 //  imu_message_.orientation.w = C_W_I.w;
 //  imu_message_.orientation.x = C_W_I.x;
 //  imu_message_.orientation.y = C_W_I.y;
 //  imu_message_.orientation.z = C_W_I.z;
 
-  imu_message_.linear_acceleration.x = linear_acceleration_I[0];
-  imu_message_.linear_acceleration.y = linear_acceleration_I[1];
-  imu_message_.linear_acceleration.z = linear_acceleration_I[2];
-  imu_message_.angular_velocity.x = angular_velocity_I[0];
-  imu_message_.angular_velocity.y = angular_velocity_I[1];
-  imu_message_.angular_velocity.z = angular_velocity_I[2];
+//  imu_message_.linear_acceleration.x = linear_acceleration_I[0];
+//  imu_message_.linear_acceleration.y = linear_acceleration_I[1];
+//  imu_message_.linear_acceleration.z = linear_acceleration_I[2];
+
+  gazebo::msgs::Vector3d* linear_acceleration = new gazebo::msgs::Vector3d();
+  linear_acceleration->set_x(linear_acceleration_I[0]);
+  linear_acceleration->set_y(linear_acceleration_I[1]);
+  linear_acceleration->set_z(linear_acceleration_I[2]);
+  imu_message_.set_allocated_linear_acceleration(linear_acceleration);
+
+//  imu_message_.angular_velocity.x = angular_velocity_I[0];
+//  imu_message_.angular_velocity.y = angular_velocity_I[1];
+//  imu_message_.angular_velocity.z = angular_velocity_I[2];
+
+  gazebo::msgs::Vector3d* angular_velocity = new gazebo::msgs::Vector3d();
+  angular_velocity->set_x(angular_velocity_I[0]);
+  angular_velocity->set_y(angular_velocity_I[1]);
+  angular_velocity->set_z(angular_velocity_I[2]);
+  imu_message_.set_allocated_angular_velocity(angular_velocity);
 
   // Publish the IMU message
   imu_pub_->Publish(imu_message_);
