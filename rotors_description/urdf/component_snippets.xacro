@@ -264,9 +264,9 @@
   
   <!-- ==================== MSG INTERFACE MACRO ====================== -->
   
-  <xacro:macro name="msg_interface_macro" params="namespace imu_sub_topic">
+  <xacro:macro name="msg_interface_plugin_macro" params="namespace imu_sub_topic">
     <gazebo>
-      <plugin name="msg_interface" filename="librotors_gazebo_msg_interface.so">
+      <plugin name="msg_interface_plugin" filename="librotors_gazebo_msg_interface_plugin.so">
         <robotNamespace>${namespace}</robotNamespace>
         <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
         <commandRateThrustSubTopic>command/rate</commandRateThrustSubTopic>
