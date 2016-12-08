@@ -36,6 +36,8 @@
 
 namespace gazebo {
 
+// typedef's to make life easier
+typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> ImuPtr;
 
 class GazeboMsgInterfacePlugin : public ModelPlugin {
  public:
@@ -53,17 +55,23 @@ class GazeboMsgInterfacePlugin : public ModelPlugin {
   /// @details	Calculates IMU parameters and then publishes one IMU message.
   void OnUpdate(const common::UpdateInfo&);
 
+
+
  private:
+
+  void ImuCallback(ImuPtr& imu_message);
+
   std::string namespace_;
   std::string imu_topic_;
 
 
   /// Handle for the Gazebo node.
-  //ros::NodeHandle* node_handle_;
   transport::NodePtr node_handle_;
 
-  // Old (ROS)
-  //ros::Publisher imu_pub_;
+  /// @brief  Used to listen to IMU messages within the Gazebo framework.
+  transport::SubscriberPtr gz_imu_sub_;
+
+
   transport::PublisherPtr imu_pub_;
 
   std::string link_name_;

@@ -31,16 +31,14 @@ GazeboMsgInterfacePlugin::GazeboMsgInterfacePlugin()
 
 GazeboMsgInterfacePlugin::~GazeboMsgInterfacePlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
-//  if (node_handle_) {
-//    //node_handle_->shutdown();
-//	  // Should we be doing this? ASL code called shutdown() then delete for ROS publisher,
-//	  // but PX4 code does not touch Gazebo publisher in destructor
-//    delete node_handle_;
-//  }
 }
 
 
 void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+
+//  gzerr << "GazeboMsgInterfacePlugin::Load() called.\n";
+  gzthrow("test");
+
   // Store the pointer to the model
   model_ = _model;
   world_ = model_->GetWorld();
@@ -58,7 +56,6 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
     gzerr << "[gazebo_imu_plugin] Please specify a robotNamespace.\n";
 
   // Get node handle
-  //node_handle_ = new ros::NodeHandle(namespace_);
   node_handle_ = transport::NodePtr(new transport::Node());
   node_handle_->Init(namespace_);
 
@@ -83,9 +80,26 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboMsgInterfacePlugin::OnUpdate, this, _1));
 
+  //==============================================//
+  //============== BUILD TOPIC NAMES =============//
+  //==============================================//
+
+
+
+  //==============================================//
+  //============= GAZEBO SUBSCRIBERS =============//
+  //==============================================//
+
+  gz_imu_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + imu_topic_, &GazeboMsgInterfacePlugin::ImuCallback, this);
+
+
   // Create publisher
   //imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
-  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>("~/" + model_->GetName() + imu_topic_, 1);
+//  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(, 1);
+}
+
+void GazeboMsgInterfacePlugin::ImuCallback(ImuPtr& imu_message) {
+  //gzerr << "Received IMU message.\n";
 }
 
 
