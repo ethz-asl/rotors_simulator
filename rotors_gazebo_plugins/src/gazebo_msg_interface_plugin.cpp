@@ -37,7 +37,7 @@ GazeboMsgInterfacePlugin::~GazeboMsgInterfacePlugin() {
 void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
 //  gzerr << "GazeboMsgInterfacePlugin::Load() called.\n";
-  gzthrow("test");
+  std::cout  << "GazeboMsgInterfacePlugin::Load() called."<< std::endl;;
 
   // Store the pointer to the model
   model_ = _model;
@@ -99,7 +99,7 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 }
 
 void GazeboMsgInterfacePlugin::ImuCallback(ImuPtr& imu_message) {
-  //gzerr << "Received IMU message.\n";
+  std::cout << "Received IMU message.\n";
 }
 
 
@@ -115,7 +115,6 @@ void GazeboMsgInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
 //  imu_pub_->Publish(imu_message_);
 
 }
-
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMsgInterfacePlugin);
 

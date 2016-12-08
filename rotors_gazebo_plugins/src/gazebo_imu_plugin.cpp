@@ -34,10 +34,15 @@ GazeboImuPlugin::GazeboImuPlugin()
       node_handle_(0),
       velocity_prev_W_(0, 0, 0) {
 
-  ROS_DEBUG("TESTING ROS_DEBUG.\n");
-  std::cout << "TESTING std::cout.\n";
-  std::cerr << "TESTING std::cerr.\n";
-  gzerr << "TESTING gzerr./n";
+  if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
+     ros::console::notifyLoggerLevelsChanged();
+  }
+
+//  ROS_DEBUG("TESTING ROS_DEBUG.\n");
+//  std::cout << "TESTING std::cout.\n";
+//  std::cerr << "TESTING std::cerr.\n";
+  gzmsg << "TESTING gzmsg./n" << std::endl;
+//  gzerr << "TESTING gzerr./n";
 
 }
 
@@ -55,8 +60,7 @@ GazeboImuPlugin::~GazeboImuPlugin() {
 
 void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
-
-
+  std::cout  << "GazeboImuPlugin::Load() called." << std::endl;
 
   // Store the pointer to the model
   model_ = _model;
@@ -343,7 +347,7 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Publish the IMU message
   imu_pub_->Publish(imu_message_);
 
-  gzerr << "Published IMU message.\n";
+//  std::cout << "Published IMU message.\n";
 
 }
 
