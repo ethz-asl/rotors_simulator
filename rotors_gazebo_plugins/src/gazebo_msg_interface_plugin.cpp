@@ -37,7 +37,7 @@ GazeboMsgInterfacePlugin::~GazeboMsgInterfacePlugin() {
 void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
 //  gzerr << "GazeboMsgInterfacePlugin::Load() called.\n";
-  std::cout  << "GazeboMsgInterfacePlugin::Load() called."<< std::endl;;
+  gzmsg << "GazeboMsgInterfacePlugin::Load() called."<< std::endl;;
 
   // Store the pointer to the model
   model_ = _model;
@@ -59,14 +59,14 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   node_handle_ = transport::NodePtr(new transport::Node());
   node_handle_->Init(namespace_);
 
-  if (_sdf->HasElement("linkName"))
-    link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
-  else
-    gzerr << "[gazebo_imu_plugin] Please specify a linkName.\n";
-  // Get the pointer to the link
-  link_ = model_->GetLink(link_name_);
-  if (link_ == NULL)
-    gzthrow("[gazebo_imu_plugin] Couldn't find specified link \"" << link_name_ << "\".");
+//  if (_sdf->HasElement("linkName"))
+//    link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
+//  else
+//    gzerr << "[gazebo_imu_plugin] Please specify a linkName.\n";
+//  // Get the pointer to the link
+//  link_ = model_->GetLink(link_name_);
+//  if (link_ == NULL)
+//    gzthrow("[gazebo_imu_plugin] Couldn't find specified link \"" << link_name_ << "\".");
 
   
   getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_,
@@ -95,11 +95,11 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
   // Create publisher
   //imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
-//  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(, 1);
+  //  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(, 1);
 }
 
 void GazeboMsgInterfacePlugin::ImuCallback(ImuPtr& imu_message) {
-  std::cout << "Received IMU message.\n";
+  //std::cout << "Received IMU message.\n";
 }
 
 
