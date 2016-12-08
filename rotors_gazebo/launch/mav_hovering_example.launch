@@ -13,6 +13,11 @@
     <!-- <arg name="debug" value="true"/> -->
     <arg name="paused" value="$(arg paused)"/>
     <!-- <arg name="gui" value="false"/> -->
+    
+    <!-- The following line causes gzmsg and gzerr messages to be printed to the console
+    (even when Gazebo is started through roslaunch) -->
+    <arg name="verbose" value="true"/>
+    
   </include>
 
   <group ns="$(arg mav_name)">
