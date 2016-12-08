@@ -32,7 +32,14 @@ namespace gazebo {
 GazeboImuPlugin::GazeboImuPlugin()
     : ModelPlugin(),
       node_handle_(0),
-      velocity_prev_W_(0, 0, 0) {}
+      velocity_prev_W_(0, 0, 0) {
+
+  ROS_DEBUG("TESTING ROS_DEBUG.\n");
+  std::cout << "TESTING std::cout.\n";
+  std::cerr << "TESTING std::cerr.\n";
+  gzerr << "TESTING gzerr./n";
+
+}
 
 GazeboImuPlugin::~GazeboImuPlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
@@ -44,8 +51,13 @@ GazeboImuPlugin::~GazeboImuPlugin() {
 //  }
 }
 
+#include <ros/console.h>
 
 void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+
+
+
+
   // Store the pointer to the model
   model_ = _model;
   world_ = model_->GetWorld();
@@ -134,46 +146,46 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 //  imu_message_.angular_velocity_covariance[0] =
 //      imu_parameters_.gyroscope_noise_density *
 //      imu_parameters_.gyroscope_noise_density;
-  imu_message_.set_angular_velocity_covariance(0, imu_parameters_.gyroscope_noise_density *
+  imu_message_.add_angular_velocity_covariance(imu_parameters_.gyroscope_noise_density *
 	      imu_parameters_.gyroscope_noise_density);
 
 //  imu_message_.angular_velocity_covariance[4] =
 //      imu_parameters_.gyroscope_noise_density *
 //      imu_parameters_.gyroscope_noise_density;
-  imu_message_.set_angular_velocity_covariance(4, imu_parameters_.gyroscope_noise_density *
+  imu_message_.add_angular_velocity_covariance(imu_parameters_.gyroscope_noise_density *
   	      imu_parameters_.gyroscope_noise_density);
 
 //  imu_message_.angular_velocity_covariance[8] =
 //      imu_parameters_.gyroscope_noise_density *
 //      imu_parameters_.gyroscope_noise_density;
-  imu_message_.set_angular_velocity_covariance(8, imu_parameters_.gyroscope_noise_density *
+  imu_message_.add_angular_velocity_covariance(imu_parameters_.gyroscope_noise_density *
   	      imu_parameters_.gyroscope_noise_density);
 
   // Linear acceleration measurement covariance.
 //  imu_message_.linear_acceleration_covariance[0] =
 //      imu_parameters_.accelerometer_noise_density *
 //      imu_parameters_.accelerometer_noise_density;
-  imu_message_.set_linear_acceleration_covariance(0,
+  imu_message_.add_linear_acceleration_covariance(
       imu_parameters_.accelerometer_noise_density *
       imu_parameters_.accelerometer_noise_density);
 
 //  imu_message_.linear_acceleration_covariance[4] =
 //      imu_parameters_.accelerometer_noise_density *
 //      imu_parameters_.accelerometer_noise_density;
-  imu_message_.set_linear_acceleration_covariance(4,
+  imu_message_.add_linear_acceleration_covariance(
         imu_parameters_.accelerometer_noise_density *
         imu_parameters_.accelerometer_noise_density);
 
 //  imu_message_.linear_acceleration_covariance[8] =
 //      imu_parameters_.accelerometer_noise_density *
 //      imu_parameters_.accelerometer_noise_density;
-  imu_message_.set_linear_acceleration_covariance(8,
+  imu_message_.add_linear_acceleration_covariance(
         imu_parameters_.accelerometer_noise_density *
         imu_parameters_.accelerometer_noise_density);
 
   // Orientation estimate covariance (no estimate provided).
 //  imu_message_.orientation_covariance[0] = -1.0;
-  imu_message_.set_orientation_covariance(0, -1.0);
+  imu_message_.add_orientation_covariance(-1.0);
 
   gravity_W_ = world_->GetPhysicsEngine()->GetGravity();
   imu_parameters_.gravity_magnitude = gravity_W_.GetLength();
@@ -330,6 +342,8 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // Publish the IMU message
   imu_pub_->Publish(imu_message_);
+
+  gzerr << "Published IMU message.\n";
 
 }
 

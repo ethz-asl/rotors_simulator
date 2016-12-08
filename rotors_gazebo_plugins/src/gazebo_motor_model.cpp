@@ -38,6 +38,10 @@ void GazeboMotorModel::Publish() {
 }
 
 void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+
+
+  //gzthrow("TEST");
+
   model_ = _model;
 
   namespace_.clear();
