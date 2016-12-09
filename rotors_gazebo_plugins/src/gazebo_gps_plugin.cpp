@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Pavel Vechersky, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +21,15 @@ namespace gazebo {
 
 GazeboGpsPlugin::GazeboGpsPlugin()
     : SensorPlugin(),
-      node_handle_(0),
+      //node_handle_(0),
       random_generator_(random_device_()) {}
 
 GazeboGpsPlugin::~GazeboGpsPlugin() {
   this->parent_sensor_->DisconnectUpdated(this->updateConnection_);
-  if (node_handle_) {
-    node_handle_->shutdown();
-    delete node_handle_;
-  }
+//  if (node_handle_) {
+//    node_handle_->shutdown();
+//    delete node_handle_;
+//  }
 }
 
 void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
@@ -49,7 +50,10 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
     node_namespace = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_gps_plugin] Please specify a robotNamespace.\n";
-  node_handle_ = new ros::NodeHandle(node_namespace);
+
+  //node_handle_ = new ros::NodeHandle(node_namespace);
+  gz_node_handle_ = gazebo::transport::NodePtr(new transport::Node());
+  gz_node_handle_->Init(node_namespace);
 
   if (_sdf->HasElement("linkName"))
     link_name = _sdf->GetElement("linkName")->Get<std::string>();
@@ -87,8 +91,11 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   parent_sensor_->SetActive(true);
 
   // Initialize the ROS publisher for sending gps location and ground speed.
-  gps_pub_ = node_handle_->advertise<sensor_msgs::NavSatFix>(gps_topic_, 1);
-  ground_speed_pub_ = node_handle_->advertise<geometry_msgs::TwistStamped>(ground_speed_topic_, 1);
+  //gps_pub_ = node_handle_->advertise<sensor_msgs::NavSatFix>(gps_topic_, 1);
+  gz_gps_pub_ = gz_node_handle_->Advertise<sensor_msgs::NavSatFix>(gps_topic_, 1);
+
+  //ground_speed_pub_ = node_handle_->advertise<geometry_msgs::TwistStamped>(ground_speed_topic_, 1);
+  gz_ground_speed_pub_ = gz_node_handle_->Advertise<geometry_msgs::TwistStamped>(ground_speed_topic_, 1);
 
   // Initialize the normal distributions for ground speed.
   ground_speed_n_[0] = NormalDistribution(0, hor_vel_std_dev);
@@ -145,10 +152,13 @@ void GazeboGpsPlugin::OnUpdate() {
   ground_speed_message_.header.stamp.nsec = current_time.nsec;
 
   // Publish the GPS message.
-  gps_pub_.publish(gps_message_);
+  //gps_pub_.publish(gps_message_);
+  gz_gps_pub_->Publish(gps_message_);
 
   // Publish the ground speed message.
-  ground_speed_pub_.publish(ground_speed_message_);
+  //ground_speed_pub_.publish(ground_speed_message_);
+  gz_ground_speed_pub_->Publish(ground_speed_message_);
+
 }
 
 GZ_REGISTER_SENSOR_PLUGIN(GazeboGpsPlugin);
