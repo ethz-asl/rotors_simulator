@@ -103,13 +103,42 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   ground_speed_n_[2] = NormalDistribution(0, ver_vel_std_dev);
 
   // Fill the GPS message.
-  gps_message_.header.frame_id = frame_id;
-  gps_message_.status.service = sensor_msgs::NavSatStatus::SERVICE_GPS;
-  gps_message_.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
-  gps_message_.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_KNOWN;
-  gps_message_.position_covariance[0] = hor_pos_std_dev * hor_pos_std_dev;
-  gps_message_.position_covariance[4] = hor_pos_std_dev * hor_pos_std_dev;
-  gps_message_.position_covariance[8] = ver_pos_std_dev * ver_pos_std_dev;
+//  gps_message_.header.frame_id = frame_id;
+//  gps_message_.status.service = sensor_msgs::NavSatStatus::SERVICE_GPS;
+//  gps_message_.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
+//  gps_message_.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_KNOWN;
+//  gps_message_.position_covariance[0] = hor_pos_std_dev * hor_pos_std_dev;
+//  gps_message_.position_covariance[4] = hor_pos_std_dev * hor_pos_std_dev;
+//  gps_message_.position_covariance[8] = ver_pos_std_dev * ver_pos_std_dev;
+  //gz_gps_message_->header().set_frame_id(fra);
+  gz_gps_message_.mutable_header()->set_frame_id("test");
+  gz_gps_message_.mutable_status()->set_service(sensor_msgs::NavSatStatus::SERVICE_GPS);
+  gz_gps_message_.mutable_status()->set_status(sensor_msgs::NavSatStatus::STATUS_FIX);
+  gz_gps_message_.set_position_covariance_type(sensor_msgs::NavSatFix::COVARIANCE_TYPE_KNOWN);
+
+  for(int i = 0; i < 9; i++){
+    switch (i){
+      case 0:
+        gz_gps_message_.add_position_covariance(hor_pos_std_dev * hor_pos_std_dev);
+        break;
+      case 1:
+      case 2:
+      case 3:
+        gz_gps_message_.add_position_covariance(0);
+        break;
+      case 4:
+        gz_gps_message_.add_position_covariance(hor_pos_std_dev * hor_pos_std_dev);
+        break;
+      case 5:
+      case 6:
+      case 7:
+        gz_gps_message_.add_position_covariance(0);
+        break;
+      case 8:
+        gz_gps_message_.add_position_covariance(ver_pos_std_dev * ver_pos_std_dev);
+        break;
+    }
+  }
 
   // Fill the ground speed message.
   ground_speed_message_.header.frame_id = frame_id;
@@ -131,18 +160,31 @@ void GazeboGpsPlugin::OnUpdate() {
 #if GAZEBO_MAJOR_VERSION > 6
   current_time = parent_sensor_->LastMeasurementTime();
 
-  gps_message_.latitude = parent_sensor_->Latitude().Degree();
-  gps_message_.longitude = parent_sensor_->Longitude().Degree();
-  gps_message_.altitude = parent_sensor_->Altitude();
+  //gps_message_.latitude = parent_sensor_->Latitude().Degree();
+  //gps_message_.longitude = parent_sensor_->Longitude().Degree();
+  //gps_message_.altitude = parent_sensor_->Altitude();
+
+  gz_gps_message_.set_latitude(parent_sensor_->Latitude().Degree());
+  gz_gps_message_.set_longitude(parent_sensor_->Longitude().Degree());
+  gz_gps_message_.set_altitude(parent_sensor_->Altitude());
+
 #else
   current_time = parent_sensor_->GetLastMeasurementTime();
 
-  gps_message_.latitude = parent_sensor_->GetLatitude().Degree();
-  gps_message_.longitude = parent_sensor_->GetLongitude().Degree();
-  gps_message_.altitude = parent_sensor_->GetAltitude();
+  //gps_message_.latitude = parent_sensor_->GetLatitude().Degree();
+  //gps_message_.longitude = parent_sensor_->GetLongitude().Degree();
+  //gps_message_.altitude = parent_sensor_->GetAltitude();
+
+  gz_gps_message_.set_latitude(parent_sensor_->GetLatitude().Degree());
+  gz_gps_message_.set_longitude(parent_sensor_->GetLongitude().Degree());
+  gz_gps_message_.set_altitude(parent_sensor_->GetAltitude());
+
 #endif
-  gps_message_.header.stamp.sec = current_time.sec;
-  gps_message_.header.stamp.nsec = current_time.nsec;
+
+  //gps_message_.header.stamp.sec = current_time.sec;
+  //gps_message_.header.stamp.nsec = current_time.nsec;
+  gz_gps_message_.mutable_header()->mutable_stamp()->set_sec(current_time.sec);
+  gz_gps_message_.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
 
   // Fill the ground speed message.
   ground_speed_message_.twist.linear.x = W_ground_speed_W_L.x;
@@ -153,7 +195,7 @@ void GazeboGpsPlugin::OnUpdate() {
 
   // Publish the GPS message.
   //gps_pub_.publish(gps_message_);
-  gz_gps_pub_->Publish(gps_message_);
+  gz_gps_pub_->Publish(gz_gps_message_);
 
   // Publish the ground speed message.
   //ground_speed_pub_.publish(ground_speed_message_);

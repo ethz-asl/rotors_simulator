@@ -3,9 +3,9 @@ package sensor_msgs.msgs;
 import "quaternion.proto";
 import "vector3d.proto";
 
-// GPS message type which is emitted by the
+// NavSatFix (GPS) message type which is emitted by the
 // GPS Gazebo plugin
-message Gps
+message NavSatFix
 {
 
   message Header {
