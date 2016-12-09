@@ -95,6 +95,7 @@ endforeach()
 
 set (msgs
   #msgs/Float.proto
+  msgs/Gps.proto
   msgs/SensorImu.proto
   #msgs/opticalFlow.proto
   #msgs/lidar.proto
