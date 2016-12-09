@@ -27,16 +27,24 @@
 #include <mav_msgs/default_topics.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
-#include <sensor_msgs/Imu.h>
+
 
 #include "gazebo/msgs/msgs.hh"
+
+// GAZEBO MSG TYPES
+#include "NavSatFix.pb.h"
 #include "SensorImu.pb.h"
+
+// ROS MSG TYPES
+#include <sensor_msgs/Imu.h>
+#include <sensor_msgs/NavSatFix.h>
 
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
 
 // typedef's to make life easier
+typedef const boost::shared_ptr<const sensor_msgs::msgs::NavSatFix> GzNavSatFixPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> GzImuPtr;
 
 //! @brief    Message interface plugin for Gazebo.
@@ -61,8 +69,6 @@ class GazeboMsgInterfacePlugin : public ModelPlugin {
 
  private:
 
-  /// @brief    Called when a IMU message is published within the Gazebo framework.
-  void ImuCallback(GzImuPtr& gz_imu_msg);
 
   std::string namespace_;
   std::string imu_topic_;
@@ -89,15 +95,23 @@ class GazeboMsgInterfacePlugin : public ModelPlugin {
 
   common::Time last_time_;
 
-  /// @brief  Used to listen to IMU messages within the Gazebo framework.
+  // ============================================ //
+  // ==================== GPS =================== //
+  // ============================================ //
+
+  transport::SubscriberPtr gz_nav_sat_fix_sub_;
+  ros::Publisher ros_nav_sat_fix_pub_;
+  sensor_msgs::NavSatFix ros_nav_sat_fix_msg_;
+  void GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg);
+
+  // ============================================ //
+  // ==================== IMU =================== //
+  // ============================================ //
+
   transport::SubscriberPtr gz_imu_sub_;
-
-  /// @brief  Used to publish IMU messages onto the ROS framework.
   ros::Publisher ros_imu_pub_;
-
-  /// @brief  Container for constructing a IMU message to then publish on
-  ///         the ROS framework.
   sensor_msgs::Imu ros_imu_msg_;
+  void GzImuCallback(GzImuPtr& gz_imu_msg);
 
 };
 
