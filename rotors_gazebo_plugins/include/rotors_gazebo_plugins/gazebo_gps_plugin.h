@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Pavel Vechersky, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,9 +52,15 @@ class GazeboGpsPlugin : public SensorPlugin {
 
  private:
   // ROS interface
-  ros::NodeHandle* node_handle_;
-  ros::Publisher gps_pub_;
-  ros::Publisher ground_speed_pub_;
+  //ros::NodeHandle* node_handle_;
+  gazebo::transport::NodePtr gz_node_handle_;
+
+  //ros::Publisher gps_pub_;
+  gazebo::transport::PublisherPtr gz_gps_pub_;
+
+  //ros::Publisher ground_speed_pub_;
+  gazebo::transport::PublisherPtr gz_ground_speed_pub_;
+
   std::string gps_topic_;
   std::string ground_speed_topic_;
 
