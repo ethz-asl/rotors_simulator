@@ -92,15 +92,20 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
 
   // Initialize the ROS publisher for sending gps location and ground speed.
   //gps_pub_ = node_handle_->advertise<sensor_msgs::NavSatFix>(gps_topic_, 1);
-  gz_gps_pub_ = gz_node_handle_->Advertise<sensor_msgs::NavSatFix>(gps_topic_, 1);
+  gz_gps_pub_ = gz_node_handle_->Advertise<sensor_msgs::msgs::NavSatFix>(gps_topic_, 1);
 
   //ground_speed_pub_ = node_handle_->advertise<geometry_msgs::TwistStamped>(ground_speed_topic_, 1);
-  gz_ground_speed_pub_ = gz_node_handle_->Advertise<geometry_msgs::TwistStamped>(ground_speed_topic_, 1);
+  gz_ground_speed_pub_ = gz_node_handle_->Advertise<sensor_msgs::msgs::TwistStamped>(ground_speed_topic_, 1);
 
   // Initialize the normal distributions for ground speed.
   ground_speed_n_[0] = NormalDistribution(0, hor_vel_std_dev);
   ground_speed_n_[1] = NormalDistribution(0, hor_vel_std_dev);
   ground_speed_n_[2] = NormalDistribution(0, ver_vel_std_dev);
+
+
+  // ============================================ //
+  // ======= POPULATE STATIC PARTS OF MSGS ====== //
+  // ============================================ //
 
   // Fill the GPS message.
 //  gps_message_.header.frame_id = frame_id;
@@ -141,7 +146,8 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   }
 
   // Fill the ground speed message.
-  ground_speed_message_.header.frame_id = frame_id;
+  //ground_speed_message_.header.frame_id = frame_id;
+  gz_ground_speed_message_.mutable_header()->set_frame_id(frame_id);
 }
 
 void GazeboGpsPlugin::OnUpdate() {
@@ -187,11 +193,17 @@ void GazeboGpsPlugin::OnUpdate() {
   gz_gps_message_.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
 
   // Fill the ground speed message.
-  ground_speed_message_.twist.linear.x = W_ground_speed_W_L.x;
-  ground_speed_message_.twist.linear.y = W_ground_speed_W_L.y;
-  ground_speed_message_.twist.linear.z = W_ground_speed_W_L.z;
-  ground_speed_message_.header.stamp.sec = current_time.sec;
-  ground_speed_message_.header.stamp.nsec = current_time.nsec;
+//  ground_speed_message_.twist.linear.x = W_ground_speed_W_L.x;
+//  ground_speed_message_.twist.linear.y = W_ground_speed_W_L.y;
+//  ground_speed_message_.twist.linear.z = W_ground_speed_W_L.z;
+//  ground_speed_message_.header.stamp.sec = current_time.sec;
+//  ground_speed_message_.header.stamp.nsec = current_time.nsec;
+
+  gz_ground_speed_message_.mutable_twist()->mutable_linear()->set_x(W_ground_speed_W_L.x);
+  gz_ground_speed_message_.mutable_twist()->mutable_linear()->set_y(W_ground_speed_W_L.y);
+  gz_ground_speed_message_.mutable_twist()->mutable_linear()->set_z(W_ground_speed_W_L.z);
+  gz_ground_speed_message_.mutable_header()->mutable_stamp()->set_sec(current_time.sec);
+  gz_ground_speed_message_.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
 
   // Publish the GPS message.
   //gps_pub_.publish(gps_message_);
@@ -199,7 +211,7 @@ void GazeboGpsPlugin::OnUpdate() {
 
   // Publish the ground speed message.
   //ground_speed_pub_.publish(ground_speed_message_);
-  gz_ground_speed_pub_->Publish(ground_speed_message_);
+  gz_ground_speed_pub_->Publish(gz_ground_speed_message_);
 
 }
 
