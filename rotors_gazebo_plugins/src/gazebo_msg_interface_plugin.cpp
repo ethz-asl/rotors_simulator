@@ -109,20 +109,36 @@ void GazeboMsgInterfacePlugin::ImuCallback(GzImuPtr& gz_imu_msg) {
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the IMU message onto ROS
 
-  ros_imu_msg_.header.stamp.sec = gz_imu_msg->header().stamp().sec();
-  ros_imu_msg_.header.stamp.nsec = gz_imu_msg->header().stamp().nsec();
   ros_imu_msg_.orientation.x = gz_imu_msg->orientation().x();
   ros_imu_msg_.orientation.y = gz_imu_msg->orientation().y();
   ros_imu_msg_.orientation.z = gz_imu_msg->orientation().z();
   ros_imu_msg_.orientation.w = gz_imu_msg->orientation().w();
 
-  ros_imu_msg_.linear_acceleration.x = gz_imu_msg->linear_acceleration().x();
-  ros_imu_msg_.linear_acceleration.y = gz_imu_msg->linear_acceleration().y();
-  ros_imu_msg_.linear_acceleration.z = gz_imu_msg->linear_acceleration().z();
+  // Orientation covariance should have 9 elements, and both the Gazebo and ROS
+  // arrays should be the same size!
+  for(int i = 0; i < gz_imu_msg->orientation_covariance_size(); i ++) {
+    ros_imu_msg_.orientation_covariance[i] = gz_imu_msg->orientation_covariance(i);
+  }
 
   ros_imu_msg_.angular_velocity.x = gz_imu_msg->angular_velocity().x();
   ros_imu_msg_.angular_velocity.y = gz_imu_msg->angular_velocity().y();
   ros_imu_msg_.angular_velocity.z = gz_imu_msg->angular_velocity().z();
+
+  for(int i = 0; i < gz_imu_msg->angular_velocity_covariance_size(); i ++) {
+    ros_imu_msg_.angular_velocity_covariance[i] = gz_imu_msg->angular_velocity_covariance(i);
+  }
+
+  ros_imu_msg_.linear_acceleration.x = gz_imu_msg->linear_acceleration().x();
+  ros_imu_msg_.linear_acceleration.y = gz_imu_msg->linear_acceleration().y();
+  ros_imu_msg_.linear_acceleration.z = gz_imu_msg->linear_acceleration().z();
+
+  for(int i = 0; i < gz_imu_msg->linear_acceleration_covariance_size(); i ++) {
+    ros_imu_msg_.linear_acceleration_covariance[i] = gz_imu_msg->linear_acceleration_covariance(i);
+  }
+
+  ros_imu_msg_.header.stamp.sec = gz_imu_msg->header().stamp().sec();
+  ros_imu_msg_.header.stamp.nsec = gz_imu_msg->header().stamp().nsec();
+  ros_imu_msg_.header.frame_id = gz_imu_msg->header().frame_id();
 
   // Publish onto ROS framework
   ros_imu_pub_.publish(ros_imu_msg_);
