@@ -97,6 +97,7 @@ set (msgs
   #msgs/Float.proto
   msgs/NavSatFix.proto
   msgs/SensorImu.proto
+  msgs/TwistStamped.proto
   #msgs/opticalFlow.proto
   #msgs/lidar.proto
   #msgs/CommandMotorSpeed.proto
