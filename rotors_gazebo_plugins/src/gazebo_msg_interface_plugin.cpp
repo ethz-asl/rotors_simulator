@@ -83,27 +83,34 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboMsgInterfacePlugin::OnUpdate, this, _1));
 
-  //==============================================//
-  //============== BUILD TOPIC NAMES =============//
-  //==============================================//
+  // ============================================ //
+  // =============== GPS MSG SETUP ============== //
+  // ============================================ //
 
+  //std::string gz_imu_topic_name = "~/" + model_->GetName() + "/" + imu_topic_;
+  //gz_imu_sub_ = gz_node_handle_->Subscribe(gz_imu_topic_name, &GazeboMsgInterfacePlugin::GzNavSatFixCallback, this);
+  //gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_imu_topic_name << "\"." << std::endl;
 
+  //ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
+  //gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << imu_topic_ << "\"." << std::endl;
 
-  //==============================================//
-  //============= GAZEBO SUBSCRIBERS =============//
-  //==============================================//
+  // ============================================ //
+  // =============== IMU MSG SETUP ============== //
+  // ============================================ //
 
-  gz_imu_sub_ = gz_node_handle_->Subscribe("~/" + model_->GetName() + imu_topic_, &GazeboMsgInterfacePlugin::ImuCallback, this);
+  gz_imu_sub_ = gz_node_handle_->Subscribe(imu_topic_, &GazeboMsgInterfacePlugin::GzImuCallback, this);
+  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << imu_topic_ << "\"." << std::endl;
 
   ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
+  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << imu_topic_ << "\"." << std::endl;
 
-
-  // Create publisher
-  //imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
-  //  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(, 1);
 }
 
-void GazeboMsgInterfacePlugin::ImuCallback(GzImuPtr& gz_imu_msg) {
+void GazeboMsgInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg) {
+  gzmsg << "GazeboMsgInterfacePlugin::GzNavSatFixCallback() called." << std::endl;
+}
+
+void GazeboMsgInterfacePlugin::GzImuCallback(GzImuPtr& gz_imu_msg) {
   //std::cout << "Received IMU message.\n";
 
   // We need to convert from a Gazebo message to a ROS message,

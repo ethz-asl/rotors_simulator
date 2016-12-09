@@ -79,9 +79,10 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     gzerr << "[gazebo_imu_plugin] Please specify a robotNamespace.\n";
 
   // Get node handle
-  //node_handle_ = new ros::NodeHandle(namespace_);
   node_handle_ = transport::NodePtr(new transport::Node());
+
   node_handle_->Init(namespace_);
+  gzmsg << "Gazebo node created at \"" << namespace_ << "\"." << std::endl;
 
   if (_sdf->HasElement("linkName"))
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
@@ -132,8 +133,10 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
           boost::bind(&GazeboImuPlugin::OnUpdate, this, _1));
 
   // Create publisher
-  //imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
-  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>("~/" + model_->GetName() + imu_topic_, 1);
+  //std::string imu_topic_name = "~/" + model_->GetName() + "/" + imu_topic_;
+  std::string imu_topic_name = imu_topic_;
+  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(imu_topic_name, 1);
+  gzmsg << "GazeboImuPlugin publishing on \"" << imu_topic_name << "\"." << std::endl;
 
   //==============================================//
   //====== POPULATE STATIS PARTS OF IMU MSG ======//
@@ -146,50 +149,6 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // elements. Only the broadband noise component is considered, specified as a
   // continuous-time density (two-sided spectrum); not the true covariance of
   // the measurements.
-  // Angular velocity measurement covariance.
-////  imu_message_.angular_velocity_covariance[0] =
-////      imu_parameters_.gyroscope_noise_density *
-////      imu_parameters_.gyroscope_noise_density;
-//  imu_message_.add_angular_velocity_covariance(imu_parameters_.gyroscope_noise_density *
-//	      imu_parameters_.gyroscope_noise_density);
-//
-////  imu_message_.angular_velocity_covariance[4] =
-////      imu_parameters_.gyroscope_noise_density *
-////      imu_parameters_.gyroscope_noise_density;
-//  imu_message_.add_angular_velocity_covariance(imu_parameters_.gyroscope_noise_density *
-//  	      imu_parameters_.gyroscope_noise_density);
-//
-////  imu_message_.angular_velocity_covariance[8] =
-////      imu_parameters_.gyroscope_noise_density *
-////      imu_parameters_.gyroscope_noise_density;
-//  imu_message_.add_angular_velocity_covariance(imu_parameters_.gyroscope_noise_density *
-//  	      imu_parameters_.gyroscope_noise_density);
-//
-//  // Linear acceleration measurement covariance.
-////  imu_message_.linear_acceleration_covariance[0] =
-////      imu_parameters_.accelerometer_noise_density *
-////      imu_parameters_.accelerometer_noise_density;
-//  imu_message_.add_linear_acceleration_covariance(
-//      imu_parameters_.accelerometer_noise_density *
-//      imu_parameters_.accelerometer_noise_density);
-//
-////  imu_message_.linear_acceleration_covariance[4] =
-////      imu_parameters_.accelerometer_noise_density *
-////      imu_parameters_.accelerometer_noise_density;
-//  imu_message_.add_linear_acceleration_covariance(
-//        imu_parameters_.accelerometer_noise_density *
-//        imu_parameters_.accelerometer_noise_density);
-//
-////  imu_message_.linear_acceleration_covariance[8] =
-////      imu_parameters_.accelerometer_noise_density *
-////      imu_parameters_.accelerometer_noise_density;
-//  imu_message_.add_linear_acceleration_covariance(
-//        imu_parameters_.accelerometer_noise_density *
-//        imu_parameters_.accelerometer_noise_density);
-//
-//  // Orientation estimate covariance (no estimate provided).
-////  imu_message_.orientation_covariance[0] = -1.0;
-//  imu_message_.add_orientation_covariance(-1.0);
 
   for(int i = 0; i < 9; i++){
     switch (i){
