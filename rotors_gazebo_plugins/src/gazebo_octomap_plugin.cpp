@@ -38,6 +38,7 @@ void OctomapFromGazeboWorld::Load(physics::WorldPtr _parent,
   gzlog << "Advertising service: " << service_name << std::endl;
   srv_ = node_handle_.advertiseService(
       service_name, &OctomapFromGazeboWorld::ServiceCallback, this);
+  octomap_publisher_ = node_handle_.advertise<octomap_msgs::Octomap>("world/octomap", 1, true);
 }
 
 bool OctomapFromGazeboWorld::ServiceCallback(
@@ -63,14 +64,14 @@ bool OctomapFromGazeboWorld::ServiceCallback(
   res.map.header.frame_id = "world";
   res.map.header.stamp = ros::Time(now.sec, now.nsec);
 
-  if (octomap_msgs::binaryMapToMsgData(*octomap_, res.map.data)) {
-    res.map.id = "OcTree";
-    res.map.binary = true;
-    res.map.resolution = octomap_->getResolution();
-  } else {
+  if (!octomap_msgs::binaryMapToMsg(*octomap_, res.map)) {
     ROS_ERROR("Error serializing OctoMap");
   }
-  std::cout << "Publishing Octomap." << std::endl;
+
+  if (req.publish_octomap) {
+    std::cout << "Publishing Octomap." << std::endl;
+    octomap_publisher_.publish(res.map);
+  }
   return true;
 }
 
