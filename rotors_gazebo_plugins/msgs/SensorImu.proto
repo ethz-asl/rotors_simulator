@@ -10,8 +10,8 @@ message Imu
   message Header {
   
   	message Stamp {
-      required float sec = 1;
-      required float nsec = 2;
+      required uint32 sec = 1;
+      required uint32 nsec = 2;
     }
   
     required string frame_id = 1;
@@ -26,5 +26,5 @@ message Imu
   required gazebo.msgs.Vector3d linear_acceleration = 5;
   repeated float   linear_acceleration_covariance = 6 [packed=true];
   
-  optional Header header = 7;
+  required Header header = 7;
 }

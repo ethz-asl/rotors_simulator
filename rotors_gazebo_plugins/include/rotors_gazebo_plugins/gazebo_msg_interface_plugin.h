@@ -37,8 +37,10 @@
 namespace gazebo {
 
 // typedef's to make life easier
-typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> ImuPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> GzImuPtr;
 
+//! @brief    Message interface plugin for Gazebo.
+//! @details  Interfaces to both ROS and MAVlink.
 class GazeboMsgInterfacePlugin : public ModelPlugin {
  public:
 
@@ -59,20 +61,19 @@ class GazeboMsgInterfacePlugin : public ModelPlugin {
 
  private:
 
-  void ImuCallback(ImuPtr& imu_message);
+  /// @brief    Called when a IMU message is published within the Gazebo framework.
+  void ImuCallback(GzImuPtr& gz_imu_msg);
 
   std::string namespace_;
   std::string imu_topic_;
 
 
-  /// Handle for the Gazebo node.
-  transport::NodePtr node_handle_;
+  /// @brief  Handle for the Gazebo node.
+  transport::NodePtr gz_node_handle_;
 
-  /// @brief  Used to listen to IMU messages within the Gazebo framework.
-  transport::SubscriberPtr gz_imu_sub_;
+  /// @brief  Handle for the ROS node.
+  ros::NodeHandle* ros_node_handle_;
 
-
-  transport::PublisherPtr imu_pub_;
 
   std::string link_name_;
 
@@ -87,6 +88,16 @@ class GazeboMsgInterfacePlugin : public ModelPlugin {
   event::ConnectionPtr updateConnection_;
 
   common::Time last_time_;
+
+  /// @brief  Used to listen to IMU messages within the Gazebo framework.
+  transport::SubscriberPtr gz_imu_sub_;
+
+  /// @brief  Used to publish IMU messages onto the ROS framework.
+  ros::Publisher ros_imu_pub_;
+
+  /// @brief  Container for constructing a IMU message to then publish on
+  ///         the ROS framework.
+  sensor_msgs::Imu ros_imu_msg_;
 
 };
 

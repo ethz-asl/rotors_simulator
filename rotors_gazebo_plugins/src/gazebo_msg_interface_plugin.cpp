@@ -27,7 +27,7 @@ namespace gazebo {
 
 GazeboMsgInterfacePlugin::GazeboMsgInterfacePlugin()
     : ModelPlugin(),
-      node_handle_(0) {}
+      gz_node_handle_(0) {}
 
 GazeboMsgInterfacePlugin::~GazeboMsgInterfacePlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
@@ -55,9 +55,12 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   else
     gzerr << "[gazebo_imu_plugin] Please specify a robotNamespace.\n";
 
-  // Get node handle
-  node_handle_ = transport::NodePtr(new transport::Node());
-  node_handle_->Init(namespace_);
+  // Get Gazebo node handle
+  gz_node_handle_ = transport::NodePtr(new transport::Node());
+  gz_node_handle_->Init(namespace_);
+
+  // Get ROS node handle
+  ros_node_handle_ = new ros::NodeHandle(namespace_);
 
 //  if (_sdf->HasElement("linkName"))
 //    link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
@@ -90,7 +93,9 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   //============= GAZEBO SUBSCRIBERS =============//
   //==============================================//
 
-  gz_imu_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + imu_topic_, &GazeboMsgInterfacePlugin::ImuCallback, this);
+  gz_imu_sub_ = gz_node_handle_->Subscribe("~/" + model_->GetName() + imu_topic_, &GazeboMsgInterfacePlugin::ImuCallback, this);
+
+  ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
 
 
   // Create publisher
@@ -98,8 +103,30 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   //  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(, 1);
 }
 
-void GazeboMsgInterfacePlugin::ImuCallback(ImuPtr& imu_message) {
+void GazeboMsgInterfacePlugin::ImuCallback(GzImuPtr& gz_imu_msg) {
   //std::cout << "Received IMU message.\n";
+
+  // We need to convert from a Gazebo message to a ROS message,
+  // and then forward the IMU message onto ROS
+
+  ros_imu_msg_.header.stamp.sec = gz_imu_msg->header().stamp().sec();
+  ros_imu_msg_.header.stamp.nsec = gz_imu_msg->header().stamp().nsec();
+  ros_imu_msg_.orientation.x = gz_imu_msg->orientation().x();
+  ros_imu_msg_.orientation.y = gz_imu_msg->orientation().y();
+  ros_imu_msg_.orientation.z = gz_imu_msg->orientation().z();
+  ros_imu_msg_.orientation.w = gz_imu_msg->orientation().w();
+
+  ros_imu_msg_.linear_acceleration.x = gz_imu_msg->linear_acceleration().x();
+  ros_imu_msg_.linear_acceleration.y = gz_imu_msg->linear_acceleration().y();
+  ros_imu_msg_.linear_acceleration.z = gz_imu_msg->linear_acceleration().z();
+
+  ros_imu_msg_.angular_velocity.x = gz_imu_msg->angular_velocity().x();
+  ros_imu_msg_.angular_velocity.y = gz_imu_msg->angular_velocity().y();
+  ros_imu_msg_.angular_velocity.z = gz_imu_msg->angular_velocity().z();
+
+  // Publish onto ROS framework
+  ros_imu_pub_.publish(ros_imu_msg_);
+
 }
 
 
@@ -111,8 +138,6 @@ void GazeboMsgInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
   double t = current_time.Double();
 
 
-  // Publish the IMU message
-//  imu_pub_->Publish(imu_message_);
 
 }
 
