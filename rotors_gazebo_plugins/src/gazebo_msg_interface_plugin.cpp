@@ -81,22 +81,6 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboMsgInterfacePlugin::OnUpdate, this, _1));
 
-  // ============================================ //
-  // =============== GPS MSG SETUP ============== //
-  // ============================================ //
-
-  std::string gps_subtopic_name;
-  if(_sdf->HasElement("gpsSubTopic"))
-    getSdfParam<std::string>(_sdf, "gpsSubTopic", gps_subtopic_name, "");
-  else
-    gzerr << "Please specify an gpsSubTopic." << std::endl;
-
-  std::string gz_gps_subtopic_name = "~/" + gps_subtopic_name;
-  gz_nav_sat_fix_sub_ = gz_node_handle_->Subscribe(gz_gps_subtopic_name, &GazeboMsgInterfacePlugin::GzNavSatFixCallback, this);
-  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_gps_subtopic_name << "\"." << std::endl;
-
-  ros_nav_sat_fix_pub_ = ros_node_handle_->advertise<sensor_msgs::NavSatFix>(gps_subtopic_name, 1);
-  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << gps_subtopic_name << "\"." << std::endl;
 
   // ============================================ //
   // =============== IMU MSG SETUP ============== //
@@ -114,6 +98,23 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
   ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
   gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << imu_topic_ << "\"." << std::endl;
+
+  // ============================================ //
+  // =========== NAV_SAT_FIX MSG SETUP ========== //
+  // ============================================ //
+
+  std::string nav_sat_fix_subtopic_name;
+  if(_sdf->HasElement("navSatFixSubTopic"))
+    getSdfParam<std::string>(_sdf, "navSatFixSubTopic", nav_sat_fix_subtopic_name, "");
+  else
+    gzerr << "Please specify an navSatFixSubTopic." << std::endl;
+
+  std::string gz_nav_sat_fix_subtopic_name = "~/" + nav_sat_fix_subtopic_name;
+  gz_nav_sat_fix_sub_ = gz_node_handle_->Subscribe(gz_nav_sat_fix_subtopic_name, &GazeboMsgInterfacePlugin::GzNavSatFixCallback, this);
+  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_nav_sat_fix_subtopic_name << "\"." << std::endl;
+
+  ros_nav_sat_fix_pub_ = ros_node_handle_->advertise<sensor_msgs::NavSatFix>(nav_sat_fix_subtopic_name, 1);
+  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << nav_sat_fix_subtopic_name << "\"." << std::endl;
 
 }
 
