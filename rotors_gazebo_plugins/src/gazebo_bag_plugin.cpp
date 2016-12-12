@@ -40,6 +40,9 @@ GazeboBagPlugin::~GazeboBagPlugin() {
 // void GazeboBagPlugin::Publish() {};
 
 void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+
+  gzmsg << "GazeboBagPlugin::Load() called." << std::endl;
+
   // Store the pointer to the model
   model_ = _model;
   // world_ = physics::get_world(model_->world.name);

@@ -1,21 +1,12 @@
 syntax = "proto2";
 package sensor_msgs.msgs;
-import "quaternion.proto";
-import "vector3d.proto";
+
+import "Header.proto";
 
 // NavSatFix (GPS) message type which is emitted by the
 // GPS Gazebo plugin
 message NavSatFix
 {
-
-  message Header {
-    message Stamp {
-      required uint32 sec = 1;
-      required uint32 nsec = 2;
-    }
-    required string frame_id = 1;
-    required Stamp stamp = 2;
-  }
   required Header header = 1;
 
   message Status {

@@ -35,8 +35,7 @@ GazeboRosInterfacePlugin::~GazeboRosInterfacePlugin() {
 
 void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
-//  gzerr << "GazeboMsgInterfacePlugin::Load() called.\n";
-  gzmsg << "GazeboMsgInterfacePlugin::Load() called."<< std::endl;;
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   // Store the pointer to the model
   model_ = _model;
