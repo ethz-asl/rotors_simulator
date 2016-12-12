@@ -48,21 +48,21 @@ void OctomapFromGazeboWorld::Load(physics::WorldPtr _parent,
 
 bool OctomapFromGazeboWorld::ServiceCallback(
     rotors_comm::Octomap::Request& req, rotors_comm::Octomap::Response& res) {
-  std::cout << "Creating octomap with origin at (" << req.bounding_box_origin.x
-            << ", " << req.bounding_box_origin.y << ", "
-            << req.bounding_box_origin.z << "), and bounding box lengths ("
-            << req.bounding_box_lengths.x << ", " << req.bounding_box_lengths.y
-            << ", " << req.bounding_box_lengths.z
-            << "), and leaf size: " << req.leaf_size << ".\n";
+  gzlog << "Creating octomap with origin at (" << req.bounding_box_origin.x
+        << ", " << req.bounding_box_origin.y << ", "
+        << req.bounding_box_origin.z << "), and bounding box lengths ("
+        << req.bounding_box_lengths.x << ", " << req.bounding_box_lengths.y
+        << ", " << req.bounding_box_lengths.z
+        << "), and leaf size: " << req.leaf_size << ".\n";
   CreateOctomap(req);
   if (req.filename != "") {
     if (octomap_) {
       std::string path = req.filename;
       octomap_->writeBinary(path);
-      std::cout << std::endl
+      gzlog << std::endl
                 << "Octree saved as " << path << std::endl;
     } else {
-      std::cout << "The octree is NULL. Will not save that." << std::endl;
+      ROS_ERROR("The octree is NULL. Will not save that.");
     }
   }
   common::Time now = world_->GetSimTime();
@@ -74,7 +74,7 @@ bool OctomapFromGazeboWorld::ServiceCallback(
   }
 
   if (req.publish_octomap) {
-    std::cout << "Publishing Octomap." << std::endl;
+    gzlog << "Publishing Octomap." << std::endl;
     octomap_publisher_.publish(res.map);
   }
   return true;
