@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Pavel Vechersky, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +20,11 @@ namespace gazebo {
 
 GazeboMagnetometerPlugin::GazeboMagnetometerPlugin()
     : ModelPlugin(),
-      node_handle_(0),
       random_generator_(random_device_()) {
 }
 
 GazeboMagnetometerPlugin::~GazeboMagnetometerPlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
-  if (node_handle_) {
-    node_handle_->shutdown();
-    delete node_handle_;
-  }
 }
 
 void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
@@ -41,7 +37,9 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_magnetometer_plugin] Please specify a robotNamespace.\n";
-  node_handle_ = new ros::NodeHandle(namespace_);
+//  node_handle_ = new ros::NodeHandle(namespace_);
+  node_handle_ = gazebo::transport::NodePtr(new transport::Node());
+  node_handle_->Init(namespace_);
 
   // Use the link name as the frame id
   std::string link_name;
@@ -77,7 +75,13 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboMagnetometerPlugin::OnUpdate, this, _1));
 
-  magnetometer_pub_ = node_handle_->advertise<sensor_msgs::MagneticField>(magnetometer_topic_, 1);
+  // ============================================ //
+  // ============= SETUP PUBLISHER ============== //
+  // ============================================ //
+
+  //magnetometer_pub_ = node_handle_->advertise<sensor_msgs::MagneticField>(magnetometer_topic_, 1);
+  magnetometer_pub_ = node_handle_->Advertise<sensor_msgs::msgs::MagneticField>(magnetometer_topic_, 1);
+  gzmsg << "GazeboMagnetometerPlugin publishing on " << magnetometer_topic_ << std::endl;
 
   // Create the normal noise distributions
   noise_n_[0] = NormalDistribution(0, noise_normal.X());
@@ -100,10 +104,37 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
                          ref_mag_down + initial_bias[2](random_generator_));
 
   // Fill the magnetometer message
-  mag_message_.header.frame_id = frame_id_;
-  mag_message_.magnetic_field_covariance[0] = noise_normal.X() * noise_normal.X();
-  mag_message_.magnetic_field_covariance[4] = noise_normal.Y() * noise_normal.Y();
-  mag_message_.magnetic_field_covariance[8] = noise_normal.Z() * noise_normal.Z();
+//  mag_message_.header.frame_id = frame_id_;
+//  mag_message_.magnetic_field_covariance[0] = noise_normal.X() * noise_normal.X();
+//  mag_message_.magnetic_field_covariance[4] = noise_normal.Y() * noise_normal.Y();
+//  mag_message_.magnetic_field_covariance[8] = noise_normal.Z() * noise_normal.Z();
+
+  mag_message_.mutable_header()->set_frame_id(frame_id_);
+
+  for(int i = 0; i < 9; i++){
+      switch (i){
+        case 0:
+          mag_message_.add_magnetic_field_covariance(noise_normal.X() * noise_normal.X());
+          break;
+        case 1:
+        case 2:
+        case 3:
+          mag_message_.add_magnetic_field_covariance(0);
+          break;
+        case 4:
+          mag_message_.add_magnetic_field_covariance(noise_normal.Y() * noise_normal.Y());
+          break;
+        case 5:
+        case 6:
+        case 7:
+          mag_message_.add_magnetic_field_covariance(0);
+          break;
+        case 8:
+          mag_message_.add_magnetic_field_covariance(noise_normal.Z() * noise_normal.Z());
+          break;
+      }
+    }
+
 }
 
 void GazeboMagnetometerPlugin::OnUpdate(const common::UpdateInfo& _info) {
@@ -120,14 +151,21 @@ void GazeboMagnetometerPlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Vector3 field_B = T_W_B.rot.RotateVectorReverse(mag_W_ + mag_noise);
 
   // Fill the magnetic field message
-  mag_message_.header.stamp.sec = current_time.sec;
-  mag_message_.header.stamp.nsec = current_time.nsec;
-  mag_message_.magnetic_field.x = field_B.x;
-  mag_message_.magnetic_field.y = field_B.y;
-  mag_message_.magnetic_field.z = field_B.z;
+//  mag_message_.header.stamp.sec = current_time.sec;
+//  mag_message_.header.stamp.nsec = current_time.nsec;
+//  mag_message_.magnetic_field.x = field_B.x;
+//  mag_message_.magnetic_field.y = field_B.y;
+//  mag_message_.magnetic_field.z = field_B.z;
+
+  mag_message_.mutable_header()->mutable_stamp()->set_sec(current_time.sec);
+  mag_message_.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
+  mag_message_.mutable_magnetic_field()->set_x(field_B.x);
+  mag_message_.mutable_magnetic_field()->set_y(field_B.y);
+  mag_message_.mutable_magnetic_field()->set_z(field_B.z);
+
 
   // Publish the message
-  magnetometer_pub_.publish(mag_message_);
+  magnetometer_pub_->Publish(mag_message_);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMagnetometerPlugin);
