@@ -32,11 +32,13 @@
 #include "gazebo/msgs/msgs.hh"
 
 // GAZEBO MSG TYPES
+#include "MagneticField.pb.h"
 #include "NavSatFix.pb.h"
 #include "SensorImu.pb.h"
 
 // ROS MSG TYPES
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/MagneticField.h>
 #include <sensor_msgs/NavSatFix.h>
 
 #include "rotors_gazebo_plugins/common.h"
@@ -44,8 +46,10 @@
 namespace gazebo {
 
 // typedef's to make life easier
-typedef const boost::shared_ptr<const sensor_msgs::msgs::NavSatFix> GzNavSatFixPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> GzImuPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> GzMagneticFieldMsgPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::NavSatFix> GzNavSatFixPtr;
+
 
 //! @brief    Message interface plugin for Gazebo.
 //! @details  Interfaces to both ROS and MAVlink.
@@ -71,7 +75,7 @@ class GazeboMsgInterfacePlugin : public ModelPlugin {
 
 
   std::string namespace_;
-  std::string imu_topic_;
+  std::string imu_sub_topic_;
 
 
   /// @brief  Handle for the Gazebo node.
@@ -95,23 +99,33 @@ class GazeboMsgInterfacePlugin : public ModelPlugin {
 
   common::Time last_time_;
 
-  // ============================================ //
-  // ==================== GPS =================== //
-  // ============================================ //
-
-  transport::SubscriberPtr gz_nav_sat_fix_sub_;
-  ros::Publisher ros_nav_sat_fix_pub_;
-  sensor_msgs::NavSatFix ros_nav_sat_fix_msg_;
-  void GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg);
 
   // ============================================ //
   // ==================== IMU =================== //
   // ============================================ //
 
-  transport::SubscriberPtr gz_imu_sub_;
-  ros::Publisher ros_imu_pub_;
-  sensor_msgs::Imu ros_imu_msg_;
-  void GzImuCallback(GzImuPtr& gz_imu_msg);
+  transport::SubscriberPtr gz_imu_sub_;         ///< Listens to Gazebo messages.
+  void GzImuCallback(GzImuPtr& gz_imu_msg);     ///< Callback for when Gazebo message is received.
+  ros::Publisher ros_imu_pub_;                  ///< Publishes ROS messages.
+  sensor_msgs::Imu ros_imu_msg_;                ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+
+  // ============================================ //
+  // ========== MAGNETIC FIELD MESSAGES ========= //
+  // ============================================ //
+
+  transport::SubscriberPtr gz_magnetic_field_sub_;                                  ///< Listens to Gazebo messages.
+  void GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg);    ///< Callback for when Gazebo message is received.
+  ros::Publisher ros_magnetic_field_pub_;                                           ///< Publishes ROS messages.
+  sensor_msgs::MagneticField ros_magnetic_field_msg_;                                         ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+
+  // ============================================ //
+  // ============= NAV SAT FIX (GPS) ============ //
+  // ============================================ //
+
+  transport::SubscriberPtr gz_nav_sat_fix_sub_;                   ///< Listens to Gazebo messages.
+  void GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg);   ///< Callback for when Gazebo message is received.
+  ros::Publisher ros_nav_sat_fix_pub_;                            ///< Publishes ROS messages.
+  sensor_msgs::NavSatFix ros_nav_sat_fix_msg_;                    ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
 };
 

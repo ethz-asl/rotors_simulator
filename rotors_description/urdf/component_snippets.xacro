@@ -264,7 +264,7 @@
   
   <!-- ==================== MSG INTERFACE MACRO ====================== -->
   
-  <xacro:macro name="msg_interface_plugin_macro" params="namespace imu_sub_topic nav_sat_fix_sub_topic">
+  <xacro:macro name="msg_interface_plugin_macro" params="namespace imu_sub_topic magnetic_field_sub_topic nav_sat_fix_sub_topic">
     <gazebo>
       <plugin name="msg_interface_plugin" filename="librotors_gazebo_msg_interface_plugin.so">
         <robotNamespace>${namespace}</robotNamespace>
@@ -272,6 +272,7 @@
         <commandRateThrustSubTopic>command/rate</commandRateThrustSubTopic>
         <commandMotorSpeedSubTopic>command/motor_speed</commandMotorSpeedSubTopic>
         <imuSubTopic>${imu_sub_topic}</imuSubTopic>
+        <magneticFieldSubTopic>${magnetic_field_sub_topic}</magneticFieldSubTopic>
         <navSatFixSubTopic>${nav_sat_fix_sub_topic}</navSatFixSubTopic>
         <motorSpeedCommandPubTopic>gazebo/command/motor_speed</motorSpeedCommandPubTopic>
       </plugin>
