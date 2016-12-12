@@ -179,10 +179,11 @@ add_dependencies(rotors_gazebo_gps_plugin ${catkin_EXPORTED_TARGETS})
 add_library(rotors_gazebo_magnetometer_plugin src/gazebo_magnetometer_plugin.cpp)
 target_link_libraries(rotors_gazebo_magnetometer_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_dependencies(rotors_gazebo_magnetometer_plugin ${catkin_EXPORTED_TARGETS})
-# GazeboMsgInterfacePlugin
-add_library(rotors_gazebo_msg_interface_plugin src/gazebo_msg_interface_plugin.cpp)
-target_link_libraries(rotors_gazebo_msg_interface_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-add_dependencies(rotors_gazebo_msg_interface_plugin ${catkin_EXPORTED_TARGETS})
+
+# ROS INTERFACE PLUGIN
+add_library(rotors_gazebo_ros_interface_plugin src/gazebo_ros_interface_plugin.cpp)
+target_link_libraries(rotors_gazebo_ros_interface_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(rotors_gazebo_ros_interface_plugin ${catkin_EXPORTED_TARGETS})
 
 if (BUILD_MAVLINK_INTERFACE)
   add_library(rotors_gazebo_mavlink_interface src/gazebo_mavlink_interface.cpp)

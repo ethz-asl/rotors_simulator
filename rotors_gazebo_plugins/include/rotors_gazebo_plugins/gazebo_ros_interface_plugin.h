@@ -53,11 +53,11 @@ typedef const boost::shared_ptr<const sensor_msgs::msgs::NavSatFix> GzNavSatFixP
 
 //! @brief    Message interface plugin for Gazebo.
 //! @details  Interfaces to both ROS and MAVlink.
-class GazeboMsgInterfacePlugin : public ModelPlugin {
+class GazeboRosInterfacePlugin : public ModelPlugin {
  public:
 
-  GazeboMsgInterfacePlugin();
-  ~GazeboMsgInterfacePlugin();
+  GazeboRosInterfacePlugin();
+  ~GazeboRosInterfacePlugin();
 
   void InitializeParams();
   void Publish();
