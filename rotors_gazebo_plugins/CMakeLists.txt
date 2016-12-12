@@ -95,6 +95,7 @@ endforeach()
 
 set (msgs
   #msgs/Float.proto
+  msgs/MagneticField.proto
   msgs/NavSatFix.proto
   msgs/SensorImu.proto
   msgs/TwistStamped.proto

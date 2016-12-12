@@ -83,7 +83,7 @@ class GazeboGpsPlugin : public SensorPlugin {
   // GPS message to be published on sensor update
   sensor_msgs::msgs::NavSatFix gz_gps_message_;
 
-  // Ground speed message to be publised on sensor update
+  // Ground speed message to be published on sensor update
   //geometry_msgs::TwistStamped gz_ground_speed_message_;
   sensor_msgs::msgs::TwistStamped gz_ground_speed_message_;
 

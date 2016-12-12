@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Pavel Vechersky, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +24,9 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <mav_msgs/default_topics.h>
-#include <ros/ros.h>
+//#include <ros/ros.h>
 #include <sensor_msgs/MagneticField.h>
+#include "MagneticField.pb.h"
 
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/sdf_api_wrapper.hpp"
@@ -54,8 +56,8 @@ class GazeboMagnetometerPlugin : public ModelPlugin {
  private:
   std::string namespace_;
   std::string magnetometer_topic_;
-  ros::NodeHandle* node_handle_;
-  ros::Publisher magnetometer_pub_;
+  gazebo::transport::NodePtr node_handle_;
+  gazebo::transport::PublisherPtr magnetometer_pub_;
   std::string frame_id_;
 
   // Pointer to the world
@@ -69,7 +71,7 @@ class GazeboMagnetometerPlugin : public ModelPlugin {
 
   math::Vector3 mag_W_;
 
-  sensor_msgs::MagneticField mag_message_;
+  sensor_msgs::msgs::MagneticField mag_message_;
 
   NormalDistribution noise_n_[3];
 
