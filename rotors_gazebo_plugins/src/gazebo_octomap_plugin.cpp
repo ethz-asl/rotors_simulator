@@ -34,11 +34,16 @@ OctomapFromGazeboWorld::~OctomapFromGazeboWorld() {
 void OctomapFromGazeboWorld::Load(physics::WorldPtr _parent,
                                   sdf::ElementPtr _sdf) {
   world_ = _parent;
+
   std::string service_name = "world/get_octomap";
+  std::string octomap_pub_topic = "world/octomap";
+  getSdfParam<std::string>(_sdf, "octomapPubTopic", octomap_pub_topic, octomap_pub_topic);
+  getSdfParam<std::string>(_sdf, "octomapServiceName", service_name, service_name);
+
   gzlog << "Advertising service: " << service_name << std::endl;
   srv_ = node_handle_.advertiseService(
       service_name, &OctomapFromGazeboWorld::ServiceCallback, this);
-  octomap_publisher_ = node_handle_.advertise<octomap_msgs::Octomap>("world/octomap", 1, true);
+  octomap_publisher_ = node_handle_.advertise<octomap_msgs::Octomap>(octomap_pub_topic, 1, true);
 }
 
 bool OctomapFromGazeboWorld::ServiceCallback(
