@@ -103,6 +103,6 @@ class GazeboMavlinkInterface : public ModelPlugin {
   double ref_lon_;
   double ref_alt_;
 };
-}
+} // namespace gazebo
 
 #endif // ROTORS_GAZEBO_PLUGINS_MAVLINK_INTERFACE_H

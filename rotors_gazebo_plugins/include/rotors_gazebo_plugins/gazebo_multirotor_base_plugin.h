@@ -93,11 +93,11 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
 
   //ros::Publisher motor_pub_;
   gazebo::transport::PublisherPtr motor_pub_;
-  sensor_msgs::msgs::Actuators msg;
+  sensor_msgs::msgs::Actuators actuators_msg_;
 
   //ros::Publisher joint_state_pub_;
   gazebo::transport::PublisherPtr joint_state_pub_;
-  sensor_msgs::msgs::JointState joint_state_msg;
+  sensor_msgs::msgs::JointState joint_state_msg_;
 
 //  ros::NodeHandle *node_handle_;
   gazebo::transport::NodePtr node_handle_;
