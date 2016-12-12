@@ -87,20 +87,38 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   // ============================================ //
 
   if(_sdf->HasElement("imuSubTopic"))
-    getSdfParam<std::string>(_sdf, "imuSubTopic", imu_topic_,
+    getSdfParam<std::string>(_sdf, "imuSubTopic", imu_sub_topic_,
                                  mav_msgs::default_topics::IMU);
   else
-    gzerr << "Please specify an imuTopic." << std::endl;
+    gzerr << "Please specify an imuSubTopic." << std::endl;
 
-  std::string gz_imu_subtopic_name = "~/" + imu_topic_;
+  std::string gz_imu_subtopic_name = "~/" + imu_sub_topic_;
   gz_imu_sub_ = gz_node_handle_->Subscribe(gz_imu_subtopic_name, &GazeboMsgInterfacePlugin::GzImuCallback, this);
   gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_imu_subtopic_name << "\"." << std::endl;
 
-  ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
-  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << imu_topic_ << "\"." << std::endl;
+  ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::Imu>(imu_sub_topic_, 1);
+  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << imu_sub_topic_ << "\"." << std::endl;
 
   // ============================================ //
-  // =========== NAV_SAT_FIX MSG SETUP ========== //
+  // ========= MAGNETIC FIELD MSG SETUP ========= //
+  // ============================================ //
+
+  std::string magnetic_field_sub_topic;
+  if(_sdf->HasElement("magneticFieldSubTopic"))
+    getSdfParam<std::string>(_sdf, "magneticFieldSubTopic", magnetic_field_sub_topic,
+                                 mav_msgs::default_topics::IMU);
+  else
+    gzerr << "Please specify an magneticFieldSubTopic." << std::endl;
+
+  std::string gz_magnetic_field_sub_topic_name = "~/" + magnetic_field_sub_topic;
+  gz_magnetic_field_sub_ = gz_node_handle_->Subscribe(gz_magnetic_field_sub_topic_name, &GazeboMsgInterfacePlugin::GzMagneticFieldMsgCallback, this);
+  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_magnetic_field_sub_topic_name << "\"." << std::endl;
+
+  ros_magnetic_field_pub_ = ros_node_handle_->advertise<sensor_msgs::MagneticField>(magnetic_field_sub_topic, 1);
+  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << magnetic_field_sub_topic << "\"." << std::endl;
+
+  // ============================================ //
+  // =========== NAV SAT FIX MSG SETUP ========== //
   // ============================================ //
 
   std::string nav_sat_fix_subtopic_name;
@@ -118,15 +136,15 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
 }
 
-void GazeboMsgInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg) {
-  gzmsg << "GazeboMsgInterfacePlugin::GzNavSatFixCallback() called." << std::endl;
-}
-
 void GazeboMsgInterfacePlugin::GzImuCallback(GzImuPtr& gz_imu_msg) {
   //std::cout << "Received IMU message.\n";
 
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the IMU message onto ROS
+
+  ros_imu_msg_.header.stamp.sec = gz_imu_msg->header().stamp().sec();
+  ros_imu_msg_.header.stamp.nsec = gz_imu_msg->header().stamp().nsec();
+  ros_imu_msg_.header.frame_id = gz_imu_msg->header().frame_id();
 
   ros_imu_msg_.orientation.x = gz_imu_msg->orientation().x();
   ros_imu_msg_.orientation.y = gz_imu_msg->orientation().y();
@@ -135,6 +153,8 @@ void GazeboMsgInterfacePlugin::GzImuCallback(GzImuPtr& gz_imu_msg) {
 
   // Orientation covariance should have 9 elements, and both the Gazebo and ROS
   // arrays should be the same size!
+  GZ_ASSERT(gz_imu_msg->orientation_covariance_size() == 9, "The Gazebo IMU message does not have 9 orientation covariance elements.");
+  GZ_ASSERT(ros_imu_msg_.orientation_covariance.size() == 9, "The ROS IMU message does not have 9 orientation covariance elements.");
   for(int i = 0; i < gz_imu_msg->orientation_covariance_size(); i ++) {
     ros_imu_msg_.orientation_covariance[i] = gz_imu_msg->orientation_covariance(i);
   }
@@ -143,6 +163,8 @@ void GazeboMsgInterfacePlugin::GzImuCallback(GzImuPtr& gz_imu_msg) {
   ros_imu_msg_.angular_velocity.y = gz_imu_msg->angular_velocity().y();
   ros_imu_msg_.angular_velocity.z = gz_imu_msg->angular_velocity().z();
 
+  GZ_ASSERT(gz_imu_msg->angular_velocity_covariance_size() == 9, "The Gazebo IMU message does not have 9 angular velocity covariance elements.");
+  GZ_ASSERT(ros_imu_msg_.angular_velocity_covariance.size() == 9, "The ROS IMU message does not have 9 angular velocity covariance elements.");
   for(int i = 0; i < gz_imu_msg->angular_velocity_covariance_size(); i ++) {
     ros_imu_msg_.angular_velocity_covariance[i] = gz_imu_msg->angular_velocity_covariance(i);
   }
@@ -151,16 +173,72 @@ void GazeboMsgInterfacePlugin::GzImuCallback(GzImuPtr& gz_imu_msg) {
   ros_imu_msg_.linear_acceleration.y = gz_imu_msg->linear_acceleration().y();
   ros_imu_msg_.linear_acceleration.z = gz_imu_msg->linear_acceleration().z();
 
+  GZ_ASSERT(gz_imu_msg->linear_acceleration_covariance_size() == 9, "The Gazebo IMU message does not have 9 linear acceleration covariance elements.");
+  GZ_ASSERT(ros_imu_msg_.linear_acceleration_covariance.size() == 9, "The ROS IMU message does not have 9 linear acceleration covariance elements.");
   for(int i = 0; i < gz_imu_msg->linear_acceleration_covariance_size(); i ++) {
     ros_imu_msg_.linear_acceleration_covariance[i] = gz_imu_msg->linear_acceleration_covariance(i);
   }
 
-  ros_imu_msg_.header.stamp.sec = gz_imu_msg->header().stamp().sec();
-  ros_imu_msg_.header.stamp.nsec = gz_imu_msg->header().stamp().nsec();
-  ros_imu_msg_.header.frame_id = gz_imu_msg->header().frame_id();
-
   // Publish onto ROS framework
   ros_imu_pub_.publish(ros_imu_msg_);
+
+}
+
+void GazeboMsgInterfacePlugin::GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg) {
+  gzmsg << "GazeboMsgInterfacePlugin::GzMagneticFieldMsgCallback() called." << std::endl;
+
+  // We need to convert from a Gazebo message to a ROS message,
+  // and then forward the MagneticField message onto ROS
+  ros_magnetic_field_msg_.header.stamp.sec = gz_magnetic_field_msg->header().stamp().sec();
+  ros_magnetic_field_msg_.header.stamp.nsec = gz_magnetic_field_msg->header().stamp().nsec();
+  ros_magnetic_field_msg_.header.frame_id = gz_magnetic_field_msg->header().frame_id();
+
+  ros_magnetic_field_msg_.magnetic_field.x = gz_magnetic_field_msg->magnetic_field().x();
+  ros_magnetic_field_msg_.magnetic_field.y = gz_magnetic_field_msg->magnetic_field().y();
+  ros_magnetic_field_msg_.magnetic_field.z = gz_magnetic_field_msg->magnetic_field().z();
+
+  // Position covariance should have 9 elements, and both the Gazebo and ROS
+  // arrays should be the same size!
+  GZ_ASSERT(gz_magnetic_field_msg->magnetic_field_covariance_size() == 9, "The Gazebo MagneticField message does not have 9 magnetic field covariance elements.");
+  GZ_ASSERT(ros_magnetic_field_msg_.magnetic_field_covariance.size() == 9, "The ROS MagneticField message does not have 9 magnetic field covariance elements.");
+  for(int i = 0; i < gz_magnetic_field_msg->magnetic_field_covariance_size(); i ++) {
+    ros_magnetic_field_msg_.magnetic_field_covariance[i] = gz_magnetic_field_msg->magnetic_field_covariance(i);
+  }
+
+  // Publish onto ROS framework
+  ros_magnetic_field_pub_.publish(ros_magnetic_field_msg_);
+
+}
+
+void GazeboMsgInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg) {
+  gzmsg << "GazeboMsgInterfacePlugin::GzNavSatFixCallback() called." << std::endl;
+
+  // We need to convert from a Gazebo message to a ROS message,
+  // and then forward the NavSatFix message onto ROS
+
+  ros_nav_sat_fix_msg_.header.stamp.sec = gz_nav_sat_fix_msg->header().stamp().sec();
+  ros_nav_sat_fix_msg_.header.stamp.nsec = gz_nav_sat_fix_msg->header().stamp().nsec();
+  ros_nav_sat_fix_msg_.header.frame_id = gz_nav_sat_fix_msg->header().frame_id();
+
+  ros_nav_sat_fix_msg_.status.service = gz_nav_sat_fix_msg->status().service();
+  ros_nav_sat_fix_msg_.status.status = gz_nav_sat_fix_msg->status().status();
+
+  ros_nav_sat_fix_msg_.latitude = gz_nav_sat_fix_msg->latitude();
+  ros_nav_sat_fix_msg_.longitude = gz_nav_sat_fix_msg->longitude();
+  ros_nav_sat_fix_msg_.altitude = gz_nav_sat_fix_msg->altitude();
+
+  ros_nav_sat_fix_msg_.position_covariance_type = gz_nav_sat_fix_msg->position_covariance_type();
+
+  // Position covariance should have 9 elements, and both the Gazebo and ROS
+  // arrays should be the same size!
+  GZ_ASSERT(gz_nav_sat_fix_msg->position_covariance_size() == 9, "The Gazebo NavSatFix message does not have 9 position covariance elements.");
+  GZ_ASSERT(ros_nav_sat_fix_msg_.position_covariance.size() == 9, "The ROS NavSatFix message does not have 9 position covariance elements.");
+  for(int i = 0; i < gz_nav_sat_fix_msg->position_covariance_size(); i ++) {
+    ros_nav_sat_fix_msg_.position_covariance[i] = gz_nav_sat_fix_msg->position_covariance(i);
+  }
+
+  // Publish onto ROS framework
+  ros_nav_sat_fix_pub_.publish(ros_nav_sat_fix_msg_);
 
 }
 
