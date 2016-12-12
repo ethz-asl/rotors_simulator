@@ -133,10 +133,13 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
           boost::bind(&GazeboImuPlugin::OnUpdate, this, _1));
 
   // Create publisher
-  //std::string imu_topic_name = "~/" + model_->GetName() + "/" + imu_topic_;
-  std::string imu_topic_name = imu_topic_;
+  // The tilde (~) instructs gazebo to create the topic name relative to the parent
+  // model. e.g. if this IMU was mounted on a firefly, the full topic path would be:
+  // /gazebo/firefly/imu_topic_name
+//  std::string imu_topic_name = "~/" + model_->GetName() + "/" + imu_topic_;
+  std::string imu_topic_name = "~/" + imu_topic_;
   imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(imu_topic_name, 1);
-  gzmsg << "GazeboImuPlugin publishing on \"" << imu_topic_name << "\"." << std::endl;
+  gzmsg << "GazeboImuPlugin publishing on Gazebo topic \"" << imu_topic_name << "\"." << std::endl;
 
   //==============================================//
   //====== POPULATE STATIS PARTS OF IMU MSG ======//
