@@ -34,14 +34,14 @@ GazeboImuPlugin::GazeboImuPlugin()
       node_handle_(0),
       velocity_prev_W_(0, 0, 0) {
 
-  if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
-     ros::console::notifyLoggerLevelsChanged();
-  }
+//  if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
+//     ros::console::notifyLoggerLevelsChanged();
+//  }
 
 //  ROS_DEBUG("TESTING ROS_DEBUG.\n");
 //  std::cout << "TESTING std::cout.\n";
 //  std::cerr << "TESTING std::cerr.\n";
-  gzmsg << "TESTING gzmsg./n" << std::endl;
+//  gzmsg << "TESTING gzmsg./n" << std::endl;
 //  gzerr << "TESTING gzerr./n";
 
 }
@@ -56,7 +56,7 @@ GazeboImuPlugin::~GazeboImuPlugin() {
 //  }
 }
 
-#include <ros/console.h>
+//#include <ros/console.h>
 
 void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
@@ -223,9 +223,9 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
                                Eigen::Vector3d* angular_velocity,
                                const double dt) {
-  ROS_ASSERT(linear_acceleration != nullptr);
-  ROS_ASSERT(angular_velocity != nullptr);
-  ROS_ASSERT(dt > 0.0);
+  GZ_ASSERT(linear_acceleration != nullptr, "Linear acceleration was null.");
+  GZ_ASSERT(angular_velocity != nullptr, "Angular velocity was null.");
+  GZ_ASSERT(dt > 0.0, "Change in time must be greater than 0.");
 
   // Gyrosocpe
   double tau_g = imu_parameters_.gyroscope_bias_correlation_time;
