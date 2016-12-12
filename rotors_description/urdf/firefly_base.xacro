@@ -27,8 +27,8 @@
   <!-- Instantiate a controller. -->
   <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />
   
-  <!-- Instantiate a message interface -->
-  <xacro:msg_interface_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />
+  <!-- Instantiate a ROS message interface -->
+  <xacro:msg_interface_plugin_macro namespace="${namespace}" imu_sub_topic="imu" gps_sub_topic="gps" />
 
   <xacro:if value="$(arg enable_mavlink_interface)">
     <!-- Instantiate mavlink telemetry interface. -->
