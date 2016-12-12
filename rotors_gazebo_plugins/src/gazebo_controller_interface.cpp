@@ -32,6 +32,9 @@ GazeboControllerInterface::~GazeboControllerInterface() {
 }
 
 void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+
+  gzmsg << "GazeboControllerInterface::Load() called." << std::endl;
+
   // Store the pointer to the model.
   model_ = _model;
 

@@ -22,19 +22,18 @@
 
 #include <ctime>
 
-#include <mav_msgs/Actuators.h>
+//#include <mav_msgs/Actuators.h>
 
 namespace gazebo {
 
 GazeboMultirotorBasePlugin::~GazeboMultirotorBasePlugin() {
   event::Events::DisconnectWorldUpdateBegin(update_connection_);
-  if (node_handle_) {
-    node_handle_->shutdown();
-    delete node_handle_;
-  }
 }
 
 void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
   model_ = _model;
   world_ = model_->GetWorld();
   namespace_.clear();
@@ -45,9 +44,17 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_,
                       rotor_velocity_slowdown_sim_);
 
-  node_handle_ = new ros::NodeHandle(namespace_);
-  motor_pub_ = node_handle_->advertise<mav_msgs::Actuators>(motor_pub_topic_, 10);
-  joint_state_pub_ = node_handle_->advertise<sensor_msgs::JointState>(joint_state_pub_topic_, 1);
+  //node_handle_ = new ros::NodeHandle(namespace_);
+  node_handle_ = gazebo::transport::NodePtr(new transport::Node());
+  node_handle_->Init(namespace_);
+
+  //motor_pub_ = node_handle_->advertise<mav_msgs::Actuators>(motor_pub_topic_, 10);
+  motor_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Actuators>(motor_pub_topic_, 10);
+  gzmsg << "motor_pub_topic_ = \"" << motor_pub_topic_ << "\"." << std::endl;
+
+  //joint_state_pub_ = node_handle_->advertise<sensor_msgs::JointState>(joint_state_pub_topic_, 1);
+  joint_state_pub_ = node_handle_->Advertise<sensor_msgs::msgs::JointState>(joint_state_pub_topic_, 1);
+  gzmsg << "joint_state_pub_topic = \"" << joint_state_pub_topic_ << "\"." << std::endl;
   frame_id_ = link_name_;
 
   link_ = model_->GetLink(link_name_);
@@ -79,26 +86,43 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
 void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Get the current simulation time.
   common::Time now = world_->GetSimTime();
-  mav_msgs::ActuatorsPtr msg(new mav_msgs::Actuators);
-  msg->angular_velocities.resize(motor_joints_.size());
-  sensor_msgs::JointStatePtr joint_state_msg(new sensor_msgs::JointState);
-  joint_state_msg->name.resize(motor_joints_.size());
-  joint_state_msg->position.resize(motor_joints_.size());
+
+  msg.mutable_header()->mutable_stamp()->set_sec(now.sec);
+  msg.mutable_header()->mutable_stamp()->set_nsec(now.nsec);
+  msg.mutable_header()->set_frame_id(frame_id_);
+
+  joint_state_msg.mutable_header()->mutable_stamp()->set_sec(now.sec);
+  joint_state_msg.mutable_header()->mutable_stamp()->set_nsec(now.nsec);
+  joint_state_msg.mutable_header()->set_frame_id(frame_id_);
+
+  //mav_msgs::ActuatorsPtr msg(new mav_msgs::Actuators);
+
+  //msg->angular_velocities.resize(motor_joints_.size());
+  msg.clear_angular_velocities();
+
+  //sensor_msgs::JointStatePtr joint_state_msg(new sensor_msgs::JointState);
+
+//  joint_state_msg->name.resize(motor_joints_.size());
+//  joint_state_msg->position.resize(motor_joints_.size());
+  joint_state_msg.clear_name();
+  joint_state_msg.clear_position();
+
   MotorNumberToJointMap::iterator m;
   for (m = motor_joints_.begin(); m != motor_joints_.end(); ++m) {
     double motor_rot_vel = m->second->GetVelocity(0) * rotor_velocity_slowdown_sim_;
-    msg->angular_velocities[m->first] = motor_rot_vel;
-    joint_state_msg->name[m->first] = m->second->GetName();
-    joint_state_msg->position[m->first] = m->second->GetAngle(0).Radian();
+
+    //msg->angular_velocities[m->first] = motor_rot_vel;
+    msg.add_angular_velocities(motor_rot_vel);
+
+//    joint_state_msg->name[m->first] = m->second->GetName();
+//    joint_state_msg->position[m->first] = m->second->GetAngle(0).Radian();
+    joint_state_msg.add_name(m->second->GetName());
+    joint_state_msg.add_position(m->second->GetAngle(0).Radian());
+
   }
-  joint_state_msg->header.stamp.sec = now.sec;
-  joint_state_msg->header.stamp.nsec = now.nsec;
-  joint_state_msg->header.frame_id = frame_id_;
-  msg->header.stamp.sec = now.sec;
-  msg->header.stamp.nsec = now.nsec;
-  msg->header.frame_id = frame_id_;
-  joint_state_pub_.publish(joint_state_msg);
-  motor_pub_.publish(msg);
+
+  joint_state_pub_->Publish(joint_state_msg);
+  motor_pub_->Publish(msg);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMultirotorBasePlugin);

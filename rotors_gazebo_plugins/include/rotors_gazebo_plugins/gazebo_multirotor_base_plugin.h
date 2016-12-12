@@ -28,10 +28,14 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-#include <mav_msgs/Actuators.h>
-#include <mav_msgs/default_topics.h>
-#include <ros/ros.h>
-#include <sensor_msgs/JointState.h>
+//#include <mav_msgs/Actuators.h>
+//#include <mav_msgs/default_topics.h>
+//#include <ros/ros.h>
+
+#include "Actuators.pb.h"
+#include "JointState.pb.h"
+
+//#include <sensor_msgs/JointState.h>
 
 #include "rotors_gazebo_plugins/common.h"
 
@@ -87,9 +91,16 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   std::string frame_id_;
   double rotor_velocity_slowdown_sim_;
 
-  ros::Publisher motor_pub_;
-  ros::Publisher joint_state_pub_;
-  ros::NodeHandle *node_handle_;
+  //ros::Publisher motor_pub_;
+  gazebo::transport::PublisherPtr motor_pub_;
+  sensor_msgs::msgs::Actuators msg;
+
+  //ros::Publisher joint_state_pub_;
+  gazebo::transport::PublisherPtr joint_state_pub_;
+  sensor_msgs::msgs::JointState joint_state_msg;
+
+//  ros::NodeHandle *node_handle_;
+  gazebo::transport::NodePtr node_handle_;
 };
 
 } // namespace gazebo
