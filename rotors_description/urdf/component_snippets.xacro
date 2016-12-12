@@ -262,11 +262,13 @@
     </gazebo>
   </xacro:macro>
   
-  <!-- ==================== MSG INTERFACE MACRO ====================== -->
+  <!-- =============================================================== -->
+  <!-- ==================== ROS INTERFACE MACRO ====================== -->
+  <!-- =============================================================== -->
   
-  <xacro:macro name="msg_interface_plugin_macro" params="namespace imu_sub_topic magnetic_field_sub_topic nav_sat_fix_sub_topic">
+  <xacro:macro name="ros_interface_plugin_macro" params="namespace imu_sub_topic magnetic_field_sub_topic nav_sat_fix_sub_topic">
     <gazebo>
-      <plugin name="msg_interface_plugin" filename="librotors_gazebo_msg_interface_plugin.so">
+      <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so">
         <robotNamespace>${namespace}</robotNamespace>
         <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
         <commandRateThrustSubTopic>command/rate</commandRateThrustSubTopic>

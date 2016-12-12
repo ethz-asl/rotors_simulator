@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-#include "rotors_gazebo_plugins/gazebo_msg_interface_plugin.h"
-
 #include <chrono>
 #include <cmath>
 #include <iostream>
 #include <stdio.h>
 
 #include <boost/bind.hpp>
+#include <rotors_gazebo_plugins/gazebo_ros_interface_plugin.h>
 
 namespace gazebo {
 
-GazeboMsgInterfacePlugin::GazeboMsgInterfacePlugin()
+GazeboRosInterfacePlugin::GazeboRosInterfacePlugin()
     : ModelPlugin(),
       gz_node_handle_(0) {}
 
-GazeboMsgInterfacePlugin::~GazeboMsgInterfacePlugin() {
+GazeboRosInterfacePlugin::~GazeboRosInterfacePlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
 }
 
 
-void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
 //  gzerr << "GazeboMsgInterfacePlugin::Load() called.\n";
   gzmsg << "GazeboMsgInterfacePlugin::Load() called."<< std::endl;;
@@ -79,7 +78,7 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   // simulation iteration.
   this->updateConnection_ =
       event::Events::ConnectWorldUpdateBegin(
-          boost::bind(&GazeboMsgInterfacePlugin::OnUpdate, this, _1));
+          boost::bind(&GazeboRosInterfacePlugin::OnUpdate, this, _1));
 
 
   // ============================================ //
@@ -93,7 +92,7 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
     gzerr << "Please specify an imuSubTopic." << std::endl;
 
   std::string gz_imu_subtopic_name = "~/" + imu_sub_topic_;
-  gz_imu_sub_ = gz_node_handle_->Subscribe(gz_imu_subtopic_name, &GazeboMsgInterfacePlugin::GzImuCallback, this);
+  gz_imu_sub_ = gz_node_handle_->Subscribe(gz_imu_subtopic_name, &GazeboRosInterfacePlugin::GzImuCallback, this);
   gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_imu_subtopic_name << "\"." << std::endl;
 
   ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::Imu>(imu_sub_topic_, 1);
@@ -111,7 +110,7 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
     gzerr << "Please specify an magneticFieldSubTopic." << std::endl;
 
   std::string gz_magnetic_field_sub_topic_name = "~/" + magnetic_field_sub_topic;
-  gz_magnetic_field_sub_ = gz_node_handle_->Subscribe(gz_magnetic_field_sub_topic_name, &GazeboMsgInterfacePlugin::GzMagneticFieldMsgCallback, this);
+  gz_magnetic_field_sub_ = gz_node_handle_->Subscribe(gz_magnetic_field_sub_topic_name, &GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback, this);
   gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_magnetic_field_sub_topic_name << "\"." << std::endl;
 
   ros_magnetic_field_pub_ = ros_node_handle_->advertise<sensor_msgs::MagneticField>(magnetic_field_sub_topic, 1);
@@ -128,7 +127,7 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
     gzerr << "Please specify an navSatFixSubTopic." << std::endl;
 
   std::string gz_nav_sat_fix_subtopic_name = "~/" + nav_sat_fix_subtopic_name;
-  gz_nav_sat_fix_sub_ = gz_node_handle_->Subscribe(gz_nav_sat_fix_subtopic_name, &GazeboMsgInterfacePlugin::GzNavSatFixCallback, this);
+  gz_nav_sat_fix_sub_ = gz_node_handle_->Subscribe(gz_nav_sat_fix_subtopic_name, &GazeboRosInterfacePlugin::GzNavSatFixCallback, this);
   gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_nav_sat_fix_subtopic_name << "\"." << std::endl;
 
   ros_nav_sat_fix_pub_ = ros_node_handle_->advertise<sensor_msgs::NavSatFix>(nav_sat_fix_subtopic_name, 1);
@@ -136,7 +135,7 @@ void GazeboMsgInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
 }
 
-void GazeboMsgInterfacePlugin::GzImuCallback(GzImuPtr& gz_imu_msg) {
+void GazeboRosInterfacePlugin::GzImuCallback(GzImuPtr& gz_imu_msg) {
   //std::cout << "Received IMU message.\n";
 
   // We need to convert from a Gazebo message to a ROS message,
@@ -184,7 +183,7 @@ void GazeboMsgInterfacePlugin::GzImuCallback(GzImuPtr& gz_imu_msg) {
 
 }
 
-void GazeboMsgInterfacePlugin::GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg) {
+void GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg) {
   gzmsg << "GazeboMsgInterfacePlugin::GzMagneticFieldMsgCallback() called." << std::endl;
 
   // We need to convert from a Gazebo message to a ROS message,
@@ -210,7 +209,7 @@ void GazeboMsgInterfacePlugin::GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr&
 
 }
 
-void GazeboMsgInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg) {
+void GazeboRosInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg) {
   gzmsg << "GazeboMsgInterfacePlugin::GzNavSatFixCallback() called." << std::endl;
 
   // We need to convert from a Gazebo message to a ROS message,
@@ -244,7 +243,7 @@ void GazeboMsgInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fi
 
 
 
-void GazeboMsgInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
+void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
   common::Time current_time  = world_->GetSimTime();
   double dt = (current_time - last_time_).Double();
   last_time_ = current_time;
@@ -254,6 +253,6 @@ void GazeboMsgInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
 
 }
 
-GZ_REGISTER_MODEL_PLUGIN(GazeboMsgInterfacePlugin);
+GZ_REGISTER_MODEL_PLUGIN(GazeboRosInterfacePlugin);
 
 } // namespace gazebo
