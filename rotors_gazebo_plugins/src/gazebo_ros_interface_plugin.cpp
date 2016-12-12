@@ -26,7 +26,12 @@ namespace gazebo {
 
 GazeboRosInterfacePlugin::GazeboRosInterfacePlugin()
     : ModelPlugin(),
-      gz_node_handle_(0) {}
+      gz_node_handle_(0),
+      ros_node_handle_(0),
+      ros_actuators_msg_(new mav_msgs::Actuators)
+{
+  // Nothing
+}
 
 GazeboRosInterfacePlugin::~GazeboRosInterfacePlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
@@ -79,6 +84,23 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboRosInterfacePlugin::OnUpdate, this, _1));
 
+  // ============================================ //
+  // ============ ACTUATORS MSG SETUP =========== //
+  // ============================================ //
+
+  std::string actuators_sub_topic;
+  if(_sdf->HasElement("actuatorsSubTopic"))
+    getSdfParam<std::string>(_sdf, "actuatorsSubTopic", actuators_sub_topic, "");
+  else
+    gzerr << "Please specify an actuatorsSubTopic." << std::endl;
+
+  std::string gz_actuators_subtopic_name = "~/" + actuators_sub_topic;
+  gz_imu_sub_ = gz_node_handle_->Subscribe(gz_actuators_subtopic_name, &GazeboRosInterfacePlugin::GzActuatorsMsgCallback, this);
+  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_actuators_subtopic_name << "\"." << std::endl;
+
+  ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::Imu>(imu_sub_topic_, 1);
+  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << imu_sub_topic_ << "\"." << std::endl;
+
 
   // ============================================ //
   // =============== IMU MSG SETUP ============== //
@@ -103,8 +125,7 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
   std::string magnetic_field_sub_topic;
   if(_sdf->HasElement("magneticFieldSubTopic"))
-    getSdfParam<std::string>(_sdf, "magneticFieldSubTopic", magnetic_field_sub_topic,
-                                 mav_msgs::default_topics::IMU);
+    getSdfParam<std::string>(_sdf, "magneticFieldSubTopic", magnetic_field_sub_topic, "");
   else
     gzerr << "Please specify an magneticFieldSubTopic." << std::endl;
 
@@ -131,6 +152,26 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
   ros_nav_sat_fix_pub_ = ros_node_handle_->advertise<sensor_msgs::NavSatFix>(nav_sat_fix_subtopic_name, 1);
   gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << nav_sat_fix_subtopic_name << "\"." << std::endl;
+
+}
+
+void GazeboRosInterfacePlugin::GzActuatorsMsgCallback(GzActuatorsMsgPtr& gz_actuators_msg) {
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
+  // We need to convert the Acutuators message from a Gazebo message to a
+  // ROS message and then publish it to the ROS framework
+
+  ros_actuators_msg_->header.stamp.sec = gz_actuators_msg->header().stamp().sec();
+  ros_actuators_msg_->header.stamp.nsec = gz_actuators_msg->header().stamp().nsec();
+  ros_actuators_msg_->header.frame_id = gz_actuators_msg->header().frame_id();
+
+  ros_actuators_msg_->angular_velocities.resize(gz_actuators_msg->angular_velocities_size());
+  for(int i = 0; i < gz_actuators_msg->angular_velocities_size(); i++) {
+    ros_actuators_msg_->angular_velocities[i] = gz_actuators_msg->angular_velocities(i);
+  }
+
+  // Publish onto ROS framework
+  ros_actuators_pub_.publish(ros_actuators_msg_);
 
 }
 
@@ -209,7 +250,7 @@ void GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr&
 }
 
 void GazeboRosInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg) {
-  gzmsg << "GazeboMsgInterfacePlugin::GzNavSatFixCallback() called." << std::endl;
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the NavSatFix message onto ROS

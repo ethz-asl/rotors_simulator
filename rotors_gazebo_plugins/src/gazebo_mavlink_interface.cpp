@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +25,13 @@ namespace gazebo {
 
 GazeboMavlinkInterface::GazeboMavlinkInterface()
     : ModelPlugin(),
-      node_handle_(0) {}
+      node_handle_(0),
+      ref_alt_(0),
+      ref_lon_(0),
+      ref_lat_(0),
+      gps_update_interval_(0),
+      rotor_count_(0)
+      {}
 
 GazeboMavlinkInterface::~GazeboMavlinkInterface() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);

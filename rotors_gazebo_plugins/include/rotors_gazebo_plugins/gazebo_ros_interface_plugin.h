@@ -32,11 +32,13 @@
 #include "gazebo/msgs/msgs.hh"
 
 // GAZEBO MSG TYPES
+#include "Actuators.pb.h"
 #include "MagneticField.pb.h"
 #include "NavSatFix.pb.h"
 #include "SensorImu.pb.h"
 
 // ROS MSG TYPES
+#include <mav_msgs/Actuators.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/MagneticField.h>
 #include <sensor_msgs/NavSatFix.h>
@@ -46,6 +48,7 @@
 namespace gazebo {
 
 // typedef's to make life easier
+typedef const boost::shared_ptr<const sensor_msgs::msgs::Actuators> GzActuatorsMsgPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> GzImuPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> GzMagneticFieldMsgPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::NavSatFix> GzNavSatFixPtr;
@@ -98,6 +101,15 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   event::ConnectionPtr updateConnection_;
 
   common::Time last_time_;
+
+  // ============================================ //
+  // ============= ACTUATORS MESSAGES =========== //
+  // ============================================ //
+
+  transport::SubscriberPtr gz_actuator_sub_;                            ///< Listens to Gazebo messages.
+  void GzActuatorsMsgCallback(GzActuatorsMsgPtr& gz_actuators_msg);     ///< Callback for when Gazebo message is received.
+  ros::Publisher ros_actuators_pub_;                                    ///< Publishes ROS messages.
+  mav_msgs::ActuatorsPtr ros_actuators_msg_;                            ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
 
   // ============================================ //
