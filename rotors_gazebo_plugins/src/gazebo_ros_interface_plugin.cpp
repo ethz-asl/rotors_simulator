@@ -92,32 +92,50 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   if(_sdf->HasElement("actuatorsSubTopic"))
     getSdfParam<std::string>(_sdf, "actuatorsSubTopic", actuators_sub_topic, "");
   else
-    gzerr << "Please specify an actuatorsSubTopic." << std::endl;
+    gzerr << "Please specify actuatorsSubTopic." << std::endl;
 
   std::string gz_actuators_subtopic_name = "~/" + actuators_sub_topic;
   gz_imu_sub_ = gz_node_handle_->Subscribe(gz_actuators_subtopic_name, &GazeboRosInterfacePlugin::GzActuatorsMsgCallback, this);
   gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_actuators_subtopic_name << "\"." << std::endl;
 
-  ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::Imu>(imu_sub_topic_, 1);
-  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << imu_sub_topic_ << "\"." << std::endl;
+  ros_imu_pub_ = ros_node_handle_->advertise<mav_msgs::Actuators>(actuators_sub_topic, 1);
+  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << actuators_sub_topic << "\"." << std::endl;
 
 
   // ============================================ //
   // =============== IMU MSG SETUP ============== //
   // ============================================ //
 
+  std::string imu_sub_topic;
   if(_sdf->HasElement("imuSubTopic"))
-    getSdfParam<std::string>(_sdf, "imuSubTopic", imu_sub_topic_,
+    getSdfParam<std::string>(_sdf, "imuSubTopic", imu_sub_topic,
                                  mav_msgs::default_topics::IMU);
   else
-    gzerr << "Please specify an imuSubTopic." << std::endl;
+    gzerr << "Please specify imuSubTopic." << std::endl;
 
-  std::string gz_imu_subtopic_name = "~/" + imu_sub_topic_;
+  std::string gz_imu_subtopic_name = "~/" + imu_sub_topic;
   gz_imu_sub_ = gz_node_handle_->Subscribe(gz_imu_subtopic_name, &GazeboRosInterfacePlugin::GzImuCallback, this);
   gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_imu_subtopic_name << "\"." << std::endl;
 
-  ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::Imu>(imu_sub_topic_, 1);
-  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << imu_sub_topic_ << "\"." << std::endl;
+  ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::Imu>(imu_sub_topic, 1);
+  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << imu_sub_topic << "\"." << std::endl;
+
+  // ============================================ //
+  // ========== JOINT STATE MSG SETUP =========== //
+  // ============================================ //
+
+  std::string joint_state_sub_topic;
+  if(_sdf->HasElement("jointStateSubTopic"))
+    getSdfParam<std::string>(_sdf, "jointStateSubTopic", joint_state_sub_topic, "");
+  else
+    gzerr << "Please specify jointStateSubTopic." << std::endl;
+
+  std::string gz_joint_state_subtopic_name = "~/" + joint_state_sub_topic;
+  gz_imu_sub_ = gz_node_handle_->Subscribe(gz_joint_state_subtopic_name, &GazeboRosInterfacePlugin::GzJointStateMsgCallback, this);
+  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_joint_state_subtopic_name << "\"." << std::endl;
+
+  ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::JointState>(joint_state_sub_topic, 1);
+  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << joint_state_sub_topic << "\"." << std::endl;
 
   // ============================================ //
   // ========= MAGNETIC FIELD MSG SETUP ========= //
@@ -176,7 +194,7 @@ void GazeboRosInterfacePlugin::GzActuatorsMsgCallback(GzActuatorsMsgPtr& gz_actu
 }
 
 void GazeboRosInterfacePlugin::GzImuCallback(GzImuPtr& gz_imu_msg) {
-  //std::cout << "Received IMU message.\n";
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the IMU message onto ROS
@@ -223,8 +241,12 @@ void GazeboRosInterfacePlugin::GzImuCallback(GzImuPtr& gz_imu_msg) {
 
 }
 
+void GazeboRosInterfacePlugin::GzJointStateMsgCallback(GzJointStateMsgPtr& gz_joint_state_msg) {
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+}
+
 void GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg) {
-  gzmsg << "GazeboMsgInterfacePlugin::GzMagneticFieldMsgCallback() called." << std::endl;
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the MagneticField message onto ROS

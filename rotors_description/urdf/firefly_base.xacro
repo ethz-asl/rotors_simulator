@@ -28,7 +28,13 @@
   <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />
   
   <!-- Instantiate a ROS message interface -->
-  <xacro:ros_interface_plugin_macro namespace="${namespace}" imu_sub_topic="imu" magnetic_field_sub_topic="magnetic_field" nav_sat_fix_sub_topic="nav_sat_fix" />
+  <xacro:ros_interface_plugin_macro 
+  		namespace="${namespace}"
+  		actuators_sub_topic="actuators"
+  		imu_sub_topic="imu"
+  		joint_state_sub_topic="joint_state"
+  		magnetic_field_sub_topic="magnetic_field"
+  		nav_sat_fix_sub_topic="nav_sat_fix" />
 
   <xacro:if value="$(arg enable_mavlink_interface)">
     <!-- Instantiate mavlink telemetry interface. -->
