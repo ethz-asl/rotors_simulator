@@ -1,0 +1,11 @@
+syntax = "proto2";
+package gz_geometry_msgs;
+
+// Point (x, y, z) message type which designed to be used
+// in other message types
+message Point
+{
+  required double x = 1;
+  required double y = 2;
+  required double z = 3;
+}

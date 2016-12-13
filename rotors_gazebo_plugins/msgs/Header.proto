@@ -1,5 +1,5 @@
 syntax = "proto2";
-package sensor_msgs.msgs;
+package gz_std_msgs;
 
 // Header type designed to be added to other
 // Gazebo message types.

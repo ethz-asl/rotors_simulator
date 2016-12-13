@@ -1,0 +1,12 @@
+syntax = "proto2";
+package gz_geometry_msgs;
+
+import "Vector3.proto";
+
+// Twist message type which designed to be used
+// in other message types
+message Twist
+{
+  required Vector3 linear = 1;
+  required Vector3 angular = 2;
+}

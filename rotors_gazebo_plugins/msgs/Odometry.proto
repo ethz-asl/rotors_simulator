@@ -1,0 +1,17 @@
+syntax = "proto2";
+package gz_geometry_msgs;
+
+import "Header.proto";
+import "PoseWithCovariance.proto";
+import "TwistWithCovariance.proto";
+
+// Odometry message type which is emitted by
+// GazeboMultirotorBasePlugin
+message Odometry
+{
+  required gz_std_msgs.Header header = 1;
+  
+  required string child_frame_id = 2;
+  required PoseWithCovariance pose = 3;
+  required TwistWithCovariance twist = 4;
+}
