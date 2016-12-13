@@ -34,43 +34,49 @@ OctomapFromGazeboWorld::~OctomapFromGazeboWorld() {
 void OctomapFromGazeboWorld::Load(physics::WorldPtr _parent,
                                   sdf::ElementPtr _sdf) {
   world_ = _parent;
+
   std::string service_name = "world/get_octomap";
+  std::string octomap_pub_topic = "world/octomap";
+  getSdfParam<std::string>(_sdf, "octomapPubTopic", octomap_pub_topic, octomap_pub_topic);
+  getSdfParam<std::string>(_sdf, "octomapServiceName", service_name, service_name);
+
   gzlog << "Advertising service: " << service_name << std::endl;
   srv_ = node_handle_.advertiseService(
       service_name, &OctomapFromGazeboWorld::ServiceCallback, this);
+  octomap_publisher_ = node_handle_.advertise<octomap_msgs::Octomap>(octomap_pub_topic, 1, true);
 }
 
 bool OctomapFromGazeboWorld::ServiceCallback(
     rotors_comm::Octomap::Request& req, rotors_comm::Octomap::Response& res) {
-  std::cout << "Creating octomap with origin at (" << req.bounding_box_origin.x
-            << ", " << req.bounding_box_origin.y << ", "
-            << req.bounding_box_origin.z << "), and bounding box lengths ("
-            << req.bounding_box_lengths.x << ", " << req.bounding_box_lengths.y
-            << ", " << req.bounding_box_lengths.z
-            << "), and leaf size: " << req.leaf_size << ".\n";
+  gzlog << "Creating octomap with origin at (" << req.bounding_box_origin.x
+        << ", " << req.bounding_box_origin.y << ", "
+        << req.bounding_box_origin.z << "), and bounding box lengths ("
+        << req.bounding_box_lengths.x << ", " << req.bounding_box_lengths.y
+        << ", " << req.bounding_box_lengths.z
+        << "), and leaf size: " << req.leaf_size << ".\n";
   CreateOctomap(req);
   if (req.filename != "") {
     if (octomap_) {
       std::string path = req.filename;
       octomap_->writeBinary(path);
-      std::cout << std::endl
+      gzlog << std::endl
                 << "Octree saved as " << path << std::endl;
     } else {
-      std::cout << "The octree is NULL. Will not save that." << std::endl;
+      ROS_ERROR("The octree is NULL. Will not save that.");
     }
   }
   common::Time now = world_->GetSimTime();
   res.map.header.frame_id = "world";
   res.map.header.stamp = ros::Time(now.sec, now.nsec);
 
-  if (octomap_msgs::binaryMapToMsgData(*octomap_, res.map.data)) {
-    res.map.id = "OcTree";
-    res.map.binary = true;
-    res.map.resolution = octomap_->getResolution();
-  } else {
+  if (!octomap_msgs::binaryMapToMsg(*octomap_, res.map)) {
     ROS_ERROR("Error serializing OctoMap");
   }
-  std::cout << "Publishing Octomap." << std::endl;
+
+  if (req.publish_octomap) {
+    gzlog << "Publishing Octomap." << std::endl;
+    octomap_publisher_.publish(res.map);
+  }
   return true;
 }
 
