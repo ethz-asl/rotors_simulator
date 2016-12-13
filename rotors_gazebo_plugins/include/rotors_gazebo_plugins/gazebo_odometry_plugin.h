@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +54,9 @@
 #include <rotors_gazebo_plugins/sdf_api_wrapper.hpp>
 #include <tf/transform_broadcaster.h>
 
+#include "Odometry.pb.h"
+
+
 namespace gazebo {
 
 // Default values
@@ -71,7 +75,8 @@ class GazeboOdometryPlugin : public ModelPlugin {
  public:
   typedef std::normal_distribution<> NormalDistribution;
   typedef std::uniform_real_distribution<> UniformDistribution;
-  typedef std::deque<std::pair<int, nav_msgs::Odometry> > OdometryQueue;
+  typedef std::deque<std::pair<int, gz_geometry_msgs::Odometry> > OdometryQueue;
+  typedef boost::array<double, 36> CovarianceMatrix;
 
   GazeboOdometryPlugin()
       : ModelPlugin(),
@@ -123,8 +128,10 @@ class GazeboOdometryPlugin : public ModelPlugin {
   UniformDistribution linear_velocity_u_[3];
   UniformDistribution angular_velocity_u_[3];
 
-  geometry_msgs::PoseWithCovariance::_covariance_type pose_covariance_matrix_;
-  geometry_msgs::TwistWithCovariance::_covariance_type twist_covariance_matrix_;
+  //geometry_msgs::PoseWithCovariance::_covariance_type pose_covariance_matrix_;
+  CovarianceMatrix pose_covariance_matrix_;
+//  geometry_msgs::TwistWithCovariance::_covariance_type twist_covariance_matrix_;
+  CovarianceMatrix twist_covariance_matrix_;
 
   int measurement_delay_;
   int measurement_divisor_;
@@ -138,11 +145,18 @@ class GazeboOdometryPlugin : public ModelPlugin {
   std::mt19937 random_generator_;
 
   ros::NodeHandle* node_handle_;
-  ros::Publisher pose_pub_;
+
+  gazebo::transport::NodePtr gz_node_ptr_;
+
+  //ros::Publisher pose_pub_;
+  gazebo::transport::PublisherPtr pose_pub_;
+
   ros::Publisher pose_with_covariance_pub_;
   ros::Publisher position_pub_;
   ros::Publisher transform_pub_;
-  ros::Publisher odometry_pub_;
+
+//  ros::Publisher odometry_pub_;
+  gazebo::transport::PublisherPtr odometry_pub_;
 
   tf::Transform tf_;
   tf::TransformBroadcaster transform_broadcaster_;

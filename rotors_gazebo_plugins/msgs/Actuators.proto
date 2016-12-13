@@ -7,7 +7,7 @@ import "Header.proto";
 // GazeboMultirotorBasePlugin
 message Actuators
 {
-  required Header header = 1;
+  required gz_std_msgs.Header header = 1;
   
   repeated double angular_velocities = 2 [packed=true];
 }

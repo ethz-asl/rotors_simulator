@@ -100,8 +100,18 @@ set (msgs
   msgs/JointState.proto
   msgs/MagneticField.proto
   msgs/NavSatFix.proto
+  msgs/Odometry.proto
+  msgs/Point.proto
+  msgs/Pose.proto
+  msgs/PoseStamped.proto
+  msgs/PoseWithCovariance.proto
+  msgs/Position.proto
+  msgs/Quaternion.proto
   msgs/SensorImu.proto
+  msgs/Twist.proto
   msgs/TwistStamped.proto
+  msgs/TwistWithCovariance.proto
+  msgs/Vector3.proto
   #msgs/opticalFlow.proto
   #msgs/lidar.proto
   #msgs/CommandMotorSpeed.proto
