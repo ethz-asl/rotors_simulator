@@ -33,6 +33,7 @@
 
 // GAZEBO MSG TYPES
 #include "Actuators.pb.h"
+#include "JointState.pb.h"
 #include "MagneticField.pb.h"
 #include "NavSatFix.pb.h"
 #include "SensorImu.pb.h"
@@ -40,6 +41,7 @@
 // ROS MSG TYPES
 #include <mav_msgs/Actuators.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/JointState.h>
 #include <sensor_msgs/MagneticField.h>
 #include <sensor_msgs/NavSatFix.h>
 
@@ -50,6 +52,7 @@ namespace gazebo {
 // typedef's to make life easier
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Actuators> GzActuatorsMsgPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> GzImuPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::JointState> GzJointStateMsgPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> GzMagneticFieldMsgPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::NavSatFix> GzNavSatFixPtr;
 
@@ -72,14 +75,9 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   /// @details	Calculates IMU parameters and then publishes one IMU message.
   void OnUpdate(const common::UpdateInfo&);
 
-
-
  private:
 
-
   std::string namespace_;
-  std::string imu_sub_topic_;
-
 
   /// @brief  Handle for the Gazebo node.
   transport::NodePtr gz_node_handle_;
@@ -111,7 +109,6 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   ros::Publisher ros_actuators_pub_;                                    ///< Publishes ROS messages.
   mav_msgs::ActuatorsPtr ros_actuators_msg_;                            ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
-
   // ============================================ //
   // ==================== IMU =================== //
   // ============================================ //
@@ -122,13 +119,22 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   sensor_msgs::Imu ros_imu_msg_;                ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // ============================================ //
+  // =========== JOINT STATE MESSAGES =========== //
+  // ============================================ //
+
+  transport::SubscriberPtr gz_joing_state_sub_;                            ///< Listens to Gazebo messages.
+  void GzJointStateMsgCallback(GzJointStateMsgPtr& gz_joint_state_msg);     ///< Callback for when Gazebo message is received.
+  ros::Publisher ros_joint_state_pub_;                                    ///< Publishes ROS messages.
+  sensor_msgs::JointStatePtr ros_joint_state_msg_;                            ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+
+  // ============================================ //
   // ========== MAGNETIC FIELD MESSAGES ========= //
   // ============================================ //
 
   transport::SubscriberPtr gz_magnetic_field_sub_;                                  ///< Listens to Gazebo messages.
   void GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg);    ///< Callback for when Gazebo message is received.
   ros::Publisher ros_magnetic_field_pub_;                                           ///< Publishes ROS messages.
-  sensor_msgs::MagneticField ros_magnetic_field_msg_;                                         ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+  sensor_msgs::MagneticField ros_magnetic_field_msg_;                               ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // ============================================ //
   // ============= NAV SAT FIX (GPS) ============ //
