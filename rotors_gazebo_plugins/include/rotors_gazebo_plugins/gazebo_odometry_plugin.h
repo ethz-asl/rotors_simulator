@@ -94,8 +94,7 @@ class GazeboOdometryPlugin : public ModelPlugin {
         unknown_delay_(kDefaultUnknownDelay),
         gazebo_sequence_(kDefaultGazeboSequence),
         odometry_sequence_(kDefaultOdometrySequence),
-        covariance_image_scale_(kDefaultCovarianceImageScale),
-        node_handle_(NULL) {}
+        covariance_image_scale_(kDefaultCovarianceImageScale) {}
 
   ~GazeboOdometryPlugin();
 
@@ -144,7 +143,7 @@ class GazeboOdometryPlugin : public ModelPlugin {
   std::random_device random_device_;
   std::mt19937 random_generator_;
 
-  ros::NodeHandle* node_handle_;
+  //ros::NodeHandle* node_handle_;
 
   gazebo::transport::NodePtr gz_node_ptr_;
 
