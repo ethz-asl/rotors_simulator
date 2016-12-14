@@ -31,6 +31,7 @@
 #include <rotors_gazebo_plugins/common.h>
 
 #include "PoseStamped.pb.h"
+#include "../include/rotors_gazebo_plugins/gazebo_ros_interface_plugin.h"
 
 
 namespace gazebo {
@@ -195,6 +196,7 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   std::string odometry_topic_name = "~/" + odometry_pub_topic_;
   odometry_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Odometry>(odometry_topic_name, 1);
   gzmsg << "Publishing on Gazebo topic \"" << odometry_topic_name << "\"." << std::endl;
+  GazeboRosInterfacePlugin::getInstance().AttachTo(odometry_topic_name, odometry_pub_topic_, GazeboRosInterfacePlugin::SupportedMsgTypes::ODOMETRY);
 
   gzmsg << "Load() finished." << std::endl;
 }
@@ -464,7 +466,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 //      odometry_pub_.publish(odometry);
 //    }
     if (odometry_pub_->HasConnections()) {
-//      gzmsg << "Publishing odometry..." << std::endl;
+      gzmsg << "Publishing odometry..." << std::endl;
       odometry_pub_->Publish(odometry_msg);
     }
 

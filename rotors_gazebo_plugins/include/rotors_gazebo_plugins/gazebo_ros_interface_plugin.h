@@ -65,12 +65,25 @@ typedef const boost::shared_ptr<const gz_geometry_msgs::Odometry> GzOdometryMsgP
 class GazeboRosInterfacePlugin : public ModelPlugin {
  public:
 
+  enum class SupportedMsgTypes {
+    ODOMETRY
+  };
+
   GazeboRosInterfacePlugin();
   ~GazeboRosInterfacePlugin();
+
+  void AttachTo(std::string gazeboTopicName, std::string rosTopicName, SupportedMsgTypes msgType);
 
   void InitializeParams();
   void Publish();
 
+
+  static GazeboRosInterfacePlugin & getInstance() {
+    GZ_ASSERT(instance, "");
+    return *instance;
+  }
+
+  static GazeboRosInterfacePlugin * instance;
  protected:
   void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 

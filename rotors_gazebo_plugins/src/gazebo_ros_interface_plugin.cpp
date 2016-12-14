@@ -24,17 +24,24 @@
 
 namespace gazebo {
 
+
+GazeboRosInterfacePlugin* GazeboRosInterfacePlugin::instance;
+
 GazeboRosInterfacePlugin::GazeboRosInterfacePlugin()
     : ModelPlugin(),
       gz_node_handle_(0),
       ros_node_handle_(0),
       ros_actuators_msg_(new mav_msgs::Actuators)
 {
+  GZ_ASSERT(!instance, "");
+  instance = this;
+
   // Nothing
 }
 
 GazeboRosInterfacePlugin::~GazeboRosInterfacePlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
+  instance = nullptr;
 }
 
 
@@ -190,6 +197,103 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
 }
 
+void imageCallback(GzOdometryMsgPtr& gz_actuators_msg)
+{
+    // My code.
+}
+
+template <typename M>
+struct AttachHelperStorage {
+  GazeboRosInterfacePlugin * ptr;
+  void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &);
+
+  void callback (const boost::shared_ptr<M const> & msg_ptr) {
+    (ptr->*fp)(msg_ptr);
+  }
+};
+
+template <typename M>
+gazebo::transport::SubscriberPtr AttachHelper(void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &), GazeboRosInterfacePlugin * ptr, std::string gazeboTopicName, std::string rosTopicName, transport::NodePtr gz_node_handle) {
+  static std::map< std::string, AttachHelperStorage<M> > callback_map;
+
+  // @todo Handle collision error
+  auto callback_entry = callback_map.emplace( gazeboTopicName, AttachHelperStorage<M>{ptr, fp});
+
+//  ptr->gz_odometry_sub_ =
+    gz_node_handle->Subscribe(gazeboTopicName,
+        &AttachHelperStorage<M>::callback,
+        &callback_entry.first->second);
+}
+
+void GazeboRosInterfacePlugin::AttachTo(std::string gazeboTopicName, std::string rosTopicName, SupportedMsgTypes msgType) {
+
+//  gz_odometry_sub_ = gz_node_handle_->Subscribe<gz_geometry_msgs::Odometry>(gazeboTopicName, &GazeboRosInterfacePlugin::GzOdometryMsgCallback, this);
+
+//
+
+  switch(msgType) {
+    case SupportedMsgTypes::ODOMETRY:
+
+      gz_odometry_sub_ = AttachHelper(&GazeboRosInterfacePlugin::GzOdometryMsgCallback, this, gazeboTopicName, rosTopicName, gz_node_handle_);
+
+    break;
+  }
+
+
+  //gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_odometry_subtopic_name << "\"." << std::endl;
+
+
+}
+
+void GazeboRosInterfacePlugin::GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odometry_msg) {
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
+  // We need to convert from a Gazebo message to a ROS message,
+  // and then forward the Odometry message onto ROS
+
+  ros_odometry_msg_.header.stamp.sec = gz_odometry_msg->header().stamp().sec();
+  ros_odometry_msg_.header.stamp.nsec = gz_odometry_msg->header().stamp().nsec();
+  ros_odometry_msg_.header.frame_id = gz_odometry_msg->header().frame_id();
+
+  ros_odometry_msg_.child_frame_id = gz_odometry_msg->child_frame_id();
+
+  // ============================================ //
+  // ===================== POSE ================= //
+  // ============================================ //
+  ros_odometry_msg_.pose.pose.position.x = gz_odometry_msg->pose().pose().position().x();
+  ros_odometry_msg_.pose.pose.position.y = gz_odometry_msg->pose().pose().position().y();
+  ros_odometry_msg_.pose.pose.position.z = gz_odometry_msg->pose().pose().position().z();
+
+  ros_odometry_msg_.pose.pose.orientation.w = gz_odometry_msg->pose().pose().orientation().w();
+  ros_odometry_msg_.pose.pose.orientation.x = gz_odometry_msg->pose().pose().orientation().x();
+  ros_odometry_msg_.pose.pose.orientation.y = gz_odometry_msg->pose().pose().orientation().y();
+  ros_odometry_msg_.pose.pose.orientation.z = gz_odometry_msg->pose().pose().orientation().z();
+
+  for(int i = 0; i < gz_odometry_msg->pose().covariance_size(); i ++) {
+    ros_odometry_msg_.pose.covariance[i] = gz_odometry_msg->pose().covariance(i);
+  }
+
+  // ============================================ //
+  // ===================== TWIST ================ //
+  // ============================================ //
+  ros_odometry_msg_.twist.twist.linear.x = gz_odometry_msg->twist().twist().linear().x();
+  ros_odometry_msg_.twist.twist.linear.y = gz_odometry_msg->twist().twist().linear().y();
+  ros_odometry_msg_.twist.twist.linear.z = gz_odometry_msg->twist().twist().linear().z();
+
+  ros_odometry_msg_.twist.twist.angular.x = gz_odometry_msg->twist().twist().angular().x();
+  ros_odometry_msg_.twist.twist.angular.y = gz_odometry_msg->twist().twist().angular().y();
+  ros_odometry_msg_.twist.twist.angular.z = gz_odometry_msg->twist().twist().angular().z();
+
+  for(int i = 0; i < gz_odometry_msg->twist().covariance_size(); i ++) {
+    ros_odometry_msg_.twist.covariance[i] = gz_odometry_msg->twist().covariance(i);
+  }
+
+  // Publish onto ROS framework
+//  gzmsg << "Publishing Odometry message to ROS framework..." << std::endl;
+  ros_odometry_pub_.publish(ros_odometry_msg_);
+
+}
+
 void GazeboRosInterfacePlugin::GzActuatorsMsgCallback(GzActuatorsMsgPtr& gz_actuators_msg) {
   gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
@@ -320,54 +424,7 @@ void GazeboRosInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fi
 
 }
 
-void GazeboRosInterfacePlugin::GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odometry_msg) {
-//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
-  // We need to convert from a Gazebo message to a ROS message,
-  // and then forward the Odometry message onto ROS
-
-  ros_odometry_msg_.header.stamp.sec = gz_odometry_msg->header().stamp().sec();
-  ros_odometry_msg_.header.stamp.nsec = gz_odometry_msg->header().stamp().nsec();
-  ros_odometry_msg_.header.frame_id = gz_odometry_msg->header().frame_id();
-
-  ros_odometry_msg_.child_frame_id = gz_odometry_msg->child_frame_id();
-
-  // ============================================ //
-  // ===================== POSE ================= //
-  // ============================================ //
-  ros_odometry_msg_.pose.pose.position.x = gz_odometry_msg->pose().pose().position().x();
-  ros_odometry_msg_.pose.pose.position.y = gz_odometry_msg->pose().pose().position().y();
-  ros_odometry_msg_.pose.pose.position.z = gz_odometry_msg->pose().pose().position().z();
-
-  ros_odometry_msg_.pose.pose.orientation.w = gz_odometry_msg->pose().pose().orientation().w();
-  ros_odometry_msg_.pose.pose.orientation.x = gz_odometry_msg->pose().pose().orientation().x();
-  ros_odometry_msg_.pose.pose.orientation.y = gz_odometry_msg->pose().pose().orientation().y();
-  ros_odometry_msg_.pose.pose.orientation.z = gz_odometry_msg->pose().pose().orientation().z();
-
-  for(int i = 0; i < gz_odometry_msg->pose().covariance_size(); i ++) {
-    ros_odometry_msg_.pose.covariance[i] = gz_odometry_msg->pose().covariance(i);
-  }
-
-  // ============================================ //
-  // ===================== TWIST ================ //
-  // ============================================ //
-  ros_odometry_msg_.twist.twist.linear.x = gz_odometry_msg->twist().twist().linear().x();
-  ros_odometry_msg_.twist.twist.linear.y = gz_odometry_msg->twist().twist().linear().y();
-  ros_odometry_msg_.twist.twist.linear.z = gz_odometry_msg->twist().twist().linear().z();
-
-  ros_odometry_msg_.twist.twist.angular.x = gz_odometry_msg->twist().twist().angular().x();
-  ros_odometry_msg_.twist.twist.angular.y = gz_odometry_msg->twist().twist().angular().y();
-  ros_odometry_msg_.twist.twist.angular.z = gz_odometry_msg->twist().twist().angular().z();
-
-  for(int i = 0; i < gz_odometry_msg->twist().covariance_size(); i ++) {
-    ros_odometry_msg_.twist.covariance[i] = gz_odometry_msg->twist().covariance(i);
-  }
-
-  // Publish onto ROS framework
-//  gzmsg << "Publishing Odometry message to ROS framework..." << std::endl;
-  ros_odometry_pub_.publish(ros_odometry_msg_);
-
-}
 
 
 
