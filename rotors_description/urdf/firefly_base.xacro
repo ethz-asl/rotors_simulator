@@ -34,7 +34,8 @@
   		imu_sub_topic="imu"
   		joint_state_sub_topic="joint_state"
   		magnetic_field_sub_topic="magnetic_field"
-  		nav_sat_fix_sub_topic="nav_sat_fix" />
+  		nav_sat_fix_sub_topic="nav_sat_fix"
+  		odometry_sub_topic="odometry_sensor1/odometry" />
 
   <xacro:if value="$(arg enable_mavlink_interface)">
     <!-- Instantiate mavlink telemetry interface. -->

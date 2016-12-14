@@ -36,10 +36,12 @@
 #include "JointState.pb.h"
 #include "MagneticField.pb.h"
 #include "NavSatFix.pb.h"
+#include "Odometry.pb.h"
 #include "SensorImu.pb.h"
 
 // ROS MSG TYPES
 #include <mav_msgs/Actuators.h>
+#include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/MagneticField.h>
@@ -55,6 +57,7 @@ typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> GzImuPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::JointState> GzJointStateMsgPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> GzMagneticFieldMsgPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::NavSatFix> GzNavSatFixPtr;
+typedef const boost::shared_ptr<const gz_geometry_msgs::Odometry> GzOdometryMsgPtr;
 
 
 //! @brief    Message interface plugin for Gazebo.
@@ -144,6 +147,15 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   void GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg);   ///< Callback for when Gazebo message is received.
   ros::Publisher ros_nav_sat_fix_pub_;                            ///< Publishes ROS messages.
   sensor_msgs::NavSatFix ros_nav_sat_fix_msg_;                    ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+
+  // ============================================ //
+  // ============== ODOMETRY MESSAGES =========== //
+  // ============================================ //
+
+  transport::SubscriberPtr gz_odometry_sub_;                            ///< Listens to Gazebo messages.
+  void GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odometry_msg);     ///< Callback for when Gazebo message is received.
+  ros::Publisher ros_odometry_pub_;                                    ///< Publishes ROS messages.
+  nav_msgs::Odometry ros_odometry_msg_;                            ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
 };
 

@@ -37,10 +37,10 @@ namespace gazebo {
 
 GazeboOdometryPlugin::~GazeboOdometryPlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
-  if (node_handle_) {
-    node_handle_->shutdown();
-    delete node_handle_;
-  }
+//  if (node_handle_) {
+//    node_handle_->shutdown();
+//    delete node_handle_;
+//  }
 }
 
 // void GazeboOdometryPlugin::InitializeParams() {};
@@ -64,16 +64,14 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   SdfVector3 noise_uniform_angular_velocity;
   const SdfVector3 zeros3(0.0, 0.0, 0.0);
 
-  gzmsg << "Clearing odometry queue..." << std::endl;
   odometry_queue_.clear();
-  gzmsg << "Odometry queue cleared." << std::endl;
 
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_odometry_plugin] Please specify a robotNamespace.\n";
 
-  node_handle_ = new ros::NodeHandle(namespace_);
+//  node_handle_ = new ros::NodeHandle(namespace_);
   gz_node_ptr_ = gazebo::transport::NodePtr(new transport::Node());
   gz_node_ptr_->Init(namespace_);
 
@@ -120,14 +118,10 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   getSdfParam<double>(_sdf, "unknownDelay", unknown_delay_, unknown_delay_);
   getSdfParam<double>(_sdf, "covarianceImageScale", covariance_image_scale_, covariance_image_scale_);
 
-  gzmsg << "Getting parent link..." << std::endl;
-
   parent_link_ = world_->GetEntity(parent_frame_id_);
   if (parent_link_ == NULL && parent_frame_id_ != kDefaultParentFrameId) {
     gzthrow("[gazebo_odometry_plugin] Couldn't find specified parent link \"" << parent_frame_id_ << "\".");
   }
-
-  gzmsg << "Populating arrays..." << std::endl;
 
   position_n_[0] = NormalDistribution(0, noise_normal_position.X());
   position_n_[1] = NormalDistribution(0, noise_normal_position.Y());
@@ -190,17 +184,17 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   // simulation iteration.
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboOdometryPlugin::OnUpdate, this, _1));
 
-
-  gzmsg << "Creating publishers..." << std::endl;
 //  pose_pub_ = node_handle_->advertise<geometry_msgs::PoseStamped>(pose_pub_topic_, 1);
   pose_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::PoseStamped>(pose_pub_topic_, 1);
 
-  pose_with_covariance_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_with_covariance_pub_topic_, 1);
-  position_pub_ = node_handle_->advertise<geometry_msgs::PointStamped>(position_pub_topic_, 1);
-  transform_pub_ = node_handle_->advertise<geometry_msgs::TransformStamped>(transform_pub_topic_, 1);
+//  pose_with_covariance_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_with_covariance_pub_topic_, 1);
+//  position_pub_ = node_handle_->advertise<geometry_msgs::PointStamped>(position_pub_topic_, 1);
+//  transform_pub_ = node_handle_->advertise<geometry_msgs::TransformStamped>(transform_pub_topic_, 1);
 
 //  odometry_pub_ = node_handle_->advertise<nav_msgs::Odometry>(odometry_pub_topic_, 1);
-  odometry_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Odometry>(odometry_pub_topic_, 1);
+  std::string odometry_topic_name = "~/" + odometry_pub_topic_;
+  odometry_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Odometry>(odometry_topic_name, 1);
+  gzmsg << "Publishing on Gazebo topic \"" << odometry_topic_name << "\"." << std::endl;
 
   gzmsg << "Load() finished." << std::endl;
 }
@@ -208,7 +202,7 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
 // This gets called by the world update start event.
 void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   // C denotes child frame, P parent frame, and W world frame.
   // Further C_pose_W_P denotes pose of P wrt. W expressed in C.
@@ -329,7 +323,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // Is it time to publish the front element?
   if (gazebo_sequence_ == odometry_queue_.front().first) {
-    gzmsg << "Publishing first element..." << std::endl;
+//    gzmsg << "Publishing first element..." << std::endl;
 
     //nav_msgs::OdometryPtr odometry(new nav_msgs::Odometry);
 
@@ -470,7 +464,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 //      odometry_pub_.publish(odometry);
 //    }
     if (odometry_pub_->HasConnections()) {
-      gzmsg << "Publishing odometry..." << std::endl;
+//      gzmsg << "Publishing odometry..." << std::endl;
       odometry_pub_->Publish(odometry_msg);
     }
 
