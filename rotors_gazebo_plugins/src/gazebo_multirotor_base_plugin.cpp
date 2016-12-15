@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +19,15 @@
  * limitations under the License.
  */
 
+// MODULE HEADER INCLUDE
 #include "rotors_gazebo_plugins/gazebo_multirotor_base_plugin.h"
 
+// STANDARD LIB INCLUDES
 #include <ctime>
+
+// USER INCLUDES
+#include "rotors_gazebo_plugins/gazebo_ros_interface_plugin.h"
+
 
 //#include <mav_msgs/Actuators.h>
 
@@ -40,7 +47,7 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
 
   getSdfParam<std::string>(_sdf, "robotNamespace", namespace_, namespace_, true);
   getSdfParam<std::string>(_sdf, "linkName", link_name_, link_name_, true);
-  getSdfParam<std::string>(_sdf, "motorPubTopic", motor_pub_topic_, motor_pub_topic_);
+  getSdfParam<std::string>(_sdf, "motorPubTopic", actuators_pub_topic_, actuators_pub_topic_);
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_,
                       rotor_velocity_slowdown_sim_);
 
@@ -48,13 +55,28 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
   node_handle_->Init(namespace_);
 
-  //motor_pub_ = node_handle_->advertise<mav_msgs::Actuators>(motor_pub_topic_, 10);
-  motor_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Actuators>(motor_pub_topic_, 10);
-  gzmsg << "motor_pub_topic_ = \"" << motor_pub_topic_ << "\"." << std::endl;
+  // ============================================ //
+  // =========== ACTUATORS MSG SETUP ============ //
+  // ============================================ //
+  motor_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Actuators>(actuators_pub_topic_, 10);
+  gzmsg << "actuators_pub_topic_ = \"" << actuators_pub_topic_ << "\"." << std::endl;
+//  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
+//        actuators_pub_topic_,
+//        actuators_pub_topic_,
+//        GazeboRosInterfacePlugin::SupportedMsgTypes::ACTUATORS);
 
-  //joint_state_pub_ = node_handle_->advertise<sensor_msgs::JointState>(joint_state_pub_topic_, 1);
+  // ============================================ //
+  // ========== JOINT STATE MSG SETUP =========== //
+  // ============================================ //
   joint_state_pub_ = node_handle_->Advertise<sensor_msgs::msgs::JointState>(joint_state_pub_topic_, 1);
   gzmsg << "joint_state_pub_topic = \"" << joint_state_pub_topic_ << "\"." << std::endl;
+//  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
+//          joint_state_pub_topic_,
+//          joint_state_pub_topic_,
+//          GazeboRosInterfacePlugin::SupportedMsgTypes::JOINT_STATE);
+
+
+
   frame_id_ = link_name_;
 
   link_ = model_->GetLink(link_name_);

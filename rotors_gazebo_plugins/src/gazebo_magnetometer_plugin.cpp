@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+// MODULE HEADER INCLUDE
 #include "rotors_gazebo_plugins/gazebo_magnetometer_plugin.h"
+
+// USER INCLUDES
+#include "rotors_gazebo_plugins/gazebo_ros_interface_plugin.h"
 
 namespace gazebo {
 
@@ -76,12 +80,15 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
           boost::bind(&GazeboMagnetometerPlugin::OnUpdate, this, _1));
 
   // ============================================ //
-  // ============= SETUP PUBLISHER ============== //
+  // ========= MAGNETIC FIELD MSG SETUP ========= //
   // ============================================ //
 
-  //magnetometer_pub_ = node_handle_->advertise<sensor_msgs::MagneticField>(magnetometer_topic_, 1);
   magnetometer_pub_ = node_handle_->Advertise<sensor_msgs::msgs::MagneticField>(magnetometer_topic_, 1);
   gzmsg << "GazeboMagnetometerPlugin publishing on " << magnetometer_topic_ << std::endl;
+  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
+          magnetometer_topic_,
+          magnetometer_topic_,
+          GazeboRosInterfacePlugin::SupportedMsgTypes::MAGNETIC_FIELD);
 
   // Create the normal noise distributions
   noise_n_[0] = NormalDistribution(0, noise_normal.X());
