@@ -55,7 +55,7 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
         joint_state_pub_topic_(kDefaultJointStatePubTopic),
-        motor_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
+        actuators_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
         link_name_(kDefaultLinkName),
         frame_id_(kDefaultFrameId),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
@@ -86,7 +86,7 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
 
   std::string namespace_;
   std::string joint_state_pub_topic_;
-  std::string motor_pub_topic_;
+  std::string actuators_pub_topic_;
   std::string link_name_;
   std::string frame_id_;
   double rotor_velocity_slowdown_sim_;

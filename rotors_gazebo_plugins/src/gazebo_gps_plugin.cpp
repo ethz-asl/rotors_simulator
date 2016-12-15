@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
+// MODULE HEADER
 #include "rotors_gazebo_plugins/gazebo_gps_plugin.h"
+
+// USER LIBS
+#include "rotors_gazebo_plugins/gazebo_ros_interface_plugin.h"
 
 namespace gazebo {
 
@@ -90,14 +94,25 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   // Make sure the parent sensor is active.
   parent_sensor_->SetActive(true);
 
-  // Initialize the ROS publisher for sending gps location and ground speed.
-  //gps_pub_ = node_handle_->advertise<sensor_msgs::NavSatFix>(gps_topic_, 1);
+  // ============================================ //
+  // =========== NAV SAT FIX MSG SETUP ========== //
+  // ============================================ //
+  gzmsg << "GazeboGpsPlugin creating publisher on \"" << gps_topic_ << "\"." << std::endl;
   gz_gps_pub_ = gz_node_handle_->Advertise<sensor_msgs::msgs::NavSatFix>(gps_topic_, 1);
-  gzmsg << "GazeboGpsPlugin publishing on " << gps_topic_ << std::endl;
+  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
+      gps_topic_,
+      gps_topic_,
+      GazeboRosInterfacePlugin::SupportedMsgTypes::NAV_SAT_FIX);
 
-  //ground_speed_pub_ = node_handle_->advertise<geometry_msgs::TwistStamped>(ground_speed_topic_, 1);
+  // ============================================ //
+  // == GROUND SPEED (TWIST STAMPED) MSG SETUP == //
+  // ============================================ //
+  gzmsg << "GazeboGpsPlugin creating publisher on \"" << ground_speed_topic_ << "\"." << std::endl;
   gz_ground_speed_pub_ = gz_node_handle_->Advertise<sensor_msgs::msgs::TwistStamped>(ground_speed_topic_, 1);
-  gzmsg << "GazeboGpsPlugin publishing on " << ground_speed_topic_ << std::endl;
+  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
+      ground_speed_topic_,
+      ground_speed_topic_,
+      GazeboRosInterfacePlugin::SupportedMsgTypes::TWIST_STAMPED);
 
   // Initialize the normal distributions for ground speed.
   ground_speed_n_[0] = NormalDistribution(0, hor_vel_std_dev);

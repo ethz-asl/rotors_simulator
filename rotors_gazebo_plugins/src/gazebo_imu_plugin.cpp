@@ -19,17 +19,18 @@
  * limitations under the License.
  */
 
+// MODULE HEADER
 #include "rotors_gazebo_plugins/gazebo_imu_plugin.h"
 
+// SYSTEM LIBS
 #include <chrono>
 #include <cmath>
 #include <iostream>
 #include <stdio.h>
-
 #include <boost/bind.hpp>
 
+// USER LIBS
 #include "rotors_gazebo_plugins/gazebo_ros_interface_plugin.h"
-
 
 
 namespace gazebo {
@@ -137,21 +138,22 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboImuPlugin::OnUpdate, this, _1));
 
-  // Create publisher
+  // ============================================ //
+  // =============== IMU MSG SETUP ============== //
+  // ============================================ //
   // The tilde (~) instructs gazebo to create the topic name relative to the parent
   // model. e.g. if this IMU was mounted on a firefly, the full topic path would be:
   // /gazebo/firefly/imu_topic_name
-//  std::string imu_topic_name = "~/" + model_->GetName() + "/" + imu_topic_;
-  std::string imu_topic_name = "~/" + imu_topic_;
-  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(imu_topic_name, 1);
-  gzmsg << "GazeboImuPlugin publishing on Gazebo topic \"" << imu_topic_name << "\"." << std::endl;
+  std::string gz_imu_topic_name = "~/" + imu_topic_;
+  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(gz_imu_topic_name, 1);
+  gzmsg << "GazeboImuPlugin publishing on Gazebo topic \"" << gz_imu_topic_name << "\"." << std::endl;
   GazeboRosInterfacePlugin::getInstance().ConnectToRos(
-        imu_topic_name,
+        gz_imu_topic_name,
         imu_topic_,
         GazeboRosInterfacePlugin::SupportedMsgTypes::IMU);
 
   //==============================================//
-  //====== POPULATE STATIS PARTS OF IMU MSG ======//
+  //====== POPULATE STATIC PARTS OF IMU MSG ======//
   //==============================================//
 
 //  imu_message_.header.frame_id = frame_id_;

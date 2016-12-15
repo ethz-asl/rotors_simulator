@@ -17,6 +17,7 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_MSG_INTERFACE_PLUGIN_H
 #define ROTORS_GAZEBO_PLUGINS_MSG_INTERFACE_PLUGIN_H
 
+// SYSTEM INCLUDES
 #include <random>
 
 #include <Eigen/Core>
@@ -38,6 +39,7 @@
 #include "NavSatFix.pb.h"
 #include "Odometry.pb.h"
 #include "SensorImu.pb.h"
+#include "TwistStamped.pb.h"
 
 // ROS MSG TYPES
 #include <mav_msgs/Actuators.h>
@@ -46,6 +48,7 @@
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/MagneticField.h>
 #include <sensor_msgs/NavSatFix.h>
+#include <geometry_msgs/TwistStamped.h>
 
 #include "rotors_gazebo_plugins/common.h"
 
@@ -58,7 +61,7 @@ typedef const boost::shared_ptr<const sensor_msgs::msgs::JointState> GzJointStat
 typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> GzMagneticFieldMsgPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::NavSatFix> GzNavSatFixPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::Odometry> GzOdometryMsgPtr;
-
+typedef const boost::shared_ptr<const sensor_msgs::msgs::TwistStamped> GzTwistStampedMsgPtr;
 
 //! @brief    Message interface plugin for Gazebo.
 //! @details  Interfaces to both ROS and MAVlink.
@@ -68,9 +71,16 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   //! @brief    The message types that GazeboRosInterfacePlugin supports.
   //! @details  For each one of these, GazeboRosInterfacePlugin knows how to convert the message
   //!           from a Gazebo message to a ROS message.
+  //! @warning  If you add another enum here, make sure to add a corresponding case block
+  //!           to the switch statement in ConnectToRos().
   enum class SupportedMsgTypes {
+    ACTUATORS,
     IMU,
+    JOINT_STATE,
+    MAGNETIC_FIELD,
+    NAV_SAT_FIX,
     ODOMETRY,
+    TWIST_STAMPED,
   };
 
   GazeboRosInterfacePlugin();
@@ -137,55 +147,65 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   // ============= ACTUATORS MESSAGES =========== //
   // ============================================ //
 
-  transport::SubscriberPtr gz_actuator_sub_;                            ///< Listens to Gazebo messages.
-  void GzActuatorsMsgCallback(GzActuatorsMsgPtr& gz_actuators_msg);     ///< Callback for when Gazebo message is received.
-  ros::Publisher ros_actuators_pub_;                                    ///< Publishes ROS messages.
+  //transport::SubscriberPtr gz_actuator_sub_;                            ///< Listens to Gazebo messages.
+  void GzActuatorsMsgCallback(GzActuatorsMsgPtr& gz_actuators_msg, ros::Publisher ros_publisher);     ///< Callback for when Gazebo message is received.
+  //ros::Publisher ros_actuators_pub_;                                    ///< Publishes ROS messages.
   mav_msgs::ActuatorsPtr ros_actuators_msg_;                            ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // ============================================ //
   // ==================== IMU =================== //
   // ============================================ //
 
-  transport::SubscriberPtr gz_imu_sub_;         ///< Listens to Gazebo messages.
+  //transport::SubscriberPtr gz_imu_sub_;         ///< Listens to Gazebo messages.
   void GzImuMsgCallback(GzImuPtr& gz_imu_msg, ros::Publisher ros_publisher);     ///< Callback for when Gazebo message is received.
-  ros::Publisher ros_imu_pub_;                  ///< Publishes ROS messages.
+  //ros::Publisher ros_imu_pub_;                  ///< Publishes ROS messages.
   sensor_msgs::Imu ros_imu_msg_;                ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // ============================================ //
   // =========== JOINT STATE MESSAGES =========== //
   // ============================================ //
 
-  transport::SubscriberPtr gz_joing_state_sub_;                            ///< Listens to Gazebo messages.
-  void GzJointStateMsgCallback(GzJointStateMsgPtr& gz_joint_state_msg);     ///< Callback for when Gazebo message is received.
-  ros::Publisher ros_joint_state_pub_;                                    ///< Publishes ROS messages.
+//  transport::SubscriberPtr gz_joing_state_sub_;                            ///< Listens to Gazebo messages.
+  void GzJointStateMsgCallback(GzJointStateMsgPtr& gz_joint_state_msg, ros::Publisher ros_publisher);     ///< Callback for when Gazebo message is received.
+//  ros::Publisher ros_joint_state_pub_;                                    ///< Publishes ROS messages.
   sensor_msgs::JointStatePtr ros_joint_state_msg_;                            ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // ============================================ //
   // ========== MAGNETIC FIELD MESSAGES ========= //
   // ============================================ //
 
-  transport::SubscriberPtr gz_magnetic_field_sub_;                                  ///< Listens to Gazebo messages.
-  void GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg);    ///< Callback for when Gazebo message is received.
-  ros::Publisher ros_magnetic_field_pub_;                                           ///< Publishes ROS messages.
+//  transport::SubscriberPtr gz_magnetic_field_sub_;                                  ///< Listens to Gazebo messages.
+  void GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg, ros::Publisher ros_publisher);    ///< Callback for when Gazebo message is received.
+//  ros::Publisher ros_magnetic_field_pub_;                                           ///< Publishes ROS messages.
   sensor_msgs::MagneticField ros_magnetic_field_msg_;                               ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // ============================================ //
   // ============= NAV SAT FIX (GPS) ============ //
   // ============================================ //
 
-  transport::SubscriberPtr gz_nav_sat_fix_sub_;                   ///< Listens to Gazebo messages.
-  void GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg);   ///< Callback for when Gazebo message is received.
-  ros::Publisher ros_nav_sat_fix_pub_;                            ///< Publishes ROS messages.
+//  transport::SubscriberPtr gz_nav_sat_fix_sub_;                   ///< Listens to Gazebo messages.
+  void GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg, ros::Publisher ros_publisher);   ///< Callback for when Gazebo message is received.
+//  ros::Publisher ros_nav_sat_fix_pub_;                            ///< Publishes ROS messages.
   sensor_msgs::NavSatFix ros_nav_sat_fix_msg_;                    ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // ============================================ //
   // ============== ODOMETRY MESSAGES =========== //
   // ============================================ //
 
-  transport::SubscriberPtr gz_odometry_sub_;                            ///< Listens to Gazebo messages.
+//  transport::SubscriberPtr gz_odometry_sub_;                            ///< Listens to Gazebo messages.
   void GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odometry_msg, ros::Publisher publisher);     ///< Callback for when Gazebo message is received.
-  ros::Publisher ros_odometry_pub_;                                    ///< Publishes ROS messages.
+//  ros::Publisher ros_odometry_pub_;                                    ///< Publishes ROS messages.
   nav_msgs::Odometry ros_odometry_msg_;                            ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+
+  // ============================================ //
+  // =========== TWIST STAMPED MESSAGES ========= //
+  // ============================================ //
+
+//  transport::SubscriberPtr gz_odometry_sub_;                            ///< Listens to Gazebo messages.
+  void GzTwistStampedMsgCallback(GzTwistStampedMsgPtr& gz_twist_stamped_msg, ros::Publisher publisher);     ///< Callback for when Gazebo message is received.
+//  ros::Publisher ros_odometry_pub_;                                    ///< Publishes ROS messages.
+  geometry_msgs::TwistStamped ros_twist_stamped_msg_;                            ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+
 
 };
 
