@@ -93,6 +93,15 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
 
  private:
 
+  template <typename M>
+  void AttachHelper(
+      void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &), GazeboRosInterfacePlugin * ptr,
+      std::string gazeboTopicName,
+      std::string rosTopicName,
+      transport::NodePtr gz_node_handle);
+
+  std::vector<gazebo::transport::SubscriberPtr> subscriberPtrs_;
+
   std::string namespace_;
 
   /// @brief  Handle for the Gazebo node.
