@@ -28,6 +28,10 @@
 
 #include <boost/bind.hpp>
 
+#include "rotors_gazebo_plugins/gazebo_ros_interface_plugin.h"
+
+
+
 namespace gazebo {
 
 GazeboImuPlugin::GazeboImuPlugin()
@@ -141,6 +145,10 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   std::string imu_topic_name = "~/" + imu_topic_;
   imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(imu_topic_name, 1);
   gzmsg << "GazeboImuPlugin publishing on Gazebo topic \"" << imu_topic_name << "\"." << std::endl;
+  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
+        imu_topic_name,
+        imu_topic_,
+        GazeboRosInterfacePlugin::SupportedMsgTypes::IMU);
 
   //==============================================//
   //====== POPULATE STATIS PARTS OF IMU MSG ======//

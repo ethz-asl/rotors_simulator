@@ -65,13 +65,20 @@ typedef const boost::shared_ptr<const gz_geometry_msgs::Odometry> GzOdometryMsgP
 class GazeboRosInterfacePlugin : public ModelPlugin {
  public:
 
+  //! @brief    The message types that GazeboRosInterfacePlugin supports.
+  //! @details  For each one of these, GazeboRosInterfacePlugin knows how to convert the message
+  //!           from a Gazebo message to a ROS message.
   enum class SupportedMsgTypes {
-    ODOMETRY
+    IMU,
+    ODOMETRY,
   };
 
   GazeboRosInterfacePlugin();
   ~GazeboRosInterfacePlugin();
 
+  //! @brief    Call this to connect a Gazebo topic to a ROS topic.
+  //! @details  Any messages published on the specified Gazebo topic will be converted into a ROS message
+  //!           and then published on the ROS framework.
   void ConnectToRos(std::string gazeboTopicName, std::string rosTopicName, SupportedMsgTypes msgType);
 
   void InitializeParams();
@@ -93,7 +100,7 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
 
  private:
 
-  template <typename M>
+  template <typename M, typename N>
   void ConnectHelper(
       void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher),
       GazeboRosInterfacePlugin * ptr,
@@ -140,7 +147,7 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   // ============================================ //
 
   transport::SubscriberPtr gz_imu_sub_;         ///< Listens to Gazebo messages.
-  void GzImuCallback(GzImuPtr& gz_imu_msg);     ///< Callback for when Gazebo message is received.
+  void GzImuMsgCallback(GzImuPtr& gz_imu_msg, ros::Publisher ros_publisher);     ///< Callback for when Gazebo message is received.
   ros::Publisher ros_imu_pub_;                  ///< Publishes ROS messages.
   sensor_msgs::Imu ros_imu_msg_;                ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
