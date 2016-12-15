@@ -95,7 +95,8 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
 
   template <typename M>
   void AttachHelper(
-      void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &), GazeboRosInterfacePlugin * ptr,
+      void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher),
+      GazeboRosInterfacePlugin * ptr,
       std::string gazeboTopicName,
       std::string rosTopicName,
       transport::NodePtr gz_node_handle);
@@ -175,7 +176,7 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   // ============================================ //
 
   transport::SubscriberPtr gz_odometry_sub_;                            ///< Listens to Gazebo messages.
-  void GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odometry_msg);     ///< Callback for when Gazebo message is received.
+  void GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odometry_msg, ros::Publisher publisher);     ///< Callback for when Gazebo message is received.
   ros::Publisher ros_odometry_pub_;                                    ///< Publishes ROS messages.
   nav_msgs::Odometry ros_odometry_msg_;                            ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 

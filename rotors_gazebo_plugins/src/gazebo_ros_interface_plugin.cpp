@@ -182,34 +182,34 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   // ============= ODOMETRY MSG SETUP =========== //
   // ============================================ //
 
-  std::string odometry_subtopic_name;
-  if(_sdf->HasElement("odometrySubTopic"))
-    getSdfParam<std::string>(_sdf, "odometrySubTopic", odometry_subtopic_name, "");
-  else
-    gzerr << "Please specify an odometrySubTopic." << std::endl;
-
-  std::string gz_odometry_subtopic_name = "~/" + odometry_subtopic_name;
-  gz_odometry_sub_ = gz_node_handle_->Subscribe(gz_odometry_subtopic_name, &GazeboRosInterfacePlugin::GzOdometryMsgCallback, this);
-  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_odometry_subtopic_name << "\"." << std::endl;
-
-  ros_odometry_pub_ = ros_node_handle_->advertise<nav_msgs::Odometry>(odometry_subtopic_name, 1);
-  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << odometry_subtopic_name << "\"." << std::endl;
+//  std::string odometry_subtopic_name;
+//  if(_sdf->HasElement("odometrySubTopic"))
+//    getSdfParam<std::string>(_sdf, "odometrySubTopic", odometry_subtopic_name, "");
+//  else
+//    gzerr << "Please specify an odometrySubTopic." << std::endl;
+//
+//  std::string gz_odometry_subtopic_name = "~/" + odometry_subtopic_name;
+//  gz_odometry_sub_ = gz_node_handle_->Subscribe(gz_odometry_subtopic_name, &GazeboRosInterfacePlugin::GzOdometryMsgCallback, this);
+//  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_odometry_subtopic_name << "\"." << std::endl;
+//
+//  ros_odometry_pub_ = ros_node_handle_->advertise<nav_msgs::Odometry>(odometry_subtopic_name, 1);
+//  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << odometry_subtopic_name << "\"." << std::endl;
 
 }
 
 template <typename M>
 struct AttachHelperStorage {
   GazeboRosInterfacePlugin * ptr;
-  void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &);
+  void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher ros_publisher);
 //  void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, Publisher);
 
-  // Publisher publisher;
+  ros::Publisher ros_publisher;
 
   /// @brief    This is what gets passed into the Gazebo Subscribe method as a callback, and hence can only
   ///           have one parameter (note boost::bind() does not work with the current Gazebo Subscribe() definitions).
   void callback (const boost::shared_ptr<M const> & msg_ptr) {
-    gzmsg << "callback() called." << std::endl;
-    (ptr->*fp)(msg_ptr);
+    //gzmsg << "callback() called." << std::endl;
+    (ptr->*fp)(msg_ptr, ros_publisher);
 //    (ptr->*fp)(msg_ptr, publisher);
   }
 
@@ -217,14 +217,22 @@ struct AttachHelperStorage {
 
 template <typename M>
 void GazeboRosInterfacePlugin::AttachHelper(
-    void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &), GazeboRosInterfacePlugin * ptr,
+    void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher),
+    GazeboRosInterfacePlugin * ptr,
     std::string gazeboTopicName,
     std::string rosTopicName,
     transport::NodePtr gz_node_handle) {
+
+  // One map will be created for each type M
   static std::map< std::string, AttachHelperStorage<M> > callback_map;
 
+  // Create ROS publisher
+
+  ros::Publisher ros_publisher = ros_node_handle_->advertise<nav_msgs::Odometry>(rosTopicName, 1);
+  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << rosTopicName << "\"." << std::endl;
+
   // @todo Handle collision error
-  auto callback_entry = callback_map.emplace( gazeboTopicName, AttachHelperStorage<M>{ptr, fp});
+  auto callback_entry = callback_map.emplace(gazeboTopicName, AttachHelperStorage<M>{ptr, fp, ros_publisher});
 
 //  ptr->gz_odometry_sub_ =
   gazebo::transport::SubscriberPtr subscriberPtr;
@@ -252,14 +260,10 @@ void GazeboRosInterfacePlugin::AttachTo(std::string gazeboTopicName, std::string
     break;
   }
 
-
-
-  //gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_odometry_subtopic_name << "\"." << std::endl;
-
 }
 
-void GazeboRosInterfacePlugin::GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odometry_msg) {
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+void GazeboRosInterfacePlugin::GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odometry_msg, ros::Publisher ros_publisher) {
+  //gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the Odometry message onto ROS
@@ -303,7 +307,7 @@ void GazeboRosInterfacePlugin::GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odomet
 
   // Publish onto ROS framework
 //  gzmsg << "Publishing Odometry message to ROS framework..." << std::endl;
-  ros_odometry_pub_.publish(ros_odometry_msg_);
+  ros_publisher.publish(ros_odometry_msg_);
 
 }
 
