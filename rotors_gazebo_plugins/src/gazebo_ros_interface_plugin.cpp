@@ -197,12 +197,18 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
 }
 
+//! @brief      A helper class that provides storage for additional parameters that are inserted
+//!             into the callback.
 template <typename M>
 struct ConnectHelperStorage {
-  GazeboRosInterfacePlugin * ptr;
-  void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher ros_publisher);
-//  void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, Publisher);
 
+  //! @brief    Pointer to the ROS interface plugin class.
+  GazeboRosInterfacePlugin * ptr;
+
+  //! @brief    Function pointer to the subscriber callback with additional parameters.
+  void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher ros_publisher);
+
+  //! @brief    The ROS publisher that is passed into the modified callback.
   ros::Publisher ros_publisher;
 
   /// @brief    This is what gets passed into the Gazebo Subscribe method as a callback, and hence can only
@@ -210,7 +216,6 @@ struct ConnectHelperStorage {
   void callback (const boost::shared_ptr<M const> & msg_ptr) {
     //gzmsg << "callback() called." << std::endl;
     (ptr->*fp)(msg_ptr, ros_publisher);
-//    (ptr->*fp)(msg_ptr, publisher);
   }
 
 };
