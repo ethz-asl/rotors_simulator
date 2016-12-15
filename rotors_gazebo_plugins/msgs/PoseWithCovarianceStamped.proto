@@ -1,0 +1,12 @@
+syntax = "proto2";
+package gz_geometry_msgs;
+
+import "Header.proto";
+import "PoseWithCovariance.proto";
+
+// Pose with covariance stamped message type,
+// used to emulate a ROS message in the Gazebo framework.
+message PoseWithCovarianceStamped {
+  required gz_std_msgs.Header header = 1;
+  required PoseWithCovariance pose_with_covariance = 2;
+}

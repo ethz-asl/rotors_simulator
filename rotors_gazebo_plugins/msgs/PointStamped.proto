@@ -1,0 +1,12 @@
+syntax = "proto2";
+package gz_geometry_msgs;
+
+import "Header.proto";
+import "Point.proto";
+
+// PointStamped message type
+message PointStamped
+{
+  required gz_std_msgs.Header header = 1;
+  required Point point = 2;
+}

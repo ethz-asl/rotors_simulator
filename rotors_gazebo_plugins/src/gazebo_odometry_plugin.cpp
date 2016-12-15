@@ -31,6 +31,9 @@
 #include <rotors_gazebo_plugins/common.h>
 
 #include "PoseStamped.pb.h"
+#include "PoseWithCovarianceStamped.pb.h"
+#include "PositionStamped.pb.h"
+
 #include "../include/rotors_gazebo_plugins/gazebo_ros_interface_plugin.h"
 
 
@@ -100,8 +103,8 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
     random_generator_.seed(std::chrono::system_clock::now().time_since_epoch().count());
   }
   getSdfParam<std::string>(_sdf, "poseTopic", pose_pub_topic_, pose_pub_topic_);
-  getSdfParam<std::string>(_sdf, "poseWithCovarianceTopic", pose_with_covariance_pub_topic_, pose_with_covariance_pub_topic_);
-  getSdfParam<std::string>(_sdf, "positionTopic", position_pub_topic_, position_pub_topic_);
+  getSdfParam<std::string>(_sdf, "poseWithCovarianceTopic", pose_with_covariance_stamped_pub_topic_, pose_with_covariance_stamped_pub_topic_);
+  getSdfParam<std::string>(_sdf, "positionTopic", position_stamped_pub_topic_, position_stamped_pub_topic_);
   getSdfParam<std::string>(_sdf, "transformTopic", transform_pub_topic_, transform_pub_topic_);
   getSdfParam<std::string>(_sdf, "odometryTopic", odometry_pub_topic_, odometry_pub_topic_);
   getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
@@ -184,16 +187,48 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   // simulation iteration.
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboOdometryPlugin::OnUpdate, this, _1));
 
-//  pose_pub_ = node_handle_->advertise<geometry_msgs::PoseStamped>(pose_pub_topic_, 1);
-  pose_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::PoseStamped>(pose_pub_topic_, 1);
+  // ============================================ //
+  // =============== POSE MSG SETUP ============= //
+  // ============================================ //
+  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << pose_pub_topic_ << "\"." << std::endl;
+  pose_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Pose>(pose_pub_topic_, 1);
+  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
+      pose_pub_topic_,
+      pose_pub_topic_,
+      GazeboRosInterfacePlugin::SupportedMsgTypes::POSE);
+
+  // ============================================ //
+  // == POSE WITH COVARIANCE STAMPED MSG SETUP == //
+  // ============================================ //
+  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << pose_with_covariance_stamped_pub_topic_ << "\"." << std::endl;
+  pose_with_covariance_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::PoseWithCovarianceStamped>(
+      pose_with_covariance_stamped_pub_topic_, 1);
+  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
+      pose_with_covariance_stamped_pub_topic_,
+      pose_with_covariance_stamped_pub_topic_,
+      GazeboRosInterfacePlugin::SupportedMsgTypes::POSE_WITH_COVARIANCE_STAMPED);
 
 //  pose_with_covariance_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_with_covariance_pub_topic_, 1);
+
 //  position_pub_ = node_handle_->advertise<geometry_msgs::PointStamped>(position_pub_topic_, 1);
+  // ============================================ //
+  // ========= POSITION STAMPED MSG SETUP ======= //
+  // ============================================ //
+  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << position_stamped_pub_topic_ << "\"." << std::endl;
+  position_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::PositionStamped>(position_stamped_pub_topic_, 1);
+  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
+      position_stamped_pub_topic_,
+      position_stamped_pub_topic_,
+      GazeboRosInterfacePlugin::SupportedMsgTypes::POSITION_STAMPED);
+
 //  transform_pub_ = node_handle_->advertise<geometry_msgs::TransformStamped>(transform_pub_topic_, 1);
 
+  // ============================================ //
+  // ============= ODOMETRY MSG SETUP =========== //
+  // ============================================ //
   std::string odometry_topic_name = gz_node_ptr_->GetTopicNamespace() + "/" + odometry_pub_topic_;
+  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << odometry_pub_topic_ << "\"." << std::endl;
   odometry_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Odometry>(odometry_topic_name, 1);
-  gzmsg << "Publishing on Gazebo topic \"" << odometry_topic_name << "\"." << std::endl;
   GazeboRosInterfacePlugin::getInstance().ConnectToRos(
       odometry_topic_name,
       odometry_pub_topic_,
@@ -420,34 +455,29 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     }
 
     // Publish all the topics, for which the topic name is specified.
-//    if (pose_pub_.getNumSubscribers() > 0) {
-//      geometry_msgs::PoseStampedPtr pose(new geometry_msgs::PoseStamped);
-//      pose->header = odometry->header;
-//      pose->pose = odometry->pose.pose;
-//      pose_pub_.publish(pose);
-//    }
-
     if (pose_pub_->HasConnections()) {
-      gzmsg << "Publishing pose..." << std::endl;
-      pose_pub_->Publish(odometry_msg.pose());
+//      gzmsg << "Publishing pose..." << std::endl;
+      pose_pub_->Publish(odometry_msg.pose().pose());
     }
 
-//    if (pose_with_covariance_pub_.getNumSubscribers() > 0) {
-//      geometry_msgs::PoseWithCovarianceStampedPtr pose_with_covariance(
-//        new geometry_msgs::PoseWithCovarianceStamped);
-//      pose_with_covariance->header = odometry->header;
-//      pose_with_covariance->pose.pose = odometry->pose.pose;
-//      pose_with_covariance->pose.covariance = odometry->pose.covariance;
-//      gzmsg << "Publishing pose_with_covariance..." << std::endl;
-//      pose_with_covariance_pub_.publish(pose_with_covariance);
-//    }
-//    if (position_pub_.getNumSubscribers() > 0) {
-//      geometry_msgs::PointStampedPtr position(new geometry_msgs::PointStamped);
-//      position->header = odometry->header;
-//      position->point = p;
+    if (pose_with_covariance_stamped_pub_->HasConnections()) {
+      gz_geometry_msgs::PoseWithCovarianceStamped pose_with_covariance_stamped_msg;
+//      pose_with_covariance_stamped_msg.set_allocated_header(odometry_msg.mutable_header());
+      pose_with_covariance_stamped_msg.mutable_header()->CopyFrom(odometry_msg.header());
+      pose_with_covariance_stamped_msg.mutable_pose_with_covariance()->CopyFrom(odometry_msg.pose());
+
+//      gzmsg << "Publishing PoseWithCovarianceStamped message..." << std::endl;
+      pose_with_covariance_stamped_pub_->Publish(pose_with_covariance_stamped_msg);
+    }
+
+    if (position_stamped_pub_->HasConnections()) {
+      gz_geometry_msgs::PositionStamped position_stamped_msg;
+      position_stamped_msg.mutable_header()->CopyFrom(odometry_msg.header());
+      position_stamped_msg.mutable_position()->CopyFrom(odometry_msg.pose().pose().position());
+
 //      gzmsg << "Publishing position..." << std::endl;
-//      position_pub_.publish(position);
-//    }
+      position_stamped_pub_->Publish(position_stamped_msg);
+    }
 //    if (transform_pub_.getNumSubscribers() > 0) {
 //      geometry_msgs::TransformStampedPtr transform(new geometry_msgs::TransformStamped);
 //      transform->header = odometry->header;
@@ -479,7 +509,6 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
     //    std::cout << "published odometry with timestamp " << odometry->header.stamp << "at time t" << world_->GetSimTime().Double()
     //        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
-
   } // if (gazebo_sequence_ == odometry_queue_.front().first) {
 
   ++gazebo_sequence_;

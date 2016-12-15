@@ -102,10 +102,13 @@ set (msgs
   msgs/NavSatFix.proto
   msgs/Odometry.proto
   msgs/Point.proto
+  msgs/PointStamped.proto
   msgs/Pose.proto
   msgs/PoseStamped.proto
   msgs/PoseWithCovariance.proto
+  msgs/PoseWithCovarianceStamped.proto
   msgs/Position.proto
+  msgs/PositionStamped.proto
   msgs/Quaternion.proto
   msgs/SensorImu.proto
   msgs/Twist.proto
