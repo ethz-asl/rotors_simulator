@@ -191,13 +191,13 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
 //  position_pub_ = node_handle_->advertise<geometry_msgs::PointStamped>(position_pub_topic_, 1);
 //  transform_pub_ = node_handle_->advertise<geometry_msgs::TransformStamped>(transform_pub_topic_, 1);
 
-//  odometry_pub_ = node_handle_->advertise<nav_msgs::Odometry>(odometry_pub_topic_, 1);
   std::string odometry_topic_name = gz_node_ptr_->GetTopicNamespace() + "/" + odometry_pub_topic_;
   odometry_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Odometry>(odometry_topic_name, 1);
   gzmsg << "Publishing on Gazebo topic \"" << odometry_topic_name << "\"." << std::endl;
-
-  // Connect to ROS
-  GazeboRosInterfacePlugin::getInstance().ConnectToRos(odometry_topic_name, odometry_pub_topic_, GazeboRosInterfacePlugin::SupportedMsgTypes::ODOMETRY);
+  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
+      odometry_topic_name,
+      odometry_pub_topic_,
+      GazeboRosInterfacePlugin::SupportedMsgTypes::ODOMETRY);
 
 }
 
@@ -465,10 +465,10 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 //      gzmsg << "Publishing odometry..." << std::endl;
 //      odometry_pub_.publish(odometry);
 //    }
-    //if (odometry_pub_->HasConnections()) {
+    if (odometry_pub_->HasConnections()) {
 //      gzmsg << "Publishing odometry..." << std::endl;
       odometry_pub_->Publish(odometry_msg);
-    //}
+    }
 
     // ROS DEPENDENCY TO FIX
 //    tf::Quaternion tf_q_W_L(q_W_L.x, q_W_L.y, q_W_L.z, q_W_L.w);
