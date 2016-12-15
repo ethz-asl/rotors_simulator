@@ -72,7 +72,7 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   GazeboRosInterfacePlugin();
   ~GazeboRosInterfacePlugin();
 
-  void AttachTo(std::string gazeboTopicName, std::string rosTopicName, SupportedMsgTypes msgType);
+  void ConnectToRos(std::string gazeboTopicName, std::string rosTopicName, SupportedMsgTypes msgType);
 
   void InitializeParams();
   void Publish();
@@ -94,7 +94,7 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
  private:
 
   template <typename M>
-  void AttachHelper(
+  void ConnectHelper(
       void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher),
       GazeboRosInterfacePlugin * ptr,
       std::string gazeboTopicName,

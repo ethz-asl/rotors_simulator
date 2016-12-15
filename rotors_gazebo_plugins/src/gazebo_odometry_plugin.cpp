@@ -197,7 +197,7 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   gzmsg << "Publishing on Gazebo topic \"" << odometry_topic_name << "\"." << std::endl;
 
   // Connect to ROS
-  GazeboRosInterfacePlugin::getInstance().AttachTo(odometry_topic_name, odometry_pub_topic_, GazeboRosInterfacePlugin::SupportedMsgTypes::ODOMETRY);
+  GazeboRosInterfacePlugin::getInstance().ConnectToRos(odometry_topic_name, odometry_pub_topic_, GazeboRosInterfacePlugin::SupportedMsgTypes::ODOMETRY);
 
 }
 
