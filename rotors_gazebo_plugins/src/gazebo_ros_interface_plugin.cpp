@@ -197,51 +197,55 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
 }
 
-void imageCallback(GzOdometryMsgPtr& gz_actuators_msg)
-{
-    // My code.
-}
-
 template <typename M>
 struct AttachHelperStorage {
   GazeboRosInterfacePlugin * ptr;
   void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &);
+//  void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, Publisher);
 
+  // Publisher publisher;
+
+  /// @brief    This is what gets passed into the Gazebo Subscribe method as a callback, and hence can only
+  ///           have one parameter (note boost::bind() does not work with the current Gazebo Subscribe() definitions).
   void callback (const boost::shared_ptr<M const> & msg_ptr) {
+    gzmsg << "callback() called." << std::endl;
     (ptr->*fp)(msg_ptr);
+//    (ptr->*fp)(msg_ptr, publisher);
   }
+
 };
 
 template <typename M>
-gazebo::transport::SubscriberPtr AttachHelper(void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &), GazeboRosInterfacePlugin * ptr, std::string gazeboTopicName, std::string rosTopicName, transport::NodePtr gz_node_handle) {
+gazebo::transport::SubscriberPtr AttachHelper(
+    void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &), GazeboRosInterfacePlugin * ptr,
+    std::string gazeboTopicName,
+    std::string rosTopicName,
+    transport::NodePtr gz_node_handle) {
   static std::map< std::string, AttachHelperStorage<M> > callback_map;
 
   // @todo Handle collision error
   auto callback_entry = callback_map.emplace( gazeboTopicName, AttachHelperStorage<M>{ptr, fp});
 
 //  ptr->gz_odometry_sub_ =
-    gz_node_handle->Subscribe(gazeboTopicName,
-        &AttachHelperStorage<M>::callback,
-        &callback_entry.first->second);
+  gz_node_handle->Subscribe(
+      gazeboTopicName,
+      &AttachHelperStorage<M>::callback,
+      &callback_entry.first->second);
+  gzmsg << "GazeboRosMsgInterfacePlugin subscribing to Gazebo topic \"" << gazeboTopicName << "\"."<< std::endl;
 }
 
 void GazeboRosInterfacePlugin::AttachTo(std::string gazeboTopicName, std::string rosTopicName, SupportedMsgTypes msgType) {
 
 //  gz_odometry_sub_ = gz_node_handle_->Subscribe<gz_geometry_msgs::Odometry>(gazeboTopicName, &GazeboRosInterfacePlugin::GzOdometryMsgCallback, this);
 
-//
-
   switch(msgType) {
     case SupportedMsgTypes::ODOMETRY:
-
       gz_odometry_sub_ = AttachHelper(&GazeboRosInterfacePlugin::GzOdometryMsgCallback, this, gazeboTopicName, rosTopicName, gz_node_handle_);
 
     break;
   }
 
-
   //gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_odometry_subtopic_name << "\"." << std::endl;
-
 
 }
 
