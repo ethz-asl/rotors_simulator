@@ -75,8 +75,6 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
 //          joint_state_pub_topic_,
 //          GazeboRosInterfacePlugin::SupportedMsgTypes::JOINT_STATE);
 
-
-
   frame_id_ = link_name_;
 
   link_ = model_->GetLink(link_name_);
