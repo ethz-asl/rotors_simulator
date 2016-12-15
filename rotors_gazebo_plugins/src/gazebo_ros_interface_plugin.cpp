@@ -327,6 +327,14 @@ void GazeboRosInterfacePlugin::ConnectToRos(std::string gazeboTopicName, std::st
           rosTopicName,
           gz_node_handle_);
       break;
+    case SupportedMsgTypes::TRANSFORM_STAMPED:
+        ConnectHelper<gz_geometry_msgs::TransformStamped, geometry_msgs::TransformStamped>(
+            &GazeboRosInterfacePlugin::GzTransformStampedMsgCallback,
+            this,
+            gazeboTopicName,
+            rosTopicName,
+            gz_node_handle_);
+        break;
     case SupportedMsgTypes::TWIST_STAMPED:
       ConnectHelper<sensor_msgs::msgs::TwistStamped, geometry_msgs::TwistStamped>(
           &GazeboRosInterfacePlugin::GzTwistStampedMsgCallback,
@@ -521,7 +529,7 @@ void GazeboRosInterfacePlugin::GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odomet
 }
 
 void GazeboRosInterfacePlugin::GzPoseMsgCallback(GzPoseMsgPtr& gz_pose_msg, ros::Publisher ros_publisher) {
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   ros_pose_msg_.position.x = gz_pose_msg->position().x();
   ros_pose_msg_.position.y = gz_pose_msg->position().y();
@@ -538,18 +546,23 @@ void GazeboRosInterfacePlugin::GzPoseMsgCallback(GzPoseMsgPtr& gz_pose_msg, ros:
 void GazeboRosInterfacePlugin::GzPositionStampedMsgCallback(
     GzPositionStampedMsgPtr& gz_position_stamped_msg,
     ros::Publisher ros_publisher) {
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 }
 
 void GazeboRosInterfacePlugin::GzPoseWithCovarianceStampedMsgCallback(
     GzPoseWithCovarianceStampedMsgPtr& gz_pose_with_covariance_stamped_msg,
     ros::Publisher ros_publisher) {
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 }
 
+void GazeboRosInterfacePlugin::GzTransformStampedMsgCallback(
+      GzTransformStampedMsgPtr& gz_transform_stamped_msg,
+      ros::Publisher ros_publisher) {
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+}
 
 void GazeboRosInterfacePlugin::GzTwistStampedMsgCallback(GzTwistStampedMsgPtr& gz_twist_stamped_msg, ros::Publisher ros_publisher) {
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 }
 
 void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {

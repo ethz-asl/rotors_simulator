@@ -42,6 +42,7 @@
 #include "PoseWithCovarianceStamped.pb.h"
 #include "PositionStamped.pb.h"
 #include "SensorImu.pb.h"
+#include "TransformStamped.pb.h"
 #include "TwistStamped.pb.h"
 
 // ROS MSG TYPES
@@ -54,6 +55,7 @@
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/TwistStamped.h>
 
 #include "rotors_gazebo_plugins/common.h"
@@ -70,6 +72,7 @@ typedef const boost::shared_ptr<const gz_geometry_msgs::Odometry> GzOdometryMsgP
 typedef const boost::shared_ptr<const gz_geometry_msgs::Pose> GzPoseMsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::PoseWithCovarianceStamped> GzPoseWithCovarianceStampedMsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::PositionStamped> GzPositionStampedMsgPtr;
+typedef const boost::shared_ptr<const gz_geometry_msgs::TransformStamped> GzTransformStampedMsgPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::TwistStamped> GzTwistStampedMsgPtr;
 
 //! @brief    Message interface plugin for Gazebo.
@@ -92,6 +95,7 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
     POSE,
     POSE_WITH_COVARIANCE_STAMPED,
     POSITION_STAMPED,
+    TRANSFORM_STAMPED,
     TWIST_STAMPED,
   };
 
@@ -232,6 +236,15 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
       GzPositionStampedMsgPtr& gz_position_stamped_msg,     //!< Callback for when Gazebo message is received.
       ros::Publisher ros_publisher);                        //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
   geometry_msgs::Point ros_position_stamped_msg_;
+
+  // ============================================ //
+  // ======== TRANSFORM STAMPED MESSAGES ======== //
+  // ============================================ //
+
+  void GzTransformStampedMsgCallback(
+      GzTransformStampedMsgPtr& gz_transform_stamped_msg,     //!< Callback for when Gazebo message is received.
+      ros::Publisher ros_publisher);                          //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+  geometry_msgs::TransformStamped ros_transform_stamped_msg_;
 
   // ============================================ //
   // =========== TWIST STAMPED MESSAGES ========= //

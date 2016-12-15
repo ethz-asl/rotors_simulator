@@ -1,0 +1,10 @@
+syntax = "proto2";
+package gz_geometry_msgs;
+
+import "Vector3.proto";
+import "Quaternion.proto";
+
+message Transform {
+  required Vector3 translation = 1;
+  required Quaternion rotation = 2;
+}

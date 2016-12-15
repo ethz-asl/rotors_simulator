@@ -84,7 +84,7 @@ class GazeboOdometryPlugin : public ModelPlugin {
         pose_pub_topic_(mav_msgs::default_topics::POSE),
         pose_with_covariance_stamped_pub_topic_(mav_msgs::default_topics::POSE_WITH_COVARIANCE),
         position_stamped_pub_topic_(mav_msgs::default_topics::POSITION),
-        transform_pub_topic_(mav_msgs::default_topics::TRANSFORM),
+        transform_stamped_pub_topic_(mav_msgs::default_topics::TRANSFORM),
         odometry_pub_topic_(mav_msgs::default_topics::ODOMETRY),
         parent_frame_id_(kDefaultParentFrameId),
         child_frame_id_(kDefaultChildFrameId),
@@ -112,7 +112,7 @@ class GazeboOdometryPlugin : public ModelPlugin {
   std::string pose_pub_topic_;
   std::string pose_with_covariance_stamped_pub_topic_;
   std::string position_stamped_pub_topic_;
-  std::string transform_pub_topic_;
+  std::string transform_stamped_pub_topic_;
   std::string odometry_pub_topic_;
   std::string parent_frame_id_;
   std::string child_frame_id_;
@@ -150,7 +150,7 @@ class GazeboOdometryPlugin : public ModelPlugin {
   gazebo::transport::PublisherPtr pose_pub_;
   gazebo::transport::PublisherPtr pose_with_covariance_stamped_pub_;
   gazebo::transport::PublisherPtr position_stamped_pub_;
-  gazebo::transport::PublisherPtr transform_pub_;
+  gazebo::transport::PublisherPtr transform_stamped_pub_;
   gazebo::transport::PublisherPtr odometry_pub_;
 
   tf::Transform tf_;

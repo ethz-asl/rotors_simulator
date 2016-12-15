@@ -111,6 +111,8 @@ set (msgs
   msgs/PositionStamped.proto
   msgs/Quaternion.proto
   msgs/SensorImu.proto
+  msgs/Transform.proto
+  msgs/TransformStamped.proto
   msgs/Twist.proto
   msgs/TwistStamped.proto
   msgs/TwistWithCovariance.proto

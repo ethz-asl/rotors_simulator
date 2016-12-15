@@ -33,6 +33,7 @@
 #include "PoseStamped.pb.h"
 #include "PoseWithCovarianceStamped.pb.h"
 #include "PositionStamped.pb.h"
+#include "TransformStamped.pb.h"
 
 #include "../include/rotors_gazebo_plugins/gazebo_ros_interface_plugin.h"
 
@@ -105,7 +106,7 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   getSdfParam<std::string>(_sdf, "poseTopic", pose_pub_topic_, pose_pub_topic_);
   getSdfParam<std::string>(_sdf, "poseWithCovarianceTopic", pose_with_covariance_stamped_pub_topic_, pose_with_covariance_stamped_pub_topic_);
   getSdfParam<std::string>(_sdf, "positionTopic", position_stamped_pub_topic_, position_stamped_pub_topic_);
-  getSdfParam<std::string>(_sdf, "transformTopic", transform_pub_topic_, transform_pub_topic_);
+  getSdfParam<std::string>(_sdf, "transformTopic", transform_stamped_pub_topic_, transform_stamped_pub_topic_);
   getSdfParam<std::string>(_sdf, "odometryTopic", odometry_pub_topic_, odometry_pub_topic_);
   getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
   getSdfParam<std::string>(_sdf, "childFrameId", child_frame_id_, child_frame_id_);
@@ -233,6 +234,16 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
       odometry_topic_name,
       odometry_pub_topic_,
       GazeboRosInterfacePlugin::SupportedMsgTypes::ODOMETRY);
+
+  // ============================================ //
+  // ======== TRANSFORM STAMPED MSG SETUP ======= //
+  // ============================================ //
+  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << transform_stamped_pub_topic_ << "\"." << std::endl;
+  transform_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::TransformStamped>(transform_stamped_pub_topic_, 1);
+  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
+      transform_stamped_pub_topic_,
+      transform_stamped_pub_topic_,
+      GazeboRosInterfacePlugin::SupportedMsgTypes::TRANSFORM_STAMPED);
 
 }
 
@@ -400,7 +411,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     q_n.normalize();
 
     //geometry_msgs::Quaternion& q_W_L = odometry->pose.pose.orientation;
-    gz_geometry_msgs::Quaternion * q_W_L =
+    gz_geometry_msgs::Quaternion* q_W_L =
         odometry_msg.mutable_pose()->mutable_pose()->mutable_orientation();
 
     Eigen::Quaterniond _q_W_L(q_W_L->w(), q_W_L->x(), q_W_L->y(), q_W_L->z());
@@ -478,7 +489,8 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 //      gzmsg << "Publishing position..." << std::endl;
       position_stamped_pub_->Publish(position_stamped_msg);
     }
-//    if (transform_pub_.getNumSubscribers() > 0) {
+
+    if (transform_stamped_pub_->HasConnections()) {
 //      geometry_msgs::TransformStampedPtr transform(new geometry_msgs::TransformStamped);
 //      transform->header = odometry->header;
 //      geometry_msgs::Vector3 translation;
@@ -487,14 +499,21 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 //      translation.z = p.z;
 //      transform->transform.translation = translation;
 //      transform->transform.rotation = q_W_L;
-//      gzmsg << "Publishing transform..." << std::endl;
-//      transform_pub_.publish(transform);
-//    }
 
-//    if (odometry_pub_.getNumSubscribers() > 0) {
-//      gzmsg << "Publishing odometry..." << std::endl;
-//      odometry_pub_.publish(odometry);
-//    }
+      gz_geometry_msgs::TransformStamped transform_stamped_msg;
+
+      transform_stamped_msg.mutable_header()->CopyFrom(odometry_msg.header());
+      transform_stamped_msg.mutable_transform()->mutable_translation()->set_x(p->x());
+      transform_stamped_msg.mutable_transform()->mutable_translation()->set_y(p->y());
+      transform_stamped_msg.mutable_transform()->mutable_translation()->set_z(p->z());
+      transform_stamped_msg.mutable_transform()->mutable_rotation()->CopyFrom(*q_W_L);
+
+//      gzmsg << "Publishing transform..." << std::endl;
+
+//      transform_stamped_pub_.publish(transform);
+      transform_stamped_pub_->Publish(transform_stamped_msg);
+    }
+
     if (odometry_pub_->HasConnections()) {
 //      gzmsg << "Publishing odometry..." << std::endl;
       odometry_pub_->Publish(odometry_msg);
