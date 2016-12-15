@@ -216,7 +216,7 @@ struct AttachHelperStorage {
 };
 
 template <typename M>
-gazebo::transport::SubscriberPtr AttachHelper(
+void GazeboRosInterfacePlugin::AttachHelper(
     void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &), GazeboRosInterfacePlugin * ptr,
     std::string gazeboTopicName,
     std::string rosTopicName,
@@ -227,23 +227,32 @@ gazebo::transport::SubscriberPtr AttachHelper(
   auto callback_entry = callback_map.emplace( gazeboTopicName, AttachHelperStorage<M>{ptr, fp});
 
 //  ptr->gz_odometry_sub_ =
-  gz_node_handle->Subscribe(
+  gazebo::transport::SubscriberPtr subscriberPtr;
+  subscriberPtr = gz_node_handle->Subscribe(
       gazeboTopicName,
       &AttachHelperStorage<M>::callback,
       &callback_entry.first->second);
   gzmsg << "GazeboRosMsgInterfacePlugin subscribing to Gazebo topic \"" << gazeboTopicName << "\"."<< std::endl;
+
+  // Save a reference to the subscriber pointer so subsriber
+  // won't be deleted.
+  subscriberPtrs_.push_back(subscriberPtr);
+
 }
 
 void GazeboRosInterfacePlugin::AttachTo(std::string gazeboTopicName, std::string rosTopicName, SupportedMsgTypes msgType) {
 
 //  gz_odometry_sub_ = gz_node_handle_->Subscribe<gz_geometry_msgs::Odometry>(gazeboTopicName, &GazeboRosInterfacePlugin::GzOdometryMsgCallback, this);
 
+  gazebo::transport::SubscriberPtr subscriberPtr;
   switch(msgType) {
     case SupportedMsgTypes::ODOMETRY:
-      gz_odometry_sub_ = AttachHelper(&GazeboRosInterfacePlugin::GzOdometryMsgCallback, this, gazeboTopicName, rosTopicName, gz_node_handle_);
+      AttachHelper(&GazeboRosInterfacePlugin::GzOdometryMsgCallback, this, gazeboTopicName, rosTopicName, gz_node_handle_);
 
     break;
   }
+
+
 
   //gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_odometry_subtopic_name << "\"." << std::endl;
 
