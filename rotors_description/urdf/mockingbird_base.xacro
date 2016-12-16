@@ -19,10 +19,10 @@
   limitations under the License.
 -->
 
-<robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="mockingbird" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
   <!-- Instantiate firefly "mechanics" -->
-  <xacro:include filename="$(find rotors_description)/urdf/firefly.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/mockingbird.xacro" />
 
   <!-- Instantiate a controller. -->
   <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />
@@ -44,9 +44,8 @@
     <xacro:bag_plugin_macro
       namespace="${namespace}"
       bag_file="$(arg log_file)"
-      rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}" 
+      rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}"
       wait_to_record_bag="$(arg wait_to_record_bag)" />
   </xacro:if>
 
 </robot>
-
