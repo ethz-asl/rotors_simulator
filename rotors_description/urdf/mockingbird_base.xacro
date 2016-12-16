@@ -23,7 +23,6 @@
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
   <!-- Instantiate firefly "mechanics" -->
   <xacro:include filename="$(find rotors_description)/urdf/mockingbird.xacro" />
-
   <!-- Instantiate a controller. -->
   <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />
 

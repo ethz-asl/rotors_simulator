@@ -145,38 +145,31 @@
   </xacro:macro>
 
   <!-- Tilting rotorunit link and joint -->
-  <xacro:macro name="rotorunit"
-    params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor radius_rotor time_constant_up time_constant_down max_rot_velocity motor_number rotor_drag_coefficient rolling_moment_coefficient color use_own_mesh mesh *origin *inertia">
-    <joint name="${robot_namespace}/rotor_${motor_number}_joint" type="continuous">
+  <xacro:macro name="rotor_unit"
+    params="robot_namespace suffix mass_rotor_unit parent motor_number mesh_rotor_unit *origin *inertia">
+    <joint name="${robot_namespace}/rotor_unit_${motor_number}_revolutejoint" type="continuous">
       <xacro:insert_block name="origin" />
-      <axis xyz="0 0 1" />
+      <axis xyz="1 0 0" />
       <!-- TODO(ff): not currently set because it's not yet supported -->
       <!-- <limit effort="2000" velocity="${max_rot_velocity}" /> -->
       <parent link="${parent}" />
-      <child link="${robot_namespace}/rotor_${motor_number}" />
+      <child link="${robot_namespace}/rotor_unit_${motor_number}" />
     </joint>
-    <link name="${robot_namespace}/rotor_${motor_number}">
+    <link name="${robot_namespace}/rotor_unit_${motor_number}">
       <inertial>
-        <mass value="${mass_rotor}" /> <!-- [kg] -->
+        <mass value="${mass_rotor_unit}" /> <!-- [kg] -->
         <xacro:insert_block name="inertia" />
       </inertial>
       <visual>
         <geometry>
           <!-- <cylinder length="0.005" radius="${radius_rotor}"/> --> <!-- [m] -->
-          <xacro:if value="${use_own_mesh}">
-            <mesh filename="${mesh}"
+            <mesh filename="${mesh_rotor_unit}"
               scale="1 1 1" />
-          </xacro:if>
-          <xacro:unless value="${use_own_mesh}">
-            <mesh filename="package://rotors_description/meshes/propeller_${direction}.dae"
-              scale="${radius_rotor} ${radius_rotor} ${radius_rotor}" /> <!-- The propeller meshes have a radius of 1m -->
-            <!-- <box size="${2*radius_rotor} 0.01 0.005"/> -->
-          </xacro:unless>
         </geometry>
       </visual>
       <collision>
         <geometry>
-          <cylinder length="0.005" radius="${radius_rotor}" /> <!-- [m] -->
+          <box size="0.005 0.005 0.005"  /> <!-- [m] -->
         </geometry>
       </collision>
     </link>
