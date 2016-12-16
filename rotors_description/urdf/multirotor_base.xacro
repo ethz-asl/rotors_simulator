@@ -147,7 +147,7 @@
   <!-- Tilting rotorunit link and joint -->
   <xacro:macro name="rotor_unit"
     params="robot_namespace suffix mass_rotor_unit parent motor_number mesh_rotor_unit *origin *inertia">
-    <joint name="${robot_namespace}/rotor_unit_${motor_number}_revolutejoint" type="continuous">
+    <joint name="${robot_namespace}/rotor_unit_${motor_number}_revolutejoint" type="fixed">
       <xacro:insert_block name="origin" />
       <axis xyz="1 0 0" />
       <!-- TODO(ff): not currently set because it's not yet supported -->
@@ -155,6 +155,16 @@
       <parent link="${parent}" />
       <child link="${robot_namespace}/rotor_unit_${motor_number}" />
     </joint>
+    <transmission name="${robot_namespace}/rotor_unit_${motor_number}_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+        <joint name="${robot_namespace}/rotor_unit_${motor_number}_revolutejoint">
+          <hardwareInterface>EffortJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="${robot_namespace}/rotor_unit_${motor_number}_tiltmotor">
+          <hardwareInterface>EffortJointInterface</hardwareInterface>
+          <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
     <link name="${robot_namespace}/rotor_unit_${motor_number}">
       <inertial>
         <mass value="${mass_rotor_unit}" /> <!-- [kg] -->

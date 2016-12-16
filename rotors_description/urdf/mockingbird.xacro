@@ -39,7 +39,7 @@
   <xacro:property name="moment_constant" value="0.016" /> <!-- [m] -->
   <xacro:property name="time_constant_up" value="0.0125" /> <!-- [s] -->
   <xacro:property name="time_constant_down" value="0.025" /> <!-- [s] -->
-  <xacro:property name="max_rot_velocity" value="838" /> <!-- [rad/s] -->
+  <xacro:property name="max_rot_velocity" value="838" /> <!-- [rad/s] --> <!-- so that it produce 1 kg thrust -->
   <xacro:property name="sin30" value="0.5" />
   <xacro:property name="cos30" value="0.866025403784" />
   <xacro:property name="rotor_drag_coefficient" value="8.06428e-05" />
@@ -73,12 +73,67 @@
   <!-- Instantiate tilting rotor_unit -->
   <xacro:rotor_unit
     robot_namespace="${namespace}"
-    suffix="front_left"
+    suffix="left"
     parent="${namespace}/base_link"
     mass_rotor_unit="${mass_rotor_unit}"
     motor_number="0"
     mesh_rotor_unit="${mesh_file_rotor_unit}">
+    <origin xyz="${cos30*arm_length} ${sin30*arm_length} 0" rpy="0 0 0.52359877559" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:rotor_unit>
+
+  <xacro:rotor_unit
+    robot_namespace="${namespace}"
+    suffix="front_left"
+    parent="${namespace}/base_link"
+    mass_rotor_unit="${mass_rotor_unit}"
+    motor_number="1"
+    mesh_rotor_unit="${mesh_file_rotor_unit}">
     <origin xyz="0 ${arm_length} 0" rpy="0 0 1.57079632679" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:rotor_unit>
+
+  <xacro:rotor_unit
+    robot_namespace="${namespace}"
+    suffix="back_left"
+    parent="${namespace}/base_link"
+    mass_rotor_unit="${mass_rotor_unit}"
+    motor_number="2"
+    mesh_rotor_unit="${mesh_file_rotor_unit}">
+    <origin xyz="-${cos30*arm_length} ${sin30*arm_length} 0" rpy="0 0 2.61799387799" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:rotor_unit>
+
+  <xacro:rotor_unit
+    robot_namespace="${namespace}"
+    suffix="back_right"
+    parent="${namespace}/base_link"
+    mass_rotor_unit="${mass_rotor_unit}"
+    motor_number="3"
+    mesh_rotor_unit="${mesh_file_rotor_unit}">
+    <origin xyz="-${cos30*arm_length} -${sin30*arm_length} 0" rpy="0 0 3.66519142919" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:rotor_unit>
+
+  <xacro:rotor_unit
+    robot_namespace="${namespace}"
+    suffix="right"
+    parent="${namespace}/base_link"
+    mass_rotor_unit="${mass_rotor_unit}"
+    motor_number="4"
+    mesh_rotor_unit="${mesh_file_rotor_unit}">
+    <origin xyz="0 -${arm_length} 0" rpy="0 0 4.71238898038" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:rotor_unit>
+
+  <xacro:rotor_unit
+    robot_namespace="${namespace}"
+    suffix="front_right"
+    parent="${namespace}/base_link"
+    mass_rotor_unit="${mass_rotor_unit}"
+    motor_number="5"
+    mesh_rotor_unit="${mesh_file_rotor_unit}">
+    <origin xyz="${cos30*arm_length} -${sin30*arm_length} 0" rpy="0 0 5.75958653158" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:rotor_unit>
 
@@ -90,7 +145,7 @@
     direction="ccw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
-    parent="${namespace}/base_link"
+    parent="${namespace}/rotor_unit_0"
     mass_rotor="${mass_rotor}"
     radius_rotor="${radius_rotor}"
     time_constant_up="${time_constant_up}"
@@ -102,7 +157,7 @@
     color="Red"
     use_own_mesh="false"
     mesh="">
-    <origin xyz="${cos30*arm_length} ${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
+    <origin xyz="0 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
 
@@ -112,7 +167,7 @@
     direction="cw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
-    parent="${namespace}/base_link"
+    parent="${namespace}/rotor_unit_1"
     mass_rotor="${mass_rotor}"
     radius_rotor="${radius_rotor}"
     time_constant_up="${time_constant_up}"
@@ -124,7 +179,7 @@
     color="Blue"
     use_own_mesh="false"
     mesh="">
-    <origin xyz="0 ${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
+    <origin xyz="0 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
 
@@ -133,7 +188,7 @@
     direction="ccw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
-    parent="${namespace}/base_link"
+    parent="${namespace}/rotor_unit_2"
     mass_rotor="${mass_rotor}"
     radius_rotor="${radius_rotor}"
     time_constant_up="${time_constant_up}"
@@ -145,7 +200,7 @@
     color="Blue"
     use_own_mesh="false"
     mesh="">
-    <origin xyz="-${cos30*arm_length} ${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
+    <origin xyz="0 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
 
@@ -154,7 +209,7 @@
     direction="cw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
-    parent="${namespace}/base_link"
+    parent="${namespace}/rotor_unit_3"
     mass_rotor="${mass_rotor}"
     radius_rotor="${radius_rotor}"
     time_constant_up="${time_constant_up}"
@@ -166,7 +221,7 @@
     color="Blue"
     use_own_mesh="false"
     mesh="">
-    <origin xyz="-${cos30*arm_length} -${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
+    <origin xyz="0 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
 
@@ -176,7 +231,7 @@
     direction="ccw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
-    parent="${namespace}/base_link"
+    parent="${namespace}/rotor_unit_4"
     mass_rotor="${mass_rotor}"
     radius_rotor="${radius_rotor}"
     time_constant_up="${time_constant_up}"
@@ -188,7 +243,7 @@
     color="Blue"
     use_own_mesh="false"
     mesh="">
-    <origin xyz="0 -${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
+    <origin xyz="0 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
 
@@ -198,7 +253,7 @@
     direction="cw"
     motor_constant="${motor_constant}"
     moment_constant="${moment_constant}"
-    parent="${namespace}/base_link"
+    parent="${namespace}/rotor_unit_5"
     mass_rotor="${mass_rotor}"
     radius_rotor="${radius_rotor}"
     time_constant_up="${time_constant_up}"
@@ -210,7 +265,7 @@
     color="Red"
     use_own_mesh="false"
     mesh="">
-    <origin xyz="${cos30*arm_length} -${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
+    <origin xyz="0 0 ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
 
