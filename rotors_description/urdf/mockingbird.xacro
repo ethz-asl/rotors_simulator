@@ -27,19 +27,23 @@
   <xacro:property name="use_mesh_file_rotor_unit" value="true" />
   <xacro:property name="mesh_file_core" value="package://rotors_description/meshes/mockingbird_core.dae" />
   <xacro:property name="mesh_file_rotor_unit" value="package://rotors_description/meshes/mockingbird_rotorunit.dae" />
-  <xacro:property name="mass_core" value="1.3" /> <!-- [kg] -->
-  <xacro:property name="mass_rotor_unit" value="0.2" /> <!-- [kg] -->
+  <xacro:property name="mass_core" value="0.5" /> <!-- [kg] -->
+  <xacro:property name="mass_rotor_unit" value="0.1" /> <!-- [kg] -->
   <xacro:property name="body_width" value="0.1" /> <!-- [m] -->
   <xacro:property name="body_height" value="0.16" /> <!-- [m] -->
   <xacro:property name="mass_rotor" value="0.005" /> <!-- [kg] -->
   <xacro:property name="arm_length" value="0.256" /> <!-- [m] -->
-  <xacro:property name="rotor_offset_top" value="0.037" /> <!-- [m] -->
+  <xacro:property name="rotor_offset_top" value="0.042" /> <!-- [m] -->
   <xacro:property name="radius_rotor" value="0.0765" /> <!-- [m] -->
   <xacro:property name="motor_constant" value="8.54858e-06" /> <!-- [kg m/s^2] -->
   <xacro:property name="moment_constant" value="0.016" /> <!-- [m] -->
   <xacro:property name="time_constant_up" value="0.0125" /> <!-- [s] -->
   <xacro:property name="time_constant_down" value="0.025" /> <!-- [s] -->
   <xacro:property name="max_rot_velocity" value="838" /> <!-- [rad/s] --> <!-- so that it produce 1 kg thrust -->
+  <xacro:property name="lower_limit_revolute" value="0" /> <!-- properties of the revolute joint of the tilted axis -->
+  <xacro:property name="upper_limit_revolute" value="0" /> <!-- properties of the revolute joint of the tilted axis -->
+  <xacro:property name="effort_revolute" value="1000" /> <!-- properties of the revolute joint of the tilted axis -->
+  <xacro:property name="velocity_revolute" value="4" /> <!-- properties of the revolute joint of the tilted axis -->
   <xacro:property name="sin30" value="0.5" />
   <xacro:property name="cos30" value="0.866025403784" />
   <xacro:property name="rotor_drag_coefficient" value="8.06428e-05" />
@@ -77,6 +81,10 @@
     parent="${namespace}/base_link"
     mass_rotor_unit="${mass_rotor_unit}"
     motor_number="0"
+    lower_limit="${lower_limit_revolute}"
+    upper_limit="${upper_limit_revolute}"
+    effort="${effort_revolute}"
+    velocity="${velocity_revolute}"
     mesh_rotor_unit="${mesh_file_rotor_unit}">
     <origin xyz="${cos30*arm_length} ${sin30*arm_length} 0" rpy="0 0 0.52359877559" />
     <xacro:insert_block name="rotor_inertia" />
@@ -88,6 +96,10 @@
     parent="${namespace}/base_link"
     mass_rotor_unit="${mass_rotor_unit}"
     motor_number="1"
+    lower_limit="${lower_limit_revolute}"
+    upper_limit="${upper_limit_revolute}"
+    effort="${effort_revolute}"
+    velocity="${velocity_revolute}"
     mesh_rotor_unit="${mesh_file_rotor_unit}">
     <origin xyz="0 ${arm_length} 0" rpy="0 0 1.57079632679" />
     <xacro:insert_block name="rotor_inertia" />
@@ -99,6 +111,10 @@
     parent="${namespace}/base_link"
     mass_rotor_unit="${mass_rotor_unit}"
     motor_number="2"
+    lower_limit="${lower_limit_revolute}"
+    upper_limit="${upper_limit_revolute}"
+    effort="${effort_revolute}"
+    velocity="${velocity_revolute}"
     mesh_rotor_unit="${mesh_file_rotor_unit}">
     <origin xyz="-${cos30*arm_length} ${sin30*arm_length} 0" rpy="0 0 2.61799387799" />
     <xacro:insert_block name="rotor_inertia" />
@@ -110,6 +126,10 @@
     parent="${namespace}/base_link"
     mass_rotor_unit="${mass_rotor_unit}"
     motor_number="3"
+    lower_limit="${lower_limit_revolute}"
+    upper_limit="${upper_limit_revolute}"
+    effort="${effort_revolute}"
+    velocity="${velocity_revolute}"
     mesh_rotor_unit="${mesh_file_rotor_unit}">
     <origin xyz="-${cos30*arm_length} -${sin30*arm_length} 0" rpy="0 0 3.66519142919" />
     <xacro:insert_block name="rotor_inertia" />
@@ -121,6 +141,10 @@
     parent="${namespace}/base_link"
     mass_rotor_unit="${mass_rotor_unit}"
     motor_number="4"
+    lower_limit="${lower_limit_revolute}"
+    upper_limit="${upper_limit_revolute}"
+    effort="${effort_revolute}"
+    velocity="${velocity_revolute}"
     mesh_rotor_unit="${mesh_file_rotor_unit}">
     <origin xyz="0 -${arm_length} 0" rpy="0 0 4.71238898038" />
     <xacro:insert_block name="rotor_inertia" />
@@ -132,6 +156,10 @@
     parent="${namespace}/base_link"
     mass_rotor_unit="${mass_rotor_unit}"
     motor_number="5"
+    lower_limit="${lower_limit_revolute}"
+    upper_limit="${upper_limit_revolute}"
+    effort="${effort_revolute}"
+    velocity="${velocity_revolute}"
     mesh_rotor_unit="${mesh_file_rotor_unit}">
     <origin xyz="${cos30*arm_length} -${sin30*arm_length} 0" rpy="0 0 5.75958653158" />
     <xacro:insert_block name="rotor_inertia" />
