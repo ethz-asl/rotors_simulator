@@ -259,7 +259,8 @@ void GazeboRosInterfacePlugin::ConnectToRos(std::string gazeboTopicName, std::st
     case SupportedMsgTypes::ACTUATORS:
       ConnectHelper<sensor_msgs::msgs::Actuators, mav_msgs::Actuators>(
           &GazeboRosInterfacePlugin::GzActuatorsMsgCallback,
-          this,gazeboTopicName,
+          this,
+          gazeboTopicName,
           rosTopicName,
           gz_node_handle_);
       break;
