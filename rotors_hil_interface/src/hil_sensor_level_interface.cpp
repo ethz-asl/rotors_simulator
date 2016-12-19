@@ -39,7 +39,7 @@ HilSensorLevelInterface::HilSensorLevelInterface(const Eigen::Quaterniond& q_S_B
   pnh.param("pressure_topic", pressure_sub_topic, kDefaultPressureSubTopic);
 
   // Compute the desired interval between published GPS messages.
-  gps_interval_nsec_ = static_cast<u_int64_t>(kSecToNsec / gps_freq);
+  gps_interval_nsec_ = static_cast<u_int64_t>(kSecToNsec_ns_per_s / gps_freq);
 
   // Compute the rotation matrix to rotate data into NED frame
   q_S_B_ = q_S_B;
@@ -90,30 +90,30 @@ std::vector<mavros_msgs::Mavlink> HilSensorLevelInterface::CollectData() {
   std::vector<mavros_msgs::Mavlink> hil_msgs;
 
   // Rotate gyroscope, accelerometer, and magnetometer data into NED frame
-  Eigen::Vector3f gyro = R_S_B_ * hil_data_.gyro;
-  Eigen::Vector3f acc = R_S_B_ * hil_data_.acc;
-  Eigen::Vector3f mag = R_S_B_ * hil_data_.mag;
+  Eigen::Vector3f gyro = R_S_B_ * hil_data_.gyro_rad_per_s;
+  Eigen::Vector3f acc = R_S_B_ * hil_data_.acc_m_per_s2;
+  Eigen::Vector3f mag = R_S_B_ * hil_data_.mag_G;
 
   // Check if we need to publish a HIL_GPS message.
   if ((current_time.nsec - last_gps_pub_time_nsec_) >= gps_interval_nsec_) {
     last_gps_pub_time_nsec_ = current_time.nsec;
 
     // Rotate ground speed data into NED frame
-    Eigen::Vector3i gps_vel = (R_S_B_ * hil_data_.gps_vel.cast<float>()).cast<int>();
+    Eigen::Vector3i gps_vel = (R_S_B_ * hil_data_.gps_vel_cm_per_s.cast<float>()).cast<int>();
 
     // Fill in a MAVLINK HIL_GPS message and convert it to MAVROS format.
     hil_gps_msg_.time_usec = time_usec;
     hil_gps_msg_.fix_type = hil_data_.fix_type;
-    hil_gps_msg_.lat = hil_data_.lat;
-    hil_gps_msg_.lon = hil_data_.lon;
-    hil_gps_msg_.alt = hil_data_.alt;
-    hil_gps_msg_.eph = hil_data_.eph;
-    hil_gps_msg_.epv = hil_data_.epv;
-    hil_gps_msg_.vel = hil_data_.vel;
+    hil_gps_msg_.lat_deg = hil_data_.lat_deg;
+    hil_gps_msg_.lon_deg = hil_data_.lon_deg;
+    hil_gps_msg_.alt_mm = hil_data_.alt_mm;
+    hil_gps_msg_.eph_cm = hil_data_.eph_cm;
+    hil_gps_msg_.epv_cm = hil_data_.epv_cm;
+    hil_gps_msg_.vel_cm_per_s = hil_data_.vel_cm_per_s;
     hil_gps_msg_.vn = gps_vel.x();
     hil_gps_msg_.ve = gps_vel.y();
     hil_gps_msg_.vd = gps_vel.z();
-    hil_gps_msg_.cog = hil_data_.cog;
+    hil_gps_msg_.cog_cdeg = hil_data_.cog_cdeg;
     hil_gps_msg_.satellites_visible = hil_data_.satellites_visible;
 
     mavlink_hil_gps_t* hil_gps_msg_ptr = &hil_gps_msg_;
@@ -138,10 +138,10 @@ std::vector<mavros_msgs::Mavlink> HilSensorLevelInterface::CollectData() {
   hil_sensor_msg_.xmag = mag.x();
   hil_sensor_msg_.ymag = mag.y();
   hil_sensor_msg_.zmag = mag.z();
-  hil_sensor_msg_.abs_pressure = hil_data_.pressure_abs;
-  hil_sensor_msg_.diff_pressure = hil_data_.pressure_diff;
-  hil_sensor_msg_.pressure_alt = hil_data_.pressure_alt;
-  hil_sensor_msg_.temperature = hil_data_.temperature;
+  hil_sensor_msg_.abs_pressure = hil_data_.pressure_abs_mbar;
+  hil_sensor_msg_.diff_pressure = hil_data_.pressure_diff_mbar;
+  hil_sensor_msg_.pressure_alt_m = hil_data_.pressure_alt_m;
+  hil_sensor_msg_.temperature_degC = hil_data_.temperature_degC;
   hil_sensor_msg_.fields_updated = kAllFieldsUpdated;
 
   mavlink_hil_sensor_t* hil_sensor_msg_ptr = &hil_sensor_msg_;

@@ -74,9 +74,9 @@ std::vector<mavros_msgs::Mavlink> HilStateLevelInterface::CollectData() {
   Eigen::Quaterniond att = q_S_B_ * hil_data_.att;
 
   // Rotate gyroscope, accelerometer, and ground speed data into NED frame
-  Eigen::Vector3f gyro = R_S_B_ * hil_data_.gyro;
-  Eigen::Vector3f acc = R_S_B_ * hil_data_.acc;
-  Eigen::Vector3i gps_vel = (R_S_B_ * hil_data_.gps_vel.cast<float>()).cast<int>();
+  Eigen::Vector3f gyro_rad_per_s = R_S_B_ * hil_data_.gyro_rad_per_s;
+  Eigen::Vector3f acc_m_per_s2 = R_S_B_ * hil_data_.acc_m_per_s2;
+  Eigen::Vector3i gps_vel_cm_per_s = (R_S_B_ * hil_data_.gps_vel_cm_per_s.cast<float>()).cast<int>();
 
   // Fill in a MAVLINK HIL_STATE_QUATERNION message and convert it to MAVROS format.
   hil_state_qtrn_msg_.time_usec = time_usec;
@@ -84,20 +84,20 @@ std::vector<mavros_msgs::Mavlink> HilStateLevelInterface::CollectData() {
   hil_state_qtrn_msg_.attitude_quaternion[1] = att.x();
   hil_state_qtrn_msg_.attitude_quaternion[2] = att.y();
   hil_state_qtrn_msg_.attitude_quaternion[3] = att.z();
-  hil_state_qtrn_msg_.rollspeed = gyro.x();
-  hil_state_qtrn_msg_.pitchspeed = gyro.y();
-  hil_state_qtrn_msg_.yawspeed = gyro.z();
-  hil_state_qtrn_msg_.lat = hil_data_.lat;
-  hil_state_qtrn_msg_.lon = hil_data_.lon;
-  hil_state_qtrn_msg_.alt = hil_data_.alt;
-  hil_state_qtrn_msg_.vx = gps_vel.x();
-  hil_state_qtrn_msg_.vy = gps_vel.y();
-  hil_state_qtrn_msg_.vz = gps_vel.z();
-  hil_state_qtrn_msg_.ind_airspeed = hil_data_.ind_airspeed;
-  hil_state_qtrn_msg_.true_airspeed = hil_data_.true_airspeed;
-  hil_state_qtrn_msg_.xacc = acc.x() * kMetersToMm / kGravityMagnitude;
-  hil_state_qtrn_msg_.yacc = acc.y() * kMetersToMm / kGravityMagnitude;
-  hil_state_qtrn_msg_.zacc = acc.z() * kMetersToMm / kGravityMagnitude;
+  hil_state_qtrn_msg_.rollspeed = gyro_rad_per_s.x();
+  hil_state_qtrn_msg_.pitchspeed = gyro_rad_per_s.y();
+  hil_state_qtrn_msg_.yawspeed = gyro_rad_per_s.z();
+  hil_state_qtrn_msg_.lat_deg = hil_data_.lat_deg;
+  hil_state_qtrn_msg_.lon_deg = hil_data_.lon_deg;
+  hil_state_qtrn_msg_.alt_mm = hil_data_.alt_mm;
+  hil_state_qtrn_msg_.vx = gps_vel_cm_per_s.x();
+  hil_state_qtrn_msg_.vy = gps_vel_cm_per_s.y();
+  hil_state_qtrn_msg_.vz = gps_vel_cm_per_s.z();
+  hil_state_qtrn_msg_.ind_airspeed_cm_per_s = hil_data_.ind_airspeed_cm_per_s;
+  hil_state_qtrn_msg_.true_airspeed_cm_per_s = hil_data_.true_airspeed_cm_per_s;
+  hil_state_qtrn_msg_.xacc = acc_m_per_s2.x() * kMetersToMm_mm_per_m / kGravityMagnitude_m_per_s2;
+  hil_state_qtrn_msg_.yacc = acc_m_per_s2.y() * kMetersToMm_mm_per_m / kGravityMagnitude_m_per_s2;
+  hil_state_qtrn_msg_.zacc = acc_m_per_s2.z() * kMetersToMm_mm_per_m / kGravityMagnitude_m_per_s2;
 
   mavlink_hil_state_quaternion_t* hil_state_qtrn_msg_ptr = &hil_state_qtrn_msg_;
   mavlink_msg_hil_state_quaternion_encode(1, 0, &mmsg, hil_state_qtrn_msg_ptr);
