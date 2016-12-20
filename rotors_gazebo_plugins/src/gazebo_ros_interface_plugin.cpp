@@ -84,13 +84,24 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboRosInterfacePlugin::OnUpdate, this, _1));
 
+  // ============================================ //
+  // === CONNECT GAZEBO TO ROS MESSAGES SETUP === //
+  // ============================================ //
+
   // Subscribe to the "connect_gazebo_to_ros_topic" topic
-  std::string connect_gazebo_to_ros_topic_subtopic = "connect_gazebo_to_ros";
+  std::string connect_gazebo_to_ros_topic_subtopic = "connect_gazebo_to_ros_topic";
   gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << connect_gazebo_to_ros_topic_subtopic << "\"." << std::endl;
   gz_connect_gazebo_to_ros_topic_sub_ = gz_node_handle_->Subscribe(
       connect_gazebo_to_ros_topic_subtopic, &GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback, this);
 
+  // ============================================ //
+  // === CONNECT ROS TO GAZEBO MESSAGES SETUP === //
+  // ============================================ //
 
+  std::string connect_ros_to_gazebo_topic_subtopic = "connect_ros_to_gazebo_topic";
+  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << connect_ros_to_gazebo_topic_subtopic << "\"." << std::endl;
+  gz_connect_ros_to_gazebo_topic_sub_ = gz_node_handle_->Subscribe(
+      connect_ros_to_gazebo_topic_subtopic, &GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback, this);
 
   // ============================================ //
   // ============ ACTUATORS MSG SETUP =========== //
@@ -354,6 +365,14 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
     default:
       gzthrow("Message type is not supported by GazeboRosInterfacePlugin.");
   }
+
+}
+
+void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
+    GzConnectRosToGazeboTopicMsgPtr& gz_connect_ros_to_gazebo_topic_msg) {
+
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
 
 }
 
