@@ -111,7 +111,8 @@ endforeach()
 
 set (msgs
   msgs/Actuators.proto
-  msgs/ConnectToRos.proto
+  msgs/ConnectGazeboToRosTopic.proto
+  msgs/ConnectRosToGazeboTopic.proto
   msgs/Header.proto
   msgs/JointState.proto
   msgs/MagneticField.proto

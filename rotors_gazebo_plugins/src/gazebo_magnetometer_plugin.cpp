@@ -79,25 +79,23 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboMagnetometerPlugin::OnUpdate, this, _1));
 
-  // Create temporary "ConnectToRos" publisher and message
+  // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr gz_connect_to_ros_pub =
-        node_handle_->Advertise<gz_std_msgs::ConnectToRos>("connect_to_ros", 1);
-  gz_std_msgs::ConnectToRos connect_to_ros_msg;
+        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros", 1);
+  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
   // ============================================ //
   // ========= MAGNETIC FIELD MSG SETUP ========= //
   // ============================================ //
 
-  magnetometer_pub_ = node_handle_->Advertise<sensor_msgs::msgs::MagneticField>(magnetometer_topic_, 1);
-  gzmsg << "GazeboMagnetometerPlugin publishing on " << magnetometer_topic_ << std::endl;
-//  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
-//          magnetometer_topic_,
-//          magnetometer_topic_,
-//          GazeboRosInterfacePlugin::SupportedMsgTypes::MAGNETIC_FIELD);
-  connect_to_ros_msg.set_gazebo_topic(magnetometer_topic_);
-  connect_to_ros_msg.set_ros_topic(magnetometer_topic_);
-  connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::MAGNETIC_FIELD);
-  gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
+  magnetometer_pub_ = node_handle_->Advertise<sensor_msgs::msgs::MagneticField>(
+      node_handle_->GetTopicNamespace() + "/" + magnetometer_topic_, 1);
+//  gzmsg << "GazeboMagnetometerPlugin publishing on " << magnetometer_topic_ << std::endl;
+
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + magnetometer_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(magnetometer_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::MAGNETIC_FIELD);
+  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   // Create the normal noise distributions
   noise_n_[0] = NormalDistribution(0, noise_normal.X());

@@ -84,11 +84,11 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboRosInterfacePlugin::OnUpdate, this, _1));
 
-  // Subscribe to the "connect to ros" topic
-  std::string connect_to_ros_subtopic = "connect_to_ros";
-  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << connect_to_ros_subtopic << "\"." << std::endl;
-  gz_connect_to_ros_sub_ = gz_node_handle_->Subscribe(
-      connect_to_ros_subtopic, &GazeboRosInterfacePlugin::GzConnectToRosMsgCallback, this);
+  // Subscribe to the "connect_gazebo_to_ros_topic" topic
+  std::string connect_gazebo_to_ros_topic_subtopic = "connect_gazebo_to_ros";
+  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << connect_gazebo_to_ros_topic_subtopic << "\"." << std::endl;
+  gz_connect_gazebo_to_ros_topic_sub_ = gz_node_handle_->Subscribe(
+      connect_gazebo_to_ros_topic_subtopic, &GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback, this);
 
 
 
@@ -254,15 +254,16 @@ void GazeboRosInterfacePlugin::ConnectHelper(
 
 }
 
-void GazeboRosInterfacePlugin::GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& gz_connect_to_ros_msg) {
+void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
+    GzConnectGazeboToRosTopicMsgPtr& gz_connect_gazebo_to_ros_topic_msg) {
 
 //  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
-  const std::string gazeboTopicName = gz_connect_to_ros_msg->gazebo_topic();
-  const std::string rosTopicName = gz_connect_to_ros_msg->ros_topic();
+  const std::string gazeboTopicName = gz_connect_gazebo_to_ros_topic_msg->gazebo_topic();
+  const std::string rosTopicName = gz_connect_gazebo_to_ros_topic_msg->ros_topic();
 
-  switch(gz_connect_to_ros_msg->msgtype()) {
-    case gz_std_msgs::ConnectToRos::ACTUATORS:
+  switch(gz_connect_gazebo_to_ros_topic_msg->msgtype()) {
+    case gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS:
       ConnectHelper<sensor_msgs::msgs::Actuators, mav_msgs::Actuators>(
           &GazeboRosInterfacePlugin::GzActuatorsMsgCallback,
           this,
@@ -270,7 +271,7 @@ void GazeboRosInterfacePlugin::GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& g
           rosTopicName,
           gz_node_handle_);
       break;
-    case gz_std_msgs::ConnectToRos::IMU:
+    case gz_std_msgs::ConnectGazeboToRosTopic::IMU:
       ConnectHelper<sensor_msgs::msgs::Imu, sensor_msgs::Imu>(
           &GazeboRosInterfacePlugin::GzImuMsgCallback,
           this,
@@ -278,7 +279,7 @@ void GazeboRosInterfacePlugin::GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& g
           rosTopicName,
           gz_node_handle_);
       break;
-    case gz_std_msgs::ConnectToRos::JOINT_STATE:
+    case gz_std_msgs::ConnectGazeboToRosTopic::JOINT_STATE:
       ConnectHelper<sensor_msgs::msgs::JointState, sensor_msgs::JointState>(
           &GazeboRosInterfacePlugin::GzJointStateMsgCallback,
           this,
@@ -286,7 +287,7 @@ void GazeboRosInterfacePlugin::GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& g
           rosTopicName,
           gz_node_handle_);
       break;
-    case gz_std_msgs::ConnectToRos::MAGNETIC_FIELD:
+    case gz_std_msgs::ConnectGazeboToRosTopic::MAGNETIC_FIELD:
       ConnectHelper<sensor_msgs::msgs::MagneticField, sensor_msgs::MagneticField>(
           &GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback,
           this,
@@ -294,7 +295,7 @@ void GazeboRosInterfacePlugin::GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& g
           rosTopicName,
           gz_node_handle_);
       break;
-    case gz_std_msgs::ConnectToRos::NAV_SAT_FIX:
+    case gz_std_msgs::ConnectGazeboToRosTopic::NAV_SAT_FIX:
       ConnectHelper<sensor_msgs::msgs::NavSatFix, sensor_msgs::NavSatFix>(
           &GazeboRosInterfacePlugin::GzNavSatFixCallback,
           this,
@@ -302,7 +303,7 @@ void GazeboRosInterfacePlugin::GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& g
           rosTopicName,
           gz_node_handle_);
       break;
-    case gz_std_msgs::ConnectToRos::POSE:
+    case gz_std_msgs::ConnectGazeboToRosTopic::POSE:
       ConnectHelper<gz_geometry_msgs::Pose, geometry_msgs::Pose>(
           &GazeboRosInterfacePlugin::GzPoseMsgCallback,
           this,
@@ -310,7 +311,7 @@ void GazeboRosInterfacePlugin::GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& g
           rosTopicName,
           gz_node_handle_);
       break;
-    case gz_std_msgs::ConnectToRos::POSE_WITH_COVARIANCE_STAMPED:
+    case gz_std_msgs::ConnectGazeboToRosTopic::POSE_WITH_COVARIANCE_STAMPED:
       ConnectHelper<gz_geometry_msgs::PoseWithCovarianceStamped, geometry_msgs::PoseWithCovarianceStamped>(
           &GazeboRosInterfacePlugin::GzPoseWithCovarianceStampedMsgCallback,
           this,
@@ -318,7 +319,7 @@ void GazeboRosInterfacePlugin::GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& g
           rosTopicName,
           gz_node_handle_);
       break;
-    case gz_std_msgs::ConnectToRos::POSITION_STAMPED:
+    case gz_std_msgs::ConnectGazeboToRosTopic::POSITION_STAMPED:
       ConnectHelper<gz_geometry_msgs::PositionStamped, geometry_msgs::Point>(
           &GazeboRosInterfacePlugin::GzPositionStampedMsgCallback,
           this,
@@ -326,7 +327,7 @@ void GazeboRosInterfacePlugin::GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& g
           rosTopicName,
           gz_node_handle_);
       break;
-    case gz_std_msgs::ConnectToRos::ODOMETRY:
+    case gz_std_msgs::ConnectGazeboToRosTopic::ODOMETRY:
       ConnectHelper<gz_geometry_msgs::Odometry, nav_msgs::Odometry>(
           &GazeboRosInterfacePlugin::GzOdometryMsgCallback,
           this,
@@ -334,7 +335,7 @@ void GazeboRosInterfacePlugin::GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& g
           rosTopicName,
           gz_node_handle_);
       break;
-    case gz_std_msgs::ConnectToRos::TRANSFORM_STAMPED:
+    case gz_std_msgs::ConnectGazeboToRosTopic::TRANSFORM_STAMPED:
         ConnectHelper<gz_geometry_msgs::TransformStamped, geometry_msgs::TransformStamped>(
             &GazeboRosInterfacePlugin::GzTransformStampedMsgCallback,
             this,
@@ -342,7 +343,7 @@ void GazeboRosInterfacePlugin::GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& g
             rosTopicName,
             gz_node_handle_);
         break;
-    case gz_std_msgs::ConnectToRos::TWIST_STAMPED:
+    case gz_std_msgs::ConnectGazeboToRosTopic::TWIST_STAMPED:
       ConnectHelper<sensor_msgs::msgs::TwistStamped, geometry_msgs::TwistStamped>(
           &GazeboRosInterfacePlugin::GzTwistStampedMsgCallback,
           this,
