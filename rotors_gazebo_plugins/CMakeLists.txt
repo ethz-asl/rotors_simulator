@@ -14,7 +14,7 @@ message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 set(MAVLINK_INTERFACE)
 set(BUILD_MAVLINK_INTERFACE)
 
-set(ROS_DEPENDENCY TRUE)
+set(ROS_DEPENDENCY FALSE)
 
 if (MAVLINK_INTERFACE STREQUAL "y")
   set(BUILD_MAVLINK_INTERFACE TRUE)
@@ -200,9 +200,11 @@ if (ROS_DEPENDENCY)
   add_dependencies(rotors_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})
 endif()
 
-add_library(rotors_gazebo_bag_plugin src/gazebo_bag_plugin.cpp)
-target_link_libraries(rotors_gazebo_bag_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+# Entire GazeboBagPlugin is a heavy ROS dependency, and so rather than passing messages to
+# GazeboRosInterfacePlugin, this entire library is only included if ROS is present.
 if (ROS_DEPENDENCY)
+    add_library(rotors_gazebo_bag_plugin src/gazebo_bag_plugin.cpp)
+    target_link_libraries(rotors_gazebo_bag_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   add_dependencies(rotors_gazebo_bag_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
@@ -266,7 +268,6 @@ install(
     rotors_gazebo_odometry_plugin
     rotors_gazebo_imu_plugin
     rotors_gazebo_controller_interface
-    rotors_gazebo_bag_plugin
     rotors_gazebo_wind_plugin
     rotors_gazebo_octomap_plugin
     rotors_gazebo_multirotor_base_plugin
@@ -275,6 +276,15 @@ install(
   DESTINATION ${BIN_DESTINATION}
   LIBRARY DESTINATION ${LIB_DESTINATION}
 )
+
+if (ROS_DEPENDENCY)
+    install(
+      TARGETS
+        rotors_gazebo_bag_plugin
+      DESTINATION ${BIN_DESTINATION}
+      LIBRARY DESTINATION ${LIB_DESTINATION}
+    )
+endif()
 
 if (BUILD_MAVLINK_INTERFACE)
   install(
