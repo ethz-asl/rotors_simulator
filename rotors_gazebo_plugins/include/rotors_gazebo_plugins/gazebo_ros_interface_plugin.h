@@ -67,6 +67,7 @@ namespace gazebo {
 
 // typedef's to make life easier
 typedef const boost::shared_ptr<const gz_std_msgs::ConnectGazeboToRosTopic> GzConnectGazeboToRosTopicMsgPtr;
+typedef const boost::shared_ptr<const gz_std_msgs::ConnectRosToGazeboTopic> GzConnectRosToGazeboTopicMsgPtr;
 
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Actuators> GzActuatorsMsgPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> GzImuPtr;
@@ -158,11 +159,18 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   common::Time last_time_;
 
   // ============================================ //
-  // ========== CONNECT TO ROS MESSAGES ========= //
+  // ====== CONNECT GAZEBO TO ROS MESSAGES ====== //
   // ============================================ //
 
   transport::SubscriberPtr gz_connect_gazebo_to_ros_topic_sub_;
   void GzConnectGazeboToRosTopicMsgCallback(GzConnectGazeboToRosTopicMsgPtr& gz_connect_gazebo_to_ros_topic_msg);
+
+  // ============================================ //
+  // ====== CONNECT ROS TO GAZEBO MESSAGES ====== //
+  // ============================================ //
+
+  transport::SubscriberPtr gz_connect_ros_to_gazebo_topic_sub_;
+  void GzConnectRosToGazeboTopicMsgCallback(GzConnectRosToGazeboTopicMsgPtr& gz_connect_ros_to_gazebo_topic_msg);
 
   // ============================================ //
   // ============= ACTUATORS MESSAGES =========== //

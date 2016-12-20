@@ -67,15 +67,16 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
       boost::bind(&GazeboControllerInterface::OnUpdate, this, _1));
 
 
-//  cmd_motor_sub_ = node_handle_->subscribe(command_motor_speed_sub_topic_, 1,
-//                                           &GazeboControllerInterface::CommandMotorCallback,
-//                                           this);
-  gzmsg << "Subscribing to Gazebo topic \"" << command_motor_speed_sub_topic_ << "\"." << std::endl;
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
-  gazebo::transport::PublisherPtr gz_connect_to_ros_pub =
-        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros", 1);
+  gazebo::transport::PublisherPtr gz_connect_gazebo_to_ros_topic_pub =
+        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+
+  // Create temporary "ConnectRosToGazeboTopic" publisher and message
+  gazebo::transport::PublisherPtr gz_connect_ros_to_gazebo_topic_pub =
+          node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("connect_ros_to_gazebo_topic", 1);
+  gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
 
   // ============================================ //
   // === ACTUATORS (MOTOR VELOCITY) MSG SETUP === //
@@ -88,7 +89,26 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(motor_velocity_reference_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);
-  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+  // ============================================ //
+  // ===== ROS->GAZEBO MOTOR SPEED MSG SETUP ==== //
+  // ============================================ //
+
+  //  cmd_motor_sub_ = node_handle_->subscribe(command_motor_speed_sub_topic_, 1,
+  //                                           &GazeboControllerInterface::CommandMotorCallback,
+  //                                           this);
+  cmd_motor_sub_ = node_handle_->Subscribe(
+      node_handle_->GetTopicNamespace() + "/" + command_motor_speed_sub_topic_,
+      &GazeboControllerInterface::CommandMotorCallback, this);
+
+  connect_ros_to_gazebo_topic_msg.set_ros_topic(command_motor_speed_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + command_motor_speed_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_msgtype(gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
+  gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
+
+  gzmsg << "Load() finished." << std::endl;
+
 }
 
 // This gets called by the world update start event.
@@ -116,10 +136,16 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   motor_velocity_reference_pub_->Publish(turning_velocities_msg);
 }
 
-void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::ActuatorsConstPtr& input_reference_msg) {
-  input_reference_.resize(input_reference_msg->angular_velocities.size());
-  for (int i = 0; i < input_reference_msg->angular_velocities.size(); ++i) {
-    input_reference_[i] = input_reference_msg->angular_velocities[i];
+//void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::ActuatorsConstPtr& input_reference_msg) {
+void GazeboControllerInterface::CommandMotorCallback(GzActuatorsMsgPtr& actuators_msg) {
+//  input_reference_.resize(input_reference_msg->angular_velocities.size());
+//  for (int i = 0; i < input_reference_msg->angular_velocities.size(); ++i) {
+//    input_reference_[i] = input_reference_msg->angular_velocities[i];
+//  }
+
+  input_reference_.resize(actuators_msg->angular_velocities_size());
+  for (int i = 0; i < actuators_msg->angular_velocities_size(); ++i) {
+    input_reference_[i] = actuators_msg->angular_velocities(i);
   }
 
   // We have received a motor command reference (it may not be the first, but this

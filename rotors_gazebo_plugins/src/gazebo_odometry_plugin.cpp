@@ -187,7 +187,7 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
     gazebo::transport::PublisherPtr gz_connect_to_ros_pub =
-          gz_node_ptr_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros", 1);
+          gz_node_ptr_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
     gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
   // ============================================ //
