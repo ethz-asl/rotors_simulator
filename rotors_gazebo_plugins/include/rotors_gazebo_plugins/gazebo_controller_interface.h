@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +33,8 @@
 #include <gazebo/physics/physics.hh>
 #include <mav_msgs/Actuators.h>
 #include <mav_msgs/default_topics.h>
-#include <ros/callback_queue.h>
-#include <ros/ros.h>
+//#include <ros/callback_queue.h>
+//#include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 
 #include "rotors_gazebo_plugins/common.h"
@@ -77,9 +78,12 @@ class GazeboControllerInterface : public ModelPlugin {
   std::string motor_velocity_reference_pub_topic_;
   std::string command_motor_speed_sub_topic_;
 
-  ros::NodeHandle* node_handle_;
-  ros::Publisher motor_velocity_reference_pub_;
-  ros::Subscriber cmd_motor_sub_;
+//  ros::NodeHandle* node_handle_;
+  gazebo::transport::NodePtr node_handle_;
+//  ros::Publisher motor_velocity_reference_pub_;
+  gazebo::transport::PublisherPtr motor_velocity_reference_pub_;
+//  ros::Subscriber cmd_motor_sub_;
+  gazebo::transport::SubscriberPtr cmd_motor_sub_;
 
   physics::ModelPtr model_;
   physics::WorldPtr world_;

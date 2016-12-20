@@ -14,7 +14,7 @@ message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 set(MAVLINK_INTERFACE)
 set(BUILD_MAVLINK_INTERFACE)
 
-set(ROS_DEPENDENCY FALSE)
+set(ROS_DEPENDENCY TRUE)
 
 if (MAVLINK_INTERFACE STREQUAL "y")
   set(BUILD_MAVLINK_INTERFACE TRUE)
@@ -36,21 +36,21 @@ add_definitions(
 add_definitions(-DROS_ASSERT_ENABLED)
 
 if (ROS_DEPENDENCY)
-message(STATUS "ROS_DEPENDENCY == TRUE")
-find_package(catkin REQUIRED COMPONENTS
-  cmake_modules
-  cv_bridge
-  geometry_msgs
-  mav_msgs
-  octomap_msgs
-  octomap_ros
-  rosbag
-  roscpp
-  rotors_comm
-  rotors_control
-  std_srvs
-  tf
-)
+  message(STATUS "ROS_DEPENDENCY == TRUE")
+  find_package(catkin REQUIRED COMPONENTS
+    cmake_modules
+    cv_bridge
+    geometry_msgs
+    mav_msgs
+    octomap_msgs
+    octomap_ros
+    rosbag
+    roscpp
+    rotors_comm
+    rotors_control
+    std_srvs
+    tf
+  )
 endif()
 
 if (BUILD_MAVLINK_INTERFACE)
@@ -110,8 +110,8 @@ endforeach()
 #message(FATAL_ERROR "GAZEBO_MSG_INCLUDE_DIRS = " ${GAZEBO_MSG_INCLUDE_DIRS})
 
 set (msgs
-  #msgs/Float.proto
   msgs/Actuators.proto
+  msgs/ConnectToRos.proto
   msgs/Header.proto
   msgs/JointState.proto
   msgs/MagneticField.proto
@@ -133,11 +133,6 @@ set (msgs
   msgs/TwistStamped.proto
   msgs/TwistWithCovariance.proto
   msgs/Vector3.proto
-  #msgs/opticalFlow.proto
-  #msgs/lidar.proto
-  #msgs/CommandMotorSpeed.proto
-  #msgs/MotorSpeed.proto
-  #msgs/Wind.proto
 )
 
 # Finally, generate the .cpp files from the .proto files
@@ -194,12 +189,6 @@ if (ROS_DEPENDENCY)
   add_dependencies(rotors_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
-add_library(rotors_gazebo_controller_interface src/gazebo_controller_interface.cpp)
-target_link_libraries(rotors_gazebo_controller_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-if (ROS_DEPENDENCY)
-  add_dependencies(rotors_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})
-endif()
-
 # Entire GazeboBagPlugin is a heavy ROS dependency, and so rather than passing messages to
 # GazeboRosInterfacePlugin, this entire library is only included if ROS is present.
 if (ROS_DEPENDENCY)
@@ -243,6 +232,12 @@ add_library(rotors_gazebo_ros_interface_plugin src/gazebo_ros_interface_plugin.c
 target_link_libraries(rotors_gazebo_ros_interface_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 if (ROS_DEPENDENCY)
   add_dependencies(rotors_gazebo_ros_interface_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+
+add_library(rotors_gazebo_controller_interface src/gazebo_controller_interface.cpp)
+target_link_libraries(rotors_gazebo_controller_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+if (ROS_DEPENDENCY)
+  add_dependencies(rotors_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})
 endif()
 
 if (BUILD_MAVLINK_INTERFACE)

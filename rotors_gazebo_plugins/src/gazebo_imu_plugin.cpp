@@ -138,6 +138,11 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboImuPlugin::OnUpdate, this, _1));
 
+  // Create temporary "ConnectToRos" publisher and message
+  gazebo::transport::PublisherPtr gz_connect_to_ros_pub =
+        node_handle_->Advertise<gz_std_msgs::ConnectToRos>("connect_to_ros", 1);
+  gz_std_msgs::ConnectToRos connect_to_ros_msg;
+
   // ============================================ //
   // =============== IMU MSG SETUP ============== //
   // ============================================ //
@@ -147,10 +152,14 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   std::string gz_imu_topic_name = "~/" + imu_topic_;
   imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(gz_imu_topic_name, 1);
   gzmsg << "GazeboImuPlugin publishing on Gazebo topic \"" << gz_imu_topic_name << "\"." << std::endl;
-  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
-        gz_imu_topic_name,
-        imu_topic_,
-        GazeboRosInterfacePlugin::SupportedMsgTypes::IMU);
+//  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
+//        gz_imu_topic_name,
+//        imu_topic_,
+//        GazeboRosInterfacePlugin::SupportedMsgTypes::IMU);
+  connect_to_ros_msg.set_gazebo_topic(imu_topic_);
+  connect_to_ros_msg.set_ros_topic(imu_topic_);
+  connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::IMU);
+  gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
 
   //==============================================//
   //====== POPULATE STATIC PARTS OF IMU MSG ======//
