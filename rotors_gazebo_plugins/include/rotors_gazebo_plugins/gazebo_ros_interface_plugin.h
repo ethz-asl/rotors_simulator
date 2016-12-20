@@ -114,13 +114,6 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   void InitializeParams();
   void Publish();
 
-
-  static GazeboRosInterfacePlugin & getInstance() {
-    GZ_ASSERT(instance, "");
-    return *instance;
-  }
-
-  static GazeboRosInterfacePlugin * instance;
  protected:
   void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
