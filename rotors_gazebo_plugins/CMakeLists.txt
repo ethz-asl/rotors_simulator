@@ -14,7 +14,7 @@ message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 set(MAVLINK_INTERFACE)
 set(BUILD_MAVLINK_INTERFACE)
 
-set(ROS_DEPENDENCY FALSE)
+set(ROS_DEPENDENCY TRUE)
 
 if (MAVLINK_INTERFACE STREQUAL "y")
   set(BUILD_MAVLINK_INTERFACE TRUE)
@@ -288,14 +288,7 @@ endif()
 # Copy over all converted protobuf files (*.pb.h and *.pb.c) from the src directory to
 # the devel directory. This is required so that you can include the protobuf header files from other C++ files.
 if (ROS_DEPENDENCY)
-  set(PROTOBUF_PATH "${CATKIN_DEVEL_PREFIX}/include/${PACKAGE_NAME}")
-else()
-  set(PROTOBUF_PATH "${CMAKE_BINARY_DIR}/include/")
-endif()
-
-message(STATUS "PROTOBUF_PATH = ${PROTOBUF_PATH}")
-if (ROS_DEPENDENCY)
-  file(COPY ${CMAKE_CURRENT_BINARY_DIR}/ DESTINATION $PROTOBUF_PATH FILES_MATCHING PATTERN "*.pb.*")
+  file(COPY ${CMAKE_CURRENT_BINARY_DIR}/ DESTINATION ${CATKIN_DEVEL_PREFIX}/include/${PACKAGE_NAME} FILES_MATCHING PATTERN "*.pb.*")
 endif()
 
 #message(FATAL_ERROR "Reached EOF.")
