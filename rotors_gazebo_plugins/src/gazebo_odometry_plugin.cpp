@@ -193,13 +193,11 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   // ============================================ //
   // =============== POSE MSG SETUP ============= //
   // ============================================ //
-  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << pose_pub_topic_ << "\"." << std::endl;
-  pose_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Pose>(pose_pub_topic_, 1);
-//  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
-//      pose_pub_topic_,
-//      pose_pub_topic_,
-//      GazeboRosInterfacePlugin::SupportedMsgTypes::POSE);
-  connect_to_ros_msg.set_gazebo_topic(pose_pub_topic_);
+//  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << pose_pub_topic_ << "\"." << std::endl;
+  pose_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Pose>(
+      gz_node_ptr_->GetTopicNamespace() + "/" + pose_pub_topic_, 1);
+
+  connect_to_ros_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + pose_pub_topic_);
   connect_to_ros_msg.set_ros_topic(pose_pub_topic_);
   connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::POSE);
   gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
@@ -207,48 +205,35 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   // ============================================ //
   // == POSE WITH COVARIANCE STAMPED MSG SETUP == //
   // ============================================ //
-  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << pose_with_covariance_stamped_pub_topic_ << "\"." << std::endl;
+//  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << pose_with_covariance_stamped_pub_topic_ << "\"." << std::endl;
   pose_with_covariance_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::PoseWithCovarianceStamped>(
-      pose_with_covariance_stamped_pub_topic_, 1);
-//  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
-//      pose_with_covariance_stamped_pub_topic_,
-//      pose_with_covariance_stamped_pub_topic_,
-//      GazeboRosInterfacePlugin::SupportedMsgTypes::POSE_WITH_COVARIANCE_STAMPED);
-  connect_to_ros_msg.set_gazebo_topic(pose_with_covariance_stamped_pub_topic_);
+      gz_node_ptr_->GetTopicNamespace() + "/" + pose_with_covariance_stamped_pub_topic_, 1);
+
+  connect_to_ros_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + pose_with_covariance_stamped_pub_topic_);
   connect_to_ros_msg.set_ros_topic(pose_with_covariance_stamped_pub_topic_);
   connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::POSE_WITH_COVARIANCE_STAMPED);
   gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
 
-//  pose_with_covariance_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_with_covariance_pub_topic_, 1);
-
-//  position_pub_ = node_handle_->advertise<geometry_msgs::PointStamped>(position_pub_topic_, 1);
   // ============================================ //
   // ========= POSITION STAMPED MSG SETUP ======= //
   // ============================================ //
-  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << position_stamped_pub_topic_ << "\"." << std::endl;
-  position_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::PositionStamped>(position_stamped_pub_topic_, 1);
-//  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
-//      position_stamped_pub_topic_,
-//      position_stamped_pub_topic_,
-//      GazeboRosInterfacePlugin::SupportedMsgTypes::POSITION_STAMPED);
-  connect_to_ros_msg.set_gazebo_topic(position_stamped_pub_topic_);
+//  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << position_stamped_pub_topic_ << "\"." << std::endl;
+  position_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::PositionStamped>(
+      gz_node_ptr_->GetTopicNamespace() + "/" + position_stamped_pub_topic_, 1);
+
+  connect_to_ros_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + position_stamped_pub_topic_);
   connect_to_ros_msg.set_ros_topic(position_stamped_pub_topic_);
   connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::POSITION_STAMPED);
   gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
 
-//  transform_pub_ = node_handle_->advertise<geometry_msgs::TransformStamped>(transform_pub_topic_, 1);
-
   // ============================================ //
   // ============= ODOMETRY MSG SETUP =========== //
   // ============================================ //
-  std::string odometry_topic_name = gz_node_ptr_->GetTopicNamespace() + "/" + odometry_pub_topic_;
-  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << odometry_pub_topic_ << "\"." << std::endl;
-  odometry_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Odometry>(odometry_topic_name, 1);
-//  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
-//      odometry_topic_name,
-//      odometry_pub_topic_,
-//      GazeboRosInterfacePlugin::SupportedMsgTypes::ODOMETRY);
-  connect_to_ros_msg.set_gazebo_topic(odometry_topic_name);
+//  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << odometry_pub_topic_ << "\"." << std::endl;
+  odometry_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Odometry>(
+      gz_node_ptr_->GetTopicNamespace() + "/" + odometry_pub_topic_, 1);
+
+  connect_to_ros_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + odometry_pub_topic_);
   connect_to_ros_msg.set_ros_topic(odometry_pub_topic_);
   connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::ODOMETRY);
   gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
@@ -256,13 +241,11 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   // ============================================ //
   // ======== TRANSFORM STAMPED MSG SETUP ======= //
   // ============================================ //
-  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << transform_stamped_pub_topic_ << "\"." << std::endl;
-  transform_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::TransformStamped>(transform_stamped_pub_topic_, 1);
-//  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
-//      transform_stamped_pub_topic_,
-//      transform_stamped_pub_topic_,
-//      GazeboRosInterfacePlugin::SupportedMsgTypes::TRANSFORM_STAMPED);
-  connect_to_ros_msg.set_gazebo_topic(transform_stamped_pub_topic_);
+//  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << transform_stamped_pub_topic_ << "\"." << std::endl;
+  transform_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::TransformStamped>(
+      gz_node_ptr_->GetTopicNamespace() + "/" + transform_stamped_pub_topic_, 1);
+
+  connect_to_ros_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + transform_stamped_pub_topic_);
   connect_to_ros_msg.set_ros_topic(transform_stamped_pub_topic_);
   connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::TRANSFORM_STAMPED);
   gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
