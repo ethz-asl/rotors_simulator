@@ -184,13 +184,10 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
                 noise_normal_angular_velocity.Z() * noise_normal_angular_velocity.Z();
   twist_covariance = twist_covd.asDiagonal();
 
-  // Listen to the update event. This event is broadcast every
-  // simulation iteration.
-  updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboOdometryPlugin::OnUpdate, this, _1));
 
   // Create temporary "ConnectToRos" publisher and message
   gazebo::transport::PublisherPtr gz_connect_to_ros_pub =
-        gz_node_ptr_->Advertise<gz_std_msgs::ConnectToRos>("connect_to_ros", 10);
+        gz_node_ptr_->Advertise<gz_std_msgs::ConnectToRos>("connect_to_ros", 1);
   gz_std_msgs::ConnectToRos connect_to_ros_msg;
 
   // ============================================ //
@@ -270,6 +267,9 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::TRANSFORM_STAMPED);
   gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
 
+  // Listen to the update event. This event is broadcast every
+  // simulation iteration.
+  updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboOdometryPlugin::OnUpdate, this, _1));
 
 }
 

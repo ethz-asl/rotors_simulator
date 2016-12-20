@@ -24,23 +24,17 @@
 
 namespace gazebo {
 
-GazeboRosInterfacePlugin *GazeboRosInterfacePlugin::instance = nullptr;
-
 GazeboRosInterfacePlugin::GazeboRosInterfacePlugin()
     : ModelPlugin(),
       gz_node_handle_(0),
       ros_node_handle_(0),
       ros_actuators_msg_(new mav_msgs::Actuators)
 {
-  GZ_ASSERT(!instance, "");
-  instance = this;
-
   // Nothing
 }
 
 GazeboRosInterfacePlugin::~GazeboRosInterfacePlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
-  instance = nullptr;
 }
 
 
