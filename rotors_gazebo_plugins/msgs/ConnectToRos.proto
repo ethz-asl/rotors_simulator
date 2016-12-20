@@ -1,0 +1,24 @@
+syntax = "proto2";
+package gz_std_msgs;
+
+
+message ConnectToRos
+{
+  required string gazebo_topic = 1;
+  required string ros_topic = 2;
+
+  enum MsgType {
+  	ACTUATORS = 0;
+    IMU = 1;
+    JOINT_STATE = 2;
+    MAGNETIC_FIELD = 3;
+    NAV_SAT_FIX = 4;
+    ODOMETRY = 5;
+    POSE = 6;
+    POSE_WITH_COVARIANCE_STAMPED = 7;
+    POSITION_STAMPED = 8;
+    TRANSFORM_STAMPED = 9;
+    TWIST_STAMPED = 10;
+  }
+  required MsgType msgType = 3;
+}

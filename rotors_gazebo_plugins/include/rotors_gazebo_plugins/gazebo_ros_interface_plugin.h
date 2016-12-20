@@ -33,6 +33,8 @@
 #include "gazebo/msgs/msgs.hh"
 
 // GAZEBO MSG TYPES
+#include "ConnectToRos.pb.h"
+
 #include "Actuators.pb.h"
 #include "JointState.pb.h"
 #include "MagneticField.pb.h"
@@ -63,6 +65,8 @@
 namespace gazebo {
 
 // typedef's to make life easier
+typedef const boost::shared_ptr<const gz_std_msgs::ConnectToRos> GzConnectToRosMsgPtr;
+
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Actuators> GzActuatorsMsgPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> GzImuPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::JointState> GzJointStateMsgPtr;
@@ -85,19 +89,19 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   //!           from a Gazebo message to a ROS message.
   //! @warning  If you add another enum here, make sure to add a corresponding case block
   //!           to the switch statement in ConnectToRos().
-  enum class SupportedMsgTypes {
-    ACTUATORS,
-    IMU,
-    JOINT_STATE,
-    MAGNETIC_FIELD,
-    NAV_SAT_FIX,
-    ODOMETRY,
-    POSE,
-    POSE_WITH_COVARIANCE_STAMPED,
-    POSITION_STAMPED,
-    TRANSFORM_STAMPED,
-    TWIST_STAMPED,
-  };
+//  enum class SupportedMsgTypes {
+//    ACTUATORS,
+//    IMU,
+//    JOINT_STATE,
+//    MAGNETIC_FIELD,
+//    NAV_SAT_FIX,
+//    ODOMETRY,
+//    POSE,
+//    POSE_WITH_COVARIANCE_STAMPED,
+//    POSITION_STAMPED,
+//    TRANSFORM_STAMPED,
+//    TWIST_STAMPED,
+//  };
 
   GazeboRosInterfacePlugin();
   ~GazeboRosInterfacePlugin();
@@ -105,7 +109,7 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   //! @brief    Call this to connect a Gazebo topic to a ROS topic.
   //! @details  Any messages published on the specified Gazebo topic will be converted into a ROS message
   //!           and then published on the ROS framework.
-  void ConnectToRos(std::string gazeboTopicName, std::string rosTopicName, SupportedMsgTypes msgType);
+//  void ConnectToRos(std::string gazeboTopicName, std::string rosTopicName, SupportedMsgTypes msgType);
 
   void InitializeParams();
   void Publish();
@@ -158,6 +162,13 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   event::ConnectionPtr updateConnection_;
 
   common::Time last_time_;
+
+  // ============================================ //
+  // ========== CONNECT TO ROS MESSAGES ========= //
+  // ============================================ //
+
+  transport::SubscriberPtr gz_connect_to_ros_sub_;
+  void GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& gz_connect_to_ros_msg);
 
   // ============================================ //
   // ============= ACTUATORS MESSAGES =========== //

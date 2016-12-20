@@ -24,8 +24,7 @@
 
 namespace gazebo {
 
-
-GazeboRosInterfacePlugin* GazeboRosInterfacePlugin::instance;
+GazeboRosInterfacePlugin *GazeboRosInterfacePlugin::instance = nullptr;
 
 GazeboRosInterfacePlugin::GazeboRosInterfacePlugin()
     : ModelPlugin(),
@@ -90,6 +89,14 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   this->updateConnection_ =
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboRosInterfacePlugin::OnUpdate, this, _1));
+
+  // Subscribe to the "connect to ros" topic
+  std::string connect_to_ros_subtopic = "connect_to_ros";
+  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << connect_to_ros_subtopic << "\"." << std::endl;
+  gz_connect_to_ros_sub_ = gz_node_handle_->Subscribe(
+      connect_to_ros_subtopic, &GazeboRosInterfacePlugin::GzConnectToRosMsgCallback, this);
+
+
 
   // ============================================ //
   // ============ ACTUATORS MSG SETUP =========== //
@@ -234,13 +241,13 @@ void GazeboRosInterfacePlugin::ConnectHelper(
   static std::map< std::string, ConnectHelperStorage<M> > callback_map;
 
   // Create ROS publisher
-  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << rosTopicName << "\"." << std::endl;
+  gzmsg << "GazeboRosInterfacePlugin publishing to ROS topic \"" << rosTopicName << "\"." << std::endl;
   ros::Publisher ros_publisher = ros_node_handle_->advertise<N>(rosTopicName, 1);
 
   // @todo Handle collision error
   auto callback_entry = callback_map.emplace(gazeboTopicName, ConnectHelperStorage<M>{ptr, fp, ros_publisher});
 
-  gzmsg << "GazeboRosMsgInterfacePlugin subscribing to Gazebo topic \"" << gazeboTopicName << "\"."<< std::endl;
+  gzmsg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << gazeboTopicName << "\"."<< std::endl;
   gazebo::transport::SubscriberPtr subscriberPtr;
   subscriberPtr = gz_node_handle->Subscribe(
       gazeboTopicName,
@@ -253,10 +260,15 @@ void GazeboRosInterfacePlugin::ConnectHelper(
 
 }
 
-void GazeboRosInterfacePlugin::ConnectToRos(std::string gazeboTopicName, std::string rosTopicName, SupportedMsgTypes msgType) {
+void GazeboRosInterfacePlugin::GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& gz_connect_to_ros_msg) {
 
-  switch(msgType) {
-    case SupportedMsgTypes::ACTUATORS:
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
+  const std::string gazeboTopicName = gz_connect_to_ros_msg->gazebo_topic();
+  const std::string rosTopicName = gz_connect_to_ros_msg->ros_topic();
+
+  switch(gz_connect_to_ros_msg->msgtype()) {
+    case gz_std_msgs::ConnectToRos::ACTUATORS:
       ConnectHelper<sensor_msgs::msgs::Actuators, mav_msgs::Actuators>(
           &GazeboRosInterfacePlugin::GzActuatorsMsgCallback,
           this,
@@ -264,7 +276,7 @@ void GazeboRosInterfacePlugin::ConnectToRos(std::string gazeboTopicName, std::st
           rosTopicName,
           gz_node_handle_);
       break;
-    case SupportedMsgTypes::IMU:
+    case gz_std_msgs::ConnectToRos::IMU:
       ConnectHelper<sensor_msgs::msgs::Imu, sensor_msgs::Imu>(
           &GazeboRosInterfacePlugin::GzImuMsgCallback,
           this,
@@ -272,7 +284,7 @@ void GazeboRosInterfacePlugin::ConnectToRos(std::string gazeboTopicName, std::st
           rosTopicName,
           gz_node_handle_);
       break;
-    case SupportedMsgTypes::JOINT_STATE:
+    case gz_std_msgs::ConnectToRos::JOINT_STATE:
       ConnectHelper<sensor_msgs::msgs::JointState, sensor_msgs::JointState>(
           &GazeboRosInterfacePlugin::GzJointStateMsgCallback,
           this,
@@ -280,7 +292,7 @@ void GazeboRosInterfacePlugin::ConnectToRos(std::string gazeboTopicName, std::st
           rosTopicName,
           gz_node_handle_);
       break;
-    case SupportedMsgTypes::MAGNETIC_FIELD:
+    case gz_std_msgs::ConnectToRos::MAGNETIC_FIELD:
       ConnectHelper<sensor_msgs::msgs::MagneticField, sensor_msgs::MagneticField>(
           &GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback,
           this,
@@ -288,7 +300,7 @@ void GazeboRosInterfacePlugin::ConnectToRos(std::string gazeboTopicName, std::st
           rosTopicName,
           gz_node_handle_);
       break;
-    case SupportedMsgTypes::NAV_SAT_FIX:
+    case gz_std_msgs::ConnectToRos::NAV_SAT_FIX:
       ConnectHelper<sensor_msgs::msgs::NavSatFix, sensor_msgs::NavSatFix>(
           &GazeboRosInterfacePlugin::GzNavSatFixCallback,
           this,
@@ -296,7 +308,7 @@ void GazeboRosInterfacePlugin::ConnectToRos(std::string gazeboTopicName, std::st
           rosTopicName,
           gz_node_handle_);
       break;
-    case SupportedMsgTypes::POSE:
+    case gz_std_msgs::ConnectToRos::POSE:
       ConnectHelper<gz_geometry_msgs::Pose, geometry_msgs::Pose>(
           &GazeboRosInterfacePlugin::GzPoseMsgCallback,
           this,
@@ -304,7 +316,7 @@ void GazeboRosInterfacePlugin::ConnectToRos(std::string gazeboTopicName, std::st
           rosTopicName,
           gz_node_handle_);
       break;
-    case SupportedMsgTypes::POSE_WITH_COVARIANCE_STAMPED:
+    case gz_std_msgs::ConnectToRos::POSE_WITH_COVARIANCE_STAMPED:
       ConnectHelper<gz_geometry_msgs::PoseWithCovarianceStamped, geometry_msgs::PoseWithCovarianceStamped>(
           &GazeboRosInterfacePlugin::GzPoseWithCovarianceStampedMsgCallback,
           this,
@@ -312,7 +324,7 @@ void GazeboRosInterfacePlugin::ConnectToRos(std::string gazeboTopicName, std::st
           rosTopicName,
           gz_node_handle_);
       break;
-    case SupportedMsgTypes::POSITION_STAMPED:
+    case gz_std_msgs::ConnectToRos::POSITION_STAMPED:
       ConnectHelper<gz_geometry_msgs::PositionStamped, geometry_msgs::Point>(
           &GazeboRosInterfacePlugin::GzPositionStampedMsgCallback,
           this,
@@ -320,7 +332,7 @@ void GazeboRosInterfacePlugin::ConnectToRos(std::string gazeboTopicName, std::st
           rosTopicName,
           gz_node_handle_);
       break;
-    case SupportedMsgTypes::ODOMETRY:
+    case gz_std_msgs::ConnectToRos::ODOMETRY:
       ConnectHelper<gz_geometry_msgs::Odometry, nav_msgs::Odometry>(
           &GazeboRosInterfacePlugin::GzOdometryMsgCallback,
           this,
@@ -328,7 +340,7 @@ void GazeboRosInterfacePlugin::ConnectToRos(std::string gazeboTopicName, std::st
           rosTopicName,
           gz_node_handle_);
       break;
-    case SupportedMsgTypes::TRANSFORM_STAMPED:
+    case gz_std_msgs::ConnectToRos::TRANSFORM_STAMPED:
         ConnectHelper<gz_geometry_msgs::TransformStamped, geometry_msgs::TransformStamped>(
             &GazeboRosInterfacePlugin::GzTransformStampedMsgCallback,
             this,
@@ -336,7 +348,7 @@ void GazeboRosInterfacePlugin::ConnectToRos(std::string gazeboTopicName, std::st
             rosTopicName,
             gz_node_handle_);
         break;
-    case SupportedMsgTypes::TWIST_STAMPED:
+    case gz_std_msgs::ConnectToRos::TWIST_STAMPED:
       ConnectHelper<sensor_msgs::msgs::TwistStamped, geometry_msgs::TwistStamped>(
           &GazeboRosInterfacePlugin::GzTwistStampedMsgCallback,
           this,
@@ -481,7 +493,7 @@ void GazeboRosInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fi
 }
 
 void GazeboRosInterfacePlugin::GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odometry_msg, ros::Publisher ros_publisher) {
-  //gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the Odometry message onto ROS
