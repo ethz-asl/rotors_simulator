@@ -140,4 +140,20 @@ $ roslaunch rotors_gazebo mav_hovering_example.launch mav_name:=firefly world_na
 
 #### Usage with a joystick
 
-**TODO(ff):** `Write something here.`
+Connect a USB joystick to your computer and launch the simulation alongside ROS joystick driver and the RotorS joystick node:
+```
+$ roslaunch rotors_gazebo mav_with_joy.launch mav_name:=firefly world_name:=basic
+```
+
+Depending on the type of joystick and the personal preference for operation, you can assign the axis number using the `axis_<roll/pitch/thrust>_` parameter and the axis direction using the `axis_direction_<roll/pitch/thrust>` parameter.
+
+#### Usage with a keyboard
+
+First, perform a one-time setup of virtual keyboard joystick as described here: https://github.com/ethz-asl/rotors_simulator/wiki/Setup-virtual-keyboard-joystick.
+
+Launch the simulation with the keyboard interface using the following launch file:
+```
+$ roslaunch rotors_gazebo mav_with_keyboard.launch mav_name:=firefly world_name:=basic
+```
+
+If everything was setup correctly, an additional GUI should appear with bars indicating the current throttle, roll, pitch, and yaw inputs. While this window is active, the Arrows and W, A, S, D keys will generate virtual joystick inputs, which can then be processed by the RotorS joystick node in the same way as real joystick commands.

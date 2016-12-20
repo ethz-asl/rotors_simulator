@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <model name="yosemite">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <heightmap>
+            <uri>model://yosemite/materials/textures/yosemite.png</uri>
+            <size>1000 1000 125</size>
+            <pos>100 0 -30</pos>
+          </heightmap>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.2</mu>
+              <mu2>0.2</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <heightmap>
+            <texture>
+              <diffuse>file://media/materials/textures/dirt_diffusespecular.png</diffuse>
+              <normal>file://media/materials/textures/flat_normal.png</normal>
+              <size>50</size>
+            </texture>
+	    <texture>
+	      <diffuse>file://media/materials/textures/terrain_detail.jpg</diffuse>
+              <normal>file://media/materials/textures/flat_normal.png</normal>
+              <size>75</size>
+            </texture>
+            <texture>
+	      <diffuse>file://yosemite/materials/textures/texture_forest.png</diffuse>
+              <normal>file://media/materials/textures/flat_normal.png</normal>
+              <size>100</size>
+            </texture>
+            <texture>
+              <diffuse>file://yosemite/materials/textures/texture_mountains.png</diffuse>
+              <normal>file://media/materials/textures/flat_normal.png</normal>
+              <size>50</size>
+            </texture>
+            <blend>
+              <min_height>35</min_height>
+              <fade_dist>10</fade_dist>
+            </blend>
+	    <blend>
+              <min_height>60</min_height>
+              <fade_dist>10</fade_dist>
+            </blend>
+	    <blend>
+              <min_height>90</min_height>
+              <fade_dist>10</fade_dist>
+            </blend>
+            <uri>model://yosemite/materials/textures/yosemite.png</uri>
+            <size>1000 1000 125</size>
+            <pos>100 0 -30</pos>
+          </heightmap>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>

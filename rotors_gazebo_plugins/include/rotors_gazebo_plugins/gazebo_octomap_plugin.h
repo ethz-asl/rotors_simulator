@@ -79,6 +79,7 @@ class OctomapFromGazeboWorld : public WorldPlugin {
   ros::NodeHandle node_handle_;
   ros::ServiceServer srv_;
   octomap::OcTree* octomap_;
+  ros::Publisher octomap_publisher_;
   bool ServiceCallback(rotors_comm::Octomap::Request& req,
                        rotors_comm::Octomap::Response& res);
 };

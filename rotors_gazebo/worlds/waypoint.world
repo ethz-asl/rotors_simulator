@@ -35,6 +35,9 @@
       <gravity>0 0 -9.8</gravity>
     </physics>
     <!-- Laser Scans -->
-    <plugin name="gazebo_octomap" filename="librotors_gazebo_octomap_plugin.so"/>
+    <plugin name='gazebo_octomap' filename='librotors_gazebo_octomap_plugin.so'>
+      <octomapPubTopic>world/octomap</octomapPubTopic>
+      <octomapServiceName>world/get_octomap</octomapServiceName>
+    </plugin>
   </world>
 </sdf>
