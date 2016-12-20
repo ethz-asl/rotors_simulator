@@ -94,38 +94,32 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   // Make sure the parent sensor is active.
   parent_sensor_->SetActive(true);
 
+  // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr gz_connect_to_ros_pub =
-      gz_node_handle_->Advertise<gz_std_msgs::ConnectToRos>("connect_to_ros", 1);
-  gz_std_msgs::ConnectToRos connect_to_ros_msg;
+        gz_node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros", 1);
+  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
   // ============================================ //
   // =========== NAV SAT FIX MSG SETUP ========== //
   // ============================================ //
   gzmsg << "GazeboGpsPlugin creating publisher on \"" << gps_topic_ << "\"." << std::endl;
   gz_gps_pub_ = gz_node_handle_->Advertise<sensor_msgs::msgs::NavSatFix>(gps_topic_, 1);
-//  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
-//      gps_topic_,
-//      gps_topic_,
-//      GazeboRosInterfacePlugin::SupportedMsgTypes::NAV_SAT_FIX);
 
-  connect_to_ros_msg.set_gazebo_topic(gps_topic_);
-  connect_to_ros_msg.set_ros_topic(gps_topic_);
-  connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::NAV_SAT_FIX);
-  gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(gps_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(gps_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::NAV_SAT_FIX);
+  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   // ============================================ //
   // == GROUND SPEED (TWIST STAMPED) MSG SETUP == //
   // ============================================ //
   gzmsg << "GazeboGpsPlugin creating publisher on \"" << ground_speed_topic_ << "\"." << std::endl;
   gz_ground_speed_pub_ = gz_node_handle_->Advertise<sensor_msgs::msgs::TwistStamped>(ground_speed_topic_, 1);
-//  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
-//      ground_speed_topic_,
-//      ground_speed_topic_,
-//      GazeboRosInterfacePlugin::SupportedMsgTypes::TWIST_STAMPED);
-  connect_to_ros_msg.set_gazebo_topic(ground_speed_topic_);
-  connect_to_ros_msg.set_ros_topic(ground_speed_topic_);
-  connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::TWIST_STAMPED);
-  gz_connect_to_ros_pub->Publish(connect_to_ros_msg);
+
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(ground_speed_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(ground_speed_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::TWIST_STAMPED);
+  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg);
 
   // Initialize the normal distributions for ground speed.
   ground_speed_n_[0] = NormalDistribution(0, hor_vel_std_dev);

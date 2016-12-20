@@ -33,7 +33,8 @@
 #include "gazebo/msgs/msgs.hh"
 
 // GAZEBO MSG TYPES
-#include "ConnectToRos.pb.h"
+#include "ConnectGazeboToRosTopic.pb.h"
+#include "ConnectRosToGazeboTopic.pb.h"
 
 #include "Actuators.pb.h"
 #include "JointState.pb.h"
@@ -65,7 +66,7 @@
 namespace gazebo {
 
 // typedef's to make life easier
-typedef const boost::shared_ptr<const gz_std_msgs::ConnectToRos> GzConnectToRosMsgPtr;
+typedef const boost::shared_ptr<const gz_std_msgs::ConnectGazeboToRosTopic> GzConnectGazeboToRosTopicMsgPtr;
 
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Actuators> GzActuatorsMsgPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> GzImuPtr;
@@ -160,8 +161,8 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   // ========== CONNECT TO ROS MESSAGES ========= //
   // ============================================ //
 
-  transport::SubscriberPtr gz_connect_to_ros_sub_;
-  void GzConnectToRosMsgCallback(GzConnectToRosMsgPtr& gz_connect_to_ros_msg);
+  transport::SubscriberPtr gz_connect_gazebo_to_ros_topic_sub_;
+  void GzConnectGazeboToRosTopicMsgCallback(GzConnectGazeboToRosTopicMsgPtr& gz_connect_gazebo_to_ros_topic_msg);
 
   // ============================================ //
   // ============= ACTUATORS MESSAGES =========== //

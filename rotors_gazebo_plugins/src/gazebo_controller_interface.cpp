@@ -72,10 +72,10 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 //                                           this);
   gzmsg << "Subscribing to Gazebo topic \"" << command_motor_speed_sub_topic_ << "\"." << std::endl;
 
-  // Create temporary "ConnectToRos" publisher and message
+  // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr gz_connect_to_ros_pub =
-        node_handle_->Advertise<gz_std_msgs::ConnectToRos>("connect_to_ros", 1);
-  gz_std_msgs::ConnectToRos connect_to_ros_msg;
+        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros", 1);
+  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
   // ============================================ //
   // === ACTUATORS (MOTOR VELOCITY) MSG SETUP === //
@@ -85,10 +85,10 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
   motor_velocity_reference_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Actuators>(
       node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_, 1);
 
-  connect_to_ros_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_);
-  connect_to_ros_msg.set_ros_topic(motor_velocity_reference_pub_topic_);
-  connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::ACTUATORS);
-  gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(motor_velocity_reference_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);
+  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 }
 
 // This gets called by the world update start event.

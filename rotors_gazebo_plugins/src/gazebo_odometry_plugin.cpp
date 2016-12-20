@@ -185,10 +185,10 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   twist_covariance = twist_covd.asDiagonal();
 
 
-  // Create temporary "ConnectToRos" publisher and message
-  gazebo::transport::PublisherPtr gz_connect_to_ros_pub =
-        gz_node_ptr_->Advertise<gz_std_msgs::ConnectToRos>("connect_to_ros", 1);
-  gz_std_msgs::ConnectToRos connect_to_ros_msg;
+  // Create temporary "ConnectGazeboToRosTopic" publisher and message
+    gazebo::transport::PublisherPtr gz_connect_to_ros_pub =
+          gz_node_ptr_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros", 1);
+    gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
   // ============================================ //
   // =============== POSE MSG SETUP ============= //
@@ -197,10 +197,10 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   pose_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Pose>(
       gz_node_ptr_->GetTopicNamespace() + "/" + pose_pub_topic_, 1);
 
-  connect_to_ros_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + pose_pub_topic_);
-  connect_to_ros_msg.set_ros_topic(pose_pub_topic_);
-  connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::POSE);
-  gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + pose_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(pose_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::POSE);
+  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   // ============================================ //
   // == POSE WITH COVARIANCE STAMPED MSG SETUP == //
@@ -209,10 +209,10 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   pose_with_covariance_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::PoseWithCovarianceStamped>(
       gz_node_ptr_->GetTopicNamespace() + "/" + pose_with_covariance_stamped_pub_topic_, 1);
 
-  connect_to_ros_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + pose_with_covariance_stamped_pub_topic_);
-  connect_to_ros_msg.set_ros_topic(pose_with_covariance_stamped_pub_topic_);
-  connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::POSE_WITH_COVARIANCE_STAMPED);
-  gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + pose_with_covariance_stamped_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(pose_with_covariance_stamped_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::POSE_WITH_COVARIANCE_STAMPED);
+  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   // ============================================ //
   // ========= POSITION STAMPED MSG SETUP ======= //
@@ -221,10 +221,10 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   position_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::PositionStamped>(
       gz_node_ptr_->GetTopicNamespace() + "/" + position_stamped_pub_topic_, 1);
 
-  connect_to_ros_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + position_stamped_pub_topic_);
-  connect_to_ros_msg.set_ros_topic(position_stamped_pub_topic_);
-  connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::POSITION_STAMPED);
-  gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + position_stamped_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(position_stamped_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::POSITION_STAMPED);
+  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   // ============================================ //
   // ============= ODOMETRY MSG SETUP =========== //
@@ -233,10 +233,10 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   odometry_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Odometry>(
       gz_node_ptr_->GetTopicNamespace() + "/" + odometry_pub_topic_, 1);
 
-  connect_to_ros_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + odometry_pub_topic_);
-  connect_to_ros_msg.set_ros_topic(odometry_pub_topic_);
-  connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::ODOMETRY);
-  gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + odometry_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(odometry_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ODOMETRY);
+  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   // ============================================ //
   // ======== TRANSFORM STAMPED MSG SETUP ======= //
@@ -245,10 +245,10 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   transform_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::TransformStamped>(
       gz_node_ptr_->GetTopicNamespace() + "/" + transform_stamped_pub_topic_, 1);
 
-  connect_to_ros_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + transform_stamped_pub_topic_);
-  connect_to_ros_msg.set_ros_topic(transform_stamped_pub_topic_);
-  connect_to_ros_msg.set_msgtype(gz_std_msgs::ConnectToRos::TRANSFORM_STAMPED);
-  gz_connect_to_ros_pub->Publish(connect_to_ros_msg, true);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(gz_node_ptr_->GetTopicNamespace() + "/" + transform_stamped_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(transform_stamped_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::TRANSFORM_STAMPED);
+  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
