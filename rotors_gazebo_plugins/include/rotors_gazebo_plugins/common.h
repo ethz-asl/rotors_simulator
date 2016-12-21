@@ -23,7 +23,7 @@
 
 #include <Eigen/Dense>
 #include <gazebo/gazebo.hh>
-#include <mav_msgs/default_topics.h>
+//#include <mav_msgs/default_topics.h>
 
 namespace gazebo {
 

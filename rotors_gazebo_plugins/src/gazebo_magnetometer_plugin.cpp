@@ -67,8 +67,10 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   const SdfVector3 zeros3(0.0, 0.0, 0.0);
 
   // Retrieve the rest of the SDF parameters
-  getSdfParam<std::string>(_sdf, "magnetometerTopic", magnetometer_topic_,
-                           mav_msgs::default_topics::MAGNETIC_FIELD);
+//  getSdfParam<std::string>(_sdf, "magnetometerTopic", magnetometer_topic_,
+//                           mav_msgs::default_topics::MAGNETIC_FIELD);
+  getSdfParam<std::string>(_sdf, "magnetometerTopic", magnetometer_topic_, "");
+
   getSdfParam<double>(_sdf, "refMagNorth", ref_mag_north, kDefaultRefMagNorth);
   getSdfParam<double>(_sdf, "refMagEast", ref_mag_east, kDefaultRefMagEast);
   getSdfParam<double>(_sdf, "refMagDown", ref_mag_down, kDefaultRefMagDown);
