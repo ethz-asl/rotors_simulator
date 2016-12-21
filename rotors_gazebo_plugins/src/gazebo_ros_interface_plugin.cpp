@@ -103,110 +103,6 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   gz_connect_ros_to_gazebo_topic_sub_ = gz_node_handle_->Subscribe(
       connect_ros_to_gazebo_topic_subtopic, &GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback, this);
 
-  // ============================================ //
-  // ============ ACTUATORS MSG SETUP =========== //
-  // ============================================ //
-
-//  std::string actuators_sub_topic;
-//  if(_sdf->HasElement("actuatorsSubTopic"))
-//    getSdfParam<std::string>(_sdf, "actuatorsSubTopic", actuators_sub_topic, "");
-//  else
-//    gzerr << "Please specify actuatorsSubTopic." << std::endl;
-//
-//  std::string gz_actuators_subtopic_name = "~/" + actuators_sub_topic;
-//  gz_imu_sub_ = gz_node_handle_->Subscribe(gz_actuators_subtopic_name, &GazeboRosInterfacePlugin::GzActuatorsMsgCallback, this);
-//  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_actuators_subtopic_name << "\"." << std::endl;
-//
-//  ros_imu_pub_ = ros_node_handle_->advertise<mav_msgs::Actuators>(actuators_sub_topic, 1);
-//  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << actuators_sub_topic << "\"." << std::endl;
-
-
-  // ============================================ //
-  // =============== IMU MSG SETUP ============== //
-  // ============================================ //
-
-//  std::string imu_sub_topic;
-//  if(_sdf->HasElement("imuSubTopic"))
-//    getSdfParam<std::string>(_sdf, "imuSubTopic", imu_sub_topic,
-//                                 mav_msgs::default_topics::IMU);
-//  else
-//    gzerr << "Please specify imuSubTopic." << std::endl;
-//
-//  std::string gz_imu_subtopic_name = "~/" + imu_sub_topic;
-//  gz_imu_sub_ = gz_node_handle_->Subscribe(gz_imu_subtopic_name, &GazeboRosInterfacePlugin::GzImuCallback, this);
-//  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_imu_subtopic_name << "\"." << std::endl;
-//
-//  ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::Imu>(imu_sub_topic, 1);
-//  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << imu_sub_topic << "\"." << std::endl;
-
-  // ============================================ //
-  // ========== JOINT STATE MSG SETUP =========== //
-  // ============================================ //
-
-//  std::string joint_state_sub_topic;
-//  if(_sdf->HasElement("jointStateSubTopic"))
-//    getSdfParam<std::string>(_sdf, "jointStateSubTopic", joint_state_sub_topic, "");
-//  else
-//    gzerr << "Please specify jointStateSubTopic." << std::endl;
-//
-//  std::string gz_joint_state_subtopic_name = "~/" + joint_state_sub_topic;
-//  gz_imu_sub_ = gz_node_handle_->Subscribe(gz_joint_state_subtopic_name, &GazeboRosInterfacePlugin::GzJointStateMsgCallback, this);
-//  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_joint_state_subtopic_name << "\"." << std::endl;
-//
-//  ros_imu_pub_ = ros_node_handle_->advertise<sensor_msgs::JointState>(joint_state_sub_topic, 1);
-//  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << joint_state_sub_topic << "\"." << std::endl;
-
-  // ============================================ //
-  // ========= MAGNETIC FIELD MSG SETUP ========= //
-  // ============================================ //
-
-//  std::string magnetic_field_sub_topic;
-//  if(_sdf->HasElement("magneticFieldSubTopic"))
-//    getSdfParam<std::string>(_sdf, "magneticFieldSubTopic", magnetic_field_sub_topic, "");
-//  else
-//    gzerr << "Please specify an magneticFieldSubTopic." << std::endl;
-//
-//  std::string gz_magnetic_field_sub_topic_name = "~/" + magnetic_field_sub_topic;
-//  gz_magnetic_field_sub_ = gz_node_handle_->Subscribe(gz_magnetic_field_sub_topic_name, &GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback, this);
-//  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_magnetic_field_sub_topic_name << "\"." << std::endl;
-//
-//  ros_magnetic_field_pub_ = ros_node_handle_->advertise<sensor_msgs::MagneticField>(magnetic_field_sub_topic, 1);
-//  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << magnetic_field_sub_topic << "\"." << std::endl;
-
-  // ============================================ //
-  // =========== NAV SAT FIX MSG SETUP ========== //
-  // ============================================ //
-
-//  std::string nav_sat_fix_subtopic_name;
-//  if(_sdf->HasElement("navSatFixSubTopic"))
-//    getSdfParam<std::string>(_sdf, "navSatFixSubTopic", nav_sat_fix_subtopic_name, "");
-//  else
-//    gzerr << "Please specify an navSatFixSubTopic." << std::endl;
-//
-//  std::string gz_nav_sat_fix_subtopic_name = "~/" + nav_sat_fix_subtopic_name;
-//  gz_nav_sat_fix_sub_ = gz_node_handle_->Subscribe(gz_nav_sat_fix_subtopic_name, &GazeboRosInterfacePlugin::GzNavSatFixCallback, this);
-//  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_nav_sat_fix_subtopic_name << "\"." << std::endl;
-//
-//  ros_nav_sat_fix_pub_ = ros_node_handle_->advertise<sensor_msgs::NavSatFix>(nav_sat_fix_subtopic_name, 1);
-//  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << nav_sat_fix_subtopic_name << "\"." << std::endl;
-
-  // ============================================ //
-  // ============= ODOMETRY MSG SETUP =========== //
-  // ============================================ //
-
-//  std::string odometry_subtopic_name;
-//  if(_sdf->HasElement("odometrySubTopic"))
-//    getSdfParam<std::string>(_sdf, "odometrySubTopic", odometry_subtopic_name, "");
-//  else
-//    gzerr << "Please specify an odometrySubTopic." << std::endl;
-//
-//  std::string gz_odometry_subtopic_name = "~/" + odometry_subtopic_name;
-//  gz_odometry_sub_ = gz_node_handle_->Subscribe(gz_odometry_subtopic_name, &GazeboRosInterfacePlugin::GzOdometryMsgCallback, this);
-//  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << gz_odometry_subtopic_name << "\"." << std::endl;
-//
-//  ros_odometry_pub_ = ros_node_handle_->advertise<nav_msgs::Odometry>(odometry_subtopic_name, 1);
-//  gzmsg << "GazeboMsgInterfacePlugin publishing to ROS topic \"" << odometry_subtopic_name << "\"." << std::endl;
-
 }
 
 //! @brief      A helper class that provides storage for additional parameters that are inserted
@@ -246,13 +142,13 @@ void GazeboRosInterfacePlugin::ConnectHelper(
   static std::map< std::string, ConnectHelperStorage<M> > callback_map;
 
   // Create ROS publisher
-  gzmsg << "GazeboRosInterfacePlugin publishing to ROS topic \"" << rosTopicName << "\"." << std::endl;
+//  gzmsg << "GazeboRosInterfacePlugin publishing to ROS topic \"" << rosTopicName << "\"." << std::endl;
   ros::Publisher ros_publisher = ros_node_handle_->advertise<N>(rosTopicName, 1);
 
   // @todo Handle collision error
   auto callback_entry = callback_map.emplace(gazeboTopicName, ConnectHelperStorage<M>{ptr, fp, ros_publisher});
 
-  gzmsg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << gazeboTopicName << "\"."<< std::endl;
+//  gzmsg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << gazeboTopicName << "\"."<< std::endl;
   gazebo::transport::SubscriberPtr subscriberPtr;
   subscriberPtr = gz_node_handle->Subscribe(
       gazeboTopicName,
@@ -373,8 +269,37 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
 
   gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
+  static std::vector<ros::Subscriber> ros_subscribers;
+
+  switch(gz_connect_ros_to_gazebo_topic_msg->msgtype()) {
+    case gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS: {
+
+      // Create Gazebo publisher
+      // (we don't need to manually save a reference for the Gazebo publisher because
+      // boost::bind will do that for us)
+      gazebo::transport::PublisherPtr gz_publisher_ptr = gz_node_handle_->Advertise<sensor_msgs::msgs::Actuators>(
+          gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+
+      // Create ROS subscriber
+      ros::Subscriber ros_subscriber = ros_node_handle_->subscribe<mav_msgs::Actuators>(
+          gz_connect_ros_to_gazebo_topic_msg->ros_topic(), 1,
+          boost::bind(&GazeboRosInterfacePlugin::RosActuatorsMsgCallback, this, _1, gz_publisher_ptr));
+
+      // Save reference to the ROS subscriber so callback will continue to be called.
+      ros_subscribers.push_back(ros_subscriber);
+
+      break;
+    } default: {
+      gzthrow("Message type is not supported by GazeboRosInterfacePlugin.");
+    }
+  }
 
 }
+
+//===========================================================================//
+//================ GAZEBO -> ROS MSG CALLBACKS/CONVERTERS ===================//
+//===========================================================================//
+
 
 void GazeboRosInterfacePlugin::GzActuatorsMsgCallback(GzActuatorsMsgPtr& gz_actuators_msg, ros::Publisher ros_publisher) {
   gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
@@ -592,11 +517,34 @@ void GazeboRosInterfacePlugin::GzTwistStampedMsgCallback(GzTwistStampedMsgPtr& g
 //  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 }
 
+//===========================================================================//
+//================ ROS -> GAZEBO MSG CALLBACKS/CONVERTERS ===================//
+//===========================================================================//
+
+void GazeboRosInterfacePlugin::RosActuatorsMsgCallback(
+    const mav_msgs::ActuatorsConstPtr& ros_actuators_msg_ptr,
+    gazebo::transport::PublisherPtr gz_publisher_ptr) {
+
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
+  // Convert ROS message to Gazebo message
+
+  sensor_msgs::msgs::Actuators gz_actuators_msg;
+
+  gz_actuators_msg.mutable_header()->mutable_stamp()->set_sec(ros_actuators_msg_ptr->header.stamp.sec);
+  gz_actuators_msg.mutable_header()->mutable_stamp()->set_nsec(ros_actuators_msg_ptr->header.stamp.nsec);
+  gz_actuators_msg.mutable_header()->set_frame_id(ros_actuators_msg_ptr->header.frame_id);
+
+  for(int i = 0; i < ros_actuators_msg_ptr->angular_velocities.size(); i++) {
+    gz_actuators_msg.add_angular_velocities(ros_actuators_msg_ptr->angular_velocities[i]);
+  }
+
+  // Publish to Gazebo
+  gz_publisher_ptr->Publish(gz_actuators_msg);
+}
+
 void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
-  common::Time current_time  = world_->GetSimTime();
-  double dt = (current_time - last_time_).Double();
-  last_time_ = current_time;
-  double t = current_time.Double();
+  // Do nothing
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosInterfacePlugin);
