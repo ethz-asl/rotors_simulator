@@ -90,7 +90,7 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
   // Subscribe to the "connect_gazebo_to_ros_topic" topic
   std::string connect_gazebo_to_ros_topic_subtopic = "connect_gazebo_to_ros_topic";
-  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << connect_gazebo_to_ros_topic_subtopic << "\"." << std::endl;
+//  gzmsg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << connect_gazebo_to_ros_topic_subtopic << "\"." << std::endl;
   gz_connect_gazebo_to_ros_topic_sub_ = gz_node_handle_->Subscribe(
       connect_gazebo_to_ros_topic_subtopic, &GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback, this);
 
@@ -99,7 +99,7 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   // ============================================ //
 
   std::string connect_ros_to_gazebo_topic_subtopic = "connect_ros_to_gazebo_topic";
-  gzmsg << "GazeboMsgInterfacePlugin subscribing to Gazebo topic \"" << connect_ros_to_gazebo_topic_subtopic << "\"." << std::endl;
+//  gzmsg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << connect_ros_to_gazebo_topic_subtopic << "\"." << std::endl;
   gz_connect_ros_to_gazebo_topic_sub_ = gz_node_handle_->Subscribe(
       connect_ros_to_gazebo_topic_subtopic, &GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback, this);
 
@@ -302,7 +302,7 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
 
 
 void GazeboRosInterfacePlugin::GzActuatorsMsgCallback(GzActuatorsMsgPtr& gz_actuators_msg, ros::Publisher ros_publisher) {
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   // We need to convert the Acutuators message from a Gazebo message to a
   // ROS message and then publish it to the ROS framework
@@ -370,7 +370,7 @@ void GazeboRosInterfacePlugin::GzImuMsgCallback(GzImuPtr& gz_imu_msg, ros::Publi
 }
 
 void GazeboRosInterfacePlugin::GzJointStateMsgCallback(GzJointStateMsgPtr& gz_joint_state_msg, ros::Publisher ros_publisher) {
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 }
 
 void GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg, ros::Publisher ros_publisher) {
@@ -540,7 +540,7 @@ void GazeboRosInterfacePlugin::RosActuatorsMsgCallback(
   }
 
   // Publish to Gazebo
-  gzmsg << "Publishing to gazebo topic \"" << gz_publisher_ptr->GetTopic() << std::endl;
+//  gzmsg << "Publishing to gazebo topic \"" << gz_publisher_ptr->GetTopic() << std::endl;
   gz_publisher_ptr->Publish(gz_actuators_msg);
 }
 
