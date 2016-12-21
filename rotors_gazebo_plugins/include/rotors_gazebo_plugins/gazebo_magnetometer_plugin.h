@@ -54,6 +54,17 @@ class GazeboMagnetometerPlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo&);
 
  private:
+
+  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
+  ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
+  bool pubs_and_subs_created_;
+
+  /// \brief    Creates all required publishers and subscribers, incl. routing of messages to/from ROS if required.
+  /// \details  Call this once the first time OnUpdate() is called (can't
+  ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
+  ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
+  void CreatePubsAndSubs();
+
   std::string namespace_;
   std::string magnetometer_topic_;
   gazebo::transport::NodePtr node_handle_;

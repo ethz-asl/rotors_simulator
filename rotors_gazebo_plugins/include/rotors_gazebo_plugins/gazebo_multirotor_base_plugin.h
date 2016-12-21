@@ -28,9 +28,6 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-//#include <mav_msgs/Actuators.h>
-//#include <mav_msgs/default_topics.h>
-//#include <ros/ros.h>
 
 #include "Actuators.pb.h"
 #include "JointState.pb.h"
@@ -59,7 +56,8 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
         link_name_(kDefaultLinkName),
         frame_id_(kDefaultFrameId),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
-        node_handle_(NULL) {}
+        node_handle_(NULL),
+        pubs_and_subs_created_(false) {}
 
   virtual ~GazeboMultirotorBasePlugin();
 
@@ -74,6 +72,17 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
+
+  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
+  ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
+  bool pubs_and_subs_created_;
+
+  /// \brief    Creates all required publishers and subscribers, incl. routing of messages to/from ROS if required.
+  /// \details  Call this once the first time OnUpdate() is called (can't
+  ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
+  ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
+  void CreatePubsAndSubs();
+
   /// \brief Pointer to the update event connection.
   event::ConnectionPtr update_connection_;
   physics::WorldPtr world_;

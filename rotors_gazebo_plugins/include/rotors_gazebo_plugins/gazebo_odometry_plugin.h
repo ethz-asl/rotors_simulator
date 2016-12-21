@@ -94,7 +94,8 @@ class GazeboOdometryPlugin : public ModelPlugin {
         unknown_delay_(kDefaultUnknownDelay),
         gazebo_sequence_(kDefaultGazeboSequence),
         odometry_sequence_(kDefaultOdometrySequence),
-        covariance_image_scale_(kDefaultCovarianceImageScale) {}
+        covariance_image_scale_(kDefaultCovarianceImageScale),
+        pubs_and_subs_created_(false) {}
 
   ~GazeboOdometryPlugin();
 
@@ -106,6 +107,17 @@ class GazeboOdometryPlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
+
+  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
+  ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
+  bool pubs_and_subs_created_;
+
+  /// \brief    Creates all required publishers and subscribers, incl. routing of messages to/from ROS if required.
+  /// \details  Call this once the first time OnUpdate() is called (can't
+  ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
+  ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
+  void CreatePubsAndSubs();
+
   OdometryQueue odometry_queue_;
 
   std::string namespace_;

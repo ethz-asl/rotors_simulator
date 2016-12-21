@@ -17,14 +17,15 @@
 // MODULE HEADER INCLUDE
 #include "rotors_gazebo_plugins/gazebo_magnetometer_plugin.h"
 
-// USER INCLUDES
-#include "rotors_gazebo_plugins/gazebo_ros_interface_plugin.h"
+#include "ConnectGazeboToRosTopic.pb.h"
 
 namespace gazebo {
 
 GazeboMagnetometerPlugin::GazeboMagnetometerPlugin()
     : ModelPlugin(),
-      random_generator_(random_device_()) {
+      random_generator_(random_device_()),
+      pubs_and_subs_created_(false) {
+  // Nothing
 }
 
 GazeboMagnetometerPlugin::~GazeboMagnetometerPlugin() {
@@ -78,24 +79,6 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   this->updateConnection_ =
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboMagnetometerPlugin::OnUpdate, this, _1));
-
-  // Create temporary "ConnectGazeboToRosTopic" publisher and message
-  gazebo::transport::PublisherPtr gz_connect_to_ros_pub =
-        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
-  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
-
-  // ============================================ //
-  // ========= MAGNETIC FIELD MSG SETUP ========= //
-  // ============================================ //
-
-  magnetometer_pub_ = node_handle_->Advertise<sensor_msgs::msgs::MagneticField>(
-      node_handle_->GetTopicNamespace() + "/" + magnetometer_topic_, 1);
-//  gzmsg << "GazeboMagnetometerPlugin publishing on " << magnetometer_topic_ << std::endl;
-
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + magnetometer_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(magnetometer_topic_);
-  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::MAGNETIC_FIELD);
-  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   // Create the normal noise distributions
   noise_n_[0] = NormalDistribution(0, noise_normal.X());
@@ -152,6 +135,12 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 }
 
 void GazeboMagnetometerPlugin::OnUpdate(const common::UpdateInfo& _info) {
+
+  if(!pubs_and_subs_created_) {
+    CreatePubsAndSubs();
+    pubs_and_subs_created_ = true;
+  }
+
   // Get the current pose and time from Gazebo
   math::Pose T_W_B = link_->GetWorldPose();
   common::Time current_time  = world_->GetSimTime();
@@ -180,6 +169,28 @@ void GazeboMagnetometerPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // Publish the message
   magnetometer_pub_->Publish(mag_message_);
+}
+
+void GazeboMagnetometerPlugin::CreatePubsAndSubs() {
+
+  // Create temporary "ConnectGazeboToRosTopic" publisher and message
+  gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
+
+  // ============================================ //
+  // ========= MAGNETIC FIELD MSG SETUP ========= //
+  // ============================================ //
+
+  magnetometer_pub_ = node_handle_->Advertise<sensor_msgs::msgs::MagneticField>(
+      node_handle_->GetTopicNamespace() + "/" + magnetometer_topic_, 1);
+//  gzmsg << "GazeboMagnetometerPlugin publishing on " << magnetometer_topic_ << std::endl;
+
+  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + magnetometer_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(magnetometer_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::MAGNETIC_FIELD);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMagnetometerPlugin);

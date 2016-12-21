@@ -18,22 +18,18 @@
 // MODULE HEADER
 #include "rotors_gazebo_plugins/gazebo_gps_plugin.h"
 
-// USER LIBS
-#include "rotors_gazebo_plugins/gazebo_ros_interface_plugin.h"
+#include "ConnectGazeboToRosTopic.pb.h"
 
 namespace gazebo {
 
 GazeboGpsPlugin::GazeboGpsPlugin()
     : SensorPlugin(),
       //node_handle_(0),
-      random_generator_(random_device_()) {}
+      random_generator_(random_device_()),
+      pubs_and_subs_created_(false) {}
 
 GazeboGpsPlugin::~GazeboGpsPlugin() {
   this->parent_sensor_->DisconnectUpdated(this->updateConnection_);
-//  if (node_handle_) {
-//    node_handle_->shutdown();
-//    delete node_handle_;
-//  }
 }
 
 void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
@@ -56,8 +52,8 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
     gzerr << "[gazebo_gps_plugin] Please specify a robotNamespace.\n";
 
   //node_handle_ = new ros::NodeHandle(node_namespace);
-  gz_node_handle_ = gazebo::transport::NodePtr(new transport::Node());
-  gz_node_handle_->Init(node_namespace);
+  node_handle_ = gazebo::transport::NodePtr(new transport::Node());
+  node_handle_->Init(node_namespace);
 
   if (_sdf->HasElement("linkName"))
     link_name = _sdf->GetElement("linkName")->Get<std::string>();
@@ -93,33 +89,6 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
 
   // Make sure the parent sensor is active.
   parent_sensor_->SetActive(true);
-
-  // Create temporary "ConnectGazeboToRosTopic" publisher and message
-  gazebo::transport::PublisherPtr gz_connect_to_ros_pub =
-        gz_node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
-  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
-
-  // ============================================ //
-  // =========== NAV SAT FIX MSG SETUP ========== //
-  // ============================================ //
-  gzmsg << "GazeboGpsPlugin creating publisher on \"" << gps_topic_ << "\"." << std::endl;
-  gz_gps_pub_ = gz_node_handle_->Advertise<sensor_msgs::msgs::NavSatFix>(gps_topic_, 1);
-
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(gps_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(gps_topic_);
-  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::NAV_SAT_FIX);
-  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
-
-  // ============================================ //
-  // == GROUND SPEED (TWIST STAMPED) MSG SETUP == //
-  // ============================================ //
-  gzmsg << "GazeboGpsPlugin creating publisher on \"" << ground_speed_topic_ << "\"." << std::endl;
-  gz_ground_speed_pub_ = gz_node_handle_->Advertise<sensor_msgs::msgs::TwistStamped>(ground_speed_topic_, 1);
-
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(ground_speed_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(ground_speed_topic_);
-  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::TWIST_STAMPED);
-  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg);
 
   // Initialize the normal distributions for ground speed.
   ground_speed_n_[0] = NormalDistribution(0, hor_vel_std_dev);
@@ -175,6 +144,12 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
 }
 
 void GazeboGpsPlugin::OnUpdate() {
+
+  if(!pubs_and_subs_created_) {
+    CreatePubsAndSubs();
+    pubs_and_subs_created_ = true;
+  }
+
   // Get the time of the last measurement.
   common::Time current_time;
 
@@ -236,6 +211,42 @@ void GazeboGpsPlugin::OnUpdate() {
   // Publish the ground speed message.
   //ground_speed_pub_.publish(ground_speed_message_);
   gz_ground_speed_pub_->Publish(gz_ground_speed_message_);
+
+}
+
+void GazeboGpsPlugin::CreatePubsAndSubs() {
+
+  // Create temporary "ConnectGazeboToRosTopic" publisher and message
+  gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
+
+  if(!connect_gazebo_to_ros_topic_pub->HasConnections()) {
+    return;
+  }
+
+  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+
+  // ============================================ //
+  // =========== NAV SAT FIX MSG SETUP ========== //
+  // ============================================ //
+  gzmsg << "GazeboGpsPlugin creating publisher on \"" << gps_topic_ << "\"." << std::endl;
+  gz_gps_pub_ = node_handle_->Advertise<sensor_msgs::msgs::NavSatFix>(gps_topic_, 1);
+
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(gps_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(gps_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::NAV_SAT_FIX);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+  // ============================================ //
+  // == GROUND SPEED (TWIST STAMPED) MSG SETUP == //
+  // ============================================ //
+  gzmsg << "GazeboGpsPlugin creating publisher on \"" << ground_speed_topic_ << "\"." << std::endl;
+  gz_ground_speed_pub_ = node_handle_->Advertise<sensor_msgs::msgs::TwistStamped>(ground_speed_topic_, 1);
+
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(ground_speed_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(ground_speed_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::TWIST_STAMPED);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg);
 
 }
 

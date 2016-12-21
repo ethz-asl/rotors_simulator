@@ -25,11 +25,7 @@
 // STANDARD LIB INCLUDES
 #include <ctime>
 
-// USER INCLUDES
-#include "rotors_gazebo_plugins/gazebo_ros_interface_plugin.h"
-
-
-//#include <mav_msgs/Actuators.h>
+#include "ConnectGazeboToRosTopic.pb.h"
 
 namespace gazebo {
 
@@ -54,26 +50,6 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   //node_handle_ = new ros::NodeHandle(namespace_);
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
   node_handle_->Init(namespace_);
-
-  // ============================================ //
-  // =========== ACTUATORS MSG SETUP ============ //
-  // ============================================ //
-  motor_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Actuators>(actuators_pub_topic_, 10);
-  gzmsg << "actuators_pub_topic_ = \"" << actuators_pub_topic_ << "\"." << std::endl;
-//  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
-//        actuators_pub_topic_,
-//        actuators_pub_topic_,
-//        GazeboRosInterfacePlugin::SupportedMsgTypes::ACTUATORS);
-
-  // ============================================ //
-  // ========== JOINT STATE MSG SETUP =========== //
-  // ============================================ //
-  joint_state_pub_ = node_handle_->Advertise<sensor_msgs::msgs::JointState>(joint_state_pub_topic_, 1);
-  gzmsg << "joint_state_pub_topic = \"" << joint_state_pub_topic_ << "\"." << std::endl;
-//  GazeboRosInterfacePlugin::getInstance().ConnectToRos(
-//          joint_state_pub_topic_,
-//          joint_state_pub_topic_,
-//          GazeboRosInterfacePlugin::SupportedMsgTypes::JOINT_STATE);
 
   frame_id_ = link_name_;
 
@@ -104,6 +80,12 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
 
 // This gets called by the world update start event.
 void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
+
+  if(!pubs_and_subs_created_) {
+    CreatePubsAndSubs();
+    pubs_and_subs_created_ = true;
+  }
+
   // Get the current simulation time.
   common::Time now = world_->GetSimTime();
 
@@ -143,6 +125,38 @@ void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   joint_state_pub_->Publish(joint_state_msg_);
   motor_pub_->Publish(actuators_msg_);
+}
+
+void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
+
+  // Create temporary "ConnectGazeboToRosTopic" publisher and message
+  gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
+
+  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+
+  // ============================================ //
+  // =========== ACTUATORS MSG SETUP ============ //
+  // ============================================ //
+  motor_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Actuators>(actuators_pub_topic_, 10);
+//  gzmsg << "actuators_pub_topic_ = \"" << actuators_pub_topic_ << "\"." << std::endl;
+
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(actuators_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(actuators_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+  // ============================================ //
+  // ========== JOINT STATE MSG SETUP =========== //
+  // ============================================ //
+  joint_state_pub_ = node_handle_->Advertise<sensor_msgs::msgs::JointState>(joint_state_pub_topic_, 1);
+  gzmsg << "joint_state_pub_topic = \"" << joint_state_pub_topic_ << "\"." << std::endl;
+
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(joint_state_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(joint_state_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::JOINT_STATE);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMultirotorBasePlugin);

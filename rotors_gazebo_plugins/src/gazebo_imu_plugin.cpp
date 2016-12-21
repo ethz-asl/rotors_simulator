@@ -38,19 +38,8 @@ namespace gazebo {
 GazeboImuPlugin::GazeboImuPlugin()
     : ModelPlugin(),
       node_handle_(0),
-      velocity_prev_W_(0, 0, 0) {
-
-//  if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
-//     ros::console::notifyLoggerLevelsChanged();
-//  }
-
-//  ROS_DEBUG("TESTING ROS_DEBUG.\n");
-//  std::cout << "TESTING std::cout.\n";
-//  std::cerr << "TESTING std::cerr.\n";
-//  gzmsg << "TESTING gzmsg./n" << std::endl;
-//  gzerr << "TESTING gzerr./n";
-
-}
+      velocity_prev_W_(0, 0, 0),
+      pubs_and_subs_created_(false) {}
 
 GazeboImuPlugin::~GazeboImuPlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
@@ -62,7 +51,6 @@ GazeboImuPlugin::~GazeboImuPlugin() {
 //  }
 }
 
-//#include <ros/console.h>
 
 void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
@@ -137,23 +125,6 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   this->updateConnection_ =
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboImuPlugin::OnUpdate, this, _1));
-
-  // Create temporary "ConnectGazeboToRosTopic" publisher and message
-  gazebo::transport::PublisherPtr gz_connect_to_ros_pub =
-        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
-  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
-
-  // ============================================ //
-  // =============== IMU MSG SETUP ============== //
-  // ============================================ //
-  // The tilde (~) instructs gazebo to create the topic name relative to the parent
-  // model. e.g. if this IMU was mounted on a firefly, the full topic path would be:
-  // /gazebo/firefly/imu_topic_name
-  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(node_handle_->GetTopicNamespace() + "/" + imu_topic_, 1);
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + imu_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(imu_topic_);
-  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::IMU);
-  gz_connect_to_ros_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   //==============================================//
   //====== POPULATE STATIC PARTS OF IMU MSG ======//
@@ -293,6 +264,12 @@ void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
 
 
 void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
+
+  if(!pubs_and_subs_created_) {
+    CreatePubsAndSubs();
+    pubs_and_subs_created_ = true;
+  }
+
   common::Time current_time  = world_->GetSimTime();
   double dt = (current_time - last_time_).Double();
   last_time_ = current_time;
@@ -377,6 +354,27 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
 }
 
+void GazeboImuPlugin::CreatePubsAndSubs() {
+
+  // Create temporary "ConnectGazeboToRosTopic" publisher and message
+  gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
+
+  // ============================================ //
+  // =============== IMU MSG SETUP ============== //
+  // ============================================ //
+  // The tilde (~) instructs gazebo to create the topic name relative to the parent
+  // model. e.g. if this IMU was mounted on a firefly, the full topic path would be:
+  // /gazebo/firefly/imu_topic_name
+  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(node_handle_->GetTopicNamespace() + "/" + imu_topic_, 1);
+
+  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + imu_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(imu_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::IMU);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+}
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboImuPlugin);
 
