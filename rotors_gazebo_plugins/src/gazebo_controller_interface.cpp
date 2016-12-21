@@ -36,7 +36,7 @@ GazeboControllerInterface::~GazeboControllerInterface() {
 
 void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
-  gzmsg << "GazeboControllerInterface::Load() called." << std::endl;
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   // Store the pointer to the model.
   model_ = _model;
@@ -66,18 +66,6 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboControllerInterface::OnUpdate, this, _1));
 
-
-
-  // Create temporary "ConnectGazeboToRosTopic" publisher and message
-  gazebo::transport::PublisherPtr gz_connect_gazebo_to_ros_topic_pub =
-        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
-  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
-
-  // Create temporary "ConnectRosToGazeboTopic" publisher and message
-  gazebo::transport::PublisherPtr gz_connect_ros_to_gazebo_topic_pub =
-          node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("connect_ros_to_gazebo_topic", 1);
-  gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
-
   // ============================================ //
   // === ACTUATORS (MOTOR VELOCITY) MSG SETUP === //
   // ============================================ //
@@ -85,11 +73,6 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
   gzmsg << "GazeboControllerInterface creating publisher on \"" << motor_velocity_reference_pub_topic_ << "\"." << std::endl;
   motor_velocity_reference_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Actuators>(
       node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_, 1);
-
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(motor_velocity_reference_pub_topic_);
-  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);
-  gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   // ============================================ //
   // ===== ROS->GAZEBO MOTOR SPEED MSG SETUP ==== //
@@ -102,17 +85,63 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
       node_handle_->GetTopicNamespace() + "/" + command_motor_speed_sub_topic_,
       &GazeboControllerInterface::CommandMotorCallback, this);
 
-  connect_ros_to_gazebo_topic_msg.set_ros_topic(command_motor_speed_sub_topic_);
-  connect_ros_to_gazebo_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + command_motor_speed_sub_topic_);
-  connect_ros_to_gazebo_topic_msg.set_msgtype(gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
-  gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
-
   gzmsg << "Load() finished." << std::endl;
 
 }
 
+bool GazeboControllerInterface::ConnectToRos() {
+
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
+  // Create temporary "ConnectGazeboToRosTopic" publisher and message
+  gazebo::transport::PublisherPtr gz_connect_gazebo_to_ros_topic_pub =
+      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
+
+  if(!gz_connect_gazebo_to_ros_topic_pub->HasConnections()) {
+    return false;
+  }
+
+  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(motor_velocity_reference_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);
+  gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+
+  // ============================================ //
+  // ===== ROS->GAZEBO MOTOR SPEED MSG SETUP ==== //
+  // ============================================ //
+
+  // Create temporary "ConnectRosToGazeboTopic" publisher and message
+  gazebo::transport::PublisherPtr gz_connect_ros_to_gazebo_topic_pub =
+          node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("connect_ros_to_gazebo_topic", 1);
+
+  if(!gz_connect_ros_to_gazebo_topic_pub->HasConnections()) {
+    return false;
+  }
+
+  gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
+
+  connect_ros_to_gazebo_topic_msg.set_ros_topic(command_motor_speed_sub_topic_);
+  // Note: This Gazebo topic name is not relative to the model!!!
+  connect_ros_to_gazebo_topic_msg.set_gazebo_topic(command_motor_speed_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_msgtype(gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
+  gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
+
+  // FINISH
+  connected_to_ros_ = true;
+  return true;
+}
+
 // This gets called by the world update start event.
 void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
+
+  if(!connected_to_ros_) {
+    if(!ConnectToRos()) {
+      gzerr << "Could not connect to ROS." << std::endl;
+      return;
+    }
+  }
 
   if (!received_first_reference_) {
     return;
@@ -131,6 +160,9 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   turning_velocities_msg.mutable_header()->mutable_stamp()->set_sec(now.sec);
 //  turning_velocities_msg->header.stamp.nsec = now.nsec;
   turning_velocities_msg.mutable_header()->mutable_stamp()->set_nsec(now.nsec);
+
+  // Frame ID is not used for this particular message
+  turning_velocities_msg.mutable_header()->set_frame_id("");
 
 //  motor_velocity_reference_pub_.publish(turning_velocities_msg);
   motor_velocity_reference_pub_->Publish(turning_velocities_msg);

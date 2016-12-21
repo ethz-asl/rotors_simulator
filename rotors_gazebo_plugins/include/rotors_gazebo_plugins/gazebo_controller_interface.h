@@ -52,6 +52,7 @@ class GazeboControllerInterface : public ModelPlugin {
   GazeboControllerInterface()
       : ModelPlugin(),
         received_first_reference_(false),
+        connected_to_ros_(false),
         namespace_(kDefaultNamespace),
         motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferenceTopic),
         command_motor_speed_sub_topic_(mav_msgs::default_topics::COMMAND_ACTUATORS),
@@ -70,6 +71,10 @@ class GazeboControllerInterface : public ModelPlugin {
   // Gets set to true the first time a motor command is received.
   // OnUpdate() will not do anything until this is true.
   bool received_first_reference_;
+
+  bool connected_to_ros_;
+
+  bool ConnectToRos();
 
   // This gets populated (including resizing if needed) when CommandMotorCallback() is
   // called.

@@ -172,6 +172,11 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   transport::SubscriberPtr gz_connect_ros_to_gazebo_topic_sub_;
   void GzConnectRosToGazeboTopicMsgCallback(GzConnectRosToGazeboTopicMsgPtr& gz_connect_ros_to_gazebo_topic_msg);
 
+  void RosActuatorsMsgCallback(
+      const mav_msgs::ActuatorsConstPtr& ros_actuators_msg_ptr,
+      gazebo::transport::PublisherPtr gz_publisher_ptr);
+
+
   // ============================================ //
   // ============= ACTUATORS MESSAGES =========== //
   // ============================================ //
