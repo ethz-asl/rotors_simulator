@@ -111,8 +111,10 @@ endforeach()
 
 set (msgs
   msgs/Actuators.proto
+  msgs/CommandMotorSpeed.proto
   msgs/ConnectGazeboToRosTopic.proto
   msgs/ConnectRosToGazeboTopic.proto
+  msgs/Float32.proto
   msgs/Header.proto
   msgs/JointState.proto
   msgs/MagneticField.proto
@@ -134,6 +136,7 @@ set (msgs
   msgs/TwistStamped.proto
   msgs/TwistWithCovariance.proto
   msgs/Vector3.proto
+  msgs/WindSpeed.proto
 )
 
 # Finally, generate the .cpp files from the .proto files

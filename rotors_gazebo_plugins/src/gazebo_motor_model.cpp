@@ -24,22 +24,26 @@ namespace gazebo {
 
 GazeboMotorModel::~GazeboMotorModel() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
-  if (node_handle_) {
-    node_handle_->shutdown();
-    delete node_handle_;
-  }
+//  if (node_handle_) {
+//    node_handle_->shutdown();
+//    delete node_handle_;
+//  }
 }
 
 void GazeboMotorModel::InitializeParams() {}
 
 void GazeboMotorModel::Publish() {
-  turning_velocity_msg_.data = joint_->GetVelocity(0);
-  motor_velocity_pub_.publish(turning_velocity_msg_);
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  turning_velocity_msg_.data = joint_->GetVelocity(0);
+  turning_velocity_msg_.set_data(joint_->GetVelocity(0));
+
+//  motor_velocity_pub_.publish(turning_velocity_msg_);
+  motor_velocity_pub_->Publish(turning_velocity_msg_);
 }
 
 void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
-
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
   //gzthrow("TEST");
 
   model_ = _model;
@@ -50,7 +54,10 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_motor_model] Please specify a robotNamespace.\n";
-  node_handle_ = new ros::NodeHandle(namespace_);
+
+//  node_handle_ = new ros::NodeHandle(namespace_);
+  node_handle_ = gazebo::transport::NodePtr(new transport::Node());
+  node_handle_->Init(namespace_);
 
   if (_sdf->HasElement("jointName"))
     joint_name_ = _sdf->GetElement("jointName")->Get<std::string>();
@@ -112,9 +119,17 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // simulation iteration.
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboMotorModel::OnUpdate, this, _1));
 
-  command_sub_ = node_handle_->subscribe(command_sub_topic_, 1, &GazeboMotorModel::VelocityCallback, this);
-  wind_speed_sub_ = node_handle_->subscribe(wind_speed_sub_topic_, 1, &GazeboMotorModel::WindSpeedCallback, this);
-  motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_speed_pub_topic_, 1);
+  gzmsg << "Subscribing to Gazebo topic \"" << command_sub_topic_ << "\"." << std::endl;
+//  command_sub_ = node_handle_->subscribe(command_sub_topic_, 1, &GazeboMotorModel::VelocityCallback, this);
+  command_sub_ = node_handle_->Subscribe(command_sub_topic_, &GazeboMotorModel::ControlVelocityCallback, this);
+
+  gzmsg << "Subscribing to Gazebo topic \"" << wind_speed_sub_topic_ << "\"." << std::endl;
+//  wind_speed_sub_ = node_handle_->subscribe(wind_speed_sub_topic_, 1, &GazeboMotorModel::WindSpeedCallback, this);
+  wind_speed_sub_ = node_handle_->Subscribe(wind_speed_sub_topic_, &GazeboMotorModel::WindSpeedCallback, this);
+
+  gzmsg << "Creating Gazebo publisher on topic \"" << motor_speed_pub_topic_ << "\"." << std::endl;
+//  motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_speed_pub_topic_, 1);
+  motor_velocity_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>(motor_speed_pub_topic_, 1);
 
   // Create the first order filter.
   rotor_velocity_filter_.reset(new FirstOrderFilter<double>(time_constant_up_, time_constant_down_, ref_motor_rot_vel_));
@@ -128,21 +143,39 @@ void GazeboMotorModel::OnUpdate(const common::UpdateInfo& _info) {
   Publish();
 }
 
-void GazeboMotorModel::VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_velocities) {
-  ROS_ASSERT_MSG(rot_velocities->angular_velocities.size() > motor_number_,
-                 "You tried to access index %d of the MotorSpeed message array which is of size %d.",
-                 motor_number_, rot_velocities->angular_velocities.size());
-  ref_motor_rot_vel_ = std::min(rot_velocities->angular_velocities[motor_number_], max_rot_velocity_);
+//void GazeboMotorModel::VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_velocities) {
+void GazeboMotorModel::ControlVelocityCallback(GzCommandMotorSpeedMsgPtr& command_motor_speed_msg) {
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
+//  ROS_ASSERT_MSG(rot_velocities->angular_velocities.size() > motor_number_,
+//                 "You tried to access index %d of the MotorSpeed message array which is of size %d.",
+//                 motor_number_, rot_velocities->angular_velocities.size());
+//  ref_motor_rot_vel_ = std::min(rot_velocities->angular_velocities[motor_number_], max_rot_velocity_);
+
+  if(command_motor_speed_msg->motor_speed_size() > motor_number_) {
+    gzerr << "You tried to access index " << motor_number_ <<
+        " of the MotorSpeed message array which is of size " << command_motor_speed_msg->motor_speed_size();
+  }
+
+  ref_motor_rot_vel_ = std::min(
+      static_cast<double>(command_motor_speed_msg->motor_speed(motor_number_)),
+      static_cast<double>(max_rot_velocity_));
 }
 
-void GazeboMotorModel::WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed) {
+void GazeboMotorModel::WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg) {
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
   // TODO(burrimi): Transform velocity to world frame if frame_id is set to something else.
-  wind_speed_W_.x = wind_speed->velocity.x;
-  wind_speed_W_.y = wind_speed->velocity.y;
-  wind_speed_W_.z = wind_speed->velocity.z;
+//  wind_speed_W_.x = wind_speed->velocity.x;
+//  wind_speed_W_.y = wind_speed->velocity.y;
+//  wind_speed_W_.z = wind_speed->velocity.z;
+  wind_speed_W_.x = wind_speed_msg->velocity().x();
+  wind_speed_W_.y = wind_speed_msg->velocity().y();
+  wind_speed_W_.z = wind_speed_msg->velocity().z();
 }
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
   motor_rot_vel_ = joint_->GetVelocity(0);
   if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_)) {
     gzerr << "Aliasing on motor [" << motor_number_ << "] might occur. Consider making smaller simulation time steps or raising the rotor_velocity_slowdown_sim_ param.\n";
