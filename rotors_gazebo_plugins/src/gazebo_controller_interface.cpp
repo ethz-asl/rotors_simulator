@@ -72,7 +72,8 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 //  motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::Actuators>(motor_velocity_reference_pub_topic_, 1);
   gzmsg << "GazeboControllerInterface creating publisher on \"" << motor_velocity_reference_pub_topic_ << "\"." << std::endl;
   motor_velocity_reference_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Actuators>(
-      node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_, 1);
+      node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_,
+      1);
 
   // ============================================ //
   // ===== ROS->GAZEBO MOTOR SPEED MSG SETUP ==== //
@@ -81,9 +82,11 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
   //  cmd_motor_sub_ = node_handle_->subscribe(command_motor_speed_sub_topic_, 1,
   //                                           &GazeboControllerInterface::CommandMotorCallback,
   //                                           this);
+  gzmsg << "Subscribing to Gazebo topic \"" << command_motor_speed_sub_topic_ << "\"." << std::endl;
   cmd_motor_sub_ = node_handle_->Subscribe(
-      node_handle_->GetTopicNamespace() + "/" + command_motor_speed_sub_topic_,
-      &GazeboControllerInterface::CommandMotorCallback, this);
+      command_motor_speed_sub_topic_,
+      &GazeboControllerInterface::CommandMotorCallback,
+      this);
 
   gzmsg << "Load() finished." << std::endl;
 
@@ -170,6 +173,9 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
 //void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::ActuatorsConstPtr& input_reference_msg) {
 void GazeboControllerInterface::CommandMotorCallback(GzActuatorsMsgPtr& actuators_msg) {
+
+  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
 //  input_reference_.resize(input_reference_msg->angular_velocities.size());
 //  for (int i = 0; i < input_reference_msg->angular_velocities.size(); ++i) {
 //    input_reference_[i] = input_reference_msg->angular_velocities[i];

@@ -540,6 +540,7 @@ void GazeboRosInterfacePlugin::RosActuatorsMsgCallback(
   }
 
   // Publish to Gazebo
+  gzmsg << "Publishing to gazebo topic \"" << gz_publisher_ptr->GetTopic() << std::endl;
   gz_publisher_ptr->Publish(gz_actuators_msg);
 }
 
