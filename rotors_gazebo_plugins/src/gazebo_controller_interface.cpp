@@ -63,10 +63,6 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboControllerInterface::OnUpdate, this, _1));
 
-
-
-
-
   gzmsg << "Load() finished." << std::endl;
 
 }

@@ -73,8 +73,10 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   double hor_vel_std_dev;
   double ver_vel_std_dev;
 
-  getSdfParam<std::string>(_sdf, "gpsTopic", gps_topic_,
-                           mav_msgs::default_topics::GPS);
+//  getSdfParam<std::string>(_sdf, "gpsTopic", gps_topic_,
+//                           mav_msgs::default_topics::GPS);
+  getSdfParam<std::string>(_sdf, "gpsTopic", gps_topic_, "");
+
   getSdfParam<std::string>(_sdf, "groundSpeedTopic", ground_speed_topic_,
                            kDefaultGroundSpeedPubTopic);
   getSdfParam<double>(_sdf, "horPosStdDev", hor_pos_std_dev, kDefaultHorPosStdDev);

@@ -56,7 +56,8 @@ class GazeboWindPlugin : public ModelPlugin {
   GazeboWindPlugin()
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
-        wind_pub_topic_(mav_msgs::default_topics::WIND),
+//        wind_pub_topic_(mav_msgs::default_topics::WIND),
+        wind_pub_topic_(""),
         wind_force_mean_(kDefaultWindForceMean),
         wind_force_variance_(kDefaultWindForceVariance),
         wind_gust_force_mean_(kDefaultWindGustForceMean),

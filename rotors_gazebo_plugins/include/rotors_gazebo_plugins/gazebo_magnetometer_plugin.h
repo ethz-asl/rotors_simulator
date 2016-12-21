@@ -23,7 +23,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-#include <mav_msgs/default_topics.h>
+//#include <mav_msgs/default_topics.h>
 //#include <ros/ros.h>
 #include <sensor_msgs/MagneticField.h>
 #include "MagneticField.pb.h"
