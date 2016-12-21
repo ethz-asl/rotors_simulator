@@ -40,6 +40,10 @@
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/motor_model.hpp"
 
+#include "Float32.pb.h"
+#include "CommandMotorSpeed.pb.h"
+#include "WindSpeed.pb.h"
+
 namespace turning_direction {
 const static int CCW = 1;
 const static int CW = -1;
@@ -50,6 +54,9 @@ namespace gazebo {
 // Default values
 static const std::string kDefaultCommandSubTopic = "gazebo/command/motor_speed";
 static const std::string kDefaultWindSpeedSubTopic = "gazebo/wind_speed";
+
+typedef const boost::shared_ptr<const gz_mav_msgs::CommandMotorSpeed> GzCommandMotorSpeedMsgPtr;
+typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
 
 // Set the max_force_ to the max double value. The limitations get handled by the FirstOrderFilter.
 static constexpr double kDefaultMaxForce = std::numeric_limits<double>::max();
@@ -69,8 +76,8 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         MotorModel(),
         command_sub_topic_(kDefaultCommandSubTopic),
         wind_speed_sub_topic_(kDefaultWindSpeedSubTopic),
-        motor_speed_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
-//        motor_speed_pub_topic_(""),
+//        motor_speed_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
+        motor_speed_pub_topic_(""),
         motor_number_(0),
         turning_direction_(turning_direction::CW),
         max_force_(kDefaultMaxForce),
@@ -118,10 +125,14 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   double time_constant_down_;
   double time_constant_up_;
 
-  ros::NodeHandle* node_handle_;
-  ros::Publisher motor_velocity_pub_;
-  ros::Subscriber command_sub_;
-  ros::Subscriber wind_speed_sub_;
+//  ros::NodeHandle* node_handle_;
+  gazebo::transport::NodePtr node_handle_;
+//  ros::Publisher motor_velocity_pub_;
+  gazebo::transport::PublisherPtr motor_velocity_pub_;
+//  ros::Subscriber command_sub_;
+  gazebo::transport::SubscriberPtr command_sub_;
+//  ros::Subscriber wind_speed_sub_;
+  gazebo::transport::SubscriberPtr wind_speed_sub_;
 
   physics::ModelPtr model_;
   physics::JointPtr joint_;
@@ -131,9 +142,14 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
 
   boost::thread callback_queue_thread_;
   void QueueThread();
-  std_msgs::Float32 turning_velocity_msg_;
-  void VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_velocities);
-  void WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed);
+//  std_msgs::Float32 turning_velocity_msg_;
+  gz_std_msgs::Float32 turning_velocity_msg_;
+
+//  void VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_velocities);
+  void ControlVelocityCallback(GzCommandMotorSpeedMsgPtr& command_motor_speed_msg);
+
+//  void WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed);
+  void WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg);
 
   std::unique_ptr<FirstOrderFilter<double>> rotor_velocity_filter_;
   math::Vector3 wind_speed_W_;
