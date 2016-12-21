@@ -32,7 +32,7 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 //#include <mav_msgs/Actuators.h>
-#include <mav_msgs/default_topics.h>
+//#include <mav_msgs/default_topics.h>
 
 #include "Actuators.pb.h"
 
