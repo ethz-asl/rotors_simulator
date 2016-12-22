@@ -30,13 +30,13 @@
 
 #include <rotors_gazebo_plugins/common.h>
 
+#include "ConnectGazeboToRosTopic.pb.h"
+#include "ConnectRosToGazeboTopic.pb.h"
+
 #include "PoseStamped.pb.h"
 #include "PoseWithCovarianceStamped.pb.h"
 #include "PositionStamped.pb.h"
 #include "TransformStamped.pb.h"
-
-#include "../include/rotors_gazebo_plugins/gazebo_ros_interface_plugin.h"
-
 
 namespace gazebo {
 

@@ -45,11 +45,11 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/TwistWithCovariance.h>
 #include <geometry_msgs/TwistWithCovarianceStamped.h>
-#include <mav_msgs/default_topics.h>
-#include <nav_msgs/Odometry.h>
+//#include <mav_msgs/default_topics.h>
+//#include <nav_msgs/Odometry.h>
 #include <opencv2/core/core.hpp>
-#include <ros/callback_queue.h>
-#include <ros/ros.h>
+//#include <ros/callback_queue.h>
+//#include <ros/ros.h>
 #include <rotors_gazebo_plugins/common.h>
 #include <rotors_gazebo_plugins/sdf_api_wrapper.hpp>
 #include <tf/transform_broadcaster.h>
@@ -81,11 +81,11 @@ class GazeboOdometryPlugin : public ModelPlugin {
   GazeboOdometryPlugin()
       : ModelPlugin(),
         random_generator_(random_device_()),
-        pose_pub_topic_(mav_msgs::default_topics::POSE),
-        pose_with_covariance_stamped_pub_topic_(mav_msgs::default_topics::POSE_WITH_COVARIANCE),
-        position_stamped_pub_topic_(mav_msgs::default_topics::POSITION),
-        transform_stamped_pub_topic_(mav_msgs::default_topics::TRANSFORM),
-        odometry_pub_topic_(mav_msgs::default_topics::ODOMETRY),
+//        pose_pub_topic_(mav_msgs::default_topics::POSE),
+//        pose_with_covariance_stamped_pub_topic_(mav_msgs::default_topics::POSE_WITH_COVARIANCE),
+//        position_stamped_pub_topic_(mav_msgs::default_topics::POSITION),
+//        transform_stamped_pub_topic_(mav_msgs::default_topics::TRANSFORM),
+//        odometry_pub_topic_(mav_msgs::default_topics::ODOMETRY),
         parent_frame_id_(kDefaultParentFrameId),
         child_frame_id_(kDefaultChildFrameId),
         link_name_(kDefaultLinkName),
