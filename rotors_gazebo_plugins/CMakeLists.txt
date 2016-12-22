@@ -232,9 +232,9 @@ if (ROS_DEPENDENCY)
 endif()
 
 # ROS INTERFACE PLUGIN
-add_library(rotors_gazebo_ros_interface_plugin src/gazebo_ros_interface_plugin.cpp)
-target_link_libraries(rotors_gazebo_ros_interface_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 if (ROS_DEPENDENCY)
+  add_library(rotors_gazebo_ros_interface_plugin src/gazebo_ros_interface_plugin.cpp)
+  target_link_libraries(rotors_gazebo_ros_interface_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   add_dependencies(rotors_gazebo_ros_interface_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
