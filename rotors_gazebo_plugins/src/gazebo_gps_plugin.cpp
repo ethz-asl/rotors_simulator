@@ -222,10 +222,6 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
         node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
 
-  if(!connect_gazebo_to_ros_topic_pub->HasConnections()) {
-    return;
-  }
-
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
   // ============================================ //

@@ -13,16 +13,17 @@ message ConnectGazeboToRosTopic
   // from a Gazebo to a ROS message
   enum MsgType {
   	ACTUATORS = 0;
-    IMU = 1;
-    JOINT_STATE = 2;
-    MAGNETIC_FIELD = 3;
-    NAV_SAT_FIX = 4;
-    ODOMETRY = 5;
-    POSE = 6;
-    POSE_WITH_COVARIANCE_STAMPED = 7;
-    POSITION_STAMPED = 8;
-    TRANSFORM_STAMPED = 9;
-    TWIST_STAMPED = 10;
+    FLOAT_32 = 1;
+    IMU = 2;
+    JOINT_STATE = 3;
+    MAGNETIC_FIELD = 4;
+    NAV_SAT_FIX = 5;
+    ODOMETRY = 6;
+    POSE = 7;
+    POSE_WITH_COVARIANCE_STAMPED = 8;
+    POSITION_STAMPED = 9;
+    TRANSFORM_STAMPED = 10;
+    TWIST_STAMPED = 11;
   }
   required MsgType msgType = 3;
 }

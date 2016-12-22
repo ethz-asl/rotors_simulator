@@ -91,7 +91,8 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         time_constant_down_(kDefaultTimeConstantDown),
         time_constant_up_(kDefaultTimeConstantUp),
         node_handle_(nullptr),
-        wind_speed_W_(0, 0, 0) {}
+        wind_speed_W_(0, 0, 0),
+        pubs_and_subs_created_(false) {}
 
   virtual ~GazeboMotorModel();
 
@@ -104,6 +105,17 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   virtual void OnUpdate(const common::UpdateInfo & /*_info*/);
 
  private:
+
+  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
+  ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
+  bool pubs_and_subs_created_;
+
+  /// \brief    Creates all required publishers and subscribers, incl. routing of messages to/from ROS if required.
+  /// \details  Call this once the first time OnUpdate() is called (can't
+  ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
+  ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
+  void CreatePubsAndSubs();
+
   std::string command_sub_topic_;
   std::string wind_speed_sub_topic_;
   std::string joint_name_;

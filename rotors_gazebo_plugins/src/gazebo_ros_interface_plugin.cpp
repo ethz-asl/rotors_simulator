@@ -178,6 +178,14 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
           rosTopicName,
           gz_node_handle_);
       break;
+    case gz_std_msgs::ConnectGazeboToRosTopic::FLOAT_32:
+      ConnectHelper<gz_std_msgs::Float32, std_msgs::Float32>(
+          &GazeboRosInterfacePlugin::GzFloat32MsgCallback,
+          this,
+          gazeboTopicName,
+          rosTopicName,
+          gz_node_handle_);
+      break;
     case gz_std_msgs::ConnectGazeboToRosTopic::IMU:
       ConnectHelper<sensor_msgs::msgs::Imu, sensor_msgs::Imu>(
           &GazeboRosInterfacePlugin::GzImuMsgCallback,
@@ -259,7 +267,8 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
           gz_node_handle_);
       break;
     default:
-      gzthrow("Message type is not supported by GazeboRosInterfacePlugin.");
+      gzthrow("ConnectGazeboToRosTopic message type with enum val = " << gz_connect_gazebo_to_ros_topic_msg->msgtype() <<
+          " is not supported by GazeboRosInterfacePlugin.");
   }
 
 }
@@ -289,8 +298,46 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       ros_subscribers.push_back(ros_subscriber);
 
       break;
+    }
+    case gz_std_msgs::ConnectRosToGazeboTopic::COMMAND_MOTOR_SPEED: {
+
+      // Create Gazebo publisher
+      // (we don't need to manually save a reference for the Gazebo publisher because
+      // boost::bind will do that for us)
+      gazebo::transport::PublisherPtr gz_publisher_ptr = gz_node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>(
+          gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+
+      // Create ROS subscriber
+      ros::Subscriber ros_subscriber = ros_node_handle_->subscribe<mav_msgs::Actuators>(
+          gz_connect_ros_to_gazebo_topic_msg->ros_topic(), 1,
+          boost::bind(&GazeboRosInterfacePlugin::RosCommandMotorSpeedMsgCallback, this, _1, gz_publisher_ptr));
+
+      // Save reference to the ROS subscriber so callback will continue to be called.
+      ros_subscribers.push_back(ros_subscriber);
+
+      break;
+    }
+    case gz_std_msgs::ConnectRosToGazeboTopic::WIND_SPEED: {
+
+      // Create Gazebo publisher
+      // (we don't need to manually save a reference for the Gazebo publisher because
+      // boost::bind will do that for us)
+      gazebo::transport::PublisherPtr gz_publisher_ptr = gz_node_handle_->Advertise<gz_mav_msgs::WindSpeed>(
+          gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+
+      // Create ROS subscriber
+      ros::Subscriber ros_subscriber = ros_node_handle_->subscribe<rotors_comm::WindSpeed>(
+          gz_connect_ros_to_gazebo_topic_msg->ros_topic(), 1,
+          boost::bind(&GazeboRosInterfacePlugin::RosWindSpeedMsgCallback, this, _1, gz_publisher_ptr));
+
+      // Save reference to the ROS subscriber so callback will continue to be called.
+      ros_subscribers.push_back(ros_subscriber);
+
+      break;
+
     } default: {
-      gzthrow("Message type is not supported by GazeboRosInterfacePlugin.");
+      gzthrow("ConnectRosToGazeboTopic message type with enum val = " << gz_connect_ros_to_gazebo_topic_msg->msgtype() <<
+                " is not supported by GazeboRosInterfacePlugin.");
     }
   }
 
@@ -318,6 +365,16 @@ void GazeboRosInterfacePlugin::GzActuatorsMsgCallback(GzActuatorsMsgPtr& gz_actu
 
   // Publish onto ROS framework
   ros_publisher.publish(ros_actuators_msg_);
+
+}
+
+void GazeboRosInterfacePlugin::GzFloat32MsgCallback(GzFloat32MsgPtr& gz_float_32_msg, ros::Publisher ros_publisher) {
+
+  // Convert Gazebo message to ROS message
+  ros_float_32_msg_.data = gz_float_32_msg->data();
+
+  // Publish to ROS
+  ros_publisher.publish(ros_float_32_msg_);
 
 }
 
@@ -517,6 +574,7 @@ void GazeboRosInterfacePlugin::GzTwistStampedMsgCallback(GzTwistStampedMsgPtr& g
 //  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
 }
 
+
 //===========================================================================//
 //================ ROS -> GAZEBO MSG CALLBACKS/CONVERTERS ===================//
 //===========================================================================//
@@ -542,6 +600,51 @@ void GazeboRosInterfacePlugin::RosActuatorsMsgCallback(
   // Publish to Gazebo
 //  gzmsg << "Publishing to gazebo topic \"" << gz_publisher_ptr->GetTopic() << std::endl;
   gz_publisher_ptr->Publish(gz_actuators_msg);
+}
+
+void GazeboRosInterfacePlugin::RosCommandMotorSpeedMsgCallback(
+    const mav_msgs::ActuatorsConstPtr& ros_actuators_msg_ptr,
+    gazebo::transport::PublisherPtr gz_publisher_ptr) {
+
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
+  // Convert ROS message to Gazebo message
+
+  gz_mav_msgs::CommandMotorSpeed gz_command_motor_speed_msg;
+
+//  gz_command_motor_speed_msg.mutable_header()->mutable_stamp()->set_sec(ros_actuators_msg_ptr->header.stamp.sec);
+//  gz_command_motor_speed_msg.mutable_header()->mutable_stamp()->set_nsec(ros_actuators_msg_ptr->header.stamp.nsec);
+//  gz_command_motor_speed_msg.mutable_header()->set_frame_id(ros_actuators_msg_ptr->header.frame_id);
+
+  for(int i = 0; i < ros_actuators_msg_ptr->angular_velocities.size(); i++) {
+    gz_command_motor_speed_msg.add_motor_speed(ros_actuators_msg_ptr->angular_velocities[i]);
+  }
+
+  // Publish to Gazebo
+//  gzmsg << "Publishing to gazebo topic \"" << gz_publisher_ptr->GetTopic() << std::endl;
+  gz_publisher_ptr->Publish(gz_command_motor_speed_msg);
+}
+
+void GazeboRosInterfacePlugin::RosWindSpeedMsgCallback(
+      const rotors_comm::WindSpeedConstPtr& ros_wind_speed_msg_ptr,
+      gazebo::transport::PublisherPtr gz_publisher_ptr) {
+
+//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
+  // Convert ROS message to Gazebo message
+  gz_mav_msgs::WindSpeed gz_wind_speed_msg;
+
+  gz_wind_speed_msg.mutable_header()->mutable_stamp()->set_sec(ros_wind_speed_msg_ptr->header.stamp.sec);
+  gz_wind_speed_msg.mutable_header()->mutable_stamp()->set_nsec(ros_wind_speed_msg_ptr->header.stamp.nsec);
+  gz_wind_speed_msg.mutable_header()->set_frame_id(ros_wind_speed_msg_ptr->header.frame_id);
+
+  gz_wind_speed_msg.mutable_velocity()->set_x(ros_wind_speed_msg_ptr->velocity.x);
+  gz_wind_speed_msg.mutable_velocity()->set_y(ros_wind_speed_msg_ptr->velocity.y);
+  gz_wind_speed_msg.mutable_velocity()->set_z(ros_wind_speed_msg_ptr->velocity.z);
+
+  // Publish to Gazebo
+  gz_publisher_ptr->Publish(gz_wind_speed_msg);
+
 }
 
 void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
