@@ -180,6 +180,23 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   }
   double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
   double force = real_motor_velocity * real_motor_velocity * motor_constant_;
+
+  // Code from sitl_gazebo version of GazeboMotorModel.
+  // Not active as model is imprecise, and does not take
+  // into account the direction of the wind (e.g. is it moving
+  // in the direction of propulsion, against?)
+#if 0
+  // scale down force linearly with forward speed
+  // XXX this has to be modelled better
+  math::Vector3 body_velocity = link_->GetWorldLinearVel();
+  double vel = body_velocity.GetLength();
+  double scalar = 1 - vel / 25.0; // at 50 m/s the rotor will not produce any force anymore
+  scalar = math::clamp(scalar, 0.0, 1.0);
+  // Apply a force to the link.
+  link_->AddRelativeForce(math::Vector3(0, 0, force * scalar));
+#endif
+
+
   // Apply a force to the link.
   link_->AddRelativeForce(math::Vector3(0, 0, force));
 
