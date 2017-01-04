@@ -14,7 +14,11 @@ message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 set(MAVLINK_INTERFACE)
 set(BUILD_MAVLINK_INTERFACE)
 
-set(ROS_ENABLE FALSE)
+if(NO_ROS)
+  message(STATUS "NO_ROS = TRUE, building rotors_gazebo_plugins WITHOUT any ROS dependancies.")
+else()
+  message(STATUS "NO_ROS = FALSE, building rotors_gazebo_plugins WITH ROS dependancies.")
+endif()
 
 if (MAVLINK_INTERFACE STREQUAL "y")
   set(BUILD_MAVLINK_INTERFACE TRUE)
@@ -35,8 +39,7 @@ add_definitions(
 # To enable assertions when compiled in release mode.
 add_definitions(-DROS_ASSERT_ENABLED)
 
-if (ROS_ENABLE)
-  message(STATUS "ROS_ENABLE == TRUE")
+if (NOT NO_ROS)
   find_package(catkin REQUIRED COMPONENTS
     cmake_modules
     cv_bridge
@@ -155,7 +158,7 @@ link_libraries(mav_msgs)
 # ==================== CATKIN ================== #
 # ============================================== #
 
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   catkin_package(
     INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS} ${CATKIN_DEVEL_PREFIX}/include/${PACKAGE_NAME}
     LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
@@ -177,25 +180,25 @@ include_directories(${Eigen_INCLUDE_DIRS})
 
 add_library(rotors_gazebo_motor_model src/gazebo_motor_model.cpp)
 target_link_libraries(rotors_gazebo_motor_model ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_motor_model ${catkin_EXPORTED_TARGETS})
 endif()
 
 add_library(rotors_gazebo_odometry_plugin src/gazebo_odometry_plugin.cpp)
 target_link_libraries(rotors_gazebo_odometry_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${OpenCV_LIBRARIES})
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_odometry_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
 add_library(rotors_gazebo_imu_plugin src/gazebo_imu_plugin.cpp)
 target_link_libraries(rotors_gazebo_imu_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
 # Entire GazeboBagPlugin is a heavy ROS dependency, and so rather than passing messages to
 # GazeboRosInterfacePlugin, this entire library is only included if ROS is present.
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   add_library(rotors_gazebo_bag_plugin src/gazebo_bag_plugin.cpp)
   target_link_libraries(rotors_gazebo_bag_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   add_dependencies(rotors_gazebo_bag_plugin ${catkin_EXPORTED_TARGETS})
@@ -203,36 +206,36 @@ endif()
 
 add_library(rotors_gazebo_wind_plugin src/gazebo_wind_plugin.cpp)
 target_link_libraries(rotors_gazebo_wind_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_wind_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
 add_library(rotors_gazebo_octomap_plugin src/gazebo_octomap_plugin.cpp)
 target_link_libraries(rotors_gazebo_octomap_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_octomap_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
 add_library(rotors_gazebo_multirotor_base_plugin src/gazebo_multirotor_base_plugin.cpp)
 target_link_libraries(rotors_gazebo_multirotor_base_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_multirotor_base_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
 add_library(rotors_gazebo_gps_plugin src/gazebo_gps_plugin.cpp)
 target_link_libraries(rotors_gazebo_gps_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_gps_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
 add_library(rotors_gazebo_magnetometer_plugin src/gazebo_magnetometer_plugin.cpp)
 target_link_libraries(rotors_gazebo_magnetometer_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_magnetometer_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
 # ROS INTERFACE PLUGIN
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   add_library(rotors_gazebo_ros_interface_plugin src/gazebo_ros_interface_plugin.cpp)
   target_link_libraries(rotors_gazebo_ros_interface_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   add_dependencies(rotors_gazebo_ros_interface_plugin ${catkin_EXPORTED_TARGETS})
@@ -240,7 +243,7 @@ endif()
 
 add_library(rotors_gazebo_controller_interface src/gazebo_controller_interface.cpp)
 target_link_libraries(rotors_gazebo_controller_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})
 endif()
 
@@ -252,7 +255,7 @@ if (BUILD_MAVLINK_INTERFACE)
 endif()
 
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   set(BIN_DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
   set(LIB_DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 else()
@@ -276,7 +279,7 @@ install(
   LIBRARY DESTINATION ${LIB_DESTINATION}
 )
 
-if (ROS_ENABLE)
+if (NOT NO_ROS)
     install(
       TARGETS
         rotors_gazebo_bag_plugin
@@ -296,7 +299,7 @@ endif()
 
 # Copy over all converted protobuf files (*.pb.h and *.pb.c) from the src directory to
 # the devel directory. This is required so that you can include the protobuf header files from other C++ files.
-if (ROS_ENABLE)
+if (NOT NO_ROS)
   file(COPY ${CMAKE_CURRENT_BINARY_DIR}/ DESTINATION ${CATKIN_DEVEL_PREFIX}/include/${PACKAGE_NAME} FILES_MATCHING PATTERN "*.pb.*")
 endif()
 
