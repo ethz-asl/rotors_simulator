@@ -21,7 +21,7 @@
 
 <robot name="neo11" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <!-- Instantiate default euroc_hex-->
+  <!-- Instantiate default neo11-->
   <xacro:include filename="$(find rotors_description)/urdf/neo11_generic_odometry_sensor.gazebo" />
 
   <!-- Mount a VI-sensor in the front of Neo. -->
