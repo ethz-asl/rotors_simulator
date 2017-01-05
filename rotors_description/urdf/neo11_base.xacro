@@ -21,7 +21,7 @@
 
 <robot name="neo11" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
-  <!-- Instantiate euroc_hex "mechanics" -->
+  <!-- Instantiate neo11 "mechanics" -->
   <xacro:include filename="$(find rotors_description)/urdf/neo11.xacro" />
 
   <!-- Instantiate a controller. -->
