@@ -1,4 +1,4 @@
-# Euroc Hex vehicle parameters
+# NEO9 vehicle parameters
 mass: 2.70703
 inertia: {xx: 0.0341171 , xy: 0.0, xz: 0.0, yy: 0.0363089, yz: 0.0, zz: 0.0627386}
 
