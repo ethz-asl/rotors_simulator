@@ -30,8 +30,8 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.sdf
   )
 add_custom_target(sdf ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.sdf)
 
-if(ONLY_BUILD_IRIS_SDF)
-  message(STATUS "Only building iris.sdf, returning now.")
+if(NO_ROS)
+  message(STATUS "NO_ROS = true, only building iris.sdf, returning now.")
   return()
 endif()
 
