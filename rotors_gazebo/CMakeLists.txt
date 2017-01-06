@@ -32,7 +32,7 @@ add_custom_target(sdf ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.s
 
 if(ONLY_BUILD_IRIS_SDF)
   message(STATUS "Only building iris.sdf, returning now.")
-  return
+  return()
 endif()
 
 find_package(catkin REQUIRED COMPONENTS gazebo_msgs geometry_msgs mav_msgs roscpp sensor_msgs)
