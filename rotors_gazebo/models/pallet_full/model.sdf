@@ -1,0 +1,190 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="pallet full">
+    <pose>0 0 1  0 0 0</pose>
+    <static>false</static>
+    <self_collide>true</self_collide>
+    <allow_auto_disable>true</allow_auto_disable>
+
+    <!-- Pallet dimensions: 120 x 80 x 14.7 cm-->
+    <include>
+      <uri>model://europallet</uri>
+      <name>pallet</name>
+      <pose>0 0 0  0 0 0</pose>
+    </include>
+	
+	<!-- Small Box dimensions: 40 x 24 x 18 cm-->
+	
+	<!-- First level of boxes -->
+    <include>
+      <uri>model://small_box</uri>
+      <name>small_box_1_lvl_1</name>
+      <pose>0.40 -0.24 0.172  0 0 0</pose>
+      <static>true</static>
+    </include>
+    
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_2_lvl_1</name>
+      <pose>0.40 0 0.172  0 0 0</pose>
+      <static>true</static>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_3_lvl_1</name>
+      <pose>0.40 0.24 0.172  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_4_lvl_1</name>
+      <pose>0 -0.24 0.172  0 0 0</pose>
+    </include>
+    
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_5_lvl_1</name>
+      <pose>0 0 0.172  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_6_lvl_1</name>
+      <pose>0 0.24 0.172  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_7_lvl_1</name>
+      <pose>-0.40 -0.24 0.172  0 0 0</pose>
+    </include>
+    
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_8_lvl_1</name>
+      <pose>-0.40 0 0.172  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_9_lvl_1</name>
+      <pose>-0.40 0.24 0.172  0 0 0</pose>
+    </include>
+	
+	
+	<!-- Second level of boxes -->
+    <include>
+      <uri>model://small_box</uri>
+      <name>small_box_1_lvl_2</name>
+      <pose>0.40 -0.24 0.353  0 0 0</pose>
+    </include>
+    
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_2_lvl_2</name>
+      <pose>0.40 0 0.353  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_3_lvl_2</name>
+      <pose>0.40 0.24 0.353  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_4_lvl_2</name>
+      <pose>0 -0.24 0.353  0 0 0</pose>
+    </include>
+    
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_5_lvl_2</name>
+      <pose>0 0 0.353  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_6_lvl_2</name>
+      <pose>0 0.24 0.353  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_7_lvl_2</name>
+      <pose>-0.40 -0.24 0.353  0 0 0</pose>
+    </include>
+    
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_8_lvl_2</name>
+      <pose>-0.40 0 0.353  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_9_lvl_2</name>
+      <pose>-0.40 0.24 0.353  0 0 0</pose>
+    </include>
+	
+	
+	<!-- Third level of boxes -->
+    <include>
+      <uri>model://small_box</uri>
+      <name>small_box_1_lvl_3</name>
+      <pose>0.40 -0.24 0.534  0 0 0</pose>
+    </include>
+    
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_2_lvl_3</name>
+      <pose>0.40 0 0.534  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_3_lvl_3</name>
+      <pose>0.40 0.24 0.534  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_4_lvl_3</name>
+      <pose>0 -0.24 0.534  0 0 0</pose>
+    </include>
+    
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_5_lvl_3</name>
+      <pose>0 0 0.534  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_6_lvl_3</name>
+      <pose>0 0.24 0.534  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_7_lvl_3</name>
+      <pose>-0.40 -0.24 0.534  0 0 0</pose>
+    </include>
+    
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_8_lvl_3</name>
+      <pose>-0.40 0 0.534  0 0 0</pose>
+    </include>
+	
+	<include>
+      <uri>model://small_box</uri>
+      <name>small_box_9_lvl_3</name>
+      <pose>-0.40 0.24 0.534  0 0 0</pose>
+      <static>true</static>
+    </include>
+	
+	
+  </model>
+</sdf>
