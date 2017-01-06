@@ -4,3 +4,4 @@
 .settings
 *.pyc
 *~
+*/models/iris/*.sdf
