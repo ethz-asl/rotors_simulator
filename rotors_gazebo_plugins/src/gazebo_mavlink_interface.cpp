@@ -20,7 +20,7 @@
 
 
 #include "rotors_gazebo_plugins/gazebo_mavlink_interface.h"
-#include "geo_mag_declination.h"
+#include "rotors_gazebo_plugins/geo_mag_declination.h"
 
 namespace gazebo {
 
