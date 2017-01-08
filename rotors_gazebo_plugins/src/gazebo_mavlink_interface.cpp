@@ -405,7 +405,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   opticalFlow_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
   
   // Publish gazebo's motor_speed message
-  motor_velocity_reference_pub_ = node_handle_->Advertise<mav_msgs::msgs::CommandMotorSpeed>("~/" + model_->GetName() + motor_velocity_reference_pub_topic_, 1);
+  motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + model_->GetName() + motor_velocity_reference_pub_topic_, 1);
 
   _rotor_count = 5;
   last_time_ = world_->GetSimTime();
@@ -482,7 +482,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
   if(received_first_referenc_) {
 
-    mav_msgs::msgs::CommandMotorSpeed turning_velocities_msg;
+    gz_mav_msgs::CommandMotorSpeed turning_velocities_msg;
 
     for (int i = 0; i < input_reference_.size(); i++){
       if (last_actuator_time_ == 0 || (current_time - last_actuator_time_).Double() > 0.2) {

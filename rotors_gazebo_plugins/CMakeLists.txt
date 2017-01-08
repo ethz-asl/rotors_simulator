@@ -256,9 +256,8 @@ if (NOT NO_ROS)
 endif()
 
 if (BUILD_MAVLINK_INTERFACE)
-  # mavlink_interface must be a shared library
-  add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp)
-  target_link_libraries(rotors_gazebo_mavlink_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${mavros_LIBRARIES})
+  add_library(rotors_gazebo_mavlink_interface src/gazebo_mavlink_interface.cpp)
+  target_link_libraries(rotors_gazebo_mavlink_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   #add_dependencies(rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
   message(STATUS "Built mavlink_interface_plugin")
 endif()
