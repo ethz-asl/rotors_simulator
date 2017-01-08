@@ -60,12 +60,12 @@ if (NOT NO_ROS)
   )
 endif()
 
-if (BUILD_MAVLINK_INTERFACE)
-  find_package(mavros)
-  find_package(mavros_msgs)
-  find_package(libmavconn)
-  message(STATUS "Added mavros dependency")
-endif()
+# if (BUILD_MAVLINK_INTERFACE)
+#   find_package(mavros)
+#   find_package(mavros_msgs)
+#   find_package(libmavconn)
+#   message(STATUS "Added mavros dependency")
+# endif()
 
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 
@@ -77,10 +77,11 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(${GAZEBO_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-if (BUILD_MAVLINK_INTERFACE)
-  include_directories(${mavros_msgs_INCLUDE_DIRS})
-  include_directories(${libmavconn_INCLUDE_DIRS})
-endif()
+
+# if (BUILD_MAVLINK_INTERFACE)
+#   include_directories(${mavros_msgs_INCLUDE_DIRS})
+#   include_directories(${libmavconn_INCLUDE_DIRS})
+# endif()
 
 # ============================================== #
 # =================== PROTOBUF ================= #
@@ -252,9 +253,10 @@ if (NOT NO_ROS)
 endif()
 
 if (BUILD_MAVLINK_INTERFACE)
-  add_library(rotors_gazebo_mavlink_interface src/gazebo_mavlink_interface.cpp)
+  # mavlink_interface must be a shared library
+  add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp)
   target_link_libraries(rotors_gazebo_mavlink_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${mavros_LIBRARIES})
-  add_dependencies(rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
+  #add_dependencies(rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
   message(STATUS "Built mavlink_interface_plugin")
 endif()
 
@@ -296,8 +298,8 @@ if (BUILD_MAVLINK_INTERFACE)
   install(
     TARGETS
       rotors_gazebo_mavlink_interface
-    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    DESTINATION ${BIN_DESTINATION}
+    LIBRARY DESTINATION ${LIB_DESTINATION}
   )
 endif()
 
