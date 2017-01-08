@@ -1,3 +1,7 @@
+# Optional arguments to be passed into file
+# NO_ROS: Build without any ROS dependencies
+# MAVLINK_INTERFACE: Build mavlink_interface_plugin (requires mav dependency)
+
 cmake_minimum_required(VERSION 2.8.3)
 project(rotors_gazebo_plugins)
 #
@@ -11,7 +15,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 
-set(MAVLINK_INTERFACE)
+#set(MAVLINK_INTERFACE)
 set(BUILD_MAVLINK_INTERFACE)
 
 if(NO_ROS)
@@ -20,16 +24,16 @@ else()
   message(STATUS "NO_ROS = FALSE, building rotors_gazebo_plugins WITH ROS dependancies.")
 endif()
 
-if (MAVLINK_INTERFACE STREQUAL "y")
+#if (MAVLINK_INTERFACE STREQUAL "y")
+if (MAVLINK_INTERFACE)
   set(BUILD_MAVLINK_INTERFACE TRUE)
+  message(STATUS "MAVLINK_INTERFACE = TRUE, adding mavros dependency and building mavlink_interface_plugin.")
 else ()
   set(BUILD_MAVLINK_INTERFACE FALSE)
+  message(STATUS "MAVLINK_INTERFACE = FALSE, NOT adding mavros dependency and NOT building mavlink_interface_plugin.")
 endif ()
 
-if (BUILD_MAVLINK_INTERFACE)
-  message(STATUS "Adding mavros dependency and building mavlink_interface_plugin")
-endif ()
-
+# Specify C++11 standard
 add_definitions(-std=c++11)
 
 add_definitions(
