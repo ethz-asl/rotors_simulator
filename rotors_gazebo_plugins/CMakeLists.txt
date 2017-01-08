@@ -125,9 +125,12 @@ set (msgs
   msgs/Float32.proto
   msgs/Header.proto
   msgs/JointState.proto
+  msgs/Lidar.proto
   msgs/MagneticField.proto
+  msgs/MotorSpeed.proto
   msgs/NavSatFix.proto
   msgs/Odometry.proto
+  msgs/OpticalFlow.proto
   msgs/Point.proto
   msgs/PointStamped.proto
   msgs/Pose.proto
