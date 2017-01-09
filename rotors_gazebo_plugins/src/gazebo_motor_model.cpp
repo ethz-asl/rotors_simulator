@@ -277,7 +277,7 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   // ==== WIND SPEED MSG SETUP (ROS->GAZEBO) ==== //
   // ============================================ //
 
-  gzdbg << "Subscribing to Gazebo topic \"" << wind_speed_sub_topic_ << "\"." << std::endl;
+  gzdbg << "Subscribing to Gazebo topic \"" << "~/" + model_->GetName() + "/" + wind_speed_sub_topic_ << "\"." << std::endl;
  //  wind_speed_sub_ = node_handle_->subscribe(wind_speed_sub_topic_, 1, &GazeboMotorModel::WindSpeedCallback, this);
   wind_speed_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + "/" + wind_speed_sub_topic_, &GazeboMotorModel::WindSpeedCallback, this);
 
