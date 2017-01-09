@@ -47,7 +47,7 @@ void GazeboMotorModel::Publish() {
 
 void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+  gzdbg << __PRETTY_FUNCTION__ << " called." << std::endl;
   //gzthrow("TEST");
 
   model_ = _model;
@@ -234,7 +234,7 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
 
 void GazeboMotorModel::CreatePubsAndSubs() {
 
-//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+  gzdbg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr gz_connect_gazebo_to_ros_topic_pub =
@@ -246,13 +246,11 @@ void GazeboMotorModel::CreatePubsAndSubs() {
       node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("connect_ros_to_gazebo_topic", 1);
   gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
 
-
-
   // ============================================ //
   //  ACTUAL MOTOR SPEED MSG SETUP (GAZEBO->ROS)  //
   // ============================================ //
 
-  gzmsg << "Creating Gazebo publisher on topic \"" << motor_speed_pub_topic_ << "\"." << std::endl;
+  gzdbg << "Creating Gazebo publisher on topic \"" << "~/" + model_->GetName() + "/" + motor_speed_pub_topic_ << "\"." << std::endl;
 //  motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_speed_pub_topic_, 1);
   motor_velocity_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>("~/" + model_->GetName() + "/" + motor_speed_pub_topic_, 1);
 
@@ -266,7 +264,7 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   // = CONTROL VELOCITY MSG SETUP (ROS->GAZEBO) = //
   // ============================================ //
 
-  gzmsg << "Subscribing to Gazebo topic \"" << command_sub_topic_ << "\"." << std::endl;
+  gzdbg << "Subscribing to Gazebo topic \"" << "~/" + model_->GetName() + "/" + command_sub_topic_ << "\"." << std::endl;
 //  command_sub_ = node_handle_->subscribe(command_sub_topic_, 1, &GazeboMotorModel::VelocityCallback, this);
   command_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + "/" + command_sub_topic_, &GazeboMotorModel::ControlVelocityCallback, this);
 
@@ -279,7 +277,7 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   // ==== WIND SPEED MSG SETUP (ROS->GAZEBO) ==== //
   // ============================================ //
 
-  gzmsg << "Subscribing to Gazebo topic \"" << wind_speed_sub_topic_ << "\"." << std::endl;
+  gzdbg << "Subscribing to Gazebo topic \"" << wind_speed_sub_topic_ << "\"." << std::endl;
  //  wind_speed_sub_ = node_handle_->subscribe(wind_speed_sub_topic_, 1, &GazeboMotorModel::WindSpeedCallback, this);
   wind_speed_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + "/" + wind_speed_sub_topic_, &GazeboMotorModel::WindSpeedCallback, this);
 
