@@ -249,14 +249,15 @@ void GazeboMotorModel::CreatePubsAndSubs() {
 
 
   // ============================================ //
-  // === MOTOR SPEED MSG SETUP (GAZEBO->ROS) ==== //
+  //  ACTUAL MOTOR SPEED MSG SETUP (GAZEBO->ROS)  //
   // ============================================ //
 
   gzmsg << "Creating Gazebo publisher on topic \"" << motor_speed_pub_topic_ << "\"." << std::endl;
 //  motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_speed_pub_topic_, 1);
-  motor_velocity_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>(motor_speed_pub_topic_, 1);
+  motor_velocity_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>("~/" + model_->GetName() + "/" + motor_speed_pub_topic_, 1);
 
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + motor_speed_pub_topic_);
+  // Connect to ROS
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + motor_speed_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(motor_speed_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::FLOAT_32);
   gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
