@@ -14,7 +14,11 @@ set(enable_ground_truth "false")
 set(enable_logging "false")
 set(enable_camera "false")
 set(enable_wind "false")
-set(rotors_description_dir "${CMAKE_CURRENT_SOURCE_DIR}/models/rotors_description")
+
+# todo FIX: This is hacky, accessing .xacro files from outside source directory! And building model file in wrong package!
+#set(rotors_description_dir "${CMAKE_CURRENT_SOURCE_DIR}/models/rotors_description")
+set(rotors_description_dir "${CMAKE_CURRENT_SOURCE_DIR}/../rotors_description")
+
 set(scripts_dir "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 
 # Creates shell commands to generate .sdf file
