@@ -216,6 +216,7 @@ include_no_matches_msg = """Include tag filename spec \"{}\" matched no files.""
 
 ## @throws XacroException if a parsing error occurs with an included document
 def process_includes(doc, base_dir):
+    print('process_includes() called with doc = ' + str(doc) + ', base_dir = ' + str(base_dir))
     namespaces = {}
     previous = doc.documentElement
     elt = next_element(previous)
@@ -243,6 +244,7 @@ def process_includes(doc, base_dir):
 
         # Process current element depending on previous conditions
         if is_include:
+            print('elt.getAttribute(\'filename\') = ' + elt.getAttribute('filename'))
             filename_spec = eval_text(elt.getAttribute('filename'), {})
             if not os.path.isabs(filename_spec):
                 filename_spec = os.path.join(base_dir, filename_spec)
@@ -670,6 +672,8 @@ def main():
     # Process substitution args
     set_substitution_args_context(load_mappings(sys.argv))
 
+    #sys.stderr.write('TESTING!!!!!!!!!!!!!!!!!!!!!!!!!\n')
+    print("Opening file f = " + args[0])
     f = open(args[0])
     doc = None
     try:
@@ -684,6 +688,7 @@ def main():
     finally:
         f.close()
 
+    print("os.path.dirname(args[0]) = " + os.path.dirname(args[0]))
     process_includes(doc, os.path.dirname(args[0]))
     if just_deps:
         for inc in all_includes:

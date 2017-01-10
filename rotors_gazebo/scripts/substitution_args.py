@@ -140,6 +140,8 @@ def resolve_args(arg_str, context=None, resolve_anon=True):
     return resolved
 
 def _resolve_args(arg_str, context, resolve_anon, commands):
+    #print('_resolve_args_() called with arg_str = ' + arg_str + ', context = ' + context, ', resolve_anon = ' + resolve_anon + ', commands = ' + commands)
+    print('_resolve_args_() called with arg_str = ' + arg_str)
     valid = ['arg']
     resolved = arg_str
     for a in _collect_args(arg_str):
