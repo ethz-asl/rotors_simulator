@@ -52,28 +52,28 @@ static constexpr float kTeslaToGauss = 10000.0;
 
 struct HilData {
   HilData() :
-      temperature(kTemperature_C),
-      eph(kHDOP),
-      epv(kVDOP),
-      cog(kUnknown),
-      ind_airspeed(0),
+      temperature_degC(kTemperature_C),
+      eph_mm(kHDOP),
+      epv_cm(kVDOP),
+      cog_1e2deg(kUnknown),
+      ind_airspeed_1e2m_per_s(0),
       satellites_visible(kSatellitesVisible) {}
 
   Eigen::Quaterniond att;      // Attitude quaternion
-  Eigen::Vector3f acc;         // Linear acceleration (m/s^2)
-  Eigen::Vector3f gyro;        // Angular rate in body frame (rad / sec)
-  Eigen::Vector3f mag;         // Magnetic field (Gauss)
-  Eigen::Vector3i gps_vel;     // GPS velocity in cm/s in earth-fixed NED frame
-  float pressure_abs;          // Absolute pressure in millibar
-  float pressure_diff;         // Differential pressure (airspeed) in millibar
+  Eigen::Vector3f acc_m_per_s2;         // Linear acceleration (m/s^2)
+  Eigen::Vector3f gyro_rad_per_s;        // Angular rate in body frame (rad / sec)
+  Eigen::Vector3f mag_G;         // Magnetic field (Gauss)
+  Eigen::Vector3i gps_vel_cm_per_s;     // GPS velocity in cm/s in earth-fixed NED frame
+  float pressure_abs_mBar;          // Absolute pressure in millibar
+  float pressure_diff_mBar;         // Differential pressure (airspeed) in millibar
   float pressure_alt;          // Altitude calculated from pressure
-  float temperature;           // Temperature in degrees celsius
-  uint32_t lat;                // Latitude (WGS84), in degrees * 1E7
-  uint32_t lon;                // Longitude (WGS84), in degrees * 1E7
+  float temperature_degC;           // Temperature in degrees celsius
+  uint32_t lat_1e7deg;                // Latitude (WGS84), in degrees * 1E7
+  uint32_t lon_1e7deg;                // Longitude (WGS84), in degrees * 1E7
   uint32_t alt;                // Altitude (AMSL, not WGS84), in meters * 1000 (positive for up)
-  uint16_t eph;                // GPS HDOP horizontal dilution of position in cm (m*100). If unknown, set to: 65535
-  uint16_t epv;                // GPS VDOP vertical dilution of position in cm (m*100). If unknown, set to: 65535
-  uint16_t vel;                // GPS ground speed (m/s * 100). If unknown, set to: 65535
+  uint16_t eph_mm;                // GPS HDOP horizontal dilution of position in cm (m*100). If unknown, set to: 65535
+  uint16_t epv_cm;                // GPS VDOP vertical dilution of position in cm (m*100). If unknown, set to: 65535
+  uint16_t vel_1e2m_per_s;                // GPS ground speed (m/s * 100). If unknown, set to: 65535
   uint16_t cog;                // Course over ground (NOT heading, but direction of movement) in degrees * 100. If unknown, set to: 65535
   uint16_t ind_airspeed;       // Indicated airspeed, expressed as m/s * 100
   uint16_t true_airspeed;      // True airspeed, expressed as m/s * 100*/
@@ -104,7 +104,7 @@ class HilListeners {
     // TODO(pvechersky): Simulate indicated air speed.
 
     // MAVLINK HIL_STATE_QUATERNION message measured airspeed in cm/s.
-    hil_data->ind_airspeed = air_speed * kMetersToCm;
+    hil_data->ind_airspeed_1e2m_per_s = air_speed * kMetersToCm;
     hil_data->true_airspeed = air_speed * kMetersToCm;
   }
 
@@ -119,8 +119,8 @@ class HilListeners {
 
     // MAVLINK HIL_GPS message measures latitude and longitude in degrees * 1e7
     // while altitude is reported in mm.
-    hil_data->lat = gps_msg->latitude * kDegreesToHil;
-    hil_data->lon = gps_msg->longitude * kDegreesToHil;
+    hil_data->lat_1e7deg = gps_msg->latitude * kDegreesToHil;
+    hil_data->lon_1e7deg = gps_msg->longitude * kDegreesToHil;
     hil_data->alt = gps_msg->altitude * kMetersToMm;
 
     hil_data->fix_type =
@@ -138,11 +138,11 @@ class HilListeners {
     ROS_ASSERT(hil_data);
 
     // MAVLINK HIL_GPS message measures GPS velocity in cm/s
-    hil_data->gps_vel = Eigen::Vector3i(ground_speed_msg->twist.linear.x,
+    hil_data->gps_vel_cm_per_s = Eigen::Vector3i(ground_speed_msg->twist.linear.x,
                                         ground_speed_msg->twist.linear.y,
                                         ground_speed_msg->twist.linear.z) * kMetersToCm;
 
-    hil_data->vel = hil_data->gps_vel.norm();
+    hil_data->vel_1e2m_per_s = hil_data->gps_vel_cm_per_s.norm();
   }
 
   /// \brief Callback for handling IMU messages.
@@ -154,7 +154,7 @@ class HilListeners {
 
     ROS_ASSERT(hil_data);
 
-    hil_data->acc = Eigen::Vector3f(imu_msg->linear_acceleration.x,
+    hil_data->acc_m_per_s2 = Eigen::Vector3f(imu_msg->linear_acceleration.x,
                                     imu_msg->linear_acceleration.y,
                                     imu_msg->linear_acceleration.z);
 
@@ -163,7 +163,7 @@ class HilListeners {
                                        imu_msg->orientation.y,
                                        imu_msg->orientation.z);
 
-    hil_data->gyro = Eigen::Vector3f(imu_msg->angular_velocity.x,
+    hil_data->gyro_rad_per_s = Eigen::Vector3f(imu_msg->angular_velocity.x,
                                      imu_msg->angular_velocity.y,
                                      imu_msg->angular_velocity.z);
   }
@@ -180,7 +180,7 @@ class HilListeners {
     // ROS magnetic field sensor message is in Tesla, while
     // MAVLINK HIL_SENSOR message measures magnetic field in Gauss.
     // 1 Tesla = 10000 Gauss
-    hil_data->mag = Eigen::Vector3f(mag_msg->magnetic_field.x,
+    hil_data->mag_G = Eigen::Vector3f(mag_msg->magnetic_field.x,
                                     mag_msg->magnetic_field.y,
                                     mag_msg->magnetic_field.z) * kTeslaToGauss;
   }
@@ -198,13 +198,13 @@ class HilListeners {
     // MAVLINK HIL_SENSOR message measures fluid pressure in millibar.
     // 1 Pascal = 0.01 millibar
     float pressure_mbar = pressure_msg->fluid_pressure * kPascalToMillibar;
-    hil_data->pressure_abs = pressure_mbar;
+    hil_data->pressure_abs_mBar = pressure_mbar;
 
     // From the following formula: p_stag - p_static = 0.5 * rho * v^2
     // HIL air speed is in cm/s and is converted to m/s for the purpose of
     // computing pressure.
-    hil_data->pressure_diff = 0.5 * kAirDensity_kg_per_m3 * hil_data->ind_airspeed *
-            hil_data->ind_airspeed * kPascalToMillibar /
+    hil_data->pressure_diff_mBar = 0.5 * kAirDensity_kg_per_m3 * hil_data->ind_airspeed_1e2m_per_s *
+            hil_data->ind_airspeed_1e2m_per_s * kPascalToMillibar /
             (kMetersToCm * kMetersToCm);
 
     hil_data->pressure_alt =
