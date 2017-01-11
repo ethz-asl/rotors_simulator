@@ -36,8 +36,8 @@ static const std::string kDefaultPressureSubTopic = "air_pressure";
 /// \param[in] rostime Time, in ROS format, to be converted.
 /// \return Time in microseconds.
 inline u_int64_t RosTimeToMicroseconds(const ros::Time& rostime) {
-  return (static_cast<u_int64_t>(rostime.nsec * 1e-3) +
-          static_cast<u_int64_t>(rostime.sec * 1e6));
+  return (static_cast<uint64_t>(rostime.nsec * 1e-3) +
+          static_cast<uint64_t>(rostime.sec * 1e6));
 }
 
 class HilInterface {
