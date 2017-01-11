@@ -29,6 +29,7 @@
 
 # Author: Stuart Glaser
 # Maintainer: William Woodall <william@osrfoundation.org>
+# This file converts .xacro files into .urdf files
 
 from __future__ import print_function
 
@@ -645,6 +646,7 @@ def open_output(output_filename):
         return open(output_filename, 'w')
 
 def main():
+    print('xarco.main() called.')
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], "ho:", ['deps', 'includes'])
     except getopt.GetoptError as err:
