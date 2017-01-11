@@ -39,7 +39,7 @@ HilSensorLevelInterface::HilSensorLevelInterface(const Eigen::Quaterniond& q_S_B
   pnh.param("pressure_topic", pressure_sub_topic, kDefaultPressureSubTopic);
 
   // Compute the desired interval between published GPS messages.
-  gps_interval_nsec_ = static_cast<u_int64_t>(kSecToNsec / gps_freq);
+  gps_interval_nsec_ = static_cast<uint64_t>(kSecToNsec / gps_freq);
 
   // Compute the rotation matrix to rotate data into NED frame
   q_S_B_ = q_S_B;
@@ -104,16 +104,16 @@ std::vector<mavros_msgs::Mavlink> HilSensorLevelInterface::CollectData() {
     // Fill in a MAVLINK HIL_GPS message and convert it to MAVROS format.
     hil_gps_msg_.time_usec = time_usec;
     hil_gps_msg_.fix_type = hil_data_.fix_type;
-    hil_gps_msg_.lat_1e7deg = hil_data_.lat_1e7deg;
-    hil_gps_msg_.lon_1e7deg = hil_data_.lon_1e7deg;
-    hil_gps_msg_.alt_mm = hil_data_.alt_mm;
-    hil_gps_msg_.eph_cm = hil_data_.eph_cm;
-    hil_gps_msg_.epv_cm = hil_data_.epv_cm;
-    hil_gps_msg_.vel_1e2m_per_s = hil_data_.vel_1e2m_per_s;
+    hil_gps_msg_.lat = hil_data_.lat_1e7deg;
+    hil_gps_msg_.lon = hil_data_.lon_1e7deg;
+    hil_gps_msg_.alt = hil_data_.alt_mm;
+    hil_gps_msg_.eph = hil_data_.eph_cm;
+    hil_gps_msg_.epv = hil_data_.epv_cm;
+    hil_gps_msg_.vel = hil_data_.vel_1e2m_per_s;
     hil_gps_msg_.vn = gps_vel.x();
     hil_gps_msg_.ve = gps_vel.y();
     hil_gps_msg_.vd = gps_vel.z();
-    hil_gps_msg_.cog_1e2deg = hil_data_.cog_1e2deg;
+    hil_gps_msg_.cog = hil_data_.cog_1e2deg;
     hil_gps_msg_.satellites_visible = hil_data_.satellites_visible;
 
     mavlink_hil_gps_t* hil_gps_msg_ptr = &hil_gps_msg_;
@@ -141,7 +141,7 @@ std::vector<mavros_msgs::Mavlink> HilSensorLevelInterface::CollectData() {
   hil_sensor_msg_.abs_pressure = hil_data_.pressure_abs_mBar;
   hil_sensor_msg_.diff_pressure = hil_data_.pressure_diff_mBar;
   hil_sensor_msg_.pressure_alt = hil_data_.pressure_alt;
-  hil_sensor_msg_.temperature_degC = hil_data_.temperature_degC;
+  hil_sensor_msg_.temperature = hil_data_.temperature_degC;
   hil_sensor_msg_.fields_updated = kAllFieldsUpdated;
 
   mavlink_hil_sensor_t* hil_sensor_msg_ptr = &hil_sensor_msg_;
