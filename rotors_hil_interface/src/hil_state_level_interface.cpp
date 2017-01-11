@@ -89,12 +89,12 @@ std::vector<mavros_msgs::Mavlink> HilStateLevelInterface::CollectData() {
   hil_state_qtrn_msg_.yawspeed = gyro.z();
   hil_state_qtrn_msg_.lat_1e7deg = hil_data_.lat_1e7deg;
   hil_state_qtrn_msg_.lon_1e7deg = hil_data_.lon_1e7deg;
-  hil_state_qtrn_msg_.alt = hil_data_.alt;
+  hil_state_qtrn_msg_.alt_mm = hil_data_.alt_mm;
   hil_state_qtrn_msg_.vx = gps_vel.x();
   hil_state_qtrn_msg_.vy = gps_vel.y();
   hil_state_qtrn_msg_.vz = gps_vel.z();
   hil_state_qtrn_msg_.ind_airspeed_1e2m_per_s = hil_data_.ind_airspeed_1e2m_per_s;
-  hil_state_qtrn_msg_.true_airspeed = hil_data_.true_airspeed;
+  hil_state_qtrn_msg_.true_airspeed_1e2m_per_s = hil_data_.true_airspeed_1e2m_per_s;
   hil_state_qtrn_msg_.xacc = acc.x() * kMetersToMm / kGravityMagnitude_m_per_s2;
   hil_state_qtrn_msg_.yacc = acc.y() * kMetersToMm / kGravityMagnitude_m_per_s2;
   hil_state_qtrn_msg_.zacc = acc.z() * kMetersToMm / kGravityMagnitude_m_per_s2;

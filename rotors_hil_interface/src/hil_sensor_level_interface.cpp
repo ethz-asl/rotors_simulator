@@ -106,8 +106,8 @@ std::vector<mavros_msgs::Mavlink> HilSensorLevelInterface::CollectData() {
     hil_gps_msg_.fix_type = hil_data_.fix_type;
     hil_gps_msg_.lat_1e7deg = hil_data_.lat_1e7deg;
     hil_gps_msg_.lon_1e7deg = hil_data_.lon_1e7deg;
-    hil_gps_msg_.alt = hil_data_.alt;
-    hil_gps_msg_.eph_mm = hil_data_.eph_mm;
+    hil_gps_msg_.alt_mm = hil_data_.alt_mm;
+    hil_gps_msg_.eph_cm = hil_data_.eph_cm;
     hil_gps_msg_.epv_cm = hil_data_.epv_cm;
     hil_gps_msg_.vel_1e2m_per_s = hil_data_.vel_1e2m_per_s;
     hil_gps_msg_.vn = gps_vel.x();

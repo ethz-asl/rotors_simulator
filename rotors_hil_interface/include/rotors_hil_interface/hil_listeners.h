@@ -53,32 +53,32 @@ static constexpr float kTeslaToGauss = 10000.0;
 struct HilData {
   HilData() :
       temperature_degC(kTemperature_C),
-      eph_mm(kHDOP),
+      eph_cm(kHDOP),
       epv_cm(kVDOP),
       cog_1e2deg(kUnknown),
       ind_airspeed_1e2m_per_s(0),
       satellites_visible(kSatellitesVisible) {}
 
-  Eigen::Quaterniond att;      // Attitude quaternion
-  Eigen::Vector3f acc_m_per_s2;         // Linear acceleration (m/s^2)
-  Eigen::Vector3f gyro_rad_per_s;        // Angular rate in body frame (rad / sec)
-  Eigen::Vector3f mag_G;         // Magnetic field (Gauss)
-  Eigen::Vector3i gps_vel_cm_per_s;     // GPS velocity in cm/s in earth-fixed NED frame
-  float pressure_abs_mBar;          // Absolute pressure in millibar
-  float pressure_diff_mBar;         // Differential pressure (airspeed) in millibar
-  float pressure_alt;          // Altitude calculated from pressure
-  float temperature_degC;           // Temperature in degrees celsius
+  Eigen::Quaterniond att;             // Attitude quaternion
+  Eigen::Vector3f acc_m_per_s2;       // Linear acceleration (m/s^2)
+  Eigen::Vector3f gyro_rad_per_s;     // Angular rate in body frame (rad / sec)
+  Eigen::Vector3f mag_G;              // Magnetic field (Gauss)
+  Eigen::Vector3i gps_vel_cm_per_s;   // GPS velocity in cm/s in earth-fixed NED frame
+  float pressure_abs_mBar;            // Absolute pressure in millibar
+  float pressure_diff_mBar;           // Differential pressure (airspeed) in millibar
+  float pressure_alt;                 // Altitude calculated from pressure
+  float temperature_degC;             // Temperature in degrees celsius
   uint32_t lat_1e7deg;                // Latitude (WGS84), in degrees * 1E7
   uint32_t lon_1e7deg;                // Longitude (WGS84), in degrees * 1E7
-  uint32_t alt;                // Altitude (AMSL, not WGS84), in meters * 1000 (positive for up)
-  uint16_t eph_mm;                // GPS HDOP horizontal dilution of position in cm (m*100). If unknown, set to: 65535
-  uint16_t epv_cm;                // GPS VDOP vertical dilution of position in cm (m*100). If unknown, set to: 65535
-  uint16_t vel_1e2m_per_s;                // GPS ground speed (m/s * 100). If unknown, set to: 65535
-  uint16_t cog;                // Course over ground (NOT heading, but direction of movement) in degrees * 100. If unknown, set to: 65535
-  uint16_t ind_airspeed;       // Indicated airspeed, expressed as m/s * 100
-  uint16_t true_airspeed;      // True airspeed, expressed as m/s * 100*/
-  uint8_t fix_type;            // < 0-1: no fix, 2: 2D fix, 3: 3D fix
-  uint8_t satellites_visible;  // Number of satellites visible. If unknown, set to 255
+  uint32_t alt_mm;                    // Altitude (AMSL, not WGS84), in meters * 1000 (positive for up)
+  uint16_t eph_cm;                    // GPS HDOP horizontal dilution of position in cm (m*100). If unknown, set to: 65535
+  uint16_t epv_cm;                    // GPS VDOP vertical dilution of position in cm (m*100). If unknown, set to: 65535
+  uint16_t vel_1e2m_per_s;            // GPS ground speed (m/s * 100). If unknown, set to: 65535
+  uint16_t cog_1e2deg;                // Course over ground (NOT heading, but direction of movement) in degrees * 100. If unknown, set to: 65535
+  uint16_t ind_airspeed_1e2m_per_s;   // Indicated airspeed, expressed as m/s * 100
+  uint16_t true_airspeed_1e2m_per_s;  // True airspeed, expressed as m/s * 100*/
+  uint8_t fix_type;                   // < 0-1: no fix, 2: 2D fix, 3: 3D fix
+  uint8_t satellites_visible;         // Number of satellites visible. If unknown, set to 255
 };
 
 class HilListeners {
@@ -105,7 +105,7 @@ class HilListeners {
 
     // MAVLINK HIL_STATE_QUATERNION message measured airspeed in cm/s.
     hil_data->ind_airspeed_1e2m_per_s = air_speed * kMetersToCm;
-    hil_data->true_airspeed = air_speed * kMetersToCm;
+    hil_data->true_airspeed_1e2m_per_s = air_speed * kMetersToCm;
   }
 
   /// \brief Callback for handling GPS messages.
@@ -121,7 +121,7 @@ class HilListeners {
     // while altitude is reported in mm.
     hil_data->lat_1e7deg = gps_msg->latitude * kDegreesToHil;
     hil_data->lon_1e7deg = gps_msg->longitude * kDegreesToHil;
-    hil_data->alt = gps_msg->altitude * kMetersToMm;
+    hil_data->alt_mm = gps_msg->altitude * kMetersToMm;
 
     hil_data->fix_type =
         (gps_msg->status.status > sensor_msgs::NavSatStatus::STATUS_NO_FIX) ?
