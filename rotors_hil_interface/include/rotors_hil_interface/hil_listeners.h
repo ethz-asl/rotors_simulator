@@ -28,10 +28,10 @@
 
 namespace rotors_hil {
 // Constants
-static constexpr float kAirDensity = 1.18;
-static constexpr float kGravityMagnitude = 9.8068;
-static constexpr float kStandardPressureMBar = 1013.25;
-static constexpr float kTemperature = 15.0;
+static constexpr float kAirDensity_kg_per_m3 = 1.18;
+static constexpr float kGravityMagnitude_m_per_s2 = 9.8068;
+static constexpr float kStandardPressure_MBar = 1013.25;
+static constexpr float kTemperature_C = 15.0;
 static constexpr int kFixNone = 0;
 static constexpr int kFix3D = 3;
 static constexpr int kHDOP = 100;
@@ -52,7 +52,7 @@ static constexpr float kTeslaToGauss = 10000.0;
 
 struct HilData {
   HilData() :
-      temperature(kTemperature),
+      temperature(kTemperature_C),
       eph(kHDOP),
       epv(kVDOP),
       cog(kUnknown),
@@ -203,12 +203,12 @@ class HilListeners {
     // From the following formula: p_stag - p_static = 0.5 * rho * v^2
     // HIL air speed is in cm/s and is converted to m/s for the purpose of
     // computing pressure.
-    hil_data->pressure_diff = 0.5 * kAirDensity * hil_data->ind_airspeed *
+    hil_data->pressure_diff = 0.5 * kAirDensity_kg_per_m3 * hil_data->ind_airspeed *
             hil_data->ind_airspeed * kPascalToMillibar /
             (kMetersToCm * kMetersToCm);
 
     hil_data->pressure_alt =
-        (1 - pow((pressure_mbar / kStandardPressureMBar), kPressureToAltExp)) *
+        (1 - pow((pressure_mbar / kStandardPressure_MBar), kPressureToAltExp)) *
             kPressureToAltMult * kFeetToMeters;
   }
 

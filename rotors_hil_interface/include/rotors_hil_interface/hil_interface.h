@@ -108,10 +108,10 @@ class HilSensorLevelInterface : public HilInterface {
   mavlink_hil_sensor_t hil_sensor_msg_;
 
   /// Interval between outgoing HIL_GPS messages.
-  u_int64_t gps_interval_nsec_;
+  uint64_t gps_interval_nsec_;
 
   /// Nanosecond portion of the last HIL_GPS message timestamp.
-  u_int64_t last_gps_pub_time_nsec_;
+  uint64_t last_gps_pub_time_nsec_;
 };
 
 class HilStateLevelInterface : public HilInterface {
