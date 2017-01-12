@@ -45,7 +45,7 @@
 
 #include <cstdint>
 #include <cmath>
-#include "geo_mag_declination.h"
+#include "rotors_gazebo_plugins/geo_mag_declination.h"
 
 /** set this always to the sampling in degrees for the table below */
 #define SAMPLING_RES		10.0f
