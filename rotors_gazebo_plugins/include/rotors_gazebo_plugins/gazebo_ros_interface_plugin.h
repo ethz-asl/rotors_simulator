@@ -158,8 +158,15 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   // ============================================ //
 
   transport::SubscriberPtr gz_connect_ros_to_gazebo_topic_sub_;
+
+  /// @brief    Subscribes to the provided ROS topic and publishes on the provided Gazebo topic (all info contained within the message).
+  /// @details  Will create a Gazebo publisher if one doesn't already exist.
   void GzConnectRosToGazeboTopicMsgCallback(GzConnectRosToGazeboTopicMsgPtr& gz_connect_ros_to_gazebo_topic_msg);
 
+  /// @brief    Finds the Gazebo publisher associated with the provided topic. If not found, a publisher for that
+  ///           topic is created.
+  template<typename T>
+  transport::PublisherPtr FindOrMakeGazeboPublisher(std::string topic);
 
   // ============================================ //
   // ===== GAZEBO->ROS CALLBACKS/CONVERTERS ===== //
