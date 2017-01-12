@@ -50,7 +50,7 @@ GazeboOdometryPlugin::~GazeboOdometryPlugin() {
 
 void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Store the pointer to the model
   model_ = _model;
@@ -192,7 +192,7 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
 // This gets called by the world update start event.
 void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
-//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   if(!pubs_and_subs_created_) {
     CreatePubsAndSubs();

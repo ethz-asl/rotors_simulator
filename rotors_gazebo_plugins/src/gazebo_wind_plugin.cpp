@@ -36,7 +36,7 @@ GazeboWindPlugin::~GazeboWindPlugin() {
 
 void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Store the pointer to the model.
   model_ = _model;
@@ -90,7 +90,7 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 // This gets called by the world update start event.
 void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Get the current simulation time.
   common::Time now = world_->GetSimTime();

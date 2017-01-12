@@ -34,7 +34,7 @@ OctomapFromGazeboWorld::~OctomapFromGazeboWorld() {
 void OctomapFromGazeboWorld::Load(physics::WorldPtr _parent,
                                   sdf::ElementPtr _sdf) {
 
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   world_ = _parent;
 
