@@ -284,7 +284,7 @@ transport::PublisherPtr GazeboRosInterfacePlugin::FindOrMakeGazeboPublisher(std:
     gz_publisher_ptr = gz_node_handle_->Advertise<T>(topic, 1);
   } else {
     gzdbg << "Gazebo publisher with topic = \"" << topic <<  "\" already exists, not creating another one." << std::endl;
-    gzerr << "Handling and already created publisher is not supported yet!" << std::endl;
+    gzerr << "Handling an already created publisher is not supported yet!" << std::endl;
   }
 
   return gz_publisher_ptr;
