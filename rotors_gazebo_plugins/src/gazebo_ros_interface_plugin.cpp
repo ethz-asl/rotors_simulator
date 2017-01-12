@@ -56,8 +56,8 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
-    gzerr << "[gazebo_imu_plugin] Please specify a robotNamespace.\n";
-  gzmsg << "Namespace is \"" << namespace_ << "\"." << std::endl;
+    gzerr << "Please specify a robotNamespace.\n";
+  gzdbg << "namespace_ = \"" << namespace_ << "\"." << std::endl;
 
   // Get Gazebo node handle
   gz_node_handle_ = transport::NodePtr(new transport::Node());

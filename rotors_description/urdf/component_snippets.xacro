@@ -265,8 +265,7 @@
   <!-- =============================================================== -->
   <!-- ==================== ROS INTERFACE MACRO ====================== -->
   <!-- =============================================================== -->
-  
-  <xacro:macro 
+  <!-- <xacro:macro 
   		name="ros_interface_plugin_macro"
   		params="namespace">
     <gazebo>
@@ -274,9 +273,11 @@
         <robotNamespace>${namespace}</robotNamespace>
       </plugin>
     </gazebo>
-  </xacro:macro>
+  </xacro:macro>-->
 
-  <!-- Macro to add the mavlink interface. -->
+  <!-- =============================================================== -->
+  <!-- ================== MAVLINK INTERFACE MACRO ==================== -->
+  <!-- =============================================================== -->
   <xacro:macro name="mavlink_interface_macro" 
     params="namespace mavlink_sub_topic imu_sub_topic mavlink_pub_topic 
       motors_speeds_pub_topic gps_update_freq rotor_count reference_magnetic_field_north 
