@@ -53,7 +53,7 @@ GazeboImuPlugin::~GazeboImuPlugin() {
 
 void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Store the pointer to the model
   model_ = _model;

@@ -37,7 +37,7 @@ GazeboMotorModel::~GazeboMotorModel() {
 void GazeboMotorModel::InitializeParams() {}
 
 void GazeboMotorModel::Publish() {
-//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
 //  turning_velocity_msg_.data = joint_->GetVelocity(0);
   turning_velocity_msg_.set_data(joint_->GetVelocity(0));
 
@@ -201,7 +201,7 @@ void GazeboMotorModel::CreatePubsAndSubs() {
 
 //void GazeboMotorModel::VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_velocities) {
 void GazeboMotorModel::ControlVelocityCallback(GzCommandMotorSpeedMsgPtr& command_motor_speed_msg) {
-//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
 //  ROS_ASSERT_MSG(rot_velocities->angular_velocities.size() > motor_number_,
 //                 "You tried to access index %d of the MotorSpeed message array which is of size %d.",
@@ -219,7 +219,7 @@ void GazeboMotorModel::ControlVelocityCallback(GzCommandMotorSpeedMsgPtr& comman
 }
 
 void GazeboMotorModel::WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg) {
-//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // TODO(burrimi): Transform velocity to world frame if frame_id is set to something else.
 //  wind_speed_W_.x = wind_speed->velocity.x;
@@ -231,7 +231,7 @@ void GazeboMotorModel::WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg) {
 }
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
-//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
   motor_rot_vel_ = joint_->GetVelocity(0);
   if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_)) {
     gzerr << "Aliasing on motor [" << motor_number_ << "] might occur. Consider making smaller simulation time steps or raising the rotor_velocity_slowdown_sim_ param.\n";

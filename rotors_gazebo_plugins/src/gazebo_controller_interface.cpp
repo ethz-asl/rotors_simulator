@@ -33,7 +33,7 @@ GazeboControllerInterface::~GazeboControllerInterface() {
 
 void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Store the pointer to the model.
   model_ = _model;
@@ -101,7 +101,7 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
 void GazeboControllerInterface::CreatePubsAndSubs() {
 
-//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr gz_connect_gazebo_to_ros_topic_pub =
@@ -148,7 +148,7 @@ void GazeboControllerInterface::CreatePubsAndSubs() {
 //void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::ActuatorsConstPtr& input_reference_msg) {
 void GazeboControllerInterface::CommandMotorCallback(GzActuatorsMsgPtr& actuators_msg) {
 
-//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
 //  input_reference_.resize(input_reference_msg->angular_velocities.size());
 //  for (int i = 0; i < input_reference_msg->angular_velocities.size(); ++i) {
