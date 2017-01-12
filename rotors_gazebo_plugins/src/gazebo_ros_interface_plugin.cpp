@@ -78,7 +78,7 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
 
   // Subscribe to the "connect_gazebo_to_ros_topic" topic
   std::string connect_gazebo_to_ros_topic_subtopic = "connect_gazebo_to_ros_topic";
-//  gzmsg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << connect_gazebo_to_ros_topic_subtopic << "\"." << std::endl;
+//  gzdbg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << connect_gazebo_to_ros_topic_subtopic << "\"." << std::endl;
   gz_connect_gazebo_to_ros_topic_sub_ = gz_node_handle_->Subscribe(
       connect_gazebo_to_ros_topic_subtopic, &GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback, this);
 
@@ -87,7 +87,7 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   // ============================================ //
 
   std::string connect_ros_to_gazebo_topic_subtopic = "connect_ros_to_gazebo_topic";
-//  gzmsg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << connect_ros_to_gazebo_topic_subtopic << "\"." << std::endl;
+//  gzdbg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << connect_ros_to_gazebo_topic_subtopic << "\"." << std::endl;
   gz_connect_ros_to_gazebo_topic_sub_ = gz_node_handle_->Subscribe(
       connect_ros_to_gazebo_topic_subtopic, &GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback, this);
 
