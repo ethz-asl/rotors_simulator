@@ -164,7 +164,7 @@ void GazeboRosInterfacePlugin::ConnectHelper(
 void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
     GzConnectGazeboToRosTopicMsgPtr& gz_connect_gazebo_to_ros_topic_msg) {
 
-//  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+  gzdbg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   const std::string gazeboTopicName = gz_connect_gazebo_to_ros_topic_msg->gazebo_topic();
   const std::string rosTopicName = gz_connect_gazebo_to_ros_topic_msg->ros_topic();
@@ -273,10 +273,27 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
 
 }
 
+template<typename T>
+transport::PublisherPtr GazeboRosInterfacePlugin::FindOrMakeGazeboPublisher(std::string topic) {
+
+  gzdbg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
+  transport::PublisherPtr gz_publisher_ptr;
+
+  if(gazebo::transport::TopicManager::Instance()->FindPublication(topic) == nullptr) {
+    gz_publisher_ptr = gz_node_handle_->Advertise<T>(topic, 1);
+  } else {
+    gzdbg << "Gazebo publisher with topic = \"" << topic <<  "\" already exists, not creating another one." << std::endl;
+    gzerr << "Handling and already created publisher is not supported yet!" << std::endl;
+  }
+
+  return gz_publisher_ptr;
+}
+
 void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
     GzConnectRosToGazeboTopicMsgPtr& gz_connect_ros_to_gazebo_topic_msg) {
 
-  gzmsg << __PRETTY_FUNCTION__ << " called." << std::endl;
+  gzdbg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   static std::vector<ros::Subscriber> ros_subscribers;
 
@@ -286,8 +303,8 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       // Create Gazebo publisher
       // (we don't need to manually save a reference for the Gazebo publisher because
       // boost::bind will do that for us)
-      gazebo::transport::PublisherPtr gz_publisher_ptr = gz_node_handle_->Advertise<sensor_msgs::msgs::Actuators>(
-          gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+        gazebo::transport::PublisherPtr gz_publisher_ptr =
+            FindOrMakeGazeboPublisher<sensor_msgs::msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic());
 
       // Create ROS subscriber
       ros::Subscriber ros_subscriber = ros_node_handle_->subscribe<mav_msgs::Actuators>(

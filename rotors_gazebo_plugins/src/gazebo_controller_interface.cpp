@@ -114,12 +114,12 @@ void GazeboControllerInterface::CreatePubsAndSubs() {
   // ============================================ //
   // === ACTUATORS (MOTOR VELOCITY) MSG SETUP === //
   // ============================================ //
-//  motor_velocity_reference_pub_ = node_handle_->advertise<mav_msgs::Actuators>(motor_velocity_reference_pub_topic_, 1);
-  gzmsg << "GazeboControllerInterface creating publisher on \"" << motor_velocity_reference_pub_topic_ << "\"." << std::endl;
+  gzdbg << "GazeboControllerInterface creating Gazebo publisher on \"" << node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_ << "\"." << std::endl;
   motor_velocity_reference_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Actuators>(
       node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_,
       1);
 
+  // Connect to ROS
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(motor_velocity_reference_pub_topic_);
@@ -129,20 +129,17 @@ void GazeboControllerInterface::CreatePubsAndSubs() {
   // ============================================ //
   // ===== ROS->GAZEBO MOTOR SPEED MSG SETUP ==== //
   // ============================================ //
-
-  //  cmd_motor_sub_ = node_handle_->subscribe(command_motor_speed_sub_topic_, 1,
-  //                                           &GazeboControllerInterface::CommandMotorCallback,
-  //                                           this);
-  gzmsg << "Subscribing to Gazebo topic \"" << command_motor_speed_sub_topic_ << "\"." << std::endl;
+  gzdbg << "Subscribing to Gazebo topic \"" << "~/" + model_->GetName() + "/" + command_motor_speed_sub_topic_ << "\"." << std::endl;
   cmd_motor_sub_ = node_handle_->Subscribe(
-      command_motor_speed_sub_topic_,
+      "~/" + model_->GetName() + "/" + command_motor_speed_sub_topic_,
       &GazeboControllerInterface::CommandMotorCallback,
       this);
 
+  // Connect to ROS
   gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
   connect_ros_to_gazebo_topic_msg.set_ros_topic(command_motor_speed_sub_topic_);
   // Note: This Gazebo topic name is not relative to the model!!!
-  connect_ros_to_gazebo_topic_msg.set_gazebo_topic(command_motor_speed_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + command_motor_speed_sub_topic_);
   connect_ros_to_gazebo_topic_msg.set_msgtype(gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
   gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
 
