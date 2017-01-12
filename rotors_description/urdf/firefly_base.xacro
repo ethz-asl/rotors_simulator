@@ -57,9 +57,6 @@
       rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}" 
       wait_to_record_bag="$(arg wait_to_record_bag)" />
   </xacro:if>
-  
-  <!-- Create a interface to send/receive messages to the outside world -->
-  <!--<xacro:msg_interface_plugin />-->
 
 </robot>
 
