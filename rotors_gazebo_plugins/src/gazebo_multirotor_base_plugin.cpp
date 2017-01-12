@@ -138,10 +138,10 @@ void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
   // ============================================ //
   // =========== ACTUATORS MSG SETUP ============ //
   // ============================================ //
-  motor_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Actuators>(actuators_pub_topic_, 10);
-//  gzmsg << "actuators_pub_topic_ = \"" << actuators_pub_topic_ << "\"." << std::endl;
+  motor_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Actuators>("~/" + model_->GetName() + "/" + actuators_pub_topic_, 10);
+//  gzdbg << "actuators_pub_topic_ = \"" << actuators_pub_topic_ << "\"." << std::endl;
 
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(actuators_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + actuators_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(actuators_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);
   connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
@@ -149,10 +149,10 @@ void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
   // ============================================ //
   // ========== JOINT STATE MSG SETUP =========== //
   // ============================================ //
-  joint_state_pub_ = node_handle_->Advertise<sensor_msgs::msgs::JointState>(joint_state_pub_topic_, 1);
-  gzmsg << "joint_state_pub_topic = \"" << joint_state_pub_topic_ << "\"." << std::endl;
+  joint_state_pub_ = node_handle_->Advertise<sensor_msgs::msgs::JointState>("~/" + model_->GetName() + "/" + joint_state_pub_topic_, 1);
+//  gzdbg << "joint_state_pub_topic = \"" << joint_state_pub_topic_ << "\"." << std::endl;
 
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(joint_state_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + joint_state_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(joint_state_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::JOINT_STATE);
   connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);

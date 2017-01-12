@@ -493,7 +493,8 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
   // ============================================ //
 //  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << pose_pub_topic_ << "\"." << std::endl;
   pose_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Pose>(
-      "~/" + model_->GetName() + "/" + pose_pub_topic_, 1);
+      "~/" + model_->GetName() + "/" + pose_pub_topic_,
+      1);
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + pose_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(pose_pub_topic_);
