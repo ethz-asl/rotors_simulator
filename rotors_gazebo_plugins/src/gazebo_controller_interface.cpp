@@ -49,7 +49,6 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
     gzerr << "[gazebo_motor_model] Please specify a robotNamespace.\n";
   }
 
-//  node_handle_ = new ros::NodeHandle(namespace_);
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
   node_handle_->Init(namespace_);
 
