@@ -257,7 +257,8 @@ endif()
 
 if (BUILD_MAVLINK_INTERFACE)
   # Should this be SHARED or not???
-  add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp)
+  # Note that this library includes TWO .cpp files.
+  add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/geo_mag_declination.cpp)
   target_link_libraries(rotors_gazebo_mavlink_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${mav_msgs})
   #add_dependencies(rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
   message(STATUS "Built mavlink_interface_plugin")
