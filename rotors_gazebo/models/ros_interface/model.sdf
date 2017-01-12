@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="ros_interface">
+    <static>true</static>
+  </model>
+</sdf>
