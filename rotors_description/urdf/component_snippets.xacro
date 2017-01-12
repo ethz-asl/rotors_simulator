@@ -268,20 +268,10 @@
   
   <xacro:macro 
   		name="ros_interface_plugin_macro"
-  		params="namespace actuators_sub_topic imu_sub_topic joint_state_sub_topic magnetic_field_sub_topic nav_sat_fix_sub_topic odometry_sub_topic">
+  		params="namespace">
     <gazebo>
       <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so">
         <robotNamespace>${namespace}</robotNamespace>
-        <commandAttitudeThrustSubTopic>command/attitude</commandAttitudeThrustSubTopic>
-        <commandRateThrustSubTopic>command/rate</commandRateThrustSubTopic>
-        <commandMotorSpeedSubTopic>command/motor_speed</commandMotorSpeedSubTopic>
-        <actuatorsSubTopic>${actuators_sub_topic}</actuatorsSubTopic>
-        <imuSubTopic>${imu_sub_topic}</imuSubTopic>
-        <jointStateSubTopic>${joint_state_sub_topic}</jointStateSubTopic>
-        <magneticFieldSubTopic>${magnetic_field_sub_topic}</magneticFieldSubTopic>
-        <navSatFixSubTopic>${nav_sat_fix_sub_topic}</navSatFixSubTopic>
-        <odometrySubTopic>${odometry_sub_topic}</odometrySubTopic>
-        <motorSpeedCommandPubTopic>gazebo/command/motor_speed</motorSpeedCommandPubTopic>
       </plugin>
     </gazebo>
   </xacro:macro>
