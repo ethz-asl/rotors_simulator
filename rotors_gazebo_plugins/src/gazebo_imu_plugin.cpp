@@ -363,13 +363,11 @@ void GazeboImuPlugin::CreatePubsAndSubs() {
   // ============================================ //
   // =============== IMU MSG SETUP ============== //
   // ============================================ //
-  // The tilde (~) instructs gazebo to create the topic name relative to the parent
-  // model. e.g. if this IMU was mounted on a firefly, the full topic path would be:
-  // /gazebo/firefly/imu_topic_name
-  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>(node_handle_->GetTopicNamespace() + "/" + imu_topic_, 1);
+
+  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>("~/" + model_->GetName() + "/" + imu_topic_, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + imu_topic_);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + imu_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(imu_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::IMU);
   connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
