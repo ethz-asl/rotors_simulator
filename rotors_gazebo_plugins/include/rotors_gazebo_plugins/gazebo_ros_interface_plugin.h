@@ -131,20 +131,14 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   /// @brief  Handle for the ROS node.
   ros::NodeHandle* ros_node_handle_;
 
-
-  std::string link_name_;
-
-
-  // Pointer to the world
+  /// @brief  Pointer to the world.
   physics::WorldPtr world_;
-  // Pointer to the model
-  physics::ModelPtr model_;
-  // Pointer to the link
-//  physics::LinkPtr link_;
-  // Pointer to the update event connection
-  event::ConnectionPtr updateConnection_;
 
-  common::Time last_time_;
+  /// @brief  Pointer to the model.
+  physics::ModelPtr model_;
+
+  /// @brief  Pointer to the update event connection.
+  event::ConnectionPtr updateConnection_;
 
   // ============================================ //
   // ====== CONNECT GAZEBO TO ROS MESSAGES ====== //

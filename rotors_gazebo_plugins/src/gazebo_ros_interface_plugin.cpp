@@ -66,18 +66,6 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   // Get ROS node handle
   ros_node_handle_ = new ros::NodeHandle(namespace_);
 
-//  if (_sdf->HasElement("linkName"))
-//    link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
-//  else
-//    gzerr << "[gazebo_imu_plugin] Please specify a linkName.\n";
-//  // Get the pointer to the link
-//  link_ = model_->GetLink(link_name_);
-//  if (link_ == NULL)
-//    gzthrow("[gazebo_imu_plugin] Couldn't find specified link \"" << link_name_ << "\".");
-
-
-  last_time_ = world_->GetSimTime();
-
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   this->updateConnection_ =
