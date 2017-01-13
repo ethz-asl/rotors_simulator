@@ -27,7 +27,7 @@
 #include "gazebo/sensors/RaySensor.hh"
 #include "gazebo/util/system.hh"
 
-#include "lidar.pb.h"
+#include "Lidar.pb.h"
 
 namespace gazebo
 {

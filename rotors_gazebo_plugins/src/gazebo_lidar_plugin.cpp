@@ -20,7 +20,7 @@
  */
 
 #include "gazebo/physics/physics.hh"
-#include "gazebo_lidar_plugin.h"
+#include "rotors_gazebo_plugins/gazebo_lidar_plugin.h"
 
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
