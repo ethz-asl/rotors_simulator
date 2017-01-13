@@ -15,7 +15,7 @@
  *
 */
 
-#include "gazebo_geotagged_images_plugin.h"
+#include "rotors_gazebo_plugins/gazebo_geotagged_images_plugin.h"
 
 #include <math.h>
 #include <string>
