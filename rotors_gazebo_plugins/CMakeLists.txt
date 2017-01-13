@@ -277,6 +277,17 @@ if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_odometry_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
+#===================================== OPTICAL FLOW PLUGIN ======================================//
+# Since the optical flow plugin depends on external code (PX4/OpticalFlow), this is
+# only conditionally built
+if(BUILD_OPTICAL_FLOW_PLUGIN)
+  add_library(rotors_gazebo_optical_flow_plugin src/gazebo_optical_flow_plugin.cpp)
+  target_link_libraries(rotors_gazebo_optical_flow_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+  if (NOT NO_ROS)
+    add_dependencies(rotors_gazebo_optical_flow_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+endif()
+
 #===================================== ROS INTERFACE PLUGIN =====================================//
 # This entire plugin is only built if ROS is a dependency
 if (NOT NO_ROS)
@@ -336,6 +347,15 @@ if (BUILD_MAVLINK_INTERFACE)
   install(
     TARGETS
       rotors_gazebo_mavlink_interface
+    DESTINATION ${BIN_DESTINATION}
+    LIBRARY DESTINATION ${LIB_DESTINATION}
+  )
+endif()
+
+if(BUILD_OPTICAL_FLOW_PLUGIN)
+  install(
+    TARGETS
+      rotors_gazebo_optical_flow_plugin
     DESTINATION ${BIN_DESTINATION}
     LIBRARY DESTINATION ${LIB_DESTINATION}
   )
