@@ -226,7 +226,7 @@ if (NOT NO_ROS)
 endif()
 
 #======================================== LIDAR PLUGIN ==========================================//
-add_library(rotors_gazebo_lidar_plugin src/gazebo_lidar_plugin.cpp)
+add_library(rotors_gazebo_lidar_plugin SHARED src/gazebo_lidar_plugin.cpp)
 target_link_libraries(rotors_gazebo_lidar_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_lidar_plugin ${catkin_EXPORTED_TARGETS})
