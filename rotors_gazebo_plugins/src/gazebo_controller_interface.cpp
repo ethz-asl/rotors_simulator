@@ -42,6 +42,10 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 
   namespace_.clear();
 
+  //==============================================//
+  //========== READ IN PARAMS FROM SDF ===========//
+  //==============================================//
+
   if (_sdf->HasElement("robotNamespace")) {
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   }
@@ -105,11 +109,11 @@ void GazeboControllerInterface::CreatePubsAndSubs() {
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr gz_connect_gazebo_to_ros_topic_pub =
-      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
+      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
 
   // Create temporary "ConnectRosToGazeboTopic" publisher and message
   gazebo::transport::PublisherPtr gz_connect_ros_to_gazebo_topic_pub =
-      node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("connect_ros_to_gazebo_topic", 1);
+      node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("~/" + kConnectRosToGazeboSubtopic, 1);
 
   // ============================================ //
   // === ACTUATORS (MOTOR VELOCITY) MSG SETUP === //
