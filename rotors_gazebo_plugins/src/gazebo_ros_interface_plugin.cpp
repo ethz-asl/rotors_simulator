@@ -25,7 +25,7 @@
 namespace gazebo {
 
 GazeboRosInterfacePlugin::GazeboRosInterfacePlugin()
-    : ModelPlugin(),
+    : WorldPlugin(),
       gz_node_handle_(0),
       ros_node_handle_(0),
       ros_actuators_msg_(new mav_msgs::Actuators)
@@ -38,13 +38,15 @@ GazeboRosInterfacePlugin::~GazeboRosInterfacePlugin() {
 }
 
 
-void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+//void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf) {
 
   gzdbg << __FUNCTION__ << " called." << std::endl;
 
   // Store the pointer to the model
-  model_ = _model;
-  world_ = model_->GetWorld();
+//  model_ = _model;
+//  world_ = model_->GetWorld();
+  world_ = _world;
 
   // default params
   namespace_.clear();
@@ -58,10 +60,12 @@ void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   else
     gzerr << "Please specify a robotNamespace.\n";
   gzdbg << "namespace_ = \"" << namespace_ << "\"." << std::endl;
+  namespace_ = "firefly";
 
   // Get Gazebo node handle
   gz_node_handle_ = transport::NodePtr(new transport::Node());
   gz_node_handle_->Init(namespace_);
+//  gz_node_handle_->Init();
 
   // Get ROS node handle
   ros_node_handle_ = new ros::NodeHandle(namespace_);
@@ -110,7 +114,7 @@ struct ConnectHelperStorage {
   /// @brief    This is what gets passed into the Gazebo Subscribe method as a callback, and hence can only
   ///           have one parameter (note boost::bind() does not work with the current Gazebo Subscribe() definitions).
   void callback (const boost::shared_ptr<M const> & msg_ptr) {
-    //gzmsg << "callback() called." << std::endl;
+    //gzdbg << "callback() called." << std::endl;
     (ptr->*fp)(msg_ptr, ros_publisher);
   }
 
@@ -130,13 +134,13 @@ void GazeboRosInterfacePlugin::ConnectHelper(
   static std::map< std::string, ConnectHelperStorage<M> > callback_map;
 
   // Create ROS publisher
-//  gzmsg << "GazeboRosInterfacePlugin publishing to ROS topic \"" << rosTopicName << "\"." << std::endl;
+//  gzdbg << "GazeboRosInterfacePlugin publishing to ROS topic \"" << rosTopicName << "\"." << std::endl;
   ros::Publisher ros_publisher = ros_node_handle_->advertise<N>(rosTopicName, 1);
 
   // @todo Handle collision error
   auto callback_entry = callback_map.emplace(gazeboTopicName, ConnectHelperStorage<M>{ptr, fp, ros_publisher});
 
-//  gzmsg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << gazeboTopicName << "\"."<< std::endl;
+//  gzdbg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << gazeboTopicName << "\"."<< std::endl;
   gazebo::transport::SubscriberPtr subscriberPtr;
   subscriberPtr = gz_node_handle->Subscribe(
       gazeboTopicName,
@@ -495,7 +499,7 @@ void GazeboRosInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fi
 }
 
 void GazeboRosInterfacePlugin::GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odometry_msg, ros::Publisher ros_publisher) {
-//  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the Odometry message onto ROS
@@ -538,7 +542,7 @@ void GazeboRosInterfacePlugin::GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odomet
   }
 
   // Publish onto ROS framework
-//  gzmsg << "Publishing Odometry message to ROS framework..." << std::endl;
+//  gzdbg << "Publishing Odometry message to ROS framework..." << std::endl;
   ros_publisher.publish(ros_odometry_msg_);
 
 }
@@ -589,7 +593,7 @@ void GazeboRosInterfacePlugin::RosActuatorsMsgCallback(
     const mav_msgs::ActuatorsConstPtr& ros_actuators_msg_ptr,
     gazebo::transport::PublisherPtr gz_publisher_ptr) {
 
-//  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Convert ROS message to Gazebo message
 
@@ -604,7 +608,7 @@ void GazeboRosInterfacePlugin::RosActuatorsMsgCallback(
   }
 
   // Publish to Gazebo
-//  gzmsg << "Publishing to gazebo topic \"" << gz_publisher_ptr->GetTopic() << std::endl;
+//  gzdbg << "Publishing to gazebo topic \"" << gz_publisher_ptr->GetTopic() << std::endl;
   gz_publisher_ptr->Publish(gz_actuators_msg);
 }
 
@@ -612,7 +616,7 @@ void GazeboRosInterfacePlugin::RosCommandMotorSpeedMsgCallback(
     const mav_msgs::ActuatorsConstPtr& ros_actuators_msg_ptr,
     gazebo::transport::PublisherPtr gz_publisher_ptr) {
 
-//  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Convert ROS message to Gazebo message
 
@@ -627,7 +631,7 @@ void GazeboRosInterfacePlugin::RosCommandMotorSpeedMsgCallback(
   }
 
   // Publish to Gazebo
-//  gzmsg << "Publishing to gazebo topic \"" << gz_publisher_ptr->GetTopic() << std::endl;
+//  gzdbg << "Publishing to gazebo topic \"" << gz_publisher_ptr->GetTopic() << std::endl;
   gz_publisher_ptr->Publish(gz_command_motor_speed_msg);
 }
 
@@ -657,6 +661,7 @@ void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Do nothing
 }
 
-GZ_REGISTER_MODEL_PLUGIN(GazeboRosInterfacePlugin);
+//GZ_REGISTER_MODEL_PLUGIN(GazeboRosInterfacePlugin);
+GZ_REGISTER_WORLD_PLUGIN(GazeboRosInterfacePlugin);
 
 } // namespace gazebo
