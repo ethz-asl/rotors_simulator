@@ -90,7 +90,7 @@ typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
 
 //! @brief    Message interface plugin for Gazebo.
 //! @details  Interfaces to both ROS and MAVlink.
-class GazeboRosInterfacePlugin : public ModelPlugin {
+class GazeboRosInterfacePlugin : public WorldPlugin {
  public:
 
   GazeboRosInterfacePlugin();
@@ -105,7 +105,9 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   void Publish();
 
  protected:
-  void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+
+//  void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+  void Load(physics::WorldPtr _world, sdf::ElementPtr _sdf);
 
   /// @brief  	This gets called by the world update start event.
   /// @details	Calculates IMU parameters and then publishes one IMU message.
@@ -135,7 +137,7 @@ class GazeboRosInterfacePlugin : public ModelPlugin {
   physics::WorldPtr world_;
 
   /// @brief  Pointer to the model.
-  physics::ModelPtr model_;
+//  physics::ModelPtr model_;
 
   /// @brief  Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
