@@ -225,6 +225,13 @@ if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
+#======================================== LIDAR PLUGIN ==========================================//
+add_library(rotors_gazebo_lidar_plugin src/gazebo_lidar_plugin.cpp)
+target_link_libraries(rotors_gazebo_lidar_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_lidar_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+
 #===================================== MAGNETOMETER PLUGIN ======================================//
 add_library(rotors_gazebo_magnetometer_plugin src/gazebo_magnetometer_plugin.cpp)
 target_link_libraries(rotors_gazebo_magnetometer_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
@@ -304,6 +311,7 @@ install(
     gazebo_geotagged_images_plugin
     rotors_gazebo_gps_plugin
     rotors_gazebo_imu_plugin
+    rotors_gazebo_lidar_plugin
     rotors_gazebo_magnetometer_plugin
     rotors_gazebo_motor_model
     rotors_gazebo_multirotor_base_plugin
