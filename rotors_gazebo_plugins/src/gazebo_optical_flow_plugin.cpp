@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2012-2015 Open Source Robotics Foundation
  *
@@ -21,7 +22,7 @@
 #endif
 
 #include "gazebo/sensors/DepthCameraSensor.hh"
-#include "gazebo_opticalFlow_plugin.h"
+#include <rotors_gazebo_plugins/gazebo_optical_flow_plugin.h>
 
 #include <highgui.h>
 #include <math.h>

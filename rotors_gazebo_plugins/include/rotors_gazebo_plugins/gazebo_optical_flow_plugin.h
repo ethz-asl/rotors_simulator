@@ -28,7 +28,7 @@
 #include "gazebo/transport/transport.hh"
 #include "gazebo/msgs/msgs.hh"
 
-#include "opticalFlow.pb.h"
+#include "OpticalFlow.pb.h"
 
 #include <opencv2/opencv.hpp>
 #include <iostream>
