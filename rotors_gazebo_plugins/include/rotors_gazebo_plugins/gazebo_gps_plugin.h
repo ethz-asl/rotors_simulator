@@ -70,12 +70,11 @@ class GazeboGpsPlugin : public SensorPlugin {
   //ros::NodeHandle* node_handle_;
   gazebo::transport::NodePtr node_handle_;
 
-  //ros::Publisher gps_pub_;
   gazebo::transport::PublisherPtr gz_gps_pub_;
 
-  //ros::Publisher ground_speed_pub_;
   gazebo::transport::PublisherPtr gz_ground_speed_pub_;
 
+  //===== VARIABLES READ FROM SDF FILE =====//
   std::string gps_topic_;
   std::string ground_speed_topic_;
 

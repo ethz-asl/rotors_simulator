@@ -358,7 +358,7 @@ void GazeboImuPlugin::CreatePubsAndSubs() {
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
-        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
+        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
 
   // ============================================ //
   // =============== IMU MSG SETUP ============== //

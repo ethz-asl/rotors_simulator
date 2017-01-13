@@ -60,6 +60,8 @@ void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _s
   else
     gzerr << "Please specify a robotNamespace.\n";
   gzdbg << "namespace_ = \"" << namespace_ << "\"." << std::endl;
+
+  /// @todo Fix this hack!!! Should not need this namespace set to firefly.
   namespace_ = "firefly";
 
   // Get Gazebo node handle
@@ -80,20 +82,19 @@ void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _s
   // === CONNECT GAZEBO TO ROS MESSAGES SETUP === //
   // ============================================ //
 
-  // Subscribe to the "connect_gazebo_to_ros_topic" topic
-  std::string connect_gazebo_to_ros_topic_subtopic = "connect_gazebo_to_ros_topic";
-//  gzdbg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << connect_gazebo_to_ros_topic_subtopic << "\"." << std::endl;
   gz_connect_gazebo_to_ros_topic_sub_ = gz_node_handle_->Subscribe(
-      connect_gazebo_to_ros_topic_subtopic, &GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback, this);
+      "~/" + kConnectGazeboToRosSubtopic,
+      &GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback,
+      this);
 
   // ============================================ //
   // === CONNECT ROS TO GAZEBO MESSAGES SETUP === //
   // ============================================ //
 
-  std::string connect_ros_to_gazebo_topic_subtopic = "connect_ros_to_gazebo_topic";
-//  gzdbg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << connect_ros_to_gazebo_topic_subtopic << "\"." << std::endl;
   gz_connect_ros_to_gazebo_topic_sub_ = gz_node_handle_->Subscribe(
-      connect_ros_to_gazebo_topic_subtopic, &GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback, this);
+      "~/" + kConnectRosToGazeboSubtopic,
+      &GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback,
+      this);
 
 }
 

@@ -84,6 +84,7 @@ class GazeboControllerInterface : public ModelPlugin {
   // called.
   Eigen::VectorXd input_reference_;
 
+  //===== VARIABLES READ FROM SDF FILE =====//
   std::string namespace_;
   std::string motor_velocity_reference_pub_topic_;
   std::string command_motor_speed_sub_topic_;

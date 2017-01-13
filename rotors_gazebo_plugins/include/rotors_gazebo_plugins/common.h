@@ -23,13 +23,15 @@
 
 #include <Eigen/Dense>
 #include <gazebo/gazebo.hh>
-//#include <mav_msgs/default_topics.h>
 
 namespace gazebo {
 
 // Default values
 static const std::string kDefaultNamespace = "";
 static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
+
+static const std::string kConnectGazeboToRosSubtopic = "connect_gazebo_to_ros_subtopic";
+static const std::string kConnectRosToGazeboSubtopic = "connect_ros_to_gazebo_subtopic";
 
 /**
  * \brief Obtains a parameter from sdf.

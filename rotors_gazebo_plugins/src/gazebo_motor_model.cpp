@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,12 +148,12 @@ void GazeboMotorModel::CreatePubsAndSubs() {
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr gz_connect_gazebo_to_ros_topic_pub =
-      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
+      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
   // Create temporary "ConnectRosToGazeboTopic" publisher and message
   gazebo::transport::PublisherPtr gz_connect_ros_to_gazebo_topic_pub =
-      node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("connect_ros_to_gazebo_topic", 1);
+      node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("~/" + kConnectRosToGazeboSubtopic, 1);
   gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
 
   // ============================================ //

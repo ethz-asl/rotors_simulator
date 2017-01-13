@@ -42,6 +42,11 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   world_ = physics::get_world(parent_sensor_->GetWorldName());
 #endif
 
+
+  //==============================================//
+  //========== READ IN PARAMS FROM SDF ===========//
+  //==============================================//
+
   // Retrieve the necessary parameters.
   std::string node_namespace;
   std::string link_name;
@@ -51,7 +56,7 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   else
     gzerr << "[gazebo_gps_plugin] Please specify a robotNamespace.\n";
 
-  //node_handle_ = new ros::NodeHandle(node_namespace);
+
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
   node_handle_->Init(node_namespace);
 
@@ -220,7 +225,7 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
-        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("connect_gazebo_to_ros_topic", 1);
+        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
