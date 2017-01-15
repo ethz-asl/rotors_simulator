@@ -45,7 +45,7 @@
             <stddev>0.001</stddev>
           </noise>
         </camera>
-        <plugin name="opticalflow_plugin" filename="libgazebo_opticalFlow_plugin.so">
+        <plugin name="opticalflow_plugin" filename="librotors_gazebo_optical_flow_plugin.so">
             <robotNamespace></robotNamespace>
         </plugin>
       </sensor>
