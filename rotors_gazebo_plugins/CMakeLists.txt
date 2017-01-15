@@ -288,7 +288,7 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   message(STATUS "klt_feature_tracker_INCLUDE_DIRS = ${klt_feature_tracker_INCLUDE_DIRS}")
   set(OpticalFlow_LIBS "OpticalFlow")
   
-  add_library(rotors_gazebo_optical_flow_plugin src/gazebo_optical_flow_plugin.cpp)
+  add_library(rotors_gazebo_optical_flow_plugin SHARED src/gazebo_optical_flow_plugin.cpp)
   target_link_libraries(rotors_gazebo_optical_flow_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   if (NOT NO_ROS)
     add_dependencies(rotors_gazebo_optical_flow_plugin ${catkin_EXPORTED_TARGETS})
