@@ -281,8 +281,10 @@ endif()
 # Since the optical flow plugin depends on external code (PX4/OpticalFlow), this is
 # only conditionally built
 if(BUILD_OPTICAL_FLOW_PLUGIN)
-  MESSAGE(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
+  # TODO The path to the optical flow repo should not be referenced here!
+  # (pass in path as variable instead?)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../OpticalFlow OpticalFlow)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../OpticalFlow/include)
   set(OpticalFlow_LIBS "OpticalFlow")
   add_library(rotors_gazebo_optical_flow_plugin src/gazebo_optical_flow_plugin.cpp)
   target_link_libraries(rotors_gazebo_optical_flow_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
