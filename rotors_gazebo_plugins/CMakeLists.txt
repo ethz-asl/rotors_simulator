@@ -283,10 +283,9 @@ endif()
 if(BUILD_OPTICAL_FLOW_PLUGIN)
   # TODO The path to the optical flow repo should not be referenced here!
   # (pass in path as variable instead?)
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../OpticalFlow OpticalFlow)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../OpticalFlow/include ${klt_feature_tracker_INCLUDE_DIRS})
-  message(STATUS "klt_feature_tracker_INCLUDE_DIRS = ${klt_feature_tracker_INCLUDE_DIRS}")
-  set(OpticalFlow_LIBS "OpticalFlow")
+  find_package(OpticalFlow REQUIRED)
+  message(STATUS "OpticalFlow_INCLUDE_DIRS = ${OpticalFlow_INCLUDE_DIRS}")
+  #set(OpticalFlow_LIBS "OpticalFlow")
   
   add_library(rotors_gazebo_optical_flow_plugin SHARED src/gazebo_optical_flow_plugin.cpp)
   target_link_libraries(rotors_gazebo_optical_flow_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
