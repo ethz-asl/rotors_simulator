@@ -282,18 +282,14 @@ endif()
 # Since the optical flow plugin depends on external code (PX4/OpticalFlow), this is
 # only conditionally built
 if(BUILD_OPTICAL_FLOW_PLUGIN)
-  # TODO The path to the optical flow repo should not be referenced here!
-  # (pass in path as variable instead?)
-  message(STATUS "CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
-  message(STATUS "CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
-  FIND_PACKAGE(Boost 1.40.0 REQUIRED timer)
-  find_package(OpticalFlow REQUIRED)
-  if(NOT DEFINED OpticalFlow_INCLUDE_DIRS)
-    message(ERROR "OpticalFlow_INCLUDE_DIRS was not defined.")
-    return()
-  endif()
 
-  #include_directories(${OpticalFlow_INCLUDE_DIRS})
+  find_package(Boost 1.40.0 REQUIRED timer)
+  
+  # OpticalFlow needs to be built and installed by the calling script, as it is very
+  # unlikely that this package already exists on the users computer.
+  # In PX4 this is done with a call to ExternalProject_Add().
+  find_package(OpticalFlow REQUIRED)
+
   add_library(rotors_gazebo_optical_flow_plugin SHARED src/gazebo_optical_flow_plugin.cpp)
   target_include_directories(rotors_gazebo_optical_flow_plugin PUBLIC ${OpticalFlow_INCLUDE_DIRS})
   target_link_libraries(rotors_gazebo_optical_flow_plugin
