@@ -286,6 +286,7 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   # (pass in path as variable instead?)
   message(STATUS "CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
   message(STATUS "CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
+  FIND_PACKAGE(Boost 1.40.0 REQUIRED timer)
   find_package(OpticalFlow REQUIRED)
   if(NOT DEFINED OpticalFlow_INCLUDE_DIRS)
     message(ERROR "OpticalFlow_INCLUDE_DIRS was not defined.")
@@ -295,7 +296,11 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   message(STATUS "OpticalFlow_LIBRARIES = ${OpticalFlow_LIBRARIES}")
   include_directories(${OpticalFlow_INCLUDE_DIRS})
   add_library(rotors_gazebo_optical_flow_plugin SHARED src/gazebo_optical_flow_plugin.cpp)
-  target_link_libraries(rotors_gazebo_optical_flow_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${OpticalFlow_LIBRARIES})
+  target_link_libraries(rotors_gazebo_optical_flow_plugin
+    ${catkin_LIBRARIES}
+    ${GAZEBO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${OpticalFlow_LIBRARIES})
   if (NOT NO_ROS)
     add_dependencies(rotors_gazebo_optical_flow_plugin ${catkin_EXPORTED_TARGETS})
   endif()
