@@ -286,7 +286,7 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   # TODO The path to the optical flow repo should not be referenced here!
   # (pass in path as variable instead?)
   message(STATUS "CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
-  message(STATUS "TEST = ${TEST}")
+  message(STATUS "CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
   find_package(OpticalFlow REQUIRED)
   message(STATUS "OpticalFlow_INCLUDE_DIRS = ${OpticalFlow_INCLUDE_DIRS}")
   #set(OpticalFlow_LIBS "OpticalFlow")
