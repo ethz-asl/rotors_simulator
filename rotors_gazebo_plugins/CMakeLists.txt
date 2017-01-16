@@ -292,10 +292,10 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
     message(ERROR "OpticalFlow_INCLUDE_DIRS was not defined.")
     return()
   endif()
-  message(STATUS "OpticalFlow_INCLUDE_DIRS = ${OpticalFlow_INCLUDE_DIRS}")
-  message(STATUS "OpticalFlow_LIBRARIES = ${OpticalFlow_LIBRARIES}")
-  include_directories(${OpticalFlow_INCLUDE_DIRS})
+
+  #include_directories(${OpticalFlow_INCLUDE_DIRS})
   add_library(rotors_gazebo_optical_flow_plugin SHARED src/gazebo_optical_flow_plugin.cpp)
+  target_include_directories(rotors_gazebo_optical_flow_plugin PUBLIC ${OpticalFlow_INCLUDE_DIRS})
   target_link_libraries(rotors_gazebo_optical_flow_plugin
     ${catkin_LIBRARIES}
     ${GAZEBO_LIBRARIES}
