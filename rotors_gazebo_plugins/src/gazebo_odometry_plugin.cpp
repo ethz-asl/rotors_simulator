@@ -42,10 +42,6 @@ namespace gazebo {
 
 GazeboOdometryPlugin::~GazeboOdometryPlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
-//  if (node_handle_) {
-//    node_handle_->shutdown();
-//    delete node_handle_;
-//  }
 }
 
 void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
