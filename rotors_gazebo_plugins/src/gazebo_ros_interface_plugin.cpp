@@ -450,7 +450,7 @@ void GazeboRosInterfacePlugin::GzImuMsgCallback(GzImuPtr& gz_imu_msg, ros::Publi
 }
 
 void GazeboRosInterfacePlugin::GzJointStateMsgCallback(GzJointStateMsgPtr& gz_joint_state_msg, ros::Publisher ros_publisher) {
-//  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // ============================================ //
   // =================== HEADER ================= //
@@ -462,6 +462,7 @@ void GazeboRosInterfacePlugin::GzJointStateMsgCallback(GzJointStateMsgPtr& gz_jo
   // ============================================ //
   // ==================== NAME ================== //
   // ============================================ //
+  ros_joint_state_msg_.name.resize(gz_joint_state_msg->name_size());
   for(int i = 0; i < gz_joint_state_msg->name_size(); i ++) {
     ros_joint_state_msg_.name[i] = gz_joint_state_msg->name(i);
   }
@@ -469,12 +470,15 @@ void GazeboRosInterfacePlugin::GzJointStateMsgCallback(GzJointStateMsgPtr& gz_jo
   // ============================================ //
   // ================== POSITION ================ //
   // ============================================ //
+  ros_joint_state_msg_.position.resize(gz_joint_state_msg->position_size());
   for(int i = 0; i < gz_joint_state_msg->position_size(); i ++) {
     ros_joint_state_msg_.position[i] = gz_joint_state_msg->position(i);
   }
 
   // Publish onto ROS framework
   ros_publisher.publish(ros_joint_state_msg_);
+
+  gzdbg << __FUNCTION__ << "() finished." << std::endl;
 
 }
 
