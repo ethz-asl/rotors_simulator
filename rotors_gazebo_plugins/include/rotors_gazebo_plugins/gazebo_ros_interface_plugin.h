@@ -181,7 +181,7 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
 
   // JOINT STATE
   void GzJointStateMsgCallback(GzJointStateMsgPtr& gz_joint_state_msg, ros::Publisher ros_publisher);           ///< Callback for when Gazebo message is received.
-  sensor_msgs::JointStatePtr ros_joint_state_msg_;                                                              ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+  sensor_msgs::JointState ros_joint_state_msg_;                                                              ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // MAGNETIC FIELD
   void GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg, ros::Publisher ros_publisher);  ///< Callback for when Gazebo message is received.
