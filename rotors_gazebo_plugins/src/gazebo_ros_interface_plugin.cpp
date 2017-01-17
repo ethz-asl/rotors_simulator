@@ -450,7 +450,7 @@ void GazeboRosInterfacePlugin::GzImuMsgCallback(GzImuPtr& gz_imu_msg, ros::Publi
 }
 
 void GazeboRosInterfacePlugin::GzJointStateMsgCallback(GzJointStateMsgPtr& gz_joint_state_msg, ros::Publisher ros_publisher) {
-  gzdbg << __FUNCTION__ << "() called." << std::endl;
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // ============================================ //
   // =================== HEADER ================= //
@@ -477,9 +477,6 @@ void GazeboRosInterfacePlugin::GzJointStateMsgCallback(GzJointStateMsgPtr& gz_jo
 
   // Publish onto ROS framework
   ros_publisher.publish(ros_joint_state_msg_);
-
-  gzdbg << __FUNCTION__ << "() finished." << std::endl;
-
 }
 
 void GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg, ros::Publisher ros_publisher) {
@@ -673,7 +670,29 @@ void GazeboRosInterfacePlugin::GzTransformStampedMsgCallback(
       GzTransformStampedMsgPtr& gz_transform_stamped_msg,
       ros::Publisher ros_publisher) {
 //  gzdbg << __FUNCTION__ << "() called." << std::endl;
-  gzthrow(__FUNCTION__ << "() is not yet implemented.");
+
+  // ============================================ //
+  // =================== HEADER ================= //
+  // ============================================ //
+  ros_transform_stamped_msg_.header.stamp.sec = gz_transform_stamped_msg->header().stamp().sec();
+  ros_transform_stamped_msg_.header.stamp.nsec = gz_transform_stamped_msg->header().stamp().nsec();
+  ros_transform_stamped_msg_.header.frame_id = gz_transform_stamped_msg->header().frame_id();
+
+  // ============================================ //
+  // =========== TRANSFORM, TRANSLATION ========= //
+  // ============================================ //
+  ros_transform_stamped_msg_.transform.translation.x = gz_transform_stamped_msg->transform().translation().x();
+  ros_transform_stamped_msg_.transform.translation.y = gz_transform_stamped_msg->transform().translation().y();
+  ros_transform_stamped_msg_.transform.translation.z = gz_transform_stamped_msg->transform().translation().z();
+
+  // ============================================ //
+  // ============ TRANSFORM, ROTATION =========== //
+  // ============================================ //
+  ros_transform_stamped_msg_.transform.rotation.x = gz_transform_stamped_msg->transform().rotation().x();
+  ros_transform_stamped_msg_.transform.rotation.y = gz_transform_stamped_msg->transform().rotation().y();
+  ros_transform_stamped_msg_.transform.rotation.z = gz_transform_stamped_msg->transform().rotation().z();
+
+  ros_publisher.publish(ros_transform_stamped_msg_);
 }
 
 void GazeboRosInterfacePlugin::GzTwistStampedMsgCallback(
