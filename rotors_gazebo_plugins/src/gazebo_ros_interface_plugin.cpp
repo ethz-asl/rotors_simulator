@@ -442,7 +442,7 @@ void GazeboRosInterfacePlugin::GzJointStateMsgCallback(GzJointStateMsgPtr& gz_jo
 }
 
 void GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg, ros::Publisher ros_publisher) {
-  gzdbg << __FUNCTION__ << "() called." << std::endl;
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the MagneticField message onto ROS
@@ -468,7 +468,7 @@ void GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr&
 }
 
 void GazeboRosInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg, ros::Publisher ros_publisher) {
-  gzdbg << __FUNCTION__ << "() called." << std::endl;
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the NavSatFix message onto ROS
@@ -500,7 +500,7 @@ void GazeboRosInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fi
 }
 
 void GazeboRosInterfacePlugin::GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odometry_msg, ros::Publisher ros_publisher) {
-  gzdbg << __FUNCTION__ << "() called." << std::endl;
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the Odometry message onto ROS
@@ -594,7 +594,7 @@ void GazeboRosInterfacePlugin::RosActuatorsMsgCallback(
     const mav_msgs::ActuatorsConstPtr& ros_actuators_msg_ptr,
     gazebo::transport::PublisherPtr gz_publisher_ptr) {
 
-  gzdbg << __FUNCTION__ << "() called." << std::endl;
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Convert ROS message to Gazebo message
 
@@ -617,7 +617,7 @@ void GazeboRosInterfacePlugin::RosCommandMotorSpeedMsgCallback(
     const mav_msgs::ActuatorsConstPtr& ros_actuators_msg_ptr,
     gazebo::transport::PublisherPtr gz_publisher_ptr) {
 
-  gzdbg << __FUNCTION__ << "() called." << std::endl;
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Convert ROS message to Gazebo message
 
@@ -662,7 +662,6 @@ void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Do nothing
 }
 
-//GZ_REGISTER_MODEL_PLUGIN(GazeboRosInterfacePlugin);
 GZ_REGISTER_WORLD_PLUGIN(GazeboRosInterfacePlugin);
 
 } // namespace gazebo

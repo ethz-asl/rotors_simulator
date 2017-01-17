@@ -1,4 +1,6 @@
 # Optional arguments to be passed into file
+# BUILD_OCTOMAP_PLUGIN: Build the optical map plugin (requires Octomap)
+# BUILD_OPTICAL_FLOW_PLUGIN: Build the optical flow plugin (requires OpenCV)
 # NO_ROS: Build without any ROS dependencies
 # MAVLINK_INTERFACE: Build mavlink_interface_plugin (requires mav dependency)
 
@@ -71,7 +73,6 @@ endif()
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 
 find_package(Eigen REQUIRED)
-find_package(octomap REQUIRED)
 find_package(gazebo REQUIRED)
 find_package(OpenCV REQUIRED)
 link_directories(${GAZEBO_LIBRARY_DIRS})
@@ -265,10 +266,16 @@ if (NOT NO_ROS)
 endif()
 
 #====================================== OCTOMAP PLUGIN ==========================================//
-add_library(rotors_gazebo_octomap_plugin src/gazebo_octomap_plugin.cpp)
-target_link_libraries(rotors_gazebo_octomap_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-if (NOT NO_ROS)
-  add_dependencies(rotors_gazebo_octomap_plugin ${catkin_EXPORTED_TARGETS})
+
+# Conditionally built since it requires Octomap as a dependency
+# ASL uses this, PX4 does not
+if(BUILD_OCTOMAP_PLUGIN)
+  find_package(octomap REQUIRED)
+  add_library(rotors_gazebo_octomap_plugin src/gazebo_octomap_plugin.cpp)
+  target_link_libraries(rotors_gazebo_octomap_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+  if (NOT NO_ROS)
+    add_dependencies(rotors_gazebo_octomap_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
 endif()
 
 #======================================= ODOMETRY PLUGIN ========================================//
@@ -340,7 +347,6 @@ install(
     rotors_gazebo_magnetometer_plugin
     rotors_gazebo_motor_model
     rotors_gazebo_multirotor_base_plugin
-    rotors_gazebo_octomap_plugin
     rotors_gazebo_odometry_plugin
     rotors_gazebo_wind_plugin
     
@@ -361,6 +367,15 @@ if (BUILD_MAVLINK_INTERFACE)
   install(
     TARGETS
       rotors_gazebo_mavlink_interface
+    DESTINATION ${BIN_DESTINATION}
+    LIBRARY DESTINATION ${LIB_DESTINATION}
+  )
+endif()
+
+if(BUILD_OCTOMAP_PLUGIN)
+  install(
+    TARGETS
+      rotors_gazebo_octomap_plugin
     DESTINATION ${BIN_DESTINATION}
     LIBRARY DESTINATION ${LIB_DESTINATION}
   )
