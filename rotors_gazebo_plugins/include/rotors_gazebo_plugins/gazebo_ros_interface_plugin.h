@@ -50,6 +50,7 @@
 #include "TransformStamped.pb.h"
 #include "TwistStamped.pb.h"
 #include "WindSpeed.pb.h"
+#include "WrenchStamped.pb.h"
 
 // ROS MSG TYPES
 #include <geometry_msgs/Point.h>
@@ -57,6 +58,7 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/WrenchStamped.h>
 #include <mav_msgs/Actuators.h>
 #include <nav_msgs/Odometry.h>
 #include <rotors_comm/WindSpeed.h>
@@ -73,20 +75,20 @@ namespace gazebo {
 // typedef's to make life easier
 typedef const boost::shared_ptr<const gz_std_msgs::ConnectGazeboToRosTopic> GzConnectGazeboToRosTopicMsgPtr;
 typedef const boost::shared_ptr<const gz_std_msgs::ConnectRosToGazeboTopic> GzConnectRosToGazeboTopicMsgPtr;
-
-typedef const boost::shared_ptr<const sensor_msgs::msgs::Actuators> GzActuatorsMsgPtr;
 typedef const boost::shared_ptr<const gz_std_msgs::Float32> GzFloat32MsgPtr;
-typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> GzImuPtr;
-typedef const boost::shared_ptr<const sensor_msgs::msgs::JointState> GzJointStateMsgPtr;
-typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> GzMagneticFieldMsgPtr;
-typedef const boost::shared_ptr<const sensor_msgs::msgs::NavSatFix> GzNavSatFixPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::Odometry> GzOdometryMsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::Pose> GzPoseMsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::PoseWithCovarianceStamped> GzPoseWithCovarianceStampedMsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::PositionStamped> GzPositionStampedMsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::TransformStamped> GzTransformStampedMsgPtr;
-typedef const boost::shared_ptr<const sensor_msgs::msgs::TwistStamped> GzTwistStampedMsgPtr;
+typedef const boost::shared_ptr<const gz_geometry_msgs::WrenchStamped> GzWrenchStampedMsgPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::Actuators> GzActuatorsMsgPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> GzImuPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::JointState> GzJointStateMsgPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> GzMagneticFieldMsgPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::NavSatFix> GzNavSatFixPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::TwistStamped> GzTwistStampedMsgPtr;
 
 //! @brief    Message interface plugin for Gazebo.
 //! @details  Interfaces to both ROS and MAVlink.
@@ -174,49 +176,54 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   std_msgs::Float32 ros_float_32_msg_;
 
   // IMU
-  void GzImuMsgCallback(GzImuPtr& gz_imu_msg, ros::Publisher ros_publisher);     ///< Callback for when Gazebo message is received.
-  sensor_msgs::Imu ros_imu_msg_;                ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+  void GzImuMsgCallback(GzImuPtr& gz_imu_msg, ros::Publisher ros_publisher);                                    ///< Callback for when Gazebo message is received.
+  sensor_msgs::Imu ros_imu_msg_;                                                                                ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // JOINT STATE
-  void GzJointStateMsgCallback(GzJointStateMsgPtr& gz_joint_state_msg, ros::Publisher ros_publisher);     ///< Callback for when Gazebo message is received.
-  sensor_msgs::JointStatePtr ros_joint_state_msg_;                            ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+  void GzJointStateMsgCallback(GzJointStateMsgPtr& gz_joint_state_msg, ros::Publisher ros_publisher);           ///< Callback for when Gazebo message is received.
+  sensor_msgs::JointStatePtr ros_joint_state_msg_;                                                              ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // MAGNETIC FIELD
-  void GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg, ros::Publisher ros_publisher);    ///< Callback for when Gazebo message is received.
-  sensor_msgs::MagneticField ros_magnetic_field_msg_;                               ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+  void GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg, ros::Publisher ros_publisher);  ///< Callback for when Gazebo message is received.
+  sensor_msgs::MagneticField ros_magnetic_field_msg_;                                                           ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // NAT SAT FIX (GPS)
-  void GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg, ros::Publisher ros_publisher);   ///< Callback for when Gazebo message is received.
-  sensor_msgs::NavSatFix ros_nav_sat_fix_msg_;                    ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+  void GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fix_msg, ros::Publisher ros_publisher);                   ///< Callback for when Gazebo message is received.
+  sensor_msgs::NavSatFix ros_nav_sat_fix_msg_;                                                                  ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // ODOMETRY
-  void GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odometry_msg, ros::Publisher ros_publisher);     ///< Callback for when Gazebo message is received.
-  nav_msgs::Odometry ros_odometry_msg_;                            ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+  void GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odometry_msg, ros::Publisher ros_publisher);                  ///< Callback for when Gazebo message is received.
+  nav_msgs::Odometry ros_odometry_msg_;                                                                         ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // POSE
-  void GzPoseMsgCallback(GzPoseMsgPtr& gz_pose_msg, ros::Publisher ros_publisher);    //!< Callback for when Gazebo message is received.
-  geometry_msgs::Pose ros_pose_msg_;                                              //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+  void GzPoseMsgCallback(GzPoseMsgPtr& gz_pose_msg, ros::Publisher ros_publisher);                              //!< Callback for when Gazebo message is received.
+  geometry_msgs::Pose ros_pose_msg_;                                                                            //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // POSE WITH COVARIANCE STAMPED
   void GzPoseWithCovarianceStampedMsgCallback(
       GzPoseWithCovarianceStampedMsgPtr& gz_pose_with_covariance_stamped_msg, ros::Publisher ros_publisher);    //!< Callback for when Gazebo message is received.
-  geometry_msgs::Pose ros_pose_with_covariance_stamped_msg_;                                              //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+  geometry_msgs::Pose ros_pose_with_covariance_stamped_msg_;                                                    //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // POSITION STAMPED
   void GzPositionStampedMsgCallback(
-      GzPositionStampedMsgPtr& gz_position_stamped_msg,     //!< Callback for when Gazebo message is received.
-      ros::Publisher ros_publisher);                        //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+      GzPositionStampedMsgPtr& gz_position_stamped_msg,                                                         //!< Callback for when Gazebo message is received.
+      ros::Publisher ros_publisher);                                                                            //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
   geometry_msgs::Point ros_position_stamped_msg_;
 
   // TRANSFORM STAMPED
   void GzTransformStampedMsgCallback(
-      GzTransformStampedMsgPtr& gz_transform_stamped_msg,     //!< Callback for when Gazebo message is received.
-      ros::Publisher ros_publisher);                          //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+      GzTransformStampedMsgPtr& gz_transform_stamped_msg,                                                       //!< Callback for when Gazebo message is received.
+      ros::Publisher ros_publisher);                                                                            //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
   geometry_msgs::TransformStamped ros_transform_stamped_msg_;
 
   // TWIST STAMPED
   void GzTwistStampedMsgCallback(GzTwistStampedMsgPtr& gz_twist_stamped_msg, ros::Publisher ros_publisher);     ///< Callback for when Gazebo message is received.
-  geometry_msgs::TwistStamped ros_twist_stamped_msg_;                            ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+  geometry_msgs::TwistStamped ros_twist_stamped_msg_;                                                           ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+
+  // WRENCH STAMPED
+  void GzWrenchStampedMsgCallback(GzWrenchStampedMsgPtr& gz_wrench_stamped_msg, ros::Publisher ros_publisher);  ///< Callback for when Gazebo message is received.
+  geometry_msgs::WrenchStamped ros_wrench_stamped_msg_;                                                         ///< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+
 
   // ============================================ //
   // ===== ROS->GAZEBO CALLBACKS/CONVERTERS ===== //

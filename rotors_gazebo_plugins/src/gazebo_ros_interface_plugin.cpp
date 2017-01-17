@@ -259,6 +259,14 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
           rosTopicName,
           gz_node_handle_);
       break;
+    case gz_std_msgs::ConnectGazeboToRosTopic::WRENCH_STAMPED:
+      ConnectHelper<gz_geometry_msgs::WrenchStamped, geometry_msgs::WrenchStamped>(
+          &GazeboRosInterfacePlugin::GzWrenchStampedMsgCallback,
+          this,
+          gazeboTopicName,
+          rosTopicName,
+          gz_node_handle_);
+      break;
     default:
       gzthrow("ConnectGazeboToRosTopic message type with enum val = " << gz_connect_gazebo_to_ros_topic_msg->msgtype() <<
           " is not supported by GazeboRosInterfacePlugin.");
@@ -439,6 +447,7 @@ void GazeboRosInterfacePlugin::GzImuMsgCallback(GzImuPtr& gz_imu_msg, ros::Publi
 
 void GazeboRosInterfacePlugin::GzJointStateMsgCallback(GzJointStateMsgPtr& gz_joint_state_msg, ros::Publisher ros_publisher) {
 //  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  gzthrow(__FUNCTION__ << "() is not yet implemented.");
 }
 
 void GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg, ros::Publisher ros_publisher) {
@@ -473,6 +482,9 @@ void GazeboRosInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fi
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the NavSatFix message onto ROS
 
+  // ============================================ //
+  // =================== HEADER ================= //
+  // ============================================ //
   ros_nav_sat_fix_msg_.header.stamp.sec = gz_nav_sat_fix_msg->header().stamp().sec();
   ros_nav_sat_fix_msg_.header.stamp.nsec = gz_nav_sat_fix_msg->header().stamp().nsec();
   ros_nav_sat_fix_msg_.header.frame_id = gz_nav_sat_fix_msg->header().frame_id();
@@ -505,6 +517,9 @@ void GazeboRosInterfacePlugin::GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odomet
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the Odometry message onto ROS
 
+  // ============================================ //
+  // =================== HEADER ================= //
+  // ============================================ //
   ros_odometry_msg_.header.stamp.sec = gz_odometry_msg->header().stamp().sec();
   ros_odometry_msg_.header.stamp.nsec = gz_odometry_msg->header().stamp().nsec();
   ros_odometry_msg_.header.frame_id = gz_odometry_msg->header().frame_id();
@@ -567,22 +582,60 @@ void GazeboRosInterfacePlugin::GzPositionStampedMsgCallback(
     GzPositionStampedMsgPtr& gz_position_stamped_msg,
     ros::Publisher ros_publisher) {
 //  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  gzthrow(__FUNCTION__ << "() is not yet implemented.");
 }
 
 void GazeboRosInterfacePlugin::GzPoseWithCovarianceStampedMsgCallback(
     GzPoseWithCovarianceStampedMsgPtr& gz_pose_with_covariance_stamped_msg,
     ros::Publisher ros_publisher) {
 //  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  gzthrow(__FUNCTION__ << "() is not yet implemented.");
 }
 
 void GazeboRosInterfacePlugin::GzTransformStampedMsgCallback(
       GzTransformStampedMsgPtr& gz_transform_stamped_msg,
       ros::Publisher ros_publisher) {
 //  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  gzthrow(__FUNCTION__ << "() is not yet implemented.");
 }
 
-void GazeboRosInterfacePlugin::GzTwistStampedMsgCallback(GzTwistStampedMsgPtr& gz_twist_stamped_msg, ros::Publisher ros_publisher) {
+void GazeboRosInterfacePlugin::GzTwistStampedMsgCallback(
+    GzTwistStampedMsgPtr& gz_twist_stamped_msg,
+    ros::Publisher ros_publisher) {
 //  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  gzthrow(__FUNCTION__ << "() is not yet implemented.");
+}
+
+
+
+void GazeboRosInterfacePlugin::GzWrenchStampedMsgCallback(
+    GzWrenchStampedMsgPtr& gz_wrench_stamped_msg,
+    ros::Publisher ros_publisher) {
+
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
+
+  // ============================================ //
+  // =================== HEADER ================= //
+  // ============================================ //
+  ros_wrench_stamped_msg_.header.stamp.sec = gz_wrench_stamped_msg->header().stamp().sec();
+  ros_wrench_stamped_msg_.header.stamp.nsec = gz_wrench_stamped_msg->header().stamp().nsec();
+  ros_wrench_stamped_msg_.header.frame_id = gz_wrench_stamped_msg->header().frame_id();
+
+  // ============================================ //
+  // =================== FORCE ================== //
+  // ============================================ //
+  ros_wrench_stamped_msg_.wrench.force.x = gz_wrench_stamped_msg->wrench().force().x();
+  ros_wrench_stamped_msg_.wrench.force.y = gz_wrench_stamped_msg->wrench().force().y();
+  ros_wrench_stamped_msg_.wrench.force.z = gz_wrench_stamped_msg->wrench().force().z();
+
+  // ============================================ //
+  // ==================== TORQUE ================ //
+  // ============================================ //
+  ros_wrench_stamped_msg_.wrench.torque.x = gz_wrench_stamped_msg->wrench().torque().x();
+  ros_wrench_stamped_msg_.wrench.torque.y = gz_wrench_stamped_msg->wrench().torque().y();
+  ros_wrench_stamped_msg_.wrench.torque.z = gz_wrench_stamped_msg->wrench().torque().z();
+
+  ros_publisher.publish(ros_wrench_stamped_msg_);
 }
 
 
@@ -660,6 +713,7 @@ void GazeboRosInterfacePlugin::RosWindSpeedMsgCallback(
 
 void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Do nothing
+  // This plugins actions are all executed through message callbacks.
 }
 
 GZ_REGISTER_WORLD_PLUGIN(GazeboRosInterfacePlugin);
