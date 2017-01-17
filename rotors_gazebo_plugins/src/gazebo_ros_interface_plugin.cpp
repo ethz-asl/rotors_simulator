@@ -230,7 +230,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
           gz_node_handle_);
       break;
     case gz_std_msgs::ConnectGazeboToRosTopic::POSITION_STAMPED:
-      ConnectHelper<gz_geometry_msgs::PositionStamped, geometry_msgs::Point>(
+      ConnectHelper<gz_geometry_msgs::PositionStamped, geometry_msgs::PointStamped>(
           &GazeboRosInterfacePlugin::GzPositionStampedMsgCallback,
           this,
           gazeboTopicName,
@@ -650,7 +650,23 @@ void GazeboRosInterfacePlugin::GzPositionStampedMsgCallback(
     GzPositionStampedMsgPtr& gz_position_stamped_msg,
     ros::Publisher ros_publisher) {
 //  gzdbg << __FUNCTION__ << "() called." << std::endl;
-  gzthrow(__FUNCTION__ << "() is not yet implemented.");
+
+  // ============================================ //
+  // =================== HEADER ================= //
+  // ============================================ //
+  ros_position_stamped_msg_.header.stamp.sec = gz_position_stamped_msg->header().stamp().sec();
+  ros_position_stamped_msg_.header.stamp.nsec = gz_position_stamped_msg->header().stamp().nsec();
+  ros_position_stamped_msg_.header.frame_id = gz_position_stamped_msg->header().frame_id();
+
+  // ============================================ //
+  // ================== POSITION ================ //
+  // ============================================ //
+
+  ros_position_stamped_msg_.point.x = gz_position_stamped_msg->position().x();
+  ros_position_stamped_msg_.point.y = gz_position_stamped_msg->position().y();
+  ros_position_stamped_msg_.point.z = gz_position_stamped_msg->position().z();
+
+  ros_publisher.publish(ros_position_stamped_msg_);
 }
 
 void GazeboRosInterfacePlugin::GzTransformStampedMsgCallback(
