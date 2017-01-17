@@ -610,15 +610,44 @@ void GazeboRosInterfacePlugin::GzPoseMsgCallback(GzPoseMsgPtr& gz_pose_msg, ros:
   ros_publisher.publish(ros_pose_msg_);
 }
 
-void GazeboRosInterfacePlugin::GzPositionStampedMsgCallback(
-    GzPositionStampedMsgPtr& gz_position_stamped_msg,
-    ros::Publisher ros_publisher) {
-//  gzdbg << __FUNCTION__ << "() called." << std::endl;
-  gzthrow(__FUNCTION__ << "() is not yet implemented.");
-}
-
 void GazeboRosInterfacePlugin::GzPoseWithCovarianceStampedMsgCallback(
     GzPoseWithCovarianceStampedMsgPtr& gz_pose_with_covariance_stamped_msg,
+    ros::Publisher ros_publisher) {
+//  gzdbg << __FUNCTION__ << "() called." << std::endl;
+
+  // ============================================ //
+  // =================== HEADER ================= //
+  // ============================================ //
+  ros_pose_with_covariance_stamped_msg_.header.stamp.sec = gz_pose_with_covariance_stamped_msg->header().stamp().sec();
+  ros_pose_with_covariance_stamped_msg_.header.stamp.nsec = gz_pose_with_covariance_stamped_msg->header().stamp().nsec();
+  ros_pose_with_covariance_stamped_msg_.header.frame_id = gz_pose_with_covariance_stamped_msg->header().frame_id();
+
+  // ============================================ //
+  // === POSE (both position and orientation) === //
+  // ============================================ //
+  ros_pose_with_covariance_stamped_msg_.pose.pose.position.x = gz_pose_with_covariance_stamped_msg->pose_with_covariance().pose().position().x();
+  ros_pose_with_covariance_stamped_msg_.pose.pose.position.y = gz_pose_with_covariance_stamped_msg->pose_with_covariance().pose().position().y();
+  ros_pose_with_covariance_stamped_msg_.pose.pose.position.z = gz_pose_with_covariance_stamped_msg->pose_with_covariance().pose().position().z();
+
+  ros_pose_with_covariance_stamped_msg_.pose.pose.orientation.w = gz_pose_with_covariance_stamped_msg->pose_with_covariance().pose().orientation().w();
+  ros_pose_with_covariance_stamped_msg_.pose.pose.orientation.x = gz_pose_with_covariance_stamped_msg->pose_with_covariance().pose().orientation().x();
+  ros_pose_with_covariance_stamped_msg_.pose.pose.orientation.y = gz_pose_with_covariance_stamped_msg->pose_with_covariance().pose().orientation().y();
+  ros_pose_with_covariance_stamped_msg_.pose.pose.orientation.z = gz_pose_with_covariance_stamped_msg->pose_with_covariance().pose().orientation().z();
+
+  // Covariance should have 36 elements, and both the Gazebo and ROS
+  // arrays should be the same size!
+  //gzdbg << "DEBUG = " << gz_pose_with_covariance_stamped_msg->pose_with_covariance().covariance_size() << std::endl;
+  GZ_ASSERT(gz_pose_with_covariance_stamped_msg->pose_with_covariance().covariance_size() == 36, "The Gazebo PoseWithCovarianceStamped message does not have 9 position covariance elements.");
+  GZ_ASSERT(ros_pose_with_covariance_stamped_msg_.pose.covariance.size() == 36, "The ROS PoseWithCovarianceStamped message does not have 9 position covariance elements.");
+  for(int i = 0; i < gz_pose_with_covariance_stamped_msg->pose_with_covariance().covariance_size(); i ++) {
+    ros_pose_with_covariance_stamped_msg_.pose.covariance[i] = gz_pose_with_covariance_stamped_msg->pose_with_covariance().covariance(i);
+  }
+
+  ros_publisher.publish(ros_pose_with_covariance_stamped_msg_);
+}
+
+void GazeboRosInterfacePlugin::GzPositionStampedMsgCallback(
+    GzPositionStampedMsgPtr& gz_position_stamped_msg,
     ros::Publisher ros_publisher) {
 //  gzdbg << __FUNCTION__ << "() called." << std::endl;
   gzthrow(__FUNCTION__ << "() is not yet implemented.");
