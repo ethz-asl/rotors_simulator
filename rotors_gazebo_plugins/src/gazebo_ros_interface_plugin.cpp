@@ -157,10 +157,12 @@ void GazeboRosInterfacePlugin::ConnectHelper(
 void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
     GzConnectGazeboToRosTopicMsgPtr& gz_connect_gazebo_to_ros_topic_msg) {
 
-  gzdbg << __FUNCTION__ << " called." << std::endl;
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   const std::string gazeboTopicName = gz_connect_gazebo_to_ros_topic_msg->gazebo_topic();
   const std::string rosTopicName = gz_connect_gazebo_to_ros_topic_msg->ros_topic();
+
+  gzdbg << "Connecting Gazebo topic \"" << gazeboTopicName << "\" to ROS topic \"" << rosTopicName << "\"." << std::endl;
 
   switch(gz_connect_gazebo_to_ros_topic_msg->msgtype()) {
     case gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS:
@@ -271,6 +273,8 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       gzthrow("ConnectGazeboToRosTopic message type with enum val = " << gz_connect_gazebo_to_ros_topic_msg->msgtype() <<
           " is not supported by GazeboRosInterfacePlugin.");
   }
+
+  gzdbg << __FUNCTION__ << "() finished." << std::endl;
 
 }
 
@@ -447,7 +451,31 @@ void GazeboRosInterfacePlugin::GzImuMsgCallback(GzImuPtr& gz_imu_msg, ros::Publi
 
 void GazeboRosInterfacePlugin::GzJointStateMsgCallback(GzJointStateMsgPtr& gz_joint_state_msg, ros::Publisher ros_publisher) {
 //  gzdbg << __FUNCTION__ << "() called." << std::endl;
-  gzthrow(__FUNCTION__ << "() is not yet implemented.");
+
+  // ============================================ //
+  // =================== HEADER ================= //
+  // ============================================ //
+  ros_joint_state_msg_.header.stamp.sec = gz_joint_state_msg->header().stamp().sec();
+  ros_joint_state_msg_.header.stamp.nsec = gz_joint_state_msg->header().stamp().nsec();
+  ros_joint_state_msg_.header.frame_id = gz_joint_state_msg->header().frame_id();
+
+  // ============================================ //
+  // ==================== NAME ================== //
+  // ============================================ //
+  for(int i = 0; i < gz_joint_state_msg->name_size(); i ++) {
+    ros_joint_state_msg_.name[i] = gz_joint_state_msg->name(i);
+  }
+
+  // ============================================ //
+  // ================== POSITION ================ //
+  // ============================================ //
+  for(int i = 0; i < gz_joint_state_msg->position_size(); i ++) {
+    ros_joint_state_msg_.position[i] = gz_joint_state_msg->position(i);
+  }
+
+  // Publish onto ROS framework
+  ros_publisher.publish(ros_joint_state_msg_);
+
 }
 
 void GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr& gz_magnetic_field_msg, ros::Publisher ros_publisher) {
