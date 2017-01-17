@@ -150,6 +150,8 @@ set (msgs
   msgs/TwistWithCovariance.proto
   msgs/Vector3.proto
   msgs/WindSpeed.proto
+  msgs/Wrench.proto
+  msgs/WrenchStamped.proto
 )
 
 # Finally, generate the .cpp files from the .proto files

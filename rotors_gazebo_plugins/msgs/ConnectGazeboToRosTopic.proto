@@ -10,7 +10,8 @@ message ConnectGazeboToRosTopic
   required string ros_topic = 2;
 
   // The supported messages types that the ROS interface plugin knows to convert
-  // from a Gazebo to a ROS message
+  // from a Gazebo to a ROS message.
+  // Provided to gz_std_msgs::ConnectGazeboToRosTopic::set_msgtype()
   enum MsgType {
   	ACTUATORS = 0;
     FLOAT_32 = 1;
@@ -24,6 +25,7 @@ message ConnectGazeboToRosTopic
     POSITION_STAMPED = 9;
     TRANSFORM_STAMPED = 10;
     TWIST_STAMPED = 11;
+    WRENCH_STAMPED = 12;
   }
   required MsgType msgType = 3;
 }
