@@ -202,7 +202,7 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   // POSE WITH COVARIANCE STAMPED
   void GzPoseWithCovarianceStampedMsgCallback(
       GzPoseWithCovarianceStampedMsgPtr& gz_pose_with_covariance_stamped_msg, ros::Publisher ros_publisher);    //!< Callback for when Gazebo message is received.
-  geometry_msgs::Pose ros_pose_with_covariance_stamped_msg_;                                                    //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+  geometry_msgs::PoseWithCovarianceStamped ros_pose_with_covariance_stamped_msg_;                                                    //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // POSITION STAMPED
   void GzPositionStampedMsgCallback(
