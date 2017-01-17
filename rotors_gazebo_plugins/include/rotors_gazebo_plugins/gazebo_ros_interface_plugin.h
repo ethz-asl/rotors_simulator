@@ -54,6 +54,7 @@
 
 // ROS MSG TYPES
 #include <geometry_msgs/Point.h>
+#include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -208,7 +209,7 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   void GzPositionStampedMsgCallback(
       GzPositionStampedMsgPtr& gz_position_stamped_msg,                                                         //!< Callback for when Gazebo message is received.
       ros::Publisher ros_publisher);                                                                            //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
-  geometry_msgs::Point ros_position_stamped_msg_;
+  geometry_msgs::PointStamped ros_position_stamped_msg_;
 
   // TRANSFORM STAMPED
   void GzTransformStampedMsgCallback(
