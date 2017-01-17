@@ -117,9 +117,9 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
 //  gps_message_.position_covariance[8] = ver_pos_std_dev * ver_pos_std_dev;
   //gz_gps_message_->header().set_frame_id(fra);
   gz_gps_message_.mutable_header()->set_frame_id("test");
-  gz_gps_message_.mutable_status()->set_service(sensor_msgs::NavSatStatus::SERVICE_GPS);
-  gz_gps_message_.mutable_status()->set_status(sensor_msgs::NavSatStatus::STATUS_FIX);
-  gz_gps_message_.set_position_covariance_type(sensor_msgs::NavSatFix::COVARIANCE_TYPE_KNOWN);
+  gz_gps_message_.set_service(sensor_msgs::msgs::NavSatFix::SERVICE_GPS);
+  gz_gps_message_.set_status(sensor_msgs::msgs::NavSatFix::STATUS_FIX);
+  gz_gps_message_.set_position_covariance_type(sensor_msgs::msgs::NavSatFix::COVARIANCE_TYPE_KNOWN);
 
   for(int i = 0; i < 9; i++){
     switch (i){
