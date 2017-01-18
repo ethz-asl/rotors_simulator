@@ -30,7 +30,6 @@ namespace gazebo {
 GazeboWindPlugin::~GazeboWindPlugin() {
   event::Events::DisconnectWorldUpdateBegin(update_connection_);
 }
-;
 
 void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
@@ -137,9 +136,10 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
   wrench_stamped_msg_.mutable_header()->mutable_stamp()->set_nsec(now.nsec);
 
   wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_x(wind.x + wind_gust.x);
-  wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_x(wind.y + wind_gust.y);
-  wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_x(wind.z + wind_gust.z);
+  wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_y(wind.y + wind_gust.y);
+  wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_z(wind.z + wind_gust.z);
 
+  // No torque due to wind, set x,y and z to 0.
   wrench_stamped_msg_.mutable_wrench()->mutable_torque()->set_x(0);
   wrench_stamped_msg_.mutable_wrench()->mutable_torque()->set_y(0);
   wrench_stamped_msg_.mutable_wrench()->mutable_torque()->set_z(0);
