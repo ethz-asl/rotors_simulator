@@ -25,7 +25,7 @@
 #include <gazebo/physics/physics.hh>
 //#include <mav_msgs/default_topics.h>
 //#include <ros/ros.h>
-#include <sensor_msgs/MagneticField.h>
+//#include <sensor_msgs/MagneticField.h>
 #include "MagneticField.pb.h"
 
 #include "rotors_gazebo_plugins/common.h"
