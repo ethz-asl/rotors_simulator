@@ -1,8 +1,0 @@
-syntax = "proto2";
-package gz_geometry_msgs;
-
-// Covariance message type which designed to be used
-// in other message types
-message Covariance {
-  required Pose pose = 1;
-}
