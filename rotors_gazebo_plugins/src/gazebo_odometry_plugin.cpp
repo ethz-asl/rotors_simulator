@@ -272,11 +272,16 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     gz_geometry_msgs::Odometry odometry;
     odometry.mutable_header()->set_frame_id(parent_frame_id_);
     //odometry.mutable_header()->set_seq(odometry_sequence_++);
+    //odometry.mutable_header()->mutable_stamp()->set_sec(
+    //    (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec);
     odometry.mutable_header()->mutable_stamp()->set_sec(
-        (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec);
+            (world_->GetSimTime()).sec + static_cast<int32_t>(unknown_delay_));
+    //odometry.mutable_header()->mutable_stamp()->set_nsec(
+    //    (world_->GetSimTime()).nsec + ros::Duration(unknown_delay_).nsec);
     odometry.mutable_header()->mutable_stamp()->set_nsec(
-        (world_->GetSimTime()).nsec + ros::Duration(unknown_delay_).nsec);
+            (world_->GetSimTime()).nsec + static_cast<int32_t>(unknown_delay_));
     odometry.set_child_frame_id(child_frame_id_);
+
 
     odometry.mutable_pose()->mutable_pose()->mutable_position()->set_x(
         gazebo_pose.pos.x);
