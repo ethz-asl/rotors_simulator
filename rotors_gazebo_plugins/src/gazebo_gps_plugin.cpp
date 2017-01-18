@@ -152,6 +152,10 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
 
 void GazeboGpsPlugin::OnUpdate() {
 
+  if(kPrintOnUpdates) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   if(!pubs_and_subs_created_) {
     CreatePubsAndSubs();
     pubs_and_subs_created_ = true;

@@ -81,6 +81,10 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
 // This gets called by the world update start event.
 void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
 
+  if(kPrintOnUpdates) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   if(!pubs_and_subs_created_) {
     CreatePubsAndSubs();
     pubs_and_subs_created_ = true;

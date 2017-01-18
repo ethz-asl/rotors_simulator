@@ -157,7 +157,9 @@ void GazeboRosInterfacePlugin::ConnectHelper(
 void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
     GzConnectGazeboToRosTopicMsgPtr& gz_connect_gazebo_to_ros_topic_msg) {
 
-  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  if(kPrintOnMsgCallback) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
 
   const std::string gazeboTopicName = gz_connect_gazebo_to_ros_topic_msg->gazebo_topic();
   const std::string rosTopicName = gz_connect_gazebo_to_ros_topic_msg->ros_topic();
@@ -281,7 +283,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
 template<typename T>
 transport::PublisherPtr GazeboRosInterfacePlugin::FindOrMakeGazeboPublisher(std::string topic) {
 
-  gzdbg << __FUNCTION__ << " called." << std::endl;
+//  gzdbg << __FUNCTION__ << " called." << std::endl;
 
   transport::PublisherPtr gz_publisher_ptr;
 
@@ -298,7 +300,9 @@ transport::PublisherPtr GazeboRosInterfacePlugin::FindOrMakeGazeboPublisher(std:
 void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
     GzConnectRosToGazeboTopicMsgPtr& gz_connect_ros_to_gazebo_topic_msg) {
 
-  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  if(kPrintOnMsgCallback) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
 
   static std::vector<ros::Subscriber> ros_subscribers;
 

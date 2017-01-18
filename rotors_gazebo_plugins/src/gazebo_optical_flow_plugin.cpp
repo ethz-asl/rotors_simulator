@@ -54,7 +54,6 @@ OpticalFlowPlugin::~OpticalFlowPlugin()
 void OpticalFlowPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
 {
   if (!_sensor)
-
     gzerr << "Invalid sensor pointer.\n";
 
   this->parentSensor =

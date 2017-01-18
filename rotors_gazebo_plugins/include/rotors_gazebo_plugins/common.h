@@ -26,6 +26,10 @@
 
 namespace gazebo {
 
+// Debugging
+static const bool kPrintOnUpdates = false;
+static const bool kPrintOnMsgCallback = false;
+
 // Default values
 static const std::string kDefaultNamespace = "";
 static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;

@@ -24,7 +24,6 @@
 #define ROTORS_GAZEBO_PLUGINS_GAZEBO_WIND_PLUGIN_H
 
 #include <string>
-//#include <ros/ros.h>
 
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
