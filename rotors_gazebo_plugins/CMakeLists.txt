@@ -1,8 +1,8 @@
 # Optional arguments to be passed into file
-# BUILD_OCTOMAP_PLUGIN: Build the optical map plugin (requires Octomap)
-# BUILD_OPTICAL_FLOW_PLUGIN: Build the optical flow plugin (requires OpenCV)
-# NO_ROS: Build without any ROS dependencies
-# MAVLINK_INTERFACE: Build mavlink_interface_plugin (requires mav dependency)
+# BUILD_MAVLINK_INTERFACE       bool    Build mavlink_interface_plugin (requires mav dependency).
+# BUILD_OCTOMAP_PLUGIN          bool    Build the optical map plugin (requires Octomap).
+# BUILD_OPTICAL_FLOW_PLUGIN     bool    Build the optical flow plugin (requires OpenCV).
+# NO_ROS                        bool    Build without any ROS dependencies.
 
 cmake_minimum_required(VERSION 2.8.3)
 project(rotors_gazebo_plugins)
@@ -18,8 +18,11 @@ message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 
-#set(MAVLINK_INTERFACE)
-set(BUILD_MAVLINK_INTERFACE)
+if(BUILD_MAVLINK_INTERFACE)
+  message(STATUS "BUILD_MAVLINK_INTERFACE = TRUE, adding mavros dependency and building mavlink_interface_plugin.")
+else ()
+  message(STATUS "BUILD_MAVLINK_INTERFACE = FALSE, NOT adding mavros dependency and NOT building mavlink_interface_plugin.")
+endif ()
 
 if(NO_ROS)
   message(STATUS "NO_ROS = TRUE, building rotors_gazebo_plugins WITHOUT any ROS dependancies.")
@@ -27,14 +30,7 @@ else()
   message(STATUS "NO_ROS = FALSE, building rotors_gazebo_plugins WITH ROS dependancies.")
 endif()
 
-#if (MAVLINK_INTERFACE STREQUAL "y")
-if (MAVLINK_INTERFACE)
-  set(BUILD_MAVLINK_INTERFACE TRUE)
-  message(STATUS "MAVLINK_INTERFACE = TRUE, adding mavros dependency and building mavlink_interface_plugin.")
-else ()
-  set(BUILD_MAVLINK_INTERFACE FALSE)
-  message(STATUS "MAVLINK_INTERFACE = FALSE, NOT adding mavros dependency and NOT building mavlink_interface_plugin.")
-endif ()
+
 
 # Specify C++11 standard
 add_definitions(-std=c++11)
@@ -206,7 +202,6 @@ endif()
 
 #================================= MAVLINK INTERFACE PLUGIN =====================================//
 if (BUILD_MAVLINK_INTERFACE)
-  # Should this be SHARED or not???
   # Note that this library includes TWO .cpp files.
   add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/geo_mag_declination.cpp)
   target_link_libraries(rotors_gazebo_mavlink_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${mav_msgs})
