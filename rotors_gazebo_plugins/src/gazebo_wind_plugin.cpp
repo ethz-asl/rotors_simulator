@@ -94,7 +94,7 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 // This gets called by the world update start event.
 void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
-  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  //gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   if(!pubs_and_subs_created_) {
     CreatePubsAndSubs();
