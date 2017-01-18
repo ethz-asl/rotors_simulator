@@ -188,7 +188,9 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
 // This gets called by the world update start event.
 void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
-//  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  if(kPrintOnUpdates) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
 
   if(!pubs_and_subs_created_) {
     CreatePubsAndSubs();

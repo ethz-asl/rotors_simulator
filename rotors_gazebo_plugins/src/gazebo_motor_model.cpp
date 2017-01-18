@@ -131,6 +131,10 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 // This gets called by the world update start event.
 void GazeboMotorModel::OnUpdate(const common::UpdateInfo& _info) {
 
+  if(kPrintOnUpdates) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   if(!pubs_and_subs_created_) {
     CreatePubsAndSubs();
     pubs_and_subs_created_ = true;
@@ -202,7 +206,10 @@ void GazeboMotorModel::CreatePubsAndSubs() {
 
 //void GazeboMotorModel::VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_velocities) {
 void GazeboMotorModel::ControlVelocityCallback(GzCommandMotorSpeedMsgPtr& command_motor_speed_msg) {
-//  gzdbg << __FUNCTION__ << "() called." << std::endl;
+
+  if(kPrintOnMsgCallback) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
 
 //  ROS_ASSERT_MSG(rot_velocities->angular_velocities.size() > motor_number_,
 //                 "You tried to access index %d of the MotorSpeed message array which is of size %d.",
@@ -220,7 +227,10 @@ void GazeboMotorModel::ControlVelocityCallback(GzCommandMotorSpeedMsgPtr& comman
 }
 
 void GazeboMotorModel::WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg) {
-//  gzdbg << __FUNCTION__ << "() called." << std::endl;
+
+  if(kPrintOnMsgCallback) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
 
   // TODO(burrimi): Transform velocity to world frame if frame_id is set to something else.
 //  wind_speed_W_.x = wind_speed->velocity.x;
@@ -233,6 +243,7 @@ void GazeboMotorModel::WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg) {
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
 //  gzdbg << __FUNCTION__ << "() called." << std::endl;
+
   motor_rot_vel_ = joint_->GetVelocity(0);
   if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_)) {
     gzerr << "Aliasing on motor [" << motor_number_ << "] might occur. Consider making smaller simulation time steps or raising the rotor_velocity_slowdown_sim_ param.\n";

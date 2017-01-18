@@ -73,6 +73,10 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 // This gets called by the world update start event.
 void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
+  if(kPrintOnUpdates) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   if(!pubs_and_subs_created_) {
     CreatePubsAndSubs();
     pubs_and_subs_created_ = true;
@@ -152,7 +156,9 @@ void GazeboControllerInterface::CreatePubsAndSubs() {
 //void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::ActuatorsConstPtr& input_reference_msg) {
 void GazeboControllerInterface::CommandMotorCallback(GzActuatorsMsgPtr& actuators_msg) {
 
-//  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  if(kPrintOnMsgCallback) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
 
 //  input_reference_.resize(input_reference_msg->angular_velocities.size());
 //  for (int i = 0; i < input_reference_msg->angular_velocities.size(); ++i) {

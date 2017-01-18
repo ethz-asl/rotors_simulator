@@ -265,6 +265,10 @@ void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
 
 void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
+  if(kPrintOnUpdates) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   if(!pubs_and_subs_created_) {
     CreatePubsAndSubs();
     pubs_and_subs_created_ = true;
