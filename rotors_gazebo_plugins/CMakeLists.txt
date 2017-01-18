@@ -196,34 +196,34 @@ include_directories(${Eigen_INCLUDE_DIRS})
 # Entire GazeboBagPlugin is a heavy ROS dependency, and so rather than passing messages to
 # GazeboRosInterfacePlugin, this entire library is only included if ROS is present.
 if (NOT NO_ROS)
-  add_library(rotors_gazebo_bag_plugin src/gazebo_bag_plugin.cpp)
+  add_library(rotors_gazebo_bag_plugin SHARED src/gazebo_bag_plugin.cpp)
   target_link_libraries(rotors_gazebo_bag_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   add_dependencies(rotors_gazebo_bag_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
 #================================= CONTROLLER INTERFACE PLUGIN ==================================//
-add_library(rotors_gazebo_controller_interface src/gazebo_controller_interface.cpp)
+add_library(rotors_gazebo_controller_interface SHARED src/gazebo_controller_interface.cpp)
 target_link_libraries(rotors_gazebo_controller_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})
 endif()
 
 #=================================== GEOTAGGED IMAGES PLUGIN ====================================//
-add_library(gazebo_geotagged_images_plugin src/gazebo_geotagged_images_plugin.cpp)
+add_library(gazebo_geotagged_images_plugin SHARED src/gazebo_geotagged_images_plugin.cpp)
 target_link_libraries(gazebo_geotagged_images_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(gazebo_geotagged_images_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
 #========================================= GPS PLUGIN ===========================================//
-add_library(rotors_gazebo_gps_plugin src/gazebo_gps_plugin.cpp)
+add_library(rotors_gazebo_gps_plugin SHARED src/gazebo_gps_plugin.cpp)
 target_link_libraries(rotors_gazebo_gps_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_gps_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
 #========================================= IMU PLUGIN ===========================================//
-add_library(rotors_gazebo_imu_plugin src/gazebo_imu_plugin.cpp)
+add_library(rotors_gazebo_imu_plugin SHARED src/gazebo_imu_plugin.cpp)
 target_link_libraries(rotors_gazebo_imu_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
@@ -237,7 +237,7 @@ if (NOT NO_ROS)
 endif()
 
 #===================================== MAGNETOMETER PLUGIN ======================================//
-add_library(rotors_gazebo_magnetometer_plugin src/gazebo_magnetometer_plugin.cpp)
+add_library(rotors_gazebo_magnetometer_plugin SHARED src/gazebo_magnetometer_plugin.cpp)
 target_link_libraries(rotors_gazebo_magnetometer_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_magnetometer_plugin ${catkin_EXPORTED_TARGETS})
@@ -254,14 +254,14 @@ if (BUILD_MAVLINK_INTERFACE)
 endif()
 
 #==================================== MOTOR MODEL PLUGIN ========================================//
-add_library(rotors_gazebo_motor_model src/gazebo_motor_model.cpp)
+add_library(rotors_gazebo_motor_model SHARED src/gazebo_motor_model.cpp)
 target_link_libraries(rotors_gazebo_motor_model ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_motor_model ${catkin_EXPORTED_TARGETS})
 endif()
 
 #==================================== MULTIROTOR BASE PLUGIN ====================================//
-add_library(rotors_gazebo_multirotor_base_plugin src/gazebo_multirotor_base_plugin.cpp)
+add_library(rotors_gazebo_multirotor_base_plugin SHARED src/gazebo_multirotor_base_plugin.cpp)
 target_link_libraries(rotors_gazebo_multirotor_base_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_multirotor_base_plugin ${catkin_EXPORTED_TARGETS})
@@ -273,7 +273,7 @@ endif()
 # ASL uses this, PX4 does not
 if(BUILD_OCTOMAP_PLUGIN)
   find_package(octomap REQUIRED)
-  add_library(rotors_gazebo_octomap_plugin src/gazebo_octomap_plugin.cpp)
+  add_library(rotors_gazebo_octomap_plugin SHARED src/gazebo_octomap_plugin.cpp)
   target_link_libraries(rotors_gazebo_octomap_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   if (NOT NO_ROS)
     add_dependencies(rotors_gazebo_octomap_plugin ${catkin_EXPORTED_TARGETS})
@@ -281,7 +281,7 @@ if(BUILD_OCTOMAP_PLUGIN)
 endif()
 
 #======================================= ODOMETRY PLUGIN ========================================//
-add_library(rotors_gazebo_odometry_plugin src/gazebo_odometry_plugin.cpp)
+add_library(rotors_gazebo_odometry_plugin SHARED src/gazebo_odometry_plugin.cpp)
 target_link_libraries(rotors_gazebo_odometry_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${OpenCV_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_odometry_plugin ${catkin_EXPORTED_TARGETS})
@@ -314,13 +314,13 @@ endif()
 #===================================== ROS INTERFACE PLUGIN =====================================//
 # This entire plugin is only built if ROS is a dependency
 if (NOT NO_ROS)
-  add_library(rotors_gazebo_ros_interface_plugin src/gazebo_ros_interface_plugin.cpp)
+  add_library(rotors_gazebo_ros_interface_plugin SHARED src/gazebo_ros_interface_plugin.cpp)
   target_link_libraries(rotors_gazebo_ros_interface_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   add_dependencies(rotors_gazebo_ros_interface_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
 #========================================= WIND PLUGIN ==========================================//
-add_library(rotors_gazebo_wind_plugin src/gazebo_wind_plugin.cpp)
+add_library(rotors_gazebo_wind_plugin SHARED src/gazebo_wind_plugin.cpp)
 target_link_libraries(rotors_gazebo_wind_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_wind_plugin ${catkin_EXPORTED_TARGETS})
