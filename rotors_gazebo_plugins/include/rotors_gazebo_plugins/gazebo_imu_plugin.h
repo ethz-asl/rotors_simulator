@@ -32,7 +32,7 @@
 //#include <mav_msgs/default_topics.h>
 //#include <ros/callback_queue.h>
 //#include <ros/ros.h>
-#include <sensor_msgs/Imu.h>
+//#include <sensor_msgs/Imu.h>
 
 #include "gazebo/msgs/msgs.hh"
 #include "SensorImu.pb.h"
