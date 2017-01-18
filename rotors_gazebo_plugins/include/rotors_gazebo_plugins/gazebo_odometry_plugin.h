@@ -149,8 +149,8 @@ class GazeboOdometryPlugin : public ModelPlugin {
   gazebo::transport::PublisherPtr transform_stamped_pub_;
   gazebo::transport::PublisherPtr odometry_pub_;
 
-  tf::Transform tf_;
-  tf::TransformBroadcaster transform_broadcaster_;
+  //tf::Transform tf_;
+  //tf::TransformBroadcaster transform_broadcaster_;
 
   physics::WorldPtr world_;
   physics::ModelPtr model_;
