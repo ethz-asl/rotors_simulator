@@ -1,8 +1,8 @@
 # Optional arguments to be passed into file
-# BUILD_MAVLINK_INTERFACE       bool    Build mavlink_interface_plugin (requires mav dependency).
-# BUILD_OCTOMAP_PLUGIN          bool    Build the optical map plugin (requires Octomap).
-# BUILD_OPTICAL_FLOW_PLUGIN     bool    Build the optical flow plugin (requires OpenCV).
-# NO_ROS                        bool    Build without any ROS dependencies.
+# BUILD_MAVLINK_INTERFACE_PLUGIN    bool    Build mavlink_interface_plugin (requires mav dependency).
+# BUILD_OCTOMAP_PLUGIN              bool    Build the optical map plugin (requires Octomap).
+# BUILD_OPTICAL_FLOW_PLUGIN         bool    Build the optical flow plugin (requires OpenCV).
+# NO_ROS                            bool    Build without any ROS dependencies.
 
 cmake_minimum_required(VERSION 2.8.3)
 project(rotors_gazebo_plugins)
@@ -18,10 +18,10 @@ message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 
-if(BUILD_MAVLINK_INTERFACE)
-  message(STATUS "BUILD_MAVLINK_INTERFACE = TRUE, adding mavros dependency and building mavlink_interface_plugin.")
+if(BUILD_MAVLINK_INTERFACE_PLUGIN)
+  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN = TRUE, adding mavros dependency and building mavlink_interface_plugin.")
 else ()
-  message(STATUS "BUILD_MAVLINK_INTERFACE = FALSE, NOT adding mavros dependency and NOT building mavlink_interface_plugin.")
+  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN = FALSE, NOT adding mavros dependency and NOT building mavlink_interface_plugin.")
 endif ()
 
 if(NO_ROS)
@@ -70,7 +70,7 @@ include_directories(${GAZEBO_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-# if (BUILD_MAVLINK_INTERFACE)
+# if (BUILD_MAVLINK_INTERFACE_PLUGIN)
 #   include_directories(${mavros_msgs_INCLUDE_DIRS})
 #   include_directories(${libmavconn_INCLUDE_DIRS})
 # endif()
@@ -201,7 +201,7 @@ if (NOT NO_ROS)
 endif()
 
 #================================= MAVLINK INTERFACE PLUGIN =====================================//
-if (BUILD_MAVLINK_INTERFACE)
+if (BUILD_MAVLINK_INTERFACE_PLUGIN)
   # Note that this library includes TWO .cpp files.
   add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/geo_mag_declination.cpp)
   target_link_libraries(rotors_gazebo_mavlink_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${mav_msgs})
@@ -321,7 +321,7 @@ if (NOT NO_ROS)
     )
 endif()
 
-if (BUILD_MAVLINK_INTERFACE)
+if (BUILD_MAVLINK_INTERFACE_PLUGIN)
   install(
     TARGETS
       rotors_gazebo_mavlink_interface
