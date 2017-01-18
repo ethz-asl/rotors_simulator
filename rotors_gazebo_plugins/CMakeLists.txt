@@ -111,44 +111,9 @@ foreach(ITR ${GAZEBO_INCLUDE_DIRS})
     set(GAZEBO_MSG_INCLUDE_DIRS "${ITR}/gazebo/msgs")
   endif()
 endforeach()
-#message(FATAL_ERROR "GAZEBO_MSG_INCLUDE_DIRS = " ${GAZEBO_MSG_INCLUDE_DIRS})
 
-#set (msgs
-#  msgs/Actuators.proto
-#  msgs/CommandMotorSpeed.proto
-#  msgs/ConnectGazeboToRosTopic.proto
-#  msgs/ConnectRosToGazeboTopic.proto
-#  msgs/Float32.proto
-#  msgs/Header.proto
-#  msgs/JointState.proto
-#  msgs/Lidar.proto
-#  msgs/MagneticField.proto
-#  msgs/MotorSpeed.proto
-#  msgs/NavSatFix.proto
-#  msgs/Odometry.proto
-#  msgs/OpticalFlow.proto
-#  msgs/Point.proto
-#  msgs/PointStamped.proto
-#  msgs/Pose.proto
-#  msgs/PoseStamped.proto
-#  msgs/PoseWithCovariance.proto
-#  msgs/PoseWithCovarianceStamped.proto
-#  msgs/Position.proto
-#  msgs/PositionStamped.proto
-#  msgs/Quaternion.proto
-#  msgs/SensorImu.proto
-#  msgs/Transform.proto
-#  msgs/TransformStamped.proto
-#  msgs/Twist.proto
-#  msgs/TwistStamped.proto
-#  msgs/TwistWithCovariance.proto
-#  msgs/Vector3.proto
-#  msgs/WindSpeed.proto
-#  msgs/Wrench.proto
-#  msgs/WrenchStamped.proto
-#)
+# Get lists of all .proto files in the msgs directory
 file(GLOB msgs msgs/*.proto)
-message(STATUS "msgs = ${msgs}")
 
 # Finally, generate the .cpp files from the .proto files
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${msgs})
