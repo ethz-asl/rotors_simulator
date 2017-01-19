@@ -32,7 +32,7 @@
 
 #include "gazebo/msgs/msgs.hh"
 
-// GAZEBO MSG TYPES
+//============= GAZEBO MSG TYPES ==============//
 #include "ConnectGazeboToRosTopic.pb.h"
 #include "ConnectRosToGazeboTopic.pb.h"
 
@@ -52,7 +52,7 @@
 #include "WindSpeed.pb.h"
 #include "WrenchStamped.pb.h"
 
-// ROS MSG TYPES
+//=============== ROS MSG TYPES ===============//
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/Pose.h>
@@ -91,25 +91,22 @@ typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> GzMagnet
 typedef const boost::shared_ptr<const sensor_msgs::msgs::NavSatFix> GzNavSatFixPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::TwistStamped> GzTwistStampedMsgPtr;
 
-//! @brief    Message interface plugin for Gazebo.
-//! @details  Interfaces to both ROS and MAVlink.
+/// \brief    ROS message interface plugin for Gazebo.
+/// \details  This routes messages to/from Gazebo and ROS. This is used
+///           so that individual plugins are not ROS dependent.
+//            This is a WorldPlugin, only one of these is designed to be enabled per Gazebo world.
 class GazeboRosInterfacePlugin : public WorldPlugin {
  public:
 
   GazeboRosInterfacePlugin();
   ~GazeboRosInterfacePlugin();
 
-  //! @brief    Call this to connect a Gazebo topic to a ROS topic.
-  //! @details  Any messages published on the specified Gazebo topic will be converted into a ROS message
-  //!           and then published on the ROS framework.
-//  void ConnectToRos(std::string gazeboTopicName, std::string rosTopicName, SupportedMsgTypes msgType);
-
   void InitializeParams();
   void Publish();
 
  protected:
 
-//  void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+
   void Load(physics::WorldPtr _world, sdf::ElementPtr _sdf);
 
   /// @brief  	This gets called by the world update start event.
@@ -118,6 +115,11 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
 
  private:
 
+  /// \brief  Provides a way for GzConnectGazeboToRosTopicMsgCallback() to connect a Gazebo subscriber to
+  ///         a ROS publisher.
+  /// \details
+  ///   M is the type of the message that will be subscribed to the Gazebo framework.
+  ///   N is the type of the message published to the ROS framework
   template <typename M, typename N>
   void ConnectHelper(
       void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher),
@@ -130,16 +132,16 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
 
   std::string namespace_;
 
-  /// @brief  Handle for the Gazebo node.
+  /// \brief  Handle for the Gazebo node.
   transport::NodePtr gz_node_handle_;
 
-  /// @brief  Handle for the ROS node.
+  /// \brief  Handle for the ROS node.
   ros::NodeHandle* ros_node_handle_;
 
-  /// @brief  Pointer to the world.
+  /// \brief  Pointer to the world.
   physics::WorldPtr world_;
 
-  /// @brief  Pointer to the update event connection.
+  /// \brief  Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
   // ============================================ //
@@ -159,8 +161,9 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   /// @details  Will create a Gazebo publisher if one doesn't already exist.
   void GzConnectRosToGazeboTopicMsgCallback(GzConnectRosToGazeboTopicMsgPtr& gz_connect_ros_to_gazebo_topic_msg);
 
-  /// @brief    Finds the Gazebo publisher associated with the provided topic. If not found, a publisher for that
-  ///           topic is created.
+  /// \brief      Looks if a publisher on the provided topic already exists, and returns it.
+  ///             If no publisher exists, this method creates one and returns that instead.
+  /// \warning    Finding an already created publisher is not supported yet!
   template<typename T>
   transport::PublisherPtr FindOrMakeGazeboPublisher(std::string topic);
 
