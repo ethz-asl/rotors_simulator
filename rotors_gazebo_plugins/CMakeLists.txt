@@ -143,9 +143,9 @@ endif()
 include_directories(include ${catkin_INCLUDE_DIRS} ${GAZEBO_MSG_INCLUDE_DIRS})
 include_directories(${Eigen_INCLUDE_DIRS})
 
-# ============================================== #
-# ============ LIBRARIES IN PACKAGE ============ #
-# ============================================== #
+# =============================================================================================== #
+# ========================================= USER LIBRARIES ====================================== #
+# =============================================================================================== #
 
 # SORTED IN ALPHABETICAL ORDER (by "plugin" name, keep it this way!)
 
@@ -282,6 +282,21 @@ if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_wind_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 
+# =============================================================================================== #
+# ======================================= EXTERNAL LIBRARIES ==================================== #
+# =============================================================================================== #
+
+# liftdrag_plugin is provided by Gazebo, but not guaranteed to be on system.
+# Naming has not been changed to match rotors convetion, due to this being an external
+# code soure.
+# Linux is not consistent with plugin availability, even on Gazebo 7
+#if("${GAZEBO_VERSION}" VERSION_LESS "7.0")
+  add_library(LiftDragPlugin SHARED src/liftdrag_plugin/liftdrag_plugin.cpp)
+  target_link_libraries(LiftDragPlugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+  if (NOT NO_ROS)
+    add_dependencies(LiftDragPlugin ${catkin_EXPORTED_TARGETS})
+  endif()
+#endif()
 
 
 
@@ -307,6 +322,8 @@ install(
     rotors_gazebo_multirotor_base_plugin
     rotors_gazebo_odometry_plugin
     rotors_gazebo_wind_plugin
+    
+    LiftDragPlugin
     
   DESTINATION ${BIN_DESTINATION}
   LIBRARY DESTINATION ${LIB_DESTINATION}
