@@ -100,21 +100,21 @@ void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _s
 
 }
 
-//! @brief      A helper class that provides storage for additional parameters that are inserted
-//!             into the callback.
+/// \brief      A helper class that provides storage for additional parameters that are inserted
+///             into the callback.
 template <typename M>
 struct ConnectHelperStorage {
 
-  //! @brief    Pointer to the ROS interface plugin class.
+  /// \brief    Pointer to the ROS interface plugin class.
   GazeboRosInterfacePlugin * ptr;
 
-  //! @brief    Function pointer to the subscriber callback with additional parameters.
+  /// \brief    Function pointer to the subscriber callback with additional parameters.
   void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher ros_publisher);
 
-  //! @brief    The ROS publisher that is passed into the modified callback.
+  /// \brief    The ROS publisher that is passed into the modified callback.
   ros::Publisher ros_publisher;
 
-  /// @brief    This is what gets passed into the Gazebo Subscribe method as a callback, and hence can only
+  /// \brief    This is what gets passed into the Gazebo Subscribe method as a callback, and hence can only
   ///           have one parameter (note boost::bind() does not work with the current Gazebo Subscribe() definitions).
   void callback (const boost::shared_ptr<M const> & msg_ptr) {
     //gzdbg << "callback() called." << std::endl;
@@ -123,8 +123,11 @@ struct ConnectHelperStorage {
 
 };
 
-// M is the type of the message that will be subscribed to the Gazebo framework.
-// N is the type of the message published to the ROS framework
+/// \brief  Provides a way for GzConnectGazeboToRosTopicMsgCallback() to connect a Gazebo subscriber to
+///         a ROS publisher.
+/// \details
+///   M is the type of the message that will be subscribed to the Gazebo framework.
+///   N is the type of the message published to the ROS framework
 template <typename M, typename N>
 void GazeboRosInterfacePlugin::ConnectHelper(
     void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher),
@@ -140,7 +143,7 @@ void GazeboRosInterfacePlugin::ConnectHelper(
 //  gzdbg << "GazeboRosInterfacePlugin publishing to ROS topic \"" << rosTopicName << "\"." << std::endl;
   ros::Publisher ros_publisher = ros_node_handle_->advertise<N>(rosTopicName, 1);
 
-  // @todo Handle collision error
+  /// \todo Handle collision error
   auto callback_entry = callback_map.emplace(gazeboTopicName, ConnectHelperStorage<M>{ptr, fp, ros_publisher});
 
 //  gzdbg << "GazeboRosInterfacePlugin subscribing to Gazebo topic \"" << gazeboTopicName << "\"."<< std::endl;
@@ -282,6 +285,9 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
 
 }
 
+/// \brief      Looks if a publisher on the provided topic already exists, and returns it.
+///             If no publisher exists, this method creates one and returns that instead.
+/// \warning    Finding an already created publisher is not supported yet!
 template<typename T>
 transport::PublisherPtr GazeboRosInterfacePlugin::FindOrMakeGazeboPublisher(std::string topic) {
 
@@ -293,6 +299,7 @@ transport::PublisherPtr GazeboRosInterfacePlugin::FindOrMakeGazeboPublisher(std:
     gz_publisher_ptr = gz_node_handle_->Advertise<T>(topic, 1);
   } else {
     gzdbg << "Gazebo publisher with topic = \"" << topic <<  "\" already exists, not creating another one." << std::endl;
+    // How do we get a handle to the publisher!?!
     gzerr << "Handling an already created publisher is not supported yet!" << std::endl;
   }
 
@@ -314,8 +321,8 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       // Create Gazebo publisher
       // (we don't need to manually save a reference for the Gazebo publisher because
       // boost::bind will do that for us)
-        gazebo::transport::PublisherPtr gz_publisher_ptr =
-            FindOrMakeGazeboPublisher<sensor_msgs::msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic());
+      gazebo::transport::PublisherPtr gz_publisher_ptr =
+          FindOrMakeGazeboPublisher<sensor_msgs::msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic());
 
       // Create ROS subscriber
       ros::Subscriber ros_subscriber = ros_node_handle_->subscribe<mav_msgs::Actuators>(
@@ -365,7 +372,7 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
 
     } default: {
       gzthrow("ConnectRosToGazeboTopic message type with enum val = " << gz_connect_ros_to_gazebo_topic_msg->msgtype() <<
-                " is not supported by GazeboRosInterfacePlugin.");
+          " is not supported by GazeboRosInterfacePlugin.");
     }
   }
 
