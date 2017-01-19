@@ -33,6 +33,11 @@ GazeboGpsPlugin::~GazeboGpsPlugin() {
 }
 
 void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
+
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   // Store the pointer to the parent sensor.
 #if GAZEBO_MAJOR_VERSION > 6
   parent_sensor_ = std::dynamic_pointer_cast<sensors::GpsSensor>(_sensor);

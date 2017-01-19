@@ -53,6 +53,10 @@ OpticalFlowPlugin::~OpticalFlowPlugin()
 /////////////////////////////////////////////////
 void OpticalFlowPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
 {
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   if (!_sensor)
     gzerr << "Invalid sensor pointer.\n";
 

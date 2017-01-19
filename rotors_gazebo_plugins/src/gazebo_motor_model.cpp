@@ -48,8 +48,9 @@ void GazeboMotorModel::Publish() {
 
 void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
-  gzdbg << __PRETTY_FUNCTION__ << " called." << std::endl;
-  //gzthrow("TEST");
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
 
   model_ = _model;
 

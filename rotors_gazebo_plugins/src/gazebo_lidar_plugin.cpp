@@ -65,6 +65,10 @@ RayPlugin::~RayPlugin()
 /////////////////////////////////////////////////
 void RayPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 {
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   // Get then name of the parent sensor
   this->parentSensor =
 #if GAZEBO_MAJOR_VERSION >= 7

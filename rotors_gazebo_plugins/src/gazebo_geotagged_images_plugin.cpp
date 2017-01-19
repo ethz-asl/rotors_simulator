@@ -47,6 +47,10 @@ GeotaggedImagesPlugin::~GeotaggedImagesPlugin()
 
 void GeotaggedImagesPlugin::Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf)
 {
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   if (!sensor)
     gzerr << "Invalid sensor pointer.\n";
 

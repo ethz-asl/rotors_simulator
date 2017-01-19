@@ -38,9 +38,15 @@ GimbalControllerPlugin::GimbalControllerPlugin()
 }
 
 /////////////////////////////////////////////////
-void GimbalControllerPlugin::Load(physics::ModelPtr _model,
-  sdf::ElementPtr _sdf)
+void GimbalControllerPlugin::Load(
+    physics::ModelPtr _model,
+    sdf::ElementPtr _sdf)
 {
+
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   this->model = _model;
 
   this->sdf = _sdf;
