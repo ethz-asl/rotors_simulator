@@ -28,17 +28,14 @@ GazeboRosInterfacePlugin::GazeboRosInterfacePlugin()
     : WorldPlugin(),
       gz_node_handle_(0),
       ros_node_handle_(0),
-      ros_actuators_msg_(new mav_msgs::Actuators)
-{
-  // Nothing
-}
+      ros_actuators_msg_(new mav_msgs::Actuators) { }
+
 
 GazeboRosInterfacePlugin::~GazeboRosInterfacePlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
 }
 
 
-//void GazeboRosInterfacePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf) {
 
   if(kPrintOnPluginLoad) {
@@ -100,6 +97,7 @@ void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _s
 
 }
 
+
 /// \brief      A helper class that provides storage for additional parameters that are inserted
 ///             into the callback.
 template <typename M>
@@ -123,11 +121,7 @@ struct ConnectHelperStorage {
 
 };
 
-/// \brief  Provides a way for GzConnectGazeboToRosTopicMsgCallback() to connect a Gazebo subscriber to
-///         a ROS publisher.
-/// \details
-///   M is the type of the message that will be subscribed to the Gazebo framework.
-///   N is the type of the message published to the ROS framework
+
 template <typename M, typename N>
 void GazeboRosInterfacePlugin::ConnectHelper(
     void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher),
@@ -158,6 +152,7 @@ void GazeboRosInterfacePlugin::ConnectHelper(
   subscriberPtrs_.push_back(subscriberPtr);
 
 }
+
 
 void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
     GzConnectGazeboToRosTopicMsgPtr& gz_connect_gazebo_to_ros_topic_msg) {
@@ -285,9 +280,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
 
 }
 
-/// \brief      Looks if a publisher on the provided topic already exists, and returns it.
-///             If no publisher exists, this method creates one and returns that instead.
-/// \warning    Finding an already created publisher is not supported yet!
+
 template<typename T>
 transport::PublisherPtr GazeboRosInterfacePlugin::FindOrMakeGazeboPublisher(std::string topic) {
 
@@ -305,6 +298,7 @@ transport::PublisherPtr GazeboRosInterfacePlugin::FindOrMakeGazeboPublisher(std:
 
   return gz_publisher_ptr;
 }
+
 
 void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
     GzConnectRosToGazeboTopicMsgPtr& gz_connect_ros_to_gazebo_topic_msg) {
