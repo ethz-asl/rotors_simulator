@@ -15,7 +15,7 @@ project(rotors_gazebo_plugins)
 message(STATUS "rotors_gazebo_plugins CMakeLists.txt called.")
 
 message(STATUS "ADDITIONAL_INCLUDE_DIRS = ${ADDITIONAL_INCLUDE_DIRS}")
-include_directories(ADDITIONAL_INCLUDE_DIRS)
+include_directories(${ADDITIONAL_INCLUDE_DIRS})
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
