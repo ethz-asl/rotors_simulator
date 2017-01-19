@@ -37,6 +37,7 @@
 #include "PoseWithCovarianceStamped.pb.h"
 #include "PositionStamped.pb.h"
 #include "TransformStamped.pb.h"
+#include "TransformStampedWithFrameIds.pb.h"
 
 namespace gazebo {
 
@@ -72,8 +73,8 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
     gzerr << "[gazebo_odometry_plugin] Please specify a robotNamespace.\n";
 
 //  node_handle_ = new ros::NodeHandle(namespace_);
-  gz_node_ptr_ = gazebo::transport::NodePtr(new transport::Node());
-  gz_node_ptr_->Init(namespace_);
+  node_handle_ = gazebo::transport::NodePtr(new transport::Node());
+  node_handle_->Init(namespace_);
 
   if (_sdf->HasElement("linkName"))
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
@@ -382,9 +383,6 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     gz_geometry_msgs::Vector3 * linear_velocity =
         odometry_msg.mutable_twist()->mutable_twist()->mutable_linear();
 
-//    linear_velocity.x += linear_velocity_n[0];
-//    linear_velocity.y += linear_velocity_n[1];
-//    linear_velocity.z += linear_velocity_n[2];
     linear_velocity->set_x(linear_velocity->x() + linear_velocity_n[0]);
     linear_velocity->set_y(linear_velocity->y() + linear_velocity_n[1]);
     linear_velocity->set_z(linear_velocity->z() + linear_velocity_n[2]);
@@ -394,24 +392,19 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     angular_velocity_n << angular_velocity_n_[0](random_generator_) + angular_velocity_u_[0](random_generator_),
                 angular_velocity_n_[1](random_generator_) + angular_velocity_u_[1](random_generator_),
                 angular_velocity_n_[2](random_generator_) + angular_velocity_u_[2](random_generator_);
-//    geometry_msgs::Vector3& angular_velocity = odometry->twist.twist.angular;
+
     gz_geometry_msgs::Vector3 * angular_velocity =
         odometry_msg.mutable_twist()->mutable_twist()->mutable_angular();
 
-//    angular_velocity.x += angular_velocity_n[0];
-//    angular_velocity.y += angular_velocity_n[1];
-//    angular_velocity.z += angular_velocity_n[2];
     angular_velocity->set_x(angular_velocity->x() + angular_velocity_n[0]);
     angular_velocity->set_y(angular_velocity->y() + angular_velocity_n[1]);
     angular_velocity->set_z(angular_velocity->z() + angular_velocity_n[2]);
 
-//    odometry->pose.covariance = pose_covariance_matrix_;
     odometry_msg.mutable_pose()->mutable_covariance()->Clear();
     for(int i = 0; i < pose_covariance_matrix_.size(); i++) {
       odometry_msg.mutable_pose()->mutable_covariance()->Add(pose_covariance_matrix_[i]);
     }
 
-//    odometry->twist.covariance = twist_covariance_matrix_;
     odometry_msg.mutable_twist()->mutable_covariance()->Clear();
     for(int i = 0; i < twist_covariance_matrix_.size(); i++) {
       odometry_msg.mutable_twist()->mutable_covariance()->Add(twist_covariance_matrix_[i]);
@@ -419,17 +412,17 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
     // Publish all the topics, for which the topic name is specified.
     if (pose_pub_->HasConnections()) {
-//      gzmsg << "Publishing pose..." << std::endl;
+      //gzmsg << "Publishing pose..." << std::endl;
       pose_pub_->Publish(odometry_msg.pose().pose());
     }
 
     if (pose_with_covariance_stamped_pub_->HasConnections()) {
       gz_geometry_msgs::PoseWithCovarianceStamped pose_with_covariance_stamped_msg;
-//      pose_with_covariance_stamped_msg.set_allocated_header(odometry_msg.mutable_header());
+
       pose_with_covariance_stamped_msg.mutable_header()->CopyFrom(odometry_msg.header());
       pose_with_covariance_stamped_msg.mutable_pose_with_covariance()->CopyFrom(odometry_msg.pose());
 
-//      gzmsg << "Publishing PoseWithCovarianceStamped message..." << std::endl;
+      //gzmsg << "Publishing PoseWithCovarianceStamped message..." << std::endl;
       pose_with_covariance_stamped_pub_->Publish(pose_with_covariance_stamped_msg);
     }
 
@@ -438,19 +431,11 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
       position_stamped_msg.mutable_header()->CopyFrom(odometry_msg.header());
       position_stamped_msg.mutable_position()->CopyFrom(odometry_msg.pose().pose().position());
 
-//      gzmsg << "Publishing position..." << std::endl;
+      //gzmsg << "Publishing position..." << std::endl;
       position_stamped_pub_->Publish(position_stamped_msg);
     }
 
     if (transform_stamped_pub_->HasConnections()) {
-//      geometry_msgs::TransformStampedPtr transform(new geometry_msgs::TransformStamped);
-//      transform->header = odometry->header;
-//      geometry_msgs::Vector3 translation;
-//      translation.x = p.x;
-//      translation.y = p.y;
-//      translation.z = p.z;
-//      transform->transform.translation = translation;
-//      transform->transform.rotation = q_W_L;
 
       gz_geometry_msgs::TransformStamped transform_stamped_msg;
 
@@ -460,14 +445,12 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
       transform_stamped_msg.mutable_transform()->mutable_translation()->set_z(p->z());
       transform_stamped_msg.mutable_transform()->mutable_rotation()->CopyFrom(*q_W_L);
 
-//      gzmsg << "Publishing transform..." << std::endl;
-
-//      transform_stamped_pub_.publish(transform);
+      //gzmsg << "Publishing transform..." << std::endl;
       transform_stamped_pub_->Publish(transform_stamped_msg);
     }
 
     if (odometry_pub_->HasConnections()) {
-//      gzmsg << "Publishing odometry..." << std::endl;
+      //gzmsg << "Publishing odometry..." << std::endl;
       odometry_pub_->Publish(odometry_msg);
     }
 
@@ -480,6 +463,24 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
     //    std::cout << "published odometry with timestamp " << odometry->header.stamp << "at time t" << world_->GetSimTime().Double()
     //        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
+
+
+    //==============================================//
+    //========= BROADCAST TRANSFORM MSG ============//
+    //==============================================//
+
+    gz_geometry_msgs::TransformStampedWithFrameIds transform_stamped_with_frame_ids_msg;
+    transform_stamped_with_frame_ids_msg.mutable_header()->CopyFrom(odometry_msg.header());
+    transform_stamped_with_frame_ids_msg.mutable_transform()->mutable_translation()->set_x(p->x());
+    transform_stamped_with_frame_ids_msg.mutable_transform()->mutable_translation()->set_y(p->y());
+    transform_stamped_with_frame_ids_msg.mutable_transform()->mutable_translation()->set_z(p->z());
+    transform_stamped_with_frame_ids_msg.mutable_transform()->mutable_rotation()->CopyFrom(*q_W_L);
+    transform_stamped_with_frame_ids_msg.set_parent_frame_id(parent_frame_id_);
+    transform_stamped_with_frame_ids_msg.set_child_frame_id(child_frame_id_);
+
+    broadcast_transform_pub_->Publish(transform_stamped_with_frame_ids_msg);
+
+
   } // if (gazebo_sequence_ == odometry_queue_.front().first) {
 
   ++gazebo_sequence_;
@@ -489,7 +490,7 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
-        gz_node_ptr_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
@@ -497,7 +498,7 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
   // =============== POSE MSG SETUP ============= //
   // ============================================ //
 //  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << pose_pub_topic_ << "\"." << std::endl;
-  pose_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Pose>(
+  pose_pub_ = node_handle_->Advertise<gz_geometry_msgs::Pose>(
       "~/" + model_->GetName() + "/" + pose_pub_topic_,
       1);
 
@@ -510,7 +511,7 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
   // == POSE WITH COVARIANCE STAMPED MSG SETUP == //
   // ============================================ //
 //  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << pose_with_covariance_stamped_pub_topic_ << "\"." << std::endl;
-  pose_with_covariance_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::PoseWithCovarianceStamped>(
+  pose_with_covariance_stamped_pub_ = node_handle_->Advertise<gz_geometry_msgs::PoseWithCovarianceStamped>(
       "~/" + model_->GetName() + "/" + pose_with_covariance_stamped_pub_topic_,
       1);
 
@@ -523,7 +524,7 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
   // ========= POSITION STAMPED MSG SETUP ======= //
   // ============================================ //
 //  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << position_stamped_pub_topic_ << "\"." << std::endl;
-  position_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::PositionStamped>(
+  position_stamped_pub_ = node_handle_->Advertise<gz_geometry_msgs::PositionStamped>(
       "~/" + model_->GetName() + "/" + position_stamped_pub_topic_,
       1);
 
@@ -536,7 +537,7 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
   // ============= ODOMETRY MSG SETUP =========== //
   // ============================================ //
 //  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << odometry_pub_topic_ << "\"." << std::endl;
-  odometry_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::Odometry>(
+  odometry_pub_ = node_handle_->Advertise<gz_geometry_msgs::Odometry>(
       "~/" + model_->GetName() + "/" + odometry_pub_topic_,
       1);
 
@@ -549,7 +550,7 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
   // ======== TRANSFORM STAMPED MSG SETUP ======= //
   // ============================================ //
 //  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << transform_stamped_pub_topic_ << "\"." << std::endl;
-  transform_stamped_pub_ = gz_node_ptr_->Advertise<gz_geometry_msgs::TransformStamped>(
+  transform_stamped_pub_ = node_handle_->Advertise<gz_geometry_msgs::TransformStamped>(
       "~/" + model_->GetName() + "/" + transform_stamped_pub_topic_,
       1);
 
@@ -557,6 +558,14 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
   connect_gazebo_to_ros_topic_msg.set_ros_topic(transform_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::TRANSFORM_STAMPED);
   connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+  // ============================================ //
+  //  TRANSFORM STAMPED WITH FRAME ID MSG SETUP   //
+  // ============================================ //
+//  gzmsg << "GazeboOdometryPlugin creating publisher on Gazebo topic \"" << transform_stamped_pub_topic_ << "\"." << std::endl;
+  broadcast_transform_pub_ = node_handle_->Advertise<gz_geometry_msgs::TransformStampedWithFrameIds>(
+      "~/" + kBroadcastTransformSubtopic,
+      1);
 
 }
 

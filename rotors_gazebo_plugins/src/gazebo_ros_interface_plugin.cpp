@@ -95,6 +95,21 @@ void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _s
       &GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback,
       this);
 
+  // ============================================ //
+  // ===== BROADCAST TRANSFORM MESSAGE SETUP ==== //
+  // ============================================ //
+
+  gz_broadcast_transform_sub_ = gz_node_handle_->Subscribe(
+      "~/" + kBroadcastTransformSubtopic,
+      &GazeboRosInterfacePlugin::GzBroadcastTransformMsgCallback,
+      this);
+
+}
+
+
+void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
+  // Do nothing
+  // This plugins actions are all executed through message callbacks.
 }
 
 
@@ -846,7 +861,7 @@ void GazeboRosInterfacePlugin::RosWindSpeedMsgCallback(
       const rotors_comm::WindSpeedConstPtr& ros_wind_speed_msg_ptr,
       gazebo::transport::PublisherPtr gz_publisher_ptr) {
 
-//  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  //gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Convert ROS message to Gazebo message
   gz_mav_msgs::WindSpeed gz_wind_speed_msg;
@@ -864,10 +879,40 @@ void GazeboRosInterfacePlugin::RosWindSpeedMsgCallback(
 
 }
 
-void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
-  // Do nothing
-  // This plugins actions are all executed through message callbacks.
+void GazeboRosInterfacePlugin::GzBroadcastTransformMsgCallback(GzTransformStampedWithFrameIdsMsgPtr& broadcast_transform_msg) {
+
+  //gzdbg << __FUNCTION__ << "() called." << std::endl;
+
+  ros::Time stamp;
+  stamp.sec = broadcast_transform_msg->header().stamp().sec();
+  stamp.nsec = broadcast_transform_msg->header().stamp().nsec();
+
+//  tf::Quaternion tf_q_W_L(q_W_L.x, q_W_L.y, q_W_L.z, q_W_L.w);
+  tf::Quaternion tf_q_W_L(
+      broadcast_transform_msg->transform().rotation().x(),
+      broadcast_transform_msg->transform().rotation().y(),
+      broadcast_transform_msg->transform().rotation().z(),
+      broadcast_transform_msg->transform().rotation().w());
+
+//  tf::Vector3 tf_p(p.x, p.y, p.z);
+  tf::Vector3 tf_p(
+      broadcast_transform_msg->transform().translation().x(),
+      broadcast_transform_msg->transform().translation().y(),
+      broadcast_transform_msg->transform().translation().z());
+
+  tf_ = tf::Transform(tf_q_W_L, tf_p);
+  transform_broadcaster_.sendTransform(
+      tf::StampedTransform(
+          tf_,
+          stamp,
+          broadcast_transform_msg->parent_frame_id(),
+          broadcast_transform_msg->child_frame_id()));
+
+  //    std::cout << "published odometry with timestamp " << odometry->header.stamp << "at time t" << world_->GetSimTime().Double()
+  //        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
 }
+
+
 
 GZ_REGISTER_WORLD_PLUGIN(GazeboRosInterfacePlugin);
 

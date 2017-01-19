@@ -56,6 +56,10 @@ static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
 static const std::string kConnectGazeboToRosSubtopic = "connect_gazebo_to_ros_subtopic";
 static const std::string kConnectRosToGazeboSubtopic = "connect_ros_to_gazebo_subtopic";
 
+/// \brief    Special-case topic for ROS interface plugin to listen to (if present)
+///           and broadcast transforms to the ROS system.
+static const std::string kBroadcastTransformSubtopic = "broadcast_transform";
+
 
 /// \brief      Obtains a parameter from sdf.
 /// \param[in]  sdf           Pointer to the sdf object.
