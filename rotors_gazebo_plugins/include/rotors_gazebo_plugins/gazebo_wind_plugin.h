@@ -30,9 +30,11 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 
+#include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
+
 #include "rotors_gazebo_plugins/common.h"
 
-#include "WrenchStamped.pb.h" // Wind message
+#include "WrenchStamped.pb.h"         // Wind message
 
 namespace gazebo {
 // Default values
@@ -52,16 +54,15 @@ static const math::Vector3 kDefaultWindGustDirection = math::Vector3(0, 1, 0);
 
 
 
-/// @brief    This gazebo plugin simulates wind acting on a model.
-/// @details  This plugin publishes on a Gazebo topic and instructs the ROS interface plugin to
+/// \brief    This gazebo plugin simulates wind acting on a model.
+/// \details  This plugin publishes on a Gazebo topic and instructs the ROS interface plugin to
 ///           forward the message onto ROS.
 class GazeboWindPlugin : public ModelPlugin {
  public:
   GazeboWindPlugin()
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
-//        wind_pub_topic_(mav_msgs::default_topics::WIND),
-        wind_pub_topic_(""),
+        wind_pub_topic_(mav_msgs::default_topics::WIND),
         wind_force_mean_(kDefaultWindForceMean),
         wind_force_variance_(kDefaultWindForceVariance),
         wind_gust_force_mean_(kDefaultWindGustForceMean),
@@ -70,18 +71,19 @@ class GazeboWindPlugin : public ModelPlugin {
         wind_gust_direction_(kDefaultWindGustDirection),
         frame_id_(kDefaultFrameId),
         link_name_(kDefaultLinkName),
-        node_handle_(NULL) {}
+        node_handle_(nullptr),
+        pubs_and_subs_created_(false) {}
 
   virtual ~GazeboWindPlugin();
 
  protected:
-  /// @brief Load the plugin.
-  /// @param[in] _model Pointer to the model that loaded this plugin.
-  /// @param[in] _sdf SDF element that describes the plugin.
+  /// \brief Load the plugin.
+  /// \param[in] _model Pointer to the model that loaded this plugin.
+  /// \param[in] _sdf SDF element that describes the plugin.
   void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
-  /// @brief Called when the world is updated.
-  /// @param[in] _info Update timing information.
+  /// \brief Called when the world is updated.
+  /// \param[in] _info Update timing information.
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
@@ -96,7 +98,7 @@ class GazeboWindPlugin : public ModelPlugin {
   ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
   void CreatePubsAndSubs();
 
-  /// @brief Pointer to the update event connection.
+  /// \brief    Pointer to the update event connection.
   event::ConnectionPtr update_connection_;
 
   physics::WorldPtr world_;
@@ -121,14 +123,12 @@ class GazeboWindPlugin : public ModelPlugin {
   common::Time wind_gust_end_;
   common::Time wind_gust_start_;
 
-  //ros::Publisher wind_pub_;
   gazebo::transport::PublisherPtr wind_pub_;
 
-  //ros::NodeHandle *node_handle_;
   gazebo::transport::NodePtr node_handle_;
 
-  /// @brief    Gazebo message for sending wind data.
-  /// @details  This is defined at the class scope so that it so re-created
+  /// \brief    Gazebo message for sending wind data.
+  /// \details  This is defined at the class scope so that it so re-created
   ///           everytime a wind message needs to be sent, increasing performance.
   gz_geometry_msgs::WrenchStamped wrench_stamped_msg_;
 

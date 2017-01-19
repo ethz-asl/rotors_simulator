@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +37,6 @@ GazeboBagPlugin::~GazeboBagPlugin() {
   bag_.close();
 }
 
-// void GazeboBagPlugin::InitializeParams() {};
-// void GazeboBagPlugin::Publish() {};
 
 void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
@@ -145,6 +144,11 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
 // This gets called by the world update start event.
 void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
+
+  if(kPrintOnUpdates) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   // Get the current simulation time.
   common::Time now = world_->GetSimTime();
   LogWrenches(now);

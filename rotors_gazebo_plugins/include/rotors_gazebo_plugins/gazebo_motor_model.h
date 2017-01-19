@@ -30,12 +30,8 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-//#include <mav_msgs/Actuators.h>
-//#include <mav_msgs/default_topics.h>
-//#include <ros/callback_queue.h>
-//#include <ros/ros.h>
-//#include <rotors_comm/WindSpeed.h>
-//#include <std_msgs/Float32.h>
+
+#include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
 
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/motor_model.hpp"
@@ -76,7 +72,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         MotorModel(),
         command_sub_topic_(kDefaultCommandSubTopic),
         wind_speed_sub_topic_(kDefaultWindSpeedSubTopic),
-//        motor_speed_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
+        motor_speed_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
         motor_speed_pub_topic_(""),
         motor_number_(0),
         turning_direction_(turning_direction::CW),
@@ -137,30 +133,29 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   double time_constant_down_;
   double time_constant_up_;
 
-//  ros::NodeHandle* node_handle_;
   gazebo::transport::NodePtr node_handle_;
-//  ros::Publisher motor_velocity_pub_;
+
   gazebo::transport::PublisherPtr motor_velocity_pub_;
-//  ros::Subscriber command_sub_;
+
   gazebo::transport::SubscriberPtr command_sub_;
-//  ros::Subscriber wind_speed_sub_;
+
   gazebo::transport::SubscriberPtr wind_speed_sub_;
 
   physics::ModelPtr model_;
   physics::JointPtr joint_;
   physics::LinkPtr link_;
+
   /// \brief Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
   boost::thread callback_queue_thread_;
+
   void QueueThread();
-//  std_msgs::Float32 turning_velocity_msg_;
+
   gz_std_msgs::Float32 turning_velocity_msg_;
 
-//  void VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_velocities);
   void ControlVelocityCallback(GzCommandMotorSpeedMsgPtr& command_motor_speed_msg);
 
-//  void WindSpeedCallback(const rotors_comm::WindSpeedConstPtr& wind_speed);
   void WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg);
 
   std::unique_ptr<FirstOrderFilter<double>> rotor_velocity_filter_;

@@ -29,14 +29,10 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/rendering/rendering.hh>
 
-namespace gazebo
-{
-/**
- * @class GeotaggedImagesPlugin
- * Gazebo plugin that saves geotagged camera images to disk.
- */
-class GAZEBO_VISIBLE GeotaggedImagesPlugin : public SensorPlugin
-{
+namespace gazebo {
+
+/// \brief    Gazebo plugin that saves geotagged camera images to disk.
+class GAZEBO_VISIBLE GeotaggedImagesPlugin : public SensorPlugin {
   public: GeotaggedImagesPlugin();
 
   public: virtual ~GeotaggedImagesPlugin();
@@ -66,4 +62,4 @@ class GAZEBO_VISIBLE GeotaggedImagesPlugin : public SensorPlugin
   protected: std::string format_;
 };
 
-} /* namespace gazebo */
+} // namespace gazebo
