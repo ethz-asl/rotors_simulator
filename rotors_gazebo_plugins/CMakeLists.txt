@@ -14,7 +14,9 @@ project(rotors_gazebo_plugins)
 
 message(STATUS "rotors_gazebo_plugins CMakeLists.txt called.")
 
-message(STATUS "ADDITIONAL_INCLUDE_DIRS = ${ADDITIONAL_INCLUDE_DIRS}")
+# Add any additional include directories as specified by the calling process (either user or another CMake file).
+# ASL: Doesn't use this, catkin manages the mav_comm dependency
+# PX4: Provides include directory for mav_msgs, so that "mav_msgs/default_topics.h" can be found and used.
 include_directories(${ADDITIONAL_INCLUDE_DIRS})
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
