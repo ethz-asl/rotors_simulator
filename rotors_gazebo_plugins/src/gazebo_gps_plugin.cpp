@@ -112,16 +112,8 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   // ======= POPULATE STATIC PARTS OF MSGS ====== //
   // ============================================ //
 
-  // Fill the GPS message.
-//  gps_message_.header.frame_id = frame_id;
-//  gps_message_.status.service = sensor_msgs::NavSatStatus::SERVICE_GPS;
-//  gps_message_.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
-//  gps_message_.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_KNOWN;
-//  gps_message_.position_covariance[0] = hor_pos_std_dev * hor_pos_std_dev;
-//  gps_message_.position_covariance[4] = hor_pos_std_dev * hor_pos_std_dev;
-//  gps_message_.position_covariance[8] = ver_pos_std_dev * ver_pos_std_dev;
-  //gz_gps_message_->header().set_frame_id(fra);
-  gz_gps_message_.mutable_header()->set_frame_id("test");
+  // Fill the static parts of the GPS message.
+  gz_gps_message_.mutable_header()->set_frame_id(frame_id);
   gz_gps_message_.set_service(sensor_msgs::msgs::NavSatFix::SERVICE_GPS);
   gz_gps_message_.set_status(sensor_msgs::msgs::NavSatFix::STATUS_FIX);
   gz_gps_message_.set_position_covariance_type(sensor_msgs::msgs::NavSatFix::COVARIANCE_TYPE_KNOWN);
@@ -150,8 +142,7 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
     }
   }
 
-  // Fill the ground speed message.
-  //ground_speed_message_.header.frame_id = frame_id;
+  // Fill the static parts of the ground speed message.
   gz_ground_speed_message_.mutable_header()->set_frame_id(frame_id);
 }
 
@@ -181,10 +172,6 @@ void GazeboGpsPlugin::OnUpdate() {
 #if GAZEBO_MAJOR_VERSION > 6
   current_time = parent_sensor_->LastMeasurementTime();
 
-  //gps_message_.latitude = parent_sensor_->Latitude().Degree();
-  //gps_message_.longitude = parent_sensor_->Longitude().Degree();
-  //gps_message_.altitude = parent_sensor_->Altitude();
-
   gz_gps_message_.set_latitude(parent_sensor_->Latitude().Degree());
   gz_gps_message_.set_longitude(parent_sensor_->Longitude().Degree());
   gz_gps_message_.set_altitude(parent_sensor_->Altitude());
@@ -192,28 +179,16 @@ void GazeboGpsPlugin::OnUpdate() {
 #else
   current_time = parent_sensor_->GetLastMeasurementTime();
 
-  //gps_message_.latitude = parent_sensor_->GetLatitude().Degree();
-  //gps_message_.longitude = parent_sensor_->GetLongitude().Degree();
-  //gps_message_.altitude = parent_sensor_->GetAltitude();
-
   gz_gps_message_.set_latitude(parent_sensor_->GetLatitude().Degree());
   gz_gps_message_.set_longitude(parent_sensor_->GetLongitude().Degree());
   gz_gps_message_.set_altitude(parent_sensor_->GetAltitude());
 
 #endif
 
-  //gps_message_.header.stamp.sec = current_time.sec;
-  //gps_message_.header.stamp.nsec = current_time.nsec;
   gz_gps_message_.mutable_header()->mutable_stamp()->set_sec(current_time.sec);
   gz_gps_message_.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
 
   // Fill the ground speed message.
-//  ground_speed_message_.twist.linear.x = W_ground_speed_W_L.x;
-//  ground_speed_message_.twist.linear.y = W_ground_speed_W_L.y;
-//  ground_speed_message_.twist.linear.z = W_ground_speed_W_L.z;
-//  ground_speed_message_.header.stamp.sec = current_time.sec;
-//  ground_speed_message_.header.stamp.nsec = current_time.nsec;
-
   gz_ground_speed_message_.mutable_twist()->mutable_linear()->set_x(W_ground_speed_W_L.x);
   gz_ground_speed_message_.mutable_twist()->mutable_linear()->set_y(W_ground_speed_W_L.y);
   gz_ground_speed_message_.mutable_twist()->mutable_linear()->set_z(W_ground_speed_W_L.z);
@@ -221,11 +196,9 @@ void GazeboGpsPlugin::OnUpdate() {
   gz_ground_speed_message_.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
 
   // Publish the GPS message.
-  //gps_pub_.publish(gps_message_);
   gz_gps_pub_->Publish(gz_gps_message_);
 
   // Publish the ground speed message.
-  //ground_speed_pub_.publish(ground_speed_message_);
   gz_ground_speed_pub_->Publish(gz_ground_speed_message_);
 
 }
@@ -241,7 +214,7 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   // ============================================ //
   // =========== NAV SAT FIX MSG SETUP ========== //
   // ============================================ //
-  gzmsg << "GazeboGpsPlugin creating publisher on \"" << gps_topic_ << "\"." << std::endl;
+  //gzmsg << "GazeboGpsPlugin creating publisher on \"" << gps_topic_ << "\"." << std::endl;
   gz_gps_pub_ = node_handle_->Advertise<sensor_msgs::msgs::NavSatFix>(gps_topic_, 1);
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(gps_topic_);
@@ -252,7 +225,7 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   // ============================================ //
   // == GROUND SPEED (TWIST STAMPED) MSG SETUP == //
   // ============================================ //
-  gzmsg << "GazeboGpsPlugin creating publisher on \"" << ground_speed_topic_ << "\"." << std::endl;
+  //gzmsg << "GazeboGpsPlugin creating publisher on \"" << ground_speed_topic_ << "\"." << std::endl;
   gz_ground_speed_pub_ = node_handle_->Advertise<sensor_msgs::msgs::TwistStamped>(ground_speed_topic_, 1);
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(ground_speed_topic_);
