@@ -73,7 +73,6 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         command_sub_topic_(kDefaultCommandSubTopic),
         wind_speed_sub_topic_(kDefaultWindSpeedSubTopic),
         motor_speed_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
-        motor_speed_pub_topic_(""),
         motor_number_(0),
         turning_direction_(turning_direction::CW),
         max_force_(kDefaultMaxForce),
