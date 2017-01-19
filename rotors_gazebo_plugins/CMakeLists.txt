@@ -12,9 +12,9 @@ project(rotors_gazebo_plugins)
 #endif()
 
 message(STATUS "rotors_gazebo_plugins CMakeLists.txt called.")
-message(STATUS "CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
-message(STATUS "CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
-message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
+
+message(STATUS "INCLUDE_DIRECTORIES = ${INCLUDE_DIRECTORIES}")
+
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 

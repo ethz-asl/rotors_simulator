@@ -34,8 +34,11 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <opencv2/core/core.hpp>
-#include <rotors_gazebo_plugins/common.h>
-#include <rotors_gazebo_plugins/sdf_api_wrapper.hpp>
+
+#include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
+
+#include "rotors_gazebo_plugins/common.h"
+#include "rotors_gazebo_plugins/sdf_api_wrapper.hpp"
 //#include <tf/transform_broadcaster.h>
 
 #include "Odometry.pb.h"
@@ -65,7 +68,7 @@ class GazeboOdometryPlugin : public ModelPlugin {
   GazeboOdometryPlugin()
       : ModelPlugin(),
         random_generator_(random_device_()),
-//        pose_pub_topic_(mav_msgs::default_topics::POSE),
+        pose_pub_topic_(mav_msgs::default_topics::POSE),
 //        pose_with_covariance_stamped_pub_topic_(mav_msgs::default_topics::POSE_WITH_COVARIANCE),
 //        position_stamped_pub_topic_(mav_msgs::default_topics::POSITION),
 //        transform_stamped_pub_topic_(mav_msgs::default_topics::TRANSFORM),
