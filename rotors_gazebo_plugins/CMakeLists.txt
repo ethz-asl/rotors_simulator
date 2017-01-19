@@ -1,4 +1,5 @@
 # Optional arguments to be passed into file
+# ADDITIONAL_INCLUDE_DIRS           string  Additional include directories to add to every build target (PX4 uses this).
 # BUILD_MAVLINK_INTERFACE_PLUGIN    bool    Build mavlink_interface_plugin (requires mav dependency).
 # BUILD_OCTOMAP_PLUGIN              bool    Build the optical map plugin (requires Octomap).
 # BUILD_OPTICAL_FLOW_PLUGIN         bool    Build the optical flow plugin (requires OpenCV).
@@ -13,7 +14,8 @@ project(rotors_gazebo_plugins)
 
 message(STATUS "rotors_gazebo_plugins CMakeLists.txt called.")
 
-message(STATUS "INCLUDE_DIRECTORIES = ${INCLUDE_DIRECTORIES}")
+message(STATUS "ADDITIONAL_INCLUDE_DIRS = ${ADDITIONAL_INCLUDE_DIRS}")
+include_directories(ADDITIONAL_INCLUDE_DIRS)
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
