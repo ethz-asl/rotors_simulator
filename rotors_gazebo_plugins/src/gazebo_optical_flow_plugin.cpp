@@ -22,7 +22,9 @@
 #endif
 
 #include "gazebo/sensors/DepthCameraSensor.hh"
-#include <rotors_gazebo_plugins/gazebo_optical_flow_plugin.h>
+
+#include "rotors_gazebo_plugins/common.h"
+#include "rotors_gazebo_plugins/gazebo_optical_flow_plugin.h"
 
 #include <highgui.h>
 #include <math.h>
