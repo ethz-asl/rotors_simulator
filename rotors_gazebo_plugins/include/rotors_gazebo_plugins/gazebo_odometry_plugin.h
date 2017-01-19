@@ -144,15 +144,19 @@ class GazeboOdometryPlugin : public ModelPlugin {
   std::random_device random_device_;
   std::mt19937 random_generator_;
 
-  //ros::NodeHandle* node_handle_;
-
-  gazebo::transport::NodePtr gz_node_ptr_;
+  gazebo::transport::NodePtr node_handle_;
 
   gazebo::transport::PublisherPtr pose_pub_;
   gazebo::transport::PublisherPtr pose_with_covariance_stamped_pub_;
   gazebo::transport::PublisherPtr position_stamped_pub_;
   gazebo::transport::PublisherPtr transform_stamped_pub_;
   gazebo::transport::PublisherPtr odometry_pub_;
+
+  /// \brief    Special-case publisher to publish stamped transforms with
+  ///           frame IDs. The ROS interface plugin (if present) will
+  ///           listen to this publisher and broadcast the transform
+  ///           using transform_broadcast().
+  gazebo::transport::PublisherPtr broadcast_transform_pub_;
 
   //tf::Transform tf_;
   //tf::TransformBroadcaster transform_broadcaster_;

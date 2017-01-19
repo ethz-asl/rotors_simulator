@@ -25,12 +25,13 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
+#include "gazebo/msgs/msgs.hh"
+
+//=================== ROS =====================//
 #include <mav_msgs/default_topics.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
-
-
-#include "gazebo/msgs/msgs.hh"
+#include <tf/transform_broadcaster.h>
 
 //============= GAZEBO MSG TYPES ==============//
 #include "ConnectGazeboToRosTopic.pb.h"
@@ -48,6 +49,7 @@
 #include "PositionStamped.pb.h"
 #include "SensorImu.pb.h"
 #include "TransformStamped.pb.h"
+#include "TransformStampedWithFrameIds.pb.h"
 #include "TwistStamped.pb.h"
 #include "WindSpeed.pb.h"
 #include "WrenchStamped.pb.h"
@@ -90,8 +92,9 @@ typedef const boost::shared_ptr<const sensor_msgs::msgs::JointState> GzJointStat
 typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> GzMagneticFieldMsgPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::NavSatFix> GzNavSatFixPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::TwistStamped> GzTwistStampedMsgPtr;
+typedef const boost::shared_ptr<const gz_geometry_msgs::TransformStampedWithFrameIds> GzTransformStampedWithFrameIdsMsgPtr;
 
-/// \brief    ROS message interface plugin for Gazebo.
+/// \brief    ROS interface plugin for Gazebo.
 /// \details  This routes messages to/from Gazebo and ROS. This is used
 ///           so that individual plugins are not ROS dependent.
 //            This is a WorldPlugin, only one of these is designed to be enabled per Gazebo world.
@@ -248,6 +251,18 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
       const rotors_comm::WindSpeedConstPtr& ros_wind_speed_msg_ptr,
       gazebo::transport::PublisherPtr gz_publisher_ptr);
 
+  // ============================================ //
+  // ====== TRANSFORM BROADCASTER RELATED ======= //
+  // ============================================ //
+
+  transport::SubscriberPtr gz_broadcast_transform_sub_;
+
+  /// \brief    This is a special-case callback which listens for Gazebo "Transform" messages. Upon receiving one it
+  ///           broadcasts the transform on the ROS system (using transform_broadcast()).
+  void GzBroadcastTransformMsgCallback(GzTransformStampedWithFrameIdsMsgPtr& broadcast_transform_msg);
+
+  tf::Transform tf_;
+  tf::TransformBroadcaster transform_broadcaster_;
 
 };
 
