@@ -33,7 +33,9 @@ GazeboWindPlugin::~GazeboWindPlugin() {
 
 void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
-  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
 
   // Store the pointer to the model.
   model_ = _model;

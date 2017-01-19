@@ -33,6 +33,11 @@ GazeboMagnetometerPlugin::~GazeboMagnetometerPlugin() {
 }
 
 void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   // Store the pointer to the model and the world
   model_ = _model;
   world_ = model_->GetWorld();

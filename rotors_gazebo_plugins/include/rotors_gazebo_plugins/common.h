@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +27,31 @@
 
 namespace gazebo {
 
-// Debugging
-static const bool kPrintOnUpdates = false;
-static const bool kPrintOnMsgCallback = false;
+//===============================================================================================//
+//========================================= DEBUGGING ===========================================//
+//===============================================================================================//
+
+/// \addtogroup Debug Print Switches
+/// @{
+
+// The following boolean constants enable/disable debug printing when certain plugin methods are called.
+// Suitable for debugging purposes. Left on permanently can swamp std::out and can crash Gazebo.
+
+static const bool kPrintOnPluginLoad    = false;
+static const bool kPrintOnUpdates       = false;
+static const bool kPrintOnMsgCallback   = false;
+
+/// @}
 
 // Default values
 static const std::string kDefaultNamespace = "";
 static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
+
+//===============================================================================================//
+//================================== TOPICS FOR ROS INTERFACE ===================================//
+//===============================================================================================//
+
+// These should perhaps be defined in an .sdf/.xacro file instead?
 
 static const std::string kConnectGazeboToRosSubtopic = "connect_gazebo_to_ros_subtopic";
 static const std::string kConnectRosToGazeboSubtopic = "connect_ros_to_gazebo_subtopic";

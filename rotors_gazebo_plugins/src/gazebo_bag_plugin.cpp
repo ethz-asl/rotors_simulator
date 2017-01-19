@@ -41,7 +41,9 @@ GazeboBagPlugin::~GazeboBagPlugin() {
 
 void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
-  gzmsg << "GazeboBagPlugin::Load() called." << std::endl;
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
 
   // Store the pointer to the model
   model_ = _model;

@@ -35,7 +35,9 @@ GazeboMultirotorBasePlugin::~GazeboMultirotorBasePlugin() {
 
 void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
-  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
 
   model_ = _model;
   world_ = model_->GetWorld();
