@@ -36,6 +36,8 @@
 #include <stdio.h>
 #include <boost/algorithm/string.hpp>
 
+#include "rotors_gazebo_plugins/common.h"
+
 using namespace gazebo;
 using namespace std;
 
