@@ -42,12 +42,6 @@ GazeboImuPlugin::GazeboImuPlugin()
 
 GazeboImuPlugin::~GazeboImuPlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
-//  if (node_handle_) {
-//    //node_handle_->shutdown();
-//	  // Should we be doing this? ASL code called shutdown() then delete for ROS publisher,
-//	  // but PX4 code does not touch Gazebo publisher in destructor
-//    delete node_handle_;
-//  }
 }
 
 
@@ -75,7 +69,6 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   node_handle_ = transport::NodePtr(new transport::Node());
 
   node_handle_->Init(namespace_);
-  gzmsg << "Gazebo node created at \"" << namespace_ << "\"." << std::endl;
 
   if (_sdf->HasElement("linkName"))
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
