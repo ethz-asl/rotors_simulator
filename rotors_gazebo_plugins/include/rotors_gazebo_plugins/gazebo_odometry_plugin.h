@@ -68,11 +68,13 @@ class GazeboOdometryPlugin : public ModelPlugin {
   GazeboOdometryPlugin()
       : ModelPlugin(),
         random_generator_(random_device_()),
+        // DEFAULT TOPICS
         pose_pub_topic_(mav_msgs::default_topics::POSE),
         pose_with_covariance_stamped_pub_topic_(mav_msgs::default_topics::POSE_WITH_COVARIANCE),
         position_stamped_pub_topic_(mav_msgs::default_topics::POSITION),
         transform_stamped_pub_topic_(mav_msgs::default_topics::TRANSFORM),
         odometry_pub_topic_(mav_msgs::default_topics::ODOMETRY),
+        //---------------
         parent_frame_id_(kDefaultParentFrameId),
         child_frame_id_(kDefaultChildFrameId),
         link_name_(kDefaultLinkName),

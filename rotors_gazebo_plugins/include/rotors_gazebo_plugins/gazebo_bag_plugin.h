@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +48,7 @@
 
 
 namespace gazebo {
+
 // Default values, the rest from common.h
 static const std::string kDefaultFrameId = "ground_truth_pose";
 static const std::string kDefaultLinkName = "base_link";
@@ -55,7 +57,9 @@ static const std::string kDefaultRecordingServiceName = "record_rosbag";
 static constexpr bool kDefaultWaitToRecord = false;
 static constexpr bool kDefaultIsRecording = false;
 
-/// \brief This plugin is used to create rosbag files from within gazebo.
+/// \brief    This plugin is used to create rosbag files from within gazebo.
+/// \details  This plugin is ROS dependent, and is not built if NO_ROS=TRUE is provided to
+///           CMakeLists.txt (as in the case of a PX4/Firmware build).
 class GazeboBagPlugin : public ModelPlugin {
   typedef std::map<const unsigned int, const physics::JointPtr> MotorNumberToJointMap;
   typedef std::pair<const unsigned int, const physics::JointPtr> MotorNumberToJointPair;
@@ -63,6 +67,7 @@ class GazeboBagPlugin : public ModelPlugin {
   GazeboBagPlugin()
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
+        // DEFAULT TOPICS
         ground_truth_pose_topic_(mav_msgs::default_topics::GROUND_TRUTH_POSE),
         ground_truth_twist_topic_(mav_msgs::default_topics::GROUND_TRUTH_TWIST),
         imu_topic_(mav_msgs::default_topics::IMU),
@@ -74,6 +79,7 @@ class GazeboBagPlugin : public ModelPlugin {
         wind_topic_(mav_msgs::default_topics::WIND),
         waypoint_topic_(mav_msgs::default_topics::COMMAND_TRAJECTORY),
         command_pose_topic_(mav_msgs::default_topics::COMMAND_POSE),
+        //---------------
         frame_id_(kDefaultFrameId),
         link_name_(kDefaultLinkName),
         bag_filename_(kDefaultBagFilename_),
@@ -81,7 +87,8 @@ class GazeboBagPlugin : public ModelPlugin {
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
         wait_to_record_(kDefaultWaitToRecord),
         is_recording_(kDefaultIsRecording),
-        node_handle_(NULL) {}
+        node_handle_(nullptr),
+        contact_mgr_(nullptr) {}
 
   virtual ~GazeboBagPlugin();
 

@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +37,9 @@
 
 namespace gazebo {
 
+/// \brief    Octomap plugin for Gazebo.
+/// \details  This plugin is dependent on ROS, and is not built if NO_ROS=TRUE is provided to
+///           CMakeLists.txt. The PX4/Firmware build does not build this file.
 class OctomapFromGazeboWorld : public WorldPlugin {
  public:
   OctomapFromGazeboWorld()
@@ -48,9 +52,11 @@ class OctomapFromGazeboWorld : public WorldPlugin {
   /// \param[in] _parent Pointer to the world that loaded this plugin.
   /// \param[in] _sdf SDF element that describes the plugin.
   void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf);
+
   bool CheckIfInterest(const math::Vector3& central_point,
                        gazebo::physics::RayShapePtr ray,
                        const double leaf_size);
+
   void FloodFill(const math::Vector3& seed_point,
                  const math::Vector3& bounding_box_origin,
                  const math::Vector3& bounding_box_lengths,

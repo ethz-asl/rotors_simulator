@@ -123,18 +123,6 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
     link_->AddForceAtRelativePosition(wind_gust, xyz_offset_);
   }
 
-//  geometry_msgs::WrenchStamped wrench_msg;
-//
-//  wrench_msg.header.frame_id = frame_id_;
-//  wrench_msg.header.stamp.sec = now.sec;
-//  wrench_msg.header.stamp.nsec = now.nsec;
-//  wrench_msg.wrench.force.x = wind.x + wind_gust.x;
-//  wrench_msg.wrench.force.y = wind.y + wind_gust.y;
-//  wrench_msg.wrench.force.z = wind.z + wind_gust.z;
-//  wrench_msg.wrench.torque.x = 0;
-//  wrench_msg.wrench.torque.y = 0;
-//  wrench_msg.wrench.torque.z = 0;
-
   wrench_stamped_msg_.mutable_header()->set_frame_id(frame_id_);
   wrench_stamped_msg_.mutable_header()->mutable_stamp()->set_sec(now.sec);
   wrench_stamped_msg_.mutable_header()->mutable_stamp()->set_nsec(now.nsec);
@@ -162,8 +150,7 @@ void GazeboWindPlugin::CreatePubsAndSubs() {
   // ============================================ //
   // =========== NAV SAT FIX MSG SETUP ========== //
   // ============================================ //
-  gzmsg << "GazeboGpsPlugin creating publisher on \"" << wind_pub_topic_ << "\"." << std::endl;
-  //wind_pub_ = node_handle_->advertise<geometry_msgs::WrenchStamped>(wind_pub_topic_, 1);
+  //gzmsg << "GazeboGpsPlugin creating publisher on \"" << wind_pub_topic_ << "\"." << std::endl;
   wind_pub_ = node_handle_->Advertise<gz_geometry_msgs::WrenchStamped>(wind_pub_topic_, 1);
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(wind_pub_topic_);

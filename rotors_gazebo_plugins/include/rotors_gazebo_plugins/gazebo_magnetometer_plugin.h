@@ -23,9 +23,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-//#include <mav_msgs/default_topics.h>
-//#include <ros/ros.h>
-//#include <sensor_msgs/MagneticField.h>
+
 #include "MagneticField.pb.h"
 
 #include "rotors_gazebo_plugins/common.h"
@@ -71,13 +69,16 @@ class GazeboMagnetometerPlugin : public ModelPlugin {
   gazebo::transport::PublisherPtr magnetometer_pub_;
   std::string frame_id_;
 
-  // Pointer to the world
+  /// \brief    Pointer to the world.
   physics::WorldPtr world_;
-  // Pointer to the model
+
+  /// \brief    Pointer to the model.
   physics::ModelPtr model_;
-  // Pointer to the link
+
+  /// \brief    Pointer to the link.
   physics::LinkPtr link_;
-  // Pointer to the update event connection
+
+  //// \brief    Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
   math::Vector3 mag_W_;

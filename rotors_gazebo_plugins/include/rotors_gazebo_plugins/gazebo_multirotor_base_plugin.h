@@ -29,10 +29,10 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 
+#include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
+
 #include "Actuators.pb.h"
 #include "JointState.pb.h"
-
-//#include <sensor_msgs/JointState.h>
 
 #include "rotors_gazebo_plugins/common.h"
 
@@ -52,8 +52,7 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
         joint_state_pub_topic_(kDefaultJointStatePubTopic),
-//        actuators_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
-        actuators_pub_topic_(""),
+        actuators_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
         link_name_(kDefaultLinkName),
         frame_id_(kDefaultFrameId),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
@@ -86,6 +85,7 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
 
   /// \brief Pointer to the update event connection.
   event::ConnectionPtr update_connection_;
+
   physics::WorldPtr world_;
   physics::ModelPtr model_;
   physics::LinkPtr link_;
@@ -101,15 +101,12 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   std::string frame_id_;
   double rotor_velocity_slowdown_sim_;
 
-  //ros::Publisher motor_pub_;
   gazebo::transport::PublisherPtr motor_pub_;
   sensor_msgs::msgs::Actuators actuators_msg_;
 
-  //ros::Publisher joint_state_pub_;
   gazebo::transport::PublisherPtr joint_state_pub_;
   sensor_msgs::msgs::JointState joint_state_msg_;
 
-//  ros::NodeHandle *node_handle_;
   gazebo::transport::NodePtr node_handle_;
 };
 
