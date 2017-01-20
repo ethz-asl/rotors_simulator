@@ -173,13 +173,12 @@ void OpticalFlowPlugin::OnNewFrame(const unsigned char * _image,
 
   timer_.stop();
 
-  Mat frame_gray = Mat(_height, _width, CV_8UC1);
-  frame_gray.data = (uchar*)_image;
-
   float flow_x_ang = 0;
   float flow_y_ang = 0;
   //calculate angular flow
-  int quality = _optical_flow->calcFlow(frame_gray, frame_time_us, dt_us, flow_x_ang, flow_y_ang);
+  int quality = _optical_flow->calcFlow((uint8_t *)_image, frame_time_us, dt_us, flow_x_ang, flow_y_ang);
+
+
 
   if (quality >= 0) { // calcFlow(...) returns -1 if data should not be published yet -> output_rate
     //prepare optical flow message
