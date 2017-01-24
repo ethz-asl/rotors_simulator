@@ -22,10 +22,29 @@ include_directories(${ADDITIONAL_INCLUDE_DIRS})
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 
+
+# =============================================================================================== #
+# ======================================== STATUS MESSAGES ====================================== #
+# =============================================================================================== #
+
+message(STATUS "ADDITIONAL_INCLUDE_DIRS = ${ADDITIONAL_INCLUDE_DIRS}")
+
 if(BUILD_MAVLINK_INTERFACE_PLUGIN)
   message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN = TRUE, adding mavros dependency and building mavlink_interface_plugin.")
 else ()
   message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN = FALSE, NOT adding mavros dependency and NOT building mavlink_interface_plugin.")
+endif ()
+
+if(BUILD_OCTOMAP_PLUGIN)
+  message(STATUS "BUILD_OCTOMAP_PLUGIN = TRUE, building gazebo_octomap_plugin.")
+else ()
+  message(STATUS "BUILD_OCTOMAP_PLUGIN = FALSE, NOT building gazebo_octomap_plugin.")
+endif ()
+
+if(BUILD_OPTICAL_FLOW_PLUGIN)
+  message(STATUS "BUILD_OPTICAL_FLOW_PLUGIN = TRUE, building gazebo_optical_flow_plugin.")
+else ()
+  message(STATUS "BUILD_OPTICAL_FLOW_PLUGIN = FALSE, NOT building gazebo_optical_flow_plugin.")
 endif ()
 
 if(NO_ROS)
