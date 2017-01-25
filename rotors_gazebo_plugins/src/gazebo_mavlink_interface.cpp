@@ -407,12 +407,23 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
       boost::bind(&GazeboMavlinkInterface::OnUpdate, this, _1));
 
   // Subscriber to IMU sensor_msgs::Imu Message and SITL message
+  gzdbg << "Creating Gazebo subscriber on topic \"" << "~/" + model_->GetName() + imu_sub_topic_ << "\"." << std::endl;
   imu_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + imu_sub_topic_, &GazeboMavlinkInterface::ImuCallback, this);
+
+  gzdbg << "Creating Gazebo subscriber on topic \"" << "~/" + model_->GetName() + lidar_sub_topic_ << "\"." << std::endl;
   lidar_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + lidar_sub_topic_, &GazeboMavlinkInterface::LidarCallback, this);
+
+  gzdbg << "Creating Gazebo subscriber on topic \"" << "~/" + model_->GetName() + opticalFlow_sub_topic_ << "\"." << std::endl;
   opticalFlow_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
   
   // Publish gazebo's motor_speed message
+  gzdbg << "Creating Gazebo publisher on topic \"" << "~/" + model_->GetName() + motor_velocity_reference_pub_topic_ << "\"." << std::endl;
   motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + model_->GetName() + motor_velocity_reference_pub_topic_, 1);
+
+  // TODO Should this be an absolute topic!?!
+  gzdbg << "Creating Gazebo publisher on topic \"" << "~/gps_position" << "\"." << std::endl;
+  gps_pub_ = node_handle_->Advertise<msgs::Vector3d>("~/gps_position");
+
 
   _rotor_count = 5;
   last_time_ = world_->GetSimTime();
@@ -474,7 +485,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   fds[0].fd = _fd;
   fds[0].events = POLLIN;
 
-  gps_pub_ = node_handle_->Advertise<msgs::Vector3d>("~/gps_position");
+
 }
 
 // This gets called by the world update start event.
@@ -551,6 +562,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
     send_mavlink_message(MAVLINK_MSG_ID_HIL_GPS, &hil_gps_msg, 200);
 
+    // Also publish GPS info on Gazebo topic
     msgs::Vector3d gps_msg;
     gps_msg.set_x(lat_rad * 180. / M_PI);
     gps_msg.set_y(lon_rad * 180. / M_PI);
