@@ -503,19 +503,22 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
     gz_mav_msgs::CommandMotorSpeed turning_velocities_msg;
 
+    gzdbg << "Publishing reference motor velocities. { ";
     for (int i = 0; i < input_reference_.size(); i++){
       if (last_actuator_time_ == 0 || (current_time - last_actuator_time_).Double() > 0.2) {
         turning_velocities_msg.add_motor_speed(0);
+        gzdbg << "0, ";
       } else {
         turning_velocities_msg.add_motor_speed(input_reference_[i]);
+        gzdbg << input_reference_[i] << ", "
       }
     }
+    gzdbg << "}" << std::endl;
     // TODO Add timestamp and Header
     // turning_velocities_msg->header.stamp.sec = current_time.sec;
     // turning_velocities_msg->header.stamp.nsec = current_time.nsec;
 
     // gzerr << turning_velocities_msg.motor_speed(0) << "\n";
-    gzdbg << "Publishing reference motor velocities." << std::endl;
     motor_velocity_reference_pub_->Publish(turning_velocities_msg);
   }
 
