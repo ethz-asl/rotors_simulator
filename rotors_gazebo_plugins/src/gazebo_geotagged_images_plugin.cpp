@@ -129,6 +129,8 @@ void GeotaggedImagesPlugin::Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf)
   this->newFrameConnection_ = this->camera_->ConnectNewImageFrame(
     boost::bind(&GeotaggedImagesPlugin::OnNewFrame, this, _1));
 
+  // This topic is published to by gazebo_mavlink_interface.cpp
+  /// \todo Should this be an absolute topic!?!
   gpsSub_ = node_handle_->Subscribe("~/gps_position", &GeotaggedImagesPlugin::OnNewGpsPosition, this);
 
   storageDir_ = "frames";
