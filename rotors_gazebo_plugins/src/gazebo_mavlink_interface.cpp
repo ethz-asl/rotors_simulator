@@ -510,7 +510,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
         gzdbg << "0, ";
       } else {
         turning_velocities_msg.add_motor_speed(input_reference_[i]);
-        gzdbg << input_reference_[i] << ", "
+        gzdbg << input_reference_[i] << ", ";
       }
     }
     gzdbg << "}" << std::endl;
