@@ -420,7 +420,8 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   gzdbg << "Creating Gazebo publisher on topic \"" << "~/" + model_->GetName() + motor_velocity_reference_pub_topic_ << "\"." << std::endl;
   motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + model_->GetName() + motor_velocity_reference_pub_topic_, 1);
 
-  // TODO Should this be an absolute topic!?!
+  // This topic is subscribed to by gazebo_geotagged_images_plugin.cpp
+  /// \todo Should this be an absolute topic!?!
   gzdbg << "Creating Gazebo publisher on topic \"" << "~/gps_position" << "\"." << std::endl;
   gps_pub_ = node_handle_->Advertise<msgs::Vector3d>("~/gps_position");
 
