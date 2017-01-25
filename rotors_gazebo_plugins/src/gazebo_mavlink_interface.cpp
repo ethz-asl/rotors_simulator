@@ -515,6 +515,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
     // turning_velocities_msg->header.stamp.nsec = current_time.nsec;
 
     // gzerr << turning_velocities_msg.motor_speed(0) << "\n";
+    gzdbg << "Publishing reference motor velocities." << std::endl;
     motor_velocity_reference_pub_->Publish(turning_velocities_msg);
   }
 
