@@ -579,6 +579,9 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 }
 
 void GazeboMavlinkInterface::send_mavlink_message(const uint8_t msgid, const void *msg, uint8_t component_ID) {
+
+  gzdbg << __FUNCTION__ << "() called, msgid = " << msgid << "., component_ID = " << component_ID << "." << std::endl;
+
   component_ID = 0;
   uint8_t payload_len = mavlink_message_lengths[msgid];
   unsigned packet_len = payload_len + MAVLINK_NUM_NON_PAYLOAD_BYTES;
@@ -616,6 +619,8 @@ void GazeboMavlinkInterface::send_mavlink_message(const uint8_t msgid, const voi
 }
 
 void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
+
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // frames
   // g - gazebo (ENU), east, north, up
@@ -759,6 +764,9 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
 }
 
 void GazeboMavlinkInterface::LidarCallback(LidarPtr& lidar_message) {
+
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
+
   mavlink_distance_sensor_t sensor_msg;
   sensor_msg.time_boot_ms = lidar_message->time_msec();
   sensor_msg.min_distance = lidar_message->min_distance() * 100.0;
@@ -778,6 +786,9 @@ void GazeboMavlinkInterface::LidarCallback(LidarPtr& lidar_message) {
 }
 
 void GazeboMavlinkInterface::OpticalFlowCallback(OpticalFlowPtr& opticalFlow_message) {
+
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
+
   mavlink_hil_optical_flow_t sensor_msg;
   sensor_msg.time_usec = opticalFlow_message->time_usec();
   sensor_msg.sensor_id = opticalFlow_message->sensor_id();
@@ -843,6 +854,9 @@ void GazeboMavlinkInterface::pollForMAVLinkMessages(double _dt, uint32_t _timeou
 
 void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
 {
+
+  gzdbg << __FUNCTION__ << "() called, msg->msgid = " << msg->msgid << "." << std::endl;
+
   switch(msg->msgid) {
   case MAVLINK_MSG_ID_HIL_ACTUATOR_CONTROLS:
     mavlink_hil_actuator_controls_t controls;
