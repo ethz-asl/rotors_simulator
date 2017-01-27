@@ -580,7 +580,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
 void GazeboMavlinkInterface::send_mavlink_message(const uint8_t msgid, const void *msg, uint8_t component_ID) {
 
-  gzdbg << __FUNCTION__ << "() called, msgid = " << msgid << "., component_ID = " << component_ID << "." << std::endl;
+  //gzdbg << __FUNCTION__ << "() called, msgid = " << msgid << "., component_ID = " << component_ID << "." << std::endl;
 
   component_ID = 0;
   uint8_t payload_len = mavlink_message_lengths[msgid];
@@ -620,7 +620,7 @@ void GazeboMavlinkInterface::send_mavlink_message(const uint8_t msgid, const voi
 
 void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
 
-  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  //gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // frames
   // g - gazebo (ENU), east, north, up
@@ -855,7 +855,7 @@ void GazeboMavlinkInterface::pollForMAVLinkMessages(double _dt, uint32_t _timeou
 void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
 {
 
-  gzdbg << __FUNCTION__ << "() called, msg->msgid = " << msg->msgid << "." << std::endl;
+  //gzdbg << __FUNCTION__ << "() called, msg->msgid = " << msg->msgid << "." << std::endl;
 
   switch(msg->msgid) {
   case MAVLINK_MSG_ID_HIL_ACTUATOR_CONTROLS:
