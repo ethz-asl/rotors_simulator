@@ -622,6 +622,18 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
 
   //gzdbg << __FUNCTION__ << "() called." << std::endl;
 
+  /*static int imu_debug_msg_count = 0;
+  if(imu_debug_msg_count >= 100) {
+    gzmsg << "{ "
+    "w: " << imu_message->orientation().w() <<
+    ", x: " << imu_message->orientation().x() <<
+    ", y: " << imu_message->orientation().y() <<
+    ", z: " << imu_message->orientation().z() <<
+    " }" << std::endl;
+    imu_debug_msg_count = 0;
+  }
+  imu_debug_msg_count++;*/
+
   // frames
   // g - gazebo (ENU), east, north, up
   // r - rotors imu frame (FLU), forward, left, up
@@ -727,6 +739,29 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
   optflow_ygyro = gyro_b.y;
   optflow_zgyro = gyro_b.z;
 
+  /*static int imu_msg_count = 0;
+  if(imu_msg_count >= 100) {
+    gzmsg << "{ "
+    "time_usec: " << sensor_msg.time_usec <<
+    ", xacc: " << sensor_msg.xacc <<
+    ", yacc: " << sensor_msg.yacc <<
+    ", zacc: " << sensor_msg.zacc <<
+    ", xgyro: " << sensor_msg.xgyro <<
+    ", ygyro: " << sensor_msg.ygyro <<
+    ", zgyro: " << sensor_msg.zgyro <<
+    ", xmag: " << sensor_msg.xmag <<
+    ", ymag: " << sensor_msg.ymag <<
+    ", zmag: " << sensor_msg.zmag <<
+    ", abs_pressure: " << sensor_msg.abs_pressure <<
+    ", diff_pressure: " << sensor_msg.diff_pressure <<
+    ", pressure_alt: " << sensor_msg.pressure_alt <<
+    ", temperature: " << sensor_msg.temperature <<
+    ", fields_updated: " << sensor_msg.fields_updated <<
+    " }" << std::endl;
+    imu_msg_count = 0;
+  }
+  imu_msg_count++;*/
+
   send_mavlink_message(MAVLINK_MSG_ID_HIL_SENSOR, &sensor_msg, 200);
 
   // ground truth
@@ -759,6 +794,33 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
   hil_state_quat.xacc = accel_true_b.x * 1000;
   hil_state_quat.yacc = accel_true_b.y * 1000;
   hil_state_quat.zacc = accel_true_b.z * 1000;
+
+  /*static int quat_msg_count = 0;
+  if(quat_msg_count >= 100) {
+    gzmsg << "{ "
+    "time_usec: " << hil_state_quat.time_usec <<
+    ", attitude_quaternion[0]: " << hil_state_quat.attitude_quaternion[0] <<
+    ", attitude_quaternion[1]: " << hil_state_quat.attitude_quaternion[1] <<
+    ", attitude_quaternion[2]: " << hil_state_quat.attitude_quaternion[2] <<
+    ", attitude_quaternion[3]: " << hil_state_quat.attitude_quaternion[3] <<
+    ", rollspeed: " << hil_state_quat.rollspeed <<
+    ", pitchspeed: " << hil_state_quat.pitchspeed <<
+    ", yawspeed: " << hil_state_quat.yawspeed <<
+    ", lat: " << hil_state_quat.lat <<
+    ", lon: " << hil_state_quat.lon <<
+    ", alt: " << hil_state_quat.alt <<
+    ", vx: " << hil_state_quat.vx <<
+    ", vy: " << hil_state_quat.vy <<
+    ", vz: " << hil_state_quat.vz <<
+    ", ind_airspeed: " << hil_state_quat.ind_airspeed <<
+    ", true_airspeed: " << hil_state_quat.true_airspeed <<
+    ", xacc: " << hil_state_quat.xacc <<
+    ", yacc: " << hil_state_quat.yacc <<
+    ", zacc: " << hil_state_quat.zacc <<
+    " }" << std::endl;
+    quat_msg_count = 0;
+  }
+  quat_msg_count++;*/
 
   send_mavlink_message(MAVLINK_MSG_ID_HIL_STATE_QUATERNION, &hil_state_quat, 200);
 }
