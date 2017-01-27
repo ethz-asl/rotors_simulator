@@ -314,17 +314,24 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 //  imu_message_.orientation.y = 0;
 //  imu_message_.orientation.z = 0;
 
-  gazebo::msgs::Quaternion* orientation = new gazebo::msgs::Quaternion();
+  /*gazebo::msgs::Quaternion* orientation = new gazebo::msgs::Quaternion();
   orientation->set_x(0);
   orientation->set_y(0);
   orientation->set_z(0);
   orientation->set_w(1);
-  imu_message_.set_allocated_orientation(orientation);
+  imu_message_.set_allocated_orientation(orientation);*/
 
 //  imu_message_.orientation.w = C_W_I.w;
 //  imu_message_.orientation.x = C_W_I.x;
 //  imu_message_.orientation.y = C_W_I.y;
 //  imu_message_.orientation.z = C_W_I.z;
+
+  gazebo::msgs::Quaternion* orientation = new gazebo::msgs::Quaternion();
+  orientation->set_w(C_W_I.w);
+  orientation->set_x(C_W_I.x);
+  orientation->set_y(C_W_I.y);
+  orientation->set_z(C_W_I.z);
+  imu_message_.set_allocated_orientation(orientation);
 
 //  imu_message_.linear_acceleration.x = linear_acceleration_I[0];
 //  imu_message_.linear_acceleration.y = linear_acceleration_I[1];
