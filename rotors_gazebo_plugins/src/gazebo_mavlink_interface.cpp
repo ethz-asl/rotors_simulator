@@ -551,7 +551,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   if (current_time.Double() - last_gps_time_.Double() > gps_update_interval_) {  // 5Hz
     // Raw UDP mavlink
     mavlink_hil_gps_t hil_gps_msg;
-    hil_gps_msg.time_usec = current_time.nsec*1000;
+    hil_gps_msg.time_usec = current_time.nsec/1000;
     hil_gps_msg.fix_type = 3;
     hil_gps_msg.lat = lat_rad * 180 / M_PI * 1e7;
     hil_gps_msg.lon = lon_rad * 180 / M_PI * 1e7;
@@ -693,7 +693,7 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
   math::Vector3 mag_b = q_nb.RotateVectorReverse(mag_n) + mag_noise_b;
 
   mavlink_hil_sensor_t sensor_msg;
-  sensor_msg.time_usec = world_->GetSimTime().nsec*1000;
+  sensor_msg.time_usec = world_->GetSimTime().nsec/1000;
   sensor_msg.xacc = accel_b.x;
   sensor_msg.yacc = accel_b.y;
   sensor_msg.zacc = accel_b.z;
@@ -734,7 +734,7 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
 
   // send ground truth
   mavlink_hil_state_quaternion_t hil_state_quat;
-  hil_state_quat.time_usec = world_->GetSimTime().nsec*1000;
+  hil_state_quat.time_usec = world_->GetSimTime().nsec/1000;
   hil_state_quat.attitude_quaternion[0] = q_nb.w;
   hil_state_quat.attitude_quaternion[1] = q_nb.x;
   hil_state_quat.attitude_quaternion[2] = q_nb.y;
