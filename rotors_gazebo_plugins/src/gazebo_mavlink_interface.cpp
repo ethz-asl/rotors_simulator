@@ -565,6 +565,27 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
     hil_gps_msg.cog = atan2(hil_gps_msg.ve, hil_gps_msg.vn) * 180.0/3.1416 * 100.0;
     hil_gps_msg.satellites_visible = 10;
 
+    /*static int gps_debug_msg_count = 0;
+    if(gps_debug_msg_count >= 0) {
+      gzmsg << "{ "
+      "time_usec: " << hil_gps_msg.time_usec <<
+      ", fix_type: " << hil_gps_msg.fix_type <<
+      ", lat: " << hil_gps_msg.lat <<
+      ", lon: " << hil_gps_msg.lon <<
+      ", alt: " << hil_gps_msg.alt <<
+      ", eph: " << hil_gps_msg.eph <<
+      ", epv: " << hil_gps_msg.epv <<
+      ", vel: " << hil_gps_msg.vel <<
+      ", vv: " << hil_gps_msg.vn <<
+      ", ve: " << hil_gps_msg.ve <<
+      ", vd: " << hil_gps_msg.vd <<
+      ", cog: " << hil_gps_msg.cog <<
+      ", satellites_visible: " << static_cast<int>(hil_gps_msg.satellites_visible) <<
+      " }" << std::endl;
+      gps_debug_msg_count = 0;
+    }
+    gps_debug_msg_count++;*/
+
     send_mavlink_message(MAVLINK_MSG_ID_HIL_GPS, &hil_gps_msg, 200);
 
     // Also publish GPS info on Gazebo topic
