@@ -70,7 +70,7 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
 
 }
 
-// This gets called by the world update start event.
+
 void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
   if(kPrintOnUpdates) {
@@ -88,28 +88,24 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
   common::Time now = world_->GetSimTime();
 
-//  mav_msgs::ActuatorsPtr turning_velocities_msg(new mav_msgs::Actuators);
   gz_sensor_msgs::Actuators turning_velocities_msg;
 
   for (int i = 0; i < input_reference_.size(); i++) {
-//    turning_velocities_msg->angular_velocities.push_back(input_reference_[i]);
     turning_velocities_msg.add_angular_velocities((double)input_reference_[i]);
   }
-//  turning_velocities_msg->header.stamp.sec = now.sec;
+
   turning_velocities_msg.mutable_header()->mutable_stamp()->set_sec(now.sec);
-//  turning_velocities_msg->header.stamp.nsec = now.nsec;
   turning_velocities_msg.mutable_header()->mutable_stamp()->set_nsec(now.nsec);
 
   // Frame ID is not used for this particular message
   turning_velocities_msg.mutable_header()->set_frame_id("");
 
-//  motor_velocity_reference_pub_.publish(turning_velocities_msg);
   motor_velocity_reference_pub_->Publish(turning_velocities_msg);
 }
 
 void GazeboControllerInterface::CreatePubsAndSubs() {
 
-//  gzdbg << __FUNCTION__ << "() called." << std::endl;
+  // gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr gz_connect_gazebo_to_ros_topic_pub =
@@ -146,24 +142,18 @@ void GazeboControllerInterface::CreatePubsAndSubs() {
   // Connect to ROS
   gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
   connect_ros_to_gazebo_topic_msg.set_ros_topic(command_motor_speed_sub_topic_);
-  // Note: This Gazebo topic name is not relative to the model!!!
   connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + command_motor_speed_sub_topic_);
   connect_ros_to_gazebo_topic_msg.set_msgtype(gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
   gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
 
 }
 
-//void GazeboControllerInterface::CommandMotorCallback(const mav_msgs::ActuatorsConstPtr& input_reference_msg) {
+
 void GazeboControllerInterface::CommandMotorCallback(GzActuatorsMsgPtr& actuators_msg) {
 
   if(kPrintOnMsgCallback) {
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
-
-//  input_reference_.resize(input_reference_msg->angular_velocities.size());
-//  for (int i = 0; i < input_reference_msg->angular_velocities.size(); ++i) {
-//    input_reference_[i] = input_reference_msg->angular_velocities[i];
-//  }
 
   input_reference_.resize(actuators_msg->angular_velocities_size());
   for (int i = 0; i < actuators_msg->angular_velocities_size(); ++i) {

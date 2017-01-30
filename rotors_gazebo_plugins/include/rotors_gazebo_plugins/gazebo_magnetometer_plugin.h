@@ -83,6 +83,9 @@ class GazeboMagnetometerPlugin : public ModelPlugin {
 
   math::Vector3 mag_W_;
 
+  /// \brief    Magnetic field message.
+  /// \details  Reused message object which is defined here to reduce
+  ///           memory allocation.
   gz_sensor_msgs::MagneticField mag_message_;
 
   NormalDistribution noise_n_[3];

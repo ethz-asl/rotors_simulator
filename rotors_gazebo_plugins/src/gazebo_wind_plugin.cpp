@@ -22,7 +22,6 @@
 
 #include "rotors_gazebo_plugins/gazebo_wind_plugin.h"
 
-//#include <geometry_msgs/WrenchStamped.h>
 #include "ConnectGazeboToRosTopic.pb.h"
 
 namespace gazebo {
@@ -54,7 +53,6 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     gzerr << "[gazebo_wind_plugin] Please specify a robotNamespace.\n";
 
   // Create Gazebo Node
-  //  node_handle_ = new ros::NodeHandle(namespace_);
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
   node_handle_->Init(namespace_);
 
@@ -150,7 +148,6 @@ void GazeboWindPlugin::CreatePubsAndSubs() {
   // ============================================ //
   // =========== NAV SAT FIX MSG SETUP ========== //
   // ============================================ //
-  //gzmsg << "GazeboGpsPlugin creating publisher on \"" << wind_pub_topic_ << "\"." << std::endl;
   wind_pub_ = node_handle_->Advertise<gz_geometry_msgs::WrenchStamped>(wind_pub_topic_, 1);
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(wind_pub_topic_);

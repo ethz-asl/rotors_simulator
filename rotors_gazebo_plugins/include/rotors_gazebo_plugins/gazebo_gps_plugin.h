@@ -48,7 +48,7 @@ class GazeboGpsPlugin : public SensorPlugin {
  protected:
   void Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf);
 
-  /// @brief    Publishes both a NavSatFix and Gazebo message.
+  /// \brief    Publishes both a NavSatFix and Gazebo message.
   void OnUpdate();
 
  private:
@@ -69,35 +69,36 @@ class GazeboGpsPlugin : public SensorPlugin {
 
   gazebo::transport::PublisherPtr gz_ground_speed_pub_;
 
-  /// \brief  Name of topic for GPS messages, read from SDF file.
+  /// \brief    Name of topic for GPS messages, read from SDF file.
   std::string gps_topic_;
 
-  /// \brief  Name of topic for ground speed messages, read from SDF file.
+  /// \brief    Name of topic for ground speed messages, read from SDF file.
   std::string ground_speed_topic_;
 
-  /// \brief  Pointer to the parent sensor
+  /// \brief    Pointer to the parent sensor
   sensors::GpsSensorPtr parent_sensor_;
 
-  /// \biref  Pointer to the world.
+  /// \biref    Pointer to the world.
   physics::WorldPtr world_;
 
-  /// \brief  Pointer to the sensor link.
+  /// \brief    Pointer to the sensor link.
   physics::LinkPtr link_;
 
-  /// \brief  Pointer to the update event connection.
+  /// \brief    Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
-  /// \brief  GPS message to be published on sensor update.
+  /// \brief    GPS message to be published on sensor update.
   gz_sensor_msgs::NavSatFix gz_gps_message_;
 
-  /// \brief  Ground speed message to be published on sensor update.
+  /// \brief    Ground speed message to be published on sensor update.
   gz_sensor_msgs::TwistStamped gz_ground_speed_message_;
 
-  /// \brief  Normal distributions for ground speed noise in x, y, and z directions.
+  /// \brief    Normal distributions for ground speed noise in x, y, and z directions.
   NormalDistribution ground_speed_n_[3];
 
-  // Random number generator
+  /// \brief    Random number generator.
   std::random_device random_device_;
+
   std::mt19937 random_generator_;
 };
 

@@ -39,7 +39,6 @@
 
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/sdf_api_wrapper.hpp"
-//#include <tf/transform_broadcaster.h>
 
 #include "Odometry.pb.h"
 
@@ -128,9 +127,7 @@ class GazeboOdometryPlugin : public ModelPlugin {
   UniformDistribution linear_velocity_u_[3];
   UniformDistribution angular_velocity_u_[3];
 
-  //geometry_msgs::PoseWithCovariance::_covariance_type pose_covariance_matrix_;
   CovarianceMatrix pose_covariance_matrix_;
-//  geometry_msgs::TwistWithCovariance::_covariance_type twist_covariance_matrix_;
   CovarianceMatrix twist_covariance_matrix_;
 
   int measurement_delay_;
@@ -158,15 +155,12 @@ class GazeboOdometryPlugin : public ModelPlugin {
   ///           using transform_broadcast().
   gazebo::transport::PublisherPtr broadcast_transform_pub_;
 
-  //tf::Transform tf_;
-  //tf::TransformBroadcaster transform_broadcaster_;
-
   physics::WorldPtr world_;
   physics::ModelPtr model_;
   physics::LinkPtr link_;
   physics::EntityPtr parent_link_;
 
-  /// \brief Pointer to the update event connection.
+  /// \brief    Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
   boost::thread callback_queue_thread_;

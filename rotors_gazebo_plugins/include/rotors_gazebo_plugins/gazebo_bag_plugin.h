@@ -166,8 +166,8 @@ class GazeboBagPlugin : public ModelPlugin {
 
   MotorNumberToJointMap motor_joints_;
 
-  /// \brief Pointer to the ContactManager to get all collisions of this
-  /// link and its children
+  /// \brief    Pointer to the ContactManager to get all collisions of this
+  ///           link and its children.
   physics::ContactManager *contact_mgr_;
 
   std::string namespace_;

@@ -77,6 +77,7 @@ class GazeboWindPlugin : public ModelPlugin {
   virtual ~GazeboWindPlugin();
 
  protected:
+
   /// \brief Load the plugin.
   /// \param[in] _model Pointer to the model that loaded this plugin.
   /// \param[in] _sdf SDF element that describes the plugin.
