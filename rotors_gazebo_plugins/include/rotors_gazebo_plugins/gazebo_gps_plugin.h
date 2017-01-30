@@ -88,10 +88,10 @@ class GazeboGpsPlugin : public SensorPlugin {
   event::ConnectionPtr updateConnection_;
 
   /// \brief  GPS message to be published on sensor update.
-  sensor_msgs::msgs::NavSatFix gz_gps_message_;
+  gz_sensor_msgs::NavSatFix gz_gps_message_;
 
   /// \brief  Ground speed message to be published on sensor update.
-  sensor_msgs::msgs::TwistStamped gz_ground_speed_message_;
+  gz_sensor_msgs::TwistStamped gz_ground_speed_message_;
 
   /// \brief  Normal distributions for ground speed noise in x, y, and z directions.
   NormalDistribution ground_speed_n_[3];

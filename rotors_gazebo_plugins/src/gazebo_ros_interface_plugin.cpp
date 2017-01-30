@@ -183,7 +183,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
 
   switch(gz_connect_gazebo_to_ros_topic_msg->msgtype()) {
     case gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS:
-      ConnectHelper<sensor_msgs::msgs::Actuators, mav_msgs::Actuators>(
+      ConnectHelper<gz_sensor_msgs::Actuators, mav_msgs::Actuators>(
           &GazeboRosInterfacePlugin::GzActuatorsMsgCallback,
           this,
           gazeboTopicName,
@@ -199,7 +199,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
           gz_node_handle_);
       break;
     case gz_std_msgs::ConnectGazeboToRosTopic::IMU:
-      ConnectHelper<sensor_msgs::msgs::Imu, sensor_msgs::Imu>(
+      ConnectHelper<gz_sensor_msgs::Imu, sensor_msgs::Imu>(
           &GazeboRosInterfacePlugin::GzImuMsgCallback,
           this,
           gazeboTopicName,
@@ -207,7 +207,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
           gz_node_handle_);
       break;
     case gz_std_msgs::ConnectGazeboToRosTopic::JOINT_STATE:
-      ConnectHelper<sensor_msgs::msgs::JointState, sensor_msgs::JointState>(
+      ConnectHelper<gz_sensor_msgs::JointState, sensor_msgs::JointState>(
           &GazeboRosInterfacePlugin::GzJointStateMsgCallback,
           this,
           gazeboTopicName,
@@ -215,7 +215,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
           gz_node_handle_);
       break;
     case gz_std_msgs::ConnectGazeboToRosTopic::MAGNETIC_FIELD:
-      ConnectHelper<sensor_msgs::msgs::MagneticField, sensor_msgs::MagneticField>(
+      ConnectHelper<gz_sensor_msgs::MagneticField, sensor_msgs::MagneticField>(
           &GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback,
           this,
           gazeboTopicName,
@@ -223,7 +223,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
           gz_node_handle_);
       break;
     case gz_std_msgs::ConnectGazeboToRosTopic::NAV_SAT_FIX:
-      ConnectHelper<sensor_msgs::msgs::NavSatFix, sensor_msgs::NavSatFix>(
+      ConnectHelper<gz_sensor_msgs::NavSatFix, sensor_msgs::NavSatFix>(
           &GazeboRosInterfacePlugin::GzNavSatFixCallback,
           this,
           gazeboTopicName,
@@ -271,7 +271,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
             gz_node_handle_);
         break;
     case gz_std_msgs::ConnectGazeboToRosTopic::TWIST_STAMPED:
-      ConnectHelper<sensor_msgs::msgs::TwistStamped, geometry_msgs::TwistStamped>(
+      ConnectHelper<gz_sensor_msgs::TwistStamped, geometry_msgs::TwistStamped>(
           &GazeboRosInterfacePlugin::GzTwistStampedMsgCallback,
           this,
           gazeboTopicName,
@@ -331,7 +331,7 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       // (we don't need to manually save a reference for the Gazebo publisher because
       // boost::bind will do that for us)
       gazebo::transport::PublisherPtr gz_publisher_ptr =
-          FindOrMakeGazeboPublisher<sensor_msgs::msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic());
+          FindOrMakeGazeboPublisher<gz_sensor_msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic());
 
       // Create ROS subscriber
       ros::Subscriber ros_subscriber = ros_node_handle_->subscribe<mav_msgs::Actuators>(
@@ -542,39 +542,39 @@ void GazeboRosInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fi
 
   //  ros_nav_sat_fix_msg_.status.service = gz_nav_sat_fix_msg->service();
   switch(gz_nav_sat_fix_msg->service()) {
-    case sensor_msgs::msgs::NavSatFix::SERVICE_GPS:
+    case gz_sensor_msgs::NavSatFix::SERVICE_GPS:
       ros_nav_sat_fix_msg_.status.service = sensor_msgs::NavSatStatus::SERVICE_GPS;
       break;
-    case sensor_msgs::msgs::NavSatFix::SERVICE_GLONASS:
+    case gz_sensor_msgs::NavSatFix::SERVICE_GLONASS:
       ros_nav_sat_fix_msg_.status.service = sensor_msgs::NavSatStatus::SERVICE_GLONASS;
       break;
-    case sensor_msgs::msgs::NavSatFix::SERVICE_COMPASS:
+    case gz_sensor_msgs::NavSatFix::SERVICE_COMPASS:
       ros_nav_sat_fix_msg_.status.service = sensor_msgs::NavSatStatus::SERVICE_COMPASS;
       break;
-    case sensor_msgs::msgs::NavSatFix::SERVICE_GALILEO:
+    case gz_sensor_msgs::NavSatFix::SERVICE_GALILEO:
       ros_nav_sat_fix_msg_.status.service = sensor_msgs::NavSatStatus::SERVICE_GALILEO;
       break;
     default:
-      gzthrow("Specific value of enum type sensor_msgs::msgs::NavSatFix::Service is not yet supported.");
+      gzthrow("Specific value of enum type gz_sensor_msgs::NavSatFix::Service is not yet supported.");
   }
 
 
   //ros_nav_sat_fix_msg_.status.status = gz_nav_sat_fix_msg->status().status();
   switch(gz_nav_sat_fix_msg->status()) {
-    case sensor_msgs::msgs::NavSatFix::STATUS_NO_FIX:
+    case gz_sensor_msgs::NavSatFix::STATUS_NO_FIX:
       ros_nav_sat_fix_msg_.status.status = sensor_msgs::NavSatStatus::STATUS_NO_FIX;
       break;
-    case sensor_msgs::msgs::NavSatFix::STATUS_FIX:
+    case gz_sensor_msgs::NavSatFix::STATUS_FIX:
       ros_nav_sat_fix_msg_.status.status = sensor_msgs::NavSatStatus::STATUS_FIX;
       break;
-    case sensor_msgs::msgs::NavSatFix::STATUS_SBAS_FIX:
+    case gz_sensor_msgs::NavSatFix::STATUS_SBAS_FIX:
       ros_nav_sat_fix_msg_.status.status = sensor_msgs::NavSatStatus::STATUS_SBAS_FIX;
       break;
-    case sensor_msgs::msgs::NavSatFix::STATUS_GBAS_FIX:
+    case gz_sensor_msgs::NavSatFix::STATUS_GBAS_FIX:
       ros_nav_sat_fix_msg_.status.status = sensor_msgs::NavSatStatus::STATUS_GBAS_FIX;
       break;
     default:
-      gzthrow("Specific value of enum type sensor_msgs::msgs::NavSatFix::Status is not yet supported.");
+      gzthrow("Specific value of enum type gz_sensor_msgs::NavSatFix::Status is not yet supported.");
   }
 
   ros_nav_sat_fix_msg_.latitude = gz_nav_sat_fix_msg->latitude();
@@ -583,20 +583,20 @@ void GazeboRosInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fi
 
 //  ros_nav_sat_fix_msg_.position_covariance_type = gz_nav_sat_fix_msg->position_covariance_type();
   switch(gz_nav_sat_fix_msg->position_covariance_type()) {
-    case sensor_msgs::msgs::NavSatFix::COVARIANCE_TYPE_UNKNOWN:
+    case gz_sensor_msgs::NavSatFix::COVARIANCE_TYPE_UNKNOWN:
       ros_nav_sat_fix_msg_.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_UNKNOWN;
       break;
-    case sensor_msgs::msgs::NavSatFix::COVARIANCE_TYPE_APPROXIMATED:
+    case gz_sensor_msgs::NavSatFix::COVARIANCE_TYPE_APPROXIMATED:
       ros_nav_sat_fix_msg_.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_APPROXIMATED;
       break;
-    case sensor_msgs::msgs::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN:
+    case gz_sensor_msgs::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN:
       ros_nav_sat_fix_msg_.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN;
       break;
-    case sensor_msgs::msgs::NavSatFix::COVARIANCE_TYPE_KNOWN:
+    case gz_sensor_msgs::NavSatFix::COVARIANCE_TYPE_KNOWN:
       ros_nav_sat_fix_msg_.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_KNOWN;
       break;
     default:
-      gzthrow("Specific value of enum type sensor_msgs::msgs::NavSatFix::PositionCovarianceType is not yet supported.");
+      gzthrow("Specific value of enum type gz_sensor_msgs::NavSatFix::PositionCovarianceType is not yet supported.");
   }
 
   // Position covariance should have 9 elements, and both the Gazebo and ROS
@@ -819,7 +819,7 @@ void GazeboRosInterfacePlugin::RosActuatorsMsgCallback(
 
   // Convert ROS message to Gazebo message
 
-  sensor_msgs::msgs::Actuators gz_actuators_msg;
+  gz_sensor_msgs::Actuators gz_actuators_msg;
 
   gz_actuators_msg.mutable_header()->mutable_stamp()->set_sec(ros_actuators_msg_ptr->header.stamp.sec);
   gz_actuators_msg.mutable_header()->mutable_stamp()->set_nsec(ros_actuators_msg_ptr->header.stamp.nsec);

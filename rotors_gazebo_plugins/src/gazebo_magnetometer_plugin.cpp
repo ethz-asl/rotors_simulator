@@ -192,7 +192,7 @@ void GazeboMagnetometerPlugin::CreatePubsAndSubs() {
   // ========= MAGNETIC FIELD MSG SETUP ========= //
   // ============================================ //
 
-  magnetometer_pub_ = node_handle_->Advertise<sensor_msgs::msgs::MagneticField>(
+  magnetometer_pub_ = node_handle_->Advertise<gz_sensor_msgs::MagneticField>(
       node_handle_->GetTopicNamespace() + "/" + magnetometer_topic_, 1);
 //  gzmsg << "GazeboMagnetometerPlugin publishing on " << magnetometer_topic_ << std::endl;
 

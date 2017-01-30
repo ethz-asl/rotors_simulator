@@ -1,5 +1,5 @@
 syntax = "proto2";
-package sensor_msgs.msgs;
+package gz_sensor_msgs;
 
 import "Header.proto";
 

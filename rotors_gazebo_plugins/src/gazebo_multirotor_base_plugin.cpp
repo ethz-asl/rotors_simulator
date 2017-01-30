@@ -144,7 +144,7 @@ void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
   // ============================================ //
   // =========== ACTUATORS MSG SETUP ============ //
   // ============================================ //
-  motor_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Actuators>("~/" + model_->GetName() + "/" + actuators_pub_topic_, 10);
+  motor_pub_ = node_handle_->Advertise<gz_sensor_msgs::Actuators>("~/" + model_->GetName() + "/" + actuators_pub_topic_, 10);
 //  gzdbg << "actuators_pub_topic_ = \"" << actuators_pub_topic_ << "\"." << std::endl;
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + actuators_pub_topic_);
@@ -155,7 +155,7 @@ void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
   // ============================================ //
   // ========== JOINT STATE MSG SETUP =========== //
   // ============================================ //
-  joint_state_pub_ = node_handle_->Advertise<sensor_msgs::msgs::JointState>("~/" + model_->GetName() + "/" + joint_state_pub_topic_, 1);
+  joint_state_pub_ = node_handle_->Advertise<gz_sensor_msgs::JointState>("~/" + model_->GetName() + "/" + joint_state_pub_topic_, 1);
 //  gzdbg << "joint_state_pub_topic = \"" << joint_state_pub_topic_ << "\"." << std::endl;
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + joint_state_pub_topic_);

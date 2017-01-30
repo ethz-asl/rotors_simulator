@@ -89,7 +89,7 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   common::Time now = world_->GetSimTime();
 
 //  mav_msgs::ActuatorsPtr turning_velocities_msg(new mav_msgs::Actuators);
-  sensor_msgs::msgs::Actuators turning_velocities_msg;
+  gz_sensor_msgs::Actuators turning_velocities_msg;
 
   for (int i = 0; i < input_reference_.size(); i++) {
 //    turning_velocities_msg->angular_velocities.push_back(input_reference_[i]);
@@ -123,7 +123,7 @@ void GazeboControllerInterface::CreatePubsAndSubs() {
   // === ACTUATORS (MOTOR VELOCITY) MSG SETUP === //
   // ============================================ //
   gzdbg << "GazeboControllerInterface creating Gazebo publisher on \"" << node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_ << "\"." << std::endl;
-  motor_velocity_reference_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Actuators>(
+  motor_velocity_reference_pub_ = node_handle_->Advertise<gz_sensor_msgs::Actuators>(
       node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_,
       1);
 

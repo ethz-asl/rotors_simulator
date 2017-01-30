@@ -44,7 +44,7 @@ namespace gazebo {
 // ConsPtr passing, such that the original commands don't have to go n_motors-times over the wire.
 static const std::string kDefaultMotorVelocityReferenceTopic = "gazebo/command/motor_speed";
 
-typedef const boost::shared_ptr<const sensor_msgs::msgs::Actuators> GzActuatorsMsgPtr;
+typedef const boost::shared_ptr<const gz_sensor_msgs::Actuators> GzActuatorsMsgPtr;
 
 class GazeboControllerInterface : public ModelPlugin {
  public:

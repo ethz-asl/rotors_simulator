@@ -102,10 +102,10 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   double rotor_velocity_slowdown_sim_;
 
   gazebo::transport::PublisherPtr motor_pub_;
-  sensor_msgs::msgs::Actuators actuators_msg_;
+  gz_sensor_msgs::Actuators actuators_msg_;
 
   gazebo::transport::PublisherPtr joint_state_pub_;
-  sensor_msgs::msgs::JointState joint_state_msg_;
+  gz_sensor_msgs::JointState joint_state_msg_;
 
   gazebo::transport::NodePtr node_handle_;
 };

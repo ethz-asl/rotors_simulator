@@ -83,7 +83,7 @@ class GazeboMagnetometerPlugin : public ModelPlugin {
 
   math::Vector3 mag_W_;
 
-  sensor_msgs::msgs::MagneticField mag_message_;
+  gz_sensor_msgs::MagneticField mag_message_;
 
   NormalDistribution noise_n_[3];
 

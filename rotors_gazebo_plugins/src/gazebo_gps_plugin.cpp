@@ -114,9 +114,9 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
 
   // Fill the static parts of the GPS message.
   gz_gps_message_.mutable_header()->set_frame_id(frame_id);
-  gz_gps_message_.set_service(sensor_msgs::msgs::NavSatFix::SERVICE_GPS);
-  gz_gps_message_.set_status(sensor_msgs::msgs::NavSatFix::STATUS_FIX);
-  gz_gps_message_.set_position_covariance_type(sensor_msgs::msgs::NavSatFix::COVARIANCE_TYPE_KNOWN);
+  gz_gps_message_.set_service(gz_sensor_msgs::NavSatFix::SERVICE_GPS);
+  gz_gps_message_.set_status(gz_sensor_msgs::NavSatFix::STATUS_FIX);
+  gz_gps_message_.set_position_covariance_type(gz_sensor_msgs::NavSatFix::COVARIANCE_TYPE_KNOWN);
 
   for(int i = 0; i < 9; i++){
     switch (i){
@@ -215,7 +215,7 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   // =========== NAV SAT FIX MSG SETUP ========== //
   // ============================================ //
   //gzmsg << "GazeboGpsPlugin creating publisher on \"" << gps_topic_ << "\"." << std::endl;
-  gz_gps_pub_ = node_handle_->Advertise<sensor_msgs::msgs::NavSatFix>(gps_topic_, 1);
+  gz_gps_pub_ = node_handle_->Advertise<gz_sensor_msgs::NavSatFix>(gps_topic_, 1);
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(gps_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(gps_topic_);
@@ -226,7 +226,7 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   // == GROUND SPEED (TWIST STAMPED) MSG SETUP == //
   // ============================================ //
   //gzmsg << "GazeboGpsPlugin creating publisher on \"" << ground_speed_topic_ << "\"." << std::endl;
-  gz_ground_speed_pub_ = node_handle_->Advertise<sensor_msgs::msgs::TwistStamped>(ground_speed_topic_, 1);
+  gz_ground_speed_pub_ = node_handle_->Advertise<gz_sensor_msgs::TwistStamped>(ground_speed_topic_, 1);
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(ground_speed_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(ground_speed_topic_);
