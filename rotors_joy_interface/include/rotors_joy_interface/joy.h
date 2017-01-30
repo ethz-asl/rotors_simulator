@@ -65,6 +65,7 @@ class Joy {
 
   Axes axes_;
   Buttons buttons_;
+  double max_height_;
 
   mav_msgs::RollPitchYawrateThrust control_msg_;
   geometry_msgs::PoseStamped pose_;
