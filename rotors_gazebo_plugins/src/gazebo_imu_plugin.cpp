@@ -203,7 +203,7 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 }
 
 
-void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
+void GazeboImuPlugin::AddNoise(Eigen::Vector3d* linear_acceleration,
                                Eigen::Vector3d* angular_velocity,
                                const double dt) {
   GZ_ASSERT(linear_acceleration != nullptr, "Linear acceleration was null.");
@@ -299,7 +299,7 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
                                      angular_vel_I.y,
                                      angular_vel_I.z);
 
-  addNoise(&linear_acceleration_I, &angular_velocity_I, dt);
+  AddNoise(&linear_acceleration_I, &angular_velocity_I, dt);
 
   // Fill IMU message.
 //  imu_message_.header.stamp.sec = current_time.sec;
@@ -308,23 +308,16 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 //  imu_message_.header.stamp.nsec = current_time.nsec;
   imu_message_.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
 
-  // TODO(burrimi): Add orientation estimator.
-//  imu_message_.orientation.w = 1;
-//  imu_message_.orientation.x = 0;
-//  imu_message_.orientation.y = 0;
-//  imu_message_.orientation.z = 0;
-
+  /// TODO(burrimi): Add orientation estimator.
+  // NOTE: rotors_simulator used to set the orientation to "0", since it is
+  // not raw IMU data but rather a calculation (and could confuse users).
+  // However, the orientation is now set as it is used by PX4.
   /*gazebo::msgs::Quaternion* orientation = new gazebo::msgs::Quaternion();
   orientation->set_x(0);
   orientation->set_y(0);
   orientation->set_z(0);
   orientation->set_w(1);
   imu_message_.set_allocated_orientation(orientation);*/
-
-//  imu_message_.orientation.w = C_W_I.w;
-//  imu_message_.orientation.x = C_W_I.x;
-//  imu_message_.orientation.y = C_W_I.y;
-//  imu_message_.orientation.z = C_W_I.z;
 
   gazebo::msgs::Quaternion* orientation = new gazebo::msgs::Quaternion();
   orientation->set_w(C_W_I.w);
@@ -333,19 +326,11 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   orientation->set_z(C_W_I.z);
   imu_message_.set_allocated_orientation(orientation);
 
-//  imu_message_.linear_acceleration.x = linear_acceleration_I[0];
-//  imu_message_.linear_acceleration.y = linear_acceleration_I[1];
-//  imu_message_.linear_acceleration.z = linear_acceleration_I[2];
-
   gazebo::msgs::Vector3d* linear_acceleration = new gazebo::msgs::Vector3d();
   linear_acceleration->set_x(linear_acceleration_I[0]);
   linear_acceleration->set_y(linear_acceleration_I[1]);
   linear_acceleration->set_z(linear_acceleration_I[2]);
   imu_message_.set_allocated_linear_acceleration(linear_acceleration);
-
-//  imu_message_.angular_velocity.x = angular_velocity_I[0];
-//  imu_message_.angular_velocity.y = angular_velocity_I[1];
-//  imu_message_.angular_velocity.z = angular_velocity_I[2];
 
   gazebo::msgs::Vector3d* angular_velocity = new gazebo::msgs::Vector3d();
   angular_velocity->set_x(angular_velocity_I[0]);
@@ -356,7 +341,7 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Publish the IMU message
   imu_pub_->Publish(imu_message_);
 
-//  std::cout << "Published IMU message.\n";
+  // std::cout << "Published IMU message.\n";
 
 }
 

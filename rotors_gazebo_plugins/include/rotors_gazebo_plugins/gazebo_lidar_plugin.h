@@ -31,14 +31,14 @@
 
 namespace gazebo
 {
-  /// \brief A Ray Sensor Plugin
-  class GAZEBO_VISIBLE RayPlugin : public SensorPlugin
+  /// \brief    A Gazebo LIDAR plugin.
+  class GAZEBO_VISIBLE GazeboLidarPlugin : public SensorPlugin
   {
     /// \brief Constructor
-    public: RayPlugin();
+    public: GazeboLidarPlugin();
 
     /// \brief Destructor
-    public: virtual ~RayPlugin();
+    public: virtual ~GazeboLidarPlugin();
 
     /// \brief Update callback
     public: virtual void OnNewLaserScans();

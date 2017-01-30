@@ -103,15 +103,8 @@ void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
   joint_state_msg_.mutable_header()->mutable_stamp()->set_nsec(now.nsec);
   joint_state_msg_.mutable_header()->set_frame_id(frame_id_);
 
-  //mav_msgs::ActuatorsPtr msg(new mav_msgs::Actuators);
-
-  //msg->angular_velocities.resize(motor_joints_.size());
   actuators_msg_.clear_angular_velocities();
 
-  //sensor_msgs::JointStatePtr joint_state_msg(new sensor_msgs::JointState);
-
-//  joint_state_msg->name.resize(motor_joints_.size());
-//  joint_state_msg->position.resize(motor_joints_.size());
   joint_state_msg_.clear_name();
   joint_state_msg_.clear_position();
 
@@ -119,14 +112,10 @@ void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
   for (m = motor_joints_.begin(); m != motor_joints_.end(); ++m) {
     double motor_rot_vel = m->second->GetVelocity(0) * rotor_velocity_slowdown_sim_;
 
-    //msg->angular_velocities[m->first] = motor_rot_vel;
     actuators_msg_.add_angular_velocities(motor_rot_vel);
 
-//    joint_state_msg->name[m->first] = m->second->GetName();
-//    joint_state_msg->position[m->first] = m->second->GetAngle(0).Radian();
     joint_state_msg_.add_name(m->second->GetName());
     joint_state_msg_.add_position(m->second->GetAngle(0).Radian());
-
   }
 
   joint_state_pub_->Publish(joint_state_msg_);
@@ -145,7 +134,6 @@ void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
   // =========== ACTUATORS MSG SETUP ============ //
   // ============================================ //
   motor_pub_ = node_handle_->Advertise<gz_sensor_msgs::Actuators>("~/" + model_->GetName() + "/" + actuators_pub_topic_, 10);
-//  gzdbg << "actuators_pub_topic_ = \"" << actuators_pub_topic_ << "\"." << std::endl;
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + actuators_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(actuators_pub_topic_);
@@ -156,7 +144,6 @@ void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
   // ========== JOINT STATE MSG SETUP =========== //
   // ============================================ //
   joint_state_pub_ = node_handle_->Advertise<gz_sensor_msgs::JointState>("~/" + model_->GetName() + "/" + joint_state_pub_topic_, 1);
-//  gzdbg << "joint_state_pub_topic = \"" << joint_state_pub_topic_ << "\"." << std::endl;
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + joint_state_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(joint_state_pub_topic_);

@@ -214,7 +214,6 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   // ============================================ //
   // =========== NAV SAT FIX MSG SETUP ========== //
   // ============================================ //
-  //gzmsg << "GazeboGpsPlugin creating publisher on \"" << gps_topic_ << "\"." << std::endl;
   gz_gps_pub_ = node_handle_->Advertise<gz_sensor_msgs::NavSatFix>(gps_topic_, 1);
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(gps_topic_);
@@ -225,7 +224,6 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   // ============================================ //
   // == GROUND SPEED (TWIST STAMPED) MSG SETUP == //
   // ============================================ //
-  //gzmsg << "GazeboGpsPlugin creating publisher on \"" << ground_speed_topic_ << "\"." << std::endl;
   gz_ground_speed_pub_ = node_handle_->Advertise<gz_sensor_msgs::TwistStamped>(ground_speed_topic_, 1);
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(ground_speed_topic_);

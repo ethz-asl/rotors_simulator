@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -489,7 +490,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
 }
 
-// This gets called by the world update start event.
+
 void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
   common::Time current_time = world_->GetSimTime();
@@ -503,17 +504,14 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
     gz_mav_msgs::CommandMotorSpeed turning_velocities_msg;
 
-    //gzdbg << "Publishing reference motor velocities. { ";
     for (int i = 0; i < input_reference_.size(); i++){
       if (last_actuator_time_ == 0 || (current_time - last_actuator_time_).Double() > 0.2) {
         turning_velocities_msg.add_motor_speed(0);
-        //gzdbg << "0, ";
       } else {
         turning_velocities_msg.add_motor_speed(input_reference_[i]);
-        //gzdbg << input_reference_[i] << ", ";
       }
     }
-    //gzdbg << "}" << std::endl;
+
     // TODO Add timestamp and Header
     // turning_velocities_msg->header.stamp.sec = current_time.sec;
     // turning_velocities_msg->header.stamp.nsec = current_time.nsec;
@@ -601,27 +599,25 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
 void GazeboMavlinkInterface::send_mavlink_message(const uint8_t msgid, const void *msg, uint8_t component_ID) {
 
-  //gzdbg << __FUNCTION__ << "() called, msgid = " << msgid << "., component_ID = " << component_ID << "." << std::endl;
-
   component_ID = 0;
   uint8_t payload_len = mavlink_message_lengths[msgid];
   unsigned packet_len = payload_len + MAVLINK_NUM_NON_PAYLOAD_BYTES;
 
   uint8_t buf[MAVLINK_MAX_PACKET_LEN];
 
-  /* header */
+  // Header
   buf[0] = MAVLINK_STX;
   buf[1] = payload_len;
-  /* no idea which numbers should be here*/
+  // no idea which numbers should be here
   buf[2] = 100;
   buf[3] = 0;
   buf[4] = component_ID;
   buf[5] = msgid;
 
-  /* payload */
+  // Payload
   memcpy(&buf[MAVLINK_NUM_HEADER_BYTES],msg, payload_len);
 
-  /* checksum */
+  // Checksym
   uint16_t checksum;
   crc_init(&checksum);
   crc_accumulate_buffer(&checksum, (const char *) &buf[1], MAVLINK_CORE_HEADER_LEN + payload_len);

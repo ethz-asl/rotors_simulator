@@ -29,20 +29,14 @@ namespace gazebo {
 
 GazeboMotorModel::~GazeboMotorModel() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
-//  if (node_handle_) {
-//    node_handle_->shutdown();
-//    delete node_handle_;
-//  }
 }
 
 void GazeboMotorModel::InitializeParams() {}
 
 void GazeboMotorModel::Publish() {
-//  gzdbg << __FUNCTION__ << "() called." << std::endl;
-//  turning_velocity_msg_.data = joint_->GetVelocity(0);
+
   turning_velocity_msg_.set_data(joint_->GetVelocity(0));
 
-//  motor_velocity_pub_.publish(turning_velocity_msg_);
   motor_velocity_pub_->Publish(turning_velocity_msg_);
 }
 
@@ -61,7 +55,6 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   else
     gzerr << "[gazebo_motor_model] Please specify a robotNamespace.\n";
 
-//  node_handle_ = new ros::NodeHandle(namespace_);
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
   node_handle_->Init(namespace_);
 
@@ -69,6 +62,7 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     joint_name_ = _sdf->GetElement("jointName")->Get<std::string>();
   else
     gzerr << "[gazebo_motor_model] Please specify a jointName, where the rotor is attached.\n";
+
   // Get the pointer to the joint.
   joint_ = model_->GetJoint(joint_name_);
   if (joint_ == NULL)
@@ -121,6 +115,7 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 #if GAZEBO_MAJOR_VERSION < 5
   joint_->SetMaxForce(0, max_force_);
 #endif
+
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboMotorModel::OnUpdate, this, _1));
@@ -165,8 +160,6 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   //  ACTUAL MOTOR SPEED MSG SETUP (GAZEBO->ROS)  //
   // ============================================ //
 
-  gzdbg << "Creating Gazebo publisher on topic \"" << "~/" + model_->GetName() + "/" + motor_speed_pub_topic_ << "\"." << std::endl;
-//  motor_velocity_pub_ = node_handle_->advertise<std_msgs::Float32>(motor_speed_pub_topic_, 1);
   motor_velocity_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>("~/" + model_->GetName() + "/" + motor_speed_pub_topic_, 1);
 
   // Connect to ROS
@@ -179,9 +172,6 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   // = CONTROL VELOCITY MSG SETUP (ROS->GAZEBO) = //
   // ============================================ //
 
-  gzdbg << "Subscribing to Gazebo topic \"" << "~/" + model_->GetName() + "/" + command_sub_topic_ <<
-      "\", where command_subtopic =  \"" << command_sub_topic_ << "\"." << std::endl;
-//  command_sub_ = node_handle_->subscribe(command_sub_topic_, 1, &GazeboMotorModel::VelocityCallback, this);
   command_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + "/" + command_sub_topic_, &GazeboMotorModel::ControlVelocityCallback, this);
 
   connect_ros_to_gazebo_topic_msg.set_ros_topic(command_sub_topic_);
@@ -193,9 +183,6 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   // ==== WIND SPEED MSG SETUP (ROS->GAZEBO) ==== //
   // ============================================ //
 
-  gzdbg << "Subscribing to Gazebo topic \"" << "~/" + model_->GetName() + "/" + wind_speed_sub_topic_
-      << "\", where wind_speed_sub_topic = \"" << wind_speed_sub_topic_ << "\"." << std::endl;
- //  wind_speed_sub_ = node_handle_->subscribe(wind_speed_sub_topic_, 1, &GazeboMotorModel::WindSpeedCallback, this);
   wind_speed_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + "/" + wind_speed_sub_topic_, &GazeboMotorModel::WindSpeedCallback, this);
 
   connect_ros_to_gazebo_topic_msg.set_ros_topic(wind_speed_sub_topic_);
@@ -205,17 +192,12 @@ void GazeboMotorModel::CreatePubsAndSubs() {
 
 }
 
-//void GazeboMotorModel::VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_velocities) {
+
 void GazeboMotorModel::ControlVelocityCallback(GzCommandMotorSpeedMsgPtr& command_motor_speed_msg) {
 
   if(kPrintOnMsgCallback) {
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
-
-//  ROS_ASSERT_MSG(rot_velocities->angular_velocities.size() > motor_number_,
-//                 "You tried to access index %d of the MotorSpeed message array which is of size %d.",
-//                 motor_number_, rot_velocities->angular_velocities.size());
-//  ref_motor_rot_vel_ = std::min(rot_velocities->angular_velocities[motor_number_], max_rot_velocity_);
 
   if(motor_number_ > command_motor_speed_msg->motor_speed_size() - 1) {
     gzerr << "You tried to access index " << motor_number_ <<
@@ -234,16 +216,12 @@ void GazeboMotorModel::WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg) {
   }
 
   // TODO(burrimi): Transform velocity to world frame if frame_id is set to something else.
-//  wind_speed_W_.x = wind_speed->velocity.x;
-//  wind_speed_W_.y = wind_speed->velocity.y;
-//  wind_speed_W_.z = wind_speed->velocity.z;
   wind_speed_W_.x = wind_speed_msg->velocity().x();
   wind_speed_W_.y = wind_speed_msg->velocity().y();
   wind_speed_W_.z = wind_speed_msg->velocity().z();
 }
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
-//  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   motor_rot_vel_ = joint_->GetVelocity(0);
   if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_)) {

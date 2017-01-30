@@ -35,10 +35,8 @@ using namespace cv;
 GZ_REGISTER_SENSOR_PLUGIN(GeotaggedImagesPlugin)
 
 
-GeotaggedImagesPlugin::GeotaggedImagesPlugin()
-: SensorPlugin(), width_(0), height_(0), depth_(0), imageCounter_(0)
-{
-}
+GeotaggedImagesPlugin::GeotaggedImagesPlugin() :
+    SensorPlugin(), width_(0), height_(0), depth_(0), imageCounter_(0) {}
 
 GeotaggedImagesPlugin::~GeotaggedImagesPlugin()
 {

@@ -42,15 +42,15 @@ using namespace gazebo;
 using namespace std;
 
 // Register this plugin with the simulator
-GZ_REGISTER_SENSOR_PLUGIN(RayPlugin)
+GZ_REGISTER_SENSOR_PLUGIN(GazeboLidarPlugin)
 
-/////////////////////////////////////////////////
-RayPlugin::RayPlugin()
+
+GazeboLidarPlugin::GazeboLidarPlugin()
 {
 }
 
-/////////////////////////////////////////////////
-RayPlugin::~RayPlugin()
+
+GazeboLidarPlugin::~GazeboLidarPlugin()
 {
 #if GAZEBO_MAJOR_VERSION >= 7
   this->parentSensor->LaserShape()->DisconnectNewLaserScans(
@@ -64,8 +64,8 @@ RayPlugin::~RayPlugin()
   this->world.reset();
 }
 
-/////////////////////////////////////////////////
-void RayPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
+
+void GazeboLidarPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 {
   if(kPrintOnPluginLoad) {
     gzdbg << __FUNCTION__ << "() called." << std::endl;
@@ -94,7 +94,7 @@ void RayPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 #else
     this->parentSensor->GetLaserShape()->ConnectNewLaserScans(
 #endif
-      boost::bind(&RayPlugin::OnNewLaserScans, this));
+      boost::bind(&GazeboLidarPlugin::OnNewLaserScans, this));
 
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
@@ -115,8 +115,8 @@ void RayPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   lidar_pub_ = node_handle_->Advertise<lidar_msgs::msgs::lidar>(topicName, 10);
 }
 
-/////////////////////////////////////////////////
-void RayPlugin::OnNewLaserScans()
+
+void GazeboLidarPlugin::OnNewLaserScans()
 {
   lidar_message.set_time_msec(0);
 #if GAZEBO_MAJOR_VERSION >= 7

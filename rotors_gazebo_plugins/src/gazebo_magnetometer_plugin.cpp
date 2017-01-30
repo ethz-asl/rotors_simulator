@@ -17,6 +17,8 @@
 // MODULE HEADER INCLUDE
 #include "rotors_gazebo_plugins/gazebo_magnetometer_plugin.h"
 
+#include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
+
 #include "ConnectGazeboToRosTopic.pb.h"
 
 namespace gazebo {
@@ -47,7 +49,7 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_magnetometer_plugin] Please specify a robotNamespace.\n";
-//  node_handle_ = new ros::NodeHandle(namespace_);
+
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
   node_handle_->Init(namespace_);
 
@@ -72,9 +74,8 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
   const SdfVector3 zeros3(0.0, 0.0, 0.0);
 
   // Retrieve the rest of the SDF parameters
-//  getSdfParam<std::string>(_sdf, "magnetometerTopic", magnetometer_topic_,
-//                           mav_msgs::default_topics::MAGNETIC_FIELD);
-  getSdfParam<std::string>(_sdf, "magnetometerTopic", magnetometer_topic_, "");
+  getSdfParam<std::string>(_sdf, "magnetometerTopic", magnetometer_topic_,
+                             mav_msgs::default_topics::MAGNETIC_FIELD);
 
   getSdfParam<double>(_sdf, "refMagNorth", ref_mag_north, kDefaultRefMagNorth);
   getSdfParam<double>(_sdf, "refMagEast", ref_mag_east, kDefaultRefMagEast);
@@ -107,12 +108,7 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
                          ref_mag_east + initial_bias[1](random_generator_),
                          ref_mag_down + initial_bias[2](random_generator_));
 
-  // Fill the magnetometer message
-//  mag_message_.header.frame_id = frame_id_;
-//  mag_message_.magnetic_field_covariance[0] = noise_normal.X() * noise_normal.X();
-//  mag_message_.magnetic_field_covariance[4] = noise_normal.Y() * noise_normal.Y();
-//  mag_message_.magnetic_field_covariance[8] = noise_normal.Z() * noise_normal.Z();
-
+  // Fill the static parts of the magnetometer message.
   mag_message_.mutable_header()->set_frame_id(frame_id_);
 
   for(int i = 0; i < 9; i++){
@@ -165,18 +161,11 @@ void GazeboMagnetometerPlugin::OnUpdate(const common::UpdateInfo& _info) {
   math::Vector3 field_B = T_W_B.rot.RotateVectorReverse(mag_W_ + mag_noise);
 
   // Fill the magnetic field message
-//  mag_message_.header.stamp.sec = current_time.sec;
-//  mag_message_.header.stamp.nsec = current_time.nsec;
-//  mag_message_.magnetic_field.x = field_B.x;
-//  mag_message_.magnetic_field.y = field_B.y;
-//  mag_message_.magnetic_field.z = field_B.z;
-
   mag_message_.mutable_header()->mutable_stamp()->set_sec(current_time.sec);
   mag_message_.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
   mag_message_.mutable_magnetic_field()->set_x(field_B.x);
   mag_message_.mutable_magnetic_field()->set_y(field_B.y);
   mag_message_.mutable_magnetic_field()->set_z(field_B.z);
-
 
   // Publish the message
   magnetometer_pub_->Publish(mag_message_);
@@ -194,7 +183,6 @@ void GazeboMagnetometerPlugin::CreatePubsAndSubs() {
 
   magnetometer_pub_ = node_handle_->Advertise<gz_sensor_msgs::MagneticField>(
       node_handle_->GetTopicNamespace() + "/" + magnetometer_topic_, 1);
-//  gzmsg << "GazeboMagnetometerPlugin publishing on " << magnetometer_topic_ << std::endl;
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + magnetometer_topic_);

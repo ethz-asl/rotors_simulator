@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +63,7 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   virtual ~GazeboMultirotorBasePlugin();
 
  protected:
+
   /// \brief Load the plugin.
   /// \param[in] _model Pointer to the model that loaded this plugin.
   /// \param[in] _sdf SDF element that describes the plugin.
@@ -102,9 +104,13 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   double rotor_velocity_slowdown_sim_;
 
   gazebo::transport::PublisherPtr motor_pub_;
+
+  /// \details    Re-used message object, defined here to reduce dynamic memory allocation.
   gz_sensor_msgs::Actuators actuators_msg_;
 
   gazebo::transport::PublisherPtr joint_state_pub_;
+
+  /// \details    Re-used message object, defined here to reduce dynamic memory allocation.
   gz_sensor_msgs::JointState joint_state_msg_;
 
   gazebo::transport::NodePtr node_handle_;

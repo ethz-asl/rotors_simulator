@@ -30,7 +30,6 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 
-//#include "gazebo/msgs/msgs.hh"
 #include "Imu.pb.h"
 
 #include "rotors_gazebo_plugins/common.h"
@@ -107,15 +106,15 @@ class GazeboImuPlugin : public ModelPlugin {
  protected:
   void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
-  /// @brief This function adds noise to acceleration and angular rates for
-  ///        accelerometer and gyroscope measurement simulation.
-  void addNoise(
+  /// \brief  This method adds noise to acceleration and angular rates for
+  ///         accelerometer and gyroscope measurement simulation.
+  void AddNoise(
       Eigen::Vector3d* linear_acceleration,
       Eigen::Vector3d* angular_velocity,
       const double dt);
 
-  /// @brief  	This gets called by the world update start event.
-  /// @details	Calculates IMU parameters and then publishes one IMU message.
+  /// \brief  	This gets called by the world update start event.
+  /// \details	Calculates IMU parameters and then publishes one IMU message.
   void OnUpdate(const common::UpdateInfo&);
 
  private:
@@ -134,12 +133,9 @@ class GazeboImuPlugin : public ModelPlugin {
   std::string namespace_;
   std::string imu_topic_;
 
-  /// Handle for the Gazebo node.
-  //ros::NodeHandle* node_handle_;
+  /// \brief    Handle for the Gazebo node.
   transport::NodePtr node_handle_;
 
-  // Old (ROS)
-  //ros::Publisher imu_pub_;
   transport::PublisherPtr imu_pub_;
 
   std::string frame_id_;
@@ -148,20 +144,23 @@ class GazeboImuPlugin : public ModelPlugin {
   std::default_random_engine random_generator_;
   std::normal_distribution<double> standard_normal_distribution_;
 
-  // Pointer to the world
+  /// \brief    Pointer to the world.
   physics::WorldPtr world_;
-  // Pointer to the model
+
+  /// \brief    Pointer to the model.
   physics::ModelPtr model_;
-  // Pointer to the link
+
+  /// \brief    Pointer to the link.
   physics::LinkPtr link_;
-  // Pointer to the update event connection
+
+  /// \brief    Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
   common::Time last_time_;
 
-  // IMU message. This is modified everytime OnUpdate() is called,
-  // and then published onto a topic
-  //sensor_msgs::Imu imu_message_;
+  /// \brief    IMU message.
+  /// \details  This is modified everytime OnUpdate() is called,
+  //            and then published onto a topic
   gz_sensor_msgs::Imu imu_message_;
 
   math::Vector3 gravity_W_;
