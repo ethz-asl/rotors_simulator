@@ -162,7 +162,7 @@ class GazeboImuPlugin : public ModelPlugin {
   // IMU message. This is modified everytime OnUpdate() is called,
   // and then published onto a topic
   //sensor_msgs::Imu imu_message_;
-  sensor_msgs::msgs::Imu imu_message_;
+  gz_sensor_msgs::Imu imu_message_;
 
   math::Vector3 gravity_W_;
   math::Vector3 velocity_prev_W_;

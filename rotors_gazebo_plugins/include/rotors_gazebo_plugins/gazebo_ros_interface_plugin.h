@@ -86,12 +86,12 @@ typedef const boost::shared_ptr<const gz_geometry_msgs::PositionStamped> GzPosit
 typedef const boost::shared_ptr<const gz_geometry_msgs::TransformStamped> GzTransformStampedMsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::WrenchStamped> GzWrenchStampedMsgPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
-typedef const boost::shared_ptr<const sensor_msgs::msgs::Actuators> GzActuatorsMsgPtr;
-typedef const boost::shared_ptr<const sensor_msgs::msgs::Imu> GzImuPtr;
-typedef const boost::shared_ptr<const sensor_msgs::msgs::JointState> GzJointStateMsgPtr;
-typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> GzMagneticFieldMsgPtr;
-typedef const boost::shared_ptr<const sensor_msgs::msgs::NavSatFix> GzNavSatFixPtr;
-typedef const boost::shared_ptr<const sensor_msgs::msgs::TwistStamped> GzTwistStampedMsgPtr;
+typedef const boost::shared_ptr<const gz_sensor_msgs::Actuators> GzActuatorsMsgPtr;
+typedef const boost::shared_ptr<const gz_sensor_msgs::Imu> GzImuPtr;
+typedef const boost::shared_ptr<const gz_sensor_msgs::JointState> GzJointStateMsgPtr;
+typedef const boost::shared_ptr<const gz_sensor_msgs::MagneticField> GzMagneticFieldMsgPtr;
+typedef const boost::shared_ptr<const gz_sensor_msgs::NavSatFix> GzNavSatFixPtr;
+typedef const boost::shared_ptr<const gz_sensor_msgs::TwistStamped> GzTwistStampedMsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::TransformStampedWithFrameIds> GzTransformStampedWithFrameIdsMsgPtr;
 
 /// \brief    ROS interface plugin for Gazebo.

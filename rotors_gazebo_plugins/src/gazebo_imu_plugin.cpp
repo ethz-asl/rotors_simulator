@@ -370,7 +370,7 @@ void GazeboImuPlugin::CreatePubsAndSubs() {
   // =============== IMU MSG SETUP ============== //
   // ============================================ //
 
-  imu_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Imu>("~/" + model_->GetName() + "/" + imu_topic_, 1);
+  imu_pub_ = node_handle_->Advertise<gz_sensor_msgs::Imu>("~/" + model_->GetName() + "/" + imu_topic_, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + imu_topic_);
