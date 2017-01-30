@@ -30,8 +30,8 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 
-#include "gazebo/msgs/msgs.hh"
-#include "SensorImu.pb.h"
+//#include "gazebo/msgs/msgs.hh"
+#include "Imu.pb.h"
 
 #include "rotors_gazebo_plugins/common.h"
 
