@@ -47,7 +47,7 @@
 #include "Pose.pb.h"
 #include "PoseWithCovarianceStamped.pb.h"
 #include "PositionStamped.pb.h"
-#include "SensorImu.pb.h"
+#include "Imu.pb.h"
 #include "TransformStamped.pb.h"
 #include "TransformStampedWithFrameIds.pb.h"
 #include "TwistStamped.pb.h"
