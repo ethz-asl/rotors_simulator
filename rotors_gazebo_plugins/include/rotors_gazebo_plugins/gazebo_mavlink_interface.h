@@ -32,7 +32,7 @@
 
 #include "common.h"
 
-#include "SensorImu.pb.h"
+#include "Imu.pb.h"
 #include "OpticalFlow.pb.h"
 #include "Lidar.pb.h"
 #include <boost/bind.hpp>
