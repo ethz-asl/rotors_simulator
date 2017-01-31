@@ -117,18 +117,7 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
 
  private:
 
-  /// \brief  Provides a way for GzConnectGazeboToRosTopicMsgCallback() to connect a Gazebo subscriber to
-  ///         a ROS publisher.
-  /// \details
-  ///   M is the type of the message that will be subscribed to the Gazebo framework.
-  ///   N is the type of the message published to the ROS framework
-  template <typename M, typename N>
-  void ConnectHelper(
-      void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher),
-      GazeboRosInterfacePlugin * ptr,
-      std::string gazeboTopicName,
-      std::string rosTopicName,
-      transport::NodePtr gz_node_handle);
+  std::vector<gazebo::transport::NodePtr> nodePtrs_;
 
   std::vector<gazebo::transport::SubscriberPtr> subscriberPtrs_;
 
@@ -153,6 +142,20 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   transport::SubscriberPtr gz_connect_gazebo_to_ros_topic_sub_;
   void GzConnectGazeboToRosTopicMsgCallback(GzConnectGazeboToRosTopicMsgPtr& gz_connect_gazebo_to_ros_topic_msg);
 
+  /// \brief  Provides a way for GzConnectGazeboToRosTopicMsgCallback() to connect a Gazebo subscriber to
+  ///         a ROS publisher.
+  /// \details
+  ///   M is the type of the message that will be subscribed to the Gazebo framework.
+  ///   N is the type of the message published to the ROS framework
+  template <typename M, typename N>
+  void ConnectHelper(
+      void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher),
+      GazeboRosInterfacePlugin * ptr,
+      std::string gazeboNamespace,
+      std::string gazeboTopicName,
+      std::string rosTopicName,
+      transport::NodePtr gz_node_handle);
+
   // ============================================ //
   // ====== CONNECT ROS TO GAZEBO MESSAGES ====== //
   // ============================================ //
@@ -162,6 +165,13 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   /// @brief    Subscribes to the provided ROS topic and publishes on the provided Gazebo topic (all info contained within the message).
   /// @details  Will create a Gazebo publisher if one doesn't already exist.
   void GzConnectRosToGazeboTopicMsgCallback(GzConnectRosToGazeboTopicMsgPtr& gz_connect_ros_to_gazebo_topic_msg);
+
+  template <typename M, typename N>
+  void ConnectRosToGazeboHelper(
+      std::string ros_topic,
+      std::string gazebo_namespace,
+      std::string gazebo_topic,
+      void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, gazebo::transport::PublisherPtr));
 
   /// \brief      Looks if a publisher on the provided topic already exists, and returns it.
   ///             If no publisher exists, this method creates one and returns that instead.
