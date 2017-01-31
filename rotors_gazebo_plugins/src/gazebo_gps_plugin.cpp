@@ -24,7 +24,6 @@ namespace gazebo {
 
 GazeboGpsPlugin::GazeboGpsPlugin()
     : SensorPlugin(),
-      //node_handle_(0),
       random_generator_(random_device_()),
       pubs_and_subs_created_(false) {}
 
@@ -53,17 +52,16 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   //==============================================//
 
   // Retrieve the necessary parameters.
-  std::string node_namespace;
   std::string link_name;
 
   if (_sdf->HasElement("robotNamespace"))
-    node_namespace = _sdf->GetElement("robotNamespace")->Get<std::string>();
+    namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_gps_plugin] Please specify a robotNamespace.\n";
 
 
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
-  node_handle_->Init(node_namespace);
+  node_handle_->Init(namespace_);
 
   if (_sdf->HasElement("linkName"))
     link_name = _sdf->GetElement("linkName")->Get<std::string>();
@@ -206,8 +204,8 @@ void GazeboGpsPlugin::OnUpdate() {
 void GazeboGpsPlugin::CreatePubsAndSubs() {
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
-  gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
-        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+  //gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+  //      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
@@ -216,20 +214,24 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   // ============================================ //
   gz_gps_pub_ = node_handle_->Advertise<gz_sensor_msgs::NavSatFix>(gps_topic_, 1);
 
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(gps_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(gps_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::NAV_SAT_FIX);
-  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  //connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  gazebo::transport::publish<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, connect_gazebo_to_ros_topic_msg);
 
   // ============================================ //
   // == GROUND SPEED (TWIST STAMPED) MSG SETUP == //
   // ============================================ //
   gz_ground_speed_pub_ = node_handle_->Advertise<gz_sensor_msgs::TwistStamped>(ground_speed_topic_, 1);
 
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(ground_speed_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(ground_speed_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::TWIST_STAMPED);
-  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg);
+  //connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg);
+  gazebo::transport::publish<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, connect_gazebo_to_ros_topic_msg);
 
 }
 

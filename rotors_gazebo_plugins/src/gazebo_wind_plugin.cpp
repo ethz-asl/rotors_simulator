@@ -140,8 +140,8 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
 void GazeboWindPlugin::CreatePubsAndSubs() {
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
-  gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
-        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+  //gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+  //      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
@@ -150,10 +150,12 @@ void GazeboWindPlugin::CreatePubsAndSubs() {
   // ============================================ //
   wind_pub_ = node_handle_->Advertise<gz_geometry_msgs::WrenchStamped>(wind_pub_topic_, 1);
 
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(wind_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(wind_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::WRENCH_STAMPED);
-  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  //connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  gazebo::transport::publish<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, connect_gazebo_to_ros_topic_msg);
 
 }
 

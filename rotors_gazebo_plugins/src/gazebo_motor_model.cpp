@@ -147,13 +147,13 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   gzdbg << __PRETTY_FUNCTION__ << " called." << std::endl;
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
-  gazebo::transport::PublisherPtr gz_connect_gazebo_to_ros_topic_pub =
-      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+  //gazebo::transport::PublisherPtr gz_connect_gazebo_to_ros_topic_pub =
+  //    node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
   // Create temporary "ConnectRosToGazeboTopic" publisher and message
-  gazebo::transport::PublisherPtr gz_connect_ros_to_gazebo_topic_pub =
-      node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("~/" + kConnectRosToGazeboSubtopic, 1);
+  //gazebo::transport::PublisherPtr gz_connect_ros_to_gazebo_topic_pub =
+  //    node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("~/" + kConnectRosToGazeboSubtopic, 1);
   gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
 
   // ============================================ //
@@ -163,10 +163,12 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   motor_velocity_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>("~/" + model_->GetName() + "/" + motor_speed_pub_topic_, 1);
 
   // Connect to ROS
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + motor_speed_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(motor_speed_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::FLOAT_32);
-  gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  //gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  gazebo::transport::publish<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, connect_gazebo_to_ros_topic_msg);
 
   // ============================================ //
   // = CONTROL VELOCITY MSG SETUP (ROS->GAZEBO) = //
@@ -175,9 +177,11 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   command_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + "/" + command_sub_topic_, &GazeboMotorModel::ControlVelocityCallback, this);
 
   connect_ros_to_gazebo_topic_msg.set_ros_topic(command_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_gazebo_namespace(namespace_);
   connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + command_sub_topic_);
   connect_ros_to_gazebo_topic_msg.set_msgtype(gz_std_msgs::ConnectRosToGazeboTopic::COMMAND_MOTOR_SPEED);
-  gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
+  //gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
+  gazebo::transport::publish<gz_std_msgs::ConnectRosToGazeboTopic>("~/" + kConnectRosToGazeboSubtopic, connect_ros_to_gazebo_topic_msg);
 
   // ============================================ //
   // ==== WIND SPEED MSG SETUP (ROS->GAZEBO) ==== //
@@ -186,9 +190,11 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   wind_speed_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + "/" + wind_speed_sub_topic_, &GazeboMotorModel::WindSpeedCallback, this);
 
   connect_ros_to_gazebo_topic_msg.set_ros_topic(wind_speed_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_gazebo_namespace(namespace_);
   connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + wind_speed_sub_topic_);
   connect_ros_to_gazebo_topic_msg.set_msgtype(gz_std_msgs::ConnectRosToGazeboTopic::WIND_SPEED);
-  gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
+  //gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
+  gazebo::transport::publish<gz_std_msgs::ConnectRosToGazeboTopic>("~/" + kConnectRosToGazeboSubtopic, connect_ros_to_gazebo_topic_msg);
 
 }
 

@@ -435,8 +435,10 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 void GazeboOdometryPlugin::CreatePubsAndSubs() {
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
-  gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
-        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+  //gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+        //node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+      //gazebo::transport::TopicManager::GetInstance().Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1, 10);
+
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
@@ -448,10 +450,12 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
       "~/" + model_->GetName() + "/" + pose_pub_topic_,
       1);
 
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + pose_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(pose_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::POSE);
-  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  //connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  gazebo::transport::publish<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, connect_gazebo_to_ros_topic_msg);
 
   // ============================================ //
   // == POSE WITH COVARIANCE STAMPED MSG SETUP == //
@@ -461,10 +465,12 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
       "~/" + model_->GetName() + "/" + pose_with_covariance_stamped_pub_topic_,
       1);
 
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + pose_with_covariance_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(pose_with_covariance_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::POSE_WITH_COVARIANCE_STAMPED);
-  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  //connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  gazebo::transport::publish<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, connect_gazebo_to_ros_topic_msg);
 
   // ============================================ //
   // ========= POSITION STAMPED MSG SETUP ======= //
@@ -474,10 +480,12 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
       "~/" + model_->GetName() + "/" + position_stamped_pub_topic_,
       1);
 
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + position_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(position_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::VECTOR_3D_STAMPED);
-  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  //connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  gazebo::transport::publish<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, connect_gazebo_to_ros_topic_msg);
 
   // ============================================ //
   // ============= ODOMETRY MSG SETUP =========== //
@@ -487,10 +495,12 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
       "~/" + model_->GetName() + "/" + odometry_pub_topic_,
       1);
 
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + odometry_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(odometry_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ODOMETRY);
-  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  //connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  gazebo::transport::publish<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, connect_gazebo_to_ros_topic_msg);
 
   // ============================================ //
   // ======== TRANSFORM STAMPED MSG SETUP ======= //
@@ -500,10 +510,12 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
       "~/" + model_->GetName() + "/" + transform_stamped_pub_topic_,
       1);
 
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + transform_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(transform_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::TRANSFORM_STAMPED);
-  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  //connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  gazebo::transport::publish<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, connect_gazebo_to_ros_topic_msg);
 
   // ============================================ //
   //  TRANSFORM STAMPED WITH FRAME ID MSG SETUP   //

@@ -105,15 +105,19 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
 void GazeboControllerInterface::CreatePubsAndSubs() {
 
-  // gzdbg << __FUNCTION__ << "() called." << std::endl;
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
-  gazebo::transport::PublisherPtr gz_connect_gazebo_to_ros_topic_pub =
-      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+  //gazebo::transport::PublisherPtr gz_connect_gazebo_to_ros_topic_pub =
+  //    node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+
+  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
   // Create temporary "ConnectRosToGazeboTopic" publisher and message
-  gazebo::transport::PublisherPtr gz_connect_ros_to_gazebo_topic_pub =
-      node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("~/" + kConnectRosToGazeboSubtopic, 1);
+  //gazebo::transport::PublisherPtr gz_connect_ros_to_gazebo_topic_pub =
+  //    node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("~/" + kConnectRosToGazeboSubtopic, 1);
+
+  gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
 
   // ============================================ //
   // === ACTUATORS (MOTOR VELOCITY) MSG SETUP === //
@@ -124,11 +128,15 @@ void GazeboControllerInterface::CreatePubsAndSubs() {
       1);
 
   // Connect to ROS
-  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(motor_velocity_reference_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);
-  gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  //gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+  gzdbg << "topicName = " << motor_velocity_reference_pub_->GetTopic() << std::endl;
+  gzdbg << "namespace_ = " << namespace_ << std::endl;
+  gzdbg << "encoded = " << node_handle_->DecodeTopicName(motor_velocity_reference_pub_->GetTopic()) << std::endl;
+  gazebo::transport::publish<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, connect_gazebo_to_ros_topic_msg);
 
   // ============================================ //
   // ===== ROS->GAZEBO MOTOR SPEED MSG SETUP ==== //
@@ -140,12 +148,15 @@ void GazeboControllerInterface::CreatePubsAndSubs() {
       this);
 
   // Connect to ROS
-  gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
   connect_ros_to_gazebo_topic_msg.set_ros_topic(command_motor_speed_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_gazebo_namespace(namespace_);
   connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + command_motor_speed_sub_topic_);
   connect_ros_to_gazebo_topic_msg.set_msgtype(gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
-  gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
+  //gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
+  gazebo::transport::publish<gz_std_msgs::ConnectRosToGazeboTopic>("~/" + kConnectRosToGazeboSubtopic, connect_ros_to_gazebo_topic_msg);
 
+
+  gzdbg << __FUNCTION__ << "() finished." << std::endl;
 }
 
 
