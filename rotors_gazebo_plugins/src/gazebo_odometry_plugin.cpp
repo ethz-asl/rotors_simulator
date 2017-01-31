@@ -35,7 +35,7 @@
 
 #include "PoseStamped.pb.h"
 #include "PoseWithCovarianceStamped.pb.h"
-#include "PositionStamped.pb.h"
+#include "Vector3dStamped.pb.h"
 #include "TransformStamped.pb.h"
 #include "TransformStampedWithFrameIds.pb.h"
 
@@ -313,7 +313,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
              position_n_[1](random_generator_) + position_u_[1](random_generator_),
              position_n_[2](random_generator_) + position_u_[2](random_generator_);
 
-    gz_geometry_msgs::Position * p = odometry_msg.mutable_pose()->mutable_pose()->mutable_position();
+    gazebo::msgs::Vector3d * p = odometry_msg.mutable_pose()->mutable_pose()->mutable_position();
     p->set_x(p->x() + pos_n[0]);
     p->set_y(p->y() + pos_n[1]);
     p->set_z(p->z() + pos_n[2]);
@@ -327,7 +327,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     Eigen::Quaterniond q_n = QuaternionFromSmallAngle(theta);
     q_n.normalize();
 
-    gz_geometry_msgs::Quaternion* q_W_L =
+    gazebo::msgs::Quaternion * q_W_L =
         odometry_msg.mutable_pose()->mutable_pose()->mutable_orientation();
 
     Eigen::Quaterniond _q_W_L(q_W_L->w(), q_W_L->x(), q_W_L->y(), q_W_L->z());
@@ -343,7 +343,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
                 linear_velocity_n_[1](random_generator_) + linear_velocity_u_[1](random_generator_),
                 linear_velocity_n_[2](random_generator_) + linear_velocity_u_[2](random_generator_);
 
-    gz_geometry_msgs::Vector3 * linear_velocity =
+    gazebo::msgs::Vector3d * linear_velocity =
         odometry_msg.mutable_twist()->mutable_twist()->mutable_linear();
 
     linear_velocity->set_x(linear_velocity->x() + linear_velocity_n[0]);
@@ -356,7 +356,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
                 angular_velocity_n_[1](random_generator_) + angular_velocity_u_[1](random_generator_),
                 angular_velocity_n_[2](random_generator_) + angular_velocity_u_[2](random_generator_);
 
-    gz_geometry_msgs::Vector3 * angular_velocity =
+    gazebo::msgs::Vector3d * angular_velocity =
         odometry_msg.mutable_twist()->mutable_twist()->mutable_angular();
 
     angular_velocity->set_x(angular_velocity->x() + angular_velocity_n[0]);
@@ -388,7 +388,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     }
 
     if (position_stamped_pub_->HasConnections()) {
-      gz_geometry_msgs::PositionStamped position_stamped_msg;
+      gz_geometry_msgs::Vector3dStamped position_stamped_msg;
       position_stamped_msg.mutable_header()->CopyFrom(odometry_msg.header());
       position_stamped_msg.mutable_position()->CopyFrom(odometry_msg.pose().pose().position());
 
@@ -444,7 +444,7 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
   // =============== POSE MSG SETUP ============= //
   // ============================================ //
 
-  pose_pub_ = node_handle_->Advertise<gz_geometry_msgs::Pose>(
+  pose_pub_ = node_handle_->Advertise<gazebo::msgs::Pose>(
       "~/" + model_->GetName() + "/" + pose_pub_topic_,
       1);
 
@@ -470,13 +470,13 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
   // ========= POSITION STAMPED MSG SETUP ======= //
   // ============================================ //
 
-  position_stamped_pub_ = node_handle_->Advertise<gz_geometry_msgs::PositionStamped>(
+  position_stamped_pub_ = node_handle_->Advertise<gz_geometry_msgs::Vector3dStamped>(
       "~/" + model_->GetName() + "/" + position_stamped_pub_topic_,
       1);
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + position_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(position_stamped_pub_topic_);
-  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::POSITION_STAMPED);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::VECTOR_3D_STAMPED);
   connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   // ============================================ //

@@ -2,12 +2,12 @@ syntax = "proto2";
 package gz_geometry_msgs;
 
 import "Header.proto";
-import "Pose.proto";
+import "pose.proto";
 
 // PoseStamped message type which is emitted by
 // GazeboOdometryPlugin
 message PoseStamped
 {
   required gz_std_msgs.Header header = 1;
-  required Pose pose = 2;
+  required gazebo.msgs.Pose pose = 2;
 }

@@ -226,7 +226,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
           gz_node_handle_);
       break;
     case gz_std_msgs::ConnectGazeboToRosTopic::POSE:
-      ConnectHelper<gz_geometry_msgs::Pose, geometry_msgs::Pose>(
+      ConnectHelper<gazebo::msgs::Pose, geometry_msgs::Pose>(
           &GazeboRosInterfacePlugin::GzPoseMsgCallback,
           this,
           gazeboTopicName,
@@ -236,14 +236,6 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
     case gz_std_msgs::ConnectGazeboToRosTopic::POSE_WITH_COVARIANCE_STAMPED:
       ConnectHelper<gz_geometry_msgs::PoseWithCovarianceStamped, geometry_msgs::PoseWithCovarianceStamped>(
           &GazeboRosInterfacePlugin::GzPoseWithCovarianceStampedMsgCallback,
-          this,
-          gazeboTopicName,
-          rosTopicName,
-          gz_node_handle_);
-      break;
-    case gz_std_msgs::ConnectGazeboToRosTopic::POSITION_STAMPED:
-      ConnectHelper<gz_geometry_msgs::PositionStamped, geometry_msgs::PointStamped>(
-          &GazeboRosInterfacePlugin::GzPositionStampedMsgCallback,
           this,
           gazeboTopicName,
           rosTopicName,
@@ -268,6 +260,14 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
     case gz_std_msgs::ConnectGazeboToRosTopic::TWIST_STAMPED:
       ConnectHelper<gz_sensor_msgs::TwistStamped, geometry_msgs::TwistStamped>(
           &GazeboRosInterfacePlugin::GzTwistStampedMsgCallback,
+          this,
+          gazeboTopicName,
+          rosTopicName,
+          gz_node_handle_);
+      break;
+    case gz_std_msgs::ConnectGazeboToRosTopic::VECTOR_3D_STAMPED:
+      ConnectHelper<gz_geometry_msgs::Vector3dStamped, geometry_msgs::PointStamped>(
+          &GazeboRosInterfacePlugin::GzVector3dStampedMsgCallback,
           this,
           gazeboTopicName,
           rosTopicName,
@@ -693,28 +693,6 @@ void GazeboRosInterfacePlugin::GzPoseWithCovarianceStampedMsgCallback(
   ros_publisher.publish(ros_pose_with_covariance_stamped_msg_);
 }
 
-void GazeboRosInterfacePlugin::GzPositionStampedMsgCallback(
-    GzPositionStampedMsgPtr& gz_position_stamped_msg,
-    ros::Publisher ros_publisher) {
-
-  // ============================================ //
-  // =================== HEADER ================= //
-  // ============================================ //
-  ros_position_stamped_msg_.header.stamp.sec = gz_position_stamped_msg->header().stamp().sec();
-  ros_position_stamped_msg_.header.stamp.nsec = gz_position_stamped_msg->header().stamp().nsec();
-  ros_position_stamped_msg_.header.frame_id = gz_position_stamped_msg->header().frame_id();
-
-  // ============================================ //
-  // ================== POSITION ================ //
-  // ============================================ //
-
-  ros_position_stamped_msg_.point.x = gz_position_stamped_msg->position().x();
-  ros_position_stamped_msg_.point.y = gz_position_stamped_msg->position().y();
-  ros_position_stamped_msg_.point.z = gz_position_stamped_msg->position().z();
-
-  ros_publisher.publish(ros_position_stamped_msg_);
-}
-
 void GazeboRosInterfacePlugin::GzTransformStampedMsgCallback(
       GzTransformStampedMsgPtr& gz_transform_stamped_msg,
       ros::Publisher ros_publisher) {
@@ -750,7 +728,27 @@ void GazeboRosInterfacePlugin::GzTwistStampedMsgCallback(
   gzthrow(__FUNCTION__ << "() is not yet implemented.");
 }
 
+void GazeboRosInterfacePlugin::GzVector3dStampedMsgCallback(
+    GzVector3dStampedMsgPtr& gz_vector_3d_stamped_msg,
+    ros::Publisher ros_publisher) {
 
+  // ============================================ //
+  // =================== HEADER ================= //
+  // ============================================ //
+  ros_position_stamped_msg_.header.stamp.sec = gz_vector_3d_stamped_msg->header().stamp().sec();
+  ros_position_stamped_msg_.header.stamp.nsec = gz_vector_3d_stamped_msg->header().stamp().nsec();
+  ros_position_stamped_msg_.header.frame_id = gz_vector_3d_stamped_msg->header().frame_id();
+
+  // ============================================ //
+  // ================== POSITION ================ //
+  // ============================================ //
+
+  ros_position_stamped_msg_.point.x = gz_vector_3d_stamped_msg->position().x();
+  ros_position_stamped_msg_.point.y = gz_vector_3d_stamped_msg->position().y();
+  ros_position_stamped_msg_.point.z = gz_vector_3d_stamped_msg->position().z();
+
+  ros_publisher.publish(ros_position_stamped_msg_);
+}
 
 void GazeboRosInterfacePlugin::GzWrenchStampedMsgCallback(
     GzWrenchStampedMsgPtr& gz_wrench_stamped_msg,

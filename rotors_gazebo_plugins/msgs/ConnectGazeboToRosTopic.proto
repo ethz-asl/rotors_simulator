@@ -22,9 +22,9 @@ message ConnectGazeboToRosTopic
     ODOMETRY = 6;
     POSE = 7;
     POSE_WITH_COVARIANCE_STAMPED = 8;
-    POSITION_STAMPED = 9;
-    TRANSFORM_STAMPED = 10;
-    TWIST_STAMPED = 11;
+    TRANSFORM_STAMPED = 9;
+    TWIST_STAMPED = 10;
+    VECTOR_3D_STAMPED = 11;
     WRENCH_STAMPED = 12;
   }
   required MsgType msgType = 3;

@@ -44,13 +44,12 @@
 #include "MagneticField.pb.h"
 #include "NavSatFix.pb.h"
 #include "Odometry.pb.h"
-#include "Pose.pb.h"
 #include "PoseWithCovarianceStamped.pb.h"
-#include "PositionStamped.pb.h"
 #include "Imu.pb.h"
 #include "TransformStamped.pb.h"
 #include "TransformStampedWithFrameIds.pb.h"
 #include "TwistStamped.pb.h"
+#include "Vector3dStamped.pb.h"
 #include "WindSpeed.pb.h"
 #include "WrenchStamped.pb.h"
 
@@ -80,10 +79,10 @@ typedef const boost::shared_ptr<const gz_std_msgs::ConnectGazeboToRosTopic> GzCo
 typedef const boost::shared_ptr<const gz_std_msgs::ConnectRosToGazeboTopic> GzConnectRosToGazeboTopicMsgPtr;
 typedef const boost::shared_ptr<const gz_std_msgs::Float32> GzFloat32MsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::Odometry> GzOdometryMsgPtr;
-typedef const boost::shared_ptr<const gz_geometry_msgs::Pose> GzPoseMsgPtr;
+typedef const boost::shared_ptr<const gazebo::msgs::Pose> GzPoseMsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::PoseWithCovarianceStamped> GzPoseWithCovarianceStampedMsgPtr;
-typedef const boost::shared_ptr<const gz_geometry_msgs::PositionStamped> GzPositionStampedMsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::TransformStamped> GzTransformStampedMsgPtr;
+typedef const boost::shared_ptr<const gz_geometry_msgs::Vector3dStamped> GzVector3dStampedMsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::WrenchStamped> GzWrenchStampedMsgPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
 typedef const boost::shared_ptr<const gz_sensor_msgs::Actuators> GzActuatorsMsgPtr;
@@ -209,11 +208,11 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   // POSE WITH COVARIANCE STAMPED
   void GzPoseWithCovarianceStampedMsgCallback(
       GzPoseWithCovarianceStampedMsgPtr& gz_pose_with_covariance_stamped_msg, ros::Publisher ros_publisher);    //!< Callback for when Gazebo message is received.
-  geometry_msgs::PoseWithCovarianceStamped ros_pose_with_covariance_stamped_msg_;                                                    //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
+  geometry_msgs::PoseWithCovarianceStamped ros_pose_with_covariance_stamped_msg_;                               //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
 
   // POSITION STAMPED
-  void GzPositionStampedMsgCallback(
-      GzPositionStampedMsgPtr& gz_position_stamped_msg,                                                         //!< Callback for when Gazebo message is received.
+  void GzVector3dStampedMsgCallback(
+      GzVector3dStampedMsgPtr& gz_vector_3d_stamped_msg,                                                        //!< Callback for when Gazebo message is received.
       ros::Publisher ros_publisher);                                                                            //!< Persistant msg object to prevent mem alloc everytime Gazebo message is converted to ROS message.
   geometry_msgs::PointStamped ros_position_stamped_msg_;
 

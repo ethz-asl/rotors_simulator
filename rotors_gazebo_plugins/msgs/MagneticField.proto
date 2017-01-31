@@ -1,30 +1,18 @@
 syntax = "proto2";
 package gz_sensor_msgs;
+
 import "quaternion.proto";
 import "vector3d.proto";
+import "Header.proto";
 
 // Magnetic field message type which is emitted by the
 // Magnetometer Gazebo plugin
 message MagneticField
 {
 
-  message Header {
-    message Stamp {
-      required uint32 sec = 1;
-      required uint32 nsec = 2;
-    }
-    required string frame_id = 1;
-    required Stamp stamp = 2;
-  }
-  required Header header = 1;
+  required gz_std_msgs.Header header = 1;
 
-  message Vector {
-    required double x = 1;
-    required double y = 2;
-    required double z = 3;
-  }
-  required Vector magnetic_field = 2;
+  required gazebo.msgs.Vector3d magnetic_field = 2;
 
   repeated float magnetic_field_covariance = 3 [packed=true];
-  
 }
