@@ -77,6 +77,15 @@ bool OctomapFromGazeboWorld::ServiceCallback(
     gzlog << "Publishing Octomap." << std::endl;
     octomap_publisher_.publish(res.map);
   }
+
+  common::SphericalCoordinatesPtr sphericalCoordinates = world_->GetSphericalCoordinates();
+  math::Vector3 origin_cartesian(0.0, 0.0, 0.0);
+  math::Vector3 origin_spherical = sphericalCoordinates->
+         SphericalFromLocal(origin_cartesian);
+
+  res.origin_latitude = origin_spherical.x;
+  res.origin_longitude = origin_spherical.y;
+  res.origin_altitude = origin_spherical.z;
   return true;
 }
 
