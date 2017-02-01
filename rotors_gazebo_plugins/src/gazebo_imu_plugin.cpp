@@ -19,20 +19,18 @@
  * limitations under the License.
  */
 
+// MODULE HEADER
+#include "rotors_gazebo_plugins/gazebo_imu_plugin.h"
+
+// USER HEADERS
+#include "ConnectGazeboToRosTopic.pb.h"
+
 // SYSTEM LIBS
 #include <chrono>
 #include <cmath>
 #include <iostream>
 #include <stdio.h>
 #include <boost/bind.hpp>
-
-// MODULE HEADER
-#include "rotors_gazebo_plugins/gazebo_imu_plugin.h"
-
-// USER HEADERS
-#include "ConnectGazeboToRosTopic.pb.h"
-#include <mav_msgs/default_topics.h>  // This comes from the mav_comm
-
 
 namespace gazebo {
 
@@ -85,12 +83,13 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   frame_id_ = link_name_;
   
-  getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_,
-                           mav_msgs::default_topics::IMU);
+//  getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_,
+//                           mav_msgs::default_topics::IMU);
+  getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_, "");
   getSdfParam<double>(_sdf, "gyroscopeNoiseDensity",
                       imu_parameters_.gyroscope_noise_density,
                       imu_parameters_.gyroscope_noise_density);
-  getSdfParam<double>(_sdf, "gyroscopeRandomWalk",
+  getSdfParam<double>(_sdf, "gyroscopeBiasRandomWalk",
                       imu_parameters_.gyroscope_random_walk,
                       imu_parameters_.gyroscope_random_walk);
   getSdfParam<double>(_sdf, "gyroscopeBiasCorrelationTime",
@@ -349,8 +348,8 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 void GazeboImuPlugin::CreatePubsAndSubs() {
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
-  //gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
-  //      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+  gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
 
   // ============================================ //
   // =============== IMU MSG SETUP ============== //
@@ -359,12 +358,10 @@ void GazeboImuPlugin::CreatePubsAndSubs() {
   imu_pub_ = node_handle_->Advertise<gz_sensor_msgs::Imu>("~/" + model_->GetName() + "/" + imu_topic_, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
-  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + imu_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(imu_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::IMU);
-  //connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
-  gazebo::transport::publish<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, connect_gazebo_to_ros_topic_msg);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
 }
 

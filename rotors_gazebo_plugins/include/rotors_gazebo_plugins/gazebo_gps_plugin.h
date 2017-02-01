@@ -63,8 +63,6 @@ class GazeboGpsPlugin : public SensorPlugin {
   ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
   void CreatePubsAndSubs();
 
-  std::string namespace_;
-
   gazebo::transport::NodePtr node_handle_;
 
   gazebo::transport::PublisherPtr gz_gps_pub_;
