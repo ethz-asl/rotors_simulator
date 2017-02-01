@@ -22,6 +22,9 @@ include_directories(${ADDITIONAL_INCLUDE_DIRS})
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 
+# Initialise a list which will keep track of all targets
+# that need to be installed.
+set(targets_to_install "")
 
 # =============================================================================================== #
 # ======================================== STATUS MESSAGES ====================================== #
@@ -179,6 +182,7 @@ if (NOT NO_ROS)
   add_library(rotors_gazebo_bag_plugin SHARED src/gazebo_bag_plugin.cpp)
   target_link_libraries(rotors_gazebo_bag_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   add_dependencies(rotors_gazebo_bag_plugin ${catkin_EXPORTED_TARGETS})
+  list(APPEND targets_to_install rotors_gazebo_bag_plugin)
 endif()
 
 #================================= CONTROLLER INTERFACE PLUGIN ==================================//
@@ -187,12 +191,22 @@ target_link_libraries(rotors_gazebo_controller_interface ${catkin_LIBRARIES} ${G
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})
 endif()
+list(APPEND targets_to_install rotors_gazebo_controller_interface)
 
 #=================================== GEOTAGGED IMAGES PLUGIN ====================================//
-add_library(gazebo_geotagged_images_plugin SHARED src/gazebo_geotagged_images_plugin.cpp)
-target_link_libraries(gazebo_geotagged_images_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-if (NOT NO_ROS)
-  add_dependencies(gazebo_geotagged_images_plugin ${catkin_EXPORTED_TARGETS})
+
+message(STATUS "GAZEBO ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}")
+message(STATUS "${GAZEBO_VERSION_MAJOR}")
+
+if(${gazebo_VERSION_MAJOR} GREATER 4)
+  add_library(gazebo_geotagged_images_plugin SHARED src/gazebo_geotagged_images_plugin.cpp)
+  target_link_libraries(gazebo_geotagged_images_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+  if (NOT NO_ROS)
+    add_dependencies(gazebo_geotagged_images_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install gazebo_geotagged_images_plugin)
+else()
+  message(STATUS "Gazebo version is less than 5, not building gazebo_geotagged_images_plugin.cpp.")
 endif()
 
 #========================================= GPS PLUGIN ===========================================//
@@ -201,6 +215,7 @@ target_link_libraries(rotors_gazebo_gps_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBR
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_gps_plugin ${catkin_EXPORTED_TARGETS})
 endif()
+list(APPEND targets_to_install rotors_gazebo_gps_plugin)
 
 #========================================= IMU PLUGIN ===========================================//
 add_library(rotors_gazebo_imu_plugin SHARED src/gazebo_imu_plugin.cpp)
@@ -208,13 +223,19 @@ target_link_libraries(rotors_gazebo_imu_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBR
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
 endif()
+list(APPEND targets_to_install rotors_gazebo_imu_plugin)
 
 #======================================== LIDAR PLUGIN ==========================================//
-add_library(rotors_gazebo_lidar_plugin SHARED src/gazebo_lidar_plugin.cpp)
-target_link_libraries(rotors_gazebo_lidar_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-if (NOT NO_ROS)
-  add_dependencies(rotors_gazebo_lidar_plugin ${catkin_EXPORTED_TARGETS})
-endif()
+if(${gazebo_VERSION_MAJOR} GREATER 4)
+  add_library(rotors_gazebo_lidar_plugin SHARED src/gazebo_lidar_plugin.cpp)
+  target_link_libraries(rotors_gazebo_lidar_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+  if (NOT NO_ROS)
+    add_dependencies(rotors_gazebo_lidar_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install rotors_gazebo_lidar_plugin)
+else()
+  message(STATUS "Gazebo version is less than 5, not building gazebo_lidar_plugin.cpp.")
+endif()    
 
 #===================================== MAGNETOMETER PLUGIN ======================================//
 add_library(rotors_gazebo_magnetometer_plugin SHARED src/gazebo_magnetometer_plugin.cpp)
@@ -222,6 +243,7 @@ target_link_libraries(rotors_gazebo_magnetometer_plugin ${catkin_LIBRARIES} ${GA
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_magnetometer_plugin ${catkin_EXPORTED_TARGETS})
 endif()
+list(APPEND targets_to_install rotors_gazebo_magnetometer_plugin)
 
 #================================= MAVLINK INTERFACE PLUGIN =====================================//
 if (BUILD_MAVLINK_INTERFACE_PLUGIN)
@@ -229,7 +251,7 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
   add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/geo_mag_declination.cpp)
   target_link_libraries(rotors_gazebo_mavlink_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${mav_msgs})
   #add_dependencies(rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
-  message(STATUS "Built mavlink_interface_plugin")
+  list(APPEND targets_to_install rotors_gazebo_mavlink_interface)
 endif()
 
 #==================================== MOTOR MODEL PLUGIN ========================================//
@@ -238,6 +260,7 @@ target_link_libraries(rotors_gazebo_motor_model ${catkin_LIBRARIES} ${GAZEBO_LIB
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_motor_model ${catkin_EXPORTED_TARGETS})
 endif()
+list(APPEND targets_to_install rotors_gazebo_motor_model)
 
 #==================================== MULTIROTOR BASE PLUGIN ====================================//
 add_library(rotors_gazebo_multirotor_base_plugin SHARED src/gazebo_multirotor_base_plugin.cpp)
@@ -245,6 +268,7 @@ target_link_libraries(rotors_gazebo_multirotor_base_plugin ${catkin_LIBRARIES} $
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_multirotor_base_plugin ${catkin_EXPORTED_TARGETS})
 endif()
+list(APPEND targets_to_install rotors_gazebo_multirotor_base_plugin)
 
 #====================================== OCTOMAP PLUGIN ==========================================//
 
@@ -257,6 +281,7 @@ if(BUILD_OCTOMAP_PLUGIN)
   if (NOT NO_ROS)
     add_dependencies(rotors_gazebo_octomap_plugin ${catkin_EXPORTED_TARGETS})
   endif()
+  list(APPEND targets_to_install rotors_gazebo_octomap_plugin)
 endif()
 
 #======================================= ODOMETRY PLUGIN ========================================//
@@ -265,6 +290,7 @@ target_link_libraries(rotors_gazebo_odometry_plugin ${catkin_LIBRARIES} ${GAZEBO
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_odometry_plugin ${catkin_EXPORTED_TARGETS})
 endif()
+list(APPEND targets_to_install rotors_gazebo_odometry_plugin)
 
 #===================================== OPTICAL FLOW PLUGIN ======================================//
 # Since the optical flow plugin depends on external code (PX4/OpticalFlow), this is
@@ -288,6 +314,7 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   if (NOT NO_ROS)
     add_dependencies(rotors_gazebo_optical_flow_plugin ${catkin_EXPORTED_TARGETS})
   endif()
+  list(APPEND targets_to_install rotors_gazebo_optical_flow_plugin)
 endif()
 
 #===================================== ROS INTERFACE PLUGIN =====================================//
@@ -296,6 +323,7 @@ if (NOT NO_ROS)
   add_library(rotors_gazebo_ros_interface_plugin SHARED src/gazebo_ros_interface_plugin.cpp)
   target_link_libraries(rotors_gazebo_ros_interface_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   add_dependencies(rotors_gazebo_ros_interface_plugin ${catkin_EXPORTED_TARGETS})
+  list(APPEND targets_to_install rotors_gazebo_ros_interface_plugin)
 endif()
 
 #========================================= WIND PLUGIN ==========================================//
@@ -304,6 +332,7 @@ target_link_libraries(rotors_gazebo_wind_plugin ${catkin_LIBRARIES} ${GAZEBO_LIB
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_wind_plugin ${catkin_EXPORTED_TARGETS})
 endif()
+list(APPEND targets_to_install rotors_gazebo_wind_plugin)
 
 # =============================================================================================== #
 # ======================================= EXTERNAL LIBRARIES ==================================== #
@@ -314,12 +343,16 @@ endif()
 # code soure.
 # Linux is not consistent with plugin availability, even on Gazebo 7
 #if("${GAZEBO_VERSION}" VERSION_LESS "7.0")
+if(${gazebo_VERSION_MAJOR} GREATER 4)
   add_library(LiftDragPlugin SHARED src/liftdrag_plugin/liftdrag_plugin.cpp)
   target_link_libraries(LiftDragPlugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   if (NOT NO_ROS)
     add_dependencies(LiftDragPlugin ${catkin_EXPORTED_TARGETS})
   endif()
-#endif()
+  list(APPEND targets_to_install LiftDragPlugin)
+else()
+  message(STATUS "Gazebo version is less than 5, not building liftdrag_plugin.cpp.")
+endif()    
 
 
 
@@ -333,60 +366,14 @@ else()
 endif()
 
 
+# Install all targets that were defined above (some conditionally) and added to the
+# variable targets_to_install
 install(
   TARGETS
-    rotors_gazebo_controller_interface
-    gazebo_geotagged_images_plugin
-    rotors_gazebo_gps_plugin
-    rotors_gazebo_imu_plugin
-    rotors_gazebo_lidar_plugin
-    rotors_gazebo_magnetometer_plugin
-    rotors_gazebo_motor_model
-    rotors_gazebo_multirotor_base_plugin
-    rotors_gazebo_odometry_plugin
-    rotors_gazebo_wind_plugin
-    
-    LiftDragPlugin
-    
+    ${targets_to_install}
   DESTINATION ${BIN_DESTINATION}
   LIBRARY DESTINATION ${LIB_DESTINATION}
 )
-
-if (NOT NO_ROS)
-    install(
-      TARGETS
-        rotors_gazebo_bag_plugin
-      DESTINATION ${BIN_DESTINATION}
-      LIBRARY DESTINATION ${LIB_DESTINATION}
-    )
-endif()
-
-if (BUILD_MAVLINK_INTERFACE_PLUGIN)
-  install(
-    TARGETS
-      rotors_gazebo_mavlink_interface
-    DESTINATION ${BIN_DESTINATION}
-    LIBRARY DESTINATION ${LIB_DESTINATION}
-  )
-endif()
-
-if(BUILD_OCTOMAP_PLUGIN)
-  install(
-    TARGETS
-      rotors_gazebo_octomap_plugin
-    DESTINATION ${BIN_DESTINATION}
-    LIBRARY DESTINATION ${LIB_DESTINATION}
-  )
-endif()
-
-if(BUILD_OPTICAL_FLOW_PLUGIN)
-  install(
-    TARGETS
-      rotors_gazebo_optical_flow_plugin
-    DESTINATION ${BIN_DESTINATION}
-    LIBRARY DESTINATION ${LIB_DESTINATION}
-  )
-endif()
 
 # Copy over all converted protobuf files (*.pb.h and *.pb.c) from the src directory to
 # the devel directory. This is required so that you can include the protobuf header files from other C++ files.
