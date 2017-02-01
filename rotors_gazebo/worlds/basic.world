@@ -7,13 +7,11 @@
     <include>
       <uri>model://sun</uri>
     </include>
-    <!--<include>
-      <uri>model://ros_interface</uri>
-    </include>-->
-    <connect_gazebo_to_ros_subtopic>connect_gazebo_to_ros_subtopic</connect_gazebo_to_ros_subtopic>
-    <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so">
-      <connect_ros_to_gazebo_subtopic>connect_ros_to_gazebo_subtopic</connect_ros_to_gazebo_subtopic>
-    </plugin>
+    
+    <!-- Only require one ROS interface plugin per world, as any other plugin can connect a Gazebo
+        topic to a ROS topic (or vise versa). -->
+    <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so"></plugin>
+    
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
       <latitude_deg>47.3667</latitude_deg>
