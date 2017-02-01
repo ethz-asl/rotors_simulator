@@ -125,8 +125,8 @@ void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
 void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
-  //gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
-  //      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+  gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
@@ -135,24 +135,20 @@ void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
   // ============================================ //
   motor_pub_ = node_handle_->Advertise<gz_sensor_msgs::Actuators>("~/" + model_->GetName() + "/" + actuators_pub_topic_, 10);
 
-  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + actuators_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(actuators_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);
-  //connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
-  gazebo::transport::publish<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, connect_gazebo_to_ros_topic_msg);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   // ============================================ //
   // ========== JOINT STATE MSG SETUP =========== //
   // ============================================ //
   joint_state_pub_ = node_handle_->Advertise<gz_sensor_msgs::JointState>("~/" + model_->GetName() + "/" + joint_state_pub_topic_, 1);
 
-  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + joint_state_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(joint_state_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::JOINT_STATE);
-  //connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
-  gazebo::transport::publish<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, connect_gazebo_to_ros_topic_msg);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
 }
 

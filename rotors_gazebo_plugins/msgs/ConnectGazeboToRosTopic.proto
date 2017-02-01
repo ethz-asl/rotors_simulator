@@ -6,9 +6,8 @@ package gz_std_msgs;
 // a ROS topic
 message ConnectGazeboToRosTopic
 {
-  required string gazebo_namespace = 1;
-  required string gazebo_topic = 2;
-  required string ros_topic = 3;
+  required string gazebo_topic = 1;
+  required string ros_topic = 2;
 
   // The supported messages types that the ROS interface plugin knows to convert
   // from a Gazebo to a ROS message.
@@ -28,5 +27,5 @@ message ConnectGazeboToRosTopic
     VECTOR_3D_STAMPED = 11;
     WRENCH_STAMPED = 12;
   }
-  required MsgType msgType = 4;
+  required MsgType msgType = 3;
 }
