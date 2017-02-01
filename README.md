@@ -1,6 +1,22 @@
 RotorS
 ===============
 
+Change Log
+===============
+
+[Author] ***Ayush Gaud***  
+
+Parrot Bebop 2 model has been added to the existing models. PIDs have been tuned manually hence there is still a scope of improvement. To change them, modify the lee_controller_bebop2.yaml and roll_pitch_yawrate_thrust_controller_bebop2.yaml.
+
+To run the demo 
+
+```
+$ roslaunch rotors_gazebo bebop_hover.launch
+
+```
+
+Readme Continued
+===============
 RotorS is a MAV gazebo simulator.
 It provides some multirotor models such as the [AscTec Hummingbird](http://www.asctec.de/en/uav-uas-drone-products/asctec-hummingbird/), the [AscTec Pelican](http://www.asctec.de/en/uav-uas-drone-products/asctec-pelican/), or the [AscTec Firefly](http://www.asctec.de/en/uav-uas-drone-products/asctec-firefly/), but the simulator is not limited for the use with these multicopters.
 
