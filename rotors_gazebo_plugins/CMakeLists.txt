@@ -125,7 +125,7 @@ if ("${PROTOBUF_VERSION}" VERSION_LESS "2.5.0")
 endif()
 
 # After running this block of code,
-# we should have something similar to 
+# we should have something similar to
 # GAZEBO_MSG_INCLUDE_DIRS = /usr/include/gazebo-7/gazebo/msgs
 set(GAZEBO_MSG_INCLUDE_DIRS)
 foreach(ITR ${GAZEBO_INCLUDE_DIRS})
@@ -142,7 +142,7 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${msgs})
 
 # Create a shared library of protobuf messages (.so extension on Linux platforms)
 add_library(mav_msgs SHARED ${PROTO_SRCS})
-target_link_libraries(mav_msgs ${PROTOBUF_LIBRARY})
+target_link_libraries(mav_msgs ${PROTOBUF_LIBRARY} gazebo_msgs)
 
 # This causes mav_msgs to be linked with every created library in this file from this
 # point forward.
@@ -159,7 +159,7 @@ if (NOT NO_ROS)
     LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
     CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf
     DEPENDS eigen gazebo octomap opencv
-    #CFG_EXTRAS rotors_gazebo_plugins.cmake  
+    #CFG_EXTRAS rotors_gazebo_plugins.cmake
   )
 endif()
 
@@ -235,7 +235,7 @@ if(${gazebo_VERSION_MAJOR} GREATER 4)
   list(APPEND targets_to_install rotors_gazebo_lidar_plugin)
 else()
   message(STATUS "Gazebo version is less than 5, not building gazebo_lidar_plugin.cpp.")
-endif()    
+endif()
 
 #===================================== MAGNETOMETER PLUGIN ======================================//
 add_library(rotors_gazebo_magnetometer_plugin SHARED src/gazebo_magnetometer_plugin.cpp)
@@ -301,9 +301,9 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   if(${gazebo_VERSION_MAJOR} LESS 5)
     message(FATAL_ERROR "Gazebo version needs to be >= v5.x. You specified BUILD_OPTICAL_FLOW_PLUGIN=TRUE, but Gazebo version was less than v5.x.")
   endif()
-  
+
   find_package(Boost 1.40.0 REQUIRED timer)
-  
+
   # OpticalFlow needs to be built and installed by the calling script, as it is very
   # unlikely that this package already exists on the users computer.
   # In PX4 this is done with a call to ExternalProject_Add().
@@ -357,7 +357,7 @@ if(${gazebo_VERSION_MAJOR} GREATER 4)
   list(APPEND targets_to_install LiftDragPlugin)
 else()
   message(STATUS "Gazebo version is less than 5, not building liftdrag_plugin.cpp.")
-endif()    
+endif()
 
 
 
