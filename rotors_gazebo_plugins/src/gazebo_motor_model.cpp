@@ -164,6 +164,10 @@ void GazeboMotorModel::OnUpdate(const common::UpdateInfo& _info) {
   prev_sim_time_ = _info.simTime.Double();
   UpdateForcesAndMoments();
   Publish();
+  // Apply the filter on the motor's velocity.
+  double motor_rot_vel = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
+  joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
+  motor_rot_vel_ = turning_direction_ * motor_rot_vel / rotor_velocity_slowdown_sim_;
 }
 
 void GazeboMotorModel::VelocityCallback(const mav_msgs::ActuatorsConstPtr& rot_velocities) {
@@ -202,7 +206,7 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   // - \omega * \lambda_1 * V_A^{\perp}
   math::Vector3 relative_wind_velocity_W = velocity_current_W_ - wind_speed_W_;
   math::Vector3 body_velocity_perpendicular = relative_wind_velocity_W - (relative_wind_velocity_W.Dot(joint_axis) * joint_axis);
-  math::Vector3 air_drag = -std::abs(real_motor_velocity) * rotor_drag_coefficient_ * body_velocity_perpendicular;
+  math::Vector3 air_drag = -thrust_force * rotor_drag_coefficient_ * body_velocity_perpendicular;
 
   math::Pose T_W_B = link_->GetWorldPose(); //TODO(burrimi): Check tf.
   math::Quaternion q_W_B = T_W_B.rot;
@@ -230,10 +234,7 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
 //  rolling_moment = -std::abs(real_motor_velocity) * rolling_moment_coefficient_ * body_velocity_perpendicular;
 //  parent_links.at(0)->AddTorque(rolling_moment);
 
-  // Apply the filter on the motor's velocity.
-  double motor_rot_vel = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
-  joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
-  motor_rot_vel_ = turning_direction_ * motor_rot_vel / rotor_velocity_slowdown_sim_;
+
 
 }
 
