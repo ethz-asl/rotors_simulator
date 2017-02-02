@@ -8,7 +8,7 @@ Change Log
 
 Parrot Bebop 2 model has been added to the existing models.
 
-![bebop_gazebo](https://cloud.githubusercontent.com/assets/4923897/22503677/d30076c4-e898-11e6-8629-f98f1dae6134.png)  
+![bebop_gazebo](https://cloud.githubusercontent.com/assets/4923897/22562910/824674e2-e9a4-11e6-8232-b4039fc92e35.gif)
 
 ####To run the demo execute the following command
 
