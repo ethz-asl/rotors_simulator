@@ -298,9 +298,9 @@ list(APPEND targets_to_install rotors_gazebo_odometry_plugin)
 if(BUILD_OPTICAL_FLOW_PLUGIN)
 
   # Check to make sure the correct Gazebo version is available.
-  if(${gazebo_VERSION_MAJOR} LESS 5) {
-    message( FATAL_ERROR "Gazebo version needs to be >= v5.x. You specified BUILD_OPTICAL_FLOW_PLUGIN=TRUE, but Gazebo version was less than v5.x." )
-  }
+  if(${gazebo_VERSION_MAJOR} LESS 5)
+    message(FATAL_ERROR "Gazebo version needs to be >= v5.x. You specified BUILD_OPTICAL_FLOW_PLUGIN=TRUE, but Gazebo version was less than v5.x.")
+  endif()
   
   find_package(Boost 1.40.0 REQUIRED timer)
   
