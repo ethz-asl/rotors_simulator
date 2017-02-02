@@ -6,7 +6,7 @@ Change Log
 
 [Author] ***Ayush Gaud***  
 
-Parrot Bebop 2 model has been added to the existing models. PIDs have been tuned manually hence there is still a scope of improvement. To change them, modify the lee_controller_bebop2.yaml.  
+Parrot Bebop 2 model has been added to the existing models.
 
 ![bebop_gazebo](https://cloud.githubusercontent.com/assets/4923897/22503677/d30076c4-e898-11e6-8629-f98f1dae6134.png)  
 
