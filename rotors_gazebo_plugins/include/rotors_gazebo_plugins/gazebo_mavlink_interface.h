@@ -38,7 +38,8 @@
 #include "gazebo/msgs/msgs.hh"
 
 #include "common.h"
-#include "mavlink/v1.0/common/mavlink.h"
+//#include "mavlink/v1.0/common/mavlink.h"
+#include "common/mavlink.h"     // Either provided by ROS or as CMake argument MAVLINK_HEADER_DIR
 #include "CommandMotorSpeed.pb.h"
 #include "MotorSpeed.pb.h"
 #include "Imu.pb.h"
