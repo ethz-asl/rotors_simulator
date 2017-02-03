@@ -61,8 +61,10 @@ endif()
 # Specify C++11 standard
 add_definitions(-std=c++11)
 
+# Provides a compiler flag notifying the preprocessor about
+# the MAVLink Interface plugin build status
 add_definitions(
-  -DMAVLINK_INTERFACE=${MAVLINK_INTERFACE}
+  -DMAVLINK_INTERFACE=${BUILD_MAVLINK_INTERFACE_PLUGIN}
 )
 
 # To enable assertions when compiled in release mode.

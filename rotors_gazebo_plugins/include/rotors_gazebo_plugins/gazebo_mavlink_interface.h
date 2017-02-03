@@ -18,36 +18,32 @@
  * limitations under the License.
  */
 
+#include <iostream>
+#include <math.h>
+#include <deque>
+#include <random>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sdf/sdf.hh>
+#include <stdio.h>
+
 #include <boost/bind.hpp>
 #include <Eigen/Eigen>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-#include "CommandMotorSpeed.pb.h"
-#include "MotorSpeed.pb.h"
+#include "gazebo/math/Vector3.hh"
 #include "gazebo/transport/transport.hh"
 #include "gazebo/msgs/msgs.hh"
-#include <stdio.h>
 
 #include "common.h"
-
+#include "mavlink/v1.0/common/mavlink.h"
+#include "CommandMotorSpeed.pb.h"
+#include "MotorSpeed.pb.h"
 #include "Imu.pb.h"
 #include "OpticalFlow.pb.h"
 #include "Lidar.pb.h"
-#include <boost/bind.hpp>
-
-#include <iostream>
-#include <math.h>
-#include <deque>
-#include <random>
-#include <sdf/sdf.hh>
-
-#include "mavlink/v1.0/common/mavlink.h"
-
-#include "gazebo/math/Vector3.hh"
-#include <sys/socket.h>
-#include <netinet/in.h>
 
 static const uint8_t mavlink_message_lengths[256] = MAVLINK_MESSAGE_LENGTHS;
 static const uint8_t mavlink_message_crcs[256] = MAVLINK_MESSAGE_CRCS;
