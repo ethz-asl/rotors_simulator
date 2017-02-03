@@ -3,6 +3,9 @@
 # BUILD_MAVLINK_INTERFACE_PLUGIN    bool    Build mavlink_interface_plugin (requires mav dependency).
 # BUILD_OCTOMAP_PLUGIN              bool    Build the optical map plugin (requires Octomap).
 # BUILD_OPTICAL_FLOW_PLUGIN         bool    Build the optical flow plugin (requires OpenCV).
+# MAVLINK_HEADER_DIR                string  Location of MAVLink header files. If not provided, this CMakeLists.txt file will
+#                                               search the default locations (e.g. ROS) for them. This variable is only required
+#                                               if BUILD_MAVLINK_INTERFACE_PLUGIN=TRUE.
 # NO_ROS                            bool    Build without any ROS dependencies.
 
 cmake_minimum_required(VERSION 2.8.3)
@@ -31,12 +34,6 @@ set(targets_to_install "")
 # =============================================================================================== #
 
 message(STATUS "ADDITIONAL_INCLUDE_DIRS = ${ADDITIONAL_INCLUDE_DIRS}")
-
-if(BUILD_MAVLINK_INTERFACE_PLUGIN)
-  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN = TRUE, adding mavros dependency and building mavlink_interface_plugin.")
-else ()
-  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN = FALSE, NOT adding mavros dependency and NOT building mavlink_interface_plugin.")
-endif ()
 
 if(BUILD_OCTOMAP_PLUGIN)
   message(STATUS "BUILD_OCTOMAP_PLUGIN = TRUE, building gazebo_octomap_plugin.")
@@ -248,7 +245,41 @@ endif()
 list(APPEND targets_to_install rotors_gazebo_magnetometer_plugin)
 
 #================================= MAVLINK INTERFACE PLUGIN =====================================//
+
+if(BUILD_MAVLINK_INTERFACE_PLUGIN)
+  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN = TRUE, adding mavros dependency and building mavlink_interface_plugin.")
+else ()
+  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN = FALSE, NOT adding mavros dependency and NOT building mavlink_interface_plugin.")
+endif ()
+
 if (BUILD_MAVLINK_INTERFACE_PLUGIN)
+
+  # We need the MAVLink headers.
+  set(MAVLINK_HEADERS_FOUND FALSE)
+  
+  # First, check to see if MAVLink headers were passed in as variable
+  if(NOT MAVLINK_HEADER_DIR STREQUAL "")
+  
+    message(STATUS "MAVLINK_HEADER_DIR provided as '${MAVLINK_HEADER_DIR}'.")
+    include_directories(${MAVLINK_HEADER_DIR})
+    set(MAVLINK_HEADERS_FOUND TRUE)
+    
+  else()
+  
+    message(STATUS "MAVLINK_HEADER_DIR not provided, falling back to looking at default paths...")
+    # If ROS indigo is installed, we should be able to find them at the path below
+    if(EXISTS /opt/ros/indigo/include/mavlink/v1.0/)
+      message(STATUS "Found MAVLink headers at /opt/ros/indigo/include/mavlink/v1.0/.")
+      include_directories("/opt/ros/indigo/include/mavlink/v1.0/")
+      set(MAVLINK_HEADERS_FOUND TRUE)
+    endif()
+    
+  endif()
+  
+  if(NOT MAVLINK_HEADERS_FOUND)
+    message(FATAL_ERROR "MAVLink headers were not found. They are required for building MavlinkInterfacePlugin.")
+  endif()
+
   # Note that this library includes TWO .cpp files.
   add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/geo_mag_declination.cpp)
   target_link_libraries(rotors_gazebo_mavlink_interface ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${mav_msgs})
