@@ -28,12 +28,14 @@
 #include <std_srvs/Empty.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
-int main(int argc, char** argv){
+int main(int argc, char** argv) {
   ros::init(argc, argv, "hovering_example");
   ros::NodeHandle nh;
+  // Create a private node handle for accessing node parameters.
+  ros::NodeHandle nh_private("~");
   ros::Publisher trajectory_pub =
       nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>(
-      mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
+          mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
   ROS_INFO("Started hovering example.");
 
   std_srvs::Empty srv;
@@ -51,8 +53,7 @@ int main(int argc, char** argv){
   if (!unpaused) {
     ROS_FATAL("Could not wake up Gazebo.");
     return -1;
-  }
-  else {
+  } else {
     ROS_INFO("Unpaused the Gazebo simulation.");
   }
 
@@ -61,16 +62,23 @@ int main(int argc, char** argv){
 
   trajectory_msgs::MultiDOFJointTrajectory trajectory_msg;
   trajectory_msg.header.stamp = ros::Time::now();
+
+  // Default desired position and yaw.
   Eigen::Vector3d desired_position(0.0, 0.0, 1.0);
   double desired_yaw = 0.0;
-  mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(desired_position,
-      desired_yaw, &trajectory_msg);
+
+  // Overwrite defaults if set as node parameters.
+  nh_private.param("x", desired_position.x(), desired_position.x());
+  nh_private.param("y", desired_position.y(), desired_position.y());
+  nh_private.param("z", desired_position.z(), desired_position.z());
+  nh_private.param("yaw", desired_yaw, desired_yaw);
+
+  mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(
+      desired_position, desired_yaw, &trajectory_msg);
 
   ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
-           nh.getNamespace().c_str(),
-           desired_position.x(),
-           desired_position.y(),
-           desired_position.z());
+           nh.getNamespace().c_str(), desired_position.x(),
+           desired_position.y(), desired_position.z());
   trajectory_pub.publish(trajectory_msg);
 
   ros::spin();
