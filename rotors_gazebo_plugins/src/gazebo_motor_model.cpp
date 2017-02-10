@@ -163,6 +163,7 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   motor_velocity_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>("~/" + model_->GetName() + "/" + motor_speed_pub_topic_, 1);
 
   // Connect to ROS
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + motor_speed_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(motor_speed_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::FLOAT_32);

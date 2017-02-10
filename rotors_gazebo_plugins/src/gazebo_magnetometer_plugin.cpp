@@ -185,6 +185,7 @@ void GazeboMagnetometerPlugin::CreatePubsAndSubs() {
       node_handle_->GetTopicNamespace() + "/" + magnetometer_topic_, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + magnetometer_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(magnetometer_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::MAGNETIC_FIELD);
