@@ -152,14 +152,19 @@ void GazeboRosInterfacePlugin::ConnectHelper(
   /// \todo Handle collision error
   auto callback_entry = callback_map.emplace(gazeboTopicName, ConnectHelperStorage<M>{ptr, fp, ros_publisher});
 
+  // Create node
+  gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
+  node_ptr->Init(namespace_);
+
   gazebo::transport::SubscriberPtr subscriberPtr;
-  subscriberPtr = gz_node_handle->Subscribe(
+  subscriberPtr = node_ptr->Subscribe(
       gazeboTopicName,
       &ConnectHelperStorage<M>::callback,
       &callback_entry.first->second);
 
   // Save a reference to the subscriber pointer so subsriber
   // won't be deleted.
+  nodePtrs_.push_back(node_ptr);
   subscriberPtrs_.push_back(subscriberPtr);
 
 }
