@@ -361,7 +361,8 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
         node_ptr->Init(namespace_);
       }
 
-      gazebo::transport::PublisherPtr gz_publisher_ptr = node_ptr->Advertise<gz_sensor_msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+      gazebo::transport::PublisherPtr gz_publisher_ptr =
+          node_ptr->Advertise<gz_sensor_msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
 
 
       // Create ROS subscriber
@@ -380,8 +381,20 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       // Create Gazebo publisher
       // (we don't need to manually save a reference for the Gazebo publisher because
       // boost::bind will do that for us)
-      gazebo::transport::PublisherPtr gz_publisher_ptr = gz_node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>(
-          gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+      //gazebo::transport::PublisherPtr gz_publisher_ptr = gz_node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>(
+      //    gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+
+      // Create node
+      gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
+      if(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() != "") {
+        gzdbg << "Creating Gazebo node with namespace = \"" << gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() << "\"." << std::endl;
+        node_ptr->Init(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace());
+      } else {
+        node_ptr->Init(namespace_);
+      }
+
+      gazebo::transport::PublisherPtr gz_publisher_ptr =
+          node_ptr->Advertise<gz_mav_msgs::CommandMotorSpeed>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
 
       // Create ROS subscriber
       ros::Subscriber ros_subscriber = ros_node_handle_->subscribe<mav_msgs::Actuators>(
@@ -398,8 +411,20 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       // Create Gazebo publisher
       // (we don't need to manually save a reference for the Gazebo publisher because
       // boost::bind will do that for us)
-      gazebo::transport::PublisherPtr gz_publisher_ptr = gz_node_handle_->Advertise<gz_mav_msgs::WindSpeed>(
-          gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+      //gazebo::transport::PublisherPtr gz_publisher_ptr = gz_node_handle_->Advertise<gz_mav_msgs::WindSpeed>(
+      //    gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+
+      // Create node
+      gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
+      if(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() != "") {
+        gzdbg << "Creating Gazebo node with namespace = \"" << gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() << "\"." << std::endl;
+        node_ptr->Init(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace());
+      } else {
+        node_ptr->Init(namespace_);
+      }
+
+      gazebo::transport::PublisherPtr gz_publisher_ptr =
+          node_ptr->Advertise<gz_mav_msgs::WindSpeed>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
 
       // Create ROS subscriber
       ros::Subscriber ros_subscriber = ros_node_handle_->subscribe<rotors_comm::WindSpeed>(
