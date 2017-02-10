@@ -317,7 +317,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
 }
 
 
-template<typename T>
+/*template<typename T>
 transport::PublisherPtr GazeboRosInterfacePlugin::FindOrMakeGazeboPublisher(std::string topic) {
 
   transport::PublisherPtr gz_publisher_ptr;
@@ -331,7 +331,7 @@ transport::PublisherPtr GazeboRosInterfacePlugin::FindOrMakeGazeboPublisher(std:
   }
 
   return gz_publisher_ptr;
-}
+}*/
 
 
 void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
@@ -349,8 +349,20 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       // Create Gazebo publisher
       // (we don't need to manually save a reference for the Gazebo publisher because
       // boost::bind will do that for us)
-      gazebo::transport::PublisherPtr gz_publisher_ptr =
-          FindOrMakeGazeboPublisher<gz_sensor_msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic());
+      //gazebo::transport::PublisherPtr gz_publisher_ptr =
+      //    FindOrMakeGazeboPublisher<gz_sensor_msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic());
+
+      // Create node
+      gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
+      if(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() != "") {
+        gzdbg << "Creating Gazebo node with namespace = \"" << gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() << "\"." << std::endl;
+        node_ptr->Init(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace());
+      } else {
+        node_ptr->Init(namespace_);
+      }
+
+      gazebo::transport::PublisherPtr gz_publisher_ptr = node_ptr->Advertise<gz_sensor_msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+
 
       // Create ROS subscriber
       ros::Subscriber ros_subscriber = ros_node_handle_->subscribe<mav_msgs::Actuators>(
@@ -359,6 +371,7 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
 
       // Save reference to the ROS subscriber so callback will continue to be called.
       ros_subscribers.push_back(ros_subscriber);
+      nodePtrs_.push_back(node_ptr);
 
       break;
     }

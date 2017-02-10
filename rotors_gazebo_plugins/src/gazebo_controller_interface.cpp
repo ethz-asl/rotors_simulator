@@ -143,6 +143,7 @@ void GazeboControllerInterface::CreatePubsAndSubs() {
   // Connect to ROS
   gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
   connect_ros_to_gazebo_topic_msg.set_ros_topic(command_motor_speed_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_gazebo_namespace(namespace_);
   connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + command_motor_speed_sub_topic_);
   connect_ros_to_gazebo_topic_msg.set_msgtype(gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
   gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
