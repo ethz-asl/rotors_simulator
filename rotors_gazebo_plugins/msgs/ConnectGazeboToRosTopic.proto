@@ -6,6 +6,8 @@ package gz_std_msgs;
 // a ROS topic
 message ConnectGazeboToRosTopic
 {
+
+  optional string gazebo_namespace = 4;
   required string gazebo_topic = 1;
   required string ros_topic = 2;
 

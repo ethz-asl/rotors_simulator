@@ -409,6 +409,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     }
 
     if (odometry_pub_->HasConnections()) {
+      // DEBUG
       odometry_pub_->Publish(odometry_msg);
     }
 
@@ -487,6 +488,8 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
       "~/" + model_->GetName() + "/" + odometry_pub_topic_,
       1);
 
+  gzdbg << "Calling set_gazebo_namespace(" << model_->GetName() << ")." << std::endl;
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(model_->GetName());
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + odometry_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(odometry_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ODOMETRY);

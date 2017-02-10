@@ -138,6 +138,7 @@ template <typename M, typename N>
 void GazeboRosInterfacePlugin::ConnectHelper(
     void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher),
     GazeboRosInterfacePlugin * ptr,
+    std::string gazeboNamespace,
     std::string gazeboTopicName,
     std::string rosTopicName,
     transport::NodePtr gz_node_handle) {
@@ -171,6 +172,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
 
+  const std::string gazeboNamespace = gz_connect_gazebo_to_ros_topic_msg->gazebo_namespace();
   const std::string gazeboTopicName = gz_connect_gazebo_to_ros_topic_msg->gazebo_topic();
   const std::string rosTopicName = gz_connect_gazebo_to_ros_topic_msg->ros_topic();
 
@@ -181,6 +183,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       ConnectHelper<gz_sensor_msgs::Actuators, mav_msgs::Actuators>(
           &GazeboRosInterfacePlugin::GzActuatorsMsgCallback,
           this,
+          gazeboNamespace,
           gazeboTopicName,
           rosTopicName,
           gz_node_handle_);
@@ -189,6 +192,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       ConnectHelper<gz_std_msgs::Float32, std_msgs::Float32>(
           &GazeboRosInterfacePlugin::GzFloat32MsgCallback,
           this,
+          gazeboNamespace,
           gazeboTopicName,
           rosTopicName,
           gz_node_handle_);
@@ -197,6 +201,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       ConnectHelper<gz_sensor_msgs::Imu, sensor_msgs::Imu>(
           &GazeboRosInterfacePlugin::GzImuMsgCallback,
           this,
+          gazeboNamespace,
           gazeboTopicName,
           rosTopicName,
           gz_node_handle_);
@@ -205,6 +210,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       ConnectHelper<gz_sensor_msgs::JointState, sensor_msgs::JointState>(
           &GazeboRosInterfacePlugin::GzJointStateMsgCallback,
           this,
+          gazeboNamespace,
           gazeboTopicName,
           rosTopicName,
           gz_node_handle_);
@@ -213,6 +219,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       ConnectHelper<gz_sensor_msgs::MagneticField, sensor_msgs::MagneticField>(
           &GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback,
           this,
+          gazeboNamespace,
           gazeboTopicName,
           rosTopicName,
           gz_node_handle_);
@@ -221,6 +228,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       ConnectHelper<gz_sensor_msgs::NavSatFix, sensor_msgs::NavSatFix>(
           &GazeboRosInterfacePlugin::GzNavSatFixCallback,
           this,
+          gazeboNamespace,
           gazeboTopicName,
           rosTopicName,
           gz_node_handle_);
@@ -229,6 +237,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       ConnectHelper<gazebo::msgs::Pose, geometry_msgs::Pose>(
           &GazeboRosInterfacePlugin::GzPoseMsgCallback,
           this,
+          gazeboNamespace,
           gazeboTopicName,
           rosTopicName,
           gz_node_handle_);
@@ -237,6 +246,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       ConnectHelper<gz_geometry_msgs::PoseWithCovarianceStamped, geometry_msgs::PoseWithCovarianceStamped>(
           &GazeboRosInterfacePlugin::GzPoseWithCovarianceStampedMsgCallback,
           this,
+          gazeboNamespace,
           gazeboTopicName,
           rosTopicName,
           gz_node_handle_);
@@ -245,6 +255,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       ConnectHelper<gz_geometry_msgs::Odometry, nav_msgs::Odometry>(
           &GazeboRosInterfacePlugin::GzOdometryMsgCallback,
           this,
+          gazeboNamespace,
           gazeboTopicName,
           rosTopicName,
           gz_node_handle_);
@@ -253,6 +264,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
         ConnectHelper<gz_geometry_msgs::TransformStamped, geometry_msgs::TransformStamped>(
             &GazeboRosInterfacePlugin::GzTransformStampedMsgCallback,
             this,
+            gazeboNamespace,
             gazeboTopicName,
             rosTopicName,
             gz_node_handle_);
@@ -261,6 +273,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       ConnectHelper<gz_sensor_msgs::TwistStamped, geometry_msgs::TwistStamped>(
           &GazeboRosInterfacePlugin::GzTwistStampedMsgCallback,
           this,
+          gazeboNamespace,
           gazeboTopicName,
           rosTopicName,
           gz_node_handle_);
@@ -269,6 +282,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       ConnectHelper<gz_geometry_msgs::Vector3dStamped, geometry_msgs::PointStamped>(
           &GazeboRosInterfacePlugin::GzVector3dStampedMsgCallback,
           this,
+          gazeboNamespace,
           gazeboTopicName,
           rosTopicName,
           gz_node_handle_);
@@ -277,6 +291,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       ConnectHelper<gz_geometry_msgs::WrenchStamped, geometry_msgs::WrenchStamped>(
           &GazeboRosInterfacePlugin::GzWrenchStampedMsgCallback,
           this,
+          gazeboNamespace,
           gazeboTopicName,
           rosTopicName,
           gz_node_handle_);
