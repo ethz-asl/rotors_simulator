@@ -154,8 +154,14 @@ void GazeboRosInterfacePlugin::ConnectHelper(
 
   // Create node
   gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
-  node_ptr->Init(namespace_);
+  if(gazeboNamespace != "") {
+    gzdbg << "Creating Gazebo node with namespace = \"" << gazeboNamespace << "\"." << std::endl;
+    node_ptr->Init(gazeboNamespace);
+  } else {
+    node_ptr->Init(namespace_);
+  }
 
+  // Create subscriber
   gazebo::transport::SubscriberPtr subscriberPtr;
   subscriberPtr = node_ptr->Subscribe(
       gazeboTopicName,
