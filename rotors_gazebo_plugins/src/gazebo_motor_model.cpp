@@ -176,6 +176,7 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   command_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + "/" + command_sub_topic_, &GazeboMotorModel::ControlVelocityCallback, this);
 
   connect_ros_to_gazebo_topic_msg.set_ros_topic(command_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_gazebo_namespace(namespace_);
   connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + command_sub_topic_);
   connect_ros_to_gazebo_topic_msg.set_msgtype(gz_std_msgs::ConnectRosToGazeboTopic::COMMAND_MOTOR_SPEED);
   gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
@@ -187,6 +188,7 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   wind_speed_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + "/" + wind_speed_sub_topic_, &GazeboMotorModel::WindSpeedCallback, this);
 
   connect_ros_to_gazebo_topic_msg.set_ros_topic(wind_speed_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_gazebo_namespace(namespace_);
   connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + wind_speed_sub_topic_);
   connect_ros_to_gazebo_topic_msg.set_msgtype(gz_std_msgs::ConnectRosToGazeboTopic::WIND_SPEED);
   gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
