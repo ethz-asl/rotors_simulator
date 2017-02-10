@@ -52,18 +52,16 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   //========== READ IN PARAMS FROM SDF ===========//
   //==============================================//
 
-  // Retrieve the necessary parameters.
-  std::string node_namespace;
   std::string link_name;
 
   if (_sdf->HasElement("robotNamespace"))
-    node_namespace = _sdf->GetElement("robotNamespace")->Get<std::string>();
+    namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_gps_plugin] Please specify a robotNamespace.\n";
 
 
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
-  node_handle_->Init(node_namespace);
+  node_handle_->Init(namespace_);
 
   if (_sdf->HasElement("linkName"))
     link_name = _sdf->GetElement("linkName")->Get<std::string>();
@@ -216,6 +214,7 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   // ============================================ //
   gz_gps_pub_ = node_handle_->Advertise<gz_sensor_msgs::NavSatFix>(gps_topic_, 1);
 
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(gps_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(gps_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::NAV_SAT_FIX);
@@ -226,6 +225,7 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   // ============================================ //
   gz_ground_speed_pub_ = node_handle_->Advertise<gz_sensor_msgs::TwistStamped>(ground_speed_topic_, 1);
 
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(ground_speed_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(ground_speed_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::TWIST_STAMPED);

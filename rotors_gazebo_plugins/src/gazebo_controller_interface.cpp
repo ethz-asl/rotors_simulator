@@ -125,6 +125,7 @@ void GazeboControllerInterface::CreatePubsAndSubs() {
 
   // Connect to ROS
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(motor_velocity_reference_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);

@@ -358,6 +358,7 @@ void GazeboImuPlugin::CreatePubsAndSubs() {
   imu_pub_ = node_handle_->Advertise<gz_sensor_msgs::Imu>("~/" + model_->GetName() + "/" + imu_topic_, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + imu_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(imu_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::IMU);
