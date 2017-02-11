@@ -1,0 +1,4 @@
+material BoxesLargeOnPallet/Diffuse
+{
+  receive_shadows off
+}
