@@ -1,0 +1,14 @@
+# NEO11 Hex vehicle parameters
+mass: 3.42
+inertia: {xx: 0.0608 , xy: 0.0, xz: 0.0, yy: 0.0688, yz: 0.0, zz: 0.1489}
+
+# angle should be expressed in rad
+# direction 1 means counter clockwise, -1 clockwise
+# The order of the rotors matters for the calculation of the allocation matrix.
+rotor_configuration:
+  '0': {angle: 0.52359877559, arm_length: 0.2895, rotor_force_constant: 1.269e-05, rotor_moment_constant: 1.6754e-2, direction: 1.0}
+  '1': {angle: 1.57079632679, arm_length: 0.2895, rotor_force_constant: 1.269e-05, rotor_moment_constant: 1.6754e-2, direction: -1.0}
+  '2': {angle: 2.61799387799, arm_length: 0.2895, rotor_force_constant: 1.269e-05, rotor_moment_constant: 1.6754e-2, direction: 1.0}
+  '3': {angle: -2.61799387799, arm_length: 0.2895, rotor_force_constant: 1.269e-05, rotor_moment_constant: 1.6754e-2, direction: -1.0}
+  '4': {angle: -1.57079632679, arm_length: 0.2895, rotor_force_constant: 1.269e-05, rotor_moment_constant: 1.6754e-2, direction: 1.0}
+  '5': {angle: -0.52359877559, arm_length: 0.2895, rotor_force_constant: 1.269e-05, rotor_moment_constant: 1.6754e-2, direction: -1.0}

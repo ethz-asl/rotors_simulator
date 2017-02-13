@@ -126,10 +126,12 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   void ConnectHelper(
       void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher),
       GazeboRosInterfacePlugin * ptr,
+      std::string gazeboNamespace,
       std::string gazeboTopicName,
       std::string rosTopicName,
       transport::NodePtr gz_node_handle);
 
+  std::vector<gazebo::transport::NodePtr> nodePtrs_;
   std::vector<gazebo::transport::SubscriberPtr> subscriberPtrs_;
 
   std::string namespace_;

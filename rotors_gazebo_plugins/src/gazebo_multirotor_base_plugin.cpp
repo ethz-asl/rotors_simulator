@@ -135,6 +135,7 @@ void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
   // ============================================ //
   motor_pub_ = node_handle_->Advertise<gz_sensor_msgs::Actuators>("~/" + model_->GetName() + "/" + actuators_pub_topic_, 10);
 
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + actuators_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(actuators_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);
@@ -145,6 +146,7 @@ void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
   // ============================================ //
   joint_state_pub_ = node_handle_->Advertise<gz_sensor_msgs::JointState>("~/" + model_->GetName() + "/" + joint_state_pub_topic_, 1);
 
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + joint_state_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(joint_state_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::JOINT_STATE);

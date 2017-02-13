@@ -150,6 +150,7 @@ void GazeboWindPlugin::CreatePubsAndSubs() {
   // ============================================ //
   wind_pub_ = node_handle_->Advertise<gz_geometry_msgs::WrenchStamped>(wind_pub_topic_, 1);
 
+  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic(wind_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(wind_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::WRENCH_STAMPED);

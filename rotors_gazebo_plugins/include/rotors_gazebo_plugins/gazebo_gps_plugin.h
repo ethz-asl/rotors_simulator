@@ -53,6 +53,8 @@ class GazeboGpsPlugin : public SensorPlugin {
 
  private:
 
+  std::string namespace_;
+
   /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
   ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
   bool pubs_and_subs_created_;

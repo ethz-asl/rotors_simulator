@@ -1,0 +1,14 @@
+# NEO9 vehicle parameters
+mass: 2.70703
+inertia: {xx: 0.0341171 , xy: 0.0, xz: 0.0, yy: 0.0363089, yz: 0.0, zz: 0.0627386}
+
+# angle should be expressed in rad
+# direction 1 means counter clockwise, -1 clockwise
+# The order of the rotors matters for the calculation of the allocation matrix.
+rotor_configuration:
+  '0': {angle: 0.52359877559, arm_length: 0.2495, rotor_force_constant: 6.8e-06, rotor_moment_constant: 1.6754e-2, direction: 1.0}
+  '1': {angle: 1.57079632679, arm_length: 0.2495, rotor_force_constant: 6.8e-06, rotor_moment_constant: 1.6754e-2, direction: -1.0}
+  '2': {angle: 2.61799387799, arm_length: 0.2495, rotor_force_constant: 6.8e-06, rotor_moment_constant: 1.6754e-2, direction: 1.0}
+  '3': {angle: -2.61799387799, arm_length: 0.2495, rotor_force_constant: 6.8e-06, rotor_moment_constant: 1.6754e-2, direction: -1.0}
+  '4': {angle: -1.57079632679, arm_length: 0.2495, rotor_force_constant: 6.8e-06, rotor_moment_constant: 1.6754e-2, direction: 1.0}
+  '5': {angle: -0.52359877559, arm_length: 0.2495, rotor_force_constant: 6.8e-06, rotor_moment_constant: 1.6754e-2, direction: -1.0}

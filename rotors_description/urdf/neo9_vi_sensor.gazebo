@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!--
+  Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<robot name="neo9" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Instantiate default neo9-->
+  <xacro:include filename="$(find rotors_description)/urdf/neo9_generic_odometry_sensor.gazebo" />
+
+  <!-- Mount a VI-sensor in the front of Neo. -->
+  <xacro:vi_sensor_macro
+      namespace="${namespace}/vi_sensor"
+      parent_link="${namespace}/base_link"
+      enable_cameras="true"
+      enable_depth="true"
+      enable_ground_truth="true">
+    <origin xyz="0.133 0.0 -0.0565" rpy="0.0 ${20.0/180.0*pi} 0.0" />
+  </xacro:vi_sensor_macro>
+  <!-- Mount up-looking camera on top of Neo. -->
+  <xacro:vi_sensor_camera_macro
+      namespace="${namespace}/vi_sensor"
+      parent_link="${namespace}/base_link"
+      camera_suffix="2"
+      frame_rate="20">
+    <origin xyz="0.019 0.0 0.073" rpy="0.0 ${-pi/2} 0.0" />
+  </xacro:vi_sensor_camera_macro>
+  <!-- Mount down-looking camera at the bottom of Neo. -->
+  <xacro:vi_sensor_camera_macro
+      namespace="${namespace}/vi_sensor"
+      parent_link="${namespace}/base_link"
+      camera_suffix="3"
+      frame_rate="20">
+    <origin xyz="0.019 0.0 -0.045" rpy="0.0 ${pi/2} 0.0" />
+  </xacro:vi_sensor_camera_macro>
+</robot>
