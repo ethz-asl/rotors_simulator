@@ -62,7 +62,8 @@ void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _s
 
   // Get Gazebo node handle
   gz_node_handle_ = transport::NodePtr(new transport::Node());
-  gz_node_handle_->Init(namespace_);
+  //gz_node_handle_->Init(namespace_);
+  gz_node_handle_->Init(kGazeboConnectMsgNamespace);
 
   // Get ROS node handle
   ros_node_handle_ = new ros::NodeHandle(namespace_);
