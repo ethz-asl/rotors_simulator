@@ -51,7 +51,9 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _s
     gzerr << "[gazebo_magnetometer_plugin] Please specify a robotNamespace.\n";
 
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
-  node_handle_->Init(namespace_);
+
+  // Initisalise with default namespace (typically /gazebo/default/)
+  node_handle_->Init();
 
   // Use the link name as the frame id
   std::string link_name;
@@ -173,25 +175,21 @@ void GazeboMagnetometerPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
 void GazeboMagnetometerPlugin::CreatePubsAndSubs() {
 
-  // Create temporary node with correct namespace for ROS interface "connect" messages
-  gazebo::transport::NodePtr ros_interface_connect_node_ptr = gazebo::transport::NodePtr(new transport::Node());
-  ros_interface_connect_node_ptr->Init(kGazeboConnectMsgNamespace);
-
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
-      ros_interface_connect_node_ptr->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
 
   // ============================================ //
   // ========= MAGNETIC FIELD MSG SETUP ========= //
   // ============================================ //
 
   magnetometer_pub_ = node_handle_->Advertise<gz_sensor_msgs::MagneticField>(
-      node_handle_->GetTopicNamespace() + "/" + magnetometer_topic_, 1);
+      "~/" + namespace_ + "/" + magnetometer_topic_, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
-  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + magnetometer_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(magnetometer_topic_);
+  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + magnetometer_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + magnetometer_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::MAGNETIC_FIELD);
   connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 

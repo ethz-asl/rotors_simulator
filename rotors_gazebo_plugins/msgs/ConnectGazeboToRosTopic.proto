@@ -7,7 +7,7 @@ package gz_std_msgs;
 message ConnectGazeboToRosTopic
 {
 
-  required string gazebo_namespace = 1;
+  //required string gazebo_namespace = 1;
   required string gazebo_topic = 2;
   required string ros_topic = 3;
 

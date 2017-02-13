@@ -49,9 +49,10 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr 
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_,
                       rotor_velocity_slowdown_sim_);
 
-  //node_handle_ = new ros::NodeHandle(namespace_);
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
-  node_handle_->Init(namespace_);
+
+  // Initisalise with default namespace (typically /gazebo/default/)
+  node_handle_->Init();
 
   frame_id_ = link_name_;
 
@@ -124,35 +125,31 @@ void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
 
 void GazeboMultirotorBasePlugin::CreatePubsAndSubs() {
 
-  // Create temporary node with correct namespace for ROS interface "connect" messages
-  gazebo::transport::NodePtr ros_interface_connect_node_ptr = gazebo::transport::NodePtr(new transport::Node());
-  ros_interface_connect_node_ptr->Init(kGazeboConnectMsgNamespace);
-
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
-      ros_interface_connect_node_ptr->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
   // ============================================ //
   // =========== ACTUATORS MSG SETUP ============ //
   // ============================================ //
-  motor_pub_ = node_handle_->Advertise<gz_sensor_msgs::Actuators>("~/" + model_->GetName() + "/" + actuators_pub_topic_, 10);
+  motor_pub_ = node_handle_->Advertise<gz_sensor_msgs::Actuators>("~/" + namespace_ + "/" + actuators_pub_topic_, 10);
 
-  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
+  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + actuators_pub_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(actuators_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + actuators_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);
   connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   // ============================================ //
   // ========== JOINT STATE MSG SETUP =========== //
   // ============================================ //
-  joint_state_pub_ = node_handle_->Advertise<gz_sensor_msgs::JointState>("~/" + model_->GetName() + "/" + joint_state_pub_topic_, 1);
+  joint_state_pub_ = node_handle_->Advertise<gz_sensor_msgs::JointState>("~/" + namespace_ + "/" + joint_state_pub_topic_, 1);
 
-  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + joint_state_pub_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(joint_state_pub_topic_);
+  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + joint_state_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + joint_state_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::JOINT_STATE);
   connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 

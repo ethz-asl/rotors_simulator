@@ -56,7 +56,9 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _
   }
 
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
-  node_handle_->Init(namespace_);
+
+  // Initisalise with default namespace (typically /gazebo/default/)
+  node_handle_->Init();
 
   getSdfParam<std::string>(_sdf, "commandMotorSpeedSubTopic", command_motor_speed_sub_topic_,
                            command_motor_speed_sub_topic_);
@@ -105,52 +107,52 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
 void GazeboControllerInterface::CreatePubsAndSubs() {
 
-  // gzdbg << __FUNCTION__ << "() called." << std::endl;
-
-  // Create temporary node with correct namespace for ROS interface "connect" messages
-  gazebo::transport::NodePtr ros_interface_connect_node_ptr = gazebo::transport::NodePtr(new transport::Node());
-  ros_interface_connect_node_ptr->Init(kGazeboConnectMsgNamespace);
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr gz_connect_gazebo_to_ros_topic_pub =
-      ros_interface_connect_node_ptr->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
 
   // Create temporary "ConnectRosToGazeboTopic" publisher and message
   gazebo::transport::PublisherPtr gz_connect_ros_to_gazebo_topic_pub =
-      ros_interface_connect_node_ptr->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("~/" + kConnectRosToGazeboSubtopic, 1);
+      node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>("~/" + kConnectRosToGazeboSubtopic, 1);
 
-  // ============================================ //
-  // === ACTUATORS (MOTOR VELOCITY) MSG SETUP === //
-  // ============================================ //
-  gzdbg << "GazeboControllerInterface creating Gazebo publisher on \"" << node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_ << "\"." << std::endl;
+  // ============================================================ //
+  // === ACTUATORS (MOTOR VELOCITY) MSG SETUP (GAZEBO -> ROS) === //
+  // ============================================================ //
+
+  // TODO This topic is missing the "~" and is in a completely different namespace, fix?
+
+  gzdbg << "GazeboControllerInterface creating Gazebo publisher on \"" << namespace_ + "/" + motor_velocity_reference_pub_topic_ << "\"." << std::endl;
   motor_velocity_reference_pub_ = node_handle_->Advertise<gz_sensor_msgs::Actuators>(
-      node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_,
+      namespace_ + "/" + motor_velocity_reference_pub_topic_,
       1);
 
   // Connect to ROS
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
-  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(node_handle_->GetTopicNamespace() + "/" + motor_velocity_reference_pub_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(motor_velocity_reference_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(namespace_ + "/" + motor_velocity_reference_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + motor_velocity_reference_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);
   gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
-  // ============================================ //
-  // ===== ROS->GAZEBO MOTOR SPEED MSG SETUP ==== //
-  // ============================================ //
-  gzdbg << "Subscribing to Gazebo topic \"" << "~/" + model_->GetName() + "/" + command_motor_speed_sub_topic_ << "\"." << std::endl;
+  // ================================================ //
+  // ===== MOTOR SPEED MSG SETUP (ROS -> GAZEBO) ==== //
+  // ================================================ //
+  gzdbg << "Subscribing to Gazebo topic \"" << "~/" + namespace_ + "/" + command_motor_speed_sub_topic_ << "\"." << std::endl;
   cmd_motor_sub_ = node_handle_->Subscribe(
-      "~/" + model_->GetName() + "/" + command_motor_speed_sub_topic_,
+      "~/" + namespace_ + "/" + command_motor_speed_sub_topic_,
       &GazeboControllerInterface::CommandMotorCallback,
       this);
 
   // Connect to ROS
   gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
-  connect_ros_to_gazebo_topic_msg.set_ros_topic(command_motor_speed_sub_topic_);
-  connect_ros_to_gazebo_topic_msg.set_gazebo_namespace(namespace_);
-  connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + command_motor_speed_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" + command_motor_speed_sub_topic_);
+  //connect_ros_to_gazebo_topic_msg.set_gazebo_namespace(namespace_);
+  connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + command_motor_speed_sub_topic_);
   connect_ros_to_gazebo_topic_msg.set_msgtype(gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
   gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
+
+  gzdbg << __FUNCTION__ << "() called." << std::endl;
 
 }
 

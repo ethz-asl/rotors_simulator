@@ -52,10 +52,6 @@ static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
 //===============================================================================================//
 
 // These should perhaps be defined in an .sdf/.xacro file instead?
-// The below settings should produce the following topics:
-// /gazebo/rotors/connect_gazebo_to_ros_subtopic
-// /gazebo/rotors/connect_ros_to_gazebo_subtopic
-static const std::string kGazeboConnectMsgNamespace = "rotors";
 static const std::string kConnectGazeboToRosSubtopic = "connect_gazebo_to_ros_subtopic";
 static const std::string kConnectRosToGazeboSubtopic = "connect_ros_to_gazebo_subtopic";
 

@@ -63,10 +63,11 @@ void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _s
   // Get Gazebo node handle
   gz_node_handle_ = transport::NodePtr(new transport::Node());
   //gz_node_handle_->Init(namespace_);
-  gz_node_handle_->Init(kGazeboConnectMsgNamespace);
+  gz_node_handle_->Init();
 
   // Get ROS node handle
-  ros_node_handle_ = new ros::NodeHandle(namespace_);
+  //ros_node_handle_ = new ros::NodeHandle(namespace_);
+  ros_node_handle_ = new ros::NodeHandle();
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -154,24 +155,24 @@ void GazeboRosInterfacePlugin::ConnectHelper(
   auto callback_entry = callback_map.emplace(gazeboTopicName, ConnectHelperStorage<M>{ptr, fp, ros_publisher});
 
   // Create node
-  gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
+  /*gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
   if(gazeboNamespace != "") {
     gzdbg << "Creating Gazebo node with namespace = \"" << gazeboNamespace << "\"." << std::endl;
     node_ptr->Init(gazeboNamespace);
   } else {
     node_ptr->Init(namespace_);
-  }
+  }*/
 
   // Create subscriber
   gazebo::transport::SubscriberPtr subscriberPtr;
-  subscriberPtr = node_ptr->Subscribe(
+  subscriberPtr = gz_node_handle->Subscribe(
       gazeboTopicName,
       &ConnectHelperStorage<M>::callback,
       &callback_entry.first->second);
 
-  // Save a reference to the subscriber pointer so subsriber
+  // Save a reference to the subscriber pointer so subscriber
   // won't be deleted.
-  nodePtrs_.push_back(node_ptr);
+  //nodePtrs_.push_back(node_ptr);
   subscriberPtrs_.push_back(subscriberPtr);
 
 }
@@ -184,7 +185,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
 
-  const std::string gazeboNamespace = gz_connect_gazebo_to_ros_topic_msg->gazebo_namespace();
+  const std::string gazeboNamespace = "";//gz_connect_gazebo_to_ros_topic_msg->gazebo_namespace();
   const std::string gazeboTopicName = gz_connect_gazebo_to_ros_topic_msg->gazebo_topic();
   const std::string rosTopicName = gz_connect_gazebo_to_ros_topic_msg->ros_topic();
 
@@ -354,16 +355,16 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       //    FindOrMakeGazeboPublisher<gz_sensor_msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic());
 
       // Create node
-      gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
+      /*gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
       if(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() != "") {
         gzdbg << "Creating Gazebo node with namespace = \"" << gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() << "\"." << std::endl;
         node_ptr->Init(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace());
       } else {
         node_ptr->Init(namespace_);
-      }
+      }*/
 
       gazebo::transport::PublisherPtr gz_publisher_ptr =
-          node_ptr->Advertise<gz_sensor_msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+          gz_node_handle_->Advertise<gz_sensor_msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
 
 
       // Create ROS subscriber
@@ -373,7 +374,7 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
 
       // Save reference to the ROS subscriber so callback will continue to be called.
       ros_subscribers.push_back(ros_subscriber);
-      nodePtrs_.push_back(node_ptr);
+      //nodePtrs_.push_back(node_ptr);
 
       break;
     }
@@ -386,16 +387,16 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       //    gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
 
       // Create node
-      gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
+      /*gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
       if(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() != "") {
         gzdbg << "Creating Gazebo node with namespace = \"" << gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() << "\"." << std::endl;
         node_ptr->Init(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace());
       } else {
         node_ptr->Init(namespace_);
-      }
+      }*/
 
       gazebo::transport::PublisherPtr gz_publisher_ptr =
-          node_ptr->Advertise<gz_mav_msgs::CommandMotorSpeed>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+          gz_node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
 
       // Create ROS subscriber
       ros::Subscriber ros_subscriber = ros_node_handle_->subscribe<mav_msgs::Actuators>(
@@ -416,16 +417,16 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       //    gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
 
       // Create node
-      gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
+      /*gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
       if(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() != "") {
         gzdbg << "Creating Gazebo node with namespace = \"" << gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() << "\"." << std::endl;
         node_ptr->Init(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace());
       } else {
         node_ptr->Init(namespace_);
-      }
+      }*/
 
       gazebo::transport::PublisherPtr gz_publisher_ptr =
-          node_ptr->Advertise<gz_mav_msgs::WindSpeed>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+          gz_node_handle_->Advertise<gz_mav_msgs::WindSpeed>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
 
       // Create ROS subscriber
       ros::Subscriber ros_subscriber = ros_node_handle_->subscribe<rotors_comm::WindSpeed>(

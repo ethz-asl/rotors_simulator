@@ -54,7 +54,9 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   // Create Gazebo Node
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
-  node_handle_->Init(namespace_);
+
+  // Initisalise with default namespace (typically /gazebo/default/)
+  node_handle_->Init();
 
   if (_sdf->HasElement("xyzOffset"))
     xyz_offset_ = _sdf->GetElement("xyzOffset")->Get<math::Vector3>();
@@ -139,24 +141,21 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
 void GazeboWindPlugin::CreatePubsAndSubs() {
 
-  // Create temporary node with correct namespace for ROS interface "connect" messages
-  gazebo::transport::NodePtr ros_interface_connect_node_ptr = gazebo::transport::NodePtr(new transport::Node());
-  ros_interface_connect_node_ptr->Init(kGazeboConnectMsgNamespace);
-
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
-      ros_interface_connect_node_ptr->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
   // ============================================ //
   // =========== NAV SAT FIX MSG SETUP ========== //
   // ============================================ //
-  wind_pub_ = node_handle_->Advertise<gz_geometry_msgs::WrenchStamped>(wind_pub_topic_, 1);
+  wind_pub_ = node_handle_->Advertise<gz_geometry_msgs::WrenchStamped>(
+      "~/" + namespace_ + "/" + wind_pub_topic_, 1);
 
-  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(wind_pub_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(wind_pub_topic_);
+  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + wind_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + wind_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::WRENCH_STAMPED);
   connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 

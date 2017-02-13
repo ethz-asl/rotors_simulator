@@ -70,7 +70,8 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Get node handle
   node_handle_ = transport::NodePtr(new transport::Node());
 
-  node_handle_->Init(namespace_);
+  // Initisalise with default namespace (typically /gazebo/default/)
+  node_handle_->Init();
 
   if (_sdf->HasElement("linkName"))
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
@@ -347,24 +348,20 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
 void GazeboImuPlugin::CreatePubsAndSubs() {
 
-  // Create temporary node with correct namespace for ROS interface "connect" messages
-  gazebo::transport::NodePtr ros_interface_connect_node_ptr = gazebo::transport::NodePtr(new transport::Node());
-  ros_interface_connect_node_ptr->Init(kGazeboConnectMsgNamespace);
-
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
-      ros_interface_connect_node_ptr->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
 
   // ============================================ //
   // =============== IMU MSG SETUP ============== //
   // ============================================ //
 
-  imu_pub_ = node_handle_->Advertise<gz_sensor_msgs::Imu>("~/" + model_->GetName() + "/" + imu_topic_, 1);
+  imu_pub_ = node_handle_->Advertise<gz_sensor_msgs::Imu>("~/" + namespace_ + "/" + imu_topic_, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
-  connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() + "/" + imu_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(imu_topic_);
+  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + imu_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + imu_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::IMU);
   connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
