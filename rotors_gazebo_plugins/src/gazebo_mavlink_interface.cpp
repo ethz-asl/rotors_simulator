@@ -61,12 +61,13 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   namespace_.clear();
   if (_sdf->HasElement("robotNamespace")) {
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
+    gzdbg << "namespace_ = \"" << namespace_ << "\"." << std::endl;
   } else {
     gzerr << "[gazebo_mavlink_interface] Please specify a robotNamespace.\n";
   }
 
   node_handle_ = transport::NodePtr(new transport::Node());
-  node_handle_->Init(namespace_);
+  node_handle_->Init();
 
   getSdfParam<std::string>(_sdf, "motorSpeedCommandPubTopic", motor_velocity_reference_pub_topic_,
                            motor_velocity_reference_pub_topic_);
@@ -407,19 +408,22 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboMavlinkInterface::OnUpdate, this, _1));
 
-  // Subscriber to IMU sensor_msgs::Imu Message and SITL message
-  gzdbg << "Creating Gazebo subscriber on topic \"" << "~/" + model_->GetName() + imu_sub_topic_ << "\"." << std::endl;
-  imu_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + imu_sub_topic_, &GazeboMavlinkInterface::ImuCallback, this);
+  //==============================================//
+  //============ GAZEBO PUB/SUB SETUP ============//
+  //==============================================//
 
-  gzdbg << "Creating Gazebo subscriber on topic \"" << "~/" + model_->GetName() + lidar_sub_topic_ << "\"." << std::endl;
-  lidar_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + lidar_sub_topic_, &GazeboMavlinkInterface::LidarCallback, this);
+  gzdbg << "Creating Gazebo subscriber on topic \"" << "~/" + namespace_ + "/" + imu_sub_topic_ << "\"." << std::endl;
+  imu_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + imu_sub_topic_, &GazeboMavlinkInterface::ImuCallback, this);
 
-  gzdbg << "Creating Gazebo subscriber on topic \"" << "~/" + model_->GetName() + opticalFlow_sub_topic_ << "\"." << std::endl;
-  opticalFlow_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
+  gzdbg << "Creating Gazebo subscriber on topic \"" << "~/" + namespace_ + "/" + lidar_sub_topic_ << "\"." << std::endl;
+  lidar_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + lidar_sub_topic_, &GazeboMavlinkInterface::LidarCallback, this);
+
+  gzdbg << "Creating Gazebo subscriber on topic \"" << "~/" + namespace_ + "/" + opticalFlow_sub_topic_ << "\"." << std::endl;
+  opticalFlow_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
   
   // Publish gazebo's motor_speed message
-  gzdbg << "Creating Gazebo publisher on topic \"" << "~/" + model_->GetName() + motor_velocity_reference_pub_topic_ << "\"." << std::endl;
-  motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + model_->GetName() + motor_velocity_reference_pub_topic_, 1);
+  gzdbg << "Creating Gazebo publisher on topic \"" << "~/" + namespace_ + "/" + motor_velocity_reference_pub_topic_ << "\"." << std::endl;
+  motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + namespace_ + "/" + motor_velocity_reference_pub_topic_, 1);
 
   // This topic is subscribed to by gazebo_geotagged_images_plugin.cpp
   /// \todo Should this be an absolute topic!?!
