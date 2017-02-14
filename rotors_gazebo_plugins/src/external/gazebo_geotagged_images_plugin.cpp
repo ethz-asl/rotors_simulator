@@ -15,18 +15,18 @@
  *
 */
 
-#include "rotors_gazebo_plugins/gazebo_geotagged_images_plugin.h"
-#include "rotors_gazebo_plugins/common.h"
+#include "rotors_gazebo_plugins/external/gazebo_geotagged_images_plugin.h"
 
 #include <math.h>
 #include <string>
 #include <iostream>
-#include <boost/filesystem.hpp>
 
+#include <boost/filesystem.hpp>
 #include <cv.h>
 #include <highgui.h>
-
 #include <opencv2/opencv.hpp>
+
+#include "rotors_gazebo_plugins/common.h"
 
 using namespace std;
 using namespace gazebo;
