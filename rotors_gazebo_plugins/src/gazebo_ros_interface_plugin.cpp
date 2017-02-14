@@ -155,14 +155,17 @@ void GazeboRosInterfacePlugin::ConnectHelper(
     std::string rosTopicName,
     transport::NodePtr gz_node_handle) {
 
-  // One map will be created for each type M
+  // One map will be created for each Gazebo message type
   static std::map< std::string, ConnectHelperStorage<GazeboMsgT> > callback_map;
 
   // Create ROS publisher
   ros::Publisher ros_publisher = ros_node_handle_->advertise<RosMsgT>(rosTopicName, 1);
 
-  /// \todo Handle collision error
   auto callback_entry = callback_map.emplace(gazeboTopicName, ConnectHelperStorage<GazeboMsgT>{ptr, fp, ros_publisher});
+
+  // Check if element was already present
+  if(!callback_entry.second)
+    gzerr << "Tried to add element to map but the gazebo topic name was already present in map." << std::endl;
 
   // Create subscriber
   gazebo::transport::SubscriberPtr subscriberPtr;
