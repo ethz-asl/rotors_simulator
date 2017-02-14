@@ -314,7 +314,7 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 //  imu_message_.header.stamp.nsec = current_time.nsec;
   imu_message_.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
 
-  /// TODO(burrimi): Add orientation estimator.
+  /// \todo(burrimi): Add orientation estimator.
   // NOTE: rotors_simulator used to set the orientation to "0", since it is
   // not raw IMU data but rather a calculation (and could confuse users).
   // However, the orientation is now set as it is used by PX4.
@@ -325,6 +325,7 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   orientation->set_w(1);
   imu_message_.set_allocated_orientation(orientation);*/
 
+  /// \todo(burrimi): add noise.
   gazebo::msgs::Quaternion* orientation = new gazebo::msgs::Quaternion();
   orientation->set_w(C_W_I.w);
   orientation->set_x(C_W_I.x);
