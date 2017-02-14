@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// SOURCE HEADER
+// MODULE
 #include <rotors_gazebo_plugins/gazebo_ros_interface_plugin.h>
 
 // SYSTEM
@@ -38,6 +38,12 @@ GazeboRosInterfacePlugin::GazeboRosInterfacePlugin()
 
 GazeboRosInterfacePlugin::~GazeboRosInterfacePlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
+
+  // Shutdown and delete ROS node handle
+  if (ros_node_handle_) {
+    ros_node_handle_->shutdown();
+    delete ros_node_handle_;
+  }
 }
 
 
@@ -50,20 +56,18 @@ void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _s
   /// \brief    Store the pointer to the model.
   world_ = _world;
 
-  namespace_.clear();
+  //namespace_.clear();
 
   //==============================================//
   //========== READ IN PARAMS FROM SDF ===========//
   //==============================================//
 
-  if (_sdf->HasElement("robotNamespace"))
+  /*if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "Please specify a robotNamespace.\n";
-  gzdbg << "namespace_ = \"" << namespace_ << "\"." << std::endl;
+  gzdbg << "namespace_ = \"" << namespace_ << "\"." << std::endl;*/
 
-  /// @todo Fix this hack!!! Should not need this namespace set to firefly.
-  namespace_ = "firefly";
 
   // Get Gazebo node handle
   gz_node_handle_ = transport::NodePtr(new transport::Node());

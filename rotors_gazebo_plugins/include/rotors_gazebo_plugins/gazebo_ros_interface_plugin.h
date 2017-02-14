@@ -134,7 +134,7 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   std::vector<gazebo::transport::NodePtr> nodePtrs_;
   std::vector<gazebo::transport::SubscriberPtr> subscriberPtrs_;
 
-  std::string namespace_;
+  //std::string namespace_;
 
   /// \brief  Handle for the Gazebo node.
   transport::NodePtr gz_node_handle_;
