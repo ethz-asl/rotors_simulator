@@ -172,12 +172,24 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   transport::PublisherPtr FindOrMakeGazeboPublisher(std::string topic);
 
   // ============================================ //
+  // ===== HELPER METHODS FOR MSG CONVERSION ==== //
+  // ============================================ //
+
+  void ConvertHeaderGzToRos(
+      const gz_std_msgs::Header & gz_header,
+      std_msgs::Header_<std::allocator<void> > * ros_header);
+
+  void ConvertHeaderRosToGz(
+      const std_msgs::Header_<std::allocator<void> > & ros_header,
+      gz_std_msgs::Header * gz_header);
+
+  // ============================================ //
   // ===== GAZEBO->ROS CALLBACKS/CONVERTERS ===== //
   // ============================================ //
 
   // ACTUATORS
   void GzActuatorsMsgCallback(GzActuatorsMsgPtr& gz_actuators_msg, ros::Publisher ros_publisher);
-  mav_msgs::ActuatorsPtr ros_actuators_msg_;
+  mav_msgs::Actuators ros_actuators_msg_;
 
   // FLOAT32
   void GzFloat32MsgCallback(GzFloat32MsgPtr& gz_float_32_msg, ros::Publisher ros_publisher);

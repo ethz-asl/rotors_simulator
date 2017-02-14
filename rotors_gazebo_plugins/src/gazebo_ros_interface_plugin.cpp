@@ -25,15 +25,14 @@
 
 // 3RD PARTY
 #include <boost/bind.hpp>
-
+#include <std_msgs/Header.h>
 
 namespace gazebo {
 
 GazeboRosInterfacePlugin::GazeboRosInterfacePlugin()
     : WorldPlugin(),
       gz_node_handle_(0),
-      ros_node_handle_(0),
-      ros_actuators_msg_(new mav_msgs::Actuators) { }
+      ros_node_handle_(0) { }
 
 
 GazeboRosInterfacePlugin::~GazeboRosInterfacePlugin() {
@@ -323,23 +322,6 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
 }
 
 
-/*template<typename T>
-transport::PublisherPtr GazeboRosInterfacePlugin::FindOrMakeGazeboPublisher(std::string topic) {
-
-  transport::PublisherPtr gz_publisher_ptr;
-
-  if(gazebo::transport::TopicManager::Instance()->FindPublication(topic) == nullptr) {
-    gz_publisher_ptr = gz_node_handle_->Advertise<T>(topic, 1);
-  } else {
-    gzdbg << "Gazebo publisher with topic = \"" << topic <<  "\" already exists, not creating another one." << std::endl;
-    // How do we get a handle to the publisher!?!
-    gzerr << "Handling an already created publisher is not supported yet!" << std::endl;
-  }
-
-  return gz_publisher_ptr;
-}*/
-
-
 void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
     GzConnectRosToGazeboTopicMsgPtr& gz_connect_ros_to_gazebo_topic_msg) {
 
@@ -352,24 +334,8 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
   switch(gz_connect_ros_to_gazebo_topic_msg->msgtype()) {
     case gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS: {
 
-      // Create Gazebo publisher
-      // (we don't need to manually save a reference for the Gazebo publisher because
-      // boost::bind will do that for us)
-      //gazebo::transport::PublisherPtr gz_publisher_ptr =
-      //    FindOrMakeGazeboPublisher<gz_sensor_msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic());
-
-      // Create node
-      /*gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
-      if(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() != "") {
-        gzdbg << "Creating Gazebo node with namespace = \"" << gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() << "\"." << std::endl;
-        node_ptr->Init(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace());
-      } else {
-        node_ptr->Init(namespace_);
-      }*/
-
       gazebo::transport::PublisherPtr gz_publisher_ptr =
           gz_node_handle_->Advertise<gz_sensor_msgs::Actuators>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
-
 
       // Create ROS subscriber
       ros::Subscriber ros_subscriber = ros_node_handle_->subscribe<mav_msgs::Actuators>(
@@ -378,26 +344,10 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
 
       // Save reference to the ROS subscriber so callback will continue to be called.
       ros_subscribers.push_back(ros_subscriber);
-      //nodePtrs_.push_back(node_ptr);
 
       break;
     }
     case gz_std_msgs::ConnectRosToGazeboTopic::COMMAND_MOTOR_SPEED: {
-
-      // Create Gazebo publisher
-      // (we don't need to manually save a reference for the Gazebo publisher because
-      // boost::bind will do that for us)
-      //gazebo::transport::PublisherPtr gz_publisher_ptr = gz_node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>(
-      //    gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
-
-      // Create node
-      /*gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
-      if(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() != "") {
-        gzdbg << "Creating Gazebo node with namespace = \"" << gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() << "\"." << std::endl;
-        node_ptr->Init(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace());
-      } else {
-        node_ptr->Init(namespace_);
-      }*/
 
       gazebo::transport::PublisherPtr gz_publisher_ptr =
           gz_node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
@@ -413,21 +363,6 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       break;
     }
     case gz_std_msgs::ConnectRosToGazeboTopic::WIND_SPEED: {
-
-      // Create Gazebo publisher
-      // (we don't need to manually save a reference for the Gazebo publisher because
-      // boost::bind will do that for us)
-      //gazebo::transport::PublisherPtr gz_publisher_ptr = gz_node_handle_->Advertise<gz_mav_msgs::WindSpeed>(
-      //    gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
-
-      // Create node
-      /*gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
-      if(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() != "") {
-        gzdbg << "Creating Gazebo node with namespace = \"" << gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace() << "\"." << std::endl;
-        node_ptr->Init(gz_connect_ros_to_gazebo_topic_msg->gazebo_namespace());
-      } else {
-        node_ptr->Init(namespace_);
-      }*/
 
       gazebo::transport::PublisherPtr gz_publisher_ptr =
           gz_node_handle_->Advertise<gz_mav_msgs::WindSpeed>(gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
@@ -451,8 +386,32 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
 }
 
 //===========================================================================//
+//==================== HELPER METHODS FOR MSG CONVERSION ====================//
+//===========================================================================//
+
+void GazeboRosInterfacePlugin::ConvertHeaderGzToRos(
+    const gz_std_msgs::Header & gz_header, std_msgs::Header_<std::allocator<void> > * ros_header) {
+
+  ros_header->stamp.sec = gz_header.stamp().sec();
+  ros_header->stamp.nsec = gz_header.stamp().nsec();
+  ros_header->frame_id = gz_header.frame_id();
+}
+
+void GazeboRosInterfacePlugin::ConvertHeaderRosToGz(
+    const std_msgs::Header_<std::allocator<void> > & ros_header,
+    gz_std_msgs::Header * gz_header) {
+
+  gz_header->mutable_stamp()->set_sec(ros_header.stamp.sec);
+  gz_header->mutable_stamp()->set_nsec(ros_header.stamp.nsec);
+  gz_header->set_frame_id(ros_header.frame_id);
+
+}
+
+//===========================================================================//
 //================ GAZEBO -> ROS MSG CALLBACKS/CONVERTERS ===================//
 //===========================================================================//
+
+
 
 
 void GazeboRosInterfacePlugin::GzActuatorsMsgCallback(GzActuatorsMsgPtr& gz_actuators_msg, ros::Publisher ros_publisher) {
@@ -460,13 +419,11 @@ void GazeboRosInterfacePlugin::GzActuatorsMsgCallback(GzActuatorsMsgPtr& gz_actu
   // We need to convert the Acutuators message from a Gazebo message to a
   // ROS message and then publish it to the ROS framework
 
-  ros_actuators_msg_->header.stamp.sec = gz_actuators_msg->header().stamp().sec();
-  ros_actuators_msg_->header.stamp.nsec = gz_actuators_msg->header().stamp().nsec();
-  ros_actuators_msg_->header.frame_id = gz_actuators_msg->header().frame_id();
+  ConvertHeaderGzToRos(gz_actuators_msg->header(), &ros_actuators_msg_.header);
 
-  ros_actuators_msg_->angular_velocities.resize(gz_actuators_msg->angular_velocities_size());
+  ros_actuators_msg_.angular_velocities.resize(gz_actuators_msg->angular_velocities_size());
   for(int i = 0; i < gz_actuators_msg->angular_velocities_size(); i++) {
-    ros_actuators_msg_->angular_velocities[i] = gz_actuators_msg->angular_velocities(i);
+    ros_actuators_msg_.angular_velocities[i] = gz_actuators_msg->angular_velocities(i);
   }
 
   // Publish onto ROS framework
@@ -489,9 +446,7 @@ void GazeboRosInterfacePlugin::GzImuMsgCallback(GzImuPtr& gz_imu_msg, ros::Publi
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the IMU message onto ROS
 
-  ros_imu_msg_.header.stamp.sec = gz_imu_msg->header().stamp().sec();
-  ros_imu_msg_.header.stamp.nsec = gz_imu_msg->header().stamp().nsec();
-  ros_imu_msg_.header.frame_id = gz_imu_msg->header().frame_id();
+  ConvertHeaderGzToRos(gz_imu_msg->header(), &ros_imu_msg_.header);
 
   ros_imu_msg_.orientation.x = gz_imu_msg->orientation().x();
   ros_imu_msg_.orientation.y = gz_imu_msg->orientation().y();
@@ -533,24 +488,13 @@ void GazeboRosInterfacePlugin::GzImuMsgCallback(GzImuPtr& gz_imu_msg, ros::Publi
 
 void GazeboRosInterfacePlugin::GzJointStateMsgCallback(GzJointStateMsgPtr& gz_joint_state_msg, ros::Publisher ros_publisher) {
 
-  // ============================================ //
-  // =================== HEADER ================= //
-  // ============================================ //
-  ros_joint_state_msg_.header.stamp.sec = gz_joint_state_msg->header().stamp().sec();
-  ros_joint_state_msg_.header.stamp.nsec = gz_joint_state_msg->header().stamp().nsec();
-  ros_joint_state_msg_.header.frame_id = gz_joint_state_msg->header().frame_id();
+  ConvertHeaderGzToRos(gz_joint_state_msg->header(), &ros_joint_state_msg_.header);
 
-  // ============================================ //
-  // ==================== NAME ================== //
-  // ============================================ //
   ros_joint_state_msg_.name.resize(gz_joint_state_msg->name_size());
   for(int i = 0; i < gz_joint_state_msg->name_size(); i ++) {
     ros_joint_state_msg_.name[i] = gz_joint_state_msg->name(i);
   }
 
-  // ============================================ //
-  // ================== POSITION ================ //
-  // ============================================ //
   ros_joint_state_msg_.position.resize(gz_joint_state_msg->position_size());
   for(int i = 0; i < gz_joint_state_msg->position_size(); i ++) {
     ros_joint_state_msg_.position[i] = gz_joint_state_msg->position(i);
@@ -564,9 +508,8 @@ void GazeboRosInterfacePlugin::GzMagneticFieldMsgCallback(GzMagneticFieldMsgPtr&
 
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the MagneticField message onto ROS
-  ros_magnetic_field_msg_.header.stamp.sec = gz_magnetic_field_msg->header().stamp().sec();
-  ros_magnetic_field_msg_.header.stamp.nsec = gz_magnetic_field_msg->header().stamp().nsec();
-  ros_magnetic_field_msg_.header.frame_id = gz_magnetic_field_msg->header().frame_id();
+
+  ConvertHeaderGzToRos(gz_magnetic_field_msg->header(), &ros_magnetic_field_msg_.header);
 
   ros_magnetic_field_msg_.magnetic_field.x = gz_magnetic_field_msg->magnetic_field().x();
   ros_magnetic_field_msg_.magnetic_field.y = gz_magnetic_field_msg->magnetic_field().y();
@@ -590,12 +533,7 @@ void GazeboRosInterfacePlugin::GzNavSatFixCallback(GzNavSatFixPtr& gz_nav_sat_fi
   // We need to convert from a Gazebo message to a ROS message,
   // and then forward the NavSatFix message onto ROS
 
-  // ============================================ //
-  // =================== HEADER ================= //
-  // ============================================ //
-  ros_nav_sat_fix_msg_.header.stamp.sec = gz_nav_sat_fix_msg->header().stamp().sec();
-  ros_nav_sat_fix_msg_.header.stamp.nsec = gz_nav_sat_fix_msg->header().stamp().nsec();
-  ros_nav_sat_fix_msg_.header.frame_id = gz_nav_sat_fix_msg->header().frame_id();
+  ConvertHeaderGzToRos(gz_nav_sat_fix_msg->header(), &ros_nav_sat_fix_msg_.header);
 
   switch(gz_nav_sat_fix_msg->service()) {
     case gz_sensor_msgs::NavSatFix::SERVICE_GPS:
@@ -673,9 +611,7 @@ void GazeboRosInterfacePlugin::GzOdometryMsgCallback(GzOdometryMsgPtr& gz_odomet
   // ============================================ //
   // =================== HEADER ================= //
   // ============================================ //
-  ros_odometry_msg_.header.stamp.sec = gz_odometry_msg->header().stamp().sec();
-  ros_odometry_msg_.header.stamp.nsec = gz_odometry_msg->header().stamp().nsec();
-  ros_odometry_msg_.header.frame_id = gz_odometry_msg->header().frame_id();
+  ConvertHeaderGzToRos(gz_odometry_msg->header(), &ros_odometry_msg_.header);
 
   ros_odometry_msg_.child_frame_id = gz_odometry_msg->child_frame_id();
 
@@ -736,9 +672,7 @@ void GazeboRosInterfacePlugin::GzPoseWithCovarianceStampedMsgCallback(
   // ============================================ //
   // =================== HEADER ================= //
   // ============================================ //
-  ros_pose_with_covariance_stamped_msg_.header.stamp.sec = gz_pose_with_covariance_stamped_msg->header().stamp().sec();
-  ros_pose_with_covariance_stamped_msg_.header.stamp.nsec = gz_pose_with_covariance_stamped_msg->header().stamp().nsec();
-  ros_pose_with_covariance_stamped_msg_.header.frame_id = gz_pose_with_covariance_stamped_msg->header().frame_id();
+  ConvertHeaderGzToRos(gz_pose_with_covariance_stamped_msg->header(), &ros_pose_with_covariance_stamped_msg_.header);
 
   // ============================================ //
   // === POSE (both position and orientation) === //
@@ -770,9 +704,7 @@ void GazeboRosInterfacePlugin::GzTransformStampedMsgCallback(
   // ============================================ //
   // =================== HEADER ================= //
   // ============================================ //
-  ros_transform_stamped_msg_.header.stamp.sec = gz_transform_stamped_msg->header().stamp().sec();
-  ros_transform_stamped_msg_.header.stamp.nsec = gz_transform_stamped_msg->header().stamp().nsec();
-  ros_transform_stamped_msg_.header.frame_id = gz_transform_stamped_msg->header().frame_id();
+  ConvertHeaderGzToRos(gz_transform_stamped_msg->header(), &ros_transform_stamped_msg_.header);
 
   // ============================================ //
   // =========== TRANSFORM, TRANSLATION ========= //
@@ -805,9 +737,7 @@ void GazeboRosInterfacePlugin::GzVector3dStampedMsgCallback(
   // ============================================ //
   // =================== HEADER ================= //
   // ============================================ //
-  ros_position_stamped_msg_.header.stamp.sec = gz_vector_3d_stamped_msg->header().stamp().sec();
-  ros_position_stamped_msg_.header.stamp.nsec = gz_vector_3d_stamped_msg->header().stamp().nsec();
-  ros_position_stamped_msg_.header.frame_id = gz_vector_3d_stamped_msg->header().frame_id();
+  ConvertHeaderGzToRos(gz_vector_3d_stamped_msg->header(), &ros_position_stamped_msg_.header);
 
   // ============================================ //
   // ================== POSITION ================ //
@@ -827,9 +757,7 @@ void GazeboRosInterfacePlugin::GzWrenchStampedMsgCallback(
   // ============================================ //
   // =================== HEADER ================= //
   // ============================================ //
-  ros_wrench_stamped_msg_.header.stamp.sec = gz_wrench_stamped_msg->header().stamp().sec();
-  ros_wrench_stamped_msg_.header.stamp.nsec = gz_wrench_stamped_msg->header().stamp().nsec();
-  ros_wrench_stamped_msg_.header.frame_id = gz_wrench_stamped_msg->header().frame_id();
+  ConvertHeaderGzToRos(gz_wrench_stamped_msg->header(), &ros_wrench_stamped_msg_.header);
 
   // ============================================ //
   // =================== FORCE ================== //
@@ -861,9 +789,7 @@ void GazeboRosInterfacePlugin::RosActuatorsMsgCallback(
 
   gz_sensor_msgs::Actuators gz_actuators_msg;
 
-  gz_actuators_msg.mutable_header()->mutable_stamp()->set_sec(ros_actuators_msg_ptr->header.stamp.sec);
-  gz_actuators_msg.mutable_header()->mutable_stamp()->set_nsec(ros_actuators_msg_ptr->header.stamp.nsec);
-  gz_actuators_msg.mutable_header()->set_frame_id(ros_actuators_msg_ptr->header.frame_id);
+  ConvertHeaderRosToGz(ros_actuators_msg_ptr->header, gz_actuators_msg.mutable_header());
 
   for(int i = 0; i < ros_actuators_msg_ptr->angular_velocities.size(); i++) {
     gz_actuators_msg.add_angular_velocities(ros_actuators_msg_ptr->angular_velocities[i]);
@@ -896,9 +822,7 @@ void GazeboRosInterfacePlugin::RosWindSpeedMsgCallback(
   // Convert ROS message to Gazebo message
   gz_mav_msgs::WindSpeed gz_wind_speed_msg;
 
-  gz_wind_speed_msg.mutable_header()->mutable_stamp()->set_sec(ros_wind_speed_msg_ptr->header.stamp.sec);
-  gz_wind_speed_msg.mutable_header()->mutable_stamp()->set_nsec(ros_wind_speed_msg_ptr->header.stamp.nsec);
-  gz_wind_speed_msg.mutable_header()->set_frame_id(ros_wind_speed_msg_ptr->header.frame_id);
+  ConvertHeaderRosToGz(ros_wind_speed_msg_ptr->header, gz_wind_speed_msg.mutable_header());
 
   gz_wind_speed_msg.mutable_velocity()->set_x(ros_wind_speed_msg_ptr->velocity.x);
   gz_wind_speed_msg.mutable_velocity()->set_y(ros_wind_speed_msg_ptr->velocity.y);
