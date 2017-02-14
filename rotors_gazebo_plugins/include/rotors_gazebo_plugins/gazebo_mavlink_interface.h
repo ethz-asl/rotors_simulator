@@ -42,7 +42,6 @@
 //#include "mavlink/v1.0/common/mavlink.h"
 
 #include "CommandMotorSpeed.pb.h"
-//#include "MotorSpeed.pb.h"
 #include "Imu.pb.h"
 #include "OpticalFlow.pb.h"
 #include "Lidar.pb.h"
@@ -95,8 +94,8 @@ class GazeboMavlinkInterface : public ModelPlugin {
         zero_position_disarmed_{},
         zero_position_armed_{},
         input_index_{},
-        lat_rad(0.0),
-        lon_rad(0.0),
+        lat_rad_(0.0),
+        lon_rad_(0.0),
         mavlink_udp_port_(kDefaultMavlinkUdpPort)
         {}
   ~GazeboMavlinkInterface();
@@ -154,18 +153,18 @@ class GazeboMavlinkInterface : public ModelPlugin {
   void handle_message(mavlink_message_t *msg);
   void pollForMAVLinkMessages(double _dt, uint32_t _timeoutMs);
 
-  static const unsigned n_out_max = 16;
+  static const unsigned kNOutMax = 16;
 
-  unsigned _rotor_count;
+  unsigned rotor_count_;
 
-  double input_offset_[n_out_max];
-  double input_scaling_[n_out_max];
-  std::string joint_control_type_[n_out_max];
-  std::string gztopic_[n_out_max];
-  double zero_position_disarmed_[n_out_max];
-  double zero_position_armed_[n_out_max];
-  int input_index_[n_out_max];
-  transport::PublisherPtr joint_control_pub_[n_out_max];
+  double input_offset_[kNOutMax];
+  double input_scaling_[kNOutMax];
+  std::string joint_control_type_[kNOutMax];
+  std::string gztopic_[kNOutMax];
+  double zero_position_disarmed_[kNOutMax];
+  double zero_position_armed_[kNOutMax];
+  int input_index_[kNOutMax];
+  transport::PublisherPtr joint_control_pub_[kNOutMax];
 
   transport::SubscriberPtr imu_sub_;
   transport::SubscriberPtr lidar_sub_;
@@ -179,8 +178,8 @@ class GazeboMavlinkInterface : public ModelPlugin {
   common::Time last_gps_time_;
   common::Time last_actuator_time_;
   double gps_update_interval_;
-  double lat_rad;
-  double lon_rad;
+  double lat_rad_;
+  double lon_rad_;
   void handle_control(double _dt);
 
   math::Vector3 gravity_W_;
@@ -190,20 +189,20 @@ class GazeboMavlinkInterface : public ModelPlugin {
   std::default_random_engine random_generator_;
   std::normal_distribution<float> standard_normal_distribution_;
 
-  int _fd;
-  struct sockaddr_in _myaddr;  ///< The locally bound address
-  struct sockaddr_in _srcaddr;  ///< SITL instance
-  socklen_t _addrlen;
-  unsigned char _buf[65535];
-  struct pollfd fds[1];
+  int fd_;
+  struct sockaddr_in myaddr_;  ///< The locally bound address
+  struct sockaddr_in srcaddr_;  ///< SITL instance
+  socklen_t addrlen_;
+  unsigned char buf_[65535];
+  struct pollfd fds_[1];
 
-  struct sockaddr_in _srcaddr_2;  ///< MAVROS
+  struct sockaddr_in srcaddr_2_;  ///< MAVROS
 
   //so we dont have to do extra callbacks
-  double optflow_xgyro;
-  double optflow_ygyro;
-  double optflow_zgyro;
-  double optflow_distance;
+  double optflow_xgyro_;
+  double optflow_ygyro_;
+  double optflow_zgyro_;
+  double optflow_distance_;
 
   in_addr_t mavlink_addr_;
   int mavlink_udp_port_;

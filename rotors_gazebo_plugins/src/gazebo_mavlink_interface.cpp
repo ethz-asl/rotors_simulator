@@ -79,10 +79,10 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
       opticalFlow_sub_topic_, opticalFlow_sub_topic_);
 
   // set input_reference_ from inputs.control
-  input_reference_.resize(n_out_max);
-  joints_.resize(n_out_max);
-  pids_.resize(n_out_max);
-  for(int i = 0; i < n_out_max; ++i)
+  input_reference_.resize(kNOutMax);
+  joints_.resize(kNOutMax);
+  pids_.resize(kNOutMax);
+  for(int i = 0; i < kNOutMax; ++i)
   {
     pids_[i].Init(0, 0, 0, 0, 0, 0, 0);
     input_reference_[i] = 0;
@@ -96,7 +96,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
       if (channel->HasElement("input_index"))
       {
         int index = channel->Get<int>("input_index");
-        if (index < n_out_max)
+        if (index < kNOutMax)
         {
           input_offset_[index] = channel->Get<double>("input_offset");
           input_scaling_[index] = channel->Get<double>("input_scaling");
@@ -431,7 +431,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   gps_pub_ = node_handle_->Advertise<msgs::Vector3d>("~/gps_position");
 
 
-  _rotor_count = 5;
+  rotor_count_ = 5;
   last_time_ = world_->GetSimTime();
   last_gps_time_ = world_->GetSimTime();
   gps_update_interval_ = 0.2;  // in seconds for 5Hz
@@ -467,29 +467,29 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   }
 
   // try to setup udp socket for communcation with simulator
-  if ((_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+  if ((fd_ = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     printf("create socket failed\n");
     return;
   }
 
-  memset((char *)&_myaddr, 0, sizeof(_myaddr));
-  _myaddr.sin_family = AF_INET;
-  _myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  memset((char *)&myaddr_, 0, sizeof(myaddr_));
+  myaddr_.sin_family = AF_INET;
+  myaddr_.sin_addr.s_addr = htonl(INADDR_ANY);
   // Let the OS pick the port
-  _myaddr.sin_port = htons(0);
+  myaddr_.sin_port = htons(0);
 
-  if (bind(_fd, (struct sockaddr *)&_myaddr, sizeof(_myaddr)) < 0) {
+  if (bind(fd_, (struct sockaddr *)&myaddr_, sizeof(myaddr_)) < 0) {
     printf("bind failed\n");
     return;
   }
 
-  _srcaddr.sin_family = AF_INET;
-  _srcaddr.sin_addr.s_addr = mavlink_addr_;
-  _srcaddr.sin_port = htons(mavlink_udp_port_);
-  _addrlen = sizeof(_srcaddr);
+  srcaddr_.sin_family = AF_INET;
+  srcaddr_.sin_addr.s_addr = mavlink_addr_;
+  srcaddr_.sin_port = htons(mavlink_udp_port_);
+  addrlen_ = sizeof(srcaddr_);
 
-  fds[0].fd = _fd;
-  fds[0].events = POLLIN;
+  fds_[0].fd = fd_;
+  fds_[0].events = POLLIN;
 
 
 }
@@ -543,11 +543,11 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
   double sin_c = sin(c);
   double cos_c = cos(c);
   if (c != 0.0) {
-    lat_rad = asin(cos_c * sin(lat_zurich) + (x_rad * sin_c * cos(lat_zurich)) / c);
-    lon_rad = (lon_zurich + atan2(y_rad * sin_c, c * cos(lat_zurich) * cos_c - x_rad * sin(lat_zurich) * sin_c));
+    lat_rad_ = asin(cos_c * sin(lat_zurich) + (x_rad * sin_c * cos(lat_zurich)) / c);
+    lon_rad_ = (lon_zurich + atan2(y_rad * sin_c, c * cos(lat_zurich) * cos_c - x_rad * sin(lat_zurich) * sin_c));
   } else {
-   lat_rad = lat_zurich;
-    lon_rad = lon_zurich;
+   lat_rad_ = lat_zurich;
+    lon_rad_ = lon_zurich;
   }
 
   if (current_time.Double() - last_gps_time_.Double() > gps_update_interval_) {  // 5Hz
@@ -555,8 +555,8 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
     mavlink_hil_gps_t hil_gps_msg;
     hil_gps_msg.time_usec = current_time.nsec/1000;
     hil_gps_msg.fix_type = 3;
-    hil_gps_msg.lat = lat_rad * 180 / M_PI * 1e7;
-    hil_gps_msg.lon = lon_rad * 180 / M_PI * 1e7;
+    hil_gps_msg.lat = lat_rad_ * 180 / M_PI * 1e7;
+    hil_gps_msg.lon = lon_rad_ * 180 / M_PI * 1e7;
     hil_gps_msg.alt = (pos_W_I.z + alt_zurich) * 1000;
     hil_gps_msg.eph = 100;
     hil_gps_msg.epv = 100;
@@ -592,8 +592,8 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
     // Also publish GPS info on Gazebo topic
     msgs::Vector3d gps_msg;
-    gps_msg.set_x(lat_rad * 180. / M_PI);
-    gps_msg.set_y(lon_rad * 180. / M_PI);
+    gps_msg.set_x(lat_rad_ * 180. / M_PI);
+    gps_msg.set_y(lon_rad_ * 180. / M_PI);
     gps_msg.set_z(hil_gps_msg.alt / 1000.f);
     gps_pub_->Publish(gps_msg);
 
@@ -632,7 +632,7 @@ void GazeboMavlinkInterface::send_mavlink_message(const uint8_t msgid, const voi
 
   ssize_t len;
 
-  len = sendto(_fd, buf, packet_len, 0, (struct sockaddr *)&_srcaddr, sizeof(_srcaddr));
+  len = sendto(fd_, buf, packet_len, 0, (struct sockaddr *)&srcaddr_, sizeof(srcaddr_));
 
   if (len <= 0) {
     printf("Failed sending mavlink message\n");
@@ -700,7 +700,7 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
 
   //gzerr << "got imu: " << C_W_I << "\n";
   //gzerr << "got pose: " << T_W_I.rot << "\n";
-  float declination = get_mag_declination(lat_rad, lon_rad);
+  float declination = get_mag_declination(lat_rad_, lon_rad_);
 
   math::Quaternion q_dn(0.0, 0.0, declination);
   math::Vector3 mag_n = q_dn.RotateVectorReverse(mag_d_);
@@ -756,9 +756,9 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
   sensor_msg.fields_updated = 4095;
 
   //gyro needed for optical flow message
-  optflow_xgyro = gyro_b.x;
-  optflow_ygyro = gyro_b.y;
-  optflow_zgyro = gyro_b.z;
+  optflow_xgyro_ = gyro_b.x;
+  optflow_ygyro_ = gyro_b.y;
+  optflow_zgyro_ = gyro_b.z;
 
   /*static int imu_msg_count = 0;
   if(imu_msg_count >= 100) {
@@ -800,8 +800,8 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
   hil_state_quat.pitchspeed = omega_nb_b.y;
   hil_state_quat.yawspeed = omega_nb_b.z;
 
-  hil_state_quat.lat = lat_rad * 180 / M_PI * 1e7;
-  hil_state_quat.lon = lon_rad * 180 / M_PI * 1e7;
+  hil_state_quat.lat = lat_rad_ * 180 / M_PI * 1e7;
+  hil_state_quat.lon = lon_rad_ * 180 / M_PI * 1e7;
   hil_state_quat.alt = (-pos_n.z + alt_zurich) * 1000;
 
   hil_state_quat.vx = vel_n.x * 100;
@@ -862,7 +862,7 @@ void GazeboMavlinkInterface::LidarCallback(LidarPtr& lidar_message) {
   sensor_msg.covariance = 0;
 
   //distance needed for optical flow message
-  optflow_distance = lidar_message->current_distance(); //[m]
+  optflow_distance_ = lidar_message->current_distance(); //[m]
 
   send_mavlink_message(MAVLINK_MSG_ID_DISTANCE_SENSOR, &sensor_msg, 200);
 
@@ -878,13 +878,13 @@ void GazeboMavlinkInterface::OpticalFlowCallback(OpticalFlowPtr& opticalFlow_mes
   sensor_msg.integration_time_us = opticalFlow_message->integration_time_us();
   sensor_msg.integrated_x = opticalFlow_message->integrated_x();
   sensor_msg.integrated_y = opticalFlow_message->integrated_y();
-  sensor_msg.integrated_xgyro = -optflow_ygyro * opticalFlow_message->integration_time_us() / 1000000.0; //xy switched
-  sensor_msg.integrated_ygyro = optflow_xgyro * opticalFlow_message->integration_time_us() / 1000000.0; //xy switched
-  sensor_msg.integrated_zgyro = -optflow_zgyro * opticalFlow_message->integration_time_us() / 1000000.0; //change direction
+  sensor_msg.integrated_xgyro = -optflow_ygyro_ * opticalFlow_message->integration_time_us() / 1000000.0; //xy switched
+  sensor_msg.integrated_ygyro = optflow_xgyro_ * opticalFlow_message->integration_time_us() / 1000000.0; //xy switched
+  sensor_msg.integrated_zgyro = -optflow_zgyro_ * opticalFlow_message->integration_time_us() / 1000000.0; //change direction
   sensor_msg.temperature = opticalFlow_message->temperature();
   sensor_msg.quality = opticalFlow_message->quality();
   sensor_msg.time_delta_distance_us = opticalFlow_message->time_delta_distance_us();
-  sensor_msg.distance = optflow_distance;
+  sensor_msg.distance = optflow_distance_;
 
   send_mavlink_message(MAVLINK_MSG_ID_HIL_OPTICAL_FLOW, &sensor_msg, 200);
 }
@@ -916,16 +916,16 @@ void GazeboMavlinkInterface::pollForMAVLinkMessages(double _dt, uint32_t _timeou
   tv.tv_usec = (_timeoutMs % 1000) * 1000UL;
 
   // poll
-  ::poll(&fds[0], (sizeof(fds[0])/sizeof(fds[0])), 0);
+  ::poll(&fds_[0], (sizeof(fds_[0])/sizeof(fds_[0])), 0);
 
-  if (fds[0].revents & POLLIN) {
-    int len = recvfrom(_fd, _buf, sizeof(_buf), 0, (struct sockaddr *)&_srcaddr, &_addrlen);
+  if (fds_[0].revents & POLLIN) {
+    int len = recvfrom(fd_, buf_, sizeof(buf_), 0, (struct sockaddr *)&srcaddr_, &addrlen_);
     if (len > 0) {
       mavlink_message_t msg;
       mavlink_status_t status;
       for (unsigned i = 0; i < len; ++i)
       {
-        if (mavlink_parse_char(MAVLINK_COMM_0, _buf[i], &msg, &status))
+        if (mavlink_parse_char(MAVLINK_COMM_0, buf_[i], &msg, &status))
         {
           // have a message, handle it
           handle_message(&msg);
@@ -952,12 +952,12 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
 
     last_actuator_time_ = world_->GetSimTime();
 
-    for (unsigned i = 0; i < n_out_max; i++) {
+    for (unsigned i = 0; i < kNOutMax; i++) {
       input_index_[i] = i;
     }
 
     // set rotor speeds, controller targets
-    input_reference_.resize(n_out_max);
+    input_reference_.resize(kNOutMax);
     for (int i = 0; i < input_reference_.size(); i++) {
       if (armed) {
         input_reference_[i] = (controls.controls[input_index_[i]] + input_offset_[i])
