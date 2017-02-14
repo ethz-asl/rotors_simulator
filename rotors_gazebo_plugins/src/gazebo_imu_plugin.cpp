@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <boost/bind.hpp>
 
+// 3RD PARTY
 #include "mav_msgs/default_topics.h"
 
 // USER HEADERS
@@ -91,7 +92,6 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   
   getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_,
                            mav_msgs::default_topics::IMU);
-  //getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_, "");
   getSdfParam<double>(_sdf, "gyroscopeNoiseDensity",
                       imu_parameters_.gyroscope_noise_density,
                       imu_parameters_.gyroscope_noise_density);

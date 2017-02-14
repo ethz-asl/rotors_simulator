@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
+// SOURCE HEADER
+#include <rotors_gazebo_plugins/gazebo_ros_interface_plugin.h>
+
+// SYSTEM
 #include <chrono>
 #include <cmath>
 #include <iostream>
 #include <stdio.h>
 
+// 3RD PARTY
 #include <boost/bind.hpp>
-#include <rotors_gazebo_plugins/gazebo_ros_interface_plugin.h>
+
 
 namespace gazebo {
 
@@ -113,32 +118,33 @@ void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
 
 /// \brief      A helper class that provides storage for additional parameters that are inserted
 ///             into the callback.
-template <typename M>
+/// \details
+///   GazeboMsgT  The type of the message that will be subscribed to the Gazebo framework.
+template <typename GazeboMsgT>
 struct ConnectHelperStorage {
 
   /// \brief    Pointer to the ROS interface plugin class.
   GazeboRosInterfacePlugin * ptr;
 
   /// \brief    Function pointer to the subscriber callback with additional parameters.
-  void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher ros_publisher);
+  void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<GazeboMsgT const> &, ros::Publisher ros_publisher);
 
   /// \brief    The ROS publisher that is passed into the modified callback.
   ros::Publisher ros_publisher;
 
   /// \brief    This is what gets passed into the Gazebo Subscribe method as a callback, and hence can only
   ///           have one parameter (note boost::bind() does not work with the current Gazebo Subscribe() definitions).
-  void callback (const boost::shared_ptr<M const> & msg_ptr) {
+  void callback (const boost::shared_ptr<GazeboMsgT const> & msg_ptr) {
     //gzdbg << "callback() called." << std::endl;
     (ptr->*fp)(msg_ptr, ros_publisher);
   }
 
 };
 
-/// \brief    A helper class that performs a conncection between a gazebo subscriber
-///           and a ROS publisher.
-template <typename M, typename N>
+
+template <typename GazeboMsgT, typename RosMsgT>
 void GazeboRosInterfacePlugin::ConnectHelper(
-    void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher),
+    void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<GazeboMsgT const> &, ros::Publisher),
     GazeboRosInterfacePlugin * ptr,
     std::string gazeboNamespace,
     std::string gazeboTopicName,
@@ -146,28 +152,19 @@ void GazeboRosInterfacePlugin::ConnectHelper(
     transport::NodePtr gz_node_handle) {
 
   // One map will be created for each type M
-  static std::map< std::string, ConnectHelperStorage<M> > callback_map;
+  static std::map< std::string, ConnectHelperStorage<GazeboMsgT> > callback_map;
 
   // Create ROS publisher
-  ros::Publisher ros_publisher = ros_node_handle_->advertise<N>(rosTopicName, 1);
+  ros::Publisher ros_publisher = ros_node_handle_->advertise<RosMsgT>(rosTopicName, 1);
 
   /// \todo Handle collision error
-  auto callback_entry = callback_map.emplace(gazeboTopicName, ConnectHelperStorage<M>{ptr, fp, ros_publisher});
-
-  // Create node
-  /*gazebo::transport::NodePtr node_ptr = transport::NodePtr(new transport::Node());
-  if(gazeboNamespace != "") {
-    gzdbg << "Creating Gazebo node with namespace = \"" << gazeboNamespace << "\"." << std::endl;
-    node_ptr->Init(gazeboNamespace);
-  } else {
-    node_ptr->Init(namespace_);
-  }*/
+  auto callback_entry = callback_map.emplace(gazeboTopicName, ConnectHelperStorage<GazeboMsgT>{ptr, fp, ros_publisher});
 
   // Create subscriber
   gazebo::transport::SubscriberPtr subscriberPtr;
   subscriberPtr = gz_node_handle->Subscribe(
       gazeboTopicName,
-      &ConnectHelperStorage<M>::callback,
+      &ConnectHelperStorage<GazeboMsgT>::callback,
       &callback_entry.first->second);
 
   // Save a reference to the subscriber pointer so subscriber

@@ -22,20 +22,21 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_MOTOR_MODELS_H
 #define ROTORS_GAZEBO_PLUGINS_MOTOR_MODELS_H
 
+// SYSTEM
 #include <stdio.h>
 
+// 3RD PARTY
 #include <boost/bind.hpp>
 #include <Eigen/Eigen>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-
 #include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
 
+// USER
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/motor_model.hpp"
-
 #include "Float32.pb.h"
 #include "CommandMotorSpeed.pb.h"
 #include "WindSpeed.pb.h"
@@ -48,8 +49,8 @@ const static int CW = -1;
 namespace gazebo {
 
 // Default values
-static const std::string kDefaultCommandSubTopic = "gazebo/command/motor_speed";
-static const std::string kDefaultWindSpeedSubTopic = "gazebo/wind_speed";
+//static const std::string kDefaultCommandSubTopic = "gazebo/command/motor_speed";
+//static const std::string kDefaultWindSpeedSubTopic = "gazebo/wind_speed";
 
 typedef const boost::shared_ptr<const gz_mav_msgs::CommandMotorSpeed> GzCommandMotorSpeedMsgPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
@@ -70,8 +71,8 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   GazeboMotorModel()
       : ModelPlugin(),
         MotorModel(),
-        command_sub_topic_(kDefaultCommandSubTopic),
-        wind_speed_sub_topic_(kDefaultWindSpeedSubTopic),
+        command_sub_topic_(mav_msgs::default_topics::COMMAND_ACTUATORS),
+        wind_speed_sub_topic_(mav_msgs::default_topics::WIND),
         motor_speed_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
         motor_number_(0),
         turning_direction_(turning_direction::CW),

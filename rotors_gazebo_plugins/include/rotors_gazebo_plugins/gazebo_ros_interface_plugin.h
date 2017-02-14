@@ -111,8 +111,8 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
 
   void Load(physics::WorldPtr _world, sdf::ElementPtr _sdf);
 
-  /// @brief  	This gets called by the world update start event.
-  /// @details	Calculates IMU parameters and then publishes one IMU message.
+  /// \brief  	This gets called by the world update start event.
+  /// \details	Calculates IMU parameters and then publishes one IMU message.
   void OnUpdate(const common::UpdateInfo&);
 
  private:
@@ -120,11 +120,11 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   /// \brief  Provides a way for GzConnectGazeboToRosTopicMsgCallback() to connect a Gazebo subscriber to
   ///         a ROS publisher.
   /// \details
-  ///   M is the type of the message that will be subscribed to the Gazebo framework.
-  ///   N is the type of the message published to the ROS framework
-  template <typename M, typename N>
+  ///   GazeboMsgT  The type of the message that will be subscribed to the Gazebo framework.
+  ///   RosMsgT     The type of the message published to the ROS framework.
+  template <typename GazeboMsgT, typename RosMsgT>
   void ConnectHelper(
-      void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<M const> &, ros::Publisher),
+      void(GazeboRosInterfacePlugin::*fp)(const boost::shared_ptr<GazeboMsgT const> &, ros::Publisher),
       GazeboRosInterfacePlugin * ptr,
       std::string gazeboNamespace,
       std::string gazeboTopicName,
