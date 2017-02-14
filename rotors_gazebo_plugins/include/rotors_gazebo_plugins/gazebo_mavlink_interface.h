@@ -37,13 +37,12 @@
 #include "gazebo/transport/transport.hh"
 #include "gazebo/msgs/msgs.hh"
 #include "common/mavlink.h"     // Either provided by ROS or as CMake argument MAVLINK_HEADER_DIR
-#include "common/mavlink_msg_hil_actuator_controls.h"
 
 #include "common.h"
 //#include "mavlink/v1.0/common/mavlink.h"
 
 #include "CommandMotorSpeed.pb.h"
-#include "MotorSpeed.pb.h"
+//#include "MotorSpeed.pb.h"
 #include "Imu.pb.h"
 #include "OpticalFlow.pb.h"
 #include "Lidar.pb.h"

@@ -1,7 +1,0 @@
-syntax = "proto2";
-package mav_msgs.msgs;
-
-message MotorSpeed
-{
-  repeated float motor_speed = 1 [packed=true];
-}
