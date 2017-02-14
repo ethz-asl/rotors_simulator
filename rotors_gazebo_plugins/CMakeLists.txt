@@ -17,6 +17,31 @@ project(rotors_gazebo_plugins)
 
 message(STATUS "rotors_gazebo_plugins CMakeLists.txt called.")
 
+
+# =============================================================================================== #
+# ========================== SET DEFAULTS FOR PASSED-IN VARIABLES =============================== #
+# =============================================================================================== #
+
+if(NOT DEFINED BUILD_MAVLINK_INTERFACE_PLUGIN)
+  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN variable not provided, setting to FALSE.")
+  set(BUILD_MAVLINK_INTERFACE_PLUGIN FALSE)
+endif()
+
+if(NOT DEFINED BUILD_OCTOMAP_PLUGIN)
+  message(STATUS "BUILD_OCTOMAP_PLUGIN variable not provided, setting to FALSE.")
+  set(BUILD_OCTOMAP_PLUGIN FALSE)
+endif()
+
+if(NOT DEFINED BUILD_OPTICAL_FLOW_PLUGIN)
+  message(STATUS "BUILD_OPTICAL_FLOW_PLUGIN variable not provided, setting to FALSE.")
+  set(BUILD_OPTICAL_FLOW_PLUGIN FALSE)
+endif()
+
+if(NOT DEFINED NO_ROS)
+  message(STATUS "NO_ROS variable not provided, setting to FALSE.")
+  set(NO_ROS FALSE)
+endif()
+
 # Add any additional include directories as specified by the calling process (either user or another CMake file).
 # ASL: Doesn't use this, catkin manages the mav_comm dependency
 # PX4: Provides include directory for mav_msgs, so that "mav_msgs/default_topics.h" can be found and used.
