@@ -22,15 +22,18 @@
 // MODULE HEADER
 #include "rotors_gazebo_plugins/gazebo_imu_plugin.h"
 
-// USER HEADERS
-#include "ConnectGazeboToRosTopic.pb.h"
-
 // SYSTEM LIBS
 #include <chrono>
 #include <cmath>
 #include <iostream>
 #include <stdio.h>
 #include <boost/bind.hpp>
+
+#include "mav_msgs/default_topics.h"
+
+// USER HEADERS
+#include "ConnectGazeboToRosTopic.pb.h"
+
 
 namespace gazebo {
 
@@ -86,9 +89,9 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   frame_id_ = link_name_;
   
-//  getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_,
-//                           mav_msgs::default_topics::IMU);
-  getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_, "");
+  getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_,
+                           mav_msgs::default_topics::IMU);
+  //getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_, "");
   getSdfParam<double>(_sdf, "gyroscopeNoiseDensity",
                       imu_parameters_.gyroscope_noise_density,
                       imu_parameters_.gyroscope_noise_density);
