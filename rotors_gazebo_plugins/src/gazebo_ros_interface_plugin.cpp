@@ -280,7 +280,7 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
             gz_node_handle_);
         break;
     case gz_std_msgs::ConnectGazeboToRosTopic::TWIST_STAMPED:
-      ConnectHelper<gz_sensor_msgs::TwistStamped, geometry_msgs::TwistStamped>(
+      ConnectHelper<gz_geometry_msgs::TwistStamped, geometry_msgs::TwistStamped>(
           &GazeboRosInterfacePlugin::GzTwistStampedMsgCallback,
           this,
           gazeboNamespace,

@@ -216,7 +216,6 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   // ============================================ //
   gz_gps_pub_ = node_handle_->Advertise<gz_sensor_msgs::NavSatFix>("~/" + namespace_ + "/" + gps_topic_, 1);
 
-  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + gps_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + gps_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::NAV_SAT_FIX);
@@ -225,9 +224,8 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   // ============================================ //
   // == GROUND SPEED (TWIST STAMPED) MSG SETUP == //
   // ============================================ //
-  gz_ground_speed_pub_ = node_handle_->Advertise<gz_sensor_msgs::TwistStamped>("~/" + namespace_ + "/" + ground_speed_topic_, 1);
+  gz_ground_speed_pub_ = node_handle_->Advertise<gz_geometry_msgs::TwistStamped>("~/" + namespace_ + "/" + ground_speed_topic_, 1);
 
-  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + ground_speed_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + ground_speed_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::TWIST_STAMPED);
