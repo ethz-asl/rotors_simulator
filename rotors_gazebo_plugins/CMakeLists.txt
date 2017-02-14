@@ -251,7 +251,7 @@ list(APPEND targets_to_install rotors_gazebo_imu_plugin)
 
 #======================================== LIDAR PLUGIN ==========================================//
 if(${gazebo_VERSION_MAJOR} GREATER 4)
-  add_library(rotors_gazebo_lidar_plugin SHARED src/gazebo_lidar_plugin.cpp)
+  add_library(rotors_gazebo_lidar_plugin SHARED src/external/gazebo_lidar_plugin.cpp)
   target_link_libraries(rotors_gazebo_lidar_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   if (NOT NO_ROS)
     add_dependencies(rotors_gazebo_lidar_plugin ${catkin_EXPORTED_TARGETS})
@@ -367,7 +367,7 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   # In PX4 this is done with a call to ExternalProject_Add().
   find_package(OpticalFlow REQUIRED)
 
-  add_library(rotors_gazebo_optical_flow_plugin SHARED src/gazebo_optical_flow_plugin.cpp)
+  add_library(rotors_gazebo_optical_flow_plugin SHARED src/external/gazebo_optical_flow_plugin.cpp)
   target_include_directories(rotors_gazebo_optical_flow_plugin PUBLIC ${OpticalFlow_INCLUDE_DIRS})
   target_link_libraries(rotors_gazebo_optical_flow_plugin
     ${catkin_LIBRARIES}

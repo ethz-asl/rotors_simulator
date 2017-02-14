@@ -17,7 +17,7 @@
 
 #include <gazebo/physics/physics.hh>
 #include <gazebo/transport/transport.hh>
-#include <gazebo_gimbal_controller_plugin.hh>
+#include "rotors_gazebo_plugins/external/gazebo_gimbal_controller_plugin.h"
 
 using namespace gazebo;
 using namespace std;

@@ -21,7 +21,7 @@
 #endif
 
 #include "gazebo/sensors/DepthCameraSensor.hh"
-#include "gazebo_gst_camera_plugin.h"
+#include "rotors_gazebo_plugins/external/gazebo_gst_camera_plugin.h"
 
 #include <math.h>
 #include <string>
