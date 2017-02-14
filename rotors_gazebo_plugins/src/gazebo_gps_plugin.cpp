@@ -15,9 +15,13 @@
  * limitations under the License.
  */
 
-// MODULE HEADER
+// MODULE
 #include "rotors_gazebo_plugins/gazebo_gps_plugin.h"
 
+// 3RD PARTY
+#include "mav_msgs/default_topics.h"
+
+// USER
 #include "ConnectGazeboToRosTopic.pb.h"
 
 namespace gazebo {
@@ -83,12 +87,12 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   double hor_vel_std_dev;
   double ver_vel_std_dev;
 
-//  getSdfParam<std::string>(_sdf, "gpsTopic", gps_topic_,
-//                           mav_msgs::default_topics::GPS);
-  getSdfParam<std::string>(_sdf, "gpsTopic", gps_topic_, "");
+  getSdfParam<std::string>(_sdf, "gpsTopic", gps_topic_,
+                           mav_msgs::default_topics::GPS);
 
   getSdfParam<std::string>(_sdf, "groundSpeedTopic", ground_speed_topic_,
-                           kDefaultGroundSpeedPubTopic);
+                           mav_msgs::default_topics::GROUND_SPEED);
+
   getSdfParam<double>(_sdf, "horPosStdDev", hor_pos_std_dev, kDefaultHorPosStdDev);
   getSdfParam<double>(_sdf, "verPosStdDev", ver_pos_std_dev, kDefaultVerPosStdDev);
   getSdfParam<double>(_sdf, "horVelStdDev", hor_vel_std_dev, kDefaultHorVelStdDev);

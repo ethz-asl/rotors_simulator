@@ -34,7 +34,6 @@
 namespace gazebo {
 
 // Default values
-static const std::string kDefaultGroundSpeedPubTopic = "ground_speed";
 static constexpr double kDefaultHorPosStdDev = 3.0;
 static constexpr double kDefaultVerPosStdDev = 6.0;
 static constexpr double kDefaultHorVelStdDev = 0.1;
