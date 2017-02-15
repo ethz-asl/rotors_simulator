@@ -1,0 +1,22 @@
+syntax = "proto2";
+package gz_sensor_msgs;
+
+import "quaternion.proto";
+import "vector3d.proto";
+import "Header.proto";
+
+// Message published by GazeboImuPlugin.
+message Imu
+{
+  
+  required gz_std_msgs.Header header = 1;
+
+  required gazebo.msgs.Quaternion orientation = 2;
+  repeated float   orientation_covariance = 3 [packed=true];
+  
+  required gazebo.msgs.Vector3d angular_velocity = 4;
+  repeated float   angular_velocity_covariance = 5 [packed=true];
+  
+  required gazebo.msgs.Vector3d linear_acceleration = 6;
+  repeated float   linear_acceleration_covariance = 7 [packed=true];
+}

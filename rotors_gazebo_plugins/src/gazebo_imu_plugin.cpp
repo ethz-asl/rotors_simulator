@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,32 +19,44 @@
  * limitations under the License.
  */
 
+// MODULE HEADER
 #include "rotors_gazebo_plugins/gazebo_imu_plugin.h"
 
+// SYSTEM LIBS
 #include <chrono>
 #include <cmath>
 #include <iostream>
 #include <stdio.h>
-
 #include <boost/bind.hpp>
+
+// 3RD PARTY
+#include "mav_msgs/default_topics.h"
+
+// USER HEADERS
+#include "ConnectGazeboToRosTopic.pb.h"
+
 
 namespace gazebo {
 
 GazeboImuPlugin::GazeboImuPlugin()
     : ModelPlugin(),
       node_handle_(0),
-      velocity_prev_W_(0, 0, 0) {}
+      velocity_prev_W_(0, 0, 0),
+      pubs_and_subs_created_(false) {}
 
 GazeboImuPlugin::~GazeboImuPlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
-  if (node_handle_) {
-    node_handle_->shutdown();
-    delete node_handle_;
-  }
 }
 
 
 void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
+  gzdbg << "_model = " << _model->GetName() << std::endl;
+
   // Store the pointer to the model
   model_ = _model;
   world_ = model_->GetWorld();
@@ -51,11 +64,20 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // default params
   namespace_.clear();
 
+  //==============================================//
+  //========== READ IN PARAMS FROM SDF ===========//
+  //==============================================//
+
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_imu_plugin] Please specify a robotNamespace.\n";
-  node_handle_ = new ros::NodeHandle(namespace_);
+
+  // Get node handle
+  node_handle_ = transport::NodePtr(new transport::Node());
+
+  // Initisalise with default namespace (typically /gazebo/default/)
+  node_handle_->Init();
 
   if (_sdf->HasElement("linkName"))
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
@@ -67,7 +89,7 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     gzthrow("[gazebo_imu_plugin] Couldn't find specified link \"" << link_name_ << "\".");
 
   frame_id_ = link_name_;
-
+  
   getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_,
                            mav_msgs::default_topics::IMU);
   getSdfParam<double>(_sdf, "gyroscopeNoiseDensity",
@@ -105,36 +127,67 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboImuPlugin::OnUpdate, this, _1));
 
-  imu_pub_ = node_handle_->advertise<sensor_msgs::Imu>(imu_topic_, 1);
+  //==============================================//
+  //====== POPULATE STATIC PARTS OF IMU MSG ======//
+  //==============================================//
 
-  // Fill imu message.
-  imu_message_.header.frame_id = frame_id_;
+//  imu_message_.header.frame_id = frame_id_;
+  imu_message_.mutable_header()->set_frame_id(frame_id_);
+
   // We assume uncorrelated noise on the 3 channels -> only set diagonal
   // elements. Only the broadband noise component is considered, specified as a
   // continuous-time density (two-sided spectrum); not the true covariance of
   // the measurements.
-  // Angular velocity measurement covariance.
-  imu_message_.angular_velocity_covariance[0] =
-      imu_parameters_.gyroscope_noise_density *
-      imu_parameters_.gyroscope_noise_density;
-  imu_message_.angular_velocity_covariance[4] =
-      imu_parameters_.gyroscope_noise_density *
-      imu_parameters_.gyroscope_noise_density;
-  imu_message_.angular_velocity_covariance[8] =
-      imu_parameters_.gyroscope_noise_density *
-      imu_parameters_.gyroscope_noise_density;
-  // Linear acceleration measurement covariance.
-  imu_message_.linear_acceleration_covariance[0] =
-      imu_parameters_.accelerometer_noise_density *
-      imu_parameters_.accelerometer_noise_density;
-  imu_message_.linear_acceleration_covariance[4] =
-      imu_parameters_.accelerometer_noise_density *
-      imu_parameters_.accelerometer_noise_density;
-  imu_message_.linear_acceleration_covariance[8] =
-      imu_parameters_.accelerometer_noise_density *
-      imu_parameters_.accelerometer_noise_density;
-  // Orientation estimate covariance (no estimate provided).
-  imu_message_.orientation_covariance[0] = -1.0;
+
+  for(int i = 0; i < 9; i++){
+    switch (i){
+      case 0:
+        imu_message_.add_angular_velocity_covariance(imu_parameters_.gyroscope_noise_density *
+        imu_parameters_.gyroscope_noise_density);
+
+        imu_message_.add_orientation_covariance(-1.0);
+
+        imu_message_.add_linear_acceleration_covariance(imu_parameters_.accelerometer_noise_density *
+        imu_parameters_.accelerometer_noise_density);
+        break;
+      case 1:
+      case 2:
+      case 3:
+        imu_message_.add_angular_velocity_covariance(0.0);
+
+        imu_message_.add_orientation_covariance(-1.0);
+
+        imu_message_.add_linear_acceleration_covariance(0.0);
+        break;
+      case 4:
+        imu_message_.add_angular_velocity_covariance(imu_parameters_.gyroscope_noise_density *
+        imu_parameters_.gyroscope_noise_density);
+
+        imu_message_.add_orientation_covariance(-1.0);
+
+        imu_message_.add_linear_acceleration_covariance(imu_parameters_.accelerometer_noise_density *
+        imu_parameters_.accelerometer_noise_density);
+        break;
+      case 5:
+      case 6:
+      case 7:
+        imu_message_.add_angular_velocity_covariance(0.0);
+
+        imu_message_.add_orientation_covariance(-1.0);
+
+        imu_message_.add_linear_acceleration_covariance(0.0);
+        break;
+      case 8:
+        imu_message_.add_angular_velocity_covariance(imu_parameters_.gyroscope_noise_density *
+        imu_parameters_.gyroscope_noise_density);
+
+        imu_message_.add_orientation_covariance(-1.0);
+
+        imu_message_.add_linear_acceleration_covariance(imu_parameters_.accelerometer_noise_density *
+        imu_parameters_.accelerometer_noise_density);
+        break;
+    }
+  }
 
   gravity_W_ = world_->GetPhysicsEngine()->GetGravity();
   imu_parameters_.gravity_magnitude = gravity_W_.GetLength();
@@ -155,14 +208,13 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   accelerometer_bias_.setZero();
 }
 
-/// \brief This function adds noise to acceleration and angular rates for
-///        accelerometer and gyroscope measurement simulation.
-void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
+
+void GazeboImuPlugin::AddNoise(Eigen::Vector3d* linear_acceleration,
                                Eigen::Vector3d* angular_velocity,
                                const double dt) {
-  ROS_ASSERT(linear_acceleration != nullptr);
-  ROS_ASSERT(angular_velocity != nullptr);
-  ROS_ASSERT(dt > 0.0);
+  GZ_ASSERT(linear_acceleration != nullptr, "Linear acceleration was null.");
+  GZ_ASSERT(angular_velocity != nullptr, "Angular velocity was null.");
+  GZ_ASSERT(dt > 0.0, "Change in time must be greater than 0.");
 
   // Gyrosocpe
   double tau_g = imu_parameters_.gyroscope_bias_correlation_time;
@@ -211,8 +263,18 @@ void GazeboImuPlugin::addNoise(Eigen::Vector3d* linear_acceleration,
 
 }
 
-// This gets called by the world update start event.
+
 void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
+
+  if(kPrintOnUpdates) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
+  if(!pubs_and_subs_created_) {
+    CreatePubsAndSubs();
+    pubs_and_subs_created_ = true;
+  }
+
   common::Time current_time  = world_->GetSimTime();
   double dt = (current_time - last_time_).Double();
   last_time_ = current_time;
@@ -243,33 +305,74 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
                                      angular_vel_I.y,
                                      angular_vel_I.z);
 
-  addNoise(&linear_acceleration_I, &angular_velocity_I, dt);
+  AddNoise(&linear_acceleration_I, &angular_velocity_I, dt);
 
   // Fill IMU message.
-  imu_message_.header.stamp.sec = current_time.sec;
-  imu_message_.header.stamp.nsec = current_time.nsec;
+//  imu_message_.header.stamp.sec = current_time.sec;
+  imu_message_.mutable_header()->mutable_stamp()->set_sec(current_time.sec);
 
-  // TODO(burrimi): Add orientation estimator.
-  imu_message_.orientation.w = 1;
-  imu_message_.orientation.x = 0;
-  imu_message_.orientation.y = 0;
-  imu_message_.orientation.z = 0;
-//  imu_message_.orientation.w = C_W_I.w;
-//  imu_message_.orientation.x = C_W_I.x;
-//  imu_message_.orientation.y = C_W_I.y;
-//  imu_message_.orientation.z = C_W_I.z;
+//  imu_message_.header.stamp.nsec = current_time.nsec;
+  imu_message_.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
 
-  imu_message_.linear_acceleration.x = linear_acceleration_I[0];
-  imu_message_.linear_acceleration.y = linear_acceleration_I[1];
-  imu_message_.linear_acceleration.z = linear_acceleration_I[2];
-  imu_message_.angular_velocity.x = angular_velocity_I[0];
-  imu_message_.angular_velocity.y = angular_velocity_I[1];
-  imu_message_.angular_velocity.z = angular_velocity_I[2];
+  /// \todo(burrimi): Add orientation estimator.
+  // NOTE: rotors_simulator used to set the orientation to "0", since it is
+  // not raw IMU data but rather a calculation (and could confuse users).
+  // However, the orientation is now set as it is used by PX4.
+  /*gazebo::msgs::Quaternion* orientation = new gazebo::msgs::Quaternion();
+  orientation->set_x(0);
+  orientation->set_y(0);
+  orientation->set_z(0);
+  orientation->set_w(1);
+  imu_message_.set_allocated_orientation(orientation);*/
 
-  imu_pub_.publish(imu_message_);
+  /// \todo(burrimi): add noise.
+  gazebo::msgs::Quaternion* orientation = new gazebo::msgs::Quaternion();
+  orientation->set_w(C_W_I.w);
+  orientation->set_x(C_W_I.x);
+  orientation->set_y(C_W_I.y);
+  orientation->set_z(C_W_I.z);
+  imu_message_.set_allocated_orientation(orientation);
+
+  gazebo::msgs::Vector3d* linear_acceleration = new gazebo::msgs::Vector3d();
+  linear_acceleration->set_x(linear_acceleration_I[0]);
+  linear_acceleration->set_y(linear_acceleration_I[1]);
+  linear_acceleration->set_z(linear_acceleration_I[2]);
+  imu_message_.set_allocated_linear_acceleration(linear_acceleration);
+
+  gazebo::msgs::Vector3d* angular_velocity = new gazebo::msgs::Vector3d();
+  angular_velocity->set_x(angular_velocity_I[0]);
+  angular_velocity->set_y(angular_velocity_I[1]);
+  angular_velocity->set_z(angular_velocity_I[2]);
+  imu_message_.set_allocated_angular_velocity(angular_velocity);
+
+  // Publish the IMU message
+  imu_pub_->Publish(imu_message_);
+
+  // std::cout << "Published IMU message.\n";
 
 }
 
+void GazeboImuPlugin::CreatePubsAndSubs() {
+
+  // Create temporary "ConnectGazeboToRosTopic" publisher and message
+  gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+
+  // ============================================ //
+  // =============== IMU MSG SETUP ============== //
+  // ============================================ //
+
+  imu_pub_ = node_handle_->Advertise<gz_sensor_msgs::Imu>("~/" + namespace_ + "/" + imu_topic_, 1);
+
+  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + imu_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + imu_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::IMU);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+}
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboImuPlugin);
-}
+
+} // namespace gazebo

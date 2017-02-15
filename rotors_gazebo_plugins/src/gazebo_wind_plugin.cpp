@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +22,20 @@
 
 #include "rotors_gazebo_plugins/gazebo_wind_plugin.h"
 
-#include <geometry_msgs/WrenchStamped.h>
+#include "ConnectGazeboToRosTopic.pb.h"
 
 namespace gazebo {
 
 GazeboWindPlugin::~GazeboWindPlugin() {
   event::Events::DisconnectWorldUpdateBegin(update_connection_);
-  if (node_handle_) {
-    node_handle_->shutdown();
-    delete node_handle_;
-  }
 }
-;
 
 void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   // Store the pointer to the model.
   model_ = _model;
   world_ = model_->GetWorld();
@@ -42,11 +43,20 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   double wind_gust_start = kDefaultWindGustStart;
   double wind_gust_duration = kDefaultWindGustDuration;
 
+  //==============================================//
+  //========== READ IN PARAMS FROM SDF ===========//
+  //==============================================//
+
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_wind_plugin] Please specify a robotNamespace.\n";
-  node_handle_ = new ros::NodeHandle(namespace_);
+
+  // Create Gazebo Node
+  node_handle_ = gazebo::transport::NodePtr(new transport::Node());
+
+  // Initisalise with default namespace (typically /gazebo/default/)
+  node_handle_->Init();
 
   if (_sdf->HasElement("xyzOffset"))
     xyz_offset_ = _sdf->GetElement("xyzOffset")->Get<math::Vector3>();
@@ -81,11 +91,20 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // simulation iteration.
   update_connection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboWindPlugin::OnUpdate, this, _1));
 
-  wind_pub_ = node_handle_->advertise<geometry_msgs::WrenchStamped>(wind_pub_topic_, 1);
 }
 
 // This gets called by the world update start event.
 void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
+
+  if(kPrintOnUpdates) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
+  if(!pubs_and_subs_created_) {
+    CreatePubsAndSubs();
+    pubs_and_subs_created_ = true;
+  }
+
   // Get the current simulation time.
   common::Time now = world_->GetSimTime();
 
@@ -104,20 +123,44 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
     link_->AddForceAtRelativePosition(wind_gust, xyz_offset_);
   }
 
-  geometry_msgs::WrenchStamped wrench_msg;
+  wrench_stamped_msg_.mutable_header()->set_frame_id(frame_id_);
+  wrench_stamped_msg_.mutable_header()->mutable_stamp()->set_sec(now.sec);
+  wrench_stamped_msg_.mutable_header()->mutable_stamp()->set_nsec(now.nsec);
 
-  wrench_msg.header.frame_id = frame_id_;
-  wrench_msg.header.stamp.sec = now.sec;
-  wrench_msg.header.stamp.nsec = now.nsec;
-  wrench_msg.wrench.force.x = wind.x + wind_gust.x;
-  wrench_msg.wrench.force.y = wind.y + wind_gust.y;
-  wrench_msg.wrench.force.z = wind.z + wind_gust.z;
-  wrench_msg.wrench.torque.x = 0;
-  wrench_msg.wrench.torque.y = 0;
-  wrench_msg.wrench.torque.z = 0;
+  wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_x(wind.x + wind_gust.x);
+  wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_y(wind.y + wind_gust.y);
+  wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_z(wind.z + wind_gust.z);
 
-  wind_pub_.publish(wrench_msg);
+  // No torque due to wind, set x,y and z to 0.
+  wrench_stamped_msg_.mutable_wrench()->mutable_torque()->set_x(0);
+  wrench_stamped_msg_.mutable_wrench()->mutable_torque()->set_y(0);
+  wrench_stamped_msg_.mutable_wrench()->mutable_torque()->set_z(0);
+
+  wind_pub_->Publish(wrench_stamped_msg_);
+}
+
+void GazeboWindPlugin::CreatePubsAndSubs() {
+
+  // Create temporary "ConnectGazeboToRosTopic" publisher and message
+  gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+
+  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+
+  // ============================================ //
+  // =========== NAV SAT FIX MSG SETUP ========== //
+  // ============================================ //
+  wind_pub_ = node_handle_->Advertise<gz_geometry_msgs::WrenchStamped>(
+      "~/" + namespace_ + "/" + wind_pub_topic_, 1);
+
+  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + wind_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + wind_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::WRENCH_STAMPED);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboWindPlugin);
-}
+
+} // namespace gazebo

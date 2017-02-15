@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="ros_interface">
+    <static>true</static>
+      <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so">
+        <robotNamespace>firefly</robotNamespace>
+      </plugin>
+  </model>
+</sdf>

@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,31 +19,39 @@
  * limitations under the License.
  */
 
-
+// MODULE
 #include "rotors_gazebo_plugins/gazebo_odometry_plugin.h"
 
+// SYSTEM
 #include <chrono>
 #include <iostream>
 
+// 3RD PARTY
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+// USER
 #include <rotors_gazebo_plugins/common.h>
+#include "ConnectGazeboToRosTopic.pb.h"
+#include "ConnectRosToGazeboTopic.pb.h"
+#include "PoseStamped.pb.h"
+#include "PoseWithCovarianceStamped.pb.h"
+#include "Vector3dStamped.pb.h"
+#include "TransformStamped.pb.h"
+#include "TransformStampedWithFrameIds.pb.h"
 
 namespace gazebo {
 
 GazeboOdometryPlugin::~GazeboOdometryPlugin() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
-  if (node_handle_) {
-    node_handle_->shutdown();
-    delete node_handle_;
-  }
 }
 
-// void GazeboOdometryPlugin::InitializeParams() {};
-// void GazeboOdometryPlugin::Publish() {};
-
 void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   // Store the pointer to the model
   model_ = _model;
   world_ = model_->GetWorld();
@@ -63,7 +72,11 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_odometry_plugin] Please specify a robotNamespace.\n";
-  node_handle_ = new ros::NodeHandle(namespace_);
+
+  node_handle_ = gazebo::transport::NodePtr(new transport::Node());
+
+  // Initisalise with default namespace (typically /gazebo/default/)
+  node_handle_->Init();
 
   if (_sdf->HasElement("linkName"))
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
@@ -89,9 +102,9 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
     random_generator_.seed(std::chrono::system_clock::now().time_since_epoch().count());
   }
   getSdfParam<std::string>(_sdf, "poseTopic", pose_pub_topic_, pose_pub_topic_);
-  getSdfParam<std::string>(_sdf, "poseWithCovarianceTopic", pose_with_covariance_pub_topic_, pose_with_covariance_pub_topic_);
-  getSdfParam<std::string>(_sdf, "positionTopic", position_pub_topic_, position_pub_topic_);
-  getSdfParam<std::string>(_sdf, "transformTopic", transform_pub_topic_, transform_pub_topic_);
+  getSdfParam<std::string>(_sdf, "poseWithCovarianceTopic", pose_with_covariance_stamped_pub_topic_, pose_with_covariance_stamped_pub_topic_);
+  getSdfParam<std::string>(_sdf, "positionTopic", position_stamped_pub_topic_, position_stamped_pub_topic_);
+  getSdfParam<std::string>(_sdf, "transformTopic", transform_stamped_pub_topic_, transform_stamped_pub_topic_);
   getSdfParam<std::string>(_sdf, "odometryTopic", odometry_pub_topic_, odometry_pub_topic_);
   getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
   getSdfParam<std::string>(_sdf, "childFrameId", child_frame_id_, child_frame_id_);
@@ -169,18 +182,26 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
                 noise_normal_angular_velocity.Z() * noise_normal_angular_velocity.Z();
   twist_covariance = twist_covd.asDiagonal();
 
+
+
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboOdometryPlugin::OnUpdate, this, _1));
-  pose_pub_ = node_handle_->advertise<geometry_msgs::PoseStamped>(pose_pub_topic_, 1);
-  pose_with_covariance_pub_ = node_handle_->advertise<geometry_msgs::PoseWithCovarianceStamped>(pose_with_covariance_pub_topic_, 1);
-  position_pub_ = node_handle_->advertise<geometry_msgs::PointStamped>(position_pub_topic_, 1);
-  transform_pub_ = node_handle_->advertise<geometry_msgs::TransformStamped>(transform_pub_topic_, 1);
-  odometry_pub_ = node_handle_->advertise<nav_msgs::Odometry>(odometry_pub_topic_, 1);
+
 }
 
 // This gets called by the world update start event.
 void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
+
+  if(kPrintOnUpdates) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
+  if(!pubs_and_subs_created_) {
+    CreatePubsAndSubs();
+    pubs_and_subs_created_ = true;
+  }
+
   // C denotes child frame, P parent frame, and W world frame.
   // Further C_pose_W_P denotes pose of P wrt. W expressed in C.
   math::Pose W_pose_W_C = link_->GetWorldCoGPose();
@@ -214,6 +235,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     gazebo_pose = C_pose_P_C_;
   }
 
+  // This flag could be set to false in the following code...
   bool publish_odometry = true;
 
   // First, determine whether we should publish a odometry.
@@ -236,23 +258,44 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
   }
 
   if (gazebo_sequence_ % measurement_divisor_ == 0) {
-    nav_msgs::Odometry odometry;
-    odometry.header.frame_id = parent_frame_id_;
-    odometry.header.seq = odometry_sequence_++;
-    odometry.header.stamp.sec = (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec;
-    odometry.header.stamp.nsec = (world_->GetSimTime()).nsec + ros::Duration(unknown_delay_).nsec;
-    odometry.child_frame_id = child_frame_id_;
-    copyPosition(gazebo_pose.pos, &odometry.pose.pose.position);
-    odometry.pose.pose.orientation.w = gazebo_pose.rot.w;
-    odometry.pose.pose.orientation.x = gazebo_pose.rot.x;
-    odometry.pose.pose.orientation.y = gazebo_pose.rot.y;
-    odometry.pose.pose.orientation.z = gazebo_pose.rot.z;
-    odometry.twist.twist.linear.x = gazebo_linear_velocity.x;
-    odometry.twist.twist.linear.y = gazebo_linear_velocity.y;
-    odometry.twist.twist.linear.z = gazebo_linear_velocity.z;
-    odometry.twist.twist.angular.x = gazebo_angular_velocity.x;
-    odometry.twist.twist.angular.y = gazebo_angular_velocity.y;
-    odometry.twist.twist.angular.z = gazebo_angular_velocity.z;
+
+    gz_geometry_msgs::Odometry odometry;
+    odometry.mutable_header()->set_frame_id(parent_frame_id_);
+    odometry.mutable_header()->mutable_stamp()->set_sec(
+            (world_->GetSimTime()).sec + static_cast<int32_t>(unknown_delay_));
+    odometry.mutable_header()->mutable_stamp()->set_nsec(
+            (world_->GetSimTime()).nsec + static_cast<int32_t>(unknown_delay_));
+    odometry.set_child_frame_id(child_frame_id_);
+
+    odometry.mutable_pose()->mutable_pose()->mutable_position()->set_x(
+        gazebo_pose.pos.x);
+    odometry.mutable_pose()->mutable_pose()->mutable_position()->set_y(
+        gazebo_pose.pos.y);
+    odometry.mutable_pose()->mutable_pose()->mutable_position()->set_z(
+        gazebo_pose.pos.z);
+
+    odometry.mutable_pose()->mutable_pose()->mutable_orientation()->set_x(
+        gazebo_pose.rot.x);
+    odometry.mutable_pose()->mutable_pose()->mutable_orientation()->set_y(
+        gazebo_pose.rot.y);
+    odometry.mutable_pose()->mutable_pose()->mutable_orientation()->set_z(
+        gazebo_pose.rot.z);
+    odometry.mutable_pose()->mutable_pose()->mutable_orientation()->set_w(
+        gazebo_pose.rot.w);
+
+    odometry.mutable_twist()->mutable_twist()->mutable_linear()->set_x(
+        gazebo_linear_velocity.x);
+    odometry.mutable_twist()->mutable_twist()->mutable_linear()->set_y(
+        gazebo_linear_velocity.y);
+    odometry.mutable_twist()->mutable_twist()->mutable_linear()->set_z(
+        gazebo_linear_velocity.z);
+
+    odometry.mutable_twist()->mutable_twist()->mutable_angular()->set_x(
+        gazebo_angular_velocity.x);
+    odometry.mutable_twist()->mutable_twist()->mutable_angular()->set_y(
+        gazebo_angular_velocity.y);
+    odometry.mutable_twist()->mutable_twist()->mutable_angular()->set_z(
+        gazebo_angular_velocity.z);
 
     if (publish_odometry)
       odometry_queue_.push_back(std::make_pair(gazebo_sequence_ + measurement_delay_, odometry));
@@ -260,12 +303,11 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // Is it time to publish the front element?
   if (gazebo_sequence_ == odometry_queue_.front().first) {
-    nav_msgs::OdometryPtr odometry(new nav_msgs::Odometry);
-    odometry->header = odometry_queue_.front().second.header;
-    odometry->child_frame_id = odometry_queue_.front().second.child_frame_id;
-    odometry->pose.pose = odometry_queue_.front().second.pose.pose;
-    odometry->twist.twist.linear = odometry_queue_.front().second.twist.twist.linear;
-    odometry->twist.twist.angular = odometry_queue_.front().second.twist.twist.angular;
+
+    // Copy the odometry message that is on the queue
+    gz_geometry_msgs::Odometry odometry_msg(odometry_queue_.front().second);
+
+    // Now that we have copied the first element from the queue, remove it.
     odometry_queue_.pop_front();
 
     // Calculate position distortions.
@@ -273,10 +315,12 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     pos_n << position_n_[0](random_generator_) + position_u_[0](random_generator_),
              position_n_[1](random_generator_) + position_u_[1](random_generator_),
              position_n_[2](random_generator_) + position_u_[2](random_generator_);
-    geometry_msgs::Point& p = odometry->pose.pose.position;
-    p.x += pos_n[0];
-    p.y += pos_n[1];
-    p.z += pos_n[2];
+
+    gazebo::msgs::Vector3d * p = odometry_msg.mutable_pose()->mutable_pose()->mutable_position();
+    p->set_x(p->x() + pos_n[0]);
+    p->set_y(p->y() + pos_n[1]);
+    p->set_z(p->z() + pos_n[2]);
+
 
     // Calculate attitude distortions.
     Eigen::Vector3d theta;
@@ -285,82 +329,196 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
              attitude_n_[2](random_generator_) + attitude_u_[2](random_generator_);
     Eigen::Quaterniond q_n = QuaternionFromSmallAngle(theta);
     q_n.normalize();
-    geometry_msgs::Quaternion& q_W_L = odometry->pose.pose.orientation;
-    Eigen::Quaterniond _q_W_L(q_W_L.w, q_W_L.x, q_W_L.y, q_W_L.z);
+
+    gazebo::msgs::Quaternion * q_W_L =
+        odometry_msg.mutable_pose()->mutable_pose()->mutable_orientation();
+
+    Eigen::Quaterniond _q_W_L(q_W_L->w(), q_W_L->x(), q_W_L->y(), q_W_L->z());
     _q_W_L = _q_W_L * q_n;
-    q_W_L.w = _q_W_L.w();
-    q_W_L.x = _q_W_L.x();
-    q_W_L.y = _q_W_L.y();
-    q_W_L.z = _q_W_L.z();
+    q_W_L->set_w(_q_W_L.w());
+    q_W_L->set_x(_q_W_L.x());
+    q_W_L->set_y(_q_W_L.y());
+    q_W_L->set_z(_q_W_L.z());
 
     // Calculate linear velocity distortions.
     Eigen::Vector3d linear_velocity_n;
     linear_velocity_n << linear_velocity_n_[0](random_generator_) + linear_velocity_u_[0](random_generator_),
                 linear_velocity_n_[1](random_generator_) + linear_velocity_u_[1](random_generator_),
                 linear_velocity_n_[2](random_generator_) + linear_velocity_u_[2](random_generator_);
-    geometry_msgs::Vector3& linear_velocity = odometry->twist.twist.linear;
-    linear_velocity.x += linear_velocity_n[0];
-    linear_velocity.y += linear_velocity_n[1];
-    linear_velocity.z += linear_velocity_n[2];
 
-    // Calculate angular veocity distortions.
+    gazebo::msgs::Vector3d * linear_velocity =
+        odometry_msg.mutable_twist()->mutable_twist()->mutable_linear();
+
+    linear_velocity->set_x(linear_velocity->x() + linear_velocity_n[0]);
+    linear_velocity->set_y(linear_velocity->y() + linear_velocity_n[1]);
+    linear_velocity->set_z(linear_velocity->z() + linear_velocity_n[2]);
+
+    // Calculate angular velocity distortions.
     Eigen::Vector3d angular_velocity_n;
     angular_velocity_n << angular_velocity_n_[0](random_generator_) + angular_velocity_u_[0](random_generator_),
                 angular_velocity_n_[1](random_generator_) + angular_velocity_u_[1](random_generator_),
                 angular_velocity_n_[2](random_generator_) + angular_velocity_u_[2](random_generator_);
-    geometry_msgs::Vector3& angular_velocity = odometry->twist.twist.angular;
-    angular_velocity.x += angular_velocity_n[0];
-    angular_velocity.y += angular_velocity_n[1];
-    angular_velocity.z += angular_velocity_n[2];
 
-    odometry->pose.covariance = pose_covariance_matrix_;
-    odometry->twist.covariance = twist_covariance_matrix_;
+    gazebo::msgs::Vector3d * angular_velocity =
+        odometry_msg.mutable_twist()->mutable_twist()->mutable_angular();
+
+    angular_velocity->set_x(angular_velocity->x() + angular_velocity_n[0]);
+    angular_velocity->set_y(angular_velocity->y() + angular_velocity_n[1]);
+    angular_velocity->set_z(angular_velocity->z() + angular_velocity_n[2]);
+
+    odometry_msg.mutable_pose()->mutable_covariance()->Clear();
+    for(int i = 0; i < pose_covariance_matrix_.size(); i++) {
+      odometry_msg.mutable_pose()->mutable_covariance()->Add(pose_covariance_matrix_[i]);
+    }
+
+    odometry_msg.mutable_twist()->mutable_covariance()->Clear();
+    for(int i = 0; i < twist_covariance_matrix_.size(); i++) {
+      odometry_msg.mutable_twist()->mutable_covariance()->Add(twist_covariance_matrix_[i]);
+    }
 
     // Publish all the topics, for which the topic name is specified.
-    if (pose_pub_.getNumSubscribers() > 0) {
-      geometry_msgs::PoseStampedPtr pose(new geometry_msgs::PoseStamped);
-      pose->header = odometry->header;
-      pose->pose = odometry->pose.pose;
-      pose_pub_.publish(pose);
+    if (pose_pub_->HasConnections()) {
+      pose_pub_->Publish(odometry_msg.pose().pose());
     }
-    if (pose_with_covariance_pub_.getNumSubscribers() > 0) {
-      geometry_msgs::PoseWithCovarianceStampedPtr pose_with_covariance(
-        new geometry_msgs::PoseWithCovarianceStamped);
-      pose_with_covariance->header = odometry->header;
-      pose_with_covariance->pose.pose = odometry->pose.pose;
-      pose_with_covariance->pose.covariance = odometry->pose.covariance;
-      pose_with_covariance_pub_.publish(pose_with_covariance);
+
+    if (pose_with_covariance_stamped_pub_->HasConnections()) {
+      gz_geometry_msgs::PoseWithCovarianceStamped pose_with_covariance_stamped_msg;
+
+      pose_with_covariance_stamped_msg.mutable_header()->CopyFrom(odometry_msg.header());
+      pose_with_covariance_stamped_msg.mutable_pose_with_covariance()->CopyFrom(odometry_msg.pose());
+
+      pose_with_covariance_stamped_pub_->Publish(pose_with_covariance_stamped_msg);
     }
-    if (position_pub_.getNumSubscribers() > 0) {
-      geometry_msgs::PointStampedPtr position(new geometry_msgs::PointStamped);
-      position->header = odometry->header;
-      position->point = p;
-      position_pub_.publish(position);
+
+    if (position_stamped_pub_->HasConnections()) {
+      gz_geometry_msgs::Vector3dStamped position_stamped_msg;
+      position_stamped_msg.mutable_header()->CopyFrom(odometry_msg.header());
+      position_stamped_msg.mutable_position()->CopyFrom(odometry_msg.pose().pose().position());
+
+      position_stamped_pub_->Publish(position_stamped_msg);
     }
-    if (transform_pub_.getNumSubscribers() > 0) {
-      geometry_msgs::TransformStampedPtr transform(new geometry_msgs::TransformStamped);
-      transform->header = odometry->header;
-      geometry_msgs::Vector3 translation;
-      translation.x = p.x;
-      translation.y = p.y;
-      translation.z = p.z;
-      transform->transform.translation = translation;
-      transform->transform.rotation = q_W_L;
-      transform_pub_.publish(transform);
+
+    if (transform_stamped_pub_->HasConnections()) {
+
+      gz_geometry_msgs::TransformStamped transform_stamped_msg;
+
+      transform_stamped_msg.mutable_header()->CopyFrom(odometry_msg.header());
+      transform_stamped_msg.mutable_transform()->mutable_translation()->set_x(p->x());
+      transform_stamped_msg.mutable_transform()->mutable_translation()->set_y(p->y());
+      transform_stamped_msg.mutable_transform()->mutable_translation()->set_z(p->z());
+      transform_stamped_msg.mutable_transform()->mutable_rotation()->CopyFrom(*q_W_L);
+
+      transform_stamped_pub_->Publish(transform_stamped_msg);
     }
-    if (odometry_pub_.getNumSubscribers() > 0) {
-      odometry_pub_.publish(odometry);
+
+    if (odometry_pub_->HasConnections()) {
+      // DEBUG
+      odometry_pub_->Publish(odometry_msg);
     }
-    tf::Quaternion tf_q_W_L(q_W_L.x, q_W_L.y, q_W_L.z, q_W_L.w);
-    tf::Vector3 tf_p(p.x, p.y, p.z);
-    tf_ = tf::Transform(tf_q_W_L, tf_p);
-    transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, odometry->header.stamp, parent_frame_id_, child_frame_id_));
-    //    std::cout << "published odometry with timestamp " << odometry->header.stamp << "at time t" << world_->GetSimTime().Double()
-    //        << "delay should be " << measurement_delay_ << "sim cycles" << std::endl;
-  }
+
+    //==============================================//
+    //========= BROADCAST TRANSFORM MSG ============//
+    //==============================================//
+
+    gz_geometry_msgs::TransformStampedWithFrameIds transform_stamped_with_frame_ids_msg;
+    transform_stamped_with_frame_ids_msg.mutable_header()->CopyFrom(odometry_msg.header());
+    transform_stamped_with_frame_ids_msg.mutable_transform()->mutable_translation()->set_x(p->x());
+    transform_stamped_with_frame_ids_msg.mutable_transform()->mutable_translation()->set_y(p->y());
+    transform_stamped_with_frame_ids_msg.mutable_transform()->mutable_translation()->set_z(p->z());
+    transform_stamped_with_frame_ids_msg.mutable_transform()->mutable_rotation()->CopyFrom(*q_W_L);
+    transform_stamped_with_frame_ids_msg.set_parent_frame_id(parent_frame_id_);
+    transform_stamped_with_frame_ids_msg.set_child_frame_id(child_frame_id_);
+
+    broadcast_transform_pub_->Publish(transform_stamped_with_frame_ids_msg);
+
+  } // if (gazebo_sequence_ == odometry_queue_.front().first) {
 
   ++gazebo_sequence_;
 }
 
-GZ_REGISTER_MODEL_PLUGIN(GazeboOdometryPlugin);
+void GazeboOdometryPlugin::CreatePubsAndSubs() {
+
+  // Create temporary "ConnectGazeboToRosTopic" publisher and message
+  gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+
+  gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+
+  // ============================================ //
+  // =============== POSE MSG SETUP ============= //
+  // ============================================ //
+
+  pose_pub_ = node_handle_->Advertise<gazebo::msgs::Pose>(
+      "~/" + namespace_ + "/" + pose_pub_topic_,
+      1);
+
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + pose_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + pose_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::POSE);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+  // ============================================ //
+  // == POSE WITH COVARIANCE STAMPED MSG SETUP == //
+  // ============================================ //
+
+  pose_with_covariance_stamped_pub_ = node_handle_->Advertise<gz_geometry_msgs::PoseWithCovarianceStamped>(
+      "~/" + namespace_ + "/" + pose_with_covariance_stamped_pub_topic_,
+      1);
+
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + pose_with_covariance_stamped_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + pose_with_covariance_stamped_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::POSE_WITH_COVARIANCE_STAMPED);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+  // ============================================ //
+  // ========= POSITION STAMPED MSG SETUP ======= //
+  // ============================================ //
+
+  position_stamped_pub_ = node_handle_->Advertise<gz_geometry_msgs::Vector3dStamped>(
+      "~/" + namespace_ + "/" + position_stamped_pub_topic_,
+      1);
+
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + position_stamped_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + position_stamped_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::VECTOR_3D_STAMPED);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+  // ============================================ //
+  // ============= ODOMETRY MSG SETUP =========== //
+  // ============================================ //
+
+  odometry_pub_ = node_handle_->Advertise<gz_geometry_msgs::Odometry>(
+      "~/" + namespace_ + "/" + odometry_pub_topic_,
+      1);
+
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + odometry_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + odometry_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ODOMETRY);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+  // ============================================ //
+  // ======== TRANSFORM STAMPED MSG SETUP ======= //
+  // ============================================ //
+
+  transform_stamped_pub_ = node_handle_->Advertise<gz_geometry_msgs::TransformStamped>(
+      "~/" + namespace_ + "/" + transform_stamped_pub_topic_,
+      1);
+
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + transform_stamped_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + transform_stamped_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::TRANSFORM_STAMPED);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+  // ============================================ //
+  // ===== "BROADCAST TRANSFORM" MSG SETUP =====  //
+  // ============================================ //
+
+  broadcast_transform_pub_ = node_handle_->Advertise<gz_geometry_msgs::TransformStampedWithFrameIds>(
+      "~/" + kBroadcastTransformSubtopic,
+      1);
+
 }
+
+GZ_REGISTER_MODEL_PLUGIN(GazeboOdometryPlugin);
+
+} // namespace gazebo

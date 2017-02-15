@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <world name="default">
+    <!-- A ground plane -->
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <plugin filename="libRubblePlugin.so" name="rubble">
+      <bottom_right>-.5 -1 0.0</bottom_right>
+      <top_left>0.5 1.0 0.4</top_left>
+      <min_size>0.05 0.05 0.05</min_size>
+      <max_size>0.2 0.2 0.2</max_size>
+      <min_mass>0.1</min_mass>
+      <max_mass>1.0</max_mass>
+      <count>100</count>
+    </plugin>
+    <model name="right_wall">
+      <static>true</static>
+      <pose>0 -1.1 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>5 0.2 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>5 0.2 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Wood</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="left_wall">
+      <static>true</static>
+      <pose>0 1.1 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>5 0.2 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>5 0.2 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Wood</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>

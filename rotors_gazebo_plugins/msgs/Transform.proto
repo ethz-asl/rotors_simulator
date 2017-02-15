@@ -1,0 +1,10 @@
+syntax = "proto2";
+package gz_geometry_msgs;
+
+import "vector3d.proto";
+import "quaternion.proto";
+
+message Transform {
+  required gazebo.msgs.Vector3d translation = 1;
+  required gazebo.msgs.Quaternion rotation = 2;
+}

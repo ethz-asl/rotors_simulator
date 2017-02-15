@@ -1,0 +1,10 @@
+syntax = "proto2";
+package gz_mav_msgs;
+
+import "Header.proto";
+import "vector3d.proto";
+
+message WindSpeed {
+  required gz_std_msgs.Header header = 1;
+  required gazebo.msgs.Vector3d velocity = 2;
+}

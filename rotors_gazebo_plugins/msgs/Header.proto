@@ -1,0 +1,13 @@
+syntax = "proto2";
+package gz_std_msgs;
+
+// Header type designed to be added to other
+// Gazebo message types.
+message Header {
+  message Stamp {
+    required uint32 sec = 1;
+    required uint32 nsec = 2;
+  }
+  required string frame_id = 1;
+  required Stamp stamp = 2;
+}

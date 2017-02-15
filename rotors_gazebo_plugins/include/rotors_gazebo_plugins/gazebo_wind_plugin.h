@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +24,17 @@
 #define ROTORS_GAZEBO_PLUGINS_GAZEBO_WIND_PLUGIN_H
 
 #include <string>
-#include <ros/ros.h>
 
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 
+#include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
+
 #include "rotors_gazebo_plugins/common.h"
+
+#include "WrenchStamped.pb.h"         // Wind message
 
 namespace gazebo {
 // Default values
@@ -50,7 +54,9 @@ static const math::Vector3 kDefaultWindGustDirection = math::Vector3(0, 1, 0);
 
 
 
-/// \brief This gazebo plugin simulates wind acting on a model.
+/// \brief    This gazebo plugin simulates wind acting on a model.
+/// \details  This plugin publishes on a Gazebo topic and instructs the ROS interface plugin to
+///           forward the message onto ROS.
 class GazeboWindPlugin : public ModelPlugin {
  public:
   GazeboWindPlugin()
@@ -65,11 +71,13 @@ class GazeboWindPlugin : public ModelPlugin {
         wind_gust_direction_(kDefaultWindGustDirection),
         frame_id_(kDefaultFrameId),
         link_name_(kDefaultLinkName),
-        node_handle_(NULL) {}
+        node_handle_(nullptr),
+        pubs_and_subs_created_(false) {}
 
   virtual ~GazeboWindPlugin();
 
  protected:
+
   /// \brief Load the plugin.
   /// \param[in] _model Pointer to the model that loaded this plugin.
   /// \param[in] _sdf SDF element that describes the plugin.
@@ -80,7 +88,18 @@ class GazeboWindPlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
-    /// \brief Pointer to the update event connection.
+
+  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
+  ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
+  bool pubs_and_subs_created_;
+
+  /// \brief    Creates all required publishers and subscribers, incl. routing of messages to/from ROS if required.
+  /// \details  Call this once the first time OnUpdate() is called (can't
+  ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
+  ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
+  void CreatePubsAndSubs();
+
+  /// \brief    Pointer to the update event connection.
   event::ConnectionPtr update_connection_;
 
   physics::WorldPtr world_;
@@ -105,9 +124,15 @@ class GazeboWindPlugin : public ModelPlugin {
   common::Time wind_gust_end_;
   common::Time wind_gust_start_;
 
-  ros::Publisher wind_pub_;
+  gazebo::transport::PublisherPtr wind_pub_;
 
-  ros::NodeHandle *node_handle_;
+  gazebo::transport::NodePtr node_handle_;
+
+  /// \brief    Gazebo message for sending wind data.
+  /// \details  This is defined at the class scope so that it so re-created
+  ///           everytime a wind message needs to be sent, increasing performance.
+  gz_geometry_msgs::WrenchStamped wrench_stamped_msg_;
+
 };
 }
 

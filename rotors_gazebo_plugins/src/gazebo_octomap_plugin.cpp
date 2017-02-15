@@ -33,6 +33,11 @@ OctomapFromGazeboWorld::~OctomapFromGazeboWorld() {
 
 void OctomapFromGazeboWorld::Load(physics::WorldPtr _parent,
                                   sdf::ElementPtr _sdf) {
+
+  if(kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   world_ = _parent;
 
   std::string service_name = "world/get_octomap";
@@ -256,4 +261,5 @@ void OctomapFromGazeboWorld::CreateOctomap(
 
 // Register this plugin with the simulator
 GZ_REGISTER_WORLD_PLUGIN(OctomapFromGazeboWorld)
-}
+
+} // namespace gazebo

@@ -1,0 +1,11 @@
+syntax = "proto2";
+package gz_geometry_msgs;
+
+import "Header.proto";
+import "Wrench.proto";
+
+// A message with both a header (with time info) and wrench info (forces and torques).
+message WrenchStamped {
+  required gz_std_msgs.Header header = 1;
+  required Wrench wrench = 2;
+}

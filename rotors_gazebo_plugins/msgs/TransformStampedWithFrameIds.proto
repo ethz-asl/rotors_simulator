@@ -1,0 +1,18 @@
+syntax = "proto2";
+package gz_geometry_msgs;
+
+import "Header.proto";
+import "Transform.proto";
+
+// A stamped transform message, but also with the 
+// parent and child frame ids. Note that the parent frame ID
+// is likely to be the same as the frame_id provided in the
+// header. Used by the topic to send transforms from the odometry
+// plugin to the ROS interface plugin, so it can then call
+// transform_broadcast().
+message TransformStampedWithFrameIds {
+  required gz_std_msgs.Header header = 1;
+  required Transform transform = 2;
+  required string parent_frame_id = 3;
+  required string child_frame_id = 4;
+}

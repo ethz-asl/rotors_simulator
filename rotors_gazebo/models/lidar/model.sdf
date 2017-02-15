@@ -44,7 +44,7 @@
             <stddev>0.01</stddev>
           </noise>
         </ray>
-	<plugin name="LaserPlugin" filename="libgazebo_lidar_plugin.so"/>
+	<plugin name="LaserPlugin" filename="librotors_gazebo_lidar_plugin.so"/>
 		<robotNamespace></robotNamespace>
         <always_on>1</always_on>
         <update_rate>20</update_rate>

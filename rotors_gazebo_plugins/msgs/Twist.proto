@@ -1,0 +1,12 @@
+syntax = "proto2";
+package gz_geometry_msgs;
+
+import "vector3d.proto";
+
+// Twist message type incorporates linear
+// and angular components.
+message Twist
+{
+  required gazebo.msgs.Vector3d linear = 1;
+  required gazebo.msgs.Vector3d angular = 2;
+}
