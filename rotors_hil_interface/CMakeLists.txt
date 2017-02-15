@@ -5,12 +5,17 @@ add_definitions(-std=c++11)
 
 find_package(Mavlink QUIET)
 
-if(Mavlink_DIR)
+if (Mavlink_DIR)
   message(STATUS "Building HIL_INTERFACE package.")
-else()
-  message(STATUS "Mavlink not found. SKipping HIL_INTERFACE package.")
+else ()
+  message(STATUS "Mavlink not found. Skipping HIL_INTERFACE package.")
+
+  # We still have to call catkin package for this to be a valid backage,
+  # even if empty.
+  find_package(catkin REQUIRED)
+  catkin_package()
   return()
-endif()
+endif ()
 
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
