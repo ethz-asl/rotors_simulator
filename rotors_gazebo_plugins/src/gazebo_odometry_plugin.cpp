@@ -19,20 +19,21 @@
  * limitations under the License.
  */
 
-
+// MODULE
 #include "rotors_gazebo_plugins/gazebo_odometry_plugin.h"
 
+// SYSTEM
 #include <chrono>
 #include <iostream>
 
+// 3RD PARTY
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+// USER
 #include <rotors_gazebo_plugins/common.h>
-
 #include "ConnectGazeboToRosTopic.pb.h"
 #include "ConnectRosToGazeboTopic.pb.h"
-
 #include "PoseStamped.pb.h"
 #include "PoseWithCovarianceStamped.pb.h"
 #include "Vector3dStamped.pb.h"
@@ -451,7 +452,6 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
       "~/" + namespace_ + "/" + pose_pub_topic_,
       1);
 
-  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + pose_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + pose_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::POSE);
@@ -465,7 +465,6 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
       "~/" + namespace_ + "/" + pose_with_covariance_stamped_pub_topic_,
       1);
 
-  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + pose_with_covariance_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + pose_with_covariance_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::POSE_WITH_COVARIANCE_STAMPED);
@@ -479,7 +478,6 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
       "~/" + namespace_ + "/" + position_stamped_pub_topic_,
       1);
 
-  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + position_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + position_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::VECTOR_3D_STAMPED);
@@ -493,7 +491,6 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
       "~/" + namespace_ + "/" + odometry_pub_topic_,
       1);
 
-  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + odometry_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + odometry_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ODOMETRY);
@@ -507,7 +504,6 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
       "~/" + namespace_ + "/" + transform_stamped_pub_topic_,
       1);
 
-  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + transform_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + transform_stamped_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::TRANSFORM_STAMPED);

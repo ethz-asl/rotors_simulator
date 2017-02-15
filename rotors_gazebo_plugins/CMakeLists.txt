@@ -15,7 +15,7 @@ project(rotors_gazebo_plugins)
 #  message( FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt." )
 #endif()
 
-message(STATUS "rotors_gazebo_plugins CMakeLists.txt called.")
+#message(STATUS "rotors_gazebo_plugins CMakeLists.txt called.")
 
 
 # =============================================================================================== #
