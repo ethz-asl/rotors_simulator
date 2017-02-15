@@ -19,7 +19,6 @@
  * limitations under the License.
  */
 
-
 #include "rotors_gazebo_plugins/gazebo_wind_plugin.h"
 
 #include "ConnectGazeboToRosTopic.pb.h"
@@ -31,8 +30,7 @@ GazeboWindPlugin::~GazeboWindPlugin() {
 }
 
 void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
-
-  if(kPrintOnPluginLoad) {
+  if (kPrintOnPluginLoad) {
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
 
@@ -63,19 +61,27 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   else
     gzerr << "[gazebo_wind_plugin] Please specify a xyzOffset.\n";
 
-  getSdfParam<std::string>(_sdf, "windPubTopic", wind_pub_topic_, "/" + namespace_ + wind_pub_topic_);
+  getSdfParam<std::string>(_sdf, "windPubTopic", wind_pub_topic_,
+                           "/" + namespace_ + wind_pub_topic_);
   getSdfParam<std::string>(_sdf, "frameId", frame_id_, frame_id_);
   getSdfParam<std::string>(_sdf, "linkName", link_name_, link_name_);
   // Get the wind params from SDF.
-  getSdfParam<double>(_sdf, "windForceMean", wind_force_mean_, wind_force_mean_);
-  getSdfParam<double>(_sdf, "windForceVariance", wind_force_variance_, wind_force_variance_);
-  getSdfParam<math::Vector3>(_sdf, "windDirection", wind_direction_, wind_direction_);
+  getSdfParam<double>(_sdf, "windForceMean", wind_force_mean_,
+                      wind_force_mean_);
+  getSdfParam<double>(_sdf, "windForceVariance", wind_force_variance_,
+                      wind_force_variance_);
+  getSdfParam<math::Vector3>(_sdf, "windDirection", wind_direction_,
+                             wind_direction_);
   // Get the wind gust params from SDF.
   getSdfParam<double>(_sdf, "windGustStart", wind_gust_start, wind_gust_start);
-  getSdfParam<double>(_sdf, "windGustDuration", wind_gust_duration, wind_gust_duration);
-  getSdfParam<double>(_sdf, "windGustForceMean", wind_gust_force_mean_, wind_gust_force_mean_);
-  getSdfParam<double>(_sdf, "windGustForceVariance", wind_gust_force_variance_, wind_gust_force_variance_);
-  getSdfParam<math::Vector3>(_sdf, "windGustDirection", wind_gust_direction_, wind_gust_direction_);
+  getSdfParam<double>(_sdf, "windGustDuration", wind_gust_duration,
+                      wind_gust_duration);
+  getSdfParam<double>(_sdf, "windGustForceMean", wind_gust_force_mean_,
+                      wind_gust_force_mean_);
+  getSdfParam<double>(_sdf, "windGustForceVariance", wind_gust_force_variance_,
+                      wind_gust_force_variance_);
+  getSdfParam<math::Vector3>(_sdf, "windGustDirection", wind_gust_direction_,
+                             wind_gust_direction_);
 
   wind_direction_.Normalize();
   wind_gust_direction_.Normalize();
@@ -84,23 +90,22 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   link_ = model_->GetLink(link_name_);
   if (link_ == NULL)
-    gzthrow("[gazebo_wind_plugin] Couldn't find specified link \"" << link_name_ << "\".");
-
+    gzthrow("[gazebo_wind_plugin] Couldn't find specified link \"" << link_name_
+                                                                   << "\".");
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  update_connection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboWindPlugin::OnUpdate, this, _1));
-
+  update_connection_ = event::Events::ConnectWorldUpdateBegin(
+      boost::bind(&GazeboWindPlugin::OnUpdate, this, _1));
 }
 
 // This gets called by the world update start event.
 void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
-
-  if(kPrintOnUpdates) {
+  if (kPrintOnUpdates) {
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
 
-  if(!pubs_and_subs_created_) {
+  if (!pubs_and_subs_created_) {
     CreatePubsAndSubs();
     pubs_and_subs_created_ = true;
   }
@@ -127,9 +132,12 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
   wrench_stamped_msg_.mutable_header()->mutable_stamp()->set_sec(now.sec);
   wrench_stamped_msg_.mutable_header()->mutable_stamp()->set_nsec(now.nsec);
 
-  wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_x(wind.x + wind_gust.x);
-  wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_y(wind.y + wind_gust.y);
-  wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_z(wind.z + wind_gust.z);
+  wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_x(wind.x +
+                                                               wind_gust.x);
+  wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_y(wind.y +
+                                                               wind_gust.y);
+  wrench_stamped_msg_.mutable_wrench()->mutable_force()->set_z(wind.z +
+                                                               wind_gust.z);
 
   // No torque due to wind, set x,y and z to 0.
   wrench_stamped_msg_.mutable_wrench()->mutable_torque()->set_x(0);
@@ -140,10 +148,10 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
 }
 
 void GazeboWindPlugin::CreatePubsAndSubs() {
-
   // Create temporary "ConnectGazeboToRosTopic" publisher and message
   gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
-      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>("~/" + kConnectGazeboToRosSubtopic, 1);
+      node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>(
+          "~/" + kConnectGazeboToRosSubtopic, 1);
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
@@ -153,14 +161,17 @@ void GazeboWindPlugin::CreatePubsAndSubs() {
   wind_pub_ = node_handle_->Advertise<gz_geometry_msgs::WrenchStamped>(
       "~/" + namespace_ + "/" + wind_pub_topic_, 1);
 
-  //connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + wind_pub_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + wind_pub_topic_);
-  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::WRENCH_STAMPED);
-  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
-
+  // connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
+                                                   wind_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" +
+                                                wind_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(
+      gz_std_msgs::ConnectGazeboToRosTopic::WRENCH_STAMPED);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg,
+                                           true);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboWindPlugin);
 
-} // namespace gazebo
+}  // namespace gazebo
