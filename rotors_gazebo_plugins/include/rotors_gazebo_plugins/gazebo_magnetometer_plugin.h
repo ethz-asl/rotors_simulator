@@ -39,7 +39,7 @@ static constexpr double kDefaultRefMagEast = 0.000000815;
 static constexpr double kDefaultRefMagDown = 0.000042795;
 
 class GazeboMagnetometerPlugin : public ModelPlugin {
-  
+
  public:
   typedef std::normal_distribution<> NormalDistribution;
   typedef std::uniform_real_distribution<> UniformDistribution;
