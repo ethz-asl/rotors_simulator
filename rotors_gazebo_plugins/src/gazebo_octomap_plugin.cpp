@@ -22,6 +22,7 @@
 
 #include <octomap_msgs/conversions.h>
 #include <gazebo/common/Time.hh>
+#include <gazebo/common/CommonTypes.hh>
 #include <gazebo/math/Vector3.hh>
 
 namespace gazebo {
@@ -83,7 +84,27 @@ bool OctomapFromGazeboWorld::ServiceCallback(
     gzlog << "Publishing Octomap." << std::endl;
     octomap_publisher_.publish(res.map);
   }
+
+  common::SphericalCoordinatesPtr sphericalCoordinates = world_->GetSphericalCoordinates();
+#if GAZEBO_MAJOR_VERSION >= 6
+  ignition::math::Vector3d origin_cartesian(0.0, 0.0, 0.0);
+  ignition::math::Vector3d origin_spherical = sphericalCoordinates->
+      SphericalFromLocal(origin_cartesian);
+
+  res.origin_latitude = origin_spherical.X();
+  res.origin_longitude = origin_spherical.Y();
+  res.origin_altitude = origin_spherical.Z();
   return true;
+#else
+  math::Vector3 origin_cartesian(0.0, 0.0, 0.0);
+  math::Vector3 origin_spherical = sphericalCoordinates->
+         SphericalFromLocal(origin_cartesian);
+
+  res.origin_latitude = origin_spherical.x;
+  res.origin_longitude = origin_spherical.y;
+  res.origin_altitude = origin_spherical.z;
+  return true;
+#endif
 }
 
 void OctomapFromGazeboWorld::FloodFill(
