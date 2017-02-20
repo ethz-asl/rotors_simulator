@@ -266,6 +266,11 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
                                  ros::Publisher ros_publisher);
   geometry_msgs::TwistStamped ros_twist_stamped_msg_;
 
+  // WIND SPEED
+  void GzWindSpeedMsgCallback(GzWindSpeedMsgPtr& gz_wind_speed_msg,
+                              ros::Publisher ros_publisher);
+  rotors_comm::WindSpeed ros_wind_speed_msg_;
+
   // WRENCH STAMPED
   void GzWrenchStampedMsgCallback(GzWrenchStampedMsgPtr& gz_wrench_stamped_msg,
                                   ros::Publisher ros_publisher);
