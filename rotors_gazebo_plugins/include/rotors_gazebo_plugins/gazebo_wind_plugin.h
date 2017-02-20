@@ -34,7 +34,7 @@
 
 #include "rotors_gazebo_plugins/common.h"
 
-#include "TwistStamped.pb.h"          // Wind speed message
+#include "WindSpeed.pb.h"             // Wind speed message
 #include "WrenchStamped.pb.h"         // Wind message
 
 namespace gazebo {
@@ -73,6 +73,8 @@ class GazeboWindPlugin : public ModelPlugin {
         wind_force_variance_(kDefaultWindForceVariance),
         wind_gust_force_mean_(kDefaultWindGustForceMean),
         wind_gust_force_variance_(kDefaultWindGustForceVariance),
+        wind_speed_mean_(kDefaultWindSpeedMean),
+        wind_speed_variance_(kDefaultWindSpeedVariance),
         wind_direction_(kDefaultWindDirection),
         wind_gust_direction_(kDefaultWindGustDirection),
         frame_id_(kDefaultFrameId),
@@ -146,7 +148,7 @@ class GazeboWindPlugin : public ModelPlugin {
   /// \brief    Gazebo message for sending wind speed data.
   /// \details  This is defined at the class scope so that it is re-created
   ///           everytime a wind speed message needs to be sent, increasing performance.
-  gz_geometry_msgs::TwistStamped twist_stamped_msg_;
+  gz_mav_msgs::WindSpeed wind_speed_msg_;
 };
 }
 
