@@ -156,7 +156,7 @@ void GazeboWindPlugin::CreatePubsAndSubs() {
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
   // ============================================ //
-  // =========== NAV SAT FIX MSG SETUP ========== //
+  // ========= WRENCH STAMPED MSG SETUP ========= //
   // ============================================ //
   wind_pub_ = node_handle_->Advertise<gz_geometry_msgs::WrenchStamped>(
       "~/" + namespace_ + "/" + wind_pub_topic_, 1);
