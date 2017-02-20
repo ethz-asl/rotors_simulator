@@ -34,12 +34,14 @@
 
 #include "rotors_gazebo_plugins/common.h"
 
+#include "TwistStamped.pb.h"          // Wind speed message
 #include "WrenchStamped.pb.h"         // Wind message
 
 namespace gazebo {
 // Default values
 static const std::string kDefaultFrameId = "world";
 static const std::string kDefaultLinkName = "base_link";
+static const std::string kDefaultWindSpeedPubTopic = "wind_speed";
 
 static constexpr double kDefaultWindForceMean = 0.0;
 static constexpr double kDefaultWindForceVariance = 0.0;
@@ -48,6 +50,9 @@ static constexpr double kDefaultWindGustForceVariance = 0.0;
 
 static constexpr double kDefaultWindGustStart = 10.0;
 static constexpr double kDefaultWindGustDuration = 0.0;
+
+static constexpr double kDefaultWindSpeedMean = 0.0;
+static constexpr double kDefaultWindSpeedVariance = 0.0;
 
 static const math::Vector3 kDefaultWindDirection = math::Vector3(1, 0, 0);
 static const math::Vector3 kDefaultWindGustDirection = math::Vector3(0, 1, 0);
@@ -63,6 +68,7 @@ class GazeboWindPlugin : public ModelPlugin {
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
         wind_pub_topic_(mav_msgs::default_topics::WIND),
+        wind_speed_pub_topic_(kDefaultWindSpeedPubTopic),
         wind_force_mean_(kDefaultWindForceMean),
         wind_force_variance_(kDefaultWindForceVariance),
         wind_gust_force_mean_(kDefaultWindGustForceMean),
@@ -111,11 +117,14 @@ class GazeboWindPlugin : public ModelPlugin {
   std::string frame_id_;
   std::string link_name_;
   std::string wind_pub_topic_;
+  std::string wind_speed_pub_topic_;
 
   double wind_force_mean_;
   double wind_force_variance_;
   double wind_gust_force_mean_;
   double wind_gust_force_variance_;
+  double wind_speed_mean_;
+  double wind_speed_variance_;
 
   math::Vector3 xyz_offset_;
   math::Vector3 wind_direction_;
@@ -125,14 +134,19 @@ class GazeboWindPlugin : public ModelPlugin {
   common::Time wind_gust_start_;
 
   gazebo::transport::PublisherPtr wind_pub_;
+  gazebo::transport::PublisherPtr wind_speed_pub_;
 
   gazebo::transport::NodePtr node_handle_;
 
   /// \brief    Gazebo message for sending wind data.
-  /// \details  This is defined at the class scope so that it so re-created
+  /// \details  This is defined at the class scope so that it is re-created
   ///           everytime a wind message needs to be sent, increasing performance.
   gz_geometry_msgs::WrenchStamped wrench_stamped_msg_;
 
+  /// \brief    Gazebo message for sending wind speed data.
+  /// \details  This is defined at the class scope so that it is re-created
+  ///           everytime a wind speed message needs to be sent, increasing performance.
+  gz_geometry_msgs::TwistStamped twist_stamped_msg_;
 };
 }
 

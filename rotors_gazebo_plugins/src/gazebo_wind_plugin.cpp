@@ -63,6 +63,8 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   getSdfParam<std::string>(_sdf, "windPubTopic", wind_pub_topic_,
                            "/" + namespace_ + wind_pub_topic_);
+  getSdfParam<std::string>(_sdf, "windSpeedPubTopic", wind_speed_pub_topic_,
+                           "/" + namespace_ + wind_speed_pub_topic_);
   getSdfParam<std::string>(_sdf, "frameId", frame_id_, frame_id_);
   getSdfParam<std::string>(_sdf, "linkName", link_name_, link_name_);
   // Get the wind params from SDF.
@@ -82,6 +84,9 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
                       wind_gust_force_variance_);
   getSdfParam<math::Vector3>(_sdf, "windGustDirection", wind_gust_direction_,
                              wind_gust_direction_);
+  // Get the wind speed params from SDF.
+  getSdfParam<double>(_sdf, "windSpeedMean", wind_speed_mean_, wind_speed_mean_);
+  getSdfParam<double>(_sdf, "windSpeedVariance", wind_speed_variance_, wind_speed_variance_);
 
   wind_direction_.Normalize();
   wind_gust_direction_.Normalize();
@@ -145,6 +150,25 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
   wrench_stamped_msg_.mutable_wrench()->mutable_torque()->set_z(0);
 
   wind_pub_->Publish(wrench_stamped_msg_);
+
+  // Calculate the wind speed
+  double wind_speed = wind_speed_mean_;
+  math::Vector3 wind_velocity = wind_speed * wind_direction_;
+
+  twist_stamped_msg_.mutable_header()->set_frame_id(frame_id_);
+  twist_stamped_msg_.mutable_header()->mutable_stamp()->set_sec(now.sec);
+  twist_stamped_msg_.mutable_header()->mutable_stamp()->set_nsec(now.nsec);
+
+  twist_stamped_msg_.mutable_twist()->mutable_linear()->set_x(wind_velocity.x);
+  twist_stamped_msg_.mutable_twist()->mutable_linear()->set_y(wind_velocity.y);
+  twist_stamped_msg_.mutable_twist()->mutable_linear()->set_z(wind_velocity.z);
+
+  // No angular velocity, set x,y and z to 0.
+  twist_stamped_msg_.mutable_twist()->mutable_angular()->set_x(0);
+  twist_stamped_msg_.mutable_twist()->mutable_angular()->set_y(0);
+  twist_stamped_msg_.mutable_twist()->mutable_angular()->set_z(0);
+
+  wind_speed_pub_->Publish(twist_stamped_msg_);
 }
 
 void GazeboWindPlugin::CreatePubsAndSubs() {
@@ -168,6 +192,21 @@ void GazeboWindPlugin::CreatePubsAndSubs() {
                                                 wind_pub_topic_);
   connect_gazebo_to_ros_topic_msg.set_msgtype(
       gz_std_msgs::ConnectGazeboToRosTopic::WRENCH_STAMPED);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg,
+                                           true);
+
+  // ============================================ //
+  // ========= TWIST STAMPED MSG SETUP ========== //
+  // ============================================ //
+  wind_speed_pub_ = node_handle_->Advertise<gz_geometry_msgs::TwistStamped>(
+      "~/" + namespace_ + "/" + wind_speed_pub_topic_, 1);
+
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
+                                                   wind_speed_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" +
+                                                wind_speed_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(
+      gz_std_msgs::ConnectGazeboToRosTopic::TWIST_STAMPED);
   connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg,
                                            true);
 }
