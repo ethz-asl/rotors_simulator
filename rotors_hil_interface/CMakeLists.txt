@@ -10,7 +10,7 @@ if (Mavlink_DIR)
 else ()
   message(STATUS "Mavlink not found. Skipping HIL_INTERFACE package.")
 
-  # We still have to call catkin package for this to be a valid backage,
+  # We still have to call catkin package for this to be a valid package,
   # even if empty.
   find_package(catkin REQUIRED)
   catkin_package()
