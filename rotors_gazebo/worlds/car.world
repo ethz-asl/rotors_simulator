@@ -10,7 +10,7 @@
     <include>
       <uri>model://opel</uri>
     </include>
-    <light type="point" name="point_light">
+    <light type="point" name="point_light_1">
       <pose>0 0 2 0 0 0</pose>
       <diffuse>1 1 1 1</diffuse>
       <specular>0.1 0.1 0.1 1</specular>
@@ -22,7 +22,7 @@
       </attenuation>
       <cast_shadows>false</cast_shadows>
     </light>    
-    <light type="point" name="point_light">
+    <light type="point" name="point_light_2">
       <pose>4 -2 2 0 0 0</pose>
       <diffuse>1 1 1 1</diffuse>
       <specular>0.1 0.1 0.1 1</specular>
@@ -34,7 +34,7 @@
       </attenuation>
       <cast_shadows>false</cast_shadows>
     </light>
-    <light type="point" name="point_light">
+    <light type="point" name="point_light_3">
       <pose>4 2 2 0 0 0</pose>
       <diffuse>1 1 1 1</diffuse>
       <specular>0.1 0.1 0.1 1</specular>
