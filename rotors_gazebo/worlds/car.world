@@ -8,7 +8,7 @@
       <uri>model://sun</uri>
     </include>
     <include>
-      <uri>model://car</uri>
+      <uri>model://opel</uri>
     </include>
     <light type="point" name="point_light">
       <pose>0 0 2 0 0 0</pose>
@@ -22,6 +22,30 @@
       </attenuation>
       <cast_shadows>false</cast_shadows>
     </light>    
+    <light type="point" name="point_light">
+      <pose>4 -2 2 0 0 0</pose>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>20</range>
+        <linear>0.2</linear>
+        <constant>0.8</constant>
+        <quadratic>0.01</quadratic>
+      </attenuation>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light type="point" name="point_light">
+      <pose>4 2 2 0 0 0</pose>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>20</range>
+        <linear>0.2</linear>
+        <constant>0.8</constant>
+        <quadratic>0.01</quadratic>
+      </attenuation>
+      <cast_shadows>false</cast_shadows>
+    </light>
    <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
       <latitude_deg>47.3667</latitude_deg>
