@@ -84,6 +84,8 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<std::string>(_sdf, "commandRateThrustTopic",
                            control_rate_thrust_topic_,
                            control_rate_thrust_topic_);
+  getSdfParam<std::string>(_sdf, "windSpeedTopic",
+                           wind_speed_topic_, wind_speed_topic_);
   getSdfParam<std::string>(_sdf, "motorTopic", motor_topic_, motor_topic_);
   getSdfParam<std::string>(_sdf, "poseTopic", ground_truth_pose_topic_,
                            ground_truth_pose_topic_);
@@ -213,6 +215,11 @@ void GazeboBagPlugin::StartRecording() {
       node_handle_->subscribe(control_rate_thrust_topic_, 10,
                               &GazeboBagPlugin::RateThrustCallback, this);
 
+  // Subscriber to Wind Speed Message.
+  wind_speed_sub_ =
+      node_handle_->subscribe(wind_speed_topic_, 10,
+                              &GazeboBagPlugin::WindSpeedCallback, this);
+
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   update_connection_ = event::Events::ConnectWorldUpdateBegin(
@@ -234,6 +241,7 @@ void GazeboBagPlugin::StopRecording() {
   control_attitude_thrust_sub_.shutdown();
   control_motor_speed_sub_.shutdown();
   control_rate_thrust_sub_.shutdown();
+  wind_speed_sub_.shutdown();
 
   // Disconnect the update event.
   event::Events::DisconnectWorldUpdateBegin(update_connection_);
@@ -294,6 +302,13 @@ void GazeboBagPlugin::RateThrustCallback(
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(namespace_ + "/" + control_rate_thrust_topic_, ros_now, control_msg);
+}
+
+void GazeboBagPlugin::WindSpeedCallback(
+    const rotors_comm::WindSpeedConstPtr& wind_speed_msg) {
+  common::Time now = world_->GetSimTime();
+  ros::Time ros_now = ros::Time(now.sec, now.nsec);
+  writeBag(namespace_ + "/" + wind_speed_topic_, ros_now, wind_speed_msg);
 }
 
 void GazeboBagPlugin::LogMotorVelocities(const common::Time now) {
