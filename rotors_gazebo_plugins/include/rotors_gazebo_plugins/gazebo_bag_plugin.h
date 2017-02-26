@@ -76,7 +76,7 @@ class GazeboBagPlugin : public ModelPlugin {
         control_rate_thrust_topic_(mav_msgs::default_topics::COMMAND_RATE_THRUST),
         motor_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
         wrench_topic_(mav_msgs::default_topics::WRENCH),
-        wind_topic_(mav_msgs::default_topics::WIND),
+        external_force_topic_(mav_msgs::default_topics::EXTERNAL_FORCE),
         waypoint_topic_(mav_msgs::default_topics::COMMAND_TRAJECTORY),
         command_pose_topic_(mav_msgs::default_topics::COMMAND_POSE),
         //---------------
@@ -112,9 +112,9 @@ class GazeboBagPlugin : public ModelPlugin {
   /// \param[in] imu_msg A IMU message from sensor_msgs.
   void ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg);
 
-  /// \brief Called when an Wind message is received.
-  /// \param[in] wind_msg A WrenchStamped message from geometry_msgs.
-  void WindCallback(const geometry_msgs::WrenchStampedConstPtr& wind_msg);
+  /// \brief Called when an WrenchStamped message is received.
+  /// \param[in] force_msg A WrenchStamped message from geometry_msgs.
+  void ExternalForceCallback(const geometry_msgs::WrenchStampedConstPtr& force_msg);
 
   /// \brief Called when a MultiDOFJointTrajectoryPoint message is received.
   /// \param[in] trajectory_msg A MultiDOFJointTrajectoryPoint message from trajectory_msgs.
@@ -174,7 +174,7 @@ class GazeboBagPlugin : public ModelPlugin {
   std::string ground_truth_pose_topic_;
   std::string ground_truth_twist_topic_;
   std::string imu_topic_;
-  std::string wind_topic_;
+  std::string external_force_topic_;
   std::string waypoint_topic_;
   std::string command_pose_topic_;
   std::string control_attitude_thrust_topic_;
@@ -202,7 +202,7 @@ class GazeboBagPlugin : public ModelPlugin {
 
   // Ros subscribers
   ros::Subscriber imu_sub_;
-  ros::Subscriber wind_sub_;
+  ros::Subscriber external_force_sub_;
   ros::Subscriber waypoint_sub_;
   ros::Subscriber control_attitude_thrust_sub_;
   ros::Subscriber control_motor_speed_sub_;

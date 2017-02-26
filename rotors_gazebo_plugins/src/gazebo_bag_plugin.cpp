@@ -89,8 +89,10 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
                            ground_truth_pose_topic_);
   getSdfParam<std::string>(_sdf, "twistTopic", ground_truth_twist_topic_,
                            ground_truth_twist_topic_);
-  getSdfParam<std::string>(_sdf, "wrenchesTopic", wrench_topic_, wrench_topic_);
-  getSdfParam<std::string>(_sdf, "windTopic", wind_topic_, wind_topic_);
+  getSdfParam<std::string>(_sdf, "wrenchesTopic", wrench_topic_,
+                           wrench_topic_);
+  getSdfParam<std::string>(_sdf, "externalForceTopic", external_force_topic_,
+                           external_force_topic_);
   getSdfParam<std::string>(_sdf, "waypointTopic", waypoint_topic_,
                            waypoint_topic_);
   getSdfParam<std::string>(_sdf, "commandPoseTopic", command_pose_topic_,
@@ -184,9 +186,9 @@ void GazeboBagPlugin::StartRecording() {
   imu_sub_ = node_handle_->subscribe(imu_topic_, 10,
                                      &GazeboBagPlugin::ImuCallback, this);
 
-  // Subscriber to Wind WrenchStamped Message.
-  wind_sub_ = node_handle_->subscribe(wind_topic_, 10,
-                                      &GazeboBagPlugin::WindCallback, this);
+  // Subscriber to External Force WrenchStamped Message.
+  external_force_sub_ = node_handle_->subscribe(external_force_topic_, 10,
+      &GazeboBagPlugin::ExternalForceCallback, this);
 
   // Subscriber to Waypoint MultiDOFJointTrajectory Message.
   waypoint_sub_ = node_handle_->subscribe(
@@ -226,7 +228,7 @@ void GazeboBagPlugin::StartRecording() {
 void GazeboBagPlugin::StopRecording() {
   // Shutdown all the subscribers.
   imu_sub_.shutdown();
-  wind_sub_.shutdown();
+  external_force_sub_.shutdown();
   waypoint_sub_.shutdown();
   command_pose_sub_.shutdown();
   control_attitude_thrust_sub_.shutdown();
@@ -251,11 +253,11 @@ void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg) {
   writeBag(namespace_ + "/" + imu_topic_, ros_now, imu_msg);
 }
 
-void GazeboBagPlugin::WindCallback(
-    const geometry_msgs::WrenchStampedConstPtr& wind_msg) {
+void GazeboBagPlugin::ExternalForceCallback(
+    const geometry_msgs::WrenchStampedConstPtr& force_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
-  writeBag(namespace_ + "/" + wind_topic_, ros_now, wind_msg);
+  writeBag(namespace_ + "/" + external_force_topic_, ros_now, force_msg);
 }
 
 void GazeboBagPlugin::WaypointCallback(

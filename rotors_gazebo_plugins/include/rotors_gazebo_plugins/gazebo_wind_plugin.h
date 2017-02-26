@@ -35,7 +35,7 @@
 #include "rotors_gazebo_plugins/common.h"
 
 #include "WindSpeed.pb.h"             // Wind speed message
-#include "WrenchStamped.pb.h"         // Wind message
+#include "WrenchStamped.pb.h"         // Wind force message
 
 namespace gazebo {
 // Default values
@@ -67,8 +67,8 @@ class GazeboWindPlugin : public ModelPlugin {
   GazeboWindPlugin()
       : ModelPlugin(),
         namespace_(kDefaultNamespace),
-        wind_pub_topic_(mav_msgs::default_topics::WIND),
-        wind_speed_pub_topic_(kDefaultWindSpeedPubTopic),
+        wind_force_pub_topic_(mav_msgs::default_topics::EXTERNAL_FORCE),
+        wind_speed_pub_topic_(mav_msgs::default_topics::WIND_SPEED),
         wind_force_mean_(kDefaultWindForceMean),
         wind_force_variance_(kDefaultWindForceVariance),
         wind_gust_force_mean_(kDefaultWindGustForceMean),
@@ -118,7 +118,7 @@ class GazeboWindPlugin : public ModelPlugin {
 
   std::string frame_id_;
   std::string link_name_;
-  std::string wind_pub_topic_;
+  std::string wind_force_pub_topic_;
   std::string wind_speed_pub_topic_;
 
   double wind_force_mean_;
@@ -135,7 +135,7 @@ class GazeboWindPlugin : public ModelPlugin {
   common::Time wind_gust_end_;
   common::Time wind_gust_start_;
 
-  gazebo::transport::PublisherPtr wind_pub_;
+  gazebo::transport::PublisherPtr wind_force_pub_;
   gazebo::transport::PublisherPtr wind_speed_pub_;
 
   gazebo::transport::NodePtr node_handle_;
