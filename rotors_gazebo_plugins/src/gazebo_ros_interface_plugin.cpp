@@ -251,6 +251,12 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
           &GazeboRosInterfacePlugin::GzVector3dStampedMsgCallback, this,
           gazeboNamespace, gazeboTopicName, rosTopicName, gz_node_handle_);
       break;
+    case gz_std_msgs::ConnectGazeboToRosTopic::WIND_SPEED:
+      ConnectHelper<gz_mav_msgs::WindSpeed,
+                    rotors_comm::WindSpeed>(
+          &GazeboRosInterfacePlugin::GzWindSpeedMsgCallback, this,
+          gazeboNamespace, gazeboTopicName, rosTopicName, gz_node_handle_);
+      break;
     case gz_std_msgs::ConnectGazeboToRosTopic::WRENCH_STAMPED:
       ConnectHelper<gz_geometry_msgs::WrenchStamped,
                     geometry_msgs::WrenchStamped>(
@@ -801,6 +807,27 @@ void GazeboRosInterfacePlugin::GzVector3dStampedMsgCallback(
   ros_position_stamped_msg_.point.z = gz_vector_3d_stamped_msg->position().z();
 
   ros_publisher.publish(ros_position_stamped_msg_);
+}
+
+void GazeboRosInterfacePlugin::GzWindSpeedMsgCallback(
+    GzWindSpeedMsgPtr& gz_wind_speed_msg,
+    ros::Publisher ros_publisher) {
+  // ============================================ //
+  // =================== HEADER ================= //
+  // ============================================ //
+  ConvertHeaderGzToRos(gz_wind_speed_msg->header(),
+                       &ros_wind_speed_msg_.header);
+
+  // ============================================ //
+  // ================== VELOCITY ================ //
+  // ============================================ //
+  ros_wind_speed_msg_.velocity.x =
+      gz_wind_speed_msg->velocity().x();
+  ros_wind_speed_msg_.velocity.y =
+      gz_wind_speed_msg->velocity().y();
+  ros_wind_speed_msg_.velocity.z =
+      gz_wind_speed_msg->velocity().z();
+  ros_publisher.publish(ros_wind_speed_msg_);
 }
 
 void GazeboRosInterfacePlugin::GzWrenchStampedMsgCallback(

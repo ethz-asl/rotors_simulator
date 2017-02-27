@@ -72,7 +72,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
       : ModelPlugin(),
         MotorModel(),
         command_sub_topic_(mav_msgs::default_topics::COMMAND_ACTUATORS),
-        wind_speed_sub_topic_(mav_msgs::default_topics::WIND),
+        wind_speed_sub_topic_(mav_msgs::default_topics::WIND_SPEED),
         motor_speed_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
         motor_number_(0),
         turning_direction_(turning_direction::CW),
