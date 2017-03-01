@@ -233,6 +233,14 @@ else()
   message(STATUS "Gazebo version is less than 5, not building gazebo_geotagged_images_plugin.cpp.")
 endif()
 
+#===================================== FW DYNAMICS PLUGIN =======================================//
+add_library(rotors_gazebo_fw_dynamics_plugin SHARED src/gazebo_fw_dynamics_plugin.cpp)
+target_link_libraries(rotors_gazebo_fw_dynamics_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_fw_dynamics_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_fw_dynamics_plugin)
+
 #========================================= GPS PLUGIN ===========================================//
 add_library(rotors_gazebo_gps_plugin SHARED src/gazebo_gps_plugin.cpp)
 target_link_libraries(rotors_gazebo_gps_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
