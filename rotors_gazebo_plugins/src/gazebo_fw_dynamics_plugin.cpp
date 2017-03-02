@@ -85,10 +85,7 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
     std::string aero_params_yaml =
         _sdf->GetElement("aeroParamsYAML")->Get<std::string>();
 
-    if (!fw_params_.LoadAeroParamsYAML(aero_params_yaml)) {
-      gzthrow("[gazebo_fw_dynamics_plugin] Couldn't load parameters from \""
-              << aero_params_yaml << "\".");
-    }
+    fw_params_.aero_params_.LoadAeroParamsYAML(aero_params_yaml);
   } else {
     gzwarn << "[gazebo_fw_dynamics_plugin] No aerodynamic paramaters YAML file"
         << " specified, using default Techpod parameters.\n";

@@ -1,67 +1,27 @@
 # Fixed wing aerodynamic parameters
-cD_alpha_0: 0.1360
-cD_alpha_1: -0.6737
-cD_alpha_2: 5.4546
+c_D_alpha: [0.136, -0.6737, 5.4546]
+c_D_beta: [0.0195, 0.0, -0.3842]
+c_D_delta_ail: [0.0195, 1.4205e-4, 7.5037e-6]
+c_D_delta_flp: [0.0195, 2.7395e-4, 1.23e-5]
 
-cD_beta_0: 0.0195
-cD_beta_1: 0.0
-cD_beta_2: -0.3842
+c_Y_beta: [0.0, -0.3073]
 
-cD_delta_ail_0: 0.0195
-cD_delta_ail_1: 1.4205e-4
-cD_delta_ail_2: 7.5037e-6
+c_L_alpha: [0.2127, 10.806, -46.8324, 60.6017]
+c_L_delta_ail: [0.3304, 0.0048]
+c_L_delta_flp: [0.3304, 0.0073]
 
-cD_delta_flp_0: 0.0195
-cD_delta_flp_1: 2.7395e-4
-cD_delta_flp_2: 1.23e-5
+c_Lm_beta: [0.0, -0.0154]
+c_Lm_p: [0.0, -0.1647]
+c_Lm_r: [0.0, 0.0117]
+c_Lm_delta_ail: [0.0, 0.0117]
+c_Lm_delta_flp: [0.0, 0.001]
 
-cY_beta_0: 0.0
-cY_beta_1: -0.3073
+c_Mm_alpha: [0.0435, -2.969]
+c_Mm_q: [-0.1173, -106.1541]
+c_Mm_delta_elv: [-0.1173, -6.1308]
 
-cL_alpha_0: 0.2127
-cL_alpha_1: 10.8060
-cL_alpha_2: -46.8324
-cL_alpha_3: 60.6017
+c_Nm_beta: [0.0, 0.043]
+c_Nm_r: [0.0, -0.0827]
+c_Nm_delta_rud: [0.0, 0.06]
 
-cL_delta_ail_0: 0.3304
-cL_delta_ail_1: 0.0048
-
-cL_delta_flp_0: 0.3304
-cL_delta_flp_1: 0.0073
-
-cLm_beta_0: 0.0
-cLm_beta_1: -0.0154
-
-cLm_p_0: 0.0
-cLm_p_1: -0.1647
-
-cLm_r_0: 0.0
-cLm_r_1: 0.0117
-
-cLm_delta_ail_0: 0.0
-cLm_delta_ail_1: 0.0117
-
-cLm_delta_flp_0: 0.0
-cLm_delta_flp_1: 0.001
-
-cMm_alpha_0: 0.0435
-cMm_alpha_1: -2.9690
-
-cMm_q_0: -0.1173
-cMm_q_1: -106.1541
-
-cMm_delta_elv_0: -0.1173
-cMm_delta_elv_1: -6.1308
-
-cNm_beta_0: 0.0
-cNm_beta_1: 0.0430
-
-cNm_r_0: 0.0
-cNm_r_1: -0.0827
-
-cNm_delta_rud_0: 0.0
-cNm_delta_rud_1: 0.06
-
-cT_0: 0.0
-cT_1: 14.7217
-cT_2: 0.0
+c_T: [0.0, 14.7217, 0.0]
