@@ -17,8 +17,8 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_FW_DYNAMICS_PLUGIN_H
 #define ROTORS_GAZEBO_PLUGINS_FW_DYNAMICS_PLUGIN_H
 
-#include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <mav_msgs/default_topics.h>
@@ -69,16 +69,18 @@ class GazeboFwDynamicsPlugin : public ModelPlugin {
 
   gazebo::transport::SubscriberPtr wind_speed_sub_;
 
-  // Pointer to the world
+  /// \brief    Pointer to the world
   physics::WorldPtr world_;
-  // Pointer to the model
+  /// \brief    Pointer to the model
   physics::ModelPtr model_;
-  // Pointer to the link
+  /// \brief    Pointer to the link
   physics::LinkPtr link_;
-  // Pointer to the update event connection
+  /// \brief    Pointer to the update event connection
   event::ConnectionPtr updateConnection_;
 
   math::Vector3 wind_speed_W_;
+
+  FWParameters fw_params_;
 
   void WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg);
 };
