@@ -36,51 +36,51 @@ static constexpr double kDefaultInertiaYz = 0.0;
 static constexpr double kDefaultInertiaZz = 0.5243;
 
 // Default aerodynamic parameter values (Techpod model)
-static const Eigen::Vector3d kDefaultCDAlpha =
+static const Eigen::Vector3d kDefaultCDragAlpha =
     Eigen::Vector3d(0.1360, -0.6737, 5.4546);
-static const Eigen::Vector3d kDefaultCDBeta =
+static const Eigen::Vector3d kDefaultCDragBeta =
     Eigen::Vector3d(0.0195, 0.0, -0.3842);
-static const Eigen::Vector3d kDefaultCDDeltaAil =
+static const Eigen::Vector3d kDefaultCDragDeltaAil =
     Eigen::Vector3d(0.0195, 1.4205e-4, 7.5037e-6);
-static const Eigen::Vector3d kDefaultCDDeltaFlp =
+static const Eigen::Vector3d kDefaultCDragDeltaFlp =
     Eigen::Vector3d(0.0195, 2.7395e-4, 1.23e-5);
 
-static const Eigen::Vector2d kDefaultCYBeta =
+static const Eigen::Vector2d kDefaultCSideForceBeta =
     Eigen::Vector2d(0.0, -0.3073);
 
-static const Eigen::Vector4d kDefaultCLAlpha =
+static const Eigen::Vector4d kDefaultCLiftAlpha =
     Eigen::Vector4d(0.2127, 10.8060, -46.8324, 60.6017);
-static const Eigen::Vector2d kDefaultCLDeltaAil =
+static const Eigen::Vector2d kDefaultCLiftDeltaAil =
     Eigen::Vector2d(0.3304, 0.0048);
-static const Eigen::Vector2d kDefaultCLDeltaFlp =
+static const Eigen::Vector2d kDefaultCLiftDeltaFlp =
     Eigen::Vector2d(0.3304, 0.0073);
 
-static const Eigen::Vector2d kDefaultCLmBeta =
+static const Eigen::Vector2d kDefaultCRollMomentBeta =
     Eigen::Vector2d(0.0, -0.0154);
-static const Eigen::Vector2d kDefaultCLmP =
+static const Eigen::Vector2d kDefaultCRollMomentP =
     Eigen::Vector2d(0.0, -0.1647);
-static const Eigen::Vector2d kDefaultCLmR =
+static const Eigen::Vector2d kDefaultCRollMomentR =
     Eigen::Vector2d(0.0, 0.0117);
-static const Eigen::Vector2d kDefaultCLmDeltaAil =
+static const Eigen::Vector2d kDefaultCRollMomentDeltaAil =
     Eigen::Vector2d(0.0, 0.0570);
-static const Eigen::Vector2d kDefaultCLmDeltaFlp =
+static const Eigen::Vector2d kDefaultCRollMomentDeltaFlp =
     Eigen::Vector2d(0.0, 0.001);
 
-static const Eigen::Vector2d kDefaultCMmAlpha =
+static const Eigen::Vector2d kDefaultCPitchMomentAlpha =
     Eigen::Vector2d(0.0435, -2.9690);
-static const Eigen::Vector2d kDefaultCMmQ =
+static const Eigen::Vector2d kDefaultCPitchMomentQ =
     Eigen::Vector2d(-0.1173, -106.1541);
-static const Eigen::Vector2d kDefaultCMmDeltaElv =
+static const Eigen::Vector2d kDefaultCPitchMomentDeltaElv =
     Eigen::Vector2d(-0.1173, -6.1308);
 
-static const Eigen::Vector2d kDefaultCNmBeta =
+static const Eigen::Vector2d kDefaultCYawMomentBeta =
     Eigen::Vector2d(0.0, 0.0430);
-static const Eigen::Vector2d kDefaultCNmR =
+static const Eigen::Vector2d kDefaultCYawMomentR =
     Eigen::Vector2d(0.0, -0.0827);
-static const Eigen::Vector2d kDefaultCNmDeltaRud =
+static const Eigen::Vector2d kDefaultCYawMomentDeltaRud =
     Eigen::Vector2d(0.0, 0.06);
 
-static const Eigen::Vector3d kDefaultCT =
+static const Eigen::Vector3d kDefaultCThrust =
     Eigen::Vector3d(0.0, 14.7217, 0.0);
 
 // Default values for fixed-wing controls (Techpod model)
@@ -127,83 +127,83 @@ struct ControlSurface {
 
 struct FWAerodynamicParameters {
   FWAerodynamicParameters()
-      : c_D_alpha(kDefaultCDAlpha),
-        c_D_beta(kDefaultCDBeta),
-        c_D_delta_ail(kDefaultCDDeltaAil),
-        c_D_delta_flp(kDefaultCDDeltaFlp),
-        c_Y_beta(kDefaultCYBeta),
-        c_L_alpha(kDefaultCLAlpha),
-        c_L_delta_ail(kDefaultCLDeltaAil),
-        c_L_delta_flp(kDefaultCLDeltaFlp),
-        c_Lm_beta(kDefaultCLmBeta),
-        c_Lm_p(kDefaultCLmP),
-        c_Lm_r(kDefaultCLmR),
-        c_Lm_delta_ail(kDefaultCLmDeltaAil),
-        c_Lm_delta_flp(kDefaultCLmDeltaFlp),
-        c_Mm_alpha(kDefaultCMmAlpha),
-        c_Mm_q(kDefaultCMmQ),
-        c_Mm_delta_elv(kDefaultCMmDeltaElv),
-        c_Nm_beta(kDefaultCNmBeta),
-        c_Nm_r(kDefaultCNmR),
-        c_Nm_delta_rud(kDefaultCNmDeltaRud),
-        c_T(kDefaultCT) {}
+      : c_drag_alpha(kDefaultCDragAlpha),
+        c_drag_beta(kDefaultCDragBeta),
+        c_drag_delta_ail(kDefaultCDragDeltaAil),
+        c_drag_delta_flp(kDefaultCDragDeltaFlp),
+        c_side_force_beta(kDefaultCSideForceBeta),
+        c_lift_alpha(kDefaultCLiftAlpha),
+        c_lift_delta_ail(kDefaultCLiftDeltaAil),
+        c_lift_delta_flp(kDefaultCLiftDeltaFlp),
+        c_roll_moment_beta(kDefaultCRollMomentBeta),
+        c_roll_moment_p(kDefaultCRollMomentP),
+        c_roll_moment_r(kDefaultCRollMomentR),
+        c_roll_moment_delta_ail(kDefaultCRollMomentDeltaAil),
+        c_roll_moment_delta_flp(kDefaultCRollMomentDeltaFlp),
+        c_pitch_moment_alpha(kDefaultCPitchMomentAlpha),
+        c_pitch_moment_q(kDefaultCPitchMomentQ),
+        c_pitch_moment_delta_elv(kDefaultCPitchMomentDeltaElv),
+        c_yaw_moment_beta(kDefaultCYawMomentBeta),
+        c_yaw_moment_r(kDefaultCYawMomentR),
+        c_yaw_moment_delta_rud(kDefaultCYawMomentDeltaRud),
+        c_thrust(kDefaultCThrust) {}
 
-  Eigen::Vector3d c_D_alpha;
-  Eigen::Vector3d c_D_beta;
-  Eigen::Vector3d c_D_delta_ail;
-  Eigen::Vector3d c_D_delta_flp;
+  Eigen::Vector3d c_drag_alpha;
+  Eigen::Vector3d c_drag_beta;
+  Eigen::Vector3d c_drag_delta_ail;
+  Eigen::Vector3d c_drag_delta_flp;
 
-  Eigen::Vector2d c_Y_beta;
+  Eigen::Vector2d c_side_force_beta;
 
-  Eigen::Vector4d c_L_alpha;
-  Eigen::Vector2d c_L_delta_ail;
-  Eigen::Vector2d c_L_delta_flp;
+  Eigen::Vector4d c_lift_alpha;
+  Eigen::Vector2d c_lift_delta_ail;
+  Eigen::Vector2d c_lift_delta_flp;
 
-  Eigen::Vector2d c_Lm_beta;
-  Eigen::Vector2d c_Lm_p;
-  Eigen::Vector2d c_Lm_r;
-  Eigen::Vector2d c_Lm_delta_ail;
-  Eigen::Vector2d c_Lm_delta_flp;
+  Eigen::Vector2d c_roll_moment_beta;
+  Eigen::Vector2d c_roll_moment_p;
+  Eigen::Vector2d c_roll_moment_r;
+  Eigen::Vector2d c_roll_moment_delta_ail;
+  Eigen::Vector2d c_roll_moment_delta_flp;
 
-  Eigen::Vector2d c_Mm_alpha;
-  Eigen::Vector2d c_Mm_q;
-  Eigen::Vector2d c_Mm_delta_elv;
+  Eigen::Vector2d c_pitch_moment_alpha;
+  Eigen::Vector2d c_pitch_moment_q;
+  Eigen::Vector2d c_pitch_moment_delta_elv;
 
-  Eigen::Vector2d c_Nm_beta;
-  Eigen::Vector2d c_Nm_r;
-  Eigen::Vector2d c_Nm_delta_rud;
+  Eigen::Vector2d c_yaw_moment_beta;
+  Eigen::Vector2d c_yaw_moment_r;
+  Eigen::Vector2d c_yaw_moment_delta_rud;
 
-  Eigen::Vector3d c_T;
+  Eigen::Vector3d c_thrust;
 
   void LoadAeroParamsYAML(const std::string& yaml_path) {
     YAML::Node node = YAML::LoadFile(yaml_path);
 
-    READ_EIGEN_VECTOR(node, c_D_alpha);
-    READ_EIGEN_VECTOR(node, c_D_beta);
-    READ_EIGEN_VECTOR(node, c_D_delta_ail);
-    READ_EIGEN_VECTOR(node, c_D_delta_flp);
+    READ_EIGEN_VECTOR(node, c_drag_alpha);
+    READ_EIGEN_VECTOR(node, c_drag_beta);
+    READ_EIGEN_VECTOR(node, c_drag_delta_ail);
+    READ_EIGEN_VECTOR(node, c_drag_delta_flp);
 
-    READ_EIGEN_VECTOR(node, c_Y_beta);
+    READ_EIGEN_VECTOR(node, c_side_force_beta);
 
-    READ_EIGEN_VECTOR(node, c_L_alpha);
-    READ_EIGEN_VECTOR(node, c_L_delta_ail);
-    READ_EIGEN_VECTOR(node, c_L_delta_flp);
+    READ_EIGEN_VECTOR(node, c_lift_alpha);
+    READ_EIGEN_VECTOR(node, c_lift_delta_ail);
+    READ_EIGEN_VECTOR(node, c_lift_delta_flp);
 
-    READ_EIGEN_VECTOR(node, c_Lm_beta);
-    READ_EIGEN_VECTOR(node, c_Lm_p);
-    READ_EIGEN_VECTOR(node, c_Lm_r);
-    READ_EIGEN_VECTOR(node, c_Lm_delta_ail);
-    READ_EIGEN_VECTOR(node, c_Lm_delta_flp);
+    READ_EIGEN_VECTOR(node, c_roll_moment_beta);
+    READ_EIGEN_VECTOR(node, c_roll_moment_p);
+    READ_EIGEN_VECTOR(node, c_roll_moment_r);
+    READ_EIGEN_VECTOR(node, c_roll_moment_delta_ail);
+    READ_EIGEN_VECTOR(node, c_roll_moment_delta_flp);
 
-    READ_EIGEN_VECTOR(node, c_Mm_alpha);
-    READ_EIGEN_VECTOR(node, c_Mm_q);
-    READ_EIGEN_VECTOR(node, c_Mm_delta_elv);
+    READ_EIGEN_VECTOR(node, c_pitch_moment_alpha);
+    READ_EIGEN_VECTOR(node, c_pitch_moment_q);
+    READ_EIGEN_VECTOR(node, c_pitch_moment_delta_elv);
 
-    READ_EIGEN_VECTOR(node, c_Nm_beta);
-    READ_EIGEN_VECTOR(node, c_Nm_r);
-    READ_EIGEN_VECTOR(node, c_Nm_delta_rud);
+    READ_EIGEN_VECTOR(node, c_yaw_moment_beta);
+    READ_EIGEN_VECTOR(node, c_yaw_moment_r);
+    READ_EIGEN_VECTOR(node, c_yaw_moment_delta_rud);
 
-    READ_EIGEN_VECTOR(node, c_T);
+    READ_EIGEN_VECTOR(node, c_thrust);
   }
 };
 
