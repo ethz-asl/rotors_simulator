@@ -17,14 +17,6 @@
 // MODULE HEADER
 #include "rotors_gazebo_plugins/gazebo_fw_dynamics_plugin.h"
 
-// SYSTEM LIBS
-#include <chrono>
-#include <cmath>
-#include <iostream>
-#include <stdio.h>
-
-#include <boost/bind.hpp>
-
 #include "ConnectRosToGazeboTopic.pb.h"
 
 namespace gazebo {
@@ -109,9 +101,16 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
         << " specified, using default Techpod parameters.\n";
   }
 
-  getSdfParam<std::string>(_sdf, "ActuatorsSubTopic",
+  // Get the rest of the sdf parameters.
+  getSdfParam<bool>(_sdf, "isInputJoystick", is_input_joystick_,
+                    kDefaultIsInputJoystick);
+  getSdfParam<std::string>(_sdf, "actuatorsSubTopic",
                            actuators_sub_topic_,
                            mav_msgs::default_topics::COMMAND_ACTUATORS);
+  getSdfParam<std::string>(_sdf, "rollPitchYawrateThrustSubTopic",
+                           roll_pitch_yawrate_thrust_sub_topic_,
+                           mav_msgs::default_topics::
+                               COMMAND_ROLL_PITCH_YAWRATE_THRUST);
   getSdfParam<std::string>(_sdf, "windSpeedSubTopic",
                            wind_speed_sub_topic_,
                            mav_msgs::default_topics::WIND_SPEED);
@@ -318,21 +317,41 @@ void GazeboFwDynamicsPlugin::CreatePubsAndSubs() {
   gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg,
                                               true);
 
-  // ============================================ //
-  // ===== ACTUATORS MSG SETUP (ROS->GAZEBO) ==== //
-  // ============================================ //
+  // If we are using a joystick for control inputs then subscribe to the
+  // RollPitchYawrateThrust msgs, otherwise subscribe to the Actuator msgs.
+  if (is_input_joystick_) {
+    // ========================================================= //
+    // === ROLL_PITCH_YAWRATE_THRUST MSG SETUP (ROS->GAZEBO) === //
+    // ========================================================= //
+    roll_pitch_yawrate_thrust_sub_ =
+        node_handle_->Subscribe("~/" + namespace_ + "/" +
+            roll_pitch_yawrate_thrust_sub_topic_,
+            &GazeboFwDynamicsPlugin::RollPitchYawrateThrustCallback, this);
 
-  actuators_sub_ =
-      node_handle_->Subscribe("~/" + namespace_ + "/" + actuators_sub_topic_,
-                              &GazeboFwDynamicsPlugin::ActuatorsCallback,
-                              this);
+    connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
+        roll_pitch_yawrate_thrust_sub_topic_);
+    connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
+        roll_pitch_yawrate_thrust_sub_topic_);
+    connect_ros_to_gazebo_topic_msg.set_msgtype(
+        gz_std_msgs::ConnectRosToGazeboTopic::ROLL_PITCH_YAWRATE_THRUST);
+  } else {
+    // ============================================ //
+    // ===== ACTUATORS MSG SETUP (ROS->GAZEBO) ==== //
+    // ============================================ //
 
-  connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
-                                                actuators_sub_topic_);
-  connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
-                                                   actuators_sub_topic_);
-  connect_ros_to_gazebo_topic_msg.set_msgtype(
-      gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
+    actuators_sub_ =
+        node_handle_->Subscribe("~/" + namespace_ + "/" + actuators_sub_topic_,
+                                &GazeboFwDynamicsPlugin::ActuatorsCallback,
+                                this);
+
+    connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
+                                                  actuators_sub_topic_);
+    connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
+                                                     actuators_sub_topic_);
+    connect_ros_to_gazebo_topic_msg.set_msgtype(
+        gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
+  }
+
   gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg,
                                               true);
 }
@@ -355,6 +374,24 @@ void GazeboFwDynamicsPlugin::ActuatorsCallback(
       actuators_msg->normalized(vehicle_params_.rudder.channel));
 
   throttle_ = actuators_msg->normalized(vehicle_params_.throttle_channel);
+}
+
+void GazeboFwDynamicsPlugin::RollPitchYawrateThrustCallback(
+    GzRollPitchYawrateThrustMsgPtr& roll_pitch_yawrate_thrust_msg) {
+  if (kPrintOnMsgCallback) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
+  delta_aileron_left_ = NormalizedInputToAngle(vehicle_params_.aileron_left,
+      roll_pitch_yawrate_thrust_msg->roll());
+  delta_aileron_right_ = NormalizedInputToAngle(vehicle_params_.aileron_right,
+      roll_pitch_yawrate_thrust_msg->roll());
+  delta_elevator_ = NormalizedInputToAngle(vehicle_params_.elevator,
+      roll_pitch_yawrate_thrust_msg->pitch());
+  delta_rudder_ = NormalizedInputToAngle(vehicle_params_.rudder,
+      roll_pitch_yawrate_thrust_msg->yaw_rate());
+
+  throttle_ = roll_pitch_yawrate_thrust_msg->thrust().x();
 }
 
 void GazeboFwDynamicsPlugin::WindSpeedCallback(

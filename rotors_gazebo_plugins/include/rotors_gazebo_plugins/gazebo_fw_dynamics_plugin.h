@@ -24,6 +24,7 @@
 #include <mav_msgs/default_topics.h>
 
 #include "Actuators.pb.h"
+#include "RollPitchYawrateThrust.pb.h"
 #include "WindSpeed.pb.h"
 
 #include "rotors_gazebo_plugins/common.h"
@@ -33,10 +34,15 @@ namespace gazebo {
 
 typedef const boost::shared_ptr<const gz_sensor_msgs::Actuators>
     GzActuatorsMsgPtr;
+typedef const boost::shared_ptr<const gz_mav_msgs::RollPitchYawrateThrust>
+    GzRollPitchYawrateThrustMsgPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed>
     GzWindSpeedMsgPtr;
 
-// Constants
+// Default values.
+static constexpr bool kDefaultIsInputJoystick = false;
+
+// Constants.
 static constexpr double kAirDensity = 1.18;
 static constexpr double kG = 9.81;
 static constexpr double kMinAirSpeedThresh = 0.1;
@@ -66,6 +72,10 @@ class GazeboFwDynamicsPlugin : public ModelPlugin {
   double NormalizedInputToAngle(const ControlSurface& surface, double input);
 
  private:
+  /// \brief    Are the input commands coming from a joystick (as opposed to
+  ///           a remote control via HIL interface, for example)?
+  bool is_input_joystick_;
+
   /// \brief    Flag that is set to true once CreatePubsAndSubs() is called,
   ///           used to prevent CreatePubsAndSubs() from be called on every
   ///           OnUpdate().
@@ -83,6 +93,8 @@ class GazeboFwDynamicsPlugin : public ModelPlugin {
   std::string namespace_;
   /// \brief    Topic name for actuator commands.
   std::string actuators_sub_topic_;
+  /// \brief    Topic name for roll_pitch_yawrate_thrust commands.
+  std::string roll_pitch_yawrate_thrust_sub_topic_;
   /// \brief    Topic name for wind speed readings.
   std::string wind_speed_sub_topic_;
 
@@ -91,6 +103,8 @@ class GazeboFwDynamicsPlugin : public ModelPlugin {
 
   /// \brief    Subscriber for receiving actuator commands.
   gazebo::transport::SubscriberPtr actuators_sub_;
+  /// \brief    Subscriber for receiving roll_pitch_yawrate_thrust commands.
+  gazebo::transport::SubscriberPtr roll_pitch_yawrate_thrust_sub_;
   /// \brief    Subscriber ror receiving wind speed readings.
   gazebo::transport::SubscriberPtr wind_speed_sub_;
 
@@ -130,6 +144,13 @@ class GazeboFwDynamicsPlugin : public ModelPlugin {
   ///           before storing them and throttle values for later use in
   ///           calculation of forces and moments.
   void ActuatorsCallback(GzActuatorsMsgPtr& actuators_msg);
+
+  /// \brief    Process the roll_pitch_yawrate_thrust commands.
+  /// \details  Converts the inputs into physical angles before storing them
+  ///           and thrust values for later use in calculation of forces and
+  ///           moments.
+  void RollPitchYawrateThrustCallback(GzRollPitchYawrateThrustMsgPtr&
+                                          roll_pitch_yawrate_thrust_msg);
 
   /// \brief    Processes the wind speed readings.
   /// \details  Stores the most current wind speed reading for later use in
