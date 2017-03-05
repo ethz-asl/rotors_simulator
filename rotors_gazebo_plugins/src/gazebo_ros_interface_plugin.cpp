@@ -806,7 +806,31 @@ void GazeboRosInterfacePlugin::GzTransformStampedMsgCallback(
 
 void GazeboRosInterfacePlugin::GzTwistStampedMsgCallback(
     GzTwistStampedMsgPtr& gz_twist_stamped_msg, ros::Publisher ros_publisher) {
-  gzthrow(__FUNCTION__ << "() is not yet implemented.");
+  // ============================================ //
+  // =================== HEADER ================= //
+  // ============================================ //
+  ConvertHeaderGzToRos(gz_twist_stamped_msg->header(),
+                       &ros_twist_stamped_msg_.header);
+
+  // ============================================ //
+  // =================== TWIST ================== //
+  // ============================================ //
+
+  ros_twist_stamped_msg_.twist.linear.x =
+      gz_twist_stamped_msg->twist().linear().x();
+  ros_twist_stamped_msg_.twist.linear.y =
+      gz_twist_stamped_msg->twist().linear().y();
+  ros_twist_stamped_msg_.twist.linear.z =
+      gz_twist_stamped_msg->twist().linear().z();
+
+  ros_twist_stamped_msg_.twist.angular.x =
+      gz_twist_stamped_msg->twist().angular().x();
+  ros_twist_stamped_msg_.twist.angular.y =
+      gz_twist_stamped_msg->twist().angular().y();
+  ros_twist_stamped_msg_.twist.angular.z =
+      gz_twist_stamped_msg->twist().angular().z();
+
+  ros_publisher.publish(ros_twist_stamped_msg_);
 }
 
 void GazeboRosInterfacePlugin::GzVector3dStampedMsgCallback(
