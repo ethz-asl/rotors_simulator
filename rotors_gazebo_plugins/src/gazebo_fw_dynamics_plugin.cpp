@@ -284,7 +284,8 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
   link_->AddRelativeTorque(moments);
 }
 
-double NormalizedInputToAngle(const ControlSurface& surface, double input) {
+double GazeboFwDynamicsPlugin::NormalizedInputToAngle(
+    const ControlSurface& surface, double input) {
   return (surface.deflection_max + surface.deflection_min) * 0.5 +
       (surface.deflection_max - surface.deflection_min) * 0.5 * input;
 }
