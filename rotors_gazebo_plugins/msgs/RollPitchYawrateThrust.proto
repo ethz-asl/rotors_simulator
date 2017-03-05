@@ -1,0 +1,29 @@
+syntax = "proto2";
+package gz_mav_msgs;
+
+import "Header.proto";
+import "vector3d.proto";
+
+message RollPitchYawrateThrust {
+  required gz_std_msgs.Header header = 1;
+
+  // We use the coordinate frames with the following convention:
+  //   x: forward
+  //   y: left
+  //   z: up
+
+  // rotation convention (z-y'-x''):
+  // yaw rotates around fixed frame's z axis
+  // pitch rotates around new y-axis (y')
+  // roll rotates around new x-axis (x'')
+  required double roll = 2;
+  required double pitch = 3;
+  required double yaw_rate = 4;
+
+  // Thrust [N] expressed in the body frame.
+  // For a fixed-wing, usually the x-component is used.
+  // For a multi-rotor, usually the z-component is used.
+  // Set all un-used components to 0.
+  required gazebo.msgs.Vector3d thrust = 5;
+}
+
