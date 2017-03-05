@@ -36,6 +36,9 @@ static constexpr double kDefaultInertiaYz = 0.0;
 static constexpr double kDefaultInertiaZz = 0.5243;
 
 // Default aerodynamic parameter values (Techpod model)
+static constexpr double kDefaultAlphaMax = 0.27;
+static constexpr double kDefaultAlphaMin = -0.27;
+
 static const Eigen::Vector3d kDefaultCDragAlpha =
     Eigen::Vector3d(0.1360, -0.6737, 5.4546);
 static const Eigen::Vector3d kDefaultCDragBeta =
@@ -93,23 +96,32 @@ static constexpr int kDefaultThrottleChannel = 5;
 static constexpr int kDefaultAileronLeftChannel = 4;
 static constexpr int kDefaultAileronRightChannel = 0;
 static constexpr int kDefaultElevatorChannel = 1;
-static constexpr int kDefaultFlapsChannel = 2;
+static constexpr int kDefaultFlapChannel = 2;
 static constexpr int kDefaultRudderChannel = 3;
 
 /// \brief  This function reads a vector from a YAML node and converts it into
 ///         a vector of type Eigen.
 template <typename Derived>
-inline void YAMLToEigenVector(const YAML::Node& params,
-                              const std::string& name,
-                              Eigen::MatrixBase<Derived>& value) {
+inline void YAMLReadEigenVector(const YAML::Node& node,
+                                const std::string& name,
+                                Eigen::MatrixBase<Derived>& value) {
   std::vector<typename Derived::RealScalar> vec =
-      params[name].as<std::vector<typename Derived::RealScalar>>();
+      node[name].as<std::vector<typename Derived::RealScalar>>();
   assert(vec.size() == Derived::SizeAtCompileTime);
   value = Eigen::Map<Derived>(&vec[0], vec.size());
 }
 
-/// \brief  Macro to reduce copies of names.
-#define READ_EIGEN_VECTOR(params, item) YAMLToEigenVector(params, #item, item);
+/// \brief  This function reads a parameter from a YAML node.
+template <typename T>
+inline void YAMLReadParam(const YAML::Node& node,
+                          const std::string& name,
+                          T& value) {
+  value = node[name].as<T>();
+}
+
+/// \brief  Macros to reduce copies of names.
+#define READ_EIGEN_VECTOR(node, item) YAMLReadEigenVector(node, #item, item);
+#define READ_PARAM(node, item) YAMLReadParam(node, #item, item);
 
 struct ControlSurface {
   ControlSurface(int cs_channel,
@@ -127,7 +139,9 @@ struct ControlSurface {
 
 struct FWAerodynamicParameters {
   FWAerodynamicParameters()
-      : c_drag_alpha(kDefaultCDragAlpha),
+      : alpha_max(kDefaultAlphaMax),
+        alpha_min(kDefaultAlphaMin),
+        c_drag_alpha(kDefaultCDragAlpha),
         c_drag_beta(kDefaultCDragBeta),
         c_drag_delta_ail(kDefaultCDragDeltaAil),
         c_drag_delta_flp(kDefaultCDragDeltaFlp),
@@ -147,6 +161,9 @@ struct FWAerodynamicParameters {
         c_yaw_moment_r(kDefaultCYawMomentR),
         c_yaw_moment_delta_rud(kDefaultCYawMomentDeltaRud),
         c_thrust(kDefaultCThrust) {}
+
+  double alpha_max;
+  double alpha_min;
 
   Eigen::Vector3d c_drag_alpha;
   Eigen::Vector3d c_drag_beta;
@@ -177,6 +194,9 @@ struct FWAerodynamicParameters {
 
   void LoadAeroParamsYAML(const std::string& yaml_path) {
     YAML::Node node = YAML::LoadFile(yaml_path);
+
+    READ_PARAM(node, alpha_max);
+    READ_PARAM(node, alpha_min);
 
     READ_EIGEN_VECTOR(node, c_drag_alpha);
     READ_EIGEN_VECTOR(node, c_drag_beta);
@@ -219,7 +239,7 @@ class FWParameters {
         aileron_left_(kDefaultAileronLeftChannel),
         aileron_right_(kDefaultAileronRightChannel),
         elevator_(kDefaultElevatorChannel),
-        flaps_(kDefaultFlapsChannel),
+        flap_(kDefaultFlapChannel),
         rudder_(kDefaultRudderChannel) {
     inertia_ << kDefaultInertiaXx, kDefaultInertiaXy, kDefaultInertiaXz,
                 kDefaultInertiaXy, kDefaultInertiaYy, kDefaultInertiaYz,
@@ -238,7 +258,7 @@ class FWParameters {
   ControlSurface aileron_left_;
   ControlSurface aileron_right_;
   ControlSurface elevator_;
-  ControlSurface flaps_;
+  ControlSurface flap_;
   ControlSurface rudder_;
 
   FWAerodynamicParameters aero_params_;
