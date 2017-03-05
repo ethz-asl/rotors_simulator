@@ -32,7 +32,13 @@ namespace gazebo {
 GazeboFwDynamicsPlugin::GazeboFwDynamicsPlugin()
     : ModelPlugin(),
       node_handle_(0),
-      wind_speed_W_(0, 0, 0),
+      W_wind_speed_W_B_(0, 0, 0),
+      delta_aileron_left_(0.0),
+      delta_aileron_right_(0.0),
+      delta_elevator_(0.0),
+      delta_flap_(0.0),
+      delta_rudder_(0.0),
+      throttle_(0.0),
       pubs_and_subs_created_(false) {
 }
 
@@ -91,9 +97,11 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
         << " specified, using default Techpod parameters.\n";
   }
 
-  std::string wind_speed_sub_topic;
+  getSdfParam<std::string>(_sdf, "ActuatorsSubTopic",
+                           actuators_sub_topic_,
+                           mav_msgs::default_topics::COMMAND_ACTUATORS);
   getSdfParam<std::string>(_sdf, "windSpeedSubTopic",
-                           wind_speed_sub_topic,
+                           wind_speed_sub_topic_,
                            mav_msgs::default_topics::WIND_SPEED);
 
   // Listen to the update event. This event is broadcast every
@@ -111,21 +119,84 @@ void GazeboFwDynamicsPlugin::OnUpdate(const common::UpdateInfo& _info) {
     CreatePubsAndSubs();
     pubs_and_subs_created_ = true;
   }
+
+  UpdateForcesAndMoments();
 }
 
 void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
 
 }
 
+double NormalizedInputToAngle(const ControlSurface& surface, double input) {
+  return (surface.deflection_max + surface.deflection_min) * 0.5 +
+      (surface.deflection_max - surface.deflection_min) * 0.5 * input;
+}
 
 void GazeboFwDynamicsPlugin::CreatePubsAndSubs() {
   gzdbg << __PRETTY_FUNCTION__ << " called." << std::endl;
+
+  // Create temporary "ConnectRosToGazeboTopic" publisher and message
+  gazebo::transport::PublisherPtr gz_connect_ros_to_gazebo_topic_pub =
+      node_handle_->Advertise<gz_std_msgs::ConnectRosToGazeboTopic>(
+          "~/" + kConnectRosToGazeboSubtopic, 1);
+  gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
+
+  // ============================================ //
+  // ==== WIND SPEED MSG SETUP (ROS->GAZEBO) ==== //
+  // ============================================ //
 
   // Wind speed subscriber (Gazebo).
   wind_speed_sub_ =
       node_handle_->Subscribe("~/" + namespace_ + "/" + wind_speed_sub_topic_,
                               &GazeboFwDynamicsPlugin::WindSpeedCallback,
                               this);
+
+  connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
+                                                wind_speed_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
+                                                   wind_speed_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_msgtype(
+      gz_std_msgs::ConnectRosToGazeboTopic::WIND_SPEED);
+  gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg,
+                                              true);
+
+  // ============================================ //
+  // ===== ACTUATORS MSG SETUP (ROS->GAZEBO) ==== //
+  // ============================================ //
+
+  actuators_sub_ =
+      node_handle_->Subscribe("~/" + namespace_ + "/" + actuators_sub_topic_,
+                              &GazeboFwDynamicsPlugin::ActuatorsCallback,
+                              this);
+
+  connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
+                                                actuators_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
+                                                   actuators_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_msgtype(
+      gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
+  gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg,
+                                              true);
+}
+
+void GazeboFwDynamicsPlugin::ActuatorsCallback(
+    GzActuatorsMsgPtr &actuators_msg) {
+  if (kPrintOnMsgCallback) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
+  delta_aileron_left_ = NormalizedInputToAngle(fw_params_.aileron_left_,
+      actuators_msg->normalized(fw_params_.aileron_left_.channel));
+  delta_aileron_right_ = NormalizedInputToAngle(fw_params_.aileron_right_,
+      actuators_msg->normalized(fw_params_.aileron_right_.channel));
+  delta_elevator_ = NormalizedInputToAngle(fw_params_.elevator_,
+      actuators_msg->normalized(fw_params_.elevator_.channel));
+  delta_flap_ = NormalizedInputToAngle(fw_params_.flap_,
+      actuators_msg->normalized(fw_params_.flap_.channel));
+  delta_rudder_ = NormalizedInputToAngle(fw_params_.rudder_,
+      actuators_msg->normalized(fw_params_.rudder_.channel));
+
+  throttle_ = actuators_msg->normalized(fw_params_.throttle_channel_);
 }
 
 void GazeboFwDynamicsPlugin::WindSpeedCallback(
@@ -134,9 +205,9 @@ void GazeboFwDynamicsPlugin::WindSpeedCallback(
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
 
-  wind_speed_W_.x = wind_speed_msg->velocity().x();
-  wind_speed_W_.y = wind_speed_msg->velocity().y();
-  wind_speed_W_.z = wind_speed_msg->velocity().z();
+  W_wind_speed_W_B_.x = wind_speed_msg->velocity().x();
+  W_wind_speed_W_B_.y = wind_speed_msg->velocity().y();
+  W_wind_speed_W_B_.z = wind_speed_msg->velocity().z();
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboFwDynamicsPlugin);
