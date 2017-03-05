@@ -31,8 +31,10 @@
 
 namespace gazebo {
 
-typedef const boost::shared_ptr<const gz_sensor_msgs::Actuators> GzActuatorsMsgPtr;
-typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
+typedef const boost::shared_ptr<const gz_sensor_msgs::Actuators>
+    GzActuatorsMsgPtr;
+typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed>
+    GzWindSpeedMsgPtr;
 
 // Constants
 static constexpr double kAirDensity = 1.18;
@@ -104,8 +106,11 @@ class GazeboFwDynamicsPlugin : public ModelPlugin {
   /// \brief    Most current wind speed reading [m/s].
   math::Vector3 W_wind_speed_W_B_;
 
-  /// \brief    The physical and aerodynamic properties of the aircraft.
-  FWParameters fw_params_;
+  /// \brief    The aerodynamic properties of the aircraft.
+  FWAerodynamicParameters aero_params_;
+
+  /// \brief    The physical properties of the aircraft.
+  FWVehicleParameters vehicle_params_;
 
   /// \brief    Left aileron deflection [rad].
   double delta_aileron_left_;

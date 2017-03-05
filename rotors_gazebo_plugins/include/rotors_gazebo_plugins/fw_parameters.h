@@ -22,18 +22,14 @@
 
 namespace gazebo {
 
+// Forward declaration.
+struct ControlSurface;
+
 // Default vehicle parameters (Techpod model)
-static constexpr double kDefaultMass = 2.65;
 static constexpr double kDefaultWingSpan = 2.59;
 static constexpr double kDefaultWingSurface = 0.47;
 static constexpr double kDefaultChordLength = 0.18;
-
-static constexpr double kDefaultInertiaXx = 0.16632;
-static constexpr double kDefaultInertiaXy = 0.0;
-static constexpr double kDefaultInertiaXz = 0.0755;
-static constexpr double kDefaultInertiaYy = 0.3899;
-static constexpr double kDefaultInertiaYz = 0.0;
-static constexpr double kDefaultInertiaZz = 0.5243;
+static constexpr double kDefaultThrustInclination = 0.0;
 
 // Default aerodynamic parameter values (Techpod model)
 static constexpr double kDefaultAlphaMax = 0.27;
@@ -92,52 +88,41 @@ static constexpr double kDefaultControlSurfaceDeflectionMin =
 static constexpr double kDefaultControlSurfaceDeflectionMax =
     20.0 * M_PI / 180.0;
 
-static constexpr int kDefaultThrottleChannel = 5;
 static constexpr int kDefaultAileronLeftChannel = 4;
 static constexpr int kDefaultAileronRightChannel = 0;
 static constexpr int kDefaultElevatorChannel = 1;
 static constexpr int kDefaultFlapChannel = 2;
 static constexpr int kDefaultRudderChannel = 3;
+static constexpr int kDefaultThrottleChannel = 5;
+
+/// \brief  Wrapper function for extracting control surface parameters from a
+///         YAML node.
+inline void YAMLReadControlSurface(const YAML::Node& node,
+                                   const std::string& name,
+                                   ControlSurface& surface);
 
 /// \brief  This function reads a vector from a YAML node and converts it into
 ///         a vector of type Eigen.
 template <typename Derived>
 inline void YAMLReadEigenVector(const YAML::Node& node,
                                 const std::string& name,
-                                Eigen::MatrixBase<Derived>& value) {
-  std::vector<typename Derived::RealScalar> vec =
-      node[name].as<std::vector<typename Derived::RealScalar>>();
-  assert(vec.size() == Derived::SizeAtCompileTime);
-  value = Eigen::Map<Derived>(&vec[0], vec.size());
-}
+                                Eigen::MatrixBase<Derived>& value);
 
 /// \brief  This function reads a parameter from a YAML node.
 template <typename T>
 inline void YAMLReadParam(const YAML::Node& node,
                           const std::string& name,
-                          T& value) {
-  value = node[name].as<T>();
-}
+                          T& value);
 
 /// \brief  Macros to reduce copies of names.
+#define READ_CONTROL_SURFACE(node, item) \
+    YAMLReadControlSurface(node, #item, item);
 #define READ_EIGEN_VECTOR(node, item) YAMLReadEigenVector(node, #item, item);
 #define READ_PARAM(node, item) YAMLReadParam(node, #item, item);
 
-struct ControlSurface {
-  ControlSurface(int cs_channel,
-                 double defl_min = kDefaultControlSurfaceDeflectionMin,
-                 double defl_max = kDefaultControlSurfaceDeflectionMax)
-      : channel(cs_channel),
-        deflection_min(defl_min),
-        deflection_max(defl_max) {}
-
-  int channel;
-
-  double deflection_min;
-  double deflection_max;
-};
-
 struct FWAerodynamicParameters {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   FWAerodynamicParameters()
       : alpha_max(kDefaultAlphaMax),
         alpha_min(kDefaultAlphaMin),
@@ -227,42 +212,93 @@ struct FWAerodynamicParameters {
   }
 };
 
-class FWParameters {
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  FWParameters()
-      : mass_(kDefaultMass),
-        wing_span_(kDefaultWingSpan),
-        wing_surface_(kDefaultWingSurface),
-        chord_length_(kDefaultChordLength),
-        throttle_channel_(kDefaultThrottleChannel),
-        aileron_left_(kDefaultAileronLeftChannel),
-        aileron_right_(kDefaultAileronRightChannel),
-        elevator_(kDefaultElevatorChannel),
-        flap_(kDefaultFlapChannel),
-        rudder_(kDefaultRudderChannel) {
-    inertia_ << kDefaultInertiaXx, kDefaultInertiaXy, kDefaultInertiaXz,
-                kDefaultInertiaXy, kDefaultInertiaYy, kDefaultInertiaYz,
-                kDefaultInertiaXz, kDefaultInertiaYz, kDefaultInertiaZz;
+struct ControlSurface {
+  ControlSurface(int cs_channel,
+                 double defl_min = kDefaultControlSurfaceDeflectionMin,
+                 double defl_max = kDefaultControlSurfaceDeflectionMax)
+      : channel(cs_channel),
+        deflection_min(defl_min),
+        deflection_max(defl_max) {}
+
+  int channel;
+
+  double deflection_min;
+  double deflection_max;
+
+  void LoadControlSurfaceNode(const YAML::Node& node) {
+    READ_PARAM(node, channel);
+    READ_PARAM(node, deflection_min);
+    READ_PARAM(node, deflection_max);
   }
-
-  double mass_;
-  double wing_span_;
-  double wing_surface_;
-  double chord_length_;
-
-  int throttle_channel_;
-
-  Eigen::Matrix3d inertia_;
-
-  ControlSurface aileron_left_;
-  ControlSurface aileron_right_;
-  ControlSurface elevator_;
-  ControlSurface flap_;
-  ControlSurface rudder_;
-
-  FWAerodynamicParameters aero_params_;
 };
+
+struct FWVehicleParameters {
+  FWVehicleParameters()
+      : wing_span(kDefaultWingSpan),
+        wing_surface(kDefaultWingSurface),
+        chord_length(kDefaultChordLength),
+        thrust_inclination(kDefaultThrustInclination),
+        throttle_channel(kDefaultThrottleChannel),
+        aileron_left(kDefaultAileronLeftChannel),
+        aileron_right(kDefaultAileronRightChannel),
+        elevator(kDefaultElevatorChannel),
+        flap(kDefaultFlapChannel),
+        rudder(kDefaultRudderChannel) {}
+
+  double wing_span;
+  double wing_surface;
+  double chord_length;
+  double thrust_inclination;
+
+  int throttle_channel;
+
+  ControlSurface aileron_left;
+  ControlSurface aileron_right;
+  ControlSurface elevator;
+  ControlSurface flap;
+  ControlSurface rudder;
+
+  void LoadVehicleParamsYAML(const std::string& yaml_path) {
+    YAML::Node node = YAML::LoadFile(yaml_path);
+
+    READ_PARAM(node, wing_span);
+    READ_PARAM(node, wing_surface);
+    READ_PARAM(node, chord_length);
+    READ_PARAM(node, thrust_inclination);
+
+    READ_PARAM(node, throttle_channel);
+
+    READ_CONTROL_SURFACE(node, aileron_left);
+    READ_CONTROL_SURFACE(node, aileron_right);
+    READ_CONTROL_SURFACE(node, elevator);
+    READ_CONTROL_SURFACE(node, flap);
+    READ_CONTROL_SURFACE(node, rudder);
+  }
+};
+
+inline void YAMLReadControlSurface(const YAML::Node& node,
+                                   const std::string& name,
+                                   ControlSurface& surface) {
+  YAML::Node surface_node = node[name];
+  surface.LoadControlSurfaceNode(surface_node);
+}
+
+template <typename Derived>
+inline void YAMLReadEigenVector(const YAML::Node& node,
+                                const std::string& name,
+                                Eigen::MatrixBase<Derived>& value) {
+  std::vector<typename Derived::RealScalar> vec =
+      node[name].as<std::vector<typename Derived::RealScalar>>();
+  assert(vec.size() == Derived::SizeAtCompileTime);
+  value = Eigen::Map<Derived>(&vec[0], vec.size());
+}
+
+template <typename T>
+inline void YAMLReadParam(const YAML::Node& node,
+                          const std::string& name,
+                          T& value) {
+  value = node[name].as<T>();
+}
 
 }
 

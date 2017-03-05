@@ -18,7 +18,8 @@
 <robot name="techpod" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Global properties -->
   <xacro:property name="namespace" value="$(arg namespace)" />
-  <xacro:property name="aero_params_yaml_file" value="$(arg yaml_params_yaml_file)" />
+  <xacro:property name="aero_params_yaml_file" value="$(arg aero_params_yaml_file)" />
+  <xacro:property name="vehicle_params_yaml_file" value="$(arg vehicle_params_yaml_file)" />
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <xacro:property name="use_mesh" value="true" />
 
@@ -128,7 +129,8 @@
     color="${body_color}"
     use_mesh_file="${use_mesh}"
     mesh_file="${body_mesh_file}"
-    aero_params_yaml="${aero_params_yaml_file}">
+    aero_params_yaml="${aero_params_yaml_file}"
+    vehicle_params_yaml="${vehicle_params_yaml_file}">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <xacro:insert_block name="body_inertia" />
   </xacro:fixed_wing_base_macro>

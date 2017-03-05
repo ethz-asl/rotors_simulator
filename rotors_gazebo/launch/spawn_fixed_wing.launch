@@ -3,7 +3,8 @@
 <launch>
   <arg name="uav_name" default="techpod"/>
   <arg name="namespace" default="$(arg uav_name)"/>
-  <arg name="yaml_params_yaml_file" default="$(find rotors_gazebo)/resource/fixed_wing/aero_params_$(arg uav_name).yaml"/>
+  <arg name="aero_params_yaml_file" default="$(find rotors_gazebo)/resource/fixed_wing/aero_params_$(arg uav_name).yaml"/>
+  <arg name="vehicle_params_yaml_file" default="$(find rotors_gazebo)/resource/fixed_wing/$(arg uav_name).yaml"/>
   <arg name="model" default="$(find rotors_description)/urdf/$(arg uav_name)_base.xacro"/>
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
   <arg name="x" default="0.0"/>
@@ -28,7 +29,8 @@
     wait_to_record_bag:=$(arg wait_to_record_bag)
     uav_name:=$(arg uav_name)
     namespace:=$(arg namespace)
-    yaml_params_yaml_file:=$(arg yaml_params_yaml_file)"
+    aero_params_yaml_file:=$(arg aero_params_yaml_file)
+    vehicle_params_yaml_file:=$(arg vehicle_params_yaml_file)"
   />
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
 

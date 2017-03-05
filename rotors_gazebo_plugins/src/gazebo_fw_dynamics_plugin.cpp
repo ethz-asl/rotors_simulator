@@ -91,9 +91,21 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
     std::string aero_params_yaml =
         _sdf->GetElement("aeroParamsYAML")->Get<std::string>();
 
-    fw_params_.aero_params_.LoadAeroParamsYAML(aero_params_yaml);
+    aero_params_.LoadAeroParamsYAML(aero_params_yaml);
   } else {
     gzwarn << "[gazebo_fw_dynamics_plugin] No aerodynamic paramaters YAML file"
+        << " specified, using default Techpod parameters.\n";
+  }
+
+  // Get the path to fixed-wing vehicle parameters YAML file. If not provided,
+  // default Techpod parameters are used.
+  if (_sdf->HasElement("vehicleParamsYAML")) {
+    std::string vehicle_params_yaml =
+        _sdf->GetElement("vehicleParamsYAML")->Get<std::string>();
+
+    vehicle_params_.LoadVehicleParamsYAML(vehicle_params_yaml);
+  } else {
+    gzwarn << "[gazebo_fw_dynamics_plugin] No vehicle paramaters YAML file"
         << " specified, using default Techpod parameters.\n";
   }
 
@@ -124,7 +136,153 @@ void GazeboFwDynamicsPlugin::OnUpdate(const common::UpdateInfo& _info) {
 }
 
 void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
+  // Express the air speed and angular velocity in the body frame.
+  // B denotes body frame and W world frame ... e.g., W_rot_W_B denotes
+  // rotation of B wrt. W expressed in W.
+  math::Quaternion W_rot_W_B = link_->GetWorldPose().rot;
+  math::Vector3 B_air_speed_W_B = W_rot_W_B.RotateVectorReverse(
+      link_->GetWorldLinearVel() - W_wind_speed_W_B_);
+  math::Vector3 B_angular_velocity_W_B = link_->GetRelativeAngularVel();
 
+  // Traditionally, fixed-wing aerodynamics use NED (North-East-Down) frame,
+  // but since our model's body frame is in North-West-Up frame we rotate the
+  // linear and angular velocities by 180 degrees around the X axis.
+  double u = B_air_speed_W_B.x;
+  double v = -B_air_speed_W_B.y;
+  double w = -B_air_speed_W_B.z;
+
+  double p = B_angular_velocity_W_B.x;
+  double q = -B_angular_velocity_W_B.y;
+  double r = -B_angular_velocity_W_B.z;
+
+  // Compute the angle of attack (alpha) and the sideslip angle (beta). To
+  // avoid division by zero, there is a minimum air speed threshold below which
+  // alpha and beta are zero.
+  double V = B_air_speed_W_B.GetLength();
+  double beta = (V < kMinAirSpeedThresh) ? 0.0 : asin(v / V);
+  double alpha = (u < kMinAirSpeedThresh) ? 0.0 : atan(w / u);
+
+  // Bound the angle of attack.
+  if (alpha > aero_params_.alpha_max)
+    alpha = aero_params_.alpha_max;
+  else if (alpha < aero_params_.alpha_min)
+    alpha = aero_params_.alpha_min;
+
+  // Pre-compute the common component in the force and moment calculations.
+  double q_bar_S = 0.5 * kAirDensity * V * V * vehicle_params_.wing_surface;
+
+  // Combine some of the control surface deflections.
+  double aileron_sum = delta_aileron_left_ + delta_aileron_right_;
+  double aileron_diff = delta_aileron_left_ - delta_aileron_right_;
+  double flap_sum = 2.0 * delta_flap_;
+  double flap_diff = 0.0;
+
+  // Compute the forces in the wind frame.
+  double drag = q_bar_S *
+      (aero_params_.c_drag_alpha.dot(
+           Eigen::Vector3d(1.0, alpha, alpha * alpha)) +
+       aero_params_.c_drag_beta.dot(
+           Eigen::Vector3d(0.0, beta, beta * beta)) +
+       aero_params_.c_drag_delta_ail.dot(
+           Eigen::Vector3d(0.0, aileron_sum, aileron_sum * aileron_sum)) +
+       aero_params_.c_drag_delta_flp.dot(
+           Eigen::Vector3d(0.0, flap_sum, flap_sum * flap_sum)));
+
+  double side_force = q_bar_S *
+      (aero_params_.c_side_force_beta.dot(
+           Eigen::Vector2d(0.0, beta)));
+
+  double lift = q_bar_S *
+      (aero_params_.c_lift_alpha.dot(
+           Eigen::Vector4d(1.0, alpha, alpha * alpha, alpha * alpha * alpha)) +
+       aero_params_.c_lift_delta_ail.dot(
+           Eigen::Vector2d(0.0, aileron_sum)) +
+       aero_params_.c_lift_delta_flp.dot(
+           Eigen::Vector2d(0.0, flap_sum)));
+
+  Eigen::Vector3d forces_Wind(-drag, side_force, -lift);
+
+  // Non-dimensionalize the angular rates for inclusion in the computation of
+  // moments. To avoid division by zero, there is a minimum air speed threshold
+  // below which the values are zero.
+  double p_hat = (V < kMinAirSpeedThresh) ? 0.0 :
+      p * vehicle_params_.wing_span / (2.0 * V);
+  double q_hat = (V < kMinAirSpeedThresh) ? 0.0 :
+      q * vehicle_params_.chord_length / (2.0 * V);
+  double r_hat = (V < kMinAirSpeedThresh) ? 0.0 :
+      r * vehicle_params_.wing_span / (2.0 * V);
+
+  // Compute the moments in the wind frame.
+  double rolling_moment = q_bar_S * vehicle_params_.wing_span *
+      (aero_params_.c_roll_moment_beta.dot(
+           Eigen::Vector2d(0.0, beta)) +
+       aero_params_.c_roll_moment_p.dot(
+           Eigen::Vector2d(0.0, p_hat)) +
+       aero_params_.c_roll_moment_r.dot(
+           Eigen::Vector2d(0.0, r_hat)) +
+       aero_params_.c_roll_moment_delta_ail.dot(
+           Eigen::Vector2d(0.0, aileron_diff)) +
+       aero_params_.c_roll_moment_delta_flp.dot(
+           Eigen::Vector2d(0.0, flap_diff)));
+
+  double pitching_moment = q_bar_S * vehicle_params_.chord_length *
+      (aero_params_.c_pitch_moment_alpha.dot(
+           Eigen::Vector2d(1.0, alpha)) +
+       aero_params_.c_pitch_moment_q.dot(
+           Eigen::Vector2d(0.0, q_hat)) +
+       aero_params_.c_pitch_moment_delta_elv.dot(
+           Eigen::Vector2d(0.0, delta_elevator_)));
+
+  double yawing_moment = q_bar_S * vehicle_params_.wing_span *
+      (aero_params_.c_yaw_moment_beta.dot(
+           Eigen::Vector2d(0.0, beta)) +
+       aero_params_.c_yaw_moment_r.dot(
+           Eigen::Vector2d(0.0, r_hat)) +
+       aero_params_.c_yaw_moment_delta_rud.dot(
+           Eigen::Vector2d(0.0, delta_rudder_)));
+
+  Eigen::Vector3d moments_Wind(rolling_moment, pitching_moment, yawing_moment);
+
+  // Compute the thrust force in the body frame.
+  double thrust = aero_params_.c_thrust.dot(
+      Eigen::Vector3d(1.0, throttle_, throttle_ * throttle_));
+  double thrust_x = cos(vehicle_params_.thrust_inclination) * thrust;
+  double thrust_z = sin(vehicle_params_.thrust_inclination) * thrust;
+
+  Eigen::Vector3d force_thrust_B(thrust_x, 0.0, thrust_z);
+
+  // Compute the transform between the body frame and the wind frame.
+  double ca = cos(alpha);
+  double sa = sin(alpha);
+  double cb = cos(beta);
+  double sb = sin(beta);
+
+  Eigen::Matrix3d R_Wind_B;
+  R_Wind_B << ca * cb, sb, sa * cb,
+              -sb * ca, cb, -sa * sb,
+              -sa, 0.0, ca;
+
+  Eigen::Matrix3d R_Wind_B_t = R_Wind_B.transpose();
+
+  // Transform all the forces and moments into the body frame
+  Eigen::Vector3d forces_B = R_Wind_B_t * forces_Wind + force_thrust_B;
+  Eigen::Vector3d moments_B = R_Wind_B_t * moments_Wind;
+
+  // Once again account for the difference between our body frame orientation
+  // and the traditional aerodynamics frame.
+  math::Vector3 forces =
+      math::Vector3(forces_B[0], -forces_B[1], -forces_B[2]);
+  math::Vector3 moments =
+      math::Vector3(moments_B[0], -moments_B[1], -moments_B[2]);
+
+  // Apply the calculated forced and moments to the main body link.
+#if GAZEBO_MAJOR_VERSION >= 6
+  link_->AddLinkForce(forces);
+#else
+  link_->AddRelativeForce(forces);
+#endif
+
+  link_->AddRelativeTorque(moments);
 }
 
 double NormalizedInputToAngle(const ControlSurface& surface, double input) {
@@ -185,18 +343,18 @@ void GazeboFwDynamicsPlugin::ActuatorsCallback(
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
 
-  delta_aileron_left_ = NormalizedInputToAngle(fw_params_.aileron_left_,
-      actuators_msg->normalized(fw_params_.aileron_left_.channel));
-  delta_aileron_right_ = NormalizedInputToAngle(fw_params_.aileron_right_,
-      actuators_msg->normalized(fw_params_.aileron_right_.channel));
-  delta_elevator_ = NormalizedInputToAngle(fw_params_.elevator_,
-      actuators_msg->normalized(fw_params_.elevator_.channel));
-  delta_flap_ = NormalizedInputToAngle(fw_params_.flap_,
-      actuators_msg->normalized(fw_params_.flap_.channel));
-  delta_rudder_ = NormalizedInputToAngle(fw_params_.rudder_,
-      actuators_msg->normalized(fw_params_.rudder_.channel));
+  delta_aileron_left_ = NormalizedInputToAngle(vehicle_params_.aileron_left,
+      actuators_msg->normalized(vehicle_params_.aileron_left.channel));
+  delta_aileron_right_ = NormalizedInputToAngle(vehicle_params_.aileron_right,
+      actuators_msg->normalized(vehicle_params_.aileron_right.channel));
+  delta_elevator_ = NormalizedInputToAngle(vehicle_params_.elevator,
+      actuators_msg->normalized(vehicle_params_.elevator.channel));
+  delta_flap_ = NormalizedInputToAngle(vehicle_params_.flap,
+      actuators_msg->normalized(vehicle_params_.flap.channel));
+  delta_rudder_ = NormalizedInputToAngle(vehicle_params_.rudder,
+      actuators_msg->normalized(vehicle_params_.rudder.channel));
 
-  throttle_ = actuators_msg->normalized(fw_params_.throttle_channel_);
+  throttle_ = actuators_msg->normalized(vehicle_params_.throttle_channel);
 }
 
 void GazeboFwDynamicsPlugin::WindSpeedCallback(
@@ -213,4 +371,3 @@ void GazeboFwDynamicsPlugin::WindSpeedCallback(
 GZ_REGISTER_MODEL_PLUGIN(GazeboFwDynamicsPlugin);
 
 }  // namespace gazebo
-
