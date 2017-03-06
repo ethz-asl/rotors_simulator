@@ -275,12 +275,7 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
       math::Vector3(moments_B[0], -moments_B[1], -moments_B[2]);
 
   // Apply the calculated forced and moments to the main body link.
-#if GAZEBO_MAJOR_VERSION >= 6
-  link_->AddLinkForce(forces);
-#else
   link_->AddRelativeForce(forces);
-#endif
-
   link_->AddRelativeTorque(moments);
 }
 
@@ -385,7 +380,7 @@ void GazeboFwDynamicsPlugin::RollPitchYawrateThrustCallback(
 
   delta_aileron_left_ = NormalizedInputToAngle(vehicle_params_.aileron_left,
       roll_pitch_yawrate_thrust_msg->roll());
-  delta_aileron_right_ = NormalizedInputToAngle(vehicle_params_.aileron_right,
+  delta_aileron_right_ = -NormalizedInputToAngle(vehicle_params_.aileron_right,
       roll_pitch_yawrate_thrust_msg->roll());
   delta_elevator_ = NormalizedInputToAngle(vehicle_params_.elevator,
       roll_pitch_yawrate_thrust_msg->pitch());

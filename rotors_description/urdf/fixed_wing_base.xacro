@@ -94,7 +94,7 @@
       <xacro:insert_block name="axis" />
       <parent link="${parent}" />
       <child link="${robot_namespace}/${surface_name}" />
-      <limit upper="${max_angle}" lower="${min_angle}" effort="0" velocity="0" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
     </joint>
 
     <link name="${robot_namespace}/${surface_name}">
