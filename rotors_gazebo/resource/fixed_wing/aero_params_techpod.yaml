@@ -1,7 +1,15 @@
 # Fixed wing aerodynamic parameters
-alpha_max: 0.27
-alpha_min: -0.27
 
+# Angle of attack bounds
+alpha_max: 0.27    # [rad]
+alpha_min: -0.27   # [rad]
+
+# The vector values correspond to the Taylor expansion coefficients, where the
+#   first value is the zero-degree term coefficient, second value is the first-
+#   degree term coefficent, and so on.
+#
+# For example, 'c_drag_alpha: [n_0, n_1, n_2]' would result in the following
+#   calculation: 'drag = n_0 + n_1 * alpha + n_2 * alpha^2'.
 c_drag_alpha: [0.136, -0.6737, 5.4546]
 c_drag_beta: [0.0195, 0.0, -0.3842]
 c_drag_delta_ail: [0.0195, 1.4205e-4, 7.5037e-6]
