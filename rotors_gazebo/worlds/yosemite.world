@@ -84,7 +84,7 @@
         </surface>
       </collision>
       <visual name='visual_1'>
-        <pose>-275 -125 0 0 0 0</pose>
+        <pose>-375 -125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -101,7 +101,7 @@
         </material>
       </visual>
       <visual name='visual_2'>
-        <pose>-275 125 0 0 0 0</pose>
+        <pose>-375 125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -118,7 +118,7 @@
         </material>
       </visual>
       <visual name='visual_3'>
-        <pose>-25 -125 0 0 0 0</pose>
+        <pose>-125 -125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -135,7 +135,7 @@
         </material>
       </visual>
       <visual name='visual_4'>
-        <pose>-25 125 0 0 0 0</pose>
+        <pose>-125 125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -152,7 +152,7 @@
         </material>
       </visual>
       <visual name='visual_5'>
-        <pose>225 -125 0 0 0 0</pose>
+        <pose>125 -125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -169,7 +169,7 @@
         </material>
       </visual>
       <visual name='visual_6'>
-        <pose>225 125 0 0 0 0</pose>
+        <pose>125 125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -186,7 +186,7 @@
         </material>
       </visual>
       <visual name='visual_7'>
-        <pose>475 125 0 0 0 0</pose>
+        <pose>375 125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
