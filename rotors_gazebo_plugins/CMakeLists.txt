@@ -118,6 +118,7 @@ find_package(OpenCV REQUIRED)
 link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(${GAZEBO_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(${YAML_CPP_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # if (BUILD_MAVLINK_INTERFACE_PLUGIN)
@@ -235,7 +236,7 @@ endif()
 
 #===================================== FW DYNAMICS PLUGIN =======================================//
 add_library(rotors_gazebo_fw_dynamics_plugin SHARED src/gazebo_fw_dynamics_plugin.cpp)
-target_link_libraries(rotors_gazebo_fw_dynamics_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} yaml-cpp)
+target_link_libraries(rotors_gazebo_fw_dynamics_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_fw_dynamics_plugin ${catkin_EXPORTED_TARGETS})
 endif()
