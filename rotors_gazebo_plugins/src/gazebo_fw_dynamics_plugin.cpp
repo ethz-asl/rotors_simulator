@@ -61,7 +61,7 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
   // Create the node handle.
   node_handle_ = transport::NodePtr(new transport::Node());
 
-  // Initisalise with default namespace (typically /gazebo/default/).
+  // Initialise with default namespace (typically /gazebo/default/).
   node_handle_->Init();
 
   // Get the link name.

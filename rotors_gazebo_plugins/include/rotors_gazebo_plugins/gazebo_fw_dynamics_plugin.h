@@ -44,7 +44,7 @@ static constexpr bool kDefaultIsInputJoystick = false;
 
 // Constants.
 static constexpr double kAirDensity = 1.18;
-static constexpr double kG = 9.81;
+static constexpr double kGravity = 9.81;
 static constexpr double kMinAirSpeedThresh = 0.1;
 
 class GazeboFwDynamicsPlugin : public ModelPlugin {
