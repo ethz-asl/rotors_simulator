@@ -178,7 +178,7 @@ struct FWAerodynamicParameters {
   Eigen::Vector3d c_thrust;
 
   void LoadAeroParamsYAML(const std::string& yaml_path) {
-    YAML::Node node = YAML::LoadFile(yaml_path);
+    const YAML::Node node = YAML::LoadFile(yaml_path);
 
     READ_PARAM(node, alpha_max);
     READ_PARAM(node, alpha_min);
@@ -259,7 +259,7 @@ struct FWVehicleParameters {
   ControlSurface rudder;
 
   void LoadVehicleParamsYAML(const std::string& yaml_path) {
-    YAML::Node node = YAML::LoadFile(yaml_path);
+    const YAML::Node node = YAML::LoadFile(yaml_path);
 
     READ_PARAM(node, wing_span);
     READ_PARAM(node, wing_surface);
@@ -279,7 +279,7 @@ struct FWVehicleParameters {
 inline void YAMLReadControlSurface(const YAML::Node& node,
                                    const std::string& name,
                                    ControlSurface& surface) {
-  YAML::Node surface_node = node[name];
+  const YAML::Node surface_node = node[name];
   surface.LoadControlSurfaceNode(surface_node);
 }
 

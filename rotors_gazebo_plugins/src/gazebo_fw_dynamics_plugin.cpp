@@ -168,7 +168,7 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
     alpha = aero_params_.alpha_min;
 
   // Pre-compute the common component in the force and moment calculations.
-  double q_bar_S = 0.5 * kAirDensity * V * V * vehicle_params_.wing_surface;
+  const double q_bar_S = 0.5 * kAirDensity * V * V * vehicle_params_.wing_surface;
 
   // Combine some of the control surface deflections.
   double aileron_sum = delta_aileron_left_ + delta_aileron_right_;
@@ -177,7 +177,7 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
   double flap_diff = 0.0;
 
   // Compute the forces in the wind frame.
-  double drag = q_bar_S *
+  const double drag = q_bar_S *
       (aero_params_.c_drag_alpha.dot(
            Eigen::Vector3d(1.0, alpha, alpha * alpha)) +
        aero_params_.c_drag_beta.dot(
@@ -187,11 +187,11 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
        aero_params_.c_drag_delta_flp.dot(
            Eigen::Vector3d(0.0, flap_sum, flap_sum * flap_sum)));
 
-  double side_force = q_bar_S *
+  const double side_force = q_bar_S *
       (aero_params_.c_side_force_beta.dot(
            Eigen::Vector2d(0.0, beta)));
 
-  double lift = q_bar_S *
+  const double lift = q_bar_S *
       (aero_params_.c_lift_alpha.dot(
            Eigen::Vector4d(1.0, alpha, alpha * alpha, alpha * alpha * alpha)) +
        aero_params_.c_lift_delta_ail.dot(
@@ -199,20 +199,20 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
        aero_params_.c_lift_delta_flp.dot(
            Eigen::Vector2d(0.0, flap_sum)));
 
-  Eigen::Vector3d forces_Wind(-drag, side_force, -lift);
+  const Eigen::Vector3d forces_Wind(-drag, side_force, -lift);
 
   // Non-dimensionalize the angular rates for inclusion in the computation of
   // moments. To avoid division by zero, there is a minimum air speed threshold
   // below which the values are zero.
-  double p_hat = (V < kMinAirSpeedThresh) ? 0.0 :
+  const double p_hat = (V < kMinAirSpeedThresh) ? 0.0 :
       p * vehicle_params_.wing_span / (2.0 * V);
-  double q_hat = (V < kMinAirSpeedThresh) ? 0.0 :
+  const double q_hat = (V < kMinAirSpeedThresh) ? 0.0 :
       q * vehicle_params_.chord_length / (2.0 * V);
-  double r_hat = (V < kMinAirSpeedThresh) ? 0.0 :
+  const double r_hat = (V < kMinAirSpeedThresh) ? 0.0 :
       r * vehicle_params_.wing_span / (2.0 * V);
 
   // Compute the moments in the wind frame.
-  double rolling_moment = q_bar_S * vehicle_params_.wing_span *
+  const double rolling_moment = q_bar_S * vehicle_params_.wing_span *
       (aero_params_.c_roll_moment_beta.dot(
            Eigen::Vector2d(0.0, beta)) +
        aero_params_.c_roll_moment_p.dot(
@@ -224,7 +224,7 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
        aero_params_.c_roll_moment_delta_flp.dot(
            Eigen::Vector2d(0.0, flap_diff)));
 
-  double pitching_moment = q_bar_S * vehicle_params_.chord_length *
+  const double pitching_moment = q_bar_S * vehicle_params_.chord_length *
       (aero_params_.c_pitch_moment_alpha.dot(
            Eigen::Vector2d(1.0, alpha)) +
        aero_params_.c_pitch_moment_q.dot(
@@ -232,7 +232,7 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
        aero_params_.c_pitch_moment_delta_elv.dot(
            Eigen::Vector2d(0.0, delta_elevator_)));
 
-  double yawing_moment = q_bar_S * vehicle_params_.wing_span *
+  const double yawing_moment = q_bar_S * vehicle_params_.wing_span *
       (aero_params_.c_yaw_moment_beta.dot(
            Eigen::Vector2d(0.0, beta)) +
        aero_params_.c_yaw_moment_r.dot(
@@ -240,15 +240,18 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
        aero_params_.c_yaw_moment_delta_rud.dot(
            Eigen::Vector2d(0.0, delta_rudder_)));
 
-  Eigen::Vector3d moments_Wind(rolling_moment, pitching_moment, yawing_moment);
+  const Eigen::Vector3d moments_Wind(rolling_moment,
+                                     pitching_moment,
+                                     yawing_moment);
 
   // Compute the thrust force in the body frame.
-  double thrust = aero_params_.c_thrust.dot(
+  const double thrust = aero_params_.c_thrust.dot(
       Eigen::Vector3d(1.0, throttle_, throttle_ * throttle_));
-  double thrust_x = cos(vehicle_params_.thrust_inclination) * thrust;
-  double thrust_z = sin(vehicle_params_.thrust_inclination) * thrust;
 
-  Eigen::Vector3d force_thrust_B(thrust_x, 0.0, thrust_z);
+  const Eigen::Vector3d force_thrust_B = thrust * Eigen::Vector3d(
+      cos(vehicle_params_.thrust_inclination),
+      0.0,
+      sin(vehicle_params_.thrust_inclination));
 
   // Compute the transform between the body frame and the wind frame.
   double ca = cos(alpha);
@@ -261,17 +264,17 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
               -sb * ca, cb, -sa * sb,
               -sa, 0.0, ca;
 
-  Eigen::Matrix3d R_Wind_B_t = R_Wind_B.transpose();
+  const Eigen::Matrix3d R_Wind_B_t = R_Wind_B.transpose();
 
   // Transform all the forces and moments into the body frame
-  Eigen::Vector3d forces_B = R_Wind_B_t * forces_Wind + force_thrust_B;
-  Eigen::Vector3d moments_B = R_Wind_B_t * moments_Wind;
+  const Eigen::Vector3d forces_B = R_Wind_B_t * forces_Wind + force_thrust_B;
+  const Eigen::Vector3d moments_B = R_Wind_B_t * moments_Wind;
 
   // Once again account for the difference between our body frame orientation
   // and the traditional aerodynamics frame.
-  math::Vector3 forces =
+  const math::Vector3 forces =
       math::Vector3(forces_B[0], -forces_B[1], -forces_B[2]);
-  math::Vector3 moments =
+  const math::Vector3 moments =
       math::Vector3(moments_B[0], -moments_B[1], -moments_B[2]);
 
   // Apply the calculated forced and moments to the main body link.
@@ -319,6 +322,7 @@ void GazeboFwDynamicsPlugin::CreatePubsAndSubs() {
     // ========================================================= //
     // === ROLL_PITCH_YAWRATE_THRUST MSG SETUP (ROS->GAZEBO) === //
     // ========================================================= //
+
     roll_pitch_yawrate_thrust_sub_ =
         node_handle_->Subscribe("~/" + namespace_ + "/" +
             roll_pitch_yawrate_thrust_sub_topic_,
