@@ -106,6 +106,7 @@ if (NOT NO_ROS)
     rotors_control
     std_srvs
     tf
+    yaml_cpp_catkin
   )
 endif()
 
@@ -115,17 +116,24 @@ message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 find_package(Eigen REQUIRED)
 find_package(gazebo REQUIRED)
 find_package(OpenCV REQUIRED)
-find_package(YamlCpp REQUIRED)
 link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(${GAZEBO_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
-include_directories(${YAML_CPP_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # if (BUILD_MAVLINK_INTERFACE_PLUGIN)
 #   include_directories(${mavros_msgs_INCLUDE_DIRS})
 #   include_directories(${libmavconn_INCLUDE_DIRS})
 # endif()
+
+# ============================================== #
+# =================== YAML_CPP ================= #
+# ============================================== #
+
+if (NO_ROS)
+  find_package(YamlCpp REQUIRED)
+  include_directories(${YAML_CPP_INCLUDE_DIR})
+endif()
 
 # ============================================== #
 # =================== PROTOBUF ================= #
@@ -183,8 +191,8 @@ if (NOT NO_ROS)
   catkin_package(
     INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS} ${CATKIN_DEVEL_PREFIX}/include/${PACKAGE_NAME}
     LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
-    CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf
-    DEPENDS eigen gazebo octomap opencv YamlCpp
+    CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf yaml_cpp_catkin
+    DEPENDS eigen gazebo octomap opencv
     #CFG_EXTRAS rotors_gazebo_plugins.cmake
   )
 endif()
