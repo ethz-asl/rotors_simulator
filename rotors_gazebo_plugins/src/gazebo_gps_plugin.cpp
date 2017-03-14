@@ -63,7 +63,7 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
 
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
 
-  // Initisalise with default namespace (typically /gazebo/default/)
+  // Initialise with default namespace (typically /gazebo/default/)
   node_handle_->Init();
 
   if (_sdf->HasElement("linkName"))
@@ -153,6 +153,9 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
 
   // Fill the static parts of the ground speed message.
   gz_ground_speed_message_.mutable_header()->set_frame_id(frame_id);
+  gz_ground_speed_message_.mutable_twist()->mutable_angular()->set_x(0.0);
+  gz_ground_speed_message_.mutable_twist()->mutable_angular()->set_y(0.0);
+  gz_ground_speed_message_.mutable_twist()->mutable_angular()->set_z(0.0);
 }
 
 void GazeboGpsPlugin::OnUpdate() {

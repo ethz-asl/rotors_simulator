@@ -53,7 +53,7 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Create Gazebo Node.
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
 
-  // Initisalise with default namespace (typically /gazebo/default/).
+  // Initialise with default namespace (typically /gazebo/default/).
   node_handle_->Init();
 
   if (_sdf->HasElement("xyzOffset"))

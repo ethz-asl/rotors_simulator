@@ -33,7 +33,8 @@
   <!-- Fixed-wing main body link -->
   <xacro:macro name="fixed_wing_base_macro"
     params="robot_namespace mass length width height color use_mesh_file 
-      mesh_file *origin *inertia">
+      mesh_file aero_params_yaml vehicle_params_yaml is_input_joystick
+      *origin *inertia">
     <link name="${robot_namespace}/base_link"></link>
 
     <joint name="${robot_namespace}/base_joint" type="fixed">
@@ -70,6 +71,17 @@
     <gazebo reference="${robot_namespace}/base_link">
       <material>Gazebo/${color}</material>
     </gazebo>
+
+    <!-- Attach fw_dynamics to the base_link -->
+    <gazebo>
+      <plugin filename="librotors_gazebo_fw_dynamics_plugin.so" name="fw_dynamics_plugin">
+        <robotNamespace>${robot_namespace}</robotNamespace>
+        <linkName>${robot_namespace}/base_link</linkName>
+        <aeroParamsYAML>${aero_params_yaml}</aeroParamsYAML>
+        <vehicleParamsYAML>${vehicle_params_yaml}</vehicleParamsYAML>
+        <isInputJoystick>${is_input_joystick}</isInputJoystick>
+      </plugin>
+    </gazebo>
   </xacro:macro>
 
   <!-- Control surface joint and link -->
@@ -82,7 +94,7 @@
       <xacro:insert_block name="axis" />
       <parent link="${parent}" />
       <child link="${robot_namespace}/${surface_name}" />
-      <limit upper="${max_angle}" lower="${min_angle}" effort="0" velocity="0" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
     </joint>
 
     <link name="${robot_namespace}/${surface_name}">

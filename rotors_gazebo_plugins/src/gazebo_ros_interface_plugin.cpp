@@ -318,6 +318,26 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
 
       break;
     }
+    case gz_std_msgs::ConnectRosToGazeboTopic::ROLL_PITCH_YAWRATE_THRUST: {
+      gazebo::transport::PublisherPtr gz_publisher_ptr =
+          gz_node_handle_->Advertise<gz_mav_msgs::RollPitchYawrateThrust>(
+              gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+
+      // Create ROS subscriber.
+      ros::Subscriber ros_subscriber =
+          ros_node_handle_->subscribe<mav_msgs::RollPitchYawrateThrust>(
+              gz_connect_ros_to_gazebo_topic_msg->ros_topic(), 1,
+              boost::bind(
+                  &GazeboRosInterfacePlugin::
+                      RosRollPitchYawrateThrustMsgCallback,
+                  this, _1, gz_publisher_ptr));
+
+      // Save reference to the ROS subscriber so callback will continue to be
+      // called.
+      ros_subscribers.push_back(ros_subscriber);
+
+      break;
+    }
     case gz_std_msgs::ConnectRosToGazeboTopic::WIND_SPEED: {
       gazebo::transport::PublisherPtr gz_publisher_ptr =
           gz_node_handle_->Advertise<gz_mav_msgs::WindSpeed>(
@@ -786,7 +806,31 @@ void GazeboRosInterfacePlugin::GzTransformStampedMsgCallback(
 
 void GazeboRosInterfacePlugin::GzTwistStampedMsgCallback(
     GzTwistStampedMsgPtr& gz_twist_stamped_msg, ros::Publisher ros_publisher) {
-  gzthrow(__FUNCTION__ << "() is not yet implemented.");
+  // ============================================ //
+  // =================== HEADER ================= //
+  // ============================================ //
+  ConvertHeaderGzToRos(gz_twist_stamped_msg->header(),
+                       &ros_twist_stamped_msg_.header);
+
+  // ============================================ //
+  // =================== TWIST ================== //
+  // ============================================ //
+
+  ros_twist_stamped_msg_.twist.linear.x =
+      gz_twist_stamped_msg->twist().linear().x();
+  ros_twist_stamped_msg_.twist.linear.y =
+      gz_twist_stamped_msg->twist().linear().y();
+  ros_twist_stamped_msg_.twist.linear.z =
+      gz_twist_stamped_msg->twist().linear().z();
+
+  ros_twist_stamped_msg_.twist.angular.x =
+      gz_twist_stamped_msg->twist().angular().x();
+  ros_twist_stamped_msg_.twist.angular.y =
+      gz_twist_stamped_msg->twist().angular().y();
+  ros_twist_stamped_msg_.twist.angular.z =
+      gz_twist_stamped_msg->twist().angular().z();
+
+  ros_publisher.publish(ros_twist_stamped_msg_);
 }
 
 void GazeboRosInterfacePlugin::GzVector3dStampedMsgCallback(
@@ -876,9 +920,19 @@ void GazeboRosInterfacePlugin::RosActuatorsMsgCallback(
   ConvertHeaderRosToGz(ros_actuators_msg_ptr->header,
                        gz_actuators_msg.mutable_header());
 
+  for (int i = 0; i < ros_actuators_msg_ptr->angles.size(); i++) {
+    gz_actuators_msg.add_angles(
+        ros_actuators_msg_ptr->angles[i]);
+  }
+
   for (int i = 0; i < ros_actuators_msg_ptr->angular_velocities.size(); i++) {
     gz_actuators_msg.add_angular_velocities(
         ros_actuators_msg_ptr->angular_velocities[i]);
+  }
+
+  for (int i = 0; i < ros_actuators_msg_ptr->normalized.size(); i++) {
+    gz_actuators_msg.add_normalized(
+        ros_actuators_msg_ptr->normalized[i]);
   }
 
   // Publish to Gazebo
@@ -901,10 +955,40 @@ void GazeboRosInterfacePlugin::RosCommandMotorSpeedMsgCallback(
   gz_publisher_ptr->Publish(gz_command_motor_speed_msg);
 }
 
+void GazeboRosInterfacePlugin::RosRollPitchYawrateThrustMsgCallback(
+    const mav_msgs::RollPitchYawrateThrustConstPtr&
+        ros_roll_pitch_yawrate_thrust_msg_ptr,
+    gazebo::transport::PublisherPtr gz_publisher_ptr) {
+  // Convert ROS message to Gazebo message
+
+  gz_mav_msgs::RollPitchYawrateThrust gz_roll_pitch_yawrate_thrust_msg;
+
+  ConvertHeaderRosToGz(ros_roll_pitch_yawrate_thrust_msg_ptr->header,
+                       gz_roll_pitch_yawrate_thrust_msg.mutable_header());
+
+  gz_roll_pitch_yawrate_thrust_msg.set_roll(
+      ros_roll_pitch_yawrate_thrust_msg_ptr->roll);
+  gz_roll_pitch_yawrate_thrust_msg.set_pitch(
+      ros_roll_pitch_yawrate_thrust_msg_ptr->pitch);
+  gz_roll_pitch_yawrate_thrust_msg.set_yaw_rate(
+      ros_roll_pitch_yawrate_thrust_msg_ptr->yaw_rate);
+
+  gz_roll_pitch_yawrate_thrust_msg.mutable_thrust()->set_x(
+      ros_roll_pitch_yawrate_thrust_msg_ptr->thrust.x);
+  gz_roll_pitch_yawrate_thrust_msg.mutable_thrust()->set_y(
+      ros_roll_pitch_yawrate_thrust_msg_ptr->thrust.y);
+  gz_roll_pitch_yawrate_thrust_msg.mutable_thrust()->set_z(
+      ros_roll_pitch_yawrate_thrust_msg_ptr->thrust.z);
+
+  // Publish to Gazebo
+  gz_publisher_ptr->Publish(gz_roll_pitch_yawrate_thrust_msg);
+}
+
 void GazeboRosInterfacePlugin::RosWindSpeedMsgCallback(
     const rotors_comm::WindSpeedConstPtr& ros_wind_speed_msg_ptr,
     gazebo::transport::PublisherPtr gz_publisher_ptr) {
   // Convert ROS message to Gazebo message
+
   gz_mav_msgs::WindSpeed gz_wind_speed_msg;
 
   ConvertHeaderRosToGz(ros_wind_speed_msg_ptr->header,

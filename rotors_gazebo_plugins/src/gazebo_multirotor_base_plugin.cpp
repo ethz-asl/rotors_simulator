@@ -54,7 +54,7 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model,
 
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
 
-  // Initisalise with default namespace (typically /gazebo/default/)
+  // Initialise with default namespace (typically /gazebo/default/)
   node_handle_->Init();
 
   frame_id_ = link_name_;

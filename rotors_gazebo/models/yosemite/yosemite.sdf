@@ -8,7 +8,7 @@
           <heightmap>
             <uri>model://yosemite/materials/textures/yosemite.png</uri>
             <size>1000 1000 125</size>
-            <pos>100 0 -30</pos>
+            <pos>0 0 -15</pos>
           </heightmap>
         </geometry>
         <surface>
@@ -44,7 +44,7 @@
               <size>50</size>
             </texture>
             <blend>
-              <min_height>35</min_height>
+              <min_height>20</min_height>
               <fade_dist>10</fade_dist>
             </blend>
 	    <blend>
@@ -57,7 +57,7 @@
             </blend>
             <uri>model://yosemite/materials/textures/yosemite.png</uri>
             <size>1000 1000 125</size>
-            <pos>100 0 -30</pos>
+            <pos>0 0 -15</pos>
           </heightmap>
         </geometry>
       </visual>

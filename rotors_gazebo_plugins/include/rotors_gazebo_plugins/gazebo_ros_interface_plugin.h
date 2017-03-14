@@ -46,6 +46,7 @@
 #include "NavSatFix.pb.h"
 #include "Odometry.pb.h"
 #include "PoseWithCovarianceStamped.pb.h"
+#include "RollPitchYawrateThrust.pb.h"
 #include "TransformStamped.pb.h"
 #include "TransformStampedWithFrameIds.pb.h"
 #include "TwistStamped.pb.h"
@@ -62,6 +63,7 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <mav_msgs/Actuators.h>
+#include <mav_msgs/RollPitchYawrateThrust.h>
 #include <nav_msgs/Odometry.h>
 #include <rotors_comm/WindSpeed.h>
 #include <sensor_msgs/Imu.h>
@@ -97,6 +99,8 @@ typedef const boost::shared_ptr<const gz_geometry_msgs::Vector3dStamped>
     GzVector3dStampedMsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::WrenchStamped>
     GzWrenchStampedMsgPtr;
+typedef const boost::shared_ptr<const gz_mav_msgs::RollPitchYawrateThrust>
+    GzRollPitchYawrateThrustPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
 typedef const boost::shared_ptr<const gz_sensor_msgs::Actuators>
     GzActuatorsMsgPtr;
@@ -288,6 +292,12 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   // COMMAND MOTOR SPEED (this is the same as ACTUATORS!, merge???)
   void RosCommandMotorSpeedMsgCallback(
       const mav_msgs::ActuatorsConstPtr& ros_command_motor_speed_msg_ptr,
+      gazebo::transport::PublisherPtr gz_publisher_ptr);
+
+  // ROLL PITCH YAWRATE THRUST
+  void RosRollPitchYawrateThrustMsgCallback(
+      const mav_msgs::RollPitchYawrateThrustConstPtr&
+          ros_roll_pitch_yawrate_thrust_msg_ptr,
       gazebo::transport::PublisherPtr gz_publisher_ptr);
 
   // WIND SPEED

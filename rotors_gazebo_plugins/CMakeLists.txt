@@ -106,6 +106,7 @@ if (NOT NO_ROS)
     rotors_control
     std_srvs
     tf
+    yaml_cpp_catkin
   )
 endif()
 
@@ -124,6 +125,15 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 #   include_directories(${mavros_msgs_INCLUDE_DIRS})
 #   include_directories(${libmavconn_INCLUDE_DIRS})
 # endif()
+
+# ============================================== #
+# =================== YAML_CPP ================= #
+# ============================================== #
+
+if (NO_ROS)
+  find_package(YamlCpp REQUIRED)
+  include_directories(${YAML_CPP_INCLUDE_DIR})
+endif()
 
 # ============================================== #
 # =================== PROTOBUF ================= #
@@ -181,7 +191,7 @@ if (NOT NO_ROS)
   catkin_package(
     INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS} ${CATKIN_DEVEL_PREFIX}/include/${PACKAGE_NAME}
     LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
-    CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf
+    CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf yaml_cpp_catkin
     DEPENDS eigen gazebo octomap opencv
     #CFG_EXTRAS rotors_gazebo_plugins.cmake
   )
@@ -232,6 +242,14 @@ if(${gazebo_VERSION_MAJOR} GREATER 4)
 else()
   message(STATUS "Gazebo version is less than 5, not building gazebo_geotagged_images_plugin.cpp.")
 endif()
+
+#===================================== FW DYNAMICS PLUGIN =======================================//
+add_library(rotors_gazebo_fw_dynamics_plugin SHARED src/gazebo_fw_dynamics_plugin.cpp)
+target_link_libraries(rotors_gazebo_fw_dynamics_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${YAML_CPP_LIBRARY})
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_fw_dynamics_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_fw_dynamics_plugin)
 
 #========================================= GPS PLUGIN ===========================================//
 add_library(rotors_gazebo_gps_plugin SHARED src/gazebo_gps_plugin.cpp)
