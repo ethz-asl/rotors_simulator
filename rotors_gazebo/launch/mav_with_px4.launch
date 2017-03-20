@@ -1,0 +1,65 @@
+<launch>
+  <arg name="mav_name" default="iris"/>
+  <arg name="world_name" default="basic"/>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="$(arg mav_name)"/>
+  <arg name="debug" default="false"/>
+  <arg name="gui" default="true"/>
+  <arg name="paused" default="true"/>
+  <!-- The following line causes gzmsg and gzerr messages to be printed to the console
+      (even when Gazebo is started through roslaunch) -->
+  <arg name="verbose" default="false"/>
+
+  <!--px4 args-->
+  <arg name="est" default="ekf2"/>
+  <arg name="rcS" default="$(find px4)/posix-configs/SITL/init/$(arg est)/$(arg mav_name)"/>
+  <arg name="fcu_url" default="udp://:14540@localhost:14557"/>
+  <arg name="gcs_url" default=""/> <!-- GCS link is provided by SITL -->
+  <arg name="tgt_system" default="1" />
+  <arg name="tgt_component" default="1" />
+  <arg name="pluginlists_yaml" default="$(find mavros)/launch/px4_pluginlists.yaml" />
+  <arg name="config_yaml" default="$(find mavros)/launch/px4_config.yaml" />
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="paused" value="$(arg paused)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="verbose" value="$(arg verbose)"/>
+  </include>
+
+  <group ns="/">
+
+    <!--rotors sim-->
+    <!--<include file="$(find rotors_gazebo)/launch/spawn_mav.launch">-->
+      <!--<arg name="mav_name" value="$(arg mav_name)" />-->
+      <!--<arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_base.xacro" />-->
+      <!--<arg name="enable_logging" value="$(arg enable_logging)" />-->
+      <!--<arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />-->
+      <!--<arg name="enable_mavlink_interface" value="true" />-->
+      <!--<arg name="log_file" value="$(arg log_file)"/>-->
+    <!--</include>-->
+
+    <arg name="sdf" default="$(find rotors_gazebo)/models/iris/iris.sdf"/>
+
+    <node name="$(anon vehicle_spawn)" output="screen" pkg="gazebo_ros" type="spawn_model"
+        args="-sdf -file $(arg sdf) -model iris"/>
+
+    <!--PX4 posix SITL-->
+    <node name="px4" pkg="px4" type="px4" args="$(find px4) $(arg rcS)"
+      output="screen"/>
+
+    <!-- MAVROS launch script PX4 (default) -->
+    <include file="$(find mavros)/launch/node.launch">
+        <arg name="pluginlists_yaml" value="$(arg pluginlists_yaml)" />
+        <arg name="config_yaml" value="$(arg config_yaml)" />
+        <arg name="fcu_url" value="$(arg fcu_url)" />
+        <arg name="gcs_url" value="$(arg gcs_url)" />
+        <arg name="tgt_system" value="$(arg tgt_system)" />
+        <arg name="tgt_component" value="$(arg tgt_component)" />
+    </include>
+
+  </group>
+
+</launch>

@@ -23,8 +23,8 @@ project(rotors_gazebo_plugins)
 # =============================================================================================== #
 
 if(NOT DEFINED BUILD_MAVLINK_INTERFACE_PLUGIN)
-  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN variable not provided, setting to FALSE.")
-  set(BUILD_MAVLINK_INTERFACE_PLUGIN FALSE)
+  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN variable not provided, setting to TRUE.")
+  set(BUILD_MAVLINK_INTERFACE_PLUGIN TRUE)
 endif()
 
 if(NOT DEFINED BUILD_OCTOMAP_PLUGIN)
@@ -314,6 +314,12 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
     if(EXISTS /opt/ros/indigo/include/mavlink/v1.0/)
       message(STATUS "Found MAVLink headers at '/opt/ros/indigo/include/mavlink/v1.0/'.")
       include_directories("/opt/ros/indigo/include/mavlink/v1.0/")
+      set(MAVLINK_HEADERS_FOUND TRUE)
+    endif()
+
+    if(EXISTS /opt/ros/kinetic/include/mavlink/v1.0/)
+      message(STATUS "Found MAVLink headers at '/opt/ros/kinetic/include/mavlink/v1.0/'.")
+      include_directories("/opt/ros/kinetic/include/mavlink/v1.0/")
       set(MAVLINK_HEADERS_FOUND TRUE)
     endif()
     
