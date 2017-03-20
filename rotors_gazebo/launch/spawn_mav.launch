@@ -39,15 +39,4 @@
    respawn="false" output="screen">
   </node>
 
-  <!-- push robot_description to factory and spawn robot in gazebo -->
-  <node name="sdf_store" pkg="xacro" type="xacro"
-    args="$(arg model) --verbosity $(arg xacro_verbosity) --check-order
-      enable_logging:=$(arg enable_logging)
-      enable_ground_truth:=$(arg enable_ground_truth)
-      enable_mavlink_interface:=$(arg enable_mavlink_interface)
-      log_file:=$(arg log_file)
-      wait_to_record_bag:=$(arg wait_to_record_bag)
-      mav_name:=$(arg mav_name)
-      namespace:=$(arg namespace)"
-    output="screen"/>
 </launch>
