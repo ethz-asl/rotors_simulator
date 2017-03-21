@@ -794,6 +794,8 @@ void GazeboRosInterfacePlugin::GzTransformStampedMsgCallback(
   // ============================================ //
   // ============ TRANSFORM, ROTATION =========== //
   // ============================================ //
+  ros_transform_stamped_msg_.transform.rotation.w =
+      gz_transform_stamped_msg->transform().rotation().w();
   ros_transform_stamped_msg_.transform.rotation.x =
       gz_transform_stamped_msg->transform().rotation().x();
   ros_transform_stamped_msg_.transform.rotation.y =
