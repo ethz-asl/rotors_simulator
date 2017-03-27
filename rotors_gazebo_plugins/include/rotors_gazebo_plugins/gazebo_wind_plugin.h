@@ -29,6 +29,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
+#include <ros/ros.h>
 
 #include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
 
@@ -57,6 +58,9 @@ static constexpr double kDefaultWindSpeedVariance = 0.0;
 static const math::Vector3 kDefaultWindDirection = math::Vector3(1, 0, 0);
 static const math::Vector3 kDefaultWindGustDirection = math::Vector3(0, 1, 0);
 
+static constexpr bool kDefaultCustomStaticWindField = false;
+static const std::string kDefaultCustomWindFieldPath = "$(find rotors_gazebo)";
+
 
 
 /// \brief    This gazebo plugin simulates wind acting on a model.
@@ -77,6 +81,7 @@ class GazeboWindPlugin : public ModelPlugin {
         wind_speed_variance_(kDefaultWindSpeedVariance),
         wind_direction_(kDefaultWindDirection),
         wind_gust_direction_(kDefaultWindGustDirection),
+        custom_static_wind_field_(kDefaultCustomStaticWindField),
         frame_id_(kDefaultFrameId),
         link_name_(kDefaultLinkName),
         node_handle_(nullptr),
@@ -135,6 +140,33 @@ class GazeboWindPlugin : public ModelPlugin {
   common::Time wind_gust_end_;
   common::Time wind_gust_start_;
 
+  /// \brief    Variables for custom wind field generation.
+  bool custom_static_wind_field_;
+  float min_x_;
+  float min_y_;
+  int n_x_;
+  int n_y_;
+  float res_x_;
+  float res_y_;
+  std::vector<float> vertical_spacing_factors_;
+  std::vector<float> bottom_z_;
+  std::vector<float> top_z_;
+  std::vector<float> u_;
+  std::vector<float> v_;
+  std::vector<float> w_;
+  
+  /// \brief  Reads wind data from a text file and saves it.
+  /// \param[in] custom_wind_field_path Path to the wind field from ~/.ros.
+  void ReadCustomWindField(std::string& custom_wind_field_path);
+  
+  /// \brief  Functions for trilinear interpolation of wind field at aircraft position.
+  /// \param[in]  link_position Position of the aircraft in world coordinates.
+  ///             *values Pointer to an array that contains wind values of the vertices used for interpolation.
+  ///             *points Pointer to an array that contains the coordinates of the vertices used for interpolation.
+  math::Vector3 LinearInterpolation(double position, math::Vector3 *values, float *points);
+  math::Vector3 BilinearInterpolation(double *position, math::Vector3 *values, float *points);
+  math::Vector3 TrilinearInterpolation(math::Vector3 link_position, math::Vector3 *values, float *points);
+  
   gazebo::transport::PublisherPtr wind_force_pub_;
   gazebo::transport::PublisherPtr wind_speed_pub_;
 
