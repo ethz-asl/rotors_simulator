@@ -16,7 +16,7 @@
     version: indigo-devel
 - git:
     local-name: px4
-    uri: git@github.com:PX4/Firmware
+    uri: https://github.com/PX4/Firmware.git
     version: master
 - git:
     local-name: rotors_simulator
