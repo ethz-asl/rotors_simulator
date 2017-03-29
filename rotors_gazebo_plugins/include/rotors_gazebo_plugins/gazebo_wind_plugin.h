@@ -160,12 +160,36 @@ class GazeboWindPlugin : public ModelPlugin {
   void ReadCustomWindField(std::string& custom_wind_field_path);
   
   /// \brief  Functions for trilinear interpolation of wind field at aircraft position.
-  /// \param[in]  link_position Position of the aircraft in world coordinates.
-  ///             *values Pointer to an array that contains wind values of the vertices used for interpolation.
-  ///             *points Pointer to an array that contains the coordinates of the vertices used for interpolation.
-  math::Vector3 LinearInterpolation(double position, math::Vector3 *values, float *points);
-  math::Vector3 BilinearInterpolation(double *position, math::Vector3 *values, float *points);
-  math::Vector3 TrilinearInterpolation(math::Vector3 link_position, math::Vector3 *values, float *points);
+  
+  /// \brief  Linear interpolation
+  /// \param[in]  position y-coordinate of the target point.
+  ///             values Pointer to an array of size 2 containing the wind values
+  ///                    of the two points to interpolate from (12 and 13).
+  ///             points Pointer to an array of size 2 containing the y-coordinate 
+  ///                    of the two points to interpolate from.
+  math::Vector3 LinearInterpolation(double position, math::Vector3* values, float* points) const;
+  
+  /// \brief  Bilinear interpolation
+  /// \param[in]  position Pointer to an array of size 2 containing the x- and 
+  ///                      y-coordinates of the target point.
+  ///             values Pointer to an array of size 4 containing the wind values 
+  ///                    of the four points to interpolate from (8, 9, 10 and 11).
+  ///             points Pointer to an array of size 14 containing the z-coordinate
+  ///                    of the eight points to interpolate from, the x-coordinate 
+  ///                    of the four intermediate points (8, 9, 10 and 11), and the 
+  ///                    y-coordinate of the last two intermediate points (12 and 13).
+  math::Vector3 BilinearInterpolation(double* position, math::Vector3* values, float* points) const;
+  
+  /// \brief  Trilinear interpolation
+  /// \param[in]  link_position Vector3 containing the x, y and z-coordinates
+  ///                           of the target point.
+  ///             values Pointer to an array of size 8 containing the wind values of the 
+  ///                    eight points to interpolate from (0, 1, 2, 3, 4, 5, 6 and 7).
+  ///             points Pointer to an array of size 14 containing the z-coordinate          
+  ///                    of the eight points to interpolate from, the x-coordinate 
+  ///                    of the four intermediate points (8, 9, 10 and 11), and the 
+  ///                    y-coordinate of the last two intermediate points (12 and 13).
+  math::Vector3 TrilinearInterpolation(math::Vector3 link_position, math::Vector3* values, float* points) const;
   
   gazebo::transport::PublisherPtr wind_force_pub_;
   gazebo::transport::PublisherPtr wind_speed_pub_;

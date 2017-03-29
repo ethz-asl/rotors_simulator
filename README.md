@@ -214,6 +214,14 @@ The order in which the data is saved in the text file is not relevant, but the f
 
 An example wind field text file can be seen for the hemicylindrical world at `$(find rotors_gazebo)/models/hemicyl` (placed in the same folder as the world model for clarity and convenience).
 
+To visualize the content of the wind field text file, the script `visualize_custom_wind_field.py` can be used to create a .vtu file, which can then be visualized using Paraview. This is done in three simple steps:
+
+  1. Copy the `visualize_custom_wind_field.py` file into the directory where your .txt file is located.
+  
+  2. `cd` to .txt file directory.
+  
+  3. Type `python visualize_custom_wind_field.py <input_file_name>.txt`. This creates a `u_vis.vtu` and a `terain.vtu` files which contain the wind data, resp. the terrain elevation data. These are directly visualizable in Paraview.
+
 #### Wind Plugin Macro
 
 Here is an example of the plugin macro to be added in the base file, containing numerous necessary user-defined variables:
