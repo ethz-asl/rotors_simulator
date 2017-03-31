@@ -372,7 +372,11 @@ void GazeboBagPlugin::LogWrenches(const common::Time now) {
   for (int i = 0; i < contact_mgr_->GetContactCount(); ++i) {
     std::string collision2_name =
         contacts[i]->collision2->GetLink()->GetScopedName();
+#if GAZEBO_MAJOR_VERSION >= 8
+    double body1_force = contacts[i]->wrench->body1Force.Length();
+#else
     double body1_force = contacts[i]->wrench->body1Force.GetLength();
+#endif
 
     // Exclude extremely small forces.
     if (body1_force < 1e-10) continue;
@@ -384,12 +388,21 @@ void GazeboBagPlugin::LogWrenches(const common::Time now) {
     wrench_msg.header.frame_id = collision1_name + "--" + collision2_name;
     wrench_msg.header.stamp.sec = now.sec;
     wrench_msg.header.stamp.nsec = now.nsec;
+#if GAZEBO_MAJOR_VERSION >= 8
+    wrench_msg.wrench.force.x = contacts[i]->wrench->body1Force.X();
+    wrench_msg.wrench.force.y = contacts[i]->wrench->body1Force.Y();
+    wrench_msg.wrench.force.z = contacts[i]->wrench->body1Force.Z();
+    wrench_msg.wrench.torque.x = contacts[i]->wrench->body1Torque.X();
+    wrench_msg.wrench.torque.y = contacts[i]->wrench->body1Torque.Y();
+    wrench_msg.wrench.torque.z = contacts[i]->wrench->body1Torque.Z();
+#else
     wrench_msg.wrench.force.x = contacts[i]->wrench->body1Force.x;
     wrench_msg.wrench.force.y = contacts[i]->wrench->body1Force.y;
     wrench_msg.wrench.force.z = contacts[i]->wrench->body1Force.z;
     wrench_msg.wrench.torque.x = contacts[i]->wrench->body1Torque.x;
     wrench_msg.wrench.torque.y = contacts[i]->wrench->body1Torque.y;
     wrench_msg.wrench.torque.z = contacts[i]->wrench->body1Torque.z;
+#endif
 
     writeBag(namespace_ + "/" + wrench_topic_, ros_now, wrench_msg);
   }
