@@ -1,0 +1,57 @@
+<launch>
+  <arg name="uav_name" default="techpod"/>
+  <arg name="world_name" default="yosemite"/>
+  <arg name="enable_logging" default="true"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="$(arg uav_name)"/>
+
+  <remap from="/techpod/imu" to="/imu0" />
+  <remap from="/techpod/camera" to="/cam0/image_raw" />
+  <remap from="/techpod/ground_truth/pose" to="/ground_truth/pose" />
+
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
+    <arg name="paused" value="false" />
+    <arg name="gui" value="true" />
+    <arg name="use_sim_time" value="false" />
+  </include>
+
+  <group ns="$(arg uav_name)">
+    <rosparam command="load" file="$(find rotors_gazebo)/resource/fixed_wing/$(arg uav_name).yaml" />
+    <rosparam command="load" file="$(find rotors_gazebo)/resource/fixed_wing/aerodynamic_params_$(arg uav_name).yaml" />
+
+    <include file="$(find rotors_gazebo)/launch/spawn_fixed_wing.launch">
+      <arg name="uav_name" value="$(arg uav_name)" />
+      <arg name="model" value="$(find rotors_description)/urdf/$(arg uav_name)_base.xacro" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg log_file)" />
+      <arg name="wait_to_record_bag" value="true" />
+      <!-- Yosemite
+      <arg name="x" value="-100" />
+      <arg name="y" value="0" />
+      <arg name="z" value="0.15" />-->
+      <!-- Cylinder and Hemicyl-->
+      <arg name="x" value="-1990" />
+      <arg name="y" value="-1990" />
+      <arg name="z" value="0.15" />
+    </include>
+
+    <node name="hil_interface" pkg="rotors_hil_interface" type="rotors_hil_interface_node" clear_params="true" output="screen">
+      <param name="gps_topic" value="gps" />
+      <param name="imu_topic" value="imu" />
+      <param name="odometry_topic" value="ground_truth/odometry" />
+      <param name="hil_controls_sub_topic" value="/mavros/hil_controls/hil_controls" />
+      <param name="actuators_pub_topic" value="gazebo/command/motor_speed" />
+      <param name="mavlink_pub_topic" value="/mavlink/to" />
+      <param name="sensor_level_hil" value="true" />
+      <param name="hil_gps_frequency" value="5.0" />
+      <param name="hil_frequency" value="100.0" />
+    </node>
+
+    <node name="rotors_gui" pkg="rqt_rotors" type="rqt_rotors" clear_params="true" output="screen" />
+  </group>
+</launch>
+
