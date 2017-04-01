@@ -1,0 +1,16 @@
+<library path="src">
+  <class name="Rotors" type="rqt_rotors.rotors.Rotors" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      Plugin for RotorS.
+    </description>
+    <qtgui>
+      <group>
+        <label>ASL</label>        
+        <icon type="theme">folder</icon>
+      </group>
+      <label>RotorS</label>
+      <icon type="theme">applications-other</icon>
+      <statustip>Plugin for RotorS.</statustip>
+    </qtgui>
+  </class>
+</library>
