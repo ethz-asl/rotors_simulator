@@ -1,0 +1,28 @@
+- git:
+    local-name: catkin_simple
+    uri: https://github.com/catkin/catkin_simple.git
+    version: master
+- git:
+    local-name: mav_comm
+    uri: https://github.com/ethz-asl/mav_comm.git
+    version: master
+- git:
+    local-name: mavlink
+    uri: https://github.com/mavlink/mavlink-gbp-release.git
+    version: upstream
+- git:
+    local-name: mavros
+    uri: https://github.com/mavlink/mavros.git
+    version: indigo-devel
+- git:
+    local-name: px4
+    uri: https://github.com/PX4/Firmware.git
+    version: master
+- git:
+    local-name: rotors_simulator
+    uri: https://github.com/jgoppert/rotors_simulator.git
+    version: px4
+- git:
+    local-name: yaml_cpp_catkin
+    uri: https://github.com/ethz-asl/yaml_cpp_catkin.git
+    version: master

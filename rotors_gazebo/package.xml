@@ -26,6 +26,7 @@
   <build_depend>geometry_msgs</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
+  <build_depend>gazebo_ros</build_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>gazebo_plugins</run_depend>
@@ -35,5 +36,13 @@
   <run_depend>geometry_msgs</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
+  <run_depend>gazebo_ros</run_depend>
+
+  <export>
+    <!--Tell gazebo where to find models(model path),
+         worlds (media path), and plugins (plugin path).-->
+    <gazebo_ros plugin_path="${prefix}/lib" gazebo_media_path="${prefix}"
+      gazebo_model_path="${prefix}/models"/>
+  </export>
 
 </package>

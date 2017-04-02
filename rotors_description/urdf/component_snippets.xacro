@@ -32,7 +32,7 @@
         <linkName>${namespace}/base_link</linkName>
         <frameId>${namespace}/base_link</frameId>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
-	<waitToRecordBag>${wait_to_record_bag}</waitToRecordBag>
+        <waitToRecordBag>${wait_to_record_bag}</waitToRecordBag>
       </plugin>
     </gazebo>
   </xacro:macro>
@@ -266,8 +266,8 @@
   <!-- ==================== ROS INTERFACE MACRO ====================== -->
   <!-- =============================================================== -->
   <!-- <xacro:macro 
-  		name="ros_interface_plugin_macro"
-  		params="namespace">
+        name="ros_interface_plugin_macro"
+        params="namespace">
     <gazebo>
       <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so">
         <robotNamespace>${namespace}</robotNamespace>
@@ -284,24 +284,120 @@
       reference_magnetic_field_east reference_magnetic_field_down reference_latitude 
       reference_longitude reference_altitude">
     <gazebo>
-      <plugin name="mavlink_interface" filename="librotors_gazebo_mavlink_interface.so">
+      <plugin name='mavlink_interface' filename='librotors_gazebo_mavlink_interface.so'>
         <robotNamespace>${namespace}</robotNamespace>
-	<mavlinkControlSubTopic>${mavlink_sub_topic}</mavlinkControlSubTopic>
         <imuSubTopic>${imu_sub_topic}</imuSubTopic>
-        <mavlinkHilSensorPubTopic>${mavlink_pub_topic}</mavlinkHilSensorPubTopic>
-	<motorSpeedsPubTopic>${motors_speeds_pub_topic}</motorSpeedsPubTopic>
-	<gpsUpdateFreq>${gps_update_freq}</gpsUpdateFreq> <!-- Frequency of HIL GPS messages [Hz] -->
-	<rotorCount>${rotor_count}</rotorCount>
-        <!-- [Gauss] Below are the North, East, and Down components of the Earth's magnetic field at the reference location.
-             The default reference location is Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84).
-	     You can obtain the magnetic field strength for your location using the World Magnetic Model: 
-             https://www.ngdc.noaa.gov/geomag/WMM/calculators.shtml -->
-        <referenceMagNorth>${reference_magnetic_field_north}</referenceMagNorth>
-        <referenceMagEast>${reference_magnetic_field_east}</referenceMagEast>
-        <referenceMagDown>${reference_magnetic_field_down}</referenceMagDown>
-	<referenceLatitude>${reference_latitude}</referenceLatitude> <!-- the initial latitude [degrees [-90, 90]] -->
-        <referenceLongitude>${reference_longitude}</referenceLongitude> <!-- the initial longitude [degrees [-180, 180]] -->
-        <referenceAltitude>${reference_altitude}</referenceAltitude> <!-- the initial altitude [m] -->
+        <!--These are nolonger used?-->
+        <!--<mavlinkControlSubTopic>${mavlink_sub_topic}</mavlinkControlSubTopic>-->
+        <!--<mavlinkHilSensorPubTopic>${mavlink_pub_topic}</mavlinkHilSensorPubTopic>-->
+        <!--<motorSpeedsPubTopic>${motors_speeds_pub_topic}</motorSpeedsPubTopic>-->
+        <!--<gpsUpdateFreq>${gps_update_freq}</gpsUpdateFreq> [> Frequency of HIL GPS messages [Hz] <]-->
+        <!--<rotorCount>${rotor_count}</rotorCount>-->
+        <!--<referenceMagNorth>${reference_magnetic_field_north}</referenceMagNorth>-->
+        <!--<referenceMagEast>${reference_magnetic_field_east}</referenceMagEast>-->
+        <!--<referenceMagDown>${reference_magnetic_field_down}</referenceMagDown>-->
+        <!--<referenceLatitude>${reference_latitude}</referenceLatitude> [> the initial latitude [degrees [-90, 90]] <]-->
+        <!--<referenceLongitude>${reference_longitude}</referenceLongitude> [> the initial longitude [degrees [-180, 180]] <]-->
+        <!--<referenceAltitude>${reference_altitude}</referenceAltitude> [> the initial altitude [m] <]-->
+        <mavlink_addr>INADDR_ANY</mavlink_addr>
+        <mavlink_udp_port>14560</mavlink_udp_port>
+        <motorSpeedCommandPubTopic>/gazebo/command/motor_speed</motorSpeedCommandPubTopic>
+        <control_channels>
+          <channel name='rotor1'>
+            <input_index>0</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>1000</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>100</zero_position_armed>
+            <joint_control_type>velocity</joint_control_type>
+          </channel>
+          <channel name='rotor2'>
+            <input_index>1</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>1000</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>100</zero_position_armed>
+            <joint_control_type>velocity</joint_control_type>
+          </channel>
+          <channel name='rotor3'>
+            <input_index>2</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>1000</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>100</zero_position_armed>
+            <joint_control_type>velocity</joint_control_type>
+          </channel>
+          <channel name='rotor4'>
+            <input_index>3</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>1000</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>100</zero_position_armed>
+            <joint_control_type>velocity</joint_control_type>
+          </channel>
+          <channel name='rotor5'>
+            <input_index>4</input_index>
+            <input_offset>1</input_offset>
+            <input_scaling>324.6</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>0</zero_position_armed>
+            <joint_control_type>velocity</joint_control_type>
+            <joint_control_pid>
+              <p>0.1</p>
+              <i>0</i>
+              <d>0</d>
+              <iMax>0.0</iMax>
+              <iMin>0.0</iMin>
+              <cmdMax>2</cmdMax>
+              <cmdMin>-2</cmdMin>
+            </joint_control_pid>
+            <joint_name>zephyr_delta_wing::propeller_joint</joint_name>
+          </channel>
+          <channel name='rotor6'>
+            <input_index>5</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>0.524</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>0</zero_position_armed>
+            <joint_control_type>position</joint_control_type>
+            <joint_name>zephyr_delta_wing::flap_left_joint</joint_name>
+            <joint_control_pid>
+              <p>10.0</p>
+              <i>0</i>
+              <d>0</d>
+              <iMax>0</iMax>
+              <iMin>0</iMin>
+              <cmdMax>20</cmdMax>
+              <cmdMin>-20</cmdMin>
+            </joint_control_pid>
+          </channel>
+          <channel name='rotor7'>
+            <input_index>6</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>0.524</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>0</zero_position_armed>
+            <joint_control_type>position</joint_control_type>
+            <joint_name>zephyr_delta_wing::flap_right_joint</joint_name>
+            <joint_control_pid>
+              <p>10.0</p>
+              <i>0</i>
+              <d>0</d>
+              <iMax>0</iMax>
+              <iMin>0</iMin>
+              <cmdMax>20</cmdMax>
+              <cmdMin>-20</cmdMin>
+            </joint_control_pid>
+          </channel>
+          <channel name='rotor8'>
+            <input_index>7</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>0.524</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>0</zero_position_armed>
+            <joint_control_type>position</joint_control_type>
+          </channel>
+        </control_channels>
       </plugin>
     </gazebo>
   </xacro:macro>
@@ -508,7 +604,7 @@
         <magnetometerTopic>${magnetometer_topic}</magnetometerTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to 'magnetic_field') -->
         <!-- [Tesla] Below is the reference Earth's magnetic field at the reference location in NED frame.
              The default reference location is Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84).
-	     You can obtain the magnetic field strength for your location using the World Magnetic Model: 
+         You can obtain the magnetic field strength for your location using the World Magnetic Model: 
              http://www.ngdc.noaa.gov/geomag-web/#igrfwmm -->
         <refMagNorth>${ref_mag_north}</refMagNorth>
         <refMagEast>${ref_mag_east}</refMagEast>

@@ -3,6 +3,7 @@
   <arg name="world_name" default="basic"/>
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
+  <arg name="enable_mavlink_interface" default="false"/>
   <arg name="log_file" default="$(arg mav_name)"/>
   <arg name="debug" default="false"/>
   <arg name="gui" default="true"/>
@@ -11,8 +12,6 @@
       (even when Gazebo is started through roslaunch) -->
   <arg name="verbose" default="false"/>
 
-  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
-  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
     <arg name="debug" value="$(arg debug)" />
@@ -27,6 +26,7 @@
       <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_base.xacro" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="enable_mavlink_interface" value="$(arg enable_mavlink_interface)" />
       <arg name="log_file" value="$(arg log_file)"/>
     </include>
   </group>
