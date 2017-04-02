@@ -19,6 +19,7 @@
 
 #include <mav_msgs/Actuators.h>
 #include <mav_msgs/default_topics.h>
+#include "common/mavlink.h"
 #include <mavros_msgs/HilControls.h>
 #include <mavros_msgs/mavlink_convert.h>
 
