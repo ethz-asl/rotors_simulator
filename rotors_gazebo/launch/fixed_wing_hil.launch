@@ -1,42 +1,33 @@
 <launch>
   <arg name="uav_name" default="techpod"/>
   <arg name="world_name" default="yosemite"/>
-  <arg name="enable_logging" default="true"/>
+  <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
   <arg name="log_file" default="$(arg uav_name)"/>
-
-  <remap from="/techpod/imu" to="/imu0" />
-  <remap from="/techpod/camera" to="/cam0/image_raw" />
-  <remap from="/techpod/ground_truth/pose" to="/ground_truth/pose" />
+  <arg name="debug" default="false"/>
+  <arg name="gui" default="true"/>
+  <arg name="paused" default="false"/>
+  <!-- The following line causes gzmsg and gzerr messages to be printed to the console
+      (even when Gazebo is started through roslaunch) -->
+  <arg name="verbose" default="false"/>
 
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
-    <arg name="paused" value="false" />
-    <arg name="gui" value="true" />
-    <arg name="use_sim_time" value="false" />
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="paused" value="$(arg paused)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="verbose" value="$(arg verbose)"/>
   </include>
 
   <group ns="$(arg uav_name)">
-    <rosparam command="load" file="$(find rotors_gazebo)/resource/fixed_wing/$(arg uav_name).yaml" />
-    <rosparam command="load" file="$(find rotors_gazebo)/resource/fixed_wing/aerodynamic_params_$(arg uav_name).yaml" />
-
     <include file="$(find rotors_gazebo)/launch/spawn_fixed_wing.launch">
       <arg name="uav_name" value="$(arg uav_name)" />
       <arg name="model" value="$(find rotors_description)/urdf/$(arg uav_name)_base.xacro" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
       <arg name="log_file" value="$(arg log_file)" />
-      <arg name="wait_to_record_bag" value="true" />
-      <!-- Yosemite
-      <arg name="x" value="-100" />
-      <arg name="y" value="0" />
-      <arg name="z" value="0.15" />-->
-      <!-- Cylinder and Hemicyl-->
-      <arg name="x" value="-1990" />
-      <arg name="y" value="-1990" />
-      <arg name="z" value="0.15" />
     </include>
 
     <node name="hil_interface" pkg="rotors_hil_interface" type="rotors_hil_interface_node" clear_params="true" output="screen">
@@ -52,6 +43,9 @@
     </node>
 
     <node name="rotors_gui" pkg="rqt_rotors" type="rqt_rotors" clear_params="true" output="screen" />
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
   </group>
 </launch>
 
