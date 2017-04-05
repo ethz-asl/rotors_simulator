@@ -42,10 +42,10 @@
       <param name="hil_frequency" value="100.0" />
     </node>
 
-    <node name="rotors_gui" pkg="rqt_rotors" type="rqt_rotors" clear_params="true" output="screen" />
-
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
   </group>
+
+  <node name="hil_plugin_gui" pkg="rqt_rotors" type="hil_plugin" clear_params="true" output="screen" />
 </launch>
 
