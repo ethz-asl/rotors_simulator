@@ -2,9 +2,9 @@
 
 import sys
 
-from rqt_rotors.rotors import Rotors
+from rqt_rotors.hil_plugin import HilPlugin
 from rqt_gui.main import Main
 
-plugin = 'rqt_rotors'
+plugin = 'rqt_rotors.hil_plugin.HilPlugin'
 main = Main(filename=plugin)
 sys.exit(main.main(sys.argv, standalone=plugin))

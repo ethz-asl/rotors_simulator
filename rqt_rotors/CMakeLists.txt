@@ -4,17 +4,14 @@ project(rqt_rotors)
 find_package(catkin REQUIRED COMPONENTS
   mavros_msgs
   rospy
-  rotors_comm
   rqt_gui
   rqt_gui_py
-  std_msgs
-  std_srvs
 )
 
 catkin_package(
   INCLUDE_DIRS
   LIBRARIES
-  CATKIN_DEPENDS mavros_msgs rospy rotors_comm rqt_gui rqt_gui_py std_msgs std_srvs
+  CATKIN_DEPENDS mavros_msgs rospy rqt_gui rqt_gui_py
   DEPENDS
 )
 catkin_python_setup()
@@ -27,6 +24,6 @@ install(DIRECTORY resource
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-install(PROGRAMS scripts/rqt_rotors
+install(PROGRAMS scripts/hil_plugin
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
