@@ -2,7 +2,7 @@
 
 import sys
 
-from rotors_rqt.rotors import Rotors
+from rqt_rotors.rotors import Rotors
 from rqt_gui.main import Main
 
 plugin = 'rqt_rotors'

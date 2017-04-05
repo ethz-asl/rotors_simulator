@@ -28,6 +28,7 @@
   <run_depend>rotors_gazebo_plugins</run_depend>
   <run_depend>rotors_hil_interface</run_depend>
   <run_depend>rotors_joy_interface</run_depend>
+  <run_depend>rqt_rotors</run_depend>
 
   <export>
     <metapackage/>

@@ -1,5 +1,5 @@
 <package>
-  <name>rotors_rqt</name>
+  <name>rqt_rotors</name>
   <version>0.0.1</version>
   <description>The rqt_rotors package</description>
 

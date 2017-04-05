@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rotors_rqt)
+project(rqt_rotors)
 
 find_package(catkin REQUIRED COMPONENTS
   mavros_msgs
