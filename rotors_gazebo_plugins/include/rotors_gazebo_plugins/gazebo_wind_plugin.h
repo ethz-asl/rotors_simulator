@@ -29,7 +29,6 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-#include <ros/ros.h>
 
 #include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
 
@@ -59,7 +58,6 @@ static const math::Vector3 kDefaultWindDirection = math::Vector3(1, 0, 0);
 static const math::Vector3 kDefaultWindGustDirection = math::Vector3(0, 1, 0);
 
 static constexpr bool kDefaultCustomStaticWindField = false;
-static const std::string kDefaultCustomWindFieldPath = "$(find rotors_gazebo)";
 
 
 

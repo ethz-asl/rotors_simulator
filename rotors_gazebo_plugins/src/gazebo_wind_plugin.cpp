@@ -80,8 +80,8 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Check if a custom static wind field should be used.
   getSdfParam<bool>(_sdf, "customStaticWindField", custom_static_wind_field_,
                       custom_static_wind_field_);
-  if(!custom_static_wind_field_) {
-    ROS_INFO_STREAM("[gazebo_wind_plugin] Using user-defined constant wind field and gusts.");
+  if (!custom_static_wind_field_) {
+    gzdbg << "[gazebo_wind_plugin] Using user-defined constant wind field and gusts.\n";
     // Get the wind params from SDF.
     getSdfParam<double>(_sdf, "windForceMean", wind_force_mean_,
                         wind_force_mean_);
@@ -103,9 +103,9 @@ void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     wind_gust_start_ = common::Time(wind_gust_start);
     wind_gust_end_ = common::Time(wind_gust_start + wind_gust_duration);
   } else {
-    ROS_INFO_STREAM("[gazebo_wind_plugin] Using custom wind field from text file.");
+    gzdbg << "[gazebo_wind_plugin] Using custom wind field from text file.\n";
     // Get the wind field text file path, read it and save data.
-    std::string custom_wind_field_path = kDefaultCustomWindFieldPath;
+    std::string custom_wind_field_path;
     getSdfParam<std::string>(_sdf, "customWindFieldPath", custom_wind_field_path,
                         custom_wind_field_path);
     ReadCustomWindField(custom_wind_field_path);
@@ -174,40 +174,46 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
     wind_force_pub_->Publish(wrench_stamped_msg_);
 
     // Calculate the wind speed.
-    double wind_speed = wind_speed_mean_;
-    wind_velocity = wind_speed * wind_direction_;
+    wind_velocity = wind_speed_mean_ * wind_direction_;
   } else {
     // Get the current position of the aircraft in world coordinates.
     math::Vector3 link_position = link_->GetWorldPose().pos;
 
-    // Find the x, y indices of the eight grid points enclosing the aircraft.
-    int i_inf = floor((link_position.x - min_x_) / res_x_);
-    int j_inf = floor((link_position.y - min_y_) / res_y_);
+    // Calculate the x, y index of the grid points with x, y-coordinate 
+    // just smaller than or equal to aircraft x, y position.
+    std::size_t x_inf = floor((link_position.x - min_x_) / res_x_);
+    std::size_t y_inf = floor((link_position.y - min_y_) / res_y_);
 
-    // In case aircraft is on one of the boundary surfaces at max_x or max_y.
-    if (i_inf == n_x_ - 1) {
-      i_inf = n_x_ - 2;
+    // In case aircraft is on one of the boundary surfaces at max_x or max_y,
+    // decrease x_inf, y_inf by one to have x_sup, y_sup on max_x, max_y.
+    if (x_inf == n_x_ - 1u) {
+      x_inf = n_x_ - 2u;
     }
-    if (j_inf == n_y_ - 1) {
-      j_inf = n_y_ - 2;
+    if (y_inf == n_y_ - 1u) {
+      y_inf = n_y_ - 2u;
     }
 
-    int i_sup = i_inf + 1;
-    int j_sup = j_inf + 1;
+    // Calculate the x, y index of the grid points with x, y-coordinate just
+    // greater than the aircraft x, y position. 
+    std::size_t x_sup = x_inf + 1u;
+    std::size_t y_sup = y_inf + 1u;
 
-    int idx_i[8] = {i_inf, i_inf, i_sup, i_sup, i_inf, i_inf, i_sup, i_sup};
-    int idx_j[8] = {j_inf, j_inf, j_inf, j_inf, j_sup, j_sup, j_sup, j_sup};
+    // Save in an array the x, y index of each of the eight grid points 
+    // enclosing the aircraft.
+    std::size_t idx_x[8] = {x_inf, x_inf, x_sup, x_sup, x_inf, x_inf, x_sup, x_sup};
+    std::size_t idx_y[8] = {y_inf, y_inf, y_inf, y_inf, y_sup, y_sup, y_sup, y_sup};
 
     // Find the vertical factor of the aircraft in each of the four surrounding 
     // grid columns, and their minimal/maximal value.
     float vertical_factors_columns[4];
-    for (int i = 0; i < 4; i++) {
+    for (std::size_t i = 0u; i < 4u; ++i) {
       vertical_factors_columns[i] = (
-        link_position.z - bottom_z_[idx_i[2 * i] + idx_j[2 * i] * n_x_]) /
-        (top_z_[idx_i[2 * i] + idx_j[2 * i] * n_x_] - bottom_z_[idx_i[2 * i] +
-                                                            idx_j[2 * i] * n_x_]);
+        link_position.z - bottom_z_[idx_x[2u * i] + idx_y[2u * i] * n_x_]) /
+        (top_z_[idx_x[2u * i] + idx_y[2u * i] * n_x_] - bottom_z_[idx_x[2u * i] +
+                                                            idx_y[2u * i] * n_x_]);
     }
-
+    
+    // Find maximal and minimal value amongst vertical factors.
     float vertical_factors_min = std::min(std::min(std::min(
       vertical_factors_columns[0], vertical_factors_columns[1]),
       vertical_factors_columns[2]), vertical_factors_columns[3]);
@@ -216,29 +222,28 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
       vertical_factors_columns[2]), vertical_factors_columns[3]);
 
     // Check if aircraft is out of wind field or not, and act accordingly.
-    if (!(i_inf < 0 || j_inf < 0 || vertical_factors_max < 0 || 
-        i_sup > (n_x_ - 1) || j_sup > (n_y_ - 1) || vertical_factors_min > 1)) {
+    if (x_inf >= 0u && y_inf >= 0u && vertical_factors_max >= 0u && 
+        x_sup <= (n_x_ - 1u) && y_sup <= (n_y_ - 1u) && vertical_factors_min <= 1u) {
       // Find indices in z-direction for each of the vertices. If link is not 
       // within the range of one of the columns, set to lowest or highest two.
-      int idx_k[8] = {0, static_cast<int>(vertical_spacing_factors_.size()) - 1, 0,
-                      static_cast<int>(vertical_spacing_factors_.size()) - 1, 0,
-                      static_cast<int>(vertical_spacing_factors_.size()) - 1, 0,
-                      static_cast<int>(vertical_spacing_factors_.size()) - 1};
-
-      for (int i = 0; i < 4; i++) {
-        if (vertical_factors_columns[i] < 0) {
+      std::size_t idx_z[8] = {0u, static_cast<int>(vertical_spacing_factors_.size()) - 1u,
+                              0u, static_cast<int>(vertical_spacing_factors_.size()) - 1u,
+                              0u, static_cast<int>(vertical_spacing_factors_.size()) - 1u,
+                              0u, static_cast<int>(vertical_spacing_factors_.size()) - 1u};
+      for (std::size_t i = 0u; i < 4u; ++i) {
+        if (vertical_factors_columns[i] < 0u) {
           // Link z-position below lowest grid point of that column.
-          idx_k[2 * i + 1] = 1;
-        } else if (vertical_factors_columns[i] >= 1) {
+          idx_z[2u * i + 1u] = 1u;
+        } else if (vertical_factors_columns[i] >= 1u) {
           // Link z-position above highest grid point of that column.
-          idx_k[2 * i] = vertical_spacing_factors_.size() - 2;
+          idx_z[2u * i] = vertical_spacing_factors_.size() - 2u;
         } else {
           // Link z-position between two grid points in that column.
-          for (int j = 0; j < vertical_spacing_factors_.size() - 1; j++) {
+          for (std::size_t j = 0u; j < vertical_spacing_factors_.size() - 1u; ++j) {
             if (vertical_spacing_factors_[j] <= vertical_factors_columns[i] && 
-                vertical_spacing_factors_[j + 1] > vertical_factors_columns[i]) {
-              idx_k[2 * i] = j;
-              idx_k[2 * i + 1] = j + 1;
+                vertical_spacing_factors_[j + 1u] > vertical_factors_columns[i]) {
+              idx_z[2u * i] = j;
+              idx_z[2u * i + 1u] = j + 1u;
               break;
             }
           }
@@ -247,36 +252,36 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
       // Extract the wind velocities corresponding to each vertex.
       math::Vector3 wind_at_vertices[8];
-      for (int i = 0; i < 8; i++) {
-        wind_at_vertices[i].x = u_[idx_i[i] + idx_j[i] * n_x_ + idx_k[i] * n_x_
+      for (std::size_t i = 0u; i < 8u; ++i) {
+        wind_at_vertices[i].x = u_[idx_x[i] + idx_y[i] * n_x_ + idx_z[i] * n_x_
                                                                         * n_y_];
-        wind_at_vertices[i].y = v_[idx_i[i] + idx_j[i] * n_x_ + idx_k[i] * n_x_
+        wind_at_vertices[i].y = v_[idx_x[i] + idx_y[i] * n_x_ + idx_z[i] * n_x_
                                                                         * n_y_];
-        wind_at_vertices[i].z = w_[idx_i[i] + idx_j[i] * n_x_ + idx_k[i] * n_x_
+        wind_at_vertices[i].z = w_[idx_x[i] + idx_y[i] * n_x_ + idx_z[i] * n_x_
                                                                         * n_y_];
       }
 
       // Extract the relevant coordinate of every point needed for trilinear 
       // interpolation (first z-direction, then x-direction, then y-direction).
       float interpolation_points[14];
-      for (int i = 0; i < 14; i++) {
-        if (i < 8) {
+      for (std::size_t i = 0u; i < 14u; ++i) {
+        if (i < 8u) {
           interpolation_points[i] = (
-            top_z_[idx_i[i] + idx_j[i] * n_x_] - bottom_z_[idx_i[i] + idx_j[i] * n_x_])
-            * vertical_spacing_factors_[idx_k[i]] + bottom_z_[idx_i[i] + idx_j[i] * n_x_];
-        } else if (i >= 8 && i < 12) {
-          interpolation_points[i] = min_x_ + res_x_ * idx_i[2 * (i - 8)];
+            top_z_[idx_x[i] + idx_y[i] * n_x_] - bottom_z_[idx_x[i] + idx_y[i] * n_x_])
+            * vertical_spacing_factors_[idx_z[i]] + bottom_z_[idx_x[i] + idx_y[i] * n_x_];
+        } else if (i >= 8u && i < 12u) {
+          interpolation_points[i] = min_x_ + res_x_ * idx_x[2u * (i - 8u)];
         } else {
-          interpolation_points[i] = min_y_ + res_y_ * idx_j[i - 9];
+          interpolation_points[i] = min_y_ + res_y_ * idx_y[i - 9u];
         }
       }
 
+      // Interpolate wind velocity at aircraft position.
       wind_velocity = TrilinearInterpolation(
         link_position, wind_at_vertices, interpolation_points);
     } else {
       // Set the wind velocity to the default constant value specified by user.
-      double wind_speed = wind_speed_mean_;
-      wind_velocity = wind_speed * wind_direction_;
+      wind_velocity = wind_speed_mean_ * wind_direction_;
     }
   }
   
@@ -393,7 +398,7 @@ void GazeboWindPlugin::ReadCustomWindField(std::string& custom_wind_field_path) 
       }
     }
     fin.close();
-    ROS_INFO_STREAM("[gazebo_wind_plugin] Successfully read custom wind field from text file.");
+    gzdbg << "[gazebo_wind_plugin] Successfully read custom wind field from text file.\n";
   } else {
     gzerr << "[gazebo_wind_plugin] Could not open custom wind field text file.\n";
   }
