@@ -5,3 +5,4 @@
 *.pyc
 *~
 */models/iris/*.sdf
+*.user
