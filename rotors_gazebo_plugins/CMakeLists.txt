@@ -130,10 +130,10 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # =================== YAML_CPP ================= #
 # ============================================== #
 
-if (NO_ROS)
+#if (NO_ROS)
   find_package(YamlCpp REQUIRED)
   include_directories(${YAML_CPP_INCLUDE_DIR})
-endif()
+#endif()
 
 # ============================================== #
 # =================== PROTOBUF ================= #
@@ -299,16 +299,16 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
 
   # We need the MAVLink headers.
   set(MAVLINK_HEADERS_FOUND FALSE)
-  
+
   # First, check to see if MAVLink headers were passed in as variable
   if(NOT ${MAVLINK_HEADER_DIR} STREQUAL "")
-  
+
     message(STATUS "MAVLINK_HEADER_DIR provided as '${MAVLINK_HEADER_DIR}'.")
     include_directories(${MAVLINK_HEADER_DIR})
     set(MAVLINK_HEADERS_FOUND TRUE)
-    
+
   else()
-  
+
     message(STATUS "MAVLINK_HEADER_DIR not provided, falling back to looking at default paths...")
     # If ROS indigo is installed, we should be able to find them at the path below
     if(EXISTS /opt/ros/indigo/include/mavlink/v1.0/)
@@ -316,9 +316,9 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
       include_directories("/opt/ros/indigo/include/mavlink/v1.0/")
       set(MAVLINK_HEADERS_FOUND TRUE)
     endif()
-    
+
   endif()
-  
+
   if(NOT MAVLINK_HEADERS_FOUND)
     message(FATAL_ERROR "MAVLink headers were not found. They are required for building MavlinkInterfacePlugin.")
   endif()
