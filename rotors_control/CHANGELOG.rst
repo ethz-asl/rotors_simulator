@@ -2,6 +2,18 @@
 Changelog for package rotors_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2017-04-08)
+-----------
+* Removing unfinished parts of px4 dummy controller and gazebo mavlink interface. Refactoring gazebo mavlink interface.
+* set all queue lengths to 1
+* make rotors_control CMakeLists consistent with upstream
+* bring rotors_control CMakeLists closer to upstream
+* update launch and xacro files to new names, update use of odometry plugin
+* px4 dummy controller: fix include paths after merge
+* fix include dir
+* move px4 files to new directories
+* Contributors: Fadri Furrer, Thomas Gubler, pvechersky
+
 2.0.1 (2015-08-10)
 ------------------
 

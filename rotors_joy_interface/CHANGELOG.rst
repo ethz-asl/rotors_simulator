@@ -2,6 +2,14 @@
 Changelog for package rotors_joy_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2017-04-08)
+-----------
+* Adding interface for Python-uinput, a virtual keyboard joystick
+* Adapting the joystick node for use with fixed-wing
+* Removing keyboard teleop node
+* Adding keyboard interface node
+* Contributors: Fadri Furrer, Pavel
+
 2.0.1 (2015-08-10)
 ------------------
 
