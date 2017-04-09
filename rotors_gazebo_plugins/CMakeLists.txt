@@ -106,7 +106,6 @@ if (NOT NO_ROS)
     rotors_control
     std_srvs
     tf
-    # yaml_cpp_catkin
   )
 endif()
 
@@ -130,10 +129,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # =================== YAML_CPP ================= #
 # ============================================== #
 
-#if (NO_ROS)
-  find_package(YamlCpp REQUIRED)
-  include_directories(${YAML_CPP_INCLUDE_DIR})
-#endif()
+find_package(YamlCpp REQUIRED)
+include_directories(${YAML_CPP_INCLUDE_DIR})
 
 # ============================================== #
 # =================== PROTOBUF ================= #
