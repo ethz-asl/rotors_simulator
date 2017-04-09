@@ -57,10 +57,10 @@ Installation Instructions
  ```
  $ cd ~/catkin_ws/src
  $ git clone git@github.com:ethz-asl/rotors_simulator.git
- $ git clone git@github.com:catkin/catkin_simple.git
  $ git clone git@github.com:ethz-asl/mav_comm.git
- $ git clone git@github.com:ethz-asl/yaml_cpp_catkin.git
  ```
+  > **Note** On OS X you to install yaml-cpp using Homebrew `brew install yaml-cpp`.
+ 
   > **Note** if you want to use `wstool` you can replace the above commands with
     ```
     wstool set --git local_repo_name git@github.com:organization/repo_name.git
