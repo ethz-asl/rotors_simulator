@@ -59,6 +59,8 @@ Installation Instructions
  $ git clone git@github.com:ethz-asl/rotors_simulator.git
  $ git clone git@github.com:ethz-asl/mav_comm.git
  ```
+  > **Note** On OS X you to install yaml-cpp using Homebrew `brew install yaml-cpp`.
+ 
   > **Note** if you want to use `wstool` you can replace the above commands with
     ```
     wstool set --git local_repo_name git@github.com:organization/repo_name.git
