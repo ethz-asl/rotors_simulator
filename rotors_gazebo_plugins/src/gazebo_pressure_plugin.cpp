@@ -103,13 +103,14 @@ void GazeboPressurePlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // Compute the geopotential altitude.
   double z = ref_alt_ + model_->GetWorldPose().pos.z;
-  double h = kR0 * z / (kR0 + z);
+  double h = kEarthRadiusMeters * z / (kEarthRadiusMeters + z);
 
   // Compute the temperature at the current altitude.
-  double t = kT0 - kTl * h;
+  double t = kSeaLevelTempKelvin - kTempLapseKelvinPerMeter * h;
 
   // Compute the current air pressure.
-  double p = kP0 * exp(kAs * log(kT0 / t));
+  double p = kPressureOneAtmospherePascals *
+      exp(kAirConstantDimensionless * log(kSeaLevelTempKelvin / t));
 
   // Fill the pressure message.
   pressure_message_.mutable_header()->mutable_stamp()->set_sec(

@@ -28,14 +28,16 @@
 
 namespace gazebo {
 // Constants
-static constexpr double kRs = 8314.32; /* Nm/ (kmol K), gas constant */
-static constexpr double kM0 = 28.9644; /* kg/kmol, mean molecular weight of air */
-static constexpr double kG0 = 9.80665; /* m/s^2, acceleration due to gravity at 45.5425 deg lat */
-static constexpr double kR0 = 6356766.0; /* m, Earth radius at g0 */
-static constexpr double kP0 = 101325.0; /* Pa, air pressure at g0 */
-static constexpr double kT0 = 288.15; /* K, standard sea-level temperature */
-static constexpr double kTl = 0.0065; /* K/m, temperature lapse */
-static constexpr double kAs = kG0 * kM0 / (kRs * -kTl);
+static constexpr double kGasConstantNmPerKmolKelvin = 8314.32;
+static constexpr double kMeanMolecularAirWeightKgPerKmol = 28.9644;
+static constexpr double kGravityMagnitude = 9.80665;
+static constexpr double kEarthRadiusMeters = 6356766.0;
+static constexpr double kPressureOneAtmospherePascals = 101325.0;
+static constexpr double kSeaLevelTempKelvin = 288.15;
+static constexpr double kTempLapseKelvinPerMeter = 0.0065;
+static constexpr double kAirConstantDimensionless = kGravityMagnitude *
+    kMeanMolecularAirWeightKgPerKmol /
+        (kGasConstantNmPerKmolKelvin * -kTempLapseKelvinPerMeter);
 
 // Default values
 static const std::string kDefaultPressurePubTopic = "air_pressure";
