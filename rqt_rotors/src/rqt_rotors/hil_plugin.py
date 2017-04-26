@@ -145,13 +145,3 @@ class HilPlugin(Plugin):
     def shutdown_plugin(self):
         if self.sys_status_sub is not None:
             self.sys_status_sub.unregister()
-
-    def save_settings(self, plugin_settings, instance_settings):
-        # TODO save intrinsic configuration, usually using:
-        # instance_settings.set_value(k, v)
-        pass
-
-    def restore_settings(self, plugin_settings, instance_settings):
-        # TODO restore intrinsic configuration, usually using:
-        # v = instance_settings.value(k)
-        pass
