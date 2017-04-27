@@ -5,6 +5,8 @@
   <description>The dataset evaluation package for the RotorS simulator.</description>
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
+  <maintainer email="mina.kamel@mavt.ethz.ch">Mina Kamel</maintainer>
+  
   <author>Fadri Furrer</author>
   <author>Michael Burri</author>
   <author>Mina Kamel</author>
