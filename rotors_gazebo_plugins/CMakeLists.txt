@@ -120,6 +120,7 @@ include_directories(${GAZEBO_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+
 # if (BUILD_MAVLINK_INTERFACE_PLUGIN)
 #   include_directories(${mavros_msgs_INCLUDE_DIRS})
 #   include_directories(${libmavconn_INCLUDE_DIRS})
@@ -452,11 +453,5 @@ install(
   DESTINATION ${BIN_DESTINATION}
   LIBRARY DESTINATION ${LIB_DESTINATION}
 )
-
-# Copy over all converted protobuf files (*.pb.h and *.pb.c) from the src directory to
-# the devel directory. This is required so that you can include the protobuf header files from other C++ files.
-if (NOT NO_ROS)
-  file(COPY ${CMAKE_CURRENT_BINARY_DIR}/ DESTINATION ${CATKIN_DEVEL_PREFIX}/include/${PACKAGE_NAME} FILES_MATCHING PATTERN "*.pb.*")
-endif()
 
 #message(FATAL_ERROR "Reached EOF.")
