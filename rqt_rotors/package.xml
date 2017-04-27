@@ -4,7 +4,8 @@
   <description>The rqt_rotors package</description>
 
   <maintainer email="pavelv@student.ethz.ch">Pavel Vechersky</maintainer>
-  <maintainer email="hitimo@ethz.ch">Timo Hinzmann</maintainer>
+  <maintainer email="timo.hinzmann@gmail.com">Timo Hinzmann</maintainer>
+
   <author>Pavel Vechersky</author>
 
   <license>ASL 2.0</license>
