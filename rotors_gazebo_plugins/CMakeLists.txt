@@ -396,6 +396,14 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   list(APPEND targets_to_install rotors_gazebo_optical_flow_plugin)
 endif()
 
+#======================================= PRESSURE PLUGIN ========================================//
+add_library(rotors_gazebo_pressure_plugin SHARED src/gazebo_pressure_plugin.cpp)
+target_link_libraries(rotors_gazebo_pressure_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_pressure_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_pressure_plugin)
+
 #===================================== ROS INTERFACE PLUGIN =====================================//
 # This entire plugin is only built if ROS is a dependency
 if (NOT NO_ROS)

@@ -196,6 +196,11 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
           &GazeboRosInterfacePlugin::GzFloat32MsgCallback, this,
           gazeboNamespace, gazeboTopicName, rosTopicName, gz_node_handle_);
       break;
+    case gz_std_msgs::ConnectGazeboToRosTopic::FLUID_PRESSURE:
+      ConnectHelper<gz_sensor_msgs::FluidPressure, sensor_msgs::FluidPressure>(
+          &GazeboRosInterfacePlugin::GzFluidPressureMsgCallback, this,
+          gazeboNamespace, gazeboTopicName, rosTopicName, gz_node_handle_);
+      break;
     case gz_std_msgs::ConnectGazeboToRosTopic::IMU:
       ConnectHelper<gz_sensor_msgs::Imu, sensor_msgs::Imu>(
           &GazeboRosInterfacePlugin::GzImuMsgCallback, this, gazeboNamespace,
@@ -413,6 +418,24 @@ void GazeboRosInterfacePlugin::GzFloat32MsgCallback(
 
   // Publish to ROS
   ros_publisher.publish(ros_float_32_msg_);
+}
+
+void GazeboRosInterfacePlugin::GzFluidPressureMsgCallback(
+    GzFluidPressureMsgPtr &gz_fluid_pressure_msg,
+    ros::Publisher ros_publisher) {
+  // We need to convert from a Gazebo message to a ROS message,
+  // and then forward the FluidPressure message onto ROS.
+
+  ConvertHeaderGzToRos(gz_fluid_pressure_msg->header(),
+                       &ros_fluid_pressure_msg_.header);
+
+  ros_fluid_pressure_msg_.fluid_pressure =
+      gz_fluid_pressure_msg->fluid_pressure();
+
+  ros_fluid_pressure_msg_.variance = gz_fluid_pressure_msg->variance();
+
+  // Publish to ROS.
+  ros_publisher.publish(ros_fluid_pressure_msg_);
 }
 
 void GazeboRosInterfacePlugin::GzImuMsgCallback(GzImuPtr& gz_imu_msg,

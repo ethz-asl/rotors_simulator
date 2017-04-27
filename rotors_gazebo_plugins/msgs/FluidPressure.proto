@@ -1,0 +1,16 @@
+syntax = "proto2";
+package gz_sensor_msgs;
+
+import "Header.proto";
+
+// FluidPressure message type which is emitted by the
+// Pressure Gazebo plugin
+// Designed to imitate ROS sensor_msgs::FluidPressure
+message FluidPressure
+{
+  required gz_std_msgs.Header header = 1;
+
+  required double fluid_pressure = 2;
+
+  required double variance = 3;
+}
