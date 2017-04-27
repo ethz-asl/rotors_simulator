@@ -2,6 +2,11 @@
 Changelog for package rotors_hil_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2017-04-27)
+-----------
+* Update maintainers.
+* Contributors: Timo Hinzmann
+
 2.1.0 (2017-04-08)
 -----------
 * fixed typo in rotors_hil_interface CMakeLists.txt
