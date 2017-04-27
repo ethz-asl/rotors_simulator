@@ -101,23 +101,28 @@ void GazeboPressurePlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   common::Time current_time = world_->GetSimTime();
 
-  // Compute the geopotential altitude.
-  double z = ref_alt_ + model_->GetWorldPose().pos.z;
-  double h = kEarthRadiusMeters * z / (kEarthRadiusMeters + z);
+  // Get the current geometric height.
+  double height_geometric_m = ref_alt_ + model_->GetWorldPose().pos.z;
+
+  // Compute the geopotential height.
+  double height_geopotential_m = kEarthRadiusMeters * height_geometric_m /
+      (kEarthRadiusMeters + height_geometric_m);
 
   // Compute the temperature at the current altitude.
-  double t = kSeaLevelTempKelvin - kTempLapseKelvinPerMeter * h;
+  double temperature_at_altitude_kelvin =
+      kSeaLevelTempKelvin - kTempLapseKelvinPerMeter * height_geopotential_m;
 
   // Compute the current air pressure.
-  double p = kPressureOneAtmospherePascals *
-      exp(kAirConstantDimensionless * log(kSeaLevelTempKelvin / t));
+  double pressure_at_altitude_pascal =
+      kPressureOneAtmospherePascals * exp(kAirConstantDimensionless *
+          log(kSeaLevelTempKelvin / temperature_at_altitude_kelvin));
 
   // Fill the pressure message.
   pressure_message_.mutable_header()->mutable_stamp()->set_sec(
       current_time.sec);
   pressure_message_.mutable_header()->mutable_stamp()->set_nsec(
       current_time.nsec);
-  pressure_message_.set_fluid_pressure(p);
+  pressure_message_.set_fluid_pressure(pressure_at_altitude_pascal);
 
   // Publish the pressure message.
   pressure_pub_->Publish(pressure_message_);
