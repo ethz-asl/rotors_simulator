@@ -1,6 +1,6 @@
 <package>
   <name>rqt_rotors</name>
-  <version>2.1.1</version>
+  <version>3.0.0</version>
   <description>The rqt_rotors package</description>
 
   <maintainer email="pavelv@student.ethz.ch">Pavel Vechersky</maintainer>

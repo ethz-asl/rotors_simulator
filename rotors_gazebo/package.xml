@@ -1,6 +1,6 @@
 <package>
   <name>rotors_gazebo</name>
-  <version>2.1.1</version>
+  <version>3.0.0</version>
   <description>The rotors_gazebo package</description>
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
