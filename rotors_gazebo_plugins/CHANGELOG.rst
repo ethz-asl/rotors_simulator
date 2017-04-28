@@ -2,6 +2,9 @@
 Changelog for package rotors_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.0 (28.04.2017)
+-----------
+
 2.1.1 (2017-04-27)
 -----------
 * Merge pull request `#377 <https://github.com/ethz-asl/rotors_simulator/issues/377>`_ from ethz-asl/feature/pressure-plugin
