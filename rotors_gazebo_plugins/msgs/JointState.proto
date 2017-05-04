@@ -1,0 +1,15 @@
+syntax = "proto2";
+package gz_sensor_msgs;
+
+import "Header.proto";
+
+// JointState message type which is emitted by
+// GazeboMultirotorBasePlugin
+message JointState
+{
+  required gz_std_msgs.Header header = 1;
+  
+  repeated string name = 2;
+  repeated double position = 3 [packed=true];
+  
+}

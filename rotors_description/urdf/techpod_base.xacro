@@ -29,6 +29,9 @@
   <!-- Mount a magnetometer. -->
   <xacro:default_magnetometer namespace="${namespace}" parent_link="${namespace}/base_link" />
 
+  <!-- Mount a pressure sensor. -->
+  <xacro:default_pressure_sensor namespace="${namespace}" parent_link="${namespace}/base_link" />
+
   <xacro:if value="$(arg enable_ground_truth)">
     <xacro:ground_truth_imu_and_odometry namespace="${namespace}" parent_link="${namespace}/base_link_inertia" />
   </xacro:if>

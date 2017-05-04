@@ -1,0 +1,35 @@
+syntax = "proto2";
+package gz_std_msgs;
+
+// Message designed to be sent to the ROS interface plugin by other
+// Gazebo plugins, to tell it to forward messages on a particular Gazebo topic onto
+// a ROS topic
+message ConnectGazeboToRosTopic
+{
+
+  //required string gazebo_namespace = 1;
+  required string gazebo_topic = 2;
+  required string ros_topic = 3;
+
+  // The supported messages types that the ROS interface plugin knows to convert
+  // from a Gazebo to a ROS message.
+  // Provided to gz_std_msgs::ConnectGazeboToRosTopic::set_msgtype()
+  enum MsgType {
+  	ACTUATORS = 0;
+    FLOAT_32 = 1;
+    FLUID_PRESSURE = 2;
+    IMU = 3;
+    JOINT_STATE = 4;
+    MAGNETIC_FIELD = 5;
+    NAV_SAT_FIX = 6;
+    ODOMETRY = 7;
+    POSE = 8;
+    POSE_WITH_COVARIANCE_STAMPED = 9;
+    TRANSFORM_STAMPED = 10;
+    TWIST_STAMPED = 11;
+    VECTOR_3D_STAMPED = 12;
+    WIND_SPEED = 13;
+    WRENCH_STAMPED = 14;
+  }
+  required MsgType msgType = 4;
+}

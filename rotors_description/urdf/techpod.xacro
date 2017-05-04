@@ -37,6 +37,7 @@
   <xacro:property name="body_width" value="2.591" /> <!-- [m] -->
   <xacro:property name="body_height" value="0.303" /> <!-- [m] -->
   <xacro:property name="body_color" value="Gray" />
+  <xacro:property name="body_mesh_file" value="package://rotors_description/meshes/techpod/techpod_body.dae" />
 
   <!-- Aileron properties -->
   <xacro:property name="aileron_length" value="0.053" /> <!-- [m] -->
@@ -45,6 +46,8 @@
   <xacro:property name="aileron_min_angle" value="-0.349066" /> <!-- [rad] -->
   <xacro:property name="aileron_max_angle" value="0.349066" /> <!-- [rad] -->
   <xacro:property name="aileron_color" value="Red" />
+  <xacro:property name="aileron_left_mesh_file" value="package://rotors_description/meshes/techpod/techpod_aileron_left.dae" />
+  <xacro:property name="aileron_right_mesh_file" value="package://rotors_description/meshes/techpod/techpod_aileron_right.dae" />
 
   <!-- Elevator properties -->
   <xacro:property name="elevator_length" value="0.051" /> <!-- [m] -->
@@ -53,6 +56,7 @@
   <xacro:property name="elevator_min_angle" value="-0.349066" /> <!-- [rad] -->
   <xacro:property name="elevator_max_angle" value="0.349066" /> <!-- [rad] -->
   <xacro:property name="elevator_color" value="Blue" />
+  <xacro:property name="elevator_mesh_file" value="package://rotors_description/meshes/techpod/techpod_elevator.dae" />
 
   <!-- Flap properties -->
   <xacro:property name="flap_length" value="0.076" /> <!-- [m] -->
@@ -61,6 +65,8 @@
   <xacro:property name="flap_min_angle" value="0.0" /> <!-- [rad] -->
   <xacro:property name="flap_max_angle" value="0.0" /> <!-- [rad] -->
   <xacro:property name="flap_color" value="Yellow" />
+  <xacro:property name="flap_left_mesh_file" value="package://rotors_description/meshes/techpod/techpod_flap_left.dae" />
+  <xacro:property name="flap_right_mesh_file" value="package://rotors_description/meshes/techpod/techpod_flap_right.dae" />
 
   <!-- Rudder properties -->
   <xacro:property name="rudder_length" value="0.129" />
@@ -69,12 +75,14 @@
   <xacro:property name="rudder_min_angle" value="-0.349066" />
   <xacro:property name="rudder_max_angle" value="0.349066" />
   <xacro:property name="rudder_color" value="Orange" />
+  <xacro:property name="rudder_mesh_file" value="package://rotors_description/meshes/techpod/techpod_rudder.dae" />
 
   <!-- Propeller properties -->
   <xacro:property name="propeller_direction" value="cw" />
   <xacro:property name="propeller_radius" value="0.1" />
   <xacro:property name="propeller_height" value="0.003" />
   <xacro:property name="propeller_color" value="Gray" />
+  <xacro:property name="propeller_mesh_file" value="package://rotors_description/meshes/propeller_${propeller_direction}.dae" />
 
   <!-- Inertia of the main body -->
   <xacro:property name="body_inertia">
@@ -118,7 +126,10 @@
     height="${body_height}"
     color="${body_color}"
     use_mesh_file="${use_mesh}"
-    mesh_file="package://rotors_description/meshes/techpod/techpod_body.dae">
+    mesh_file="${body_mesh_file}"
+    aero_params_yaml="$(arg aero_params_yaml_file)"
+    vehicle_params_yaml="$(arg vehicle_params_yaml_file)"
+    is_input_joystick="$(arg is_input_joystick)">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <xacro:insert_block name="body_inertia" />
   </xacro:fixed_wing_base_macro>
@@ -133,7 +144,7 @@
     max_angle="${aileron_max_angle}"
     color="${aileron_color}"
     use_mesh_file="${use_mesh}"
-    mesh_file="package://rotors_description/meshes/techpod/techpod_aileron_left.dae"
+    mesh_file="${aileron_left_mesh_file}"
     surface_length="${aileron_length}"
     surface_width="${aileron_width}"
     surface_height="${aileron_height}">
@@ -152,7 +163,7 @@
     max_angle="${aileron_max_angle}"
     color="${aileron_color}"
     use_mesh_file="${use_mesh}"
-    mesh_file="package://rotors_description/meshes/techpod/techpod_aileron_right.dae"
+    mesh_file="${aileron_right_mesh_file}"
     surface_length="${aileron_length}"
     surface_width="${aileron_width}"
     surface_height="${aileron_height}">
@@ -172,7 +183,7 @@
     max_angle="${elevator_max_angle}"
     color="${elevator_color}"
     use_mesh_file="${use_mesh}"
-    mesh_file="package://rotors_description/meshes/techpod/techpod_elevator.dae"
+    mesh_file="${elevator_mesh_file}"
     surface_length="${elevator_length}"
     surface_width="${elevator_width}"
     surface_height="${elevator_height}">
@@ -192,7 +203,7 @@
     max_angle="${flap_max_angle}"
     color="${flap_color}"
     use_mesh_file="${use_mesh}"
-    mesh_file="package://rotors_description/meshes/techpod/techpod_flap_left.dae"
+    mesh_file="${flap_left_mesh_file}"
     surface_length="${flap_length}"
     surface_width="${flap_width}"
     surface_height="${flap_height}">
@@ -211,7 +222,7 @@
     max_angle="${flap_max_angle}"
     color="${flap_color}"
     use_mesh_file="${use_mesh}"
-    mesh_file="package://rotors_description/meshes/techpod/techpod_flap_right.dae"
+    mesh_file="${flap_right_mesh_file}"
     surface_length="${flap_length}"
     surface_width="${flap_width}"
     surface_height="${flap_height}">
@@ -231,7 +242,7 @@
     max_angle="${rudder_max_angle}"
     color="${rudder_color}"
     use_mesh_file="${use_mesh}"
-    mesh_file="package://rotors_description/meshes/techpod/techpod_rudder.dae"
+    mesh_file="${rudder_mesh_file}"
     surface_length="${rudder_length}"
     surface_width="${rudder_width}"
     surface_height="${rudder_height}">
@@ -250,7 +261,7 @@
     propeller_radius="${propeller_radius}"
     color="${propeller_color}"
     use_mesh_file="${use_mesh}"
-    mesh_file="package://rotors_description/meshes/propeller_${propeller_direction}.dae">
+    mesh_file="${propeller_mesh_file}">
     <origin xyz="-0.025 0 0.15" rpy="0 ${-0.5*PI} 0" />
     <xacro:insert_block name="propeller_inertia" />
   </xacro:propeller>

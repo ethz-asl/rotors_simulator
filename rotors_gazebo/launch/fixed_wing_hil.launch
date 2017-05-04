@@ -1,0 +1,51 @@
+<launch>
+  <arg name="uav_name" default="techpod"/>
+  <arg name="world_name" default="yosemite"/>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="$(arg uav_name)"/>
+  <arg name="debug" default="false"/>
+  <arg name="gui" default="true"/>
+  <arg name="paused" default="false"/>
+  <!-- The following line causes gzmsg and gzerr messages to be printed to the console
+      (even when Gazebo is started through roslaunch) -->
+  <arg name="verbose" default="false"/>
+
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="paused" value="$(arg paused)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="verbose" value="$(arg verbose)"/>
+  </include>
+
+  <group ns="$(arg uav_name)">
+    <include file="$(find rotors_gazebo)/launch/spawn_fixed_wing.launch">
+      <arg name="uav_name" value="$(arg uav_name)" />
+      <arg name="model" value="$(find rotors_description)/urdf/$(arg uav_name)_base.xacro" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg log_file)" />
+    </include>
+
+    <node name="hil_interface" pkg="rotors_hil_interface" type="rotors_hil_interface_node" clear_params="true" output="screen">
+      <param name="gps_topic" value="gps" />
+      <param name="imu_topic" value="imu" />
+      <param name="odometry_topic" value="ground_truth/odometry" />
+      <param name="hil_controls_sub_topic" value="/mavros/hil_controls/hil_controls" />
+      <param name="actuators_pub_topic" value="gazebo/command/motor_speed" />
+      <param name="mavlink_pub_topic" value="/mavlink/to" />
+      <param name="sensor_level_hil" value="true" />
+      <param name="hil_gps_frequency" value="5.0" />
+      <param name="hil_frequency" value="100.0" />
+    </node>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  </group>
+
+  <node name="hil_plugin_gui" pkg="rqt_rotors" type="hil_plugin" clear_params="true" output="screen" />
+</launch>
+

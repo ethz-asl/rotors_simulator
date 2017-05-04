@@ -2,6 +2,12 @@
 Changelog for package rotors_simulator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2017-04-08)
+-----------
+* Adding hil_interface to the meta package
+* switch url website in package.xml to github repo
+* Contributors: Fadri Furrer, Pavel
+
 2.0.1 (2015-08-10)
 ------------------
 

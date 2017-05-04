@@ -1,0 +1,22 @@
+syntax = "proto2";
+package gz_std_msgs;
+
+// Message designed to be sent to the ROS interface plugin by other
+// Gazebo plugins, to tell it to forward messages on a particular ROS topic onto
+// a Gazebo topic
+message ConnectRosToGazeboTopic
+{
+  required string ros_topic = 1;
+  //required string gazebo_namespace = 2;
+  required string gazebo_topic = 3;
+  
+  // The supported messages types that the ROS interface plugin knows to convert
+  // from a ROS to a Gazebo message
+  enum MsgType {
+  	ACTUATORS = 0;
+  	COMMAND_MOTOR_SPEED = 1;
+  	ROLL_PITCH_YAWRATE_THRUST = 2;
+  	WIND_SPEED = 3;
+  }
+  required MsgType msgType = 4;
+}

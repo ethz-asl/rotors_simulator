@@ -1,0 +1,13 @@
+syntax = "proto2";
+package gz_geometry_msgs;
+
+import "Header.proto";
+import "Twist.proto";
+
+// TwistStamped (e.g. ground speed) message type which is emitted by the
+// GPS Gazebo plugin
+message TwistStamped
+{
+  required gz_std_msgs.Header header = 1;
+  required Twist twist = 2;
+}

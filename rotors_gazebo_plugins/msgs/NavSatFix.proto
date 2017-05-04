@@ -1,0 +1,43 @@
+syntax = "proto2";
+package gz_sensor_msgs;
+
+import "Header.proto";
+
+// NavSatFix (GPS) message type which is emitted by the
+// GPS Gazebo plugin
+// Designed to imitate ROS sensor_msgs::NavSatStatus
+message NavSatFix
+{
+  required gz_std_msgs.Header header = 1;
+  
+  enum Service {
+    SERVICE_GPS = 0;
+    SERVICE_GLONASS = 1;
+    SERVICE_COMPASS = 2;
+    SERVICE_GALILEO = 3;
+  }
+  required Service service = 2;
+
+  enum Status {
+    STATUS_NO_FIX = 0;
+    STATUS_FIX = 1;
+    STATUS_SBAS_FIX = 2;
+    STATUS_GBAS_FIX = 3;
+  }
+  required Status status = 3;
+
+  required double latitude = 4;
+  required double longitude = 5;
+  required double altitude = 6; 
+
+  enum PositionCovarianceType {
+    COVARIANCE_TYPE_UNKNOWN = 0;
+    COVARIANCE_TYPE_APPROXIMATED = 1;
+    COVARIANCE_TYPE_DIAGONAL_KNOWN = 2;
+    COVARIANCE_TYPE_KNOWN = 3;
+  }
+  required PositionCovarianceType position_covariance_type = 7;
+  
+  repeated float position_covariance = 8 [packed=true];
+  
+}

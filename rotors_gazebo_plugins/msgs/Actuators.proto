@@ -1,0 +1,17 @@
+syntax = "proto2";
+package gz_sensor_msgs;
+
+import "Header.proto";
+
+// Actuators message type which is emitted by
+// GazeboMultirotorBasePlugin
+message Actuators
+{
+  required gz_std_msgs.Header header = 1;
+
+  repeated double angles = 2 [packed=true];
+  
+  repeated double angular_velocities = 3 [packed=true];
+
+  repeated double normalized = 4 [packed=true];
+}

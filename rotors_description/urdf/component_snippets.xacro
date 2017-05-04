@@ -261,8 +261,23 @@
       </plugin>
     </gazebo>
   </xacro:macro>
+  
+  <!-- =============================================================== -->
+  <!-- ==================== ROS INTERFACE MACRO ====================== -->
+  <!-- =============================================================== -->
+  <!-- <xacro:macro 
+  		name="ros_interface_plugin_macro"
+  		params="namespace">
+    <gazebo>
+      <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so">
+        <robotNamespace>${namespace}</robotNamespace>
+      </plugin>
+    </gazebo>
+  </xacro:macro>-->
 
-  <!-- Macro to add the mavlink interface. -->
+  <!-- =============================================================== -->
+  <!-- ================== MAVLINK INTERFACE MACRO ==================== -->
+  <!-- =============================================================== -->
   <xacro:macro name="mavlink_interface_macro" 
     params="namespace mavlink_sub_topic imu_sub_topic mavlink_pub_topic 
       motors_speeds_pub_topic gps_update_freq rotor_count reference_magnetic_field_north 
@@ -294,7 +309,7 @@
   <!-- Macro to add an IMU. -->
   <xacro:macro name="imu_plugin_macro"
     params="namespace imu_suffix parent_link imu_topic
-      mass_imu_sensor gyroscope_noise_density gyroscopoe_random_walk
+      mass_imu_sensor gyroscope_noise_density gyroscope_random_walk
       gyroscope_bias_correlation_time gyroscope_turn_on_bias_sigma
       accelerometer_noise_density accelerometer_random_walk
       accelerometer_bias_correlation_time accelerometer_turn_on_bias_sigma
@@ -322,7 +337,7 @@
         <linkName>${namespace}/imu${imu_suffix}_link</linkName> <!-- (string, required): name of the body which holds the IMU sensor -->
         <imuTopic>${imu_topic}</imuTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
         <gyroscopeNoiseDensity>${gyroscope_noise_density}</gyroscopeNoiseDensity> <!-- Gyroscope noise density (two-sided spectrum) [rad/s/sqrt(Hz)] -->
-        <gyroscopeRandomWalk>${gyroscopoe_random_walk}</gyroscopeRandomWalk> <!-- Gyroscope bias random walk [rad/s/s/sqrt(Hz)] -->
+        <gyroscopeRandomWalk>${gyroscope_random_walk}</gyroscopeRandomWalk> <!-- Gyroscope bias random walk [rad/s/s/sqrt(Hz)] -->
         <gyroscopeBiasCorrelationTime>${gyroscope_bias_correlation_time}</gyroscopeBiasCorrelationTime> <!-- Gyroscope bias correlation time constant [s] -->
         <gyroscopeTurnOnBiasSigma>${gyroscope_turn_on_bias_sigma}</gyroscopeTurnOnBiasSigma> <!-- Gyroscope turn on bias standard deviation [rad/s] -->
         <accelerometerNoiseDensity>${accelerometer_noise_density}</accelerometerNoiseDensity> <!-- Accelerometer noise density (two-sided spectrum) [m/s^2/sqrt(Hz)] -->
@@ -504,11 +519,42 @@
     </gazebo>
   </xacro:macro>
 
+  <!-- Macro to add an air pressure sensor. -->
+  <xacro:macro name="pressure_sensor_plugin_macro"
+    params="namespace pressure_sensor_suffix parent_link pressure_topic
+      mass_pressure_sensor reference_altitude pressure_variance *inertia
+      *origin">
+    <!-- Pressure sensor link -->
+    <link name="${namespace}/pressure_sensor${pressure_sensor_suffix}_link">
+      <inertial>
+        <xacro:insert_block name="inertia" />
+        <mass value="${mass_pressure_sensor}" />  <!-- [kg] -->
+        <origin xyz="0 0 0" rpy="0 0 0" />
+      </inertial>
+    </link>
+    <!-- Pressure sensor joint -->
+    <joint name="${namespace}/pressure_sensor${pressure_sensor_suffix}_joint" type="revolute">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/pressure_sensor${pressure_sensor_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+    <gazebo>
+      <plugin filename="librotors_gazebo_pressure_plugin.so" name="rotors_gazebo_pressure_sensor${pressure_sensor_suffix}_plugin">
+        <robotNamespace>${namespace}</robotNamespace> <!-- (string, required): ros namespace in which the messages are published -->
+        <linkName>${namespace}/pressure_sensor${pressure_sensor_suffix}_link</linkName> <!-- (string, required): name of the body which holds the pressure sensor -->
+        <pressureTopic>${pressure_topic}</pressureTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to 'air_pressure') -->
+        <referenceAltitude>${reference_altitude}</referenceAltitude> <!-- the initial altitude [m] -->
+        <pressureVariance>${pressure_variance}</pressureVariance> <!-- the air pressure variance [Pa^2] -->
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
   <!-- Macro to add the wind plugin. -->
   <xacro:macro name="wind_plugin_macro"
     params="namespace xyz_offset wind_direction wind_force_mean
       wind_gust_direction wind_gust_duration wind_gust_start
-      wind_gust_force_mean">
+      wind_gust_force_mean wind_speed_mean">
     <gazebo>
       <plugin filename="librotors_gazebo_wind_plugin.so" name="wind_plugin">
         <frameId>world</frameId>
@@ -521,6 +567,7 @@
         <windGustDuration>${wind_gust_duration}</windGustDuration> <!-- [s] -->
         <windGustStart>${wind_gust_start}</windGustStart> <!-- [s] -->
         <windGustForceMean>${wind_gust_force_mean}</windGustForceMean> <!-- [N] -->
+        <windSpeedMean>${wind_speed_mean}</windSpeedMean> <!-- [m/s] -->
       </plugin>
     </gazebo>
   </xacro:macro>
@@ -732,7 +779,7 @@
       imu_topic="imu"
       mass_imu_sensor="0.015"
       gyroscope_noise_density="0.0003394"
-      gyroscopoe_random_walk="0.000038785"
+      gyroscope_random_walk="0.000038785"
       gyroscope_bias_correlation_time="1000.0"
       gyroscope_turn_on_bias_sigma="0.0087"
       accelerometer_noise_density="0.004"
@@ -753,7 +800,7 @@
       imu_topic="ground_truth/imu"
       mass_imu_sensor="0.00001"
       gyroscope_noise_density="0.0"
-      gyroscopoe_random_walk="0.0"
+      gyroscope_random_walk="0.0"
       gyroscope_bias_correlation_time="1000.0"
       gyroscope_turn_on_bias_sigma="0.0"
       accelerometer_noise_density="0.0"
@@ -805,7 +852,7 @@
       imu_topic="imu"
       mass_imu_sensor="0.015"
       gyroscope_noise_density="0.0003394"
-      gyroscopoe_random_walk="0.000038785"
+      gyroscope_random_walk="0.000038785"
       gyroscope_bias_correlation_time="1000.0"
       gyroscope_turn_on_bias_sigma="0.0087"
       accelerometer_noise_density="0.004"
@@ -851,6 +898,20 @@
       <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:magnetometer_plugin_macro>
+  </xacro:macro>
+
+  <xacro:macro name="default_pressure_sensor" params="namespace parent_link">
+    <xacro:pressure_sensor_plugin_macro
+      namespace="${namespace}"
+      pressure_sensor_suffix=""
+      parent_link="${parent_link}"
+      pressure_topic="air_pressure"
+      mass_pressure_sensor="0.015"
+      reference_altitude="500.0"
+      pressure_variance="0.0">
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </xacro:pressure_sensor_plugin_macro>
   </xacro:macro>
 
   <xacro:macro name="default_mavlink_interface" params="namespace imu_sub_topic rotor_count">

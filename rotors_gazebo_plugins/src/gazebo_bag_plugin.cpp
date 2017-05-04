@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +18,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 #include "rotors_gazebo_plugins/gazebo_bag_plugin.h"
 
@@ -36,10 +36,11 @@ GazeboBagPlugin::~GazeboBagPlugin() {
   bag_.close();
 }
 
-// void GazeboBagPlugin::InitializeParams() {};
-// void GazeboBagPlugin::Publish() {};
-
 void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+  if (kPrintOnPluginLoad) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   // Store the pointer to the model
   model_ = _model;
   // world_ = physics::get_world(model_->world.name);
@@ -47,57 +48,69 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   if (_sdf->HasElement("robotNamespace")) {
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
-  }
-  else {
+  } else {
     gzerr << "[gazebo_bag_plugin] Please specify a robotNamespace.\n";
   }
   node_handle_ = new ros::NodeHandle(namespace_);
 
   if (_sdf->HasElement("bagFileName")) {
     bag_filename_ = _sdf->GetElement("bagFileName")->Get<std::string>();
-  }
-  else {
+  } else {
     gzerr << "[gazebo_bag_plugin] Please specify a bagFileName.\n";
   }
 
   if (_sdf->HasElement("linkName")) {
     link_name_ = _sdf->GetElement("linkName")->Get<std::string>();
-  }
-  else {
-    gzwarn << "[gazebo_bag_plugin] No linkName specified, using default " << link_name_ << ".\n";
+  } else {
+    gzwarn << "[gazebo_bag_plugin] No linkName specified, using default "
+           << link_name_ << ".\n";
   }
 
   // Get the pointer to the link
   link_ = model_->GetLink(link_name_);
   if (link_ == NULL) {
-    gzthrow("[gazebo_bag_plugin] Couldn't find specified link \"" << link_name_ << "\".");
+    gzthrow("[gazebo_bag_plugin] Couldn't find specified link \"" << link_name_
+                                                                  << "\".");
   }
 
   getSdfParam<std::string>(_sdf, "frameId", frame_id_, frame_id_);
   getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_, imu_topic_);
-  getSdfParam<std::string>(_sdf, "commandAttitudeThrustTopic", control_attitude_thrust_topic_,
+  getSdfParam<std::string>(_sdf, "commandAttitudeThrustTopic",
+                           control_attitude_thrust_topic_,
                            control_attitude_thrust_topic_);
-  getSdfParam<std::string>(_sdf, "commandMotorSpeedTopic", control_motor_speed_topic_,
+  getSdfParam<std::string>(_sdf, "commandMotorSpeedTopic",
+                           control_motor_speed_topic_,
                            control_motor_speed_topic_);
-  getSdfParam<std::string>(_sdf, "commandRateThrustTopic", control_rate_thrust_topic_,
+  getSdfParam<std::string>(_sdf, "commandRateThrustTopic",
+                           control_rate_thrust_topic_,
                            control_rate_thrust_topic_);
+  getSdfParam<std::string>(_sdf, "windSpeedTopic",
+                           wind_speed_topic_, wind_speed_topic_);
   getSdfParam<std::string>(_sdf, "motorTopic", motor_topic_, motor_topic_);
-  getSdfParam<std::string>(_sdf, "poseTopic", ground_truth_pose_topic_, ground_truth_pose_topic_);
-  getSdfParam<std::string>(_sdf, "twistTopic", ground_truth_twist_topic_, ground_truth_twist_topic_);
-  getSdfParam<std::string>(_sdf, "wrenchesTopic", wrench_topic_, wrench_topic_);
-  getSdfParam<std::string>(_sdf, "windTopic", wind_topic_, wind_topic_);
-  getSdfParam<std::string>(_sdf, "waypointTopic", waypoint_topic_, waypoint_topic_);
-  getSdfParam<std::string>(_sdf, "commandPoseTopic", command_pose_topic_, command_pose_topic_);
-  getSdfParam<std::string>(_sdf, "recordingServiceName", recording_service_name_, recording_service_name_);
+  getSdfParam<std::string>(_sdf, "poseTopic", ground_truth_pose_topic_,
+                           ground_truth_pose_topic_);
+  getSdfParam<std::string>(_sdf, "twistTopic", ground_truth_twist_topic_,
+                           ground_truth_twist_topic_);
+  getSdfParam<std::string>(_sdf, "wrenchesTopic", wrench_topic_,
+                           wrench_topic_);
+  getSdfParam<std::string>(_sdf, "externalForceTopic", external_force_topic_,
+                           external_force_topic_);
+  getSdfParam<std::string>(_sdf, "waypointTopic", waypoint_topic_,
+                           waypoint_topic_);
+  getSdfParam<std::string>(_sdf, "commandPoseTopic", command_pose_topic_,
+                           command_pose_topic_);
+  getSdfParam<std::string>(_sdf, "recordingServiceName",
+                           recording_service_name_, recording_service_name_);
 
-  getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_,
+  getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim",
+                      rotor_velocity_slowdown_sim_,
                       rotor_velocity_slowdown_sim_);
 
   getSdfParam<bool>(_sdf, "waitToRecordBag", wait_to_record_, wait_to_record_);
 
-  recording_service_ = node_handle_->advertiseService(recording_service_name_,
-                                                      &GazeboBagPlugin::RecordingServiceCallback,
-                                                      this);
+  recording_service_ = node_handle_->advertiseService(
+      recording_service_name_, &GazeboBagPlugin::RecordingServiceCallback,
+      this);
 
   // Get the motor joints.
   child_links_ = link_->GetChildJointsLinks();
@@ -134,12 +147,15 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   }
 
   // If we do not need to wait for user command, we start recording right away
-  if (!wait_to_record_)
-    StartRecording();
+  if (!wait_to_record_) StartRecording();
 }
 
 // This gets called by the world update start event.
 void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
+  if (kPrintOnUpdates) {
+    gzdbg << __FUNCTION__ << "() called." << std::endl;
+  }
+
   // Get the current simulation time.
   common::Time now = world_->GetSimTime();
   LogWrenches(now);
@@ -149,7 +165,7 @@ void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
 void GazeboBagPlugin::StartRecording() {
   time_t rawtime;
-  struct tm *timeinfo;
+  struct tm* timeinfo;
   char buffer[80];
 
   time(&rawtime);
@@ -169,49 +185,63 @@ void GazeboBagPlugin::StartRecording() {
   bag_.open(full_bag_filename, rosbag::bagmode::Write);
 
   // Subscriber to IMU sensor_msgs::Imu Message.
-  imu_sub_ = node_handle_->subscribe(imu_topic_, 10, &GazeboBagPlugin::ImuCallback, this);
+  imu_sub_ = node_handle_->subscribe(imu_topic_, 10,
+                                     &GazeboBagPlugin::ImuCallback, this);
 
-  // Subscriber to Wind WrenchStamped Message.
-  wind_sub_ = node_handle_->subscribe(wind_topic_, 10, &GazeboBagPlugin::WindCallback, this);
+  // Subscriber to External Force WrenchStamped Message.
+  external_force_sub_ = node_handle_->subscribe(external_force_topic_, 10,
+      &GazeboBagPlugin::ExternalForceCallback, this);
 
   // Subscriber to Waypoint MultiDOFJointTrajectory Message.
-  waypoint_sub_ = node_handle_->subscribe(waypoint_topic_, 10, &GazeboBagPlugin::WaypointCallback, this);
+  waypoint_sub_ = node_handle_->subscribe(
+      waypoint_topic_, 10, &GazeboBagPlugin::WaypointCallback, this);
 
   // Subscriber to PoseStamped pose command message.
-  command_pose_sub_ = node_handle_->subscribe(command_pose_topic_, 10, &GazeboBagPlugin::CommandPoseCallback, this);
+  command_pose_sub_ = node_handle_->subscribe(
+      command_pose_topic_, 10, &GazeboBagPlugin::CommandPoseCallback, this);
 
   // Subscriber to Control Attitude Thrust Message.
-  control_attitude_thrust_sub_ = node_handle_->subscribe(control_attitude_thrust_topic_, 10,
-                                                           &GazeboBagPlugin::AttitudeThrustCallback, this);
+  control_attitude_thrust_sub_ =
+      node_handle_->subscribe(control_attitude_thrust_topic_, 10,
+                              &GazeboBagPlugin::AttitudeThrustCallback, this);
 
   // Subscriber to Control Motor Speed Message.
-  control_motor_speed_sub_ = node_handle_->subscribe(control_motor_speed_topic_, 10,
-                                                       &GazeboBagPlugin::ActuatorsCallback, this);
+  control_motor_speed_sub_ =
+      node_handle_->subscribe(control_motor_speed_topic_, 10,
+                              &GazeboBagPlugin::ActuatorsCallback, this);
 
   // Subscriber to Control Rate Thrust Message.
-  control_rate_thrust_sub_ = node_handle_->subscribe(control_rate_thrust_topic_, 10,
-                                                       &GazeboBagPlugin::RateThrustCallback, this);
+  control_rate_thrust_sub_ =
+      node_handle_->subscribe(control_rate_thrust_topic_, 10,
+                              &GazeboBagPlugin::RateThrustCallback, this);
+
+  // Subscriber to Wind Speed Message.
+  wind_speed_sub_ =
+      node_handle_->subscribe(wind_speed_topic_, 10,
+                              &GazeboBagPlugin::WindSpeedCallback, this);
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  update_connection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboBagPlugin::OnUpdate,
-                                                                          this, _1));
+  update_connection_ = event::Events::ConnectWorldUpdateBegin(
+      boost::bind(&GazeboBagPlugin::OnUpdate, this, _1));
 
   // Set the flag that we are actively recording.
   is_recording_ = true;
 
-  ROS_INFO("GazeboBagPlugin START recording bagfile %s", full_bag_filename.c_str());
+  ROS_INFO("GazeboBagPlugin START recording bagfile %s",
+           full_bag_filename.c_str());
 }
 
 void GazeboBagPlugin::StopRecording() {
   // Shutdown all the subscribers.
   imu_sub_.shutdown();
-  wind_sub_.shutdown();
+  external_force_sub_.shutdown();
   waypoint_sub_.shutdown();
   command_pose_sub_.shutdown();
   control_attitude_thrust_sub_.shutdown();
   control_motor_speed_sub_.shutdown();
   control_rate_thrust_sub_.shutdown();
+  wind_speed_sub_.shutdown();
 
   // Disconnect the update event.
   event::Events::DisconnectWorldUpdateBegin(update_connection_);
@@ -231,10 +261,11 @@ void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg) {
   writeBag(namespace_ + "/" + imu_topic_, ros_now, imu_msg);
 }
 
-void GazeboBagPlugin::WindCallback(const geometry_msgs::WrenchStampedConstPtr& wind_msg) {
+void GazeboBagPlugin::ExternalForceCallback(
+    const geometry_msgs::WrenchStampedConstPtr& force_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
-  writeBag(namespace_ + "/" + wind_topic_, ros_now, wind_msg);
+  writeBag(namespace_ + "/" + external_force_topic_, ros_now, force_msg);
 }
 
 void GazeboBagPlugin::WaypointCallback(
@@ -244,7 +275,8 @@ void GazeboBagPlugin::WaypointCallback(
   writeBag(namespace_ + "/" + waypoint_topic_, ros_now, trajectory_msg);
 }
 
-void GazeboBagPlugin::CommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg) {
+void GazeboBagPlugin::CommandPoseCallback(
+    const geometry_msgs::PoseStampedConstPtr& pose_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(namespace_ + "/" + command_pose_topic_, ros_now, pose_msg);
@@ -254,19 +286,29 @@ void GazeboBagPlugin::AttitudeThrustCallback(
     const mav_msgs::AttitudeThrustConstPtr& control_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
-  writeBag(namespace_ + "/" + control_attitude_thrust_topic_, ros_now, control_msg);
+  writeBag(namespace_ + "/" + control_attitude_thrust_topic_, ros_now,
+           control_msg);
 }
 
-void GazeboBagPlugin::ActuatorsCallback(const mav_msgs::ActuatorsConstPtr& control_msg) {
+void GazeboBagPlugin::ActuatorsCallback(
+    const mav_msgs::ActuatorsConstPtr& control_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(namespace_ + "/" + control_motor_speed_topic_, ros_now, control_msg);
 }
 
-void GazeboBagPlugin::RateThrustCallback(const mav_msgs::RateThrustConstPtr& control_msg) {
+void GazeboBagPlugin::RateThrustCallback(
+    const mav_msgs::RateThrustConstPtr& control_msg) {
   common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(namespace_ + "/" + control_rate_thrust_topic_, ros_now, control_msg);
+}
+
+void GazeboBagPlugin::WindSpeedCallback(
+    const rotors_comm::WindSpeedConstPtr& wind_speed_msg) {
+  common::Time now = world_->GetSimTime();
+  ros::Time ros_now = ros::Time(now.sec, now.nsec);
+  writeBag(namespace_ + "/" + wind_speed_topic_, ros_now, wind_speed_msg);
 }
 
 void GazeboBagPlugin::LogMotorVelocities(const common::Time now) {
@@ -277,7 +319,8 @@ void GazeboBagPlugin::LogMotorVelocities(const common::Time now) {
 
   MotorNumberToJointMap::iterator m;
   for (m = motor_joints_.begin(); m != motor_joints_.end(); ++m) {
-    double motor_rot_vel = m->second->GetVelocity(0) * rotor_velocity_slowdown_sim_;
+    double motor_rot_vel =
+        m->second->GetVelocity(0) * rotor_velocity_slowdown_sim_;
     rot_velocities_msg.angular_velocities[m->first] = motor_rot_vel;
   }
   rot_velocities_msg.header.stamp.sec = now.sec;
@@ -325,48 +368,62 @@ void GazeboBagPlugin::LogGroundTruth(const common::Time now) {
 
 void GazeboBagPlugin::LogWrenches(const common::Time now) {
   geometry_msgs::WrenchStamped wrench_msg;
-  std::vector<physics::Contact *> contacts = contact_mgr_->GetContacts();
+  std::vector<physics::Contact*> contacts = contact_mgr_->GetContacts();
   for (int i = 0; i < contact_mgr_->GetContactCount(); ++i) {
-    std::string collision2_name = contacts[i]->collision2->GetLink()->GetScopedName();
+    std::string collision2_name =
+        contacts[i]->collision2->GetLink()->GetScopedName();
+#if GAZEBO_MAJOR_VERSION >= 8
+    double body1_force = contacts[i]->wrench->body1Force.Length();
+#else
     double body1_force = contacts[i]->wrench->body1Force.GetLength();
+#endif
 
     // Exclude extremely small forces.
-    if (body1_force < 1e-10)
-      continue;
+    if (body1_force < 1e-10) continue;
     // Do this, such that all the contacts are logged.
     // (publishing on the same topic with the same time stamp is impossible)
-    ros::Time ros_now = ros::Time(now.sec, now.nsec + i*1000);
-    std::string collision1_name = contacts[i]->collision1->GetLink()->GetScopedName();
+    ros::Time ros_now = ros::Time(now.sec, now.nsec + i * 1000);
+    std::string collision1_name =
+        contacts[i]->collision1->GetLink()->GetScopedName();
     wrench_msg.header.frame_id = collision1_name + "--" + collision2_name;
     wrench_msg.header.stamp.sec = now.sec;
     wrench_msg.header.stamp.nsec = now.nsec;
+#if GAZEBO_MAJOR_VERSION >= 8
+    wrench_msg.wrench.force.x = contacts[i]->wrench->body1Force.X();
+    wrench_msg.wrench.force.y = contacts[i]->wrench->body1Force.Y();
+    wrench_msg.wrench.force.z = contacts[i]->wrench->body1Force.Z();
+    wrench_msg.wrench.torque.x = contacts[i]->wrench->body1Torque.X();
+    wrench_msg.wrench.torque.y = contacts[i]->wrench->body1Torque.Y();
+    wrench_msg.wrench.torque.z = contacts[i]->wrench->body1Torque.Z();
+#else
     wrench_msg.wrench.force.x = contacts[i]->wrench->body1Force.x;
     wrench_msg.wrench.force.y = contacts[i]->wrench->body1Force.y;
     wrench_msg.wrench.force.z = contacts[i]->wrench->body1Force.z;
     wrench_msg.wrench.torque.x = contacts[i]->wrench->body1Torque.x;
     wrench_msg.wrench.torque.y = contacts[i]->wrench->body1Torque.y;
     wrench_msg.wrench.torque.z = contacts[i]->wrench->body1Torque.z;
+#endif
 
     writeBag(namespace_ + "/" + wrench_topic_, ros_now, wrench_msg);
   }
 }
 
-bool GazeboBagPlugin::RecordingServiceCallback(rotors_comm::RecordRosbag::Request& req,
-                                               rotors_comm::RecordRosbag::Response& res) {
+bool GazeboBagPlugin::RecordingServiceCallback(
+    rotors_comm::RecordRosbag::Request& req,
+    rotors_comm::RecordRosbag::Response& res) {
   if (req.record && !is_recording_) {
     StartRecording();
     res.success = true;
-  }
-  else if (req.record && is_recording_) {
-    gzwarn << "[gazebo_bag_plugin] Already recording rosbag, ignoring start command.\n";
+  } else if (req.record && is_recording_) {
+    gzwarn << "[gazebo_bag_plugin] Already recording rosbag, ignoring start "
+              "command.\n";
     res.success = false;
-  }
-  else if (!req.record && is_recording_) {
+  } else if (!req.record && is_recording_) {
     StopRecording();
     res.success = true;
-  }
-  else if (!req.record && !is_recording_) {
-    gzwarn << "[gazebo_bag_plugin] Already not recording rosbag, ignoring stop command.\n";
+  } else if (!req.record && !is_recording_) {
+    gzwarn << "[gazebo_bag_plugin] Already not recording rosbag, ignoring stop "
+              "command.\n";
     res.success = false;
   }
 
@@ -374,4 +431,5 @@ bool GazeboBagPlugin::RecordingServiceCallback(rotors_comm::RecordRosbag::Reques
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboBagPlugin);
-}
+
+}  // namespace gazebo

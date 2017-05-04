@@ -77,6 +77,8 @@ Installation Instructions
  $ git clone git@github.com:ethz-asl/rotors_simulator.git
  $ git clone git@github.com:ethz-asl/mav_comm.git
  ```
+  > **Note** On OS X you to install yaml-cpp using Homebrew `brew install yaml-cpp`.
+ 
   > **Note** if you want to use `wstool` you can replace the above commands with
     ```
     wstool set --git local_repo_name git@github.com:organization/repo_name.git
@@ -106,7 +108,7 @@ Basic Usage
 Launch the simulator with a hex-rotor helicopter model, in our case, the AscTec Firefly in a basic world.
 
 ```
-$ roslaunch rotors_gazebo mav_empty_world.launch mav_name:=firefly world_name:=basic
+$ roslaunch rotors_gazebo mav_hovering_example.launch mav_name:=firefly world_name:=basic
 ```
 
 > **Note** The first run of gazebo might take considerably long, as it will download some models from an online database.
@@ -175,3 +177,11 @@ $ roslaunch rotors_gazebo mav_with_keyboard.launch mav_name:=firefly world_name:
 ```
 
 If everything was setup correctly, an additional GUI should appear with bars indicating the current throttle, roll, pitch, and yaw inputs. While this window is active, the Arrows and W, A, S, D keys will generate virtual joystick inputs, which can then be processed by the RotorS joystick node in the same way as real joystick commands.
+
+Gazebo Version
+--------------
+
+At a minimum, Gazebo `v2.x` is required (which is installed by default with ROS Indigo). However, it is **recommended to install at least Gazebo `v5.x`** for full functionlity, as there are the following limitations:
+
+1. `iris.sdf` can only be generated with Gazebo >= `v3.0`, as it requires use of the `gz sdf ...` tool. If this requirement is not met, you will not be able to use the Iris MAV in any of the simulations.
+2. The Gazebo plugins `GazeboGeotaggedImagesPlugin`, `LidarPlugin` and the `LiftDragPlugin` all require Gazebo >= `v5.0`, and will not be built if this requirement is not met.

@@ -1,0 +1,43 @@
+<launch>
+  <arg name="uav_name" default="techpod"/>
+  <arg name="world_name" default="yosemite"/>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="$(arg uav_name)"/>
+  <arg name="debug" default="false"/>
+  <arg name="gui" default="true"/>
+  <arg name="paused" default="true"/>
+  <!-- The following line causes gzmsg and gzerr messages to be printed to the console
+      (even when Gazebo is started through roslaunch) -->
+  <arg name="verbose" default="false"/>
+
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="paused" value="$(arg paused)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="verbose" value="$(arg verbose)"/>
+  </include>
+
+  <group ns="$(arg uav_name)">
+    <include file="$(find rotors_gazebo)/launch/spawn_fixed_wing.launch">
+      <arg name="uav_name" value="$(arg uav_name)" />
+      <arg name="model" value="$(find rotors_description)/urdf/$(arg uav_name)_base.xacro" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg log_file)"/>
+      <arg name="is_input_joystick" value="true" />
+    </include>
+    <node name="joy_node" pkg="joy" type="joy_node" />
+    <node name="rotors_joy_interface" pkg="rotors_joy_interface" type="rotors_joy_interface">
+      <param name="is_fixed_wing" value="true" />
+      <param name="max_roll" value="1.0" />
+      <param name="max_pitch" value="1.0" />
+      <param name="max_yaw_rate" value="1.0" />
+    </node>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  </group>
+</launch>

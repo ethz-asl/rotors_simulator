@@ -4,6 +4,7 @@
  * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,28 +33,18 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-#include <geometry_msgs/Point.h>
-#include <geometry_msgs/PointStamped.h>
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/PoseWithCovariance.h>
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
-#include <geometry_msgs/Quaternion.h>
-#include <geometry_msgs/Transform.h>
-#include <geometry_msgs/TransformStamped.h>
-#include <geometry_msgs/Twist.h>
-#include <geometry_msgs/TwistWithCovariance.h>
-#include <geometry_msgs/TwistWithCovarianceStamped.h>
-#include <mav_msgs/default_topics.h>
-#include <nav_msgs/Odometry.h>
 #include <opencv2/core/core.hpp>
-#include <ros/callback_queue.h>
-#include <ros/ros.h>
-#include <rotors_gazebo_plugins/common.h>
-#include <rotors_gazebo_plugins/sdf_api_wrapper.hpp>
-#include <tf/transform_broadcaster.h>
+
+#include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
+
+#include "rotors_gazebo_plugins/common.h"
+#include "rotors_gazebo_plugins/sdf_api_wrapper.hpp"
+
+#include "Odometry.pb.h"
+
 
 namespace gazebo {
+
 // Default values
 static const std::string kDefaultParentFrameId = "world";
 static const std::string kDefaultChildFrameId = "odometry_sensor";
@@ -70,16 +61,19 @@ class GazeboOdometryPlugin : public ModelPlugin {
  public:
   typedef std::normal_distribution<> NormalDistribution;
   typedef std::uniform_real_distribution<> UniformDistribution;
-  typedef std::deque<std::pair<int, nav_msgs::Odometry> > OdometryQueue;
+  typedef std::deque<std::pair<int, gz_geometry_msgs::Odometry> > OdometryQueue;
+  typedef boost::array<double, 36> CovarianceMatrix;
 
   GazeboOdometryPlugin()
       : ModelPlugin(),
         random_generator_(random_device_()),
+        // DEFAULT TOPICS
         pose_pub_topic_(mav_msgs::default_topics::POSE),
-        pose_with_covariance_pub_topic_(mav_msgs::default_topics::POSE_WITH_COVARIANCE),
-        position_pub_topic_(mav_msgs::default_topics::POSITION),
-        transform_pub_topic_(mav_msgs::default_topics::TRANSFORM),
+        pose_with_covariance_stamped_pub_topic_(mav_msgs::default_topics::POSE_WITH_COVARIANCE),
+        position_stamped_pub_topic_(mav_msgs::default_topics::POSITION),
+        transform_stamped_pub_topic_(mav_msgs::default_topics::TRANSFORM),
         odometry_pub_topic_(mav_msgs::default_topics::ODOMETRY),
+        //---------------
         parent_frame_id_(kDefaultParentFrameId),
         child_frame_id_(kDefaultChildFrameId),
         link_name_(kDefaultLinkName),
@@ -89,7 +83,7 @@ class GazeboOdometryPlugin : public ModelPlugin {
         gazebo_sequence_(kDefaultGazeboSequence),
         odometry_sequence_(kDefaultOdometrySequence),
         covariance_image_scale_(kDefaultCovarianceImageScale),
-        node_handle_(NULL) {}
+        pubs_and_subs_created_(false) {}
 
   ~GazeboOdometryPlugin();
 
@@ -101,13 +95,24 @@ class GazeboOdometryPlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
+
+  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
+  ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
+  bool pubs_and_subs_created_;
+
+  /// \brief    Creates all required publishers and subscribers, incl. routing of messages to/from ROS if required.
+  /// \details  Call this once the first time OnUpdate() is called (can't
+  ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
+  ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
+  void CreatePubsAndSubs();
+
   OdometryQueue odometry_queue_;
 
   std::string namespace_;
   std::string pose_pub_topic_;
-  std::string pose_with_covariance_pub_topic_;
-  std::string position_pub_topic_;
-  std::string transform_pub_topic_;
+  std::string pose_with_covariance_stamped_pub_topic_;
+  std::string position_stamped_pub_topic_;
+  std::string transform_stamped_pub_topic_;
   std::string odometry_pub_topic_;
   std::string parent_frame_id_;
   std::string child_frame_id_;
@@ -122,8 +127,8 @@ class GazeboOdometryPlugin : public ModelPlugin {
   UniformDistribution linear_velocity_u_[3];
   UniformDistribution angular_velocity_u_[3];
 
-  geometry_msgs::PoseWithCovariance::_covariance_type pose_covariance_matrix_;
-  geometry_msgs::TwistWithCovariance::_covariance_type twist_covariance_matrix_;
+  CovarianceMatrix pose_covariance_matrix_;
+  CovarianceMatrix twist_covariance_matrix_;
 
   int measurement_delay_;
   int measurement_divisor_;
@@ -136,27 +141,32 @@ class GazeboOdometryPlugin : public ModelPlugin {
   std::random_device random_device_;
   std::mt19937 random_generator_;
 
-  ros::NodeHandle* node_handle_;
-  ros::Publisher pose_pub_;
-  ros::Publisher pose_with_covariance_pub_;
-  ros::Publisher position_pub_;
-  ros::Publisher transform_pub_;
-  ros::Publisher odometry_pub_;
+  gazebo::transport::NodePtr node_handle_;
 
-  tf::Transform tf_;
-  tf::TransformBroadcaster transform_broadcaster_;
+  gazebo::transport::PublisherPtr pose_pub_;
+  gazebo::transport::PublisherPtr pose_with_covariance_stamped_pub_;
+  gazebo::transport::PublisherPtr position_stamped_pub_;
+  gazebo::transport::PublisherPtr transform_stamped_pub_;
+  gazebo::transport::PublisherPtr odometry_pub_;
+
+  /// \brief    Special-case publisher to publish stamped transforms with
+  ///           frame IDs. The ROS interface plugin (if present) will
+  ///           listen to this publisher and broadcast the transform
+  ///           using transform_broadcast().
+  gazebo::transport::PublisherPtr broadcast_transform_pub_;
 
   physics::WorldPtr world_;
   physics::ModelPtr model_;
   physics::LinkPtr link_;
   physics::EntityPtr parent_link_;
 
-  /// \brief Pointer to the update event connection.
+  /// \brief    Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
   boost::thread callback_queue_thread_;
   void QueueThread();
 };
-}
+
+} // namespace gazebo
 
 #endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_ODOMETRY_PLUGIN_H

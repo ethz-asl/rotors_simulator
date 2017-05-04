@@ -1,0 +1,33 @@
+# Techpod vehicle parameters
+wing_span: 2.59           # [m]
+wing_surface: 0.47        # [m^2]
+chord_length: 0.18        # [m]
+thrust_inclination: 0.0   # [rad]
+
+# Channel number for throttle in the array of normalized actuator commands
+throttle_channel: 5
+
+# Control surfaces parameters
+#   [rad] Minimum deflection angle
+#   [rad] Maximum deflection angle
+#   Channel number in the array of normalized actuator commands
+aileron_left:
+  channel: 4
+  deflection_min: -0.349066
+  deflection_max: 0.349066
+aileron_right:
+  channel: 0
+  deflection_min: -0.349066
+  deflection_max: 0.349066
+elevator:
+  channel: 1
+  deflection_min: -0.349066
+  deflection_max: 0.349066
+flap:
+  channel: 2
+  deflection_min: -0.349066
+  deflection_max: 0.349066
+rudder:
+  channel: 3
+  deflection_min: -0.349066
+  deflection_max: 0.349066

@@ -1,0 +1,11 @@
+syntax = "proto2";
+package gz_geometry_msgs;
+
+import "vector3d.proto";
+
+// Wrench includes both force and torque information about a joint.
+message Wrench
+{
+  required gazebo.msgs.Vector3d force = 1;
+  required gazebo.msgs.Vector3d torque = 2;
+}

@@ -1,0 +1,12 @@
+<library path="src">
+  <class name="Hil Plugin" type="rqt_rotors.hil_plugin.HilPlugin" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      Plugin for RotorS HIL interface.
+    </description>
+    <qtgui>
+      <label>RotorS HIL</label>
+      <icon type="theme">applications-other</icon>
+      <statustip>Plugin for RotorS HIL interface.</statustip>
+    </qtgui>
+  </class>
+</library>

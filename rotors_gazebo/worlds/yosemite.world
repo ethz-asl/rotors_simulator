@@ -16,6 +16,11 @@
         </clouds>
       </sky>
     </scene>
+
+    <!-- Only require one ROS interface plugin per world, as any other plugin can connect a Gazebo
+        topic to a ROS topic (or vise versa). -->
+    <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so"></plugin>
+
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
       <latitude_deg>47.3667</latitude_deg>
@@ -79,7 +84,7 @@
         </surface>
       </collision>
       <visual name='visual_1'>
-        <pose>-275 -125 0 0 0 0</pose>
+        <pose>-375 -125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -96,7 +101,7 @@
         </material>
       </visual>
       <visual name='visual_2'>
-        <pose>-275 125 0 0 0 0</pose>
+        <pose>-375 125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -113,7 +118,7 @@
         </material>
       </visual>
       <visual name='visual_3'>
-        <pose>-25 -125 0 0 0 0</pose>
+        <pose>-125 -125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -130,7 +135,7 @@
         </material>
       </visual>
       <visual name='visual_4'>
-        <pose>-25 125 0 0 0 0</pose>
+        <pose>-125 125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -147,7 +152,7 @@
         </material>
       </visual>
       <visual name='visual_5'>
-        <pose>225 -125 0 0 0 0</pose>
+        <pose>125 -125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -164,7 +169,7 @@
         </material>
       </visual>
       <visual name='visual_6'>
-        <pose>225 125 0 0 0 0</pose>
+        <pose>125 125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -181,7 +186,7 @@
         </material>
       </visual>
       <visual name='visual_7'>
-        <pose>475 125 0 0 0 0</pose>
+        <pose>375 125 0 0 0 0</pose>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>

@@ -1,0 +1,11 @@
+syntax = "proto2";
+package gz_geometry_msgs;
+
+import "Twist.proto";
+
+// Twist with covariance message type which is designed to be used
+// in other message types
+message TwistWithCovariance {
+  required Twist twist = 1;
+  repeated double covariance = 2 [packed=true];
+}
