@@ -7,9 +7,12 @@
   <arg name="debug" default="false"/>
   <arg name="gui" default="true"/>
   <arg name="paused" default="false"/>
+  <arg name="x_spawn" default="0.0"/>
+  <arg name="y_spawn" default="0.0"/>
+  <arg name="z_spawn" default="0.1"/>
   <!-- The following line causes gzmsg and gzerr messages to be printed to the console
       (even when Gazebo is started through roslaunch) -->
-  <arg name="verbose" default="false"/>
+  <arg name="verbose" default="true"/>
 
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
@@ -28,6 +31,9 @@
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
       <arg name="log_file" value="$(arg log_file)" />
+      <arg name="x" value="$(arg x_spawn)" />
+      <arg name="y" value="$(arg y_spawn)" />
+      <arg name="z" value="$(arg z_spawn)" />
     </include>
 
     <node name="hil_interface" pkg="rotors_hil_interface" type="rotors_hil_interface_node" clear_params="true" output="screen">

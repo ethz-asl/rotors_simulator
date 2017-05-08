@@ -21,6 +21,8 @@ project(rotors_gazebo_plugins)
 # =============================================================================================== #
 # ========================== SET DEFAULTS FOR PASSED-IN VARIABLES =============================== #
 # =============================================================================================== #
+# Build the octomap plugin "hack for the asl fixed wing"
+set(BUILD_OCTOMAP_PLUGIN TRUE)
 
 if(NOT DEFINED BUILD_MAVLINK_INTERFACE_PLUGIN)
   message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN variable not provided, setting to FALSE.")

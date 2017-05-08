@@ -69,7 +69,21 @@ Installation Instructions
     ```
     https://github.com/mavlink/mavros
     ```
- 4. Build your workspace with `python_catkin_tools` (therefore you need `python_catkin_tools`)
+ 4. Install protobuff version 2.5
+    ```
+   $ cd
+   $ mkdir software
+   $ cd software
+   $ git clone https://github.com/google/protobu
+   $ git checkout v2.5.0
+   $ ./autogen.sh
+   $ ./configure
+   $ make -j4
+   $ make check
+   $ sudo make install
+   $ sudo ldconfig # refresh shared library cache.
+   ```
+ 5. Build your workspace with `python_catkin_tools` (therefore you need `python_catkin_tools`)
 
    ```
    $ cd ~/catkin_ws/
@@ -77,7 +91,7 @@ Installation Instructions
    $ catkin build
    ```
 
- 5. Add sourcing to your `.bashrc` file
+ 6. Add sourcing to your `.bashrc` file
 
    ```
    $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc

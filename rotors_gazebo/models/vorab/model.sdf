@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+
+  <model name="vorab">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <heightmap>
+            <uri>model://vorab/materials/textures/vorab.png</uri>
+            <size>26000 26000 2730</size>
+            <pos>0 0 520</pos>
+          </heightmap>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.2</mu>
+              <mu2>0.2</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <heightmap>
+            <use_terrain_paging>false</use_terrain_paging>
+            <texture>
+              <diffuse>file://vorab/materials/textures/vorab_texture.jpg</diffuse>
+              <normal>file://media/materials/textures/flat_normal.png</normal>
+              <size>26000</size>
+            </texture>
+            <uri>model://vorab/materials/textures/vorab.png</uri>
+            <size>26000 26000 2730</size>
+            <pos>0 0 520</pos>
+          </heightmap>
+        </geometry>
+      </visual>
+
+    </link>
+  </model>
+</sdf>
