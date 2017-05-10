@@ -2,6 +2,11 @@
 Changelog for package rotors_joy_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2017-04-27)
+-----------
+* update maintainers
+* Contributors: fmina
+
 2.1.0 (2017-04-08)
 -----------
 * Adding interface for Python-uinput, a virtual keyboard joystick

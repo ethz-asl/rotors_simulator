@@ -2,6 +2,18 @@
 Changelog for package rotors_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2017-04-27)
+-----------
+* Merge pull request `#377 <https://github.com/ethz-asl/rotors_simulator/issues/377>`_ from ethz-asl/feature/pressure-plugin
+  Feature/pressure-plugin
+* More verbose variable names in pressure calculations.
+* update maintainers
+* Giving more verbose names to the constants
+* Adapting the pressure plugin to work with Gazebo transport interface
+* Adding Gazebo interface for fluid pressure message
+* Initial commit for pressure plugin.
+* Contributors: Timo Hinzmann, fmina, pvechersky
+
 2.1.0 (2017-04-08)
 -----------
 * fixes issue 371
