@@ -117,6 +117,9 @@ void GazeboPressurePlugin::OnUpdate(const common::UpdateInfo& _info) {
       kPressureOneAtmospherePascals * exp(kAirConstantDimensionless *
           log(kSeaLevelTempKelvin / temperature_at_altitude_kelvin));
 
+  // Add noise to pressure measurement.
+  pressure_at_altitude_pascal += pressure_n_[0](random_generator_);
+
   // Fill the pressure message.
   pressure_message_.mutable_header()->mutable_stamp()->set_sec(
       current_time.sec);
