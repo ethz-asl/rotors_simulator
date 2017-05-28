@@ -49,7 +49,6 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   parent_sensor_ = boost::dynamic_pointer_cast<sensors::GpsSensor>(_sensor);
   world_ = physics::get_world(parent_sensor_->GetWorldName());
 #endif
-
   //==============================================//
   //========== READ IN PARAMS FROM SDF ===========//
   //==============================================//
@@ -107,6 +106,11 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
 
   // Make sure the parent sensor is active.
   parent_sensor_->SetActive(true);
+
+  // Initialize the normal distributions for position.
+  position_n_[0] = NormalDistribution(0, hor_pos_std_dev);
+  position_n_[1] = NormalDistribution(0, hor_pos_std_dev);
+  position_n_[2] = NormalDistribution(0, ver_pos_std_dev);
 
   // Initialize the normal distributions for ground speed.
   ground_speed_n_[0] = NormalDistribution(0, hor_vel_std_dev);
@@ -190,9 +194,40 @@ void GazeboGpsPlugin::OnUpdate() {
 #else
   current_time = parent_sensor_->GetLastMeasurementTime();
 
-  gz_gps_message_.set_latitude(parent_sensor_->GetLatitude().Degree());
-  gz_gps_message_.set_longitude(parent_sensor_->GetLongitude().Degree());
-  gz_gps_message_.set_altitude(parent_sensor_->GetAltitude());
+  // Get the world pose of the sensor.
+  std::string parentName = parent_sensor_->GetParentName();
+  physics::EntityPtr parent = world_->GetEntity(parentName);
+  math::Pose sensorPose = parent_sensor_->GetPose() + parent->GetWorldPose();
+
+  // Get the position out of the pose.
+  math::Vector3 pos = sensorPose.pos;
+
+  // Add noise to position.
+  pos += math::Vector3(position_n_[0](random_generator_),
+                       position_n_[1](random_generator_),
+                       position_n_[2](random_generator_));
+
+  // Set up the GPS conversion ENU-->LLA.
+  // Initialise the reference point for the conversion.
+  // Reference point = origin of Gazebo world.
+  geodetic_converter::GeodeticConverter* g = new geodetic_converter::GeodeticConverter;
+  math::Angle lat_ref = world_->GetSphericalCoordinates()->GetLatitudeReference();
+  math::Angle lon_ref = world_->GetSphericalCoordinates()->GetLongitudeReference();
+  double alt_ref = world_->GetSphericalCoordinates()->GetElevationReference();
+  double lat_ref_deg = lat_ref.Degree();
+  double lon_ref_deg = lon_ref.Degree();
+
+  g->initialiseReference(lat_ref_deg, lon_ref_deg, alt_ref);
+  
+  //Convert ENU to LLA (WGS-84).
+  double latitude = 0;
+  double longitude = 0;
+  double altitude = 0;
+  g->enu2Geodetic(pos.x, pos.y, pos.z, &latitude, &longitude, &altitude);
+
+  gz_gps_message_.set_latitude(latitude);
+  gz_gps_message_.set_longitude(longitude);
+  gz_gps_message_.set_altitude(altitude);
 
 #endif
 
