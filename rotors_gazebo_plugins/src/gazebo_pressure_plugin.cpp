@@ -76,6 +76,9 @@ void GazeboPressurePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   getSdfParam<double>(_sdf, "referenceAltitude", ref_alt_, kDefaultRefAlt);
   getSdfParam<double>(_sdf, "pressureVariance", pressure_var_, kDefaultPressureVar);
 
+  // Initialize the normal distribution for pressure.
+  pressure_n_[0] = NormalDistribution(0, pressure_var_);
+
   // Listen to the update event. This event is broadcast every simulation
   // iteration.
   this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(
