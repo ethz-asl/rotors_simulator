@@ -17,8 +17,9 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_PRESSURE_PLUGIN_H
 #define ROTORS_GAZEBO_PLUGINS_PRESSURE_PLUGIN_H
 
-// SYSTEM
 #include <random>
+
+#include <glog/logging.h>
 
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/common.hh>
