@@ -124,7 +124,9 @@ int main(int argc, char** argv) {
 
     mav_msgs::msgMultiDofJointTrajectoryPointFromEigen(trajectory_point, &msg->points[i]);
   }
-  wp_pub.publish(*msg);
+  wp_pub.publish(msg);
+
+  ros::shutdown();
 
   return 0;
 }
