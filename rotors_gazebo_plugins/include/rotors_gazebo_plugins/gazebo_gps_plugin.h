@@ -97,6 +97,12 @@ class GazeboGpsPlugin : public SensorPlugin {
   /// \brief    Ground speed message to be published on sensor update.
   gz_geometry_msgs::TwistStamped gz_ground_speed_message_;
 
+  /// \brief    Variances for noise.
+  double hor_pos_std_dev_;
+  double ver_pos_std_dev_;
+  double hor_vel_std_dev_;
+  double ver_vel_std_dev_;
+
   /// \brief    Normal distributions for position noise in x, y, and z directions.
   NormalDistribution position_n_[3];
 

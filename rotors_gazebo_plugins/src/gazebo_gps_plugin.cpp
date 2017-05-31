@@ -80,10 +80,6 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
           << "\"\n";
 
   // Retrieve the rest of the SDF parameters.
-  double hor_pos_std_dev;
-  double ver_pos_std_dev;
-  double hor_vel_std_dev;
-  double ver_vel_std_dev;
 
   getSdfParam<std::string>(_sdf, "gpsTopic", gps_topic_,
                            mav_msgs::default_topics::GPS);
@@ -91,13 +87,13 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   getSdfParam<std::string>(_sdf, "groundSpeedTopic", ground_speed_topic_,
                            mav_msgs::default_topics::GROUND_SPEED);
 
-  getSdfParam<double>(_sdf, "horPosStdDev", hor_pos_std_dev,
+  getSdfParam<double>(_sdf, "horPosStdDev", hor_pos_std_dev_,
                       kDefaultHorPosStdDev);
-  getSdfParam<double>(_sdf, "verPosStdDev", ver_pos_std_dev,
+  getSdfParam<double>(_sdf, "verPosStdDev", ver_pos_std_dev_,
                       kDefaultVerPosStdDev);
-  getSdfParam<double>(_sdf, "horVelStdDev", hor_vel_std_dev,
+  getSdfParam<double>(_sdf, "horVelStdDev", hor_vel_std_dev_,
                       kDefaultHorVelStdDev);
-  getSdfParam<double>(_sdf, "verVelStdDev", ver_vel_std_dev,
+  getSdfParam<double>(_sdf, "verVelStdDev", ver_vel_std_dev_,
                       kDefaultVerVelStdDev);
 
   // Connect to the sensor update event.
@@ -108,14 +104,14 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   parent_sensor_->SetActive(true);
 
   // Initialize the normal distributions for position.
-  position_n_[0] = NormalDistribution(0, hor_pos_std_dev);
-  position_n_[1] = NormalDistribution(0, hor_pos_std_dev);
-  position_n_[2] = NormalDistribution(0, ver_pos_std_dev);
+  position_n_[0] = NormalDistribution(0, hor_pos_std_dev_);
+  position_n_[1] = NormalDistribution(0, hor_pos_std_dev_);
+  position_n_[2] = NormalDistribution(0, ver_pos_std_dev_);
 
   // Initialize the normal distributions for ground speed.
-  ground_speed_n_[0] = NormalDistribution(0, hor_vel_std_dev);
-  ground_speed_n_[1] = NormalDistribution(0, hor_vel_std_dev);
-  ground_speed_n_[2] = NormalDistribution(0, ver_vel_std_dev);
+  ground_speed_n_[0] = NormalDistribution(0, hor_vel_std_dev_);
+  ground_speed_n_[1] = NormalDistribution(0, hor_vel_std_dev_);
+  ground_speed_n_[2] = NormalDistribution(0, ver_vel_std_dev_);
 
   // ============================================ //
   // ======= POPULATE STATIC PARTS OF MSGS ====== //
@@ -131,8 +127,8 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   for (int i = 0; i < 9; i++) {
     switch (i) {
       case 0:
-        gz_gps_message_.add_position_covariance(hor_pos_std_dev *
-                                                hor_pos_std_dev);
+        gz_gps_message_.add_position_covariance(hor_pos_std_dev_ *
+                                                hor_pos_std_dev_);
         break;
       case 1:
       case 2:
@@ -140,8 +136,8 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
         gz_gps_message_.add_position_covariance(0);
         break;
       case 4:
-        gz_gps_message_.add_position_covariance(hor_pos_std_dev *
-                                                hor_pos_std_dev);
+        gz_gps_message_.add_position_covariance(hor_pos_std_dev_ *
+                                                hor_pos_std_dev_);
         break;
       case 5:
       case 6:
@@ -149,8 +145,8 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
         gz_gps_message_.add_position_covariance(0);
         break;
       case 8:
-        gz_gps_message_.add_position_covariance(ver_pos_std_dev *
-                                                ver_pos_std_dev);
+        gz_gps_message_.add_position_covariance(ver_pos_std_dev_ *
+                                                ver_pos_std_dev_);
         break;
     }
   }
@@ -179,9 +175,16 @@ void GazeboGpsPlugin::OnUpdate() {
   math::Vector3 W_ground_speed_W_L = link_->GetWorldLinearVel();
 
   // Apply noise to ground speed.
-  W_ground_speed_W_L += math::Vector3(ground_speed_n_[0](random_generator_),
-                                      ground_speed_n_[1](random_generator_),
-                                      ground_speed_n_[2](random_generator_));
+  if(hor_vel_std_dev_ != 0) {
+    W_ground_speed_W_L.Set(W_ground_speed_W_L[0] + ground_speed_n_[0](random_generator_),
+                           W_ground_speed_W_L[1] + ground_speed_n_[1](random_generator_),
+                           W_ground_speed_W_L[2]);
+  }
+  if(ver_vel_std_dev_ != 0) {
+    W_ground_speed_W_L.Set(W_ground_speed_W_L[0],
+                           W_ground_speed_W_L[1],
+                           W_ground_speed_W_L[2] + ground_speed_n_[2](random_generator_));
+  }
 
 // Fill the GPS message.
 #if GAZEBO_MAJOR_VERSION > 6
@@ -203,9 +206,16 @@ void GazeboGpsPlugin::OnUpdate() {
   math::Vector3 pos = sensorPose.pos;
 
   // Add noise to position.
-  pos += math::Vector3(position_n_[0](random_generator_),
-                       position_n_[1](random_generator_),
-                       position_n_[2](random_generator_));
+  if(hor_pos_std_dev_ != 0) {
+    pos.Set(pos[0] + position_n_[0](random_generator_),
+            pos[1] + position_n_[1](random_generator_),
+            pos[2]);
+  }
+  if(ver_pos_std_dev_ != 0) {
+    pos.Set(pos[0],
+            pos[1],
+            pos[2] + position_n_[2](random_generator_));
+  }
 
   // Set up the GPS conversion ENU-->LLA.
   // Initialise the reference point for the conversion.
