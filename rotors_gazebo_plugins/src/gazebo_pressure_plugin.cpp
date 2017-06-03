@@ -75,7 +75,7 @@ void GazeboPressurePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   getSdfParam<std::string>(_sdf, "pressureTopic", pressure_topic_, kDefaultPressurePubTopic);
   getSdfParam<double>(_sdf, "referenceAltitude", ref_alt_, kDefaultRefAlt);
   getSdfParam<double>(_sdf, "pressureVariance", pressure_var_, kDefaultPressureVar);
-  CHECK(pressure_var_ > 0.0);
+  CHECK(pressure_var_ >= 0.0);
 
   // Initialize the normal distribution for pressure.
   double mean = 0.0;
