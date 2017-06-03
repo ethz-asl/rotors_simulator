@@ -108,10 +108,16 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   position_n_[1] = NormalDistribution(0, hor_pos_std_dev_);
   position_n_[2] = NormalDistribution(0, ver_pos_std_dev_);
 
+  CHECK(hor_pos_std_dev_ >= 0.0);
+  CHECK(ver_pos_std_dev_ >= 0.0);
+
   // Initialize the normal distributions for ground speed.
   ground_speed_n_[0] = NormalDistribution(0, hor_vel_std_dev_);
   ground_speed_n_[1] = NormalDistribution(0, hor_vel_std_dev_);
   ground_speed_n_[2] = NormalDistribution(0, ver_vel_std_dev_);
+
+  CHECK(hor_vel_std_dev_ >= 0.0);
+  CHECK(ver_vel_std_dev_ >= 0.0);
 
   // ============================================ //
   // ======= POPULATE STATIC PARTS OF MSGS ====== //
@@ -175,12 +181,12 @@ void GazeboGpsPlugin::OnUpdate() {
   math::Vector3 W_ground_speed_W_L = link_->GetWorldLinearVel();
 
   // Apply noise to ground speed.
-  if(hor_vel_std_dev_ != 0) {
+  if(hor_vel_std_dev_ > 0.0) {
     W_ground_speed_W_L.Set(W_ground_speed_W_L[0] + ground_speed_n_[0](random_generator_),
                            W_ground_speed_W_L[1] + ground_speed_n_[1](random_generator_),
                            W_ground_speed_W_L[2]);
   }
-  if(ver_vel_std_dev_ != 0) {
+  if(ver_vel_std_dev_ > 0.0) {
     W_ground_speed_W_L.Set(W_ground_speed_W_L[0],
                            W_ground_speed_W_L[1],
                            W_ground_speed_W_L[2] + ground_speed_n_[2](random_generator_));
@@ -202,42 +208,36 @@ void GazeboGpsPlugin::OnUpdate() {
   physics::EntityPtr parent = world_->GetEntity(parentName);
   math::Pose sensorPose = parent_sensor_->GetPose() + parent->GetWorldPose();
 
-  // Get the position out of the pose.
-  math::Vector3 pos = sensorPose.pos;
-
   // Add noise to position.
-  if(hor_pos_std_dev_ != 0) {
-    pos.Set(pos[0] + position_n_[0](random_generator_),
-            pos[1] + position_n_[1](random_generator_),
-            pos[2]);
+  if(hor_pos_std_dev_ > 0.0) {
+    sensorPose.pos.Set(sensorPose.pos[0] + position_n_[0](random_generator_),
+                       sensorPose.pos[1] + position_n_[1](random_generator_),
+                       sensorPose.pos[2]);
   }
-  if(ver_pos_std_dev_ != 0) {
-    pos.Set(pos[0],
-            pos[1],
-            pos[2] + position_n_[2](random_generator_));
+  if(ver_pos_std_dev_ > 0.0) {
+    sensorPose.pos.Set(sensorPose.pos[0],
+                       sensorPose.pos[1],
+                       sensorPose.pos[2] + position_n_[2](random_generator_));
   }
 
   // Set up the GPS conversion ENU-->LLA.
   // Initialise the reference point for the conversion.
   // Reference point = origin of Gazebo world.
   geodetic_converter::GeodeticConverter* g = new geodetic_converter::GeodeticConverter;
-  math::Angle lat_ref = world_->GetSphericalCoordinates()->GetLatitudeReference();
-  math::Angle lon_ref = world_->GetSphericalCoordinates()->GetLongitudeReference();
-  double alt_ref = world_->GetSphericalCoordinates()->GetElevationReference();
-  double lat_ref_deg = lat_ref.Degree();
-  double lon_ref_deg = lon_ref.Degree();
 
-  g->initialiseReference(lat_ref_deg, lon_ref_deg, alt_ref);
+  g->initialiseReference(world_->GetSphericalCoordinates()->GetLatitudeReference().Degree(),
+                         world_->GetSphericalCoordinates()->GetLongitudeReference().Degree(),
+                         world_->GetSphericalCoordinates()->GetElevationReference());
   
   //Convert ENU to LLA (WGS-84).
-  double latitude = 0;
-  double longitude = 0;
-  double altitude = 0;
-  g->enu2Geodetic(pos.x, pos.y, pos.z, &latitude, &longitude, &altitude);
+  double latitude_deg = 0.0;
+  double longitude_deg = 0.0;
+  double altitude_m = 0.0;
+  g->enu2Geodetic(sensorPose.pos.x, sensorPose.pos.y, sensorPose.pos.z, &latitude_deg, &longitude_deg, &altitude_m);
 
-  gz_gps_message_.set_latitude(latitude);
-  gz_gps_message_.set_longitude(longitude);
-  gz_gps_message_.set_altitude(altitude);
+  gz_gps_message_.set_latitude(latitude_deg);
+  gz_gps_message_.set_longitude(longitude_deg);
+  gz_gps_message_.set_altitude(altitude_m);
 
 #endif
 
