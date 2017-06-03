@@ -17,6 +17,10 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_PRESSURE_PLUGIN_H
 #define ROTORS_GAZEBO_PLUGINS_PRESSURE_PLUGIN_H
 
+#include <random>
+
+#include <glog/logging.h>
+
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
@@ -51,6 +55,8 @@ class GazeboPressurePlugin : public ModelPlugin {
 
   /// \brief    Destructor.
   virtual ~GazeboPressurePlugin();
+
+  typedef std::normal_distribution<> NormalDistribution;
 
  protected:
   /// \brief    Called when the plugin is first created, and after the world
@@ -104,10 +110,15 @@ class GazeboPressurePlugin : public ModelPlugin {
   /// \brief    Pressure measurement variance (Pa^2).
   double pressure_var_;
 
+  /// \brief    Normal distribution for pressure noise.
+  NormalDistribution pressure_n_[1];
+
   /// \brief    Fluid pressure message.
   /// \details  This is modified everytime OnUpdate() is called,
   //            and then published onto a topic
   gz_sensor_msgs::FluidPressure pressure_message_;
+
+  std::mt19937 random_generator_;
 };
 }
 

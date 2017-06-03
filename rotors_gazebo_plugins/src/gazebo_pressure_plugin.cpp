@@ -75,6 +75,11 @@ void GazeboPressurePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   getSdfParam<std::string>(_sdf, "pressureTopic", pressure_topic_, kDefaultPressurePubTopic);
   getSdfParam<double>(_sdf, "referenceAltitude", ref_alt_, kDefaultRefAlt);
   getSdfParam<double>(_sdf, "pressureVariance", pressure_var_, kDefaultPressureVar);
+  CHECK(pressure_var_ > 0.0);
+
+  // Initialize the normal distribution for pressure.
+  double mean = 0.0;
+  pressure_n_[0] = NormalDistribution(mean, sqrt(pressure_var_));
 
   // Listen to the update event. This event is broadcast every simulation
   // iteration.
@@ -116,6 +121,11 @@ void GazeboPressurePlugin::OnUpdate(const common::UpdateInfo& _info) {
   double pressure_at_altitude_pascal =
       kPressureOneAtmospherePascals * exp(kAirConstantDimensionless *
           log(kSeaLevelTempKelvin / temperature_at_altitude_kelvin));
+
+  // Add noise to pressure measurement.
+  if(pressure_var_ > 0.0) {
+    pressure_at_altitude_pascal += pressure_n_[0](random_generator_);
+  }
 
   // Fill the pressure message.
   pressure_message_.mutable_header()->mutable_stamp()->set_sec(
