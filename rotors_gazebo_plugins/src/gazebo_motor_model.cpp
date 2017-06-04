@@ -319,6 +319,10 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   double ref_motor_rot_vel;
   ref_motor_rot_vel =
       rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
+  // make sure max force is still valid, may be reset to 0 by world reset any time.
+  #if GAZEBO_MAJOR_VERSION < 5
+    joint_->SetMaxForce(0, max_force_);
+  #endif
   joint_->SetVelocity(
       0, turning_direction_ * ref_motor_rot_vel / rotor_velocity_slowdown_sim_);
 }
