@@ -53,7 +53,6 @@ class WaypointWithTime {
 };
 
 int main(int argc, char** argv) {
-
   ros::init(argc, argv, "waypoint_publisher");
   ros::NodeHandle nh;
 
@@ -126,6 +125,7 @@ int main(int argc, char** argv) {
   }
   wp_pub.publish(msg);
 
+  ros::spinOnce();
   ros::shutdown();
 
   return 0;

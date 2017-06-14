@@ -81,5 +81,8 @@ int main(int argc, char** argv) {
            desired_position.y(), desired_position.z());
   trajectory_pub.publish(trajectory_msg);
 
-  ros::spin();
+  ros::spinOnce();
+  ros::shutdown();
+
+  return 0;
 }
