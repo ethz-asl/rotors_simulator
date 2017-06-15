@@ -97,7 +97,6 @@ if (NOT NO_ROS)
     cmake_modules
     cv_bridge
     geometry_msgs
-    glog_catkin
     mav_msgs
     octomap_msgs
     octomap_ros
@@ -116,6 +115,7 @@ message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 find_package(Eigen REQUIRED)
 find_package(gazebo REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(Glog REQUIRED)
 link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(${GAZEBO_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
@@ -399,7 +399,7 @@ endif()
 
 #======================================= PRESSURE PLUGIN ========================================//
 add_library(rotors_gazebo_pressure_plugin SHARED src/gazebo_pressure_plugin.cpp)
-target_link_libraries(rotors_gazebo_pressure_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+target_link_libraries(rotors_gazebo_pressure_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${GLOG_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_pressure_plugin ${catkin_EXPORTED_TARGETS})
 endif()
