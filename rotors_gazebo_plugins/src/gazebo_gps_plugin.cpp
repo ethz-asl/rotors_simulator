@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+// SYSTEM
+#include <gps_common/conversions.h>
+
 // MODULE
 #include "rotors_gazebo_plugins/gazebo_gps_plugin.h"
 
@@ -220,21 +223,24 @@ void GazeboGpsPlugin::OnUpdate() {
                        sensorPose.pos[2] + position_n_[2](random_generator_));
   }
 
-  // Set up the GPS conversion ENU-->LLA.
   // Initialise the reference point for the conversion.
   // Reference point = origin of Gazebo world.
-  geodetic_converter::GeodeticConverter* g = new geodetic_converter::GeodeticConverter;
+  double northing, easting;
+  char utm_zone[10];
+  gps_common::LLtoUTM(world_->GetSphericalCoordinates()->GetLatitudeReference().Degree(),
+                      world_->GetSphericalCoordinates()->GetLongitudeReference().Degree(),
+                      northing, easting, utm_zone);
 
-  g->initialiseReference(world_->GetSphericalCoordinates()->GetLatitudeReference().Degree(),
-                         world_->GetSphericalCoordinates()->GetLongitudeReference().Degree(),
-                         world_->GetSphericalCoordinates()->GetElevationReference());
-  
-  //Convert ENU to LLA (WGS-84).
+  // Set up the GPS conversion UTM --> WGS84/LLA.
   double latitude_deg = 0.0;
   double longitude_deg = 0.0;
-  double altitude_m = 0.0;
-  g->enu2Geodetic(sensorPose.pos.x, sensorPose.pos.y, sensorPose.pos.z, &latitude_deg, &longitude_deg, &altitude_m);
-
+  // TODO(hitimo): Validate that this results in correct GPS altitude.
+  double altitude_m = sensorPose.pos.z - orld_->GetSphericalCoordinates()->GetElevationReference();
+  // NED (Gazebo) <-> ENU (UTM) conversion:
+  // UTM: x=easting, y=northing, z=elevation.
+  // So northing=x_gazebo, easting=y_gazebo.
+  gps_common::UTMtoLL(sensorPose.pos.y, sensorPose.pos.x, utm_zone,
+                      latitude_deg, longitude_deg);
   gz_gps_message_.set_latitude(latitude_deg);
   gz_gps_message_.set_longitude(longitude_deg);
   gz_gps_message_.set_altitude(altitude_m);

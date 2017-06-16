@@ -25,7 +25,6 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/sensors/sensors.hh>
-#include <geodetic_utils/geodetic_conv.hpp>
 #include <glog/logging.h>
 
 // USER

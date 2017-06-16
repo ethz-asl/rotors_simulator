@@ -24,11 +24,13 @@
   <build_depend>cv_bridge</build_depend>
   <build_depend>gazebo</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>gps_common</build_depend>
   <build_depend>libgoogle-glog-dev</build_depend>
   <build_depend>mav_msgs</build_depend>
   <build_depend>octomap</build_depend>
   <build_depend>octomap_msgs</build_depend>
   <build_depend>octomap_ros</build_depend>
+  <build_depend>protobuf-dev</build_depend>
   <build_depend>rosbag</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>rotors_comm</build_depend>
@@ -36,18 +38,17 @@
   <build_depend>std_srvs</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>yaml-cpp</build_depend>
-  <build_depend>protobuf-dev</build_depend>
-
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>cv_bridge</run_depend>
   <run_depend>gazebo_ros</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <run_depend>gps_common</run_depend>
   <run_depend>libgoogle-glog-dev</run_depend>
   <run_depend>mav_msgs</run_depend>
-  <run_depend>octomap</run_depend>
   <run_depend>octomap_msgs</run_depend>
   <run_depend>octomap_ros</run_depend>
+  <run_depend>octomap</run_depend>
   <run_depend>rosbag</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rotors_comm</run_depend>
