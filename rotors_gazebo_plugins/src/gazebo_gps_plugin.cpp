@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-// SYSTEM
-#include <gps_common/conversions.h>
-
 // MODULE
 #include "rotors_gazebo_plugins/gazebo_gps_plugin.h"
 
@@ -235,7 +232,7 @@ void GazeboGpsPlugin::OnUpdate() {
   double latitude_deg = 0.0;
   double longitude_deg = 0.0;
   // TODO(hitimo): Validate that this results in correct GPS altitude.
-  double altitude_m = sensorPose.pos.z - orld_->GetSphericalCoordinates()->GetElevationReference();
+  double altitude_m = sensorPose.pos.z - world_->GetSphericalCoordinates()->GetElevationReference();
   // NED (Gazebo) <-> ENU (UTM) conversion:
   // UTM: x=easting, y=northing, z=elevation.
   // So northing=x_gazebo, easting=y_gazebo.
