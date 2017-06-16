@@ -33,14 +33,14 @@ bool sim_running = false;
 
 static const int64_t kNanoSecondsInSecond = 1000000000;
 
-void callback(const sensor_msgs::ImuPtr& /*msg*/) {
+void callback(const sensor_msgs::ImuPtr& msg) {
   sim_running = true;
 }
 
 class WaypointWithTime {
  public:
   WaypointWithTime()
-      : waiting_time(0) {
+      : waiting_time(0), yaw(0.0) {
   }
 
   WaypointWithTime(double t, float x, float y, float z, float _yaw)
@@ -53,7 +53,6 @@ class WaypointWithTime {
 };
 
 int main(int argc, char** argv) {
-
   ros::init(argc, argv, "waypoint_publisher");
   ros::NodeHandle nh;
 
@@ -80,10 +79,8 @@ int main(int argc, char** argv) {
       waypoints.push_back(WaypointWithTime(t, x, y, z, yaw * DEG_2_RAD));
     }
     wp_file.close();
-    ROS_INFO("Read %d waypoints.", (int )waypoints.size());
-  }
-
-  else {
+    ROS_INFO("Read %d waypoints.", (int) waypoints.size());
+  } else {
     ROS_ERROR_STREAM("Unable to open poses file: " << args.at(1));
     return -1;
   }
@@ -127,6 +124,9 @@ int main(int argc, char** argv) {
     mav_msgs::msgMultiDofJointTrajectoryPointFromEigen(trajectory_point, &msg->points[i]);
   }
   wp_pub.publish(msg);
+
+  ros::spinOnce();
+  ros::shutdown();
 
   return 0;
 }

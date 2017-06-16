@@ -2,6 +2,11 @@
 Changelog for package rotors_evaluation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2017-04-27)
+-----------
+* update maintainers
+* Contributors: fmina
+
 2.1.0 (2017-04-08)
 -----------
 * switch url website in package.xml to github repo

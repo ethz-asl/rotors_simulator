@@ -28,9 +28,8 @@
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
 int main(int argc, char** argv) {
-
   ros::init(argc, argv, "waypoint_publisher");
-  ros::NodeHandle nh("");
+  ros::NodeHandle nh;
   ros::Publisher trajectory_pub =
       nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>(
       mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
@@ -44,11 +43,9 @@ int main(int argc, char** argv) {
 
   if (args.size() == 5) {
     delay = 1.0;
-  }
-  else if (args.size() == 6) {
+  } else if (args.size() == 6) {
     delay = std::stof(args.at(5));
-  }
-  else{
+  } else {
     ROS_ERROR("Usage: waypoint_publisher <x> <y> <z> <yaw_deg> [<delay>]\n");
     return -1;
   }
@@ -73,12 +70,17 @@ int main(int argc, char** argv) {
     ROS_INFO("There is no subscriber available, trying again in 1 second.");
     ros::Duration(1.0).sleep();
   }
+
   ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
            nh.getNamespace().c_str(),
            desired_position.x(),
            desired_position.y(),
            desired_position.z());
+
   trajectory_pub.publish(trajectory_msg);
+
+  ros::spinOnce();
+  ros::shutdown();
 
   return 0;
 }

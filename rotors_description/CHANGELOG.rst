@@ -2,6 +2,12 @@
 Changelog for package rotors_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2017-04-27)
+-----------
+* update maintainers
+* Adding pressure plugin to urdf description
+* Contributors: fmina, pvechersky
+
 2.1.0 (2017-04-08)
 -----------
 * Implementing fixed-wing operation with a joystick
