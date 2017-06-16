@@ -554,7 +554,8 @@
   <xacro:macro name="wind_plugin_macro"
     params="namespace xyz_offset wind_direction wind_force_mean
       wind_gust_direction wind_gust_duration wind_gust_start
-      wind_gust_force_mean wind_speed_mean">
+      wind_gust_force_mean wind_speed_mean use_custom_static_wind_field 
+      custom_wind_field_path">
     <gazebo>
       <plugin filename="librotors_gazebo_wind_plugin.so" name="wind_plugin">
         <frameId>world</frameId>
@@ -568,6 +569,8 @@
         <windGustStart>${wind_gust_start}</windGustStart> <!-- [s] -->
         <windGustForceMean>${wind_gust_force_mean}</windGustForceMean> <!-- [N] -->
         <windSpeedMean>${wind_speed_mean}</windSpeedMean> <!-- [m/s] -->
+        <useCustomStaticWindField>${use_custom_static_wind_field}</useCustomStaticWindField>
+        <customWindFieldPath>${custom_wind_field_path}</customWindFieldPath> <!-- from ~/.ros -->
       </plugin>
     </gazebo>
   </xacro:macro>

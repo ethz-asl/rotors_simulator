@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <model name="hemicyl">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <heightmap>
+            <uri>model://hemicyl/materials/textures/hemicyl257.png</uri>
+            <size>4000 4000 202.3346</size>
+            <pos>0 0 0</pos>
+          </heightmap>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.2</mu>
+              <mu2>0.2</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <heightmap>
+            <texture>
+	            <diffuse>file://hemicyl/materials/textures/grass_dry.png</diffuse>
+              <normal>file://media/materials/textures/flat_normal.png</normal>
+              <size>1000</size>
+            </texture>
+	          <texture>
+	            <diffuse>file://hemicyl/materials/textures/texture_rock.png</diffuse>
+              <normal>file://media/materials/textures/flat_normal.png</normal>
+              <size>200</size>
+            </texture>
+            <blend>
+              <min_height>5</min_height>
+              <fade_dist>5</fade_dist>
+            </blend>
+            <uri>model://hemicyl/materials/textures/hemicyl257.png</uri>
+            <size>4000 4000 202.3346</size>
+            <pos>0 0 0</pos>
+          </heightmap>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>
