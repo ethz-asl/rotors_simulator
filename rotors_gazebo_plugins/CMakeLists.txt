@@ -96,7 +96,6 @@ if (NOT NO_ROS)
   find_package(catkin REQUIRED COMPONENTS
     cmake_modules
     cv_bridge
-    geodetic_utils
     geometry_msgs
     mav_msgs
     octomap_msgs
