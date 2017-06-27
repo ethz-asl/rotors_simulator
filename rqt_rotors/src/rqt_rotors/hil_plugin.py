@@ -124,13 +124,13 @@ class HilPlugin(Plugin):
 
         if (self.armed != msg.armed):
             self.armed = msg.armed
-            self.text_mode_safety_armed.setText(self.mav_mode_text(self.armed))
-            self.button_arm.setEnabled(not(self.armed))
+            self._widget.text_mode_safety_armed.setText(self.mav_mode_text(self.armed))
+            self._widget.button_arm.setEnabled(not(self.armed))
             self.mav_mode = self.mav_mode | self.MAV_MODE_FLAG_SAFETY_ARMED
 
         if (self.guided != msg.guided):
             self.guided = msg.guided
-            self.text_mode_guided.setText(self.mav_mode_text(self.guided))
+            self._widget.text_mode_guided.setText(self.mav_mode_text(self.guided))
 
         self.last_heartbeat_time = time.time()
 
