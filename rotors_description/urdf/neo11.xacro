@@ -21,7 +21,7 @@
 
 <robot name="neo11" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Properties -->
-  <xacro:property name="namespace" value="$(arg mav_name)" />
+  <xacro:property name="namespace" value="$(arg namespace)" />
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <xacro:property name="use_mesh_file" value="true" />
   <xacro:property name="mesh_file" value="package://rotors_description/meshes/neo11.dae" />
