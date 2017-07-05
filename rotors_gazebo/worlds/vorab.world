@@ -5,7 +5,11 @@
       <octomapPubTopic>world/octomap</octomapPubTopic>
       <octomapServiceName>world/get_octomap</octomapServiceName>
     </plugin>
-    
+
+    <!-- Only require one ROS interface plugin per world, as any other plugin can connect a Gazebo
+        topic to a ROS topic (or vise versa). -->
+    <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so"></plugin>
+
     <gui>
       <camera name="user_camera">
         <pose frame=''>0 -100 2800 2.87561e-17 0.264566 1.71395</pose>
@@ -24,7 +28,7 @@
       <surface_model>EARTH_WGS84</surface_model>
       <latitude_deg>46.87482</latitude_deg>
       <longitude_deg>9.18340</longitude_deg>
-      <elevation>500.0</elevation>
+      <elevation>0.0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
 
