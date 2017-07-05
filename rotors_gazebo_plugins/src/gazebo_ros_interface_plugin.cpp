@@ -283,6 +283,9 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
 
+  gzdbg << "Connecting ROS topic \"" << gz_connect_ros_to_gazebo_topic_msg->ros_topic()
+        << "\" to Gazebo topic \"" << gz_connect_ros_to_gazebo_topic_msg->gazebo_topic() << "\"." << std::endl;
+
   static std::vector<ros::Subscriber> ros_subscribers;
 
   switch (gz_connect_ros_to_gazebo_topic_msg->msgtype()) {
@@ -367,6 +370,7 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
               << " is not supported by GazeboRosInterfacePlugin.");
     }
   }
+  gzdbg << __FUNCTION__ << "() finished." << std::endl;
 }
 
 //===========================================================================//

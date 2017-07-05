@@ -31,6 +31,7 @@ GazeboFwDynamicsPlugin::GazeboFwDynamicsPlugin()
       delta_flap_(0.0),
       delta_rudder_(0.0),
       throttle_(0.0),
+      is_input_joystick_(false),
       pubs_and_subs_created_(false) {
 }
 

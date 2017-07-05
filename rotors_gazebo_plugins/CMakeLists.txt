@@ -23,9 +23,6 @@ project(rotors_gazebo_plugins)
 # =============================================================================================== #
 # Build the octomap plugin "hack for the asl fixed wing"
 set(BUILD_OCTOMAP_PLUGIN TRUE)
-set(BUILD_MAVLINK_INTERFACE_PLUGIN TRUE)
-set(MAVLINK_HEADER_DIR "/home/florian/catkin_ws/devel/include/mavlink/v1.0/")
-
 
 if(NOT DEFINED BUILD_MAVLINK_INTERFACE_PLUGIN)
   message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN variable not provided, setting to FALSE.")
@@ -126,10 +123,10 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 
-if (BUILD_MAVLINK_INTERFACE_PLUGIN)
-  include_directories(${mavros_msgs_INCLUDE_DIRS})
-  include_directories(${libmavconn_INCLUDE_DIRS})
-endif()
+#if (BUILD_MAVLINK_INTERFACE_PLUGIN)
+#  include_directories(${mavros_msgs_INCLUDE_DIRS})
+#  include_directories(${libmavconn_INCLUDE_DIRS})
+#endif()
 
 # ============================================== #
 # =================== YAML_CPP ================= #

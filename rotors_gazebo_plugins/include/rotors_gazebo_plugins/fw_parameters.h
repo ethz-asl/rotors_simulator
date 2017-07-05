@@ -91,8 +91,8 @@ static constexpr double kDefaultControlSurfaceDeflectionMax =
 static constexpr int kDefaultAileronLeftChannel = 4;
 static constexpr int kDefaultAileronRightChannel = 0;
 static constexpr int kDefaultElevatorChannel = 1;
-static constexpr int kDefaultFlapChannel = 2;
-static constexpr int kDefaultRudderChannel = 3;
+static constexpr int kDefaultFlapChannel = 3;
+static constexpr int kDefaultRudderChannel = 2;
 static constexpr int kDefaultThrottleChannel = 5;
 
 /// \brief  Wrapper function for extracting control surface parameters from a
