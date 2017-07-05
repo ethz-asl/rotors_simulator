@@ -12,22 +12,22 @@ throttle_channel: 5
 #   [rad] Maximum deflection angle
 #   Channel number in the array of normalized actuator commands
 aileron_left:
-  channel: 4
+  channel: 0
   deflection_min: -0.349066
   deflection_max: 0.349066
 aileron_right:
   channel: 0
-  deflection_min: -0.349066
-  deflection_max: 0.349066
+  deflection_min: 0.349066
+  deflection_max: -0.349066
 elevator:
   channel: 1
   deflection_min: -0.349066
   deflection_max: 0.349066
 flap:
-  channel: 2
+  channel: 3
   deflection_min: -0.349066
   deflection_max: 0.349066
 rudder:
-  channel: 3
+  channel: 2
   deflection_min: -0.349066
   deflection_max: 0.349066
