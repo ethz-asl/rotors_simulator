@@ -41,7 +41,7 @@
       <param name="imu_topic" value="imu" />
       <param name="odometry_topic" value="ground_truth/odometry" />
       <param name="hil_controls_sub_topic" value="/mavros/hil_controls/hil_controls" />
-      <param name="actuators_pub_topic" value="gazebo/command/motor_speed" />
+      <param name="actuators_pub_topic" value="command/motor_speed" />
       <param name="mavlink_pub_topic" value="/mavlink/to" />
       <param name="sensor_level_hil" value="true" />
       <param name="hil_gps_frequency" value="5.0" />
