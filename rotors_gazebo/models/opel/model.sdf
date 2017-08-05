@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 <sdf version="1.5">
 <model name="car">
-  <pose>4 0 0.8 0 0 0</pose>
+  <pose>0 0 0.8 0 0 0</pose>
   <static>true</static>
     <link name="link">
       <inertial>
@@ -24,7 +24,8 @@
         </geometry>
       </collision>
       <visual name="visual">
-        <geometry>
+        <cast_shadows>false</cast_shadows>
+	<geometry>
           <mesh>
             <uri>model://opel/meshes/opel.dae</uri>
           </mesh>

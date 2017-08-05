@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 <sdf version="1.5">
 <model name="Polo">
-  <pose>0 0 0 0 0 0</pose>
+  <pose>2 -2 0 0 0 0</pose>
   <static>true</static>
     <link name="link">
       <inertial>

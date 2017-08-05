@@ -1,4 +1,4 @@
-# Ardrone vehicle parameters
+# Bebop2 vehicle parameters
 mass: 0.503
 inertia: {xx: 1.805e-3, xy: -8.619e-7, xz: 1.555e-5, yy: 1.764e-3, yz: 3.595e-7, zz: 3.328e-3}
 
