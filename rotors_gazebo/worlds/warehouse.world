@@ -12,6 +12,11 @@
     <include>
       <uri>model://asphalt_plane</uri>
     </include>
+
+    <!-- Only one ROS interface plugin is required per world, as any other plugin can connect a Gazebo
+         topic to a ROS topic (or vise versa). -->
+    <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so"/>
+
     <physics name='default_physics' default='0' type='ode'>
       <gravity>0 0 -9.8066</gravity>
       <ode>
@@ -45,7 +50,7 @@
       <uri>model://shelves_high2</uri>
       <pose>-4.13394 3.4 0 0 -0 0</pose>
     </include>
-    
+
     <!-- SHELVES -->
     <include>
       <name>shelves 3</name>
@@ -57,7 +62,7 @@
       <uri>model://shelves_high2</uri>
       <pose>-4.13394 4.7 0 0 -0 0</pose>
     </include>
-    
+
     <!-- SHELVES -->
     <include>
       <name>shelves 5</name>
@@ -69,7 +74,7 @@
       <uri>model://shelves_high2_no_collision</uri>
       <pose>-4.13394 -1.5 0 0 -0 0</pose>
     </include>
-    
+
     <!-- SHELVES -->
     <include>
       <name>shelves 7</name>
@@ -81,7 +86,7 @@
       <uri>model://shelves_high2_no_collision</uri>
       <pose>-4.13394 -2.8 0 0 -0 0</pose>
     </include>
-    
+
     <!-- SHELVES -->
     <include>
       <name>shelves 9</name>
@@ -93,7 +98,7 @@
       <uri>model://shelves_high2_no_collision</uri>
       <pose>-4.13394 -7.8 0 0 -0 0</pose>
     </include>
-    
+
     <!-- SHELVES -->
     <include>
       <name>shelves 11</name>
@@ -105,11 +110,11 @@
       <uri>model://shelves_high2_no_collision</uri>
       <pose>-4.13394 -9.1 0 0 -0 0</pose>
     </include>
-    
+
     <!-- =================================
             Ground level
          ================================= -->
-    
+
     <!-- PALLET 1 -->
     <include>
       <name>pallet 1 box</name>
@@ -121,7 +126,7 @@
       <uri>model://europallet</uri>
       <pose>1.48088 3.400944 0.0635 0 0 -1.56736</pose>
     </include>
-    
+
     <!-- PALLET 4 -->
     <include>
       <name>pallet 4 box</name>
@@ -133,7 +138,7 @@
       <uri>model://europallet</uri>
       <pose>-2.40127 3.415746 0.0635 0 0 -1.5558</pose>
     </include>
-    
+
     <!-- PALLET 7 -->
     <include>
       <name>pallet 7 box</name>
@@ -145,7 +150,7 @@
       <uri>model://europallet</uri>
       <pose>2.59788 3.454115 0.0635 0 0 -1.56921</pose>
     </include>
-    
+
     <!-- PALLET 10 -->
     <include>
       <name>pallet 10 box</name>
@@ -157,7 +162,7 @@
       <uri>model://europallet</uri>
       <pose>-3.41303 3.343739 0.0635 0 -0 1.56536</pose>
     </include>
-    
+
     <!-- PALLET 11 -->
     <include>
       <name>pallet 11 box</name>
@@ -169,7 +174,7 @@
       <uri>model://europallet</uri>
       <pose>-4.70127 3.415746 0.0635 0 0 -1.5558</pose>
     </include>
-    
+
     <!-- PALLET 12 -->
     <include>
       <name>pallet 12 box</name>
@@ -181,7 +186,7 @@
       <uri>model://europallet</uri>
       <pose>-5.91303 3.343739 0.0635 0 -0 1.56536</pose>
     </include>
-    
+
     <!-- EMPTY PALLET 18 -->
     <include>
       <name>pallet 18 support</name>
@@ -193,11 +198,11 @@
       <uri>model://europallet</uri>
       <pose>0.134986 3.337637 0.2102 0 -0 1.2</pose>
     </include>
-      
+
     <!-- =================================
             1st level
          ================================= -->
-    
+
     <!-- PALLET 2 -->
     <include>
       <name>pallet 2 box</name>
@@ -209,8 +214,8 @@
       <uri>model://europallet</uri>
       <pose>-3.21303 3.343739 1.6373 0 -0 1.56536</pose>
     </include>
-    
-    
+
+
     <!-- PALLET 5 - SMALL BOXES -->
     <include>
       <name>pallet 5 multi boxes</name>
@@ -218,7 +223,7 @@
       <pose>0.334986 3.337637 1.63184 0 0 -1.57575</pose>
       <static>true</static>
     </include>
-    
+
     <!-- PALLET 17 - SMALL BOXES -->
     <include>
       <name>pallet 17 multi boxes</name>
@@ -226,7 +231,7 @@
       <pose>0.334986 3.337637 2.31 0 0 -1.57575</pose>
       <static>true</static>
     </include>
-      
+
     <!-- PALLET 8 -->
     <include>
       <name>pallet 8 box</name>
@@ -238,7 +243,7 @@
       <uri>model://europallet</uri>
       <pose>2.64128 3.308661 1.64676 0 0 -1.55378</pose>
     </include>
-    
+
     <!-- PALLET 9 -->
     <include>
       <name>pallet 9 box</name>
@@ -250,7 +255,7 @@
       <uri>model://europallet</uri>
       <pose>-2.28744 2.915349 1.64676 0 -0 1.5541</pose>
     </include>
-    
+
     <!-- PALLET 13 -->
     <include>
       <name>pallet 13 box</name>
@@ -262,7 +267,7 @@
       <uri>model://europallet</uri>
       <pose>-4.70127 3.415746 1.64676 0 0 -1.5558</pose>
     </include>
-    
+
     <!-- PALLET 14 -->
     <include>
       <name>pallet 14 box</name>
@@ -274,7 +279,7 @@
       <uri>model://europallet</uri>
       <pose>-5.91303 3.343739 1.64676 0 -0 1.56536</pose>
     </include>
-    
+
     <!-- PALLET 19 -->
     <include>
       <name>pallet 19 box</name>
@@ -286,12 +291,12 @@
       <uri>model://europallet</uri>
       <pose>-0.8 3.337637 1.6373 0 -0 1.56536</pose>
     </include>
-    
-    
+
+
     <!-- =================================
             2nd level
          ================================= -->
-    
+
     <!-- PALLET 6 - SMALL BOXES -->
     <include>
       <name>pallet 6 multi boxes</name>
@@ -299,7 +304,7 @@
       <pose>-2.18966 3.351916 3.27046 0 0 -1.58092</pose>
       <static>true</static>
     </include>
-    
+
     <!-- PALLET 15 - SMALL BOXES -->
     <include>
       <name>pallet 15 multi boxes</name>
@@ -307,7 +312,7 @@
       <pose>-4.68966 3.351916 3.27046 0 0 -1.58092</pose>
       <static>true</static>
     </include>
-   
+
     <!-- PALLET 16 - SMALL BOXES -->
     <include>
       <name>pallet 16 multi boxes</name>
@@ -315,8 +320,8 @@
       <pose>-5.88966 3.351916 3.27046 0 0 -1.58092</pose>
       <static>true</static>
     </include>
-      
-      
+
+
     <!-- PALLET 20 -->
     <include>
       <name>pallet 20 box</name>
@@ -328,7 +333,7 @@
       <uri>model://europallet</uri>
       <pose>-3.21303 3.343739 3.27046 0 -0 1.56536</pose>
     </include>
-    
+
     <!-- PALLET 21 -->
     <include>
       <name>pallet 21 box</name>
@@ -340,7 +345,7 @@
       <uri>model://europallet</uri>
       <pose>2.64128 3.308661 3.27046 0 0 -1.55378</pose>
     </include>
-    
+
     <!-- PALLET 22 -->
     <include>
       <name>pallet 22 box</name>
@@ -352,12 +357,12 @@
       <uri>model://europallet</uri>
       <pose>-0.8 3.337637 3.27046 0 -0 1.56536</pose>
     </include>
-    
-    
+
+
     <!-- =================================
             Shelves B - Ground level
          ================================= -->
-    
+
     <!-- PALLET 1 -->
     <include>
       <name>pallet B-0-1 box</name>
@@ -369,7 +374,7 @@
       <uri>model://europallet</uri>
       <pose>1.48088 -1.5 0.0635 0 0 1.56736</pose>
     </include>
-    
+
     <!-- PALLET 7 -->
     <include>
       <name>pallet B-0-2 box</name>
@@ -381,12 +386,12 @@
       <uri>model://europallet</uri>
       <pose>2.9 -1.5 0.0635 0 0 1.56921</pose>
     </include>
-    
-    
+
+
     <!-- =================================
             Shelves B - 1st level
          ================================= -->
-    
+
     <!-- PALLET 1 -->
     <include>
       <name>pallet B-1-1 box</name>
@@ -400,7 +405,7 @@
       <pose>1.6 -1.5 1.60 0 0 1.56736</pose>
       <static>true</static>
     </include>
-    
+
     <!-- PALLET 7 -->
     <include>
       <name>pallet B-1-2 box</name>
@@ -414,11 +419,11 @@
       <pose>2.9 -1.5 1.60 0 0 1.56921</pose>
       <static>true</static>
     </include>
-    
+
     <!-- =================================
             Shelves B - 2st level
          ================================= -->
-    
+
     <!-- PALLET 1 -->
     <include>
       <name>pallet B-2-1 box</name>
@@ -432,7 +437,7 @@
       <pose>1.6 -1.5 3.27 0 0 1.56736</pose>
       <static>true</static>
     </include>
-    
+
     <!-- PALLET 7 -->
     <include>
       <name>pallet B-2-2 box</name>
@@ -446,27 +451,27 @@
       <pose>2.9 -1.5 3.27 0 0 1.56921</pose>
       <static>true</static>
     </include>
-    
+
     <!-- ACCESSORIES -->
     <include>
       <name>first_2015_trash_can</name>
       <uri>model://first_2015_trash_can</uri>
       <pose>3.8239 3.403029 0 0 -0 0</pose>
     </include>
-    
-    
+
+
     <include>
       <name>grey_wall</name>
       <uri>model://grey_wall</uri>
       <pose>-8.34545 0 0 0 0 -1.57</pose>
     </include>
-    
+
     <include>
       <name>grey_wall2</name>
       <uri>model://grey_wall</uri>
       <pose>-3.5 9 0 0 0 0</pose>
     </include>
- 
+
 
   </world>
 </sdf>
