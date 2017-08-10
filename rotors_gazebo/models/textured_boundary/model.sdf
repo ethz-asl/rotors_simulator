@@ -1,0 +1,129 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="textured_boundary">
+  	<pose>0 0 0 0 0 0</pose>
+    <static>true</static>
+    <link name="link">
+      <collision name="collision1">
+        <pose>10 0 5 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 20 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual1">
+        <cast_shadows>false</cast_shadows>
+        <pose>10 0 5 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 20 10</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://textured_boundary/materials/scripts</uri>
+            <uri>model://textured_boundary/materials/textures</uri>
+            <name>wall/1</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="collision2">
+        <pose>0 10 5 0 0 -1.570796</pose>
+        <geometry>
+          <box>
+            <size>0.1 20 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual2">
+        <cast_shadows>false</cast_shadows>
+        <pose>0 10 5 0 0 1.570796</pose>
+        <geometry>
+          <box>
+            <size>0.1 20 10</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://textured_boundary/materials/scripts</uri>
+            <uri>model://textured_boundary/materials/textures</uri>
+            <name>wall/2</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="collision3">
+        <pose>-10 0 5 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 20 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual3">
+        <cast_shadows>false</cast_shadows>
+        <pose>-10 0 5 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 20 10</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://textured_boundary/materials/scripts</uri>
+            <uri>model://textured_boundary/materials/textures</uri>
+            <name>wall/3</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="collision4">
+        <pose>0 -10 5 0 0 -1.570796</pose>
+        <geometry>
+          <box>
+            <size>0.1 20 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual4">
+        <cast_shadows>false</cast_shadows>
+        <pose>0 -10 5 0 0 1.570796</pose>
+        <geometry>
+          <box>
+            <size>0.1 20 10</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://textured_boundary/materials/scripts</uri>
+            <uri>model://textured_boundary/materials/textures</uri>
+            <name>wall/4</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="ground">
+        <pose>0 0 0 0 1.570796 0</pose>
+        <geometry>
+          <box>
+            <size>0.01 20 20</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="groud_visual">
+        <cast_shadows>false</cast_shadows>
+        <pose>0 0 0 0 1.570796 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 20 20</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://textured_boundary/materials/scripts</uri>
+            <uri>model://textured_boundary/materials/textures</uri>
+            <name>ground</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

@@ -1,0 +1,104 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="textured_boundary">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision1">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 20 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual1">
+        <cast_shadows>false</cast_shadows>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 20 10</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://textured_boundary/materials/scripts</uri>
+            <uri>model://textured_boundary/materials/textures</uri>
+            <name>wall/1</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="collision2">
+        <pose>0 20 0 0 0 -1.570796</pose>
+        <geometry>
+          <box>
+            <size>1 20 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual2">
+        <cast_shadows>false</cast_shadows>
+        <pose>0 20 0 0 0 -1.570796</pose>
+        <geometry>
+          <box>
+            <size>1 20 10</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://textured_boundary/materials/scripts</uri>
+            <uri>model://textured_boundary/materials/textures</uri>
+            <name>wall/1</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="collision3">
+        <pose>20 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 20 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual3">
+        <cast_shadows>false</cast_shadows>
+        <pose>20 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 20 10</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://textured_boundary/materials/scripts</uri>
+            <uri>model://textured_boundary/materials/textures</uri>
+            <name>wall/1</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="collision4">
+        <pose>0 0 0 0 0 -1.570796</pose>
+        <geometry>
+          <box>
+            <size>1 20 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual4">
+        <cast_shadows>false</cast_shadows>
+        <pose>0 0 0 0 0 -1.570796</pose>
+        <geometry>
+          <box>
+            <size>1 20 10</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://textured_boundary/materials/scripts</uri>
+            <uri>model://textured_boundary/materials/textures</uri>
+            <name>wall/1</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
