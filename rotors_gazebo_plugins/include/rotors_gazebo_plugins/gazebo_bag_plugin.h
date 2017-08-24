@@ -67,7 +67,7 @@ class GazeboBagPlugin : public ModelPlugin {
         control_rate_thrust_topic_(mav_msgs::default_topics::COMMAND_RATE_THRUST),
         motor_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
         wrench_topic_(mav_msgs::default_topics::WRENCH),
-        wind_topic_(mav_msgs::default_topics::WIND),
+        wind_topic_(mav_msgs::default_topics::WIND_SPEED),
         waypoint_topic_(mav_msgs::default_topics::COMMAND_TRAJECTORY),
         command_pose_topic_(mav_msgs::default_topics::COMMAND_POSE),
         frame_id_(kDefaultFrameId),
