@@ -138,9 +138,12 @@ class HilListeners {
     ROS_ASSERT(hil_data);
 
     // MAVLINK HIL_GPS message measures GPS velocity in cm/s
-    hil_data->gps_vel_cm_per_s = Eigen::Vector3i(ground_speed_msg->twist.linear.x,
-                                        ground_speed_msg->twist.linear.y,
-                                        ground_speed_msg->twist.linear.z) * kMetersToCm;
+    hil_data->gps_vel_cm_per_s =
+        (Eigen::Vector3f(ground_speed_msg->twist.linear.x,
+                         ground_speed_msg->twist.linear.y,
+                         ground_speed_msg->twist.linear.z) *
+         kMetersToCm)
+            .cast<int>();
 
     hil_data->vel_1e2m_per_s = hil_data->gps_vel_cm_per_s.norm();
   }
