@@ -49,30 +49,17 @@ Installation Instructions - Ubuntu 16.04 with ROS Kinetic
  $ cd ~/catkin_ws/src
  $ catkin_init_workspace  # initialize your catkin workspace
  $ wstool init
+ $ wget https://github.com/ethz-asl/rotors_simulator/blob/master/rotors_hil.rosinstall
+ $ wstool merge rotors_hil.rosinstall  # If you don't want the HIL functionalities use the rotors_minimal.rosinstall
+ $ wstool update
  ```
- > **Note** for setups with multiple workspaces please refer to the official documentation at http://docs.ros.org/independent/api/rosinstall/html/ by replacing `rosws` by `wstool`.
- 3. Get the simulator and additional dependencies
 
- ```
- $ cd ~/catkin_ws/src
- $ git clone git@github.com:ethz-asl/rotors_simulator.git
- $ git clone git@github.com:ethz-asl/mav_comm.git
- ```
   > **Note** On OS X you to install yaml-cpp using Homebrew `brew install yaml-cpp`.
- 
-  > **Note** if you want to use `wstool` you can replace the above commands with
-    ```
-    wstool set --git local_repo_name git@github.com:organization/repo_name.git
-    ```
-  > **Note** if you want to build and use the `gazebo_mavlink_interface` plugin you have to get MAVROS as an additional dependency from link below. Follow the installation instructions provided there and build all of its packages prior to building the rest of your workspace. 
-    ```
-    https://github.com/mavlink/mavros
-    ```
+
  4. Build your workspace with `python_catkin_tools` (therefore you need `python_catkin_tools`)
 
    ```
    $ cd ~/catkin_ws/
-   $ catkin init  # If you haven't done this before.
    $ catkin build
    ```
 
