@@ -29,8 +29,62 @@ doi="10.1007/978-3-319-26054-9_23",
 url="http://dx.doi.org/10.1007/978-3-319-26054-9_23"
 }
 ```
-Installation Instructions
--------------------------
+Installation Instructions - Ubuntu 16.04 with ROS Kinetic
+---------------------------------------------------------
+ 1. Install and initialize ROS kinetic desktop full, additional ROS packages, catkin-tools, and wstool:
+
+ ```
+ $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
+ $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+ $ sudo apt-get update
+ $ sudo apt-get install ros-kinetic-desktop-full ros-kinetic-joy ros-kinetic-octomap-ros python-wstool python-catkin-tools protobuf-compiler libgoogle-glog-dev
+ $ sudo rosdep init
+ $ rosdep update
+ $ source /opt/ros/kinetic/setup.bash
+ ```
+ 2. If you don't have ROS workspace yet you can do so by
+
+ ```
+ $ mkdir -p ~/catkin_ws/src
+ $ cd ~/catkin_ws/src
+ $ catkin_init_workspace  # initialize your catkin workspace
+ $ wstool init
+ ```
+ > **Note** for setups with multiple workspaces please refer to the official documentation at http://docs.ros.org/independent/api/rosinstall/html/ by replacing `rosws` by `wstool`.
+ 3. Get the simulator and additional dependencies
+
+ ```
+ $ cd ~/catkin_ws/src
+ $ git clone git@github.com:ethz-asl/rotors_simulator.git
+ $ git clone git@github.com:ethz-asl/mav_comm.git
+ ```
+  > **Note** On OS X you to install yaml-cpp using Homebrew `brew install yaml-cpp`.
+ 
+  > **Note** if you want to use `wstool` you can replace the above commands with
+    ```
+    wstool set --git local_repo_name git@github.com:organization/repo_name.git
+    ```
+  > **Note** if you want to build and use the `gazebo_mavlink_interface` plugin you have to get MAVROS as an additional dependency from link below. Follow the installation instructions provided there and build all of its packages prior to building the rest of your workspace. 
+    ```
+    https://github.com/mavlink/mavros
+    ```
+ 4. Build your workspace with `python_catkin_tools` (therefore you need `python_catkin_tools`)
+
+   ```
+   $ cd ~/catkin_ws/
+   $ catkin init  # If you haven't done this before.
+   $ catkin build
+   ```
+
+ 5. Add sourcing to your `.bashrc` file
+
+   ```
+   $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+   $ source ~/.bashrc
+   ```
+
+Installation Instructions - Ubuntu 14.04 with ROS Indigo
+--------------------------------------------------------
 
  1. Install and initialize ROS indigo desktop full, additional ROS packages, catkin-tools, and wstool:
 
