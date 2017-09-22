@@ -50,20 +50,20 @@ Installation Instructions - Ubuntu 16.04 with ROS Kinetic
  $ catkin_init_workspace  # initialize your catkin workspace
  $ wstool init
  $ wget https://github.com/ethz-asl/rotors_simulator/blob/master/rotors_hil.rosinstall
- $ wstool merge rotors_hil.rosinstall  # If you don't want the HIL functionalities use the rotors_minimal.rosinstall
+ $ wstool merge rotors_hil.rosinstall
  $ wstool update
  ```
 
-  > **Note** On OS X you to install yaml-cpp using Homebrew `brew install yaml-cpp`.
+  > **Note** On OS X you need to install yaml-cpp using Homebrew `brew install yaml-cpp`.
 
- 4. Build your workspace with `python_catkin_tools` (therefore you need `python_catkin_tools`)
+ 3. Build your workspace with `python_catkin_tools` (therefore you need `python_catkin_tools`)
 
    ```
    $ cd ~/catkin_ws/
    $ catkin build
    ```
 
- 5. Add sourcing to your `.bashrc` file
+ 4. Add sourcing to your `.bashrc` file
 
    ```
    $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
@@ -100,13 +100,13 @@ Installation Instructions - Ubuntu 14.04 with ROS Indigo
  $ git clone git@github.com:ethz-asl/rotors_simulator.git
  $ git clone git@github.com:ethz-asl/mav_comm.git
  ```
-  > **Note** On OS X you to install yaml-cpp using Homebrew `brew install yaml-cpp`.
- 
+  > **Note** On OS X you need to install yaml-cpp using Homebrew `brew install yaml-cpp`.
+
   > **Note** if you want to use `wstool` you can replace the above commands with
     ```
     wstool set --git local_repo_name git@github.com:organization/repo_name.git
     ```
-  > **Note** if you want to build and use the `gazebo_mavlink_interface` plugin you have to get MAVROS as an additional dependency from link below. Follow the installation instructions provided there and build all of its packages prior to building the rest of your workspace. 
+  > **Note** if you want to build and use the `gazebo_mavlink_interface` plugin you have to get MAVROS as an additional dependency from link below. Follow the installation instructions provided there and build all of its packages prior to building the rest of your workspace.
     ```
     https://github.com/mavlink/mavros
     ```
