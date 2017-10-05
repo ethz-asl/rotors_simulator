@@ -17,91 +17,89 @@
 #include "rotors_hil_interface/hil_interface_node.h"
 
 namespace rotors_hil {
-
 HilInterfaceNode::HilInterfaceNode() :
-    rate_(kDefaultHilFrequency) {
-  ros::NodeHandle pnh("~");
+	rate_(kDefaultHilFrequency) {
+	ros::NodeHandle pnh("~");
 
-  bool sensor_level_hil;
-  double hil_frequency;
-  double S_B_roll;
-  double S_B_pitch;
-  double S_B_yaw;
-  std::string actuators_pub_topic;
-  std::string mavlink_pub_topic;
-  std::string hil_controls_sub_topic;
+	double hil_frequency;
+	std::string actuators_pub_topic;
+	std::string hil_gps_pub_topic;
+	std::string hil_sensor_pub_topic;
+	std::string hil_state_pub_topic;
+	std::string hil_controls_sub_topic;
 
-  pnh.param("sensor_level_hil", sensor_level_hil, kDefaultSensorLevelHil);
-  pnh.param("hil_frequency", hil_frequency, kDefaultHilFrequency);
-  pnh.param("body_to_sensor_roll", S_B_roll, kDefaultBodyToSensorsRoll);
-  pnh.param("body_to_sensor_pitch", S_B_pitch, kDefaultBodyToSensorsPitch);
-  pnh.param("body_to_sensor_yaw", S_B_yaw, kDefaultBodyToSensorsYaw);
-  pnh.param("actuators_pub_topic", actuators_pub_topic, std::string(mav_msgs::default_topics::COMMAND_ACTUATORS));
-  pnh.param("mavlink_pub_topic", mavlink_pub_topic, kDefaultMavlinkPubTopic);
-  pnh.param("hil_controls_sub_topic", hil_controls_sub_topic, kDefaultHilControlsSubTopic);
+	pnh.param("sensor_level_hil", sensor_level_hil, kDefaultSensorLevelHil);
+	pnh.param("hil_frequency", hil_frequency, kDefaultHilFrequency);
+	pnh.param("actuators_pub_topic", actuators_pub_topic, std::string(mav_msgs::default_topics::COMMAND_ACTUATORS));
+	pnh.param("hil_gps_pub_topic", hil_gps_pub_topic, kDefaultHilGPSPubTopic);
+	pnh.param("hil_sensor_pub_topic", hil_sensor_pub_topic, kDefaultHilSensorPubTopic);
+	pnh.param("hil_state_pub_topic", hil_state_pub_topic, kDefaultHilStatePubTopic);
+	pnh.param("hil_controls_sub_topic", hil_controls_sub_topic, kDefaultHilControlsSubTopic);
 
-  // Create the quaternion and rotation matrix to rotate data into NED frame.
-  Eigen::AngleAxisd roll_angle(S_B_roll, Eigen::Vector3d::UnitX());
-  Eigen::AngleAxisd pitch_angle(S_B_pitch, Eigen::Vector3d::UnitY());
-  Eigen::AngleAxisd yaw_angle(S_B_yaw, Eigen::Vector3d::UnitZ());
+	if (sensor_level_hil)
+		hil_interface_ = std::shared_ptr<HilSensorLevelInterface>(new HilSensorLevelInterface());
+	else
+		hil_interface_ = std::shared_ptr<HilStateLevelInterface>(new HilStateLevelInterface());
 
-  const Eigen::Quaterniond q_S_B = roll_angle * pitch_angle * yaw_angle;
+	rate_ = ros::Rate(hil_frequency);
 
-  if (sensor_level_hil)
-    hil_interface_ = std::auto_ptr<HilSensorLevelInterface>(new HilSensorLevelInterface(q_S_B));
-  else
-    hil_interface_ = std::auto_ptr<HilStateLevelInterface>(new HilStateLevelInterface(q_S_B));
+	// Publishers
+	actuators_pub_ = nh_.advertise<mav_msgs::Actuators>(actuators_pub_topic, 1);
+	hil_gps_pub_ = nh_.advertise<mavros_msgs::HilGPS>(hil_gps_pub_topic, 10);
+	hil_sensor_pub_ = nh_.advertise<mavros_msgs::HilSensor>(hil_sensor_pub_topic, 10);
+	hil_state_pub_ = nh_.advertise<mavros_msgs::HilStateQuaternion>(hil_state_pub_topic, 10);
 
-  rate_ = ros::Rate(hil_frequency);
-
-  actuators_pub_ = nh_.advertise<mav_msgs::Actuators>(actuators_pub_topic, 1);
-  mavlink_pub_ = nh_.advertise<mavros_msgs::Mavlink>(mavlink_pub_topic, 5);
-  hil_controls_sub_ = nh_.subscribe(hil_controls_sub_topic, 1,
-                                        &HilInterfaceNode::HilControlsCallback, this);
+	// Subscribers
+	hil_controls_sub_ = nh_.subscribe(hil_controls_sub_topic, 1,
+			&HilInterfaceNode::HilControlsCallback, this);
 }
 
-HilInterfaceNode::~HilInterfaceNode() {
-}
+HilInterfaceNode::~HilInterfaceNode() {}
 
 void HilInterfaceNode::MainTask() {
-  while (ros::ok()) {
-    std::vector<mavros_msgs::Mavlink> hil_msgs = hil_interface_->CollectData();
+	while (ros::ok()) {
+		if (sensor_level_hil) {
+			mavros_msgs::HilGPS hil_gps_msg = hil_interface_->CollectGPSData();
+			mavros_msgs::HilSensor hil_sensor_msg = hil_interface_->CollectSensorData();
 
-    while (!hil_msgs.empty()) {
-      mavlink_pub_.publish(hil_msgs.back());
-      hil_msgs.pop_back();
-    }
+			hil_gps_pub_.publish(hil_gps_msg);
+			hil_sensor_pub_.publish(hil_sensor_msg);
+		}
+		else {
+			mavros_msgs::HilStateQuaternion hil_state_msg = hil_interface_->CollectStateData();
 
-    ros::spinOnce();
-    rate_.sleep();
-  }
+			hil_state_pub_.publish(hil_state_msg);
+		}
+
+		ros::spinOnce();
+		rate_.sleep();
+	}
 }
 
 void HilInterfaceNode::HilControlsCallback(const mavros_msgs::HilControlsConstPtr& hil_controls_msg) {
-  mav_msgs::Actuators act_msg;
+	mav_msgs::Actuators act_msg;
 
-  ros::Time current_time = ros::Time::now();
+	ros::Time current_time = ros::Time::now();
 
-  act_msg.normalized.push_back(hil_controls_msg->roll_ailerons);
-  act_msg.normalized.push_back(hil_controls_msg->pitch_elevator);
-  act_msg.normalized.push_back(hil_controls_msg->yaw_rudder);
-  act_msg.normalized.push_back(hil_controls_msg->aux1);
-  act_msg.normalized.push_back(hil_controls_msg->aux2);
-  act_msg.normalized.push_back(hil_controls_msg->throttle);
+	act_msg.normalized.push_back(hil_controls_msg->roll_ailerons);
+	act_msg.normalized.push_back(hil_controls_msg->pitch_elevator);
+	act_msg.normalized.push_back(hil_controls_msg->yaw_rudder);
+	act_msg.normalized.push_back(hil_controls_msg->aux1);
+	act_msg.normalized.push_back(hil_controls_msg->aux2);
+	act_msg.normalized.push_back(hil_controls_msg->throttle);
 
-  act_msg.header.stamp.sec = current_time.sec;
-  act_msg.header.stamp.nsec = current_time.nsec;
+	act_msg.header.stamp.sec = current_time.sec;
+	act_msg.header.stamp.nsec = current_time.nsec;
 
-  actuators_pub_.publish(act_msg);
+	actuators_pub_.publish(act_msg);
 }
-
-}
+}	// namespace rotors_hil
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "rotors_hil_interface_node");
-  rotors_hil::HilInterfaceNode hil_interface_node;
+	ros::init(argc, argv, "rotors_hil_interface_node");
+	rotors_hil::HilInterfaceNode hil_interface_node;
 
-  hil_interface_node.MainTask();
+	hil_interface_node.MainTask();
 
-  return 0;
+	return 0;
 }
