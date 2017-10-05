@@ -34,9 +34,11 @@
       <param name="gps_topic" value="gps" />
       <param name="imu_topic" value="imu" />
       <param name="odometry_topic" value="ground_truth/odometry" />
-      <param name="hil_controls_sub_topic" value="/mavros/hil_controls/hil_controls" />
+      <param name="hil_controls_sub_topic" value="/mavros/hil/controls" />
       <param name="actuators_pub_topic" value="gazebo/command/motor_speed" />
-      <param name="mavlink_pub_topic" value="/mavlink/to" />
+      <param name="hil_gps_pub_topic" value="/mavros/hil/gps" />
+	  <param name="hil_sensor_pub_topic" value="/mavros/hil/sensor" />
+	  <param name="hil_state_pub_topic" value="/mavros/hil/state" />
       <param name="sensor_level_hil" value="true" />
       <param name="hil_gps_frequency" value="5.0" />
       <param name="hil_frequency" value="100.0" />
@@ -48,4 +50,3 @@
 
   <node name="hil_plugin_gui" pkg="rqt_rotors" type="hil_plugin" clear_params="true" output="screen" />
 </launch>
-
