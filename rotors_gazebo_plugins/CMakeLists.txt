@@ -3,6 +3,7 @@
 # BUILD_MAVLINK_INTERFACE_PLUGIN    bool    Build mavlink_interface_plugin (requires mav dependency).
 # BUILD_OCTOMAP_PLUGIN              bool    Build the optical map plugin (requires Octomap).
 # BUILD_OPTICAL_FLOW_PLUGIN         bool    Build the optical flow plugin (requires OpenCV).
+# BUILD_AERIAL_MANIPULATION_PLUGINS bool    Build plugins related to aerial manipulation
 # MAVLINK_HEADER_DIR                string  Location of MAVLink header files. If not provided, this CMakeLists.txt file will
 #                                               search the default locations (e.g. ROS) for them. This variable is only required
 #                                               if BUILD_MAVLINK_INTERFACE_PLUGIN=TRUE.
@@ -30,6 +31,11 @@ endif()
 if(NOT DEFINED BUILD_OCTOMAP_PLUGIN)
   message(STATUS "BUILD_OCTOMAP_PLUGIN variable not provided, setting to FALSE.")
   set(BUILD_OCTOMAP_PLUGIN FALSE)
+endif()
+
+if(NOT DEFINED BUILD_AERIAL_MANIPULATION_PLUGINS)
+  message(STATUS "BUILD_AERIAL_MANIPULATION_PLUGINS variable not provided, setting to FALSE.")
+  set(BUILD_AERIAL_MANIPULATION_PLUGINS FALSE)
 endif()
 
 if(NOT DEFINED BUILD_OPTICAL_FLOW_PLUGIN)
@@ -72,6 +78,12 @@ else ()
   message(STATUS "BUILD_OPTICAL_FLOW_PLUGIN = FALSE, NOT building gazebo_optical_flow_plugin.")
 endif ()
 
+if(BUILD_AERIAL_MANIPULATION_PLUGINS)
+  message(STATUS "BUILD_AERIAL_MANIPULATION_PLUGINS = TRUE, building aerial manipulation plugins.")
+else ()
+  message(STATUS "BUILD_AERIAL_MANIPULATION_PLUGINS = FALSE, NOT building aerial manipulation plugins.")
+endif ()
+
 if(NO_ROS)
   message(STATUS "NO_ROS = TRUE, building rotors_gazebo_plugins WITHOUT any ROS dependancies.")
 else()
@@ -97,6 +109,7 @@ if (NOT NO_ROS)
     cmake_modules
     cv_bridge
     geometry_msgs
+    trajectory_msgs
     mav_msgs
     octomap_msgs
     octomap_ros
@@ -198,7 +211,7 @@ if (NOT NO_ROS)
   catkin_package(
     INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
     LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
-    CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf
+    CATKIN_DEPENDS cv_bridge geometry_msgs trajectory_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf
     DEPENDS eigen gazebo octomap opencv
     #CFG_EXTRAS rotors_gazebo_plugins.cmake
   )
@@ -365,6 +378,37 @@ if(BUILD_OCTOMAP_PLUGIN)
     add_dependencies(rotors_gazebo_octomap_plugin ${catkin_EXPORTED_TARGETS})
   endif()
   list(APPEND targets_to_install rotors_gazebo_octomap_plugin)
+endif()
+#====================================== Aerial Manipulation PLUGINs ==========================================//
+
+if(BUILD_AERIAL_MANIPULATION_PLUGINS)
+  add_library(rotors_gazebo_servo_motor_plugin SHARED src/gazebo_servo_motor_plugin.cpp)
+  target_link_libraries(rotors_gazebo_servo_motor_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+  if (NOT NO_ROS)
+    add_dependencies(rotors_gazebo_servo_motor_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install rotors_gazebo_servo_motor_plugin)
+
+  add_library(rotors_gazebo_six_dof_shock_absorber_plugin SHARED src/gazebo_six_dof_shock_absorber_plugin.cpp)
+  target_link_libraries(rotors_gazebo_six_dof_shock_absorber_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+  if (NOT NO_ROS)
+    add_dependencies(rotors_gazebo_six_dof_shock_absorber_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install rotors_gazebo_six_dof_shock_absorber_plugin)
+
+  add_library(rotors_gazebo_robot_initial_configuration_plugin SHARED src/gazebo_robot_initial_configuration_plugin.cpp)
+  target_link_libraries(rotors_gazebo_robot_initial_configuration_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+  if (NOT NO_ROS)
+    add_dependencies(rotors_gazebo_robot_initial_configuration_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install rotors_gazebo_robot_initial_configuration_plugin)
+
+  add_library(rotors_gazebo_force_sensor_plugin SHARED src/gazebo_force_sensor_plugin.cpp)
+  target_link_libraries(rotors_gazebo_force_sensor_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+  if (NOT NO_ROS)
+    add_dependencies(rotors_gazebo_force_sensor_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install rotors_gazebo_force_sensor_plugin)
 endif()
 
 #======================================= ODOMETRY PLUGIN ========================================//

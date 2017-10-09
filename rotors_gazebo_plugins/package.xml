@@ -24,6 +24,7 @@
   <build_depend>cv_bridge</build_depend>
   <build_depend>gazebo</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>trajectory_msgs</build_depend>
   <build_depend>libgoogle-glog-dev</build_depend>
   <build_depend>mav_msgs</build_depend>
   <build_depend>octomap</build_depend>
@@ -43,6 +44,7 @@
   <run_depend>cv_bridge</run_depend>
   <run_depend>gazebo_ros</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <run_depend>trajectory_msgs</run_depend>
   <run_depend>libgoogle-glog-dev</run_depend>
   <run_depend>mav_msgs</run_depend>
   <run_depend>octomap</run_depend>
