@@ -49,7 +49,7 @@ Installation Instructions - Ubuntu 16.04 with ROS Kinetic
  $ cd ~/catkin_ws/src
  $ catkin_init_workspace  # initialize your catkin workspace
  $ wstool init
- $ wget https://raw.githubusercontent.com/ethz-asl/rotors_simulator/master/rotors_hil.rosinstall
+ $ wget https://raw.githubusercontent.com/mktk1117/rotors_simulator/master/rotors_hil.rosinstall
  $ wstool merge rotors_hil.rosinstall
  $ wstool update
  ```
