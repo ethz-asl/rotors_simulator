@@ -27,6 +27,8 @@
   <build_depend>geometry_msgs</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
+  <!-- bkjung-->
+  <!--build_depend>ps3joy</build_depend-->
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>gazebo_plugins</run_depend>
@@ -36,5 +38,7 @@
   <run_depend>geometry_msgs</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
+  <!-- bkjung-->
+  <run_depend>ps3joy</run_depend>
 
 </package>
