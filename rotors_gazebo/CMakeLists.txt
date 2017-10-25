@@ -52,6 +52,8 @@ catkin_package(
     mav_msgs
     roscpp
     sensor_msgs
+    #bkjung
+    #ps3joy
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})
