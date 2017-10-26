@@ -409,6 +409,13 @@ if(BUILD_AERIAL_MANIPULATION_PLUGINS)
     add_dependencies(rotors_gazebo_force_sensor_plugin ${catkin_EXPORTED_TARGETS})
   endif()
   list(APPEND targets_to_install rotors_gazebo_force_sensor_plugin)
+  
+  add_library(rotors_gazebo_hebi_sea_plugin SHARED src/gazebo_hebi_sea_plugin.cpp)
+  target_link_libraries(rotors_gazebo_hebi_sea_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+  if (NOT NO_ROS)
+    add_dependencies(rotors_gazebo_hebi_sea_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install rotors_gazebo_hebi_sea_plugin)
 endif()
 
 #======================================= ODOMETRY PLUGIN ========================================//

@@ -38,4 +38,30 @@
 	<!-- Include plugins -->
 	<!-- <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro"/> -->
 
+  <!-- Instantiate force sensor on end-effector -->
+	<xacro:force_sensor_plugin_macro
+		namespace="${namespace}/delta_manipulator"
+		force_sensor_suffix="ee"
+		parent_link="${namespace}/delta_manipulator/end_effector_link"
+		force_sensor_topic="force_sensor"
+		force_sensor_truth_topic="force_sensor_truth"
+		wrench_vector_pub_topic="wrench_vector"
+		parent_frame_id="world" 
+		reference_frame_id="world"
+		mass_force_sensor="0.001"
+		lin_force_meas_enabled="true"
+		torque_meas_enabled="false"
+		disp_wrench_vector="true"
+		measurement_divisor="1"
+		measurement_delay="0"
+		unknown_delay="0.0"
+		cutoff_frequency="10.0"
+		noise_normal_linear_force="0 0 0"
+		noise_normal_torque="0 0 0"
+		noise_uniform_linear_force="0 0 0"
+		noise_uniform_torque="0 0 0" >
+		<inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+		<!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+		<origin xyz="0.04 0.1 -0.005" rpy="0.0 1.57 1.2"/>
+	</xacro:force_sensor_plugin_macro>
 </robot>

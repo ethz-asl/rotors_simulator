@@ -42,6 +42,7 @@ Closed kinematic loop macro
       <parent>${parent_link}</parent>
       <axis>
         <xyz>${axis}</xyz>
+        <use_parent_model_frame>False</use_parent_model_frame>
         <dynamics>
           <damping>${damping}</damping>
           <friction>${friction}</friction>
@@ -180,6 +181,47 @@ Actuators Macros:
 </xacro:macro>
 
 
+<xacro:macro name="hebi_actuator_plugin"
+  params="namespace motor_name parent_link actuated_joint maxTorque noLoadSpeed
+          Kp Kd Ki maxAngle minAngle measurement_divisor measurement_delay unknown_delay
+          noise_normal_angle noise_normal_angular_velocity noise_normal_torque noise_uniform_angle
+          noise_uniform_angular_velocity noise_uniform_torque enable_visual visual_scale color *origin *inertial">
+
+  <link name="${namespace}/${motor_name}">
+    <xacro:insert_block name="inertial" />
+    <xacro:if value="${enable_visual}">
+      <visual>
+        <geometry>
+          <mesh filename="package://rotors_description/meshes/actuators/hebi_X5-4.dae"
+             scale="${visual_scale} ${visual_scale} ${visual_scale}"/>
+        </geometry>
+      </visual>
+    </xacro:if>
+  </link>
+  <gazebo reference="${namespace}/${motor_name}">
+    <material>Gazebo/${color}</material>
+  </gazebo>
+  <joint name="${namespace}/${motor_name}" type="revolute">
+    <parent link="${parent_link}"/>
+    <child link="${namespace}/${motor_name}"/>
+    <xacro:insert_block name="origin" />
+    <limit upper="0" lower="0" effort="0" velocity="0" />
+  </joint>
+  <gazebo>
+    <plugin name="${namespace}/${motor_name}" filename="librotors_gazebo_hebi_sea_plugin.so">
+      <robotNamespace>${namespace}</robotNamespace>
+      <jointName>${actuated_joint}</jointName>
+      <motorName>${motor_name}</motorName>
+      <jointStatePubTopic>${actuated_joint}</jointStatePubTopic>
+      <position_kp>0.2</position_kp>
+      <velocity_kp>0.1</velocity_kp>
+      <effort_kp>0.0</effort_kp>
+      <effort_kd>0.0</effort_kd>
+      <effort_output_lp>0.5</effort_output_lp>
+      <effort_D_on_error>false</effort_D_on_error>
+    </plugin>
+  </gazebo>
+</xacro:macro>
 <!--
 #########################################################################################################################
 Sensors Macros:
