@@ -97,6 +97,7 @@ if (NOT NO_ROS)
     cmake_modules
     cv_bridge
     geometry_msgs
+		sensor_msgs
     mav_msgs
     octomap_msgs
     octomap_ros
