@@ -117,6 +117,12 @@ Installation Instructions - Ubuntu 14.04 with ROS Indigo
    $ catkin init  # If you haven't done this before.
    $ catkin build
    ```
+   > **Note** if you are getting errors related to "future" package, you may need python future:
+    ```
+    sudo apt-get install python-pip
+    pip install --upgrade pip
+    pip install future
+    ```
 
  5. Add sourcing to your `.bashrc` file
 
