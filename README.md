@@ -37,7 +37,7 @@ Installation Instructions - Ubuntu 16.04 with ROS Kinetic
  $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
  $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
  $ sudo apt-get update
- $ sudo apt-get install ros-kinetic-desktop-full ros-kinetic-joy ros-kinetic-octomap-ros ros-kinetic-mavlink python-wstool python-catkin-tools protobuf-compiler libgoogle-glog-dev
+ $ sudo apt-get install ros-kinetic-desktop-full ros-kinetic-joy ros-kinetic-octomap-ros ros-kinetic-mavlink python-wstool python-catkin-tools protobuf-compiler libgoogle-glog-dev ros-kinetic-control-toolbox
  $ sudo rosdep init
  $ rosdep update
  $ source /opt/ros/kinetic/setup.bash
@@ -49,7 +49,7 @@ Installation Instructions - Ubuntu 16.04 with ROS Kinetic
  $ cd ~/catkin_ws/src
  $ catkin_init_workspace  # initialize your catkin workspace
  $ wstool init
- $ wget https://github.com/ethz-asl/rotors_simulator/blob/master/rotors_hil.rosinstall
+ $ wget https://raw.githubusercontent.com/ethz-asl/rotors_simulator/master/rotors_hil.rosinstall
  $ wstool merge rotors_hil.rosinstall
  $ wstool update
  ```
@@ -117,6 +117,12 @@ Installation Instructions - Ubuntu 14.04 with ROS Indigo
    $ catkin init  # If you haven't done this before.
    $ catkin build
    ```
+   > **Note** if you are getting errors related to "future" package, you may need python future:
+    ```
+    sudo apt-get install python-pip
+    pip install --upgrade pip
+    pip install future
+    ```
 
  5. Add sourcing to your `.bashrc` file
 
