@@ -18,44 +18,48 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-
-<robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="firefly" 
+  xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
   <!-- Instantiate firefly "mechanics" -->
   <xacro:include filename="$(find rotors_description)/urdf/firefly.xacro" />
-
   <!-- Instantiate a controller. -->
   <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />
-  
   <!-- Instantiate a ROS message interface -->
   <!-- <xacro:ros_interface_plugin_macro namespace="${namespace}" />-->
-
   <xacro:if value="$(arg enable_mavlink_interface)">
     <!-- Instantiate mavlink telemetry interface. -->
     <xacro:default_mavlink_interface namespace="${namespace}" imu_sub_topic="imu" rotor_count="6" />
   </xacro:if>
-
   <!-- Mount an ADIS16448 IMU. -->
   <xacro:default_imu namespace="${namespace}" parent_link="${namespace}/base_link" />
-
   <!-- Added by bkjung -->
   <xacro:default_gps namespace="${namespace}" parent_link="${namespace}/base_link" />
   <xacro:default_magnetometer namespace="${namespace}" parent_link="${namespace}/base_link" />
   <xacro:default_pressure_sensor namespace="${namespace}" parent_link="${namespace}/base_link" />
-  <xacro:camera_macro namespace="${namespace}" parent_link="${namespace}/base_link">
-
+  <xacro:camera_macro 
+    namespace="${namespace}" 
+    parent_link="${namespace}/base_link" 
+    camera_suffix="${namespace}/camera_suffix" 
+    frame_rate="${namespace}/frame_rate" 
+    horizontal_fov="1.3962634" 
+    image_width="752" 
+    image_height="480" 
+    image_format="L8" 
+    min_distance="0.02" 
+    max_distance="30" 
+    noise_mean="0.0" 
+    noise_stddev="0.007" 
+    enable_visual="true">
+    <mesh filename="package://rotors_description/meshes/vi_camera.dae" scale="1 1 1" />
+    <!-- <xacro:insert_block name="origin" /> -->
+    <origin xyz="0 0 -0.05" rpy="0 0 0" />
+  </xacro:camera_macro>
   <xacro:if value="$(arg enable_ground_truth)">
     <xacro:ground_truth_imu_and_odometry namespace="${namespace}" parent_link="${namespace}/base_link" />
   </xacro:if>
-
   <xacro:if value="$(arg enable_logging)">
     <!-- Instantiate a logger -->
-    <xacro:bag_plugin_macro
-      namespace="${namespace}"
-      bag_file="$(arg log_file)"
-      rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}" 
-      wait_to_record_bag="$(arg wait_to_record_bag)" />
+    <xacro:bag_plugin_macro namespace="${namespace}" bag_file="$(arg log_file)" rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}" wait_to_record_bag="$(arg wait_to_record_bag)" />
   </xacro:if>
-
 </robot>
-
