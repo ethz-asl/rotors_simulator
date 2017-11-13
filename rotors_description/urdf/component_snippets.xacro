@@ -120,7 +120,7 @@
   <!-- Camera joint macro - just the joints, links, and collisions for a single
        camera. -->
   <xacro:macro name="camera_joint_macro"
-    params="namespace parent_link camera_suffix enable_visual *origin *geometry" >
+    params="namespace parent_link camera_suffix enable_visual *origin **geometry" >
     <link name="${namespace}/camera_${camera_suffix}_link">
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0" />
