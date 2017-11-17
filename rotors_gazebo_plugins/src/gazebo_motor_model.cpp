@@ -259,7 +259,10 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
              "raising the rotor_velocity_slowdown_sim_ param.\n";
   }
   double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
-  double force = real_motor_velocity * real_motor_velocity * motor_constant_;
+  //get the sign of the rotation direction
+  int real_motor_velocity_sign = (real_motor_velocity > 0) - (real_motor_velocity < 0);
+  //assuming symmetric propeller
+  double force = turning_direction_ * real_motor_velocity_sign * real_motor_velocity * real_motor_velocity * motor_constant_;
 
 // TODO(ff): remove this?
 // Code from sitl_gazebo version of GazeboMotorModel.
