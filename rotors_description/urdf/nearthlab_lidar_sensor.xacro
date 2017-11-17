@@ -23,10 +23,13 @@
       <parent link="${parent_link}" />
       <child link="${namespace}/lidar_link" />
     </joint>
-    <gazebo>
+    <gazebo reference="${namespace}/lidar_link">
       <!-- <sensor name="laser" type="ray"> -->
       <sensor type="ray" name="${namespace}_lidar">
         <pose>0 0 0 0 -1.570896 0</pose>
+        <always_on>1</always_on>
+        <update_rate>20</update_rate>
+        <visualize>true</visualize>
         <ray>
           <scan>
             <horizontal>
@@ -47,11 +50,11 @@
             <stddev>0.01</stddev>
           </noise>
         </ray>
-        <plugin name="LaserPlugin" filename="librotors_gazebo_lidar_plugin.so"/>
-        <robotNamespace></robotNamespace>
-        <always_on>1</always_on>
-        <update_rate>20</update_rate>
-        <visualize>true</visualize>
+        <plugin filename="librotors_gazebo_lidar_plugin.so" name="rotors_gazebo_lidar_plugin">
+          <robotNamespace>${namespace}</robotNamespace>
+          <linkName>${namespace}/lidar_link</linkName>
+          <lidarTopic>lidar</lidarTopic>
+        </plugin>
       </sensor>
     </gazebo>
 

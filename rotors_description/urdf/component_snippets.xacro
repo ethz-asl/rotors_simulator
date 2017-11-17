@@ -52,7 +52,8 @@
       <xacro:if value="${enable_visual}">
         <visual>
           <!-- <origin xyz="0 0 0" rpy="0 ${pi/2} 0" /> -->
-          <origin xyz="0 0 0" rpy="0 ${pi} 0" />
+          <!-- <origin xyz="0 0 0" rpy="0 ${pi} 0" /> -->
+          <origin xyz="0.01 0 0" rpy="0 ${pi/2} 0" />
           <geometry>
             <xacro:insert_block name="geometry" />
           </geometry>

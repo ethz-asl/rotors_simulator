@@ -9,7 +9,7 @@
         <inertia ixx="2.1733e-6" ixy="0" ixz="0" iyy="2.1733e-6" iyz="0" izz="1.8e-7" />
       </inertial>
       <visual>
-        <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" />
+        <origin xyz="0 0 0" rpy="${pi/2} ${pi/2} ${pi/2}" />
         <geometry>
           <xacro:insert_block name="geometry" />
         </geometry>

@@ -39,23 +39,19 @@
   <xacro:default_gps namespace="${namespace}" parent_link="${namespace}/base_link" />
   <xacro:default_magnetometer namespace="${namespace}" parent_link="${namespace}/base_link" />
   <xacro:default_pressure_sensor namespace="${namespace}" parent_link="${namespace}/base_link" />
-  <!-- <xacro:camera_macro namespace="${namespace}" parent_link="${namespace}/base_link" camera_suffix="${namespace}/camera_suffix" frame_rate="${namespace}/frame_rate" horizontal_fov="1.3962634" image_width="752" image_height="480" image_format="L8" min_distance="0.02" max_distance="30" noise_mean="0.0" noise_stddev="0.007" enable_visual="true">
-    <mesh filename="package://rotors_description/meshes/vi_camera.dae" scale="1 1 1" />
-    <origin xyz="0 0 -0.035" rpy="0 0 0" />
-  </xacro:camera_macro> -->
   <xacro:camera_joint_macro namespace="${namespace}" parent_link="${namespace}/base_link" camera_suffix="${namespace}/camera_joint" enable_visual="true">
     <origin xyz="0 0 -0.015" rpy="0 0 0" />
     <geometry>
       <cylinder length="0.02" radius="0.006" />
     </geometry>
   </xacro:camera_joint_macro>
-  <!--LIDAR Sensor Added by bkjung-->
-  <!-- <xacro:lidar_macro namespace="${namespace}" parent_link="${namespace}/base_link">
+
+  <!-- Camera Sensor-->
+  <xacro:camera_macro namespace="${namespace}" parent_link="${namespace}/base_link" camera_suffix="${namespace}/camera_suffix" frame_rate="${namespace}/frame_rate" horizontal_fov="1.3962634" image_width="752" image_height="480" image_format="L8" min_distance="0.02" max_distance="30" noise_mean="0.0" noise_stddev="0.007" enable_visual="true">
+    <mesh filename="package://rotors_description/meshes/vi_camera.dae" scale="1 1 1" />
     <origin xyz="0 0 -0.035" rpy="0 0 0" />
-    <geometry>
-      <cylinder length="0.02" radius="0.015" />
-    </geometry>
-  </xacro:lidar_macro> -->
+  </xacro:camera_macro>
+  
   <xacro:if value="$(arg enable_ground_truth)">
     <xacro:ground_truth_imu_and_odometry namespace="${namespace}" parent_link="${namespace}/base_link" />
   </xacro:if>
@@ -63,11 +59,20 @@
     <!-- Instantiate a logger -->
     <xacro:bag_plugin_macro namespace="${namespace}" bag_file="$(arg log_file)" rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}" wait_to_record_bag="$(arg wait_to_record_bag)" />
   </xacro:if>
+
+  <!--LIDAR Sensor-->
+  <xacro:lidar_macro namespace="${namespace}" parent_link="${namespace}/base_link">
+    <origin xyz="0 0 -0.035" rpy="0 0 0" />
+    <geometry>
+      <cylinder length="0.02" radius="0.015" />
+    </geometry>
+  </xacro:lidar_macro>
    
-  <xacro:payload_macro namespace="${namespace}" parent_link="${namespace}/base_link" >
-    <origin xyz="0 0 -0.07" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://rotors_description/meshes/nearthlab_payload.dae" scale="0.0005 0.0005 0.0005" />
-      </geometry>
-  </xacro:payload_macro>
+  <!-- Nearthlab Payload -->
+  <!-- <xacro:payload_macro namespace="${namespace}" parent_link="${namespace}/base_link" > -->
+    <!-- <origin xyz="0 0 -0.06" rpy="0 0 0" /> -->
+      <!-- <geometry> -->
+        <!-- <mesh filename="package://rotors_description/meshes/nearthlab_payload.dae" scale="0.0004 0.0004 0.0004" /> -->
+      <!-- </geometry> -->
+  <!-- </xacro:payload_macro> -->
 </robot>
