@@ -22,6 +22,7 @@
   xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
   <xacro:include filename="$(find rotors_description)/urdf/nearthlab_lidar_sensor.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/nearthlab_payload.xacro" />
   <!-- Instantiate firefly "mechanics" -->
   <xacro:include filename="$(find rotors_description)/urdf/firefly.xacro" />
   <!-- Instantiate a controller. -->
@@ -49,13 +50,12 @@
     </geometry>
   </xacro:camera_joint_macro>
   <!--LIDAR Sensor Added by bkjung-->
-  <xacro:lidar_macro namespace="${namespace}" parent_link="${namespace}/base_link">
-    <!-- <origin xyz="0 0 -0.07" rpy="0 0 0" /> -->
+  <!-- <xacro:lidar_macro namespace="${namespace}" parent_link="${namespace}/base_link">
     <origin xyz="0 0 -0.035" rpy="0 0 0" />
     <geometry>
       <cylinder length="0.02" radius="0.015" />
     </geometry>
-  </xacro:lidar_macro>
+  </xacro:lidar_macro> -->
   <xacro:if value="$(arg enable_ground_truth)">
     <xacro:ground_truth_imu_and_odometry namespace="${namespace}" parent_link="${namespace}/base_link" />
   </xacro:if>
@@ -63,5 +63,11 @@
     <!-- Instantiate a logger -->
     <xacro:bag_plugin_macro namespace="${namespace}" bag_file="$(arg log_file)" rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}" wait_to_record_bag="$(arg wait_to_record_bag)" />
   </xacro:if>
-
+  <!--Nearthlab Payload-->
+  <xacro:payload_macro namespace="${namespace}" parent_link="${namespace}/base_link" />
+    <origin xyz="0 0 -0.035" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/nearthlab_payload.dae" scale="1 1 1" />
+      </geometry>
+  </xacro:payload_macro>
 </robot>
