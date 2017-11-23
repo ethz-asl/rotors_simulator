@@ -28,11 +28,11 @@
   <xacro:include filename="$(find rotors_description)/urdf/dextar_manipulator.xacro" />
 
   <!-- <link name="world"/> -->
-  <!-- Mount a closed chain arm on the belly of the Firefly. -->
+  <!-- Mount a closed chain arm on the belly of the neo11. -->
   <xacro:dextar_manipulator_macro
     namespace="${namespace}/dextar_manipulator"
     parent_link="${namespace}/base_link">
-    <origin xyz="0 0 0.06" rpy="0.0 0.0 -1.57" />
+    <origin xyz="0 0 0.12" rpy="0.0 0.0 1.57" />
   </xacro:dextar_manipulator_macro>
 
 </robot>

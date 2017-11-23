@@ -1,5 +1,5 @@
 <launch>
-  <arg name="mav_name" default="firefly"/>
+  <arg name="mav_name" default="neo11"/>
   <arg name="enable_logging" default="false" />
   <arg name="enable_ground_truth" default="true" />
   <arg name="world_name" default="empty_aerial_manipulation"/>

@@ -4,10 +4,13 @@
 
   <xacro:property name="link_radius" value="0.02"/>
 
-  <xacro:property name="link1_length" value="0.296"/>
-  <xacro:property name="link2_length" value="0.5"/>
+  <xacro:property name="link1_length" value="0.315"/>
+  <xacro:property name="link2_length" value="0.455"/>
 
-  <xacro:property name="link0_center_to_center_length" value="0.1"/>
+  <xacro:property name="link0_center_to_center_length" value="0.08"/>
+
+  <xacro:property name="joint_1_offset" value="2.70"/>
+  <xacro:property name="joint_2_offset" value="0.44"/>
 
   <xacro:property name="link0_frame">
     <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -65,14 +68,14 @@
           </link>
 
           <link name="${namespace}/link1_1">
-            <!-- <collision>
-              <origin xyz="0 0 0" rpy="0 0 0"/>
+            <collision>
+              <origin xyz="0 0 0" rpy="3.14 0 0"/>
               <geometry>
                 <mesh filename="package://rotors_description/meshes/dextar_manipulator/link1_1.dae"/>
               </geometry>
-            </collision> -->
+            </collision>
             <visual>
-              <origin xyz="0 0 0" rpy="0 0 0"/>
+              <origin xyz="0 0 0" rpy="3.14 0 0"/>
               <geometry>
                 <mesh filename="package://rotors_description/meshes/dextar_manipulator/link1_1.dae"/>
               </geometry>
@@ -84,14 +87,14 @@
           </link>
 
           <link name="${namespace}/link1_2">
-            <!-- <collision>
-              <origin xyz="0 0 0" rpy="0 0 0"/>
+            <collision>
+              <origin xyz="0 0 0" rpy="3.14 0 0"/>
               <geometry>
                 <mesh filename="package://rotors_description/meshes/dextar_manipulator/link1_2.dae"/>
               </geometry>
-            </collision> -->
+            </collision>
             <visual>
-              <origin xyz="0 0 0" rpy="0 0 0"/>
+              <origin xyz="0 0 0" rpy="3.14 0 0"/>
               <geometry>
                 <mesh filename="package://rotors_description/meshes/dextar_manipulator/link1_2.dae"/>
               </geometry>
@@ -143,55 +146,55 @@
           <!-- Define joints -->
           <xacro:revolute_joint_macro
             namespace="${namespace}"
-            joint_name="delta_manipulator/joint_1"
+            joint_name="dextar_manipulator/joint_1"
             parent_link="${namespace}/manipulator_base_link"
             child_link="${namespace}/link1_1"
-            axis="0 0 -1"
+            axis="0 0 1"
             friction="0"
             damping="0.1">
-            <origin xyz="${-link0_center_to_center_length/2} 0 -0.005" rpy="0 0 0"/>
+            <origin xyz="${-link0_center_to_center_length/2} 0 0" rpy="0 0 ${joint_1_offset}"/>
           </xacro:revolute_joint_macro>
 
           <xacro:revolute_joint_macro
             namespace="${namespace}"
-            joint_name="delta_manipulator/joint_2"
+            joint_name="dextar_manipulator/joint_2"
             parent_link="${namespace}/manipulator_base_link"
             child_link="${namespace}/link1_2"
-            axis="0 0 -1"
+            axis="0 0 1"
             friction="0"
             damping="0.1">
-            <origin xyz="${link0_center_to_center_length/2} 0 -0.005" rpy="0 0 0"/>
+            <origin xyz="${link0_center_to_center_length/2} 0 0" rpy="0 0 ${joint_2_offset}"/>
           </xacro:revolute_joint_macro>
 
           <xacro:revolute_joint_macro
             namespace="${namespace}"
-            joint_name="delta_manipulator/joint_3"
+            joint_name="dextar_manipulator/joint_3"
             parent_link="${namespace}/link1_1"
             child_link="${namespace}/link2_1"
-            axis="0 0 -1"
+            axis="0 0 1"
             friction="0"
             damping="0.1">
-            <origin xyz="${link1_length} 0 -0.0145" rpy="0 0 0"/>
+            <origin xyz="${link1_length} 0 0.016" rpy="0 0 0"/>
           </xacro:revolute_joint_macro>
 
           <xacro:revolute_joint_macro
             namespace="${namespace}"
-            joint_name="delta_manipulator/joint_4"
+            joint_name="dextar_manipulator/joint_4"
             parent_link="${namespace}/link1_2"
             child_link="${namespace}/link2_2"
-            axis="0 0 -1"
+            axis="0 0 1"
             friction="0"
             damping="0.1">
-            <origin xyz="${link1_length} 0 -0.0145" rpy="0 0 0"/>
+            <origin xyz="${link1_length} 0 0.016" rpy="0 0 0"/>
           </xacro:revolute_joint_macro>
 
           <xacro:gazebo_revolute_joint_macro
             namespace="${namespace}"
-            joint_name="delta_manipulator/joint_5"
+            joint_name="dextar_manipulator/joint_5"
             parent_link="${namespace}/link2_1"
             child_link="${namespace}/link2_2"
             pose="${link2_length} 0 0 0 0 0"
-            axis="0 0 -1"
+            axis="0 0 1"
             friction="0"
             damping="0.1"
             spring_reference="0"
@@ -215,7 +218,7 @@
           namespace="${namespace}"
           motor_name="X5-4/M1"
           parent_link="${namespace}/manipulator_base_link"
-          actuated_joint="delta_manipulator/joint_1"
+          actuated_joint="dextar_manipulator/joint_1"
           maxTorque="2"
           noLoadSpeed="0.11"
           Kp="30.0"
@@ -235,7 +238,7 @@
           enable_visual="true"
           visual_scale="1"
           color="Red">
-          <origin xyz="${link0_center_to_center_length/2} 0 0" rpy="3.14 0 1.57"/>
+          <origin xyz="${link0_center_to_center_length/2} 0 0" rpy="0 0 -1.57"/>
           <xacro:insert_block name="generic_servo_inertial"/>
         </xacro:hebi_actuator_plugin>
 
@@ -243,7 +246,7 @@
           namespace="${namespace}"
           motor_name="X5-4/M2"
           parent_link="${namespace}/manipulator_base_link"
-          actuated_joint="delta_manipulator/joint_2"
+          actuated_joint="dextar_manipulator/joint_2"
           maxTorque="2"
           noLoadSpeed="0.11"
           Kp="30.0"
@@ -263,7 +266,7 @@
           enable_visual="true"
           visual_scale="1"
           color="Red">
-          <origin xyz="${-link0_center_to_center_length/2} 0 0" rpy="3.14 0 1.57"/>
+          <origin xyz="${-link0_center_to_center_length/2} 0 0" rpy="0 0 -1.57"/>
           <xacro:insert_block name="generic_servo_inertial"/>
         </xacro:hebi_actuator_plugin>
 
@@ -273,13 +276,13 @@
           <plugin name="initial_configuration" filename="librotors_gazebo_robot_initial_configuration_plugin.so">
             <robotNamespace>${namespace}</robotNamespace>
             <initial_configuration>
-              <config joint_name="delta_manipulator/joint_1"  initial_position="-2.7342"/>
-              <config joint_name="delta_manipulator/joint_3"  initial_position=" 1.8625"/>
-              <config joint_name="delta_manipulator/joint_2" initial_position="-0.4074"/>
-              <config joint_name="delta_manipulator/joint_4" initial_position="-1.8625"/>
+              <config joint_name="dextar_manipulator/joint_1"  initial_position=" 0.0"/>
+              <config joint_name="dextar_manipulator/joint_3"  initial_position="-1.8806"/>
+              <config joint_name="dextar_manipulator/joint_2"  initial_position=" 0.0"/>
+              <config joint_name="dextar_manipulator/joint_4"  initial_position="1.8806"/>
             </initial_configuration>
             <loop_closure_joints>
-              <joint joint_name="delta_manipulator/joint_5"/>
+              <joint joint_name="dextar_manipulator/joint_5"/>
             </loop_closure_joints>
           </plugin>
         </gazebo>
