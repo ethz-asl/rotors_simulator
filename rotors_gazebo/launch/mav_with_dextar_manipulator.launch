@@ -37,16 +37,14 @@
 
     <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-    <!-- <node name="delta_manipulator_joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" clear_params="true">
+    <node name="dextar_manipulator_joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" clear_params="true">
       <param name="rate" value="1000"/>
       <rosparam param="source_list">
-        [/neo11/delta_manipulator/joint_0_actuator,
-        /neo11/delta_manipulator/joint_1_actuator,
-        /neo11/delta_manipulator/joint_2_actuator,
-        /neo11/delta_manipulator/end_effector_joint_actuator]
+        [/neo11/dextar_manipulator/X54/M1,
+        /neo11/dextar_manipulator/X54/M2]
       </rosparam>
-      <remap from="joint_states" to="delta_manipulator/joint_states"/>
-    </node> -->
+      <remap from="joint_states" to="dextar_manipulator/joint_states"/>
+    </node>
 
   </group>
 </launch>

@@ -201,7 +201,8 @@ Actuators Macros:
   <gazebo reference="${namespace}/${motor_name}">
     <material>Gazebo/${color}</material>
   </gazebo>
-  <joint name="${namespace}/${motor_name}" type="revolute">
+  <!-- name does not contain namespace to match hardware -->
+  <joint name="${motor_name}" type="revolute">
     <parent link="${parent_link}"/>
     <child link="${namespace}/${motor_name}"/>
     <xacro:insert_block name="origin" />
