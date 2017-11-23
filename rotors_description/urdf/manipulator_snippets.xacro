@@ -212,7 +212,7 @@ Actuators Macros:
       <robotNamespace>${namespace}</robotNamespace>
       <jointName>${actuated_joint}</jointName>
       <motorName>${motor_name}</motorName>
-      <jointStatePubTopic>${actuated_joint}</jointStatePubTopic>
+      <jointStatePubTopic>${motor_name}</jointStatePubTopic>
       <position_kp>0.2</position_kp>
       <velocity_kp>0.1</velocity_kp>
       <effort_kp>0.0</effort_kp>
