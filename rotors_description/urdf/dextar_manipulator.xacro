@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find rotors_description)/urdf/manipulator_snippets.xacro" />
 
-  <xacro:property name="link_radius" value="0.02"/>
+  <xacro:property name="link_radius" value="0.01"/>
 
   <xacro:property name="link1_length" value="0.315"/>
   <xacro:property name="link2_length" value="0.455"/>
@@ -69,7 +69,7 @@
           </link>
 
           <link name="${namespace}/link1_1">
-            <collision>
+            <!-- <collision>
               <origin xyz="0 0 0" rpy="3.14 0 0"/>
               <geometry>
                 <mesh filename="package://rotors_description/meshes/dextar_manipulator/link1_1.dae"/>
@@ -80,6 +80,20 @@
               <geometry>
                 <mesh filename="package://rotors_description/meshes/dextar_manipulator/link1_1.dae"/>
               </geometry>
+            </visual> -->
+            <collision>
+              <origin rpy="0 1.57 0" xyz="${link1_length/2} 0 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link1_length}" />
+              </geometry>
+      	       <material name="white"/>
+            </collision>
+            <visual>
+              <origin rpy="0 1.57 0" xyz="${link1_length/2} 0 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link1_length}" />
+              </geometry>
+      	       <material name="white"/>
             </visual>
             <inertial>
               <xacro:insert_block name="link1_frame"/>
@@ -88,7 +102,7 @@
           </link>
 
           <link name="${namespace}/link1_2">
-            <collision>
+            <!-- <collision>
               <origin xyz="0 0 0" rpy="3.14 0 0"/>
               <geometry>
                 <mesh filename="package://rotors_description/meshes/dextar_manipulator/link1_2.dae"/>
@@ -99,6 +113,20 @@
               <geometry>
                 <mesh filename="package://rotors_description/meshes/dextar_manipulator/link1_2.dae"/>
               </geometry>
+            </visual> -->
+            <collision>
+              <origin rpy="0 1.57 0" xyz="${link1_length/2} 0 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link1_length}" />
+              </geometry>
+      	       <material name="white"/>
+            </collision>
+            <visual>
+              <origin rpy="0 1.57 0" xyz="${link1_length/2} 0 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link1_length}" />
+              </geometry>
+      	       <material name="white"/>
             </visual>
             <inertial>
               <xacro:insert_block name="link1_frame"/>
@@ -107,7 +135,7 @@
           </link>
 
           <link name="${namespace}/link2_1">
-            <collision>
+            <!-- <collision>
               <origin xyz="0 0 0" rpy="0 0 0"/>
               <geometry>
                 <mesh filename="package://rotors_description/meshes/dextar_manipulator/link2_1.dae"/>
@@ -118,6 +146,20 @@
               <geometry>
                 <mesh filename="package://rotors_description/meshes/dextar_manipulator/link2_1.dae"/>
               </geometry>
+            </visual> -->
+            <collision>
+              <origin rpy="0 1.57 0" xyz="${link1_length/2} 0 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link2_length}" />
+              </geometry>
+      	       <material name="white"/>
+            </collision>
+            <visual>
+              <origin rpy="0 1.57 0" xyz="${link2_length/2} 0 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link2_length}" />
+              </geometry>
+      	       <material name="white"/>
             </visual>
             <inertial>
               <xacro:insert_block name="link2_frame"/>
@@ -126,7 +168,7 @@
           </link>
 
           <link name="${namespace}/link2_2">
-            <collision>
+            <!-- <collision>
               <origin xyz="0 0 0" rpy="0 0 0"/>
               <geometry>
                 <mesh filename="package://rotors_description/meshes/dextar_manipulator/link2_2.dae"/>
@@ -137,6 +179,20 @@
               <geometry>
                 <mesh filename="package://rotors_description/meshes/dextar_manipulator/link2_2.dae"/>
               </geometry>
+            </visual> -->
+            <collision>
+              <origin rpy="0 1.57 0" xyz="${link1_length/2} 0 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link2_length}" />
+              </geometry>
+      	       <material name="white"/>
+            </collision>
+            <visual>
+              <origin rpy="0 1.57 0" xyz="${link2_length/2} 0 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link2_length}" />
+              </geometry>
+      	       <material name="white"/>
             </visual>
             <inertial>
               <xacro:insert_block name="link2_frame"/>
@@ -300,6 +356,33 @@
             <rotational_damper_constant>1 1 1</rotational_damper_constant>
           </plugin>
         </gazebo> -->
+
+        <!-- Instantiate force sensor on end-effector -->
+      	<xacro:force_sensor_plugin_macro
+      		namespace="${namespace}"
+      		force_sensor_suffix="ee"
+      		parent_link="${namespace}/link2_2"
+      		force_sensor_topic="force_sensor"
+      		force_sensor_truth_topic="force_sensor_truth"
+      		wrench_vector_pub_topic="wrench_vector"
+      		parent_frame_id="world"
+      		reference_frame_id="world"
+      		mass_force_sensor="0.001"
+      		lin_force_meas_enabled="true"
+      		torque_meas_enabled="false"
+      		disp_wrench_vector="true"
+      		measurement_divisor="1"
+      		measurement_delay="0"
+      		unknown_delay="0.0"
+      		cutoff_frequency="10.0"
+      		noise_normal_linear_force="0 0 0"
+      		noise_normal_torque="0 0 0"
+      		noise_uniform_linear_force="0 0 0"
+      		noise_uniform_torque="0 0 0" >
+      		<inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      		<!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+      		<origin xyz="${link2_length} 0.0 0.0" rpy="1.57 0.0 ${-joint_34_offset-joint_2_offset}"/>
+      	</xacro:force_sensor_plugin_macro>
 
       </xacro:macro>
 
