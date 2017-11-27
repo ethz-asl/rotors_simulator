@@ -11,6 +11,7 @@
 
   <xacro:property name="joint_1_offset" value="2.70"/>
   <xacro:property name="joint_2_offset" value="0.44"/>
+  <xacro:property name="joint_34_offset" value="1.9248"/>
 
   <xacro:property name="link0_frame">
     <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -277,9 +278,9 @@
             <robotNamespace>${namespace}</robotNamespace>
             <initial_configuration>
               <config joint_name="${namespace}/joint_1"  initial_position=" 0.0"/>
-              <config joint_name="${namespace}/joint_3"  initial_position="-1.8806"/>
+              <config joint_name="${namespace}/joint_3"  initial_position="${-joint_34_offset}"/>
               <config joint_name="${namespace}/joint_2"  initial_position=" 0.0"/>
-              <config joint_name="${namespace}/joint_4"  initial_position="1.8806"/>
+              <config joint_name="${namespace}/joint_4"  initial_position="${ joint_34_offset}"/>
             </initial_configuration>
             <loop_closure_joints>
               <joint joint_name="${namespace}/joint_5"/>
