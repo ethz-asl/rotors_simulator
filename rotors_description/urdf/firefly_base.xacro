@@ -69,10 +69,10 @@
   </xacro:lidar_macro>
    
   <!-- Nearthlab Payload -->
-  <!-- <xacro:payload_macro namespace="${namespace}" parent_link="${namespace}/base_link" > -->
-    <!-- <origin xyz="0 0 -0.06" rpy="0 0 0" /> -->
-      <!-- <geometry> -->
-        <!-- <mesh filename="package://rotors_description/meshes/nearthlab_payload.dae" scale="0.0004 0.0004 0.0004" /> -->
-      <!-- </geometry> -->
-  <!-- </xacro:payload_macro> -->
+  <xacro:payload_macro namespace="${namespace}" parent_link="${namespace}/base_link" >
+    <origin xyz="0 0 -0.06" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/nearthlab_payload.dae" scale="0.0004 0.0004 0.0004" />
+      </geometry>
+  </xacro:payload_macro>
 </robot>
