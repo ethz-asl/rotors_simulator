@@ -201,7 +201,8 @@ Actuators Macros:
   <gazebo reference="${namespace}/${motor_name}">
     <material>Gazebo/${color}</material>
   </gazebo>
-  <joint name="${namespace}/${motor_name}" type="revolute">
+  <!-- name does not contain namespace to match hardware -->
+  <joint name="${motor_name}" type="revolute">
     <parent link="${parent_link}"/>
     <child link="${namespace}/${motor_name}"/>
     <xacro:insert_block name="origin" />
@@ -212,11 +213,11 @@ Actuators Macros:
       <robotNamespace>${namespace}</robotNamespace>
       <jointName>${actuated_joint}</jointName>
       <motorName>${motor_name}</motorName>
-      <jointStatePubTopic>${actuated_joint}</jointStatePubTopic>
+      <jointStatePubTopic>${motor_name}</jointStatePubTopic>
       <position_kp>0.2</position_kp>
       <velocity_kp>0.1</velocity_kp>
-      <effort_kp>0.0</effort_kp>
-      <effort_kd>0.0</effort_kd>
+      <effort_kp>0.04</effort_kp>
+      <effort_kd>0.005</effort_kd>
       <effort_output_lp>0.5</effort_output_lp>
       <effort_D_on_error>false</effort_D_on_error>
     </plugin>

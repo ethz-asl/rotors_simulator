@@ -210,6 +210,10 @@ void GazeboHebiSEA::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   getSdfParam<std::string>(_sdf, "commandSubTopic", command_sub_topic_, command_sub_topic_);
   getSdfParam<std::string>(_sdf, "jointStatePubTopic", joint_state_pub_topic_,
                            joint_state_pub_topic_);
+  // erase all dashes from topic name
+  joint_state_pub_topic_.erase(
+      remove(joint_state_pub_topic_.begin(), joint_state_pub_topic_.end(), '-'),
+      joint_state_pub_topic_.end() );
 
   getSdfParam<double>(_sdf, "noiseNormalAngle", noise_normal_angle, 0.0);
   getSdfParam<double>(_sdf, "noiseNormalAngularVelocity", noise_normal_velocity, 0.0);
@@ -260,7 +264,7 @@ void GazeboHebiSEA::OnUpdate(const common::UpdateInfo& _info)
     joint_state.header.seq = motor_sequence_++;
     joint_state.header.stamp.sec = now.sec + ros::Duration(unknown_delay_).sec;
     joint_state.header.stamp.nsec = now.nsec + ros::Duration(unknown_delay_).nsec;
-    joint_state.name.push_back(joint_name_);
+    joint_state.name.push_back(motor_name_);
     joint_state.position.push_back(joint_->GetAngle(0).Radian());
     joint_state.velocity.push_back(joint_->GetVelocity(0));
     joint_state.effort.push_back(joint_->GetForce(0));
@@ -280,13 +284,13 @@ void GazeboHebiSEA::OnUpdate(const common::UpdateInfo& _info)
 void GazeboHebiSEA::CommandCallback(const trajectory_msgs::JointTrajectoryPtr& msg)
 {
   for (int i = 0; i < msg->joint_names.size(); i++) {
-    if (msg->joint_names.at(i) == joint_name_) {
+    if (msg->joint_names.at(i) == motor_name_) {
       if (msg->points.size() < 1) {
-        gzerr << "[gazebo_hebi_sea: " << joint_name_
+        gzerr << "[gazebo_hebi_sea: " << motor_name_
               << "] Number of points in command joint trajectory is wrong.\n";
         return;
       } else if (msg->points.size() > 1) {
-        gzwarn << "[gazebo_hebi_sea: " << joint_name_
+        gzwarn << "[gazebo_hebi_sea: " << motor_name_
                << "] Number of points referenecs is > 1, will ignore the rest of queue\n.";
       }
 
@@ -346,9 +350,9 @@ void GazeboHebiSEA::RunController()
                                                    current_velocity);
       double pwm_effort_loop = effort_pid_.run(sampling_time_, effort_reference_, current_effort);
 
-      std::cout << "pwm_position_loop: " << pwm_position_loop << std::endl;
-      std::cout << "pwm_velocity_loop: " << pwm_velocity_loop << std::endl;
-      std::cout << "pwm_effort_loop: " <<  pwm_effort_loop << std::endl;
+      // std::cout << "pwm_position_loop: " << pwm_position_loop << std::endl;
+      // std::cout << "pwm_velocity_loop: " << pwm_velocity_loop << std::endl;
+      // std::cout << "pwm_effort_loop: " <<  pwm_effort_loop << std::endl;
 
       output_pwm_ = pwm_position_loop + pwm_velocity_loop + pwm_effort_loop;
       break;

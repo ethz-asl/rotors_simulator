@@ -161,7 +161,7 @@ class PIDController
       derivative = (error - previous_error_) / dt;
     } else {
       derivative = (measurement - previous_measurment_) / dt;
-      std::cout << "derivative: " << derivative << std::endl;
+      // std::cout << "derivative: " << derivative << std::endl;
     }
     derivative = limit(derivative, 100.0, -100.0);
     double Dout = parameters_.k_d_ * derivative;
