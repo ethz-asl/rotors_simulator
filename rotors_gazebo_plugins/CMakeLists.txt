@@ -317,10 +317,10 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
   else()
 
     message(STATUS "MAVLINK_HEADER_DIR not provided, falling back to looking at default paths...")
-    # If ROS indigo is installed, we should be able to find them at the path below
-    if(EXISTS /opt/ros/indigo/include/mavlink/v1.0/)
-      message(STATUS "Found MAVLink headers at '/opt/ros/indigo/include/mavlink/v1.0/'.")
-      include_directories("/opt/ros/indigo/include/mavlink/v1.0/")
+    # If ROS is installed, we should be able to find them at the path below
+    if(EXISTS /opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/)
+      message(STATUS "Found MAVLink headers at '/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/'.")
+      include_directories("/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/")
       set(MAVLINK_HEADERS_FOUND TRUE)
     endif()
 
