@@ -8,14 +8,18 @@
         <mass value="0.01" />
         <inertia ixx="2.1733e-6" ixy="0" ixz="0" iyy="2.1733e-6" iyz="0" izz="1.8e-7" />
       </inertial>
-      <visual>
-        <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
+      <visual name="visual">
+        <origin xyz="0 0 -0.035" rpy="0 ${pi/2} 0" />
+        <!-- <geometry>
+          <cylinder length="0.02" radius="0.015" />
+        </geometry> -->
         <geometry>
           <xacro:insert_block name="geometry" />
         </geometry>
-        <material name="black">
-          <!-- <script>Gazebo/Black</script> -->
-        </material>
+        <!-- <material>
+          <script>Gazebo/Black</script>
+        </material> -->
+        <material name="black" />
       </visual>
     </link>
     <joint name="${namespace}_lidar_joint" type="fixed">
@@ -23,13 +27,9 @@
       <parent link="${parent_link}" />
       <child link="${namespace}/lidar_link" />
     </joint>
-    <gazebo reference="${namespace}/lidar_link">
-      <!-- <sensor name="laser" type="ray"> -->
+    <gazebo>
       <sensor type="ray" name="${namespace}_lidar">
         <pose>0 0 0 0 -1.570896 0</pose>
-        <always_on>1</always_on>
-        <update_rate>20</update_rate>
-        <visualize>true</visualize>
         <ray>
           <scan>
             <horizontal>
@@ -50,13 +50,12 @@
             <stddev>0.01</stddev>
           </noise>
         </ray>
-        <plugin filename="librotors_gazebo_lidar_plugin.so" name="rotors_gazebo_lidar_plugin">
-          <robotNamespace>${namespace}</robotNamespace>
-          <linkName>${namespace}/lidar_link</linkName>
-          <lidarTopic>lidar</lidarTopic>
-        </plugin>
+	      <plugin name="LaserPlugin" filename="librotors_gazebo_lidar_plugin.so"/>
+		    <robotNamespace></robotNamespace>
+        <always_on>1</always_on>
+        <update_rate>20</update_rate>
+        <visualize>true</visualize>
       </sensor>
     </gazebo>
-
   </xacro:macro>
 </robot>

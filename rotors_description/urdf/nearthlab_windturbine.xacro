@@ -1,29 +1,29 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:property name="pi" value="3.14159265359" />
-  <xacro:macro name="payload_macro" params="namespace parent_link *origin **geometry">
-    <link name="${namespace}/payload_link">
+  <xacro:macro name="windturbine_macro" params="namespace parent_link *origin **geometry">
+    <link name="${namespace}/windturbine_link">
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass value="0.01" />
         <inertia ixx="2.1733e-6" ixy="0" ixz="0" iyy="2.1733e-6" iyz="0" izz="1.8e-7" />
       </inertial>
-      <visual name="visual">
-        <origin xyz="0 0 0" rpy="${pi/2} 0 ${pi/2}" />
+      <visual>
+        <origin xyz="3 0 0" rpy="0 0 0" />
         <geometry>
           <xacro:insert_block name="geometry" />
         </geometry>
-        <material name="black" />
+        <material name="white" />
       </visual>
     </link>
-    <joint name="${namespace}_payload_joint" type="fixed">
+    <joint name="${namespace}_windturbine_joint" type="fixed">
       <xacro:insert_block name="origin" />
       <parent link="${parent_link}" />
-      <child link="${namespace}/payload_link" />
+      <child link="${namespace}/windturbine_link" />
     </joint>
     <gazebo>
       <!-- <sensor name="laser" type="ray"> -->
-      <sensor type="ray" name="${namespace}_payload">
+      <sensor type="ray" name="${namespace}_windturbine">
         <pose>0 0 0 0 -1.570896 0</pose>
         <ray>
           <scan>

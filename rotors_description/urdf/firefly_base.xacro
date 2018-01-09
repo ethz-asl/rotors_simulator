@@ -23,6 +23,7 @@
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
   <xacro:include filename="$(find rotors_description)/urdf/nearthlab_lidar_sensor.xacro" />
   <xacro:include filename="$(find rotors_description)/urdf/nearthlab_payload.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/nearthlab_windturbine.xacro" />
   <!-- Instantiate firefly "mechanics" -->
   <xacro:include filename="$(find rotors_description)/urdf/firefly.xacro" />
   <!-- Instantiate a controller. -->
@@ -62,17 +63,27 @@
 
   <!--LIDAR Sensor-->
   <xacro:lidar_macro namespace="${namespace}" parent_link="${namespace}/base_link">
-    <origin xyz="0 0 -0.035" rpy="0 0 0" />
+    <!-- <origin xyz="0 0 -0.035" rpy="0 0 0" /> -->
+    <origin xyz="0 0 0" rpy="0 0 0" />
     <geometry>
       <cylinder length="0.02" radius="0.015" />
     </geometry>
   </xacro:lidar_macro>
    
   <!-- Nearthlab Payload -->
-  <xacro:payload_macro namespace="${namespace}" parent_link="${namespace}/base_link" >
+  <!-- <xacro:payload_macro namespace="${namespace}" parent_link="${namespace}/base_link" >
     <origin xyz="0 0 -0.06" rpy="0 0 0" />
       <geometry>
         <mesh filename="package://rotors_description/meshes/nearthlab_payload.dae" scale="0.0004 0.0004 0.0004" />
       </geometry>
-  </xacro:payload_macro>
+  </xacro:payload_macro> -->
+
+  <!-- Nearthlab Windturbine -->
+  <xacro:windturbine_macro namespace="${namespace}" parent_link="${namespace}/base_link" >
+    <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/nearthlab_windturbine_A_shape.dae" scale="0.05 0.05 0.05" />
+      </geometry>
+  </xacro:windturbine_macro>
+  
 </robot>
