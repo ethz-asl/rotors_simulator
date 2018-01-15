@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/ot/catkin_ws_velodyne_simulator/install/setup.sh

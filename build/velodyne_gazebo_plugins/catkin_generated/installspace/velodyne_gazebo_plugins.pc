@@ -1,0 +1,8 @@
+prefix=/home/ot/catkin_ws_velodyne_simulator/install
+
+Name: velodyne_gazebo_plugins
+Description: Description of velodyne_gazebo_plugins
+Version: 1.0.6
+Cflags: -I/home/ot/catkin_ws_velodyne_simulator/install/include
+Libs: -L/home/ot/catkin_ws_velodyne_simulator/install/lib -lgazebo_ros_velodyne_laser
+Requires: roscpp sensor_msgs gazebo_ros

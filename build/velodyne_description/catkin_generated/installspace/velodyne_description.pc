@@ -1,0 +1,8 @@
+prefix=/home/ot/catkin_ws_velodyne_simulator/install
+
+Name: velodyne_description
+Description: Description of velodyne_description
+Version: 1.0.6
+Cflags: 
+Libs: -L/home/ot/catkin_ws_velodyne_simulator/install/lib 
+Requires: 
