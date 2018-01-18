@@ -214,10 +214,12 @@ Actuators Macros:
       <jointName>${actuated_joint}</jointName>
       <motorName>${motor_name}</motorName>
       <jointStatePubTopic>${motor_name}</jointStatePubTopic>
-      <position_kp>0.2</position_kp>
-      <velocity_kp>0.1</velocity_kp>
-      <effort_kp>0.04</effort_kp>
-      <effort_kd>0.005</effort_kd>
+      <!-- <position_kp>0.2</position_kp> -->
+      <!-- <velocity_kp>0.1</velocity_kp> -->
+      <position_kp>0.0</position_kp>
+      <velocity_kp>0.0</velocity_kp>
+      <effort_kp>0.02</effort_kp>
+      <effort_kd>0.0</effort_kd>
       <effort_output_lp>0.5</effort_output_lp>
       <effort_D_on_error>false</effort_D_on_error>
     </plugin>
