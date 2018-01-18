@@ -148,7 +148,7 @@
               </geometry>
             </visual> -->
             <collision>
-              <origin rpy="0 1.57 0" xyz="${link1_length/2} 0 0"/>
+              <origin rpy="0 1.57 0" xyz="${link2_length/2} 0 0"/>
               <geometry>
                 <cylinder radius="${link_radius}" length="${link2_length}" />
               </geometry>
@@ -181,7 +181,7 @@
               </geometry>
             </visual> -->
             <collision>
-              <origin rpy="0 1.57 0" xyz="${link1_length/2} 0 0"/>
+              <origin rpy="0 1.57 0" xyz="${link2_length/2} 0 0"/>
               <geometry>
                 <cylinder radius="${link_radius}" length="${link2_length}" />
               </geometry>
@@ -365,7 +365,7 @@
       		force_sensor_topic="force_sensor"
       		force_sensor_truth_topic="force_sensor_truth"
       		wrench_vector_pub_topic="wrench_vector"
-      		parent_frame_id="world"
+      		parent_frame_id="${namespace}/link2_2"
       		reference_frame_id="world"
       		mass_force_sensor="0.001"
       		lin_force_meas_enabled="true"
