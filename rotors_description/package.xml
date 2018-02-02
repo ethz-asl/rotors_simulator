@@ -1,6 +1,6 @@
 <package>
   <name>rotors_description</name>
-  <version>2.1.1</version>
+  <version>2.2.0</version>
   <description>The rotors_description package provides URDF models of the AscTec multicopters.</description>
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
@@ -11,6 +11,10 @@
   <author>Mina Kamel</author>
   <author>Janosch Nikolic</author>
   <author>Markus Achtelik</author>
+  <author>Giuseppe Silano</author>
+  <author>Emanuele Aucone</author>
+  <author>Benjamin Rodriguez</author>
+  <author>Luigi Iannelli</author>
 
   <license>ASL 2.0</license>
 

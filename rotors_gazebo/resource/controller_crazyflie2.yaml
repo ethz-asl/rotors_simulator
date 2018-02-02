@@ -1,0 +1,11 @@
+# Position controller parameters
+xy_gain_kp: {x: 15, y: -15}
+xy_gain_ki: {x: 1, y: -1}
+attitude_gain_kp: {phi: 3.5, theta: 3.5}
+attitude_gain_ki: {phi: 2, theta: 2}
+rate_gain_kp: {p: 70, q: 70, r: 70}
+rate_gain_ki: {p: 0, q: 0, r: 16.7}
+yaw_gain_kp: {yaw: 3}
+hovering_gain_kp: {z: 14000}
+hovering_gain_ki: {z: 15000}
+hovering_gain_kd: {z: -20000}    

@@ -2,6 +2,11 @@
 Changelog for package rotors_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2018-02-02)
+-----------
+* added the Crazyflie 2.0 hovering example launch file
+* added the Crazyflie 2.0 parameter and controller yaml files
+
 2.1.1 (2017-04-27)
 -----------
 * update maintainers

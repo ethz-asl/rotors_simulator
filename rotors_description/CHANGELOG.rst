@@ -2,6 +2,11 @@
 Changelog for package rotors_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2018-02-02)
+-----------
+* added Crazyflie 2.0 urdf: crazyflie2.xacro and crazyflie2_base.xacro. The MPU-9250 IMU plugin is under developing.
+* added Crazyflie 2.0 mesh file
+
 2.1.1 (2017-04-27)
 -----------
 * update maintainers
