@@ -27,72 +27,72 @@
 
 namespace rotors_control {
 
-LeePositionControllerNode::LeePositionControllerNode() {
+LeePositionControllerNode::LeePositionControllerNode(
+  const ros::NodeHandle& nh, const ros::NodeHandle& private_nh)
+  :nh_(nh),
+   private_nh_(private_nh){
   InitializeParams();
 
-  ros::NodeHandle nh;
-
-  cmd_pose_sub_ = nh.subscribe(
+  cmd_pose_sub_ = nh_.subscribe(
       mav_msgs::default_topics::COMMAND_POSE, 1,
       &LeePositionControllerNode::CommandPoseCallback, this);
 
-  cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(
+  cmd_multi_dof_joint_trajectory_sub_ = nh_.subscribe(
       mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
       &LeePositionControllerNode::MultiDofJointTrajectoryCallback, this);
 
-  odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 1,
+  odometry_sub_ = nh_.subscribe(mav_msgs::default_topics::ODOMETRY, 1,
                                &LeePositionControllerNode::OdometryCallback, this);
 
-  motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(
+  motor_velocity_reference_pub_ = nh_.advertise<mav_msgs::Actuators>(
       mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
 
-  command_timer_ = nh.createTimer(ros::Duration(0), &LeePositionControllerNode::TimedCommandCallback, this,
+  command_timer_ = nh_.createTimer(ros::Duration(0), &LeePositionControllerNode::TimedCommandCallback, this,
                                   true, false);
 }
 
 LeePositionControllerNode::~LeePositionControllerNode() { }
 
 void LeePositionControllerNode::InitializeParams() {
-  ros::NodeHandle pnh("~");
 
   // Read parameters from rosparam.
-  GetRosParameter(pnh, "position_gain/x",
+  GetRosParameter(private_nh_, "position_gain/x",
                   lee_position_controller_.controller_parameters_.position_gain_.x(),
                   &lee_position_controller_.controller_parameters_.position_gain_.x());
-  GetRosParameter(pnh, "position_gain/y",
+  GetRosParameter(private_nh_, "position_gain/y",
                   lee_position_controller_.controller_parameters_.position_gain_.y(),
                   &lee_position_controller_.controller_parameters_.position_gain_.y());
-  GetRosParameter(pnh, "position_gain/z",
+  GetRosParameter(private_nh_, "position_gain/z",
                   lee_position_controller_.controller_parameters_.position_gain_.z(),
                   &lee_position_controller_.controller_parameters_.position_gain_.z());
-  GetRosParameter(pnh, "velocity_gain/x",
+  GetRosParameter(private_nh_, "velocity_gain/x",
                   lee_position_controller_.controller_parameters_.velocity_gain_.x(),
                   &lee_position_controller_.controller_parameters_.velocity_gain_.x());
-  GetRosParameter(pnh, "velocity_gain/y",
+  GetRosParameter(private_nh_, "velocity_gain/y",
                   lee_position_controller_.controller_parameters_.velocity_gain_.y(),
                   &lee_position_controller_.controller_parameters_.velocity_gain_.y());
-  GetRosParameter(pnh, "velocity_gain/z",
+  GetRosParameter(private_nh_, "velocity_gain/z",
                   lee_position_controller_.controller_parameters_.velocity_gain_.z(),
                   &lee_position_controller_.controller_parameters_.velocity_gain_.z());
-  GetRosParameter(pnh, "attitude_gain/x",
+  GetRosParameter(private_nh_, "attitude_gain/x",
                   lee_position_controller_.controller_parameters_.attitude_gain_.x(),
                   &lee_position_controller_.controller_parameters_.attitude_gain_.x());
-  GetRosParameter(pnh, "attitude_gain/y",
+  GetRosParameter(private_nh_, "attitude_gain/y",
                   lee_position_controller_.controller_parameters_.attitude_gain_.y(),
                   &lee_position_controller_.controller_parameters_.attitude_gain_.y());
-  GetRosParameter(pnh, "attitude_gain/z",
+  GetRosParameter(private_nh_, "attitude_gain/z",
                   lee_position_controller_.controller_parameters_.attitude_gain_.z(),
                   &lee_position_controller_.controller_parameters_.attitude_gain_.z());
-  GetRosParameter(pnh, "angular_rate_gain/x",
+  GetRosParameter(private_nh_, "angular_rate_gain/x",
                   lee_position_controller_.controller_parameters_.angular_rate_gain_.x(),
                   &lee_position_controller_.controller_parameters_.angular_rate_gain_.x());
-  GetRosParameter(pnh, "angular_rate_gain/y",
+  GetRosParameter(private_nh_, "angular_rate_gain/y",
                   lee_position_controller_.controller_parameters_.angular_rate_gain_.y(),
                   &lee_position_controller_.controller_parameters_.angular_rate_gain_.y());
-  GetRosParameter(pnh, "angular_rate_gain/z",
+  GetRosParameter(private_nh_, "angular_rate_gain/z",
                   lee_position_controller_.controller_parameters_.angular_rate_gain_.z(),
                   &lee_position_controller_.controller_parameters_.angular_rate_gain_.z());
-  GetVehicleParameters(pnh, &lee_position_controller_.vehicle_parameters_);
+  GetVehicleParameters(private_nh_, &lee_position_controller_.vehicle_parameters_);
   lee_position_controller_.InitializeParameters();
 }
 void LeePositionControllerNode::Publish() {
@@ -197,7 +197,9 @@ void LeePositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPt
 int main(int argc, char** argv) {
   ros::init(argc, argv, "lee_position_controller_node");
 
-  rotors_control::LeePositionControllerNode lee_position_controller_node;
+  ros::NodeHandle nh;
+  ros::NodeHandle private_nh("~");
+  rotors_control::LeePositionControllerNode lee_position_controller_node(nh, private_nh);
 
   ros::spin();
 
