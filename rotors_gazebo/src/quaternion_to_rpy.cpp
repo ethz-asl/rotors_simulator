@@ -17,41 +17,51 @@
  * limitations under the License.
  */
 
-#include "ros/ros.h"
-#include "geometry_msgs/Vector3.h"
-#include "geometry_msgs/PoseStamped.h"
-#include "tf/transform_datatypes.h"
-#include "rotors_control/common.h"
+#include "rotors_gazebo/transform_datatypes.h"
+#include "LinearMath/btQuaternion.h"
 
-#include <nav_msgs/Odometry.h>
-#include <mav_msgs/eigen_mav_msgs.h>
+#include <math.h> 
+#include <ros/ros.h>
+#include <ros/console.h> 
+#include <Eigen/Eigen>
+#include <stdio.h>
+#include <boost/bind.hpp>
+
+#include <angles/angles.h>
+#include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <mav_msgs/conversions.h>
+#include <mav_msgs/default_topics.h>
+#include <mav_msgs/eigen_mav_msgs.h>
+#include <nav_msgs/Odometry.h>
 
-// Here I use global publisher and subscriber, since I want to access the
-// publisher in the function MsgCallback:
+#define M_PI    3.14159265358979323846  /* pi */
+
 ros::Publisher rpy_publisher;
 ros::Subscriber quat_subscriber;
 
-// Function for conversion of quaternion to roll pitch and yaw. The angles
-// are published here too.
-void MsgCallback(const nav_msgs::OdometryConstPtr& odometry_msg)
+void MsgCallback(const nav_msgs::Odometry odometry_msg)
 {
-
-    EigenOdometry odometry;
-    eigenOdometryFromMsg(odometry_msg, &odometry);
-
     // the incoming geometry_msgs::PoseStamped is transformed to a tf::Quaterion
-    tf::Quaternion q(odometry.orientation.x(), odometry.orientation.y(), odometry.orientation.z(), odometry.orientation.w());
+    mav_msgs::EigenOdometry odometry;
+    eigenOdometryFromMsg(odometry_msg, &odometry);
+    tf::Quaternion q(odometry.orientation_W_B.x(), odometry.orientation_W_B.y(), odometry.orientation_W_B.z(), 
+                     odometry.orientation_W_B.w());
     tf::Matrix3x3 m(q);
+
+    // the tf::Quaternion has a method to acess roll pitch and yaw
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
-    roll = -1 * roll;
+
+    //We need to change the sign because the conversion is along XYZ and not ZYX, on wich the control algorithms has been 
+    //designed
+    roll = -1 * roll; 
 
     // the found angles are written in a geometry_msgs::Vector3
     geometry_msgs::Vector3 rpy;
-    rpy.x = roll * 180.0 / M_PI;
-    rpy.y = pitch * 180.0 / M_PI;
-    rpy.z = yaw * 180.0 / M_PI;
+    rpy.x = roll * (180 / M_PI);
+    rpy.y = pitch * (180 / M_PI);
+    rpy.z = yaw * (180 / M_PI);
 
     // this Vector is then published:
     rpy_publisher.publish(rpy);
@@ -61,13 +71,17 @@ void MsgCallback(const nav_msgs::OdometryConstPtr& odometry_msg)
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "quaternion_to_rpy");
+
     ros::NodeHandle n;
+
     rpy_publisher = n.advertise<geometry_msgs::Vector3>("orientation_rpy", 1);
-    quat_subscriber = n.subscribe("odometry_sensor1/odometry", 1, MsgCallback);
+
+    quat_subscriber = n.subscribe(mav_msgs::default_topics::ODOMETRY, 1, MsgCallback);
 
     // check for incoming quaternions untill ctrl+c is pressed
     ROS_DEBUG("waiting for quaternion");
+
     ros::spin();
+
     return 0;
 }
-

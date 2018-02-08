@@ -37,7 +37,11 @@
     <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen" />
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <node name="quaternion_to_rpy" pkg="rotors_gazebo" type="quaternion_to_rpy" output="screen" >
+       <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node>
     <node name="position_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg mav_name)/odometry_sensor1/odometry/pose/pose/position" output="screen" />
+    <node name="orientation_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg mav_name)/orientation_rpy" output="screen" />
 
   </group>
 </launch>

@@ -27,15 +27,19 @@
   <build_depend>gazebo_plugins</build_depend>
   <build_depend>rotors_gazebo_plugins</build_depend>
   <build_depend>mav_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
   <build_depend>gazebo_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
+  <build_depend>cmake_modules</build_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>gazebo_plugins</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>rotors_gazebo_plugins</run_depend>
   <run_depend>mav_msgs</run_depend>
+  <run_depend>nav_msgs</run_depend>
   <run_depend>gazebo_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>roscpp</run_depend>

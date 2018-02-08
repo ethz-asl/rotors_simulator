@@ -6,6 +6,7 @@ Changelog for package rotors_gazebo
 -----------
 * added the Crazyflie 2.0 hovering example launch file
 * added the Crazyflie 2.0 parameter and controller yaml files
+* added the Quaternion to RPY node (XYZ conversion and not ZYX)
 
 2.1.1 (2017-04-27)
 -----------
