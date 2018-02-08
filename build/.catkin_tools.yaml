@@ -1,0 +1,6 @@
+devel_space: /home/ot/catkin_ws_velodyne_simulator/devel
+install: false
+install_space: /home/ot/catkin_ws_velodyne_simulator/install
+profile: default
+source_space: /home/ot/catkin_ws_velodyne_simulator/src
+workspace: /home/ot/catkin_ws_velodyne_simulator

@@ -1,0 +1,14 @@
+# Docker image from Docker Hub
+image: osrf/ros:kinetic-desktop-full
+
+pipelines:
+  default:
+    - step:
+        script:
+          - mkdir -p /tmp/src/repo && mv `pwd`/* /tmp/src/repo && mv /tmp/src `pwd`  # Move everything into the src directory
+          - source `find /opt/ros -name setup.bash | sort | head -1` && echo $ROS_DISTRO # Source ROS environment
+          - apt update && rosdep install --from-paths src --ignore-src -y # Install dependencies missing from the docker image
+          - catkin_make_isolated --install -DCMAKE_BUILD_TYPE=Release
+          - catkin_make_isolated --install -DCMAKE_BUILD_TYPE=Release --make-args tests
+          - catkin_make_isolated --install -DCMAKE_BUILD_TYPE=Release --make-args run_tests
+          - catkin_test_results build_isolated

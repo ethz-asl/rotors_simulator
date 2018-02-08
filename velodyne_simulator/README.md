@@ -1,6 +1,8 @@
 # Velodyne Simulator
 URDF description and Gazebo plugins to simulate Velodyne laser scanners
 
+![rviz screenshot](img/rviz.png)
+
 # Features
 * URDF with colored meshes
 * Gazebo plugin based on [gazeboo_plugins/gazebo_ros_block_laser](https://github.com/ros-simulation/gazebo_ros_pkgs/blob/kinetic-devel/gazebo_plugins/src/gazebo_ros_block_laser.cpp)
@@ -35,6 +37,3 @@ URDF description and Gazebo plugins to simulate Velodyne laser scanners
 
 # Example Gazebo Robot
 ```roslaunch velodyne_description example.launch```
-
-# Velodyne on RotorS model
-``example gazebo launch : roslaunch rotors_gazebo mav_hovering_example_velodyne.launch``
