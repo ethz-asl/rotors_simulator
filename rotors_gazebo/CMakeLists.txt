@@ -54,7 +54,14 @@ find_package(catkin REQUIRED COMPONENTS
   cmake_modules
 )
 
-find_package(Eigen REQUIRED)
+FIND_LIBRARY (BTQUATERNION_LIBRARY btQuaternion /usr/local/btQuaternion/lib/)
+
+find_package(
+  Eigen REQUIRED
+  PkgConfig REQUIRED
+)
+
+pkg_check_modules (bullet REQUIRED bullet)
 
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
@@ -81,7 +88,7 @@ target_link_libraries(hovering_example ${catkin_LIBRARIES})
 add_dependencies(hovering_example ${catkin_EXPORTED_TARGETS})
 
 add_executable(quaternion_to_rpy src/quaternion_to_rpy.cpp)
-target_link_libraries(quaternion_to_rpy ${catkin_LIBRARIES})
+target_link_libraries(quaternion_to_rpy ${catkin_LIBRARIES} ${BTQUATERNION_LIBRARIES})
 add_dependencies(quaternion_to_rpy ${catkin_EXPORTED_TARGETS})
 
 foreach(dir launch models resource worlds)

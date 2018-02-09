@@ -1,2 +1,3 @@
 - git: {local-name: mav_comm, uri: 'https://github.com/ethz-asl/mav_comm.git'}
+- git: {local-name: bullet, uri: 'https://github.com/kripken/bullet.git'}
 - git: {local-name: rotors_simulator, uri: 'https://github.com/ethz-asl/rotors_simulator.git'}

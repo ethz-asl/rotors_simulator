@@ -18,7 +18,6 @@
  */
 
 #include "rotors_gazebo/transform_datatypes.h"
-#include "LinearMath/btQuaternion.h"
 
 #include <math.h> 
 #include <ros/ros.h>
@@ -34,6 +33,7 @@
 #include <mav_msgs/default_topics.h>
 #include <mav_msgs/eigen_mav_msgs.h>
 #include <nav_msgs/Odometry.h>
+#include <bullet/LinearMath/btQuaternion.h>
 
 #define M_PI    3.14159265358979323846  /* pi */
 
