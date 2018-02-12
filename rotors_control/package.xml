@@ -30,7 +30,7 @@
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>cmake_modules</build_depend>
-  <build_depend>bullet</build_depend>
+  <build_depend>libbullet-dev</build_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>dynamic_reconfigure</run_depend>
@@ -39,6 +39,6 @@
   <run_depend>nav_msgs</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
-  <run_depend>bullet</run_depend>
+  <run_depend>libbullet-dev</run_depend>
 
 </package>
