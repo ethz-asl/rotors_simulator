@@ -18,8 +18,8 @@
  */
 
 #include "rotors_gazebo/transform_datatypes.h"
-#include "rotors_control/Matrix3x3.h"
-#include "rotors_control/Quaternion.h" 
+#include "rotors_gazebo/Matrix3x3.h"
+#include "rotors_gazebo/Quaternion.h" 
 
 #include <math.h> 
 #include <ros/ros.h>
