@@ -20,12 +20,12 @@
 #include "rotors_control/position_controller.h"
 #include "rotors_control/transform_datatypes.h"
 
-#include <math.h> 
+#include <math.h>
+#include <Matrix3x3.h>
+#include <Quaternion.h> 
 
-#include <angles/angles.h>
 #include <nav_msgs/Odometry.h>
 #include <ros/console.h>
-#include <bullet/LinearMath/btQuaternion.h>
 
 
 #define M_PI                      3.14159265358979323846  /* pi */

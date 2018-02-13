@@ -25,15 +25,15 @@
 #include <Eigen/Eigen>
 #include <stdio.h>
 #include <boost/bind.hpp>
+#include <Matrix3x3.h>
+#include <Quaternion.h>
 
-#include <angles/angles.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/default_topics.h>
 #include <mav_msgs/eigen_mav_msgs.h>
 #include <nav_msgs/Odometry.h>
-#include <bullet/LinearMath/btQuaternion.h>
 
 #define M_PI    3.14159265358979323846  /* pi */
 

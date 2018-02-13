@@ -12,14 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
   cmake_modules
 )
 
-FIND_LIBRARY (BTQUATERNION_LIBRARY btQuaternion /usr/local/btQuaternion/lib/)
-
 find_package(
   Eigen REQUIRED
-  PkgConfig REQUIRED
 )
-
-pkg_check_modules (bullet REQUIRED bullet)
 
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
@@ -49,7 +44,7 @@ add_library(roll_pitch_yawrate_thrust_controller
 target_link_libraries(lee_position_controller ${catkin_LIBRARIES})
 add_dependencies(lee_position_controller ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(position_controller ${catkin_LIBRARIES} ${BTQUATERNION_LIBRARIES})
+target_link_libraries(position_controller ${catkin_LIBRARIES})
 add_dependencies(position_controller ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(roll_pitch_yawrate_thrust_controller ${catkin_LIBRARIES})

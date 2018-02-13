@@ -5,7 +5,6 @@ Changelog for package rotors_control
 2.2.0 (2018-02-02)
 -----------
 * added Crazyflie 2.0 position controller. The lower level controller is the same of the Crazyflie 2.0 firmware (released 2018.01.01)
-* added dependencies to bullet library. For more details see http://cs.gettysburg.edu/~cpresser/cs391/software/bullet_install_linux.html
 * Contributors: Giuseppe Silano, Emanuele Aucone, Benjamin Rodriguez, Luigi Iannelli
 
 2.1.1 (2017-04-27)
