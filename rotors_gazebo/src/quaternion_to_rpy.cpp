@@ -18,6 +18,8 @@
  */
 
 #include "rotors_gazebo/transform_datatypes.h"
+#include "rotors_control/Matrix3x3.h"
+#include "rotors_control/Quaternion.h" 
 
 #include <math.h> 
 #include <ros/ros.h>
@@ -25,8 +27,6 @@
 #include <Eigen/Eigen>
 #include <stdio.h>
 #include <boost/bind.hpp>
-#include <tf/Matrix3x3.h>
-#include <tf/Quaternion.h>
 
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/PoseStamped.h>

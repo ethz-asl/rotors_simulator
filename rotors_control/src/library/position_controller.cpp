@@ -19,10 +19,10 @@
 
 #include "rotors_control/position_controller.h"
 #include "rotors_control/transform_datatypes.h"
+#include "rotors_control/Matrix3x3.h"
+#include "rotors_control/Quaternion.h" 
 
 #include <math.h>
-#include <tf/Matrix3x3.h>
-#include <tf/Quaternion.h> 
 
 #include <nav_msgs/Odometry.h>
 #include <ros/console.h>
