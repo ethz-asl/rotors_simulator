@@ -21,8 +21,8 @@
 #include "rotors_control/transform_datatypes.h"
 
 #include <math.h>
-#include <Matrix3x3.h>
-#include <Quaternion.h> 
+#include <tf/Matrix3x3.h>
+#include <tf/Quaternion.h> 
 
 #include <nav_msgs/Odometry.h>
 #include <ros/console.h>

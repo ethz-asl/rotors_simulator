@@ -25,8 +25,8 @@
 #include <Eigen/Eigen>
 #include <stdio.h>
 #include <boost/bind.hpp>
-#include <Matrix3x3.h>
-#include <Quaternion.h>
+#include <tf/Matrix3x3.h>
+#include <tf/Quaternion.h>
 
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/PoseStamped.h>
