@@ -148,8 +148,8 @@ class PIDController
     }
 
     target = parameters_.target_lp_ * target + (1 - parameters_.target_lp_) * previous_target_;
-    double error = target - measurement;
     target = limit(target, parameters_.max_target_, parameters_.min_target_);
+    double error = target - measurement;
     // Proportional term
     double Pout = parameters_.k_p_ * error;
     // Integral term
