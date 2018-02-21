@@ -295,7 +295,7 @@
           enable_visual="true"
           visual_scale="1"
           color="Red">
-          <origin xyz="${link0_center_to_center_length/2} 0 0" rpy="0 0 -1.57"/>
+          <origin xyz="${-link0_center_to_center_length/2} 0 0" rpy="0 0 -1.57"/>
           <xacro:insert_block name="generic_servo_inertial"/>
         </xacro:hebi_actuator_plugin>
 
@@ -323,7 +323,7 @@
           enable_visual="true"
           visual_scale="1"
           color="Red">
-          <origin xyz="${-link0_center_to_center_length/2} 0 0" rpy="0 0 -1.57"/>
+          <origin xyz="${link0_center_to_center_length/2} 0 0" rpy="0 0 -1.57"/>
           <xacro:insert_block name="generic_servo_inertial"/>
         </xacro:hebi_actuator_plugin>
 
