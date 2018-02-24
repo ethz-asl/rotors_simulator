@@ -5,6 +5,8 @@
   Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
   Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
   Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+  Copyright 2018 Giuseppe Silano, University of Sannio in Benevento, Italy
+  Copyright 2018 Luigi Iannelli, University of Sannio in Benevento, Italy
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -862,6 +864,27 @@
       accelerometer_random_walk="0.006"
       accelerometer_bias_correlation_time="300.0"
       accelerometer_turn_on_bias_sigma="0.1960">
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </xacro:imu_plugin_macro>
+  </xacro:macro>
+
+  <xacro:macro name="crazyflie2_imu" params="namespace parent_link">
+    <!-- Mount an MPU-9250 IMU. -->
+    <xacro:imu_plugin_macro
+      namespace="${namespace}"
+      imu_suffix=""
+      parent_link="${parent_link}"
+      imu_topic="imu"
+      mass_imu_sensor="0.00001"
+      gyroscope_noise_density="0.000175"
+      gyroscope_random_walk="0.0105"
+      gyroscope_bias_correlation_time="1000.0"
+      gyroscope_turn_on_bias_sigma= "0.09" 
+      accelerometer_noise_density="0.003"
+      accelerometer_random_walk="0.18"
+      accelerometer_bias_correlation_time="300.0"
+      accelerometer_turn_on_bias_sigma="0.588">
       <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:imu_plugin_macro>

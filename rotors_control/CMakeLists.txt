@@ -18,10 +18,11 @@ find_package(
 
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
-  LIBRARIES lee_position_controller position_controller roll_pitch_yawrate_thrust_controller
+  LIBRARIES lee_position_controller position_controller roll_pitch_yawrate_thrust_controller sensfusion6 complementary_filter_crazyflie2
   CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs
   DEPENDS Eigen
 )
+
 
 include_directories(
   include
@@ -41,6 +42,14 @@ add_library(roll_pitch_yawrate_thrust_controller
   src/library/roll_pitch_yawrate_thrust_controller.cpp
 )
 
+add_library(complementary_filter_crazyflie2
+  src/library/complementary_filter_crazyflie2.cpp
+)
+
+add_library(sensfusion6
+  src/library/sensfusion6.cpp
+)
+
 target_link_libraries(lee_position_controller ${catkin_LIBRARIES})
 add_dependencies(lee_position_controller ${catkin_EXPORTED_TARGETS})
 
@@ -50,6 +59,12 @@ add_dependencies(position_controller ${catkin_EXPORTED_TARGETS})
 target_link_libraries(roll_pitch_yawrate_thrust_controller ${catkin_LIBRARIES})
 add_dependencies(roll_pitch_yawrate_thrust_controller ${catkin_EXPORTED_TARGETS})
 
+target_link_libraries(complementary_filter_crazyflie2 ${catkin_LIBRARIES})
+add_dependencies(complementary_filter_crazyflie2 ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(sensfusion6 ${catkin_LIBRARIES})
+add_dependencies(sensfusion6 ${catkin_EXPORTED_TARGETS})
+
 add_executable(lee_position_controller_node src/nodes/lee_position_controller_node.cpp)
 add_dependencies(lee_position_controller_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(lee_position_controller_node
@@ -58,7 +73,7 @@ target_link_libraries(lee_position_controller_node
 add_executable(position_controller_node src/nodes/position_controller_node.cpp)
 add_dependencies(position_controller_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(position_controller_node
-  position_controller ${catkin_LIBRARIES})
+  position_controller complementary_filter_crazyflie2 sensfusion6 ${catkin_LIBRARIES})
 
 add_executable(roll_pitch_yawrate_thrust_controller_node
   src/nodes/roll_pitch_yawrate_thrust_controller_node.cpp)

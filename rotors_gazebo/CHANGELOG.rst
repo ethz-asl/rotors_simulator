@@ -2,6 +2,11 @@
 Changelog for package rotors_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0.1 (2018-02-02)
+-----------
+* modified the controller_crazyflie2.yaml, adding the integral gain on yaw position controller
+* Contributors: Giuseppe Silano, Luigi Iannelli
+
 2.2.0 (2018-02-02)
 -----------
 * added the Crazyflie 2.0 hovering example launch file

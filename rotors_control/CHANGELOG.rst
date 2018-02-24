@@ -2,6 +2,12 @@
 Changelog for package rotors_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0.1 (2018-02-23)
+-----------
+* added the Crazyflie 2.0 default state estimator: complementary filter, in according to the last firmware release 2018.01.01
+* modified the position controller in order to take into account the state estimator
+* Contributors: Giuseppe Silano, Luigi Iannelli
+
 2.2.0 (2018-02-02)
 -----------
 * added Crazyflie 2.0 position controller. The lower level controller is the same of the Crazyflie 2.0 firmware (released 2018.01.01)

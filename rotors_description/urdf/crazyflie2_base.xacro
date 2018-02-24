@@ -31,25 +31,8 @@
     <xacro:default_mavlink_interface namespace="${namespace}" imu_sub_topic="imu" rotor_count="4" />
   </xacro:if>
 
-  <!-- Mount an MPU-9250 IMU.
-  <xacro:imu_plugin_macro
-      namespace="${namespace}"
-      imu_suffix=""
-      parent_link="${namespace}/base_link"
-      imu_topic="imu"
-      mass_imu_sensor="0.00001"
-      gyroscope_noise_density=""
-      gyroscope_random_walk=""
-      gyroscope_bias_correlation_time=""
-      gyroscope_turn_on_bias_sigma=""
-      accelerometer_noise_density=""
-      accelerometer_random_walk=""
-      accelerometer_bias_correlation_time=""
-      accelerometer_turn_on_bias_sigma="">
-      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
-      <origin xyz="0 0 0" rpy="0 0 0" />
-    </xacro:imu_plugin_macro> -->
-
+  <!-- Mount an MPU-9250 IMU. -->
+  <xacro:crazyflie2_imu namespace="${namespace}" parent_link="${namespace}/base_link" /> 
 
   <xacro:if value="$(arg enable_ground_truth)">
     <xacro:ground_truth_imu_and_odometry namespace="${namespace}" parent_link="${namespace}/base_link" />

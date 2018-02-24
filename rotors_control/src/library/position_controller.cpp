@@ -21,8 +21,11 @@
 #include "rotors_control/transform_datatypes.h"
 #include "rotors_control/Matrix3x3.h"
 #include "rotors_control/Quaternion.h" 
+#include "rotors_control/stabilizer_types.h"
+#include "rotors_control/sensfusion6.h"
 
-#include <math.h>
+#include <math.h> 
+#include <ros/ros.h>
 
 #include <nav_msgs/Odometry.h>
 #include <ros/console.h>
@@ -32,7 +35,7 @@
 #define OMEGA_OFFSET              65673  /* OMEGA OFFSET */
 #define ANGULAR_MOTOR_COEFFICIENT 0.2685 /* ANGULAR_MOTOR_COEFFICIENT */
 #define MOTORS_INTERCEPT          4070.3 /* MOTORS_INTERCEPT */
-#define T                         0.01  /* TIME STEP */
+#define T                         0.01f  /* TIME STEP */
 
 
 namespace rotors_control{
@@ -42,14 +45,36 @@ PositionController::PositionController()
     first_time_hovering_controller_(false),
     first_time_xy_controller_(false),
     first_time_attitude_controller_(false),
-    first_time_rate_controller_(false){
+    first_time_rate_controller_(false),
+    first_time_yaw_position_controller_(false){
 
 }
 
 PositionController::~PositionController() {}
 
 void PositionController::SetOdometry(const EigenOdometry& odometry) {
-    odometry_ = odometry;
+    
+    odometry_ = odometry;    
+}
+
+void PositionController::SetOdometryEstimated() {
+
+    complementary_filter_crazyflie_.EstimatorComplementary(&state_, &sensors_);
+}
+
+void PositionController::SetSensorData(const sensorData_t& sensors) {
+    
+    sensors_ = sensors;
+    SetOdometryEstimated();
+    
+    // Only the position sensor is ideal, we don't have virtual sensor or systems to get it
+    state_.position.x = odometry_.position[0];
+    state_.position.y = odometry_.position[1];
+    state_.position.z = odometry_.position[2];
+
+    state_.linearVelocity.x = odometry_.velocity[0];
+    state_.linearVelocity.y = odometry_.velocity[1];
+    state_.linearVelocity.z = odometry_.velocity[2];
 }
 
 void PositionController::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory) {
@@ -112,15 +137,20 @@ void PositionController::Quaternion2Euler(double* roll, double* pitch, double* y
     assert(roll);
     assert(pitch);
     assert(yaw);
+
+    double x, y, z, w;
+    x = state_.attitudeQuaternion.x;
+    y = state_.attitudeQuaternion.y;
+    z = state_.attitudeQuaternion.z;
+    w = state_.attitudeQuaternion.w;
     
-    tf::Quaternion q(odometry_.orientation.x(), odometry_.orientation.y(), odometry_.orientation.z(), odometry_.orientation.w());
+    tf::Quaternion q(x, y, z, w);
     tf::Matrix3x3 m(q);
     m.getRPY(*roll, *pitch, *yaw);
 
-    //We need to change the sign because the conversion is along XYZ and not ZYX, on wich the control algorithms has been 
-    //designed
-    *roll = -1 * *roll;    
-  
+    //We need to change the sign becase the conversion is along XYZ and not ZYX, on wich the control algorithms has been designed
+    *roll=-1 * *roll;
+
 }
 
 void PositionController::XYController(double* theta_command_, double* phi_command_) {
@@ -128,8 +158,8 @@ void PositionController::XYController(double* theta_command_, double* phi_comman
     assert(phi_command_);    
 
     double v_, u_;
-    u_ = odometry_.velocity[0];  
-    v_ = odometry_.velocity[1];
+    u_ = state_.linearVelocity.x;  
+    v_ = state_.linearVelocity.y;
 
     double xe, ye;
     ErrorBodyFrame(&xe, &ye);
@@ -147,7 +177,7 @@ void PositionController::XYController(double* theta_command_, double* phi_comman
     
     theta_command_kp = controller_parameters_.xy_gain_kp_.x() * xe_error_;
     theta_command_ki = theta_command_ki + (controller_parameters_.xy_gain_ki_.x() * xe_error_ * T);
-    *theta_command_ = theta_command_kp + theta_command_ki;
+    *theta_command_  = theta_command_kp + theta_command_ki;
 
    if(!(*theta_command_ < 30 && *theta_command_ > -30))
       if(*theta_command_ > 30)
@@ -157,7 +187,7 @@ void PositionController::XYController(double* theta_command_, double* phi_comman
 
     phi_command_kp = controller_parameters_.xy_gain_kp_.y() * ye_error_;
     phi_command_ki = phi_command_ki + (controller_parameters_.xy_gain_ki_.y() * ye_error_ * T);
-    *phi_command_ = phi_command_kp + phi_command_ki;
+    *phi_command_  = phi_command_kp + phi_command_ki;
 
    if(!(*phi_command_ < 30 && *phi_command_ > -30))
       if(*phi_command_ > 30)
@@ -174,9 +204,10 @@ void PositionController::AttitudeController(double* p_command_, double* q_comman
     double roll, pitch, yaw;
     Quaternion2Euler(&roll, &pitch, &yaw);  
 
-    double pitch_degree_, roll_degree_;
+    double pitch_degree_, roll_degree_, yaw_degree_;
     pitch_degree_ = pitch * (180/M_PI); 
-    roll_degree_ = roll * (180/M_PI);
+    roll_degree_ = roll * (180/M_PI); 
+    yaw_degree_ = yaw * (180/M_PI);
  
     double theta_command_, phi_command_;
     XYController(&theta_command_, &phi_command_);
@@ -208,9 +239,9 @@ void PositionController::RateController(double* delta_phi, double* delta_theta, 
     assert(delta_psi);
     
     double p_radians, q_radians, r_radians;
-    p_radians =  odometry_.angular_velocity[0];
-    q_radians =  odometry_.angular_velocity[1];
-    r_radians =  odometry_.angular_velocity[2];
+    p_radians =  state_.angularVelocity.x;
+    q_radians =  state_.angularVelocity.y;
+    r_radians =  state_.angularVelocity.z;
 
     double p_degree, q_degree, r_degree;
     p_degree = p_radians * (180/M_PI);
@@ -266,7 +297,7 @@ void PositionController::ControlMixer(double* PWM_1, double* PWM_2, double* PWM_
 
 }
 
-void PositionController::YawPositionController(double* r_command_) const {
+void PositionController::YawPositionController(double* r_command_) {
     assert(r_command_);
 
     double yaw, roll, pitch;
@@ -277,7 +308,15 @@ void PositionController::YawPositionController(double* r_command_) const {
     yaw_reference_degree_ = command_trajectory_.getYaw() * (180/M_PI);
     yaw_error_degree_ = yaw_reference_degree_ - yaw_degree_;
 
-    *r_command_ = controller_parameters_.yaw_gain_kp_ * yaw_error_degree_;
+    double r_command_kp, r_command_ki;
+    if(!first_time_yaw_position_controller_){
+       r_command_ki = 0;
+       first_time_yaw_position_controller_ = true;
+    }
+
+    r_command_kp = controller_parameters_.yaw_gain_kp_ * yaw_error_degree_;
+    r_command_ki = r_command_ki + (controller_parameters_.yaw_gain_ki_ * yaw_error_degree_ * T);
+    *r_command_ = r_command_ki + r_command_kp;
 
    if(!(*r_command_ < 200 && *r_command_ > -200))
       if(*r_command_ > 200)
@@ -291,7 +330,7 @@ void PositionController::HoveringController(double* delta_omega_) {
     assert(delta_omega_);
 
     double z_error_;
-    z_error_ = command_trajectory_.position_W[2] - odometry_.position[2];
+    z_error_ = command_trajectory_.position_W[2] - state_.position.z;
 
     double delta_omega_kp, delta_omega_ki, delta_omega_kd;
 
@@ -302,7 +341,7 @@ void PositionController::HoveringController(double* delta_omega_) {
 
     delta_omega_kp = controller_parameters_.hovering_gain_kp_ * z_error_;
     delta_omega_ki = delta_omega_ki + (controller_parameters_.hovering_gain_ki_ * z_error_* T);
-    delta_omega_kd = controller_parameters_.hovering_gain_kd_ * odometry_.velocity[2];
+    delta_omega_kd = controller_parameters_.hovering_gain_kd_ * state_.linearVelocity.z;
     *delta_omega_ = delta_omega_kp + delta_omega_ki + delta_omega_kd;
 
     if(!(*delta_omega_ < 15000 && *delta_omega_ > -20000))
@@ -318,8 +357,8 @@ void PositionController::ErrorBodyFrame(double* xe, double* ye) const {
     assert(ye);
     
     double xe_error_, ye_error_;
-    xe_error_ = command_trajectory_.position_W[0] - odometry_.position[0];
-    ye_error_ = command_trajectory_.position_W[1] - odometry_.position[1];
+    xe_error_ = command_trajectory_.position_W[0] - state_.position.x;
+    ye_error_ = command_trajectory_.position_W[1] - state_.position.y;
 
     double yaw, roll, pitch;
     Quaternion2Euler(&roll, &pitch, &yaw);   

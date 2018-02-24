@@ -29,12 +29,15 @@
 #include <mav_msgs/AttitudeThrust.h>
 #include <mav_msgs/eigen_mav_msgs.h>
 #include <nav_msgs/Odometry.h>
+#include <sensor_msgs/Imu.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
 #include "rotors_control/common.h"
 #include "rotors_control/position_controller.h"
+#include "rotors_control/complementary_filter_crazyflie2.h"
+
 
 namespace rotors_control {
 
@@ -57,6 +60,7 @@ namespace rotors_control {
             ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
             ros::Subscriber cmd_pose_sub_;
             ros::Subscriber odometry_sub_;
+            ros::Subscriber imu_sub_;
 
             //publisher
             ros::Publisher motor_velocity_reference_pub_;
@@ -72,6 +76,8 @@ namespace rotors_control {
             void CommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg);
 
             void OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg);
+
+            void IMUCallback(const sensor_msgs::ImuConstPtr& imu_msg);
 
     };
 }

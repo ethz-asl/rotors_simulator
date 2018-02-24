@@ -2,6 +2,11 @@
 Changelog for package rotors_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0.1 (2018-02-02)
+-----------
+* added the Crazyflie 2.0 IMU (MPU-9250) inside the component_snippest.xacro file. The IMU substitutes the ideal sensor previously employed in the crazyfie_base.xacro
+* Contributors: Giuseppe Silano, Luigi Iannelli
+
 2.2.0 (2018-02-02)
 -----------
 * added Crazyflie 2.0 urdf: crazyflie2.xacro and crazyflie2_base.xacro. The MPU-9250 IMU plugin is under developing.

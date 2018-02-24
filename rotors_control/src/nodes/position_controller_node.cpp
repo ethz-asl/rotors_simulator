@@ -20,10 +20,13 @@
 #include <ros/ros.h>
 #include <mav_msgs/default_topics.h>
 #include <ros/console.h> 
+#include <sensor_msgs/Imu.h>
 
 #include "position_controller_node.h"
 
 #include "rotors_control/parameters_ros.h"
+#include "rotors_control/stabilizer_types.h"
+#include "rotors_control/complementary_filter_crazyflie2.h"
 
 
 namespace rotors_control {
@@ -38,6 +41,8 @@ PositionControllerNode::PositionControllerNode() {
     cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,  &PositionControllerNode::MultiDofJointTrajectoryCallback, this);
 
     odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 1, &PositionControllerNode::OdometryCallback, this);
+
+    imu_sub_ = nh.subscribe(mav_msgs::default_topics::IMU, 1, &PositionControllerNode::IMUCallback, this);
 
     motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
 
@@ -157,6 +162,9 @@ void PositionControllerNode::InitializeParams() {
   GetRosParameter(pnh, "yaw_gain_kp/yaw",
                   position_controller_.controller_parameters_.yaw_gain_kp_,
                   &position_controller_.controller_parameters_.yaw_gain_kp_);
+  GetRosParameter(pnh, "yaw_gain_ki/yaw",
+                  position_controller_.controller_parameters_.yaw_gain_ki_,
+                  &position_controller_.controller_parameters_.yaw_gain_ki_);
 
   GetRosParameter(pnh, "hovering_gain_kp/z",
                   position_controller_.controller_parameters_.hovering_gain_kp_,
@@ -186,6 +194,26 @@ void PositionControllerNode::CommandPoseCallback(const geometry_msgs::PoseStampe
 
     position_controller_.SetTrajectoryPoint(commands_.front());
     commands_.pop_front();
+}
+
+void PositionControllerNode::IMUCallback(const sensor_msgs::ImuConstPtr& imu_msg) {
+
+    ROS_INFO_ONCE("PositionController got first imu message.");
+
+    sensorData_t sensors;
+    
+    //Angular velocities data
+    sensors.gyro.x = imu_msg->angular_velocity.x;
+    sensors.gyro.y = imu_msg->angular_velocity.y;
+    sensors.gyro.z = imu_msg->angular_velocity.z;
+    
+    //Linear acceleration data
+    sensors.acc.x = imu_msg->linear_acceleration.x;
+    sensors.acc.y = imu_msg->linear_acceleration.y;
+    sensors.acc.z = imu_msg->linear_acceleration.z;
+
+    position_controller_.SetSensorData(sensors);
+
 }
 
 void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg) {
