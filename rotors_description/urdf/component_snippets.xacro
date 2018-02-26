@@ -849,13 +849,13 @@
   </xacro:macro>
 
   <xacro:macro name="default_imu" params="namespace parent_link">
-    <!-- ADIS16448 IMU. -->
+    <!-- ADIS16448 IMU. -->    
     <xacro:imu_plugin_macro
       namespace="${namespace}"
       imu_suffix=""
       parent_link="${parent_link}"
       imu_topic="imu"
-      mass_imu_sensor="0.015"
+      mass_imu_sensor="0.015"        
       gyroscope_noise_density="0.0003394"
       gyroscope_random_walk="0.000038785"
       gyroscope_bias_correlation_time="1000.0"
@@ -863,7 +863,7 @@
       accelerometer_noise_density="0.004"
       accelerometer_random_walk="0.006"
       accelerometer_bias_correlation_time="300.0"
-      accelerometer_turn_on_bias_sigma="0.1960">
+      accelerometer_turn_on_bias_sigma="0.1960">      
       <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:imu_plugin_macro>

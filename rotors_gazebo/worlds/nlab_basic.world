@@ -4,6 +4,7 @@
     <include>
       <uri>model://ground_plane</uri>
     </include>
+    
     <include>
       <uri>model://sun</uri>
     </include>
@@ -16,14 +17,14 @@
       <surface_model>EARTH_WGS84</surface_model>
       <latitude_deg>47.3667</latitude_deg>
       <longitude_deg>8.5500</longitude_deg>
-      <elevation>500.0</elevation>
-      <heading_deg>0</heading_deg>
+      <elevation>500.0</elevation> <!-- in meters -->
+      <heading_deg>0</heading_deg> <!-- in degrees -->
     </spherical_coordinates>
     <physics type='ode'>
       <ode>
         <solver>
           <type>quick</type>
-          <iters>1000</iters>
+          <iters>50</iters> <!-- simulating iterations per one step -->
           <sor>1.3</sor>
         </solver>
         <constraints>
@@ -33,13 +34,18 @@
           <contact_surface_layer>0.001</contact_surface_layer>          
         </constraints>
       </ode>
-      <max_step_size>0.01</max_step_size>
+      <max_step_size>0.0025</max_step_size>
       <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>100</real_time_update_rate>
+      <real_time_update_rate>400</real_time_update_rate>
       <gravity>0 0 -9.8</gravity>
     </physics>
     <scene>
       <shadows>0</shadows>
     </scene>
+    <gui>
+      <camera name="user_default">
+        <pose> -10 0 10 0 0.27 0</pose>
+      </camera>
+    </gui>
   </world>
 </sdf>

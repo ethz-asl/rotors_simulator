@@ -319,7 +319,7 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   double ref_motor_rot_vel;
   ref_motor_rot_vel =
       rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
-
+  
   // Make sure max force is set, as it may be reset to 0 by a world reset any
   // time. (This cannot be done during Reset() because the change will be undone
   // by the Joint's reset function afterwards.)
