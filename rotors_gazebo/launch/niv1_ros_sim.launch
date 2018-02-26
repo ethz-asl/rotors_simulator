@@ -1,5 +1,5 @@
 <launch>
-  <arg name="mav_name" default="niv1"/>
+  <arg name="mav_name" default="niv1_sim"/>
   <arg name="world_name" default="nlab_basic"/>
   <arg name="enable_logging" default="false" />
   <arg name="enable_ground_truth" default="true" />
@@ -27,8 +27,8 @@
     
     <node name="roll_pitch_yawrate_thrust_controller_node" pkg="rotors_control" type="roll_pitch_yawrate_thrust_controller_node" output="screen">
       <rosparam
-        command="load" file="$(find rotors_gazebo)/resource/roll_pitch_yawrate_thrust_controller_$(arg mav_name).yaml" />
-      <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name).yaml" />
+        command="load" file="$(find rotors_gazebo)/resource/roll_pitch_yawrate_thrust_controller_niv1.yaml" />
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/niv1.yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
     
