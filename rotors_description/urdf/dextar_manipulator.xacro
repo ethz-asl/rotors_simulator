@@ -33,6 +33,11 @@
       <inertia ixx="0.000948062" ixy="0.0" ixz="-0.001716204"
         iyy="0.00730949" iyz="0.0"
         izz="0.006364922"/>
+      <!-- heavy manipulator for ff_impedance control testing -->
+      <!-- <mass value="0.1"/> -->
+      <!-- <inertia ixx="${5*0.000948062}" ixy="0.0" ixz="${5*-0.001716204}"
+        iyy="${5*0.00730949}" iyz="0.0"
+        izz="${5*0.006364922}"/> -->
       </xacro:property>
 
     <xacro:property name="link2_frame">
@@ -44,6 +49,11 @@
       <inertia ixx="0.000229511" ixy="0.0" ixz="0.00000098"
         iyy="0.0018644679" iyz="0.0"
         izz="0.0018419229"/>
+      <!-- heavy manipulator for ff_impedance control testing -->
+      <!-- <mass value="0.1"/> -->
+      <!-- <inertia ixx="${5*0.000229511}" ixy="0.0" ixz="${5*0.00000098}"
+        iyy="${5*0.0018644679}" iyz="0.0"
+        izz="${5*0.0018419229}"/> -->
       </xacro:property>
 
           <!--
