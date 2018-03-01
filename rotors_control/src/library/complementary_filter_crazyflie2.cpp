@@ -53,14 +53,14 @@ ComplementaryFilterCrazyflie2::ComplementaryFilterCrazyflie2() {}
 
 ComplementaryFilterCrazyflie2::~ComplementaryFilterCrazyflie2() {}
 
-void ComplementaryFilterCrazyflie2::PositionUpdateVelocity(double *angularVelocityY, double *angularVelocityX,
-                       double *angularAccY, double *angularAccX) {
+void ComplementaryFilterCrazyflie2::PositionUpdateVelocity(double* angularVelocityY, double* angularVelocityX,
+                       double* angularAccY, double* angularAccX) {
 
   *angularVelocityY = *angularAccY;
   *angularVelocityX = *angularAccX;
 }
 
-void ComplementaryFilterCrazyflie2::EstimatorComplementary(state_t *state, sensorData_t *sensorData){
+void ComplementaryFilterCrazyflie2::EstimatorComplementary(state_t* state, sensorData_t* sensorData){
 
   // Read sensors at full rate (1000Hz)
   sensors_fusion_.Sensfusion6UpdateQ(&sensorData->gyro.x, &sensorData->gyro.y, &sensorData->gyro.z, &sensorData->acc.x, &sensorData->acc.y, &sensorData->acc.z, (double) ATTITUDE_UPDATE_DT);

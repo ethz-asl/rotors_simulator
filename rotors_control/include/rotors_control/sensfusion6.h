@@ -64,7 +64,7 @@ class SensFusion {
     void Sensfusion6UpdateQ(double *gx, double *gy, double *gz, double *ax, double *ay, double *az, double dt);
     void Sensfusion6GetQuaternion(double* qx, double* qy, double* qz, double* qw);
     void Sensfusion6GetEulerRPY(double* roll, double* pitch, double* yaw);
-    void Sensfusion6GetAccZWithoutGravity(double *angularAccZ, double *ax, double *ay, double *az);
+    void Sensfusion6GetAccZWithoutGravity(double* angularAccZ, double* ax, double* ay, double* az);
 
   private:
    
@@ -82,7 +82,7 @@ class SensFusion {
     double Sensfusion6GetInvThrustCompensationForTilt();
     double InvSqrt(double x);
     void EstimatedGravityDirection(double* gx, double* gy, double* gz);
-    void Sensfusion6GetAccZ(double *baseZacc_, double *ax, double *ay, double *az);
+    void Sensfusion6GetAccZ(double* baseZacc_, double* ax, double* ay, double* az);
 
   };
 }

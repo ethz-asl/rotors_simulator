@@ -97,7 +97,7 @@ double SensFusion::InvSqrt(double x){
 // Date     Author          Notes
 // 29/09/2011 SOH Madgwick    Initial release
 // 02/10/2011 SOH Madgwick    Optimised for reduced CPU load
-void SensFusion::Sensfusion6UpdateQ(double *gx, double *gy, double *gz, double *ax, double *ay, double *az, double dt){
+void SensFusion::Sensfusion6UpdateQ(double* gx, double* gy, double* gz, double* ax, double* ay, double* az, double dt){
 
   double recipNorm;
   double s0, s1, s2, s3;
@@ -190,7 +190,7 @@ void SensFusion::Sensfusion6UpdateQ(double *gx, double *gy, double *gz, double *
 // Date     Author      Notes
 // 29/09/2011 SOH Madgwick    Initial release
 // 02/10/2011 SOH Madgwick    Optimised for reduced CPU load
-void SensFusion::Sensfusion6UpdateQ(double *gx, double *gy, double *gz, double *ax, double *ay, double *az, double dt){
+void SensFusion::Sensfusion6UpdateQ(double* gx, double* gy, double* gz, double* ax, double* ay, double* az, double dt){
   
   double recipNorm;
   double halfvx, halfvy, halfvz;
@@ -302,7 +302,7 @@ void SensFusion::Sensfusion6GetEulerRPY(double* roll, double* pitch, double* yaw
 
 }
 
-void SensFusion::Sensfusion6GetAccZWithoutGravity(double *angularAccZ, double *ax, double *ay, double *az){
+void SensFusion::Sensfusion6GetAccZWithoutGravity(double* angularAccZ, double* ax, double* ay, double* az){
   
   // Return unbiased (baseZacc) accelerations
   double ax_, ay_, az_, baseZacc;
@@ -321,7 +321,7 @@ double SensFusion::Sensfusion6GetInvThrustCompensationForTilt(){
 }
 
 
-void SensFusion::Sensfusion6GetAccZ(double *baseZacc_, double *ax, double *ay, double *az){
+void SensFusion::Sensfusion6GetAccZ(double* baseZacc_, double* ax, double* ay, double* az){
 
   // return vertical acceleration
   // (A dot G) / |G|,  (|G| = 1) -> (A dot G)

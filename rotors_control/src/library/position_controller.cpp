@@ -341,7 +341,7 @@ void PositionController::HoveringController(double* delta_omega_) {
 
     delta_omega_kp = controller_parameters_.hovering_gain_kp_ * z_error_;
     delta_omega_ki = delta_omega_ki + (controller_parameters_.hovering_gain_ki_ * z_error_* T);
-    delta_omega_kd = controller_parameters_.hovering_gain_kd_ * state_.linearVelocity.z;
+    delta_omega_kd = controller_parameters_.hovering_gain_kd_ * -state_.linearVelocity.z;
     *delta_omega_ = delta_omega_kp + delta_omega_ki + delta_omega_kd;
 
     if(!(*delta_omega_ < 15000 && *delta_omega_ > -20000))

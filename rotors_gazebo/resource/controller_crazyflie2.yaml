@@ -9,4 +9,4 @@ yaw_gain_kp: {yaw: 3}
 yaw_gain_ki: {yaw: 0}
 hovering_gain_kp: {z: 14000}
 hovering_gain_ki: {z: 15000}
-hovering_gain_kd: {z: -20000}    
+hovering_gain_kd: {z: 20000}    

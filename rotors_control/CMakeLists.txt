@@ -59,7 +59,7 @@ add_dependencies(position_controller ${catkin_EXPORTED_TARGETS})
 target_link_libraries(roll_pitch_yawrate_thrust_controller ${catkin_LIBRARIES})
 add_dependencies(roll_pitch_yawrate_thrust_controller ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(complementary_filter_crazyflie2 ${catkin_LIBRARIES})
+target_link_libraries(complementary_filter_crazyflie2 sensfusion6 ${catkin_LIBRARIES})
 add_dependencies(complementary_filter_crazyflie2 ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(sensfusion6 ${catkin_LIBRARIES})
