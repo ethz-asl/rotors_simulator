@@ -102,6 +102,8 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   std::string link_name_;
   std::string frame_id_;
   double rotor_velocity_slowdown_sim_;
+  double angular_air_resistance_;
+  double linear_air_resistance_;
 
   gazebo::transport::PublisherPtr motor_pub_;
 

@@ -937,4 +937,92 @@
     </xacro:mavlink_interface_macro>
   </xacro:macro>
 
+<xacro:macro name="niv1_imu" params="namespace parent_link">
+    <!-- ADIS16448 IMU. -->    
+    <xacro:imu_plugin_macro
+      namespace="${namespace}"
+      imu_suffix=""
+      parent_link="${parent_link}"
+      imu_topic="imu"
+      mass_imu_sensor="0.015"        
+      gyroscope_noise_density="0.0003394"
+      gyroscope_random_walk="0.000038785"
+      gyroscope_bias_correlation_time="1000.0"
+      gyroscope_turn_on_bias_sigma="0.0"
+      accelerometer_noise_density="0.0004"
+      accelerometer_random_walk="0.0006"
+      accelerometer_bias_correlation_time="300.0"
+      accelerometer_turn_on_bias_sigma="0.0">      
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <origin xyz="0 0 0.05" rpy="0 0 0" />
+    </xacro:imu_plugin_macro>
+  </xacro:macro>
+
+  <xacro:macro name="niv1_gps" params="namespace parent_link">
+    <!-- Default GPS. -->
+    <xacro:gps_plugin_macro
+      namespace="${namespace}"
+      gps_suffix=""
+      parent_link="${parent_link}"
+      gps_topic="gps"
+      ground_speed_topic="ground_speed"
+      mass_gps_sensor="0.015"
+      horizontal_pos_std_dev="3.0"
+      vertical_pos_std_dev="6.0"
+      horizontal_vel_std_dev="0.1"
+      vertical_vel_std_dev="0.1">
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </xacro:gps_plugin_macro>
+  </xacro:macro>
+
+  <xacro:macro name="niv1_magnetometer" params="namespace parent_link">
+    <!-- ADIS16448 Magnetometer. -->
+    <xacro:magnetometer_plugin_macro
+      namespace="${namespace}"
+      magnetometer_suffix=""
+      parent_link="${parent_link}"
+      magnetometer_topic="magnetic_field"
+      mass_magnetometer_sensor="0.015"
+      ref_mag_north="0.000021493"
+      ref_mag_east="0.000000815"
+      ref_mag_down="0.000042795"
+      noise_normal="0.000000080 0.000000080 0.000000080"
+      noise_uniform_initial_bias="0.000000400 0.000000400 0.000000400">
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </xacro:magnetometer_plugin_macro>
+  </xacro:macro>
+
+  <xacro:macro name="niv1_pressure_sensor" params="namespace parent_link">
+    <xacro:pressure_sensor_plugin_macro
+      namespace="${namespace}"
+      pressure_sensor_suffix=""
+      parent_link="${parent_link}"
+      pressure_topic="air_pressure"
+      mass_pressure_sensor="0.015"
+      reference_altitude="500.0"
+      pressure_variance="0.0">
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </xacro:pressure_sensor_plugin_macro>
+  </xacro:macro>
+
+  <xacro:macro name="default_mavlink_interface" params="namespace imu_sub_topic rotor_count">
+    <xacro:mavlink_interface_macro
+      namespace="${namespace}"
+      mavlink_sub_topic="/mavlink/from"
+      imu_sub_topic="${imu_sub_topic}"
+      mavlink_pub_topic="/mavlink/to"
+      motors_speeds_pub_topic="gazebo/command/motor_speed"
+      gps_update_freq="5.0"
+      rotor_count="${rotor_count}"
+      reference_magnetic_field_north="0.21475"
+      reference_magnetic_field_east="0.00797"
+      reference_magnetic_field_down="0.42817"
+      reference_latitude="47.3667"
+      reference_longitude="8.5500"
+      reference_altitude="500.0">
+    </xacro:mavlink_interface_macro>
+  </xacro:macro>
 </robot>

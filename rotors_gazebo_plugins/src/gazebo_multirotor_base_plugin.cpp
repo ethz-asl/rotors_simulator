@@ -51,7 +51,14 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model,
   getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim",
                       rotor_velocity_slowdown_sim_,
                       rotor_velocity_slowdown_sim_);
-
+                           
+  getSdfParam<double>(_sdf, "angularAirResistance",
+                      angular_air_resistance_,
+                      angular_air_resistance_);
+  getSdfParam<double>(_sdf, "linearAirResistance",
+                      linear_air_resistance_,
+                      linear_air_resistance_);
+ 
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
 
   // Initialise with default namespace (typically /gazebo/default/)
@@ -112,6 +119,9 @@ void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
   joint_state_msg_.clear_name();
   joint_state_msg_.clear_position();
 
+  link_->SetAngularVel(link_->GetRelativeAngularVel() * (1-angular_air_resistance_)); // added by hjs
+  link_->SetLinearVel (link_->GetWorldLinearVel    () * (1- linear_air_resistance_)); // added by hjs
+  
   MotorNumberToJointMap::iterator m;
   for (m = motor_joints_.begin(); m != motor_joints_.end(); ++m) {
     double motor_rot_vel =

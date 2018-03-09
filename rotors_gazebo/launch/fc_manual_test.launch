@@ -32,7 +32,9 @@
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
     -->
-    <node name="motor_control_publisher_node" pkg="fc_simulator_nearthlab" type="motor_control_publisher_node" />
+    <node name="motor_control_publisher_node" pkg="fc_simulator_nearthlab" type="motor_control_publisher_node" >
+      <param name="com_port" type="string" value="/dev/ttyUSB0"/>
+    </node>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
   </group>
 </launch>

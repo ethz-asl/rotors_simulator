@@ -80,6 +80,8 @@
         <robotNamespace>${robot_namespace}</robotNamespace>
         <linkName>${robot_namespace}/base_link</linkName>
         <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+        <angularAirResistance>${angular_air_resistance}</angularAirResistance>
+        <linearAirResistance>${linear_air_resistance}</linearAirResistance>
       </plugin>
     </gazebo>
   </xacro:macro>
@@ -143,4 +145,34 @@
       <material>Gazebo/${color}</material>
     </gazebo>
   </xacro:macro>
+
+  <xacro:macro name="support"
+    params="robot_namespace suffix parent support_number color *origin *inertia">
+    <joint name="${robot_namespace}/support_${support_number}_joint" type="continuous">
+      <xacro:insert_block name="origin" />
+      <axis xyz="0 0 1" />
+      <parent link="${parent}" />
+      <child link="${robot_namespace}/support_${support_number}" />
+    </joint>
+    <link name="${robot_namespace}/support_${support_number}">
+      <inertial>
+        <mass value="0.001" /> <!-- [kg] -->
+        <xacro:insert_block name="inertia" />
+      </inertial>
+      <visual>
+        <geometry>
+          <cylinder length="0.2" radius="0.01"/> --> <!-- [m] -->
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder length="0.2" radius="0.01" /> <!-- [m] -->
+        </geometry>
+      </collision>
+    </link>
+    <gazebo reference="${robot_namespace}/support_${support_number}">
+      <material>Gazebo/${color}</material>
+    </gazebo>
+  </xacro:macro>
+
 </robot>

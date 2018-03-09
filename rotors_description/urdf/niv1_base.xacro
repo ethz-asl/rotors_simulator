@@ -32,16 +32,16 @@
   <!-- <xacro:ros_interface_plugin_macro namespace="${namespace}" />-->
   <xacro:if value="$(arg enable_mavlink_interface)">
     <!-- Instantiate mavlink telemetry interface. -->
-    <xacro:default_mavlink_interface namespace="${namespace}" imu_sub_topic="imu" rotor_count="6" />
+    <xacro:niv1_mavlink_interface namespace="${namespace}" imu_sub_topic="imu" rotor_count="6" />
   </xacro:if>
   <!-- Mount an ADIS16448 IMU. -->
   
-  <xacro:default_imu namespace="${namespace}" parent_link="${namespace}/base_link" />
+  <xacro:niv1_imu namespace="${namespace}" parent_link="${namespace}/base_link" />
   
   <!-- Added by bkjung -->
-  <xacro:default_gps namespace="${namespace}" parent_link="${namespace}/base_link" />
-  <xacro:default_magnetometer namespace="${namespace}" parent_link="${namespace}/base_link" />
-  <xacro:default_pressure_sensor namespace="${namespace}" parent_link="${namespace}/base_link" />
+  <xacro:niv1_gps namespace="${namespace}" parent_link="${namespace}/base_link" />
+  <xacro:niv1_magnetometer namespace="${namespace}" parent_link="${namespace}/base_link" />
+  <xacro:niv1_pressure_sensor namespace="${namespace}" parent_link="${namespace}/base_link" />
   <xacro:camera_joint_macro namespace="${namespace}" parent_link="${namespace}/base_link" camera_suffix="${namespace}/camera_joint" enable_visual="true">
     <origin xyz="0 0 -0.015" rpy="0 0 0" />
     <geometry>

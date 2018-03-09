@@ -26,17 +26,15 @@
   <xacro:property name="use_mesh_file" value="true" />
   <xacro:property name="mesh_file" value="package://rotors_description/meshes/niv1_body.dae" />
   <xacro:property name="mass" value="12" /> <!-- [kg] -->
-  <xacro:property name="body_width" value="0.2" /> <!-- [m] -->
-  <xacro:property name="body_height" value="0.2" /> <!-- [m] -->
+  <xacro:property name="body_width" value="0.05" /> <!-- [m] -->
+  <xacro:property name="body_height" value="0.05" /> <!-- [m] -->
   <xacro:property name="mass_rotor" value="0.2" /> <!-- [kg] -->
   <xacro:property name="arm_length" value="0.636" /> <!-- [m] -->
   <xacro:property name="rotor_offset_top" value="0.053" /> <!-- [m] -->
   <xacro:property name="radius_rotor" value="0.3" /> <!-- [m] -->
 
   <xacro:property name="motor_constant_for_ros_sim" value="8.54858e-05" /> <!-- [kg m/s^2]  force = real_motor_velocity * real_motor_velocity * motor_constant_-->
-  
-  <xacro:property name="motor_constant_bak" value="0.9e-04" /> <!-- [kg m/s^2]  force = real_motor_velocity * real_motor_velocity * motor_constant_-->
-  <xacro:property name="motor_constant" value="8.9e-05" /> <!-- [kg m/s^2]  force = real_motor_velocity * real_motor_velocity * motor_constant_-->
+  <xacro:property name="motor_constant" value="1.2e-04" /> <!-- [kg m/s^2]  force = real_motor_velocity * real_motor_velocity * motor_constant_-->
   
   <xacro:property name="moment_constant" value="0.025" /> <!-- [m] math::Vector3 drag_torque(0, 0, -turning_direction_ * force * moment_constant_); -->
   <xacro:property name="moment_constan_org" value="0.025" /> <!-- [m] math::Vector3 drag_torque(0, 0, -turning_direction_ * force * moment_constant_); -->
@@ -56,19 +54,24 @@
   
   <xacro:property name="rolling_moment_coefficient" value="0.000001" /> <!-- math::Vector3 rolling_moment = -std::abs(real_motor_velocity) * rolling_moment_coefficient_ * body_velocity_perpendicular; -->
 
-  
+  <xacro:property name="angular_air_resistance" value="0.01" />
+  <xacro:property name="linear_air_resistance" value="0.001" />
   <!-- Property Blocks -->
   <xacro:property name="body_inertia">
     <!--
     <inertia ixx="0.0347563" ixy="0.0" ixz="0.0" iyy="0.0458929" iyz="0.0" izz="0.0977" /> [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
-    <!-- <inertia ixx="0.801" ixy="0.0" ixz="0.0" iyy="0.827" iyz="0.0" izz="1.450" /> -->
-    <inertia ixx="1.5" ixy="0.0" ixz="0.0" iyy="1.5" iyz="0.0" izz="10.0" />
+    <inertia ixx="0.801" ixy="0.0" ixz="0.0" iyy="0.827" iyz="0.0" izz="1.450" />
   </xacro:property>
 
   <!-- inertia of a single rotor, assuming it is a cuboid. -->
   <xacro:property name="rotor_inertia">
     <!-- <xacro:box_inertia x="${radius_rotor}" y="0.015" z="0.003" mass="${mass_rotor*rotor_velocity_slowdown_sim}" /> -->
     <xacro:box_inertia x="${radius_rotor}" y="0.015" z="0.003" mass="${mass_rotor*rotor_velocity_slowdown_sim}" /> 
+  </xacro:property>
+
+  <xacro:property name="support_inertia">
+    <!-- <xacro:box_inertia x="${radius_rotor}" y="0.015" z="0.003" mass="${mass_rotor*rotor_velocity_slowdown_sim}" /> -->
+    <xacro:box_inertia x="0.03" y="0.03" z="0.2" mass="0.001" /> 
   </xacro:property>
 
   <!-- Included URDF Files -->
@@ -174,6 +177,47 @@
     <origin xyz="-${rotor_pos_x} -${rotor_pos_y} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
+
+ <!-- Instantiate support -->
+    <xacro:support
+    robot_namespace="${namespace}"
+    suffix="front_right"
+    parent="${namespace}/base_link"
+    support_number="0"
+    color="Grey">
+     <origin xyz="${rotor_pos_x} -${rotor_pos_y} ${rotor_offset_top-0.2}" rpy="0 0 0" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:support>
+
+
+  <xacro:support
+    robot_namespace="${namespace}"
+    suffix="front_left"
+    parent="${namespace}/base_link"
+    support_number="1"
+    color="Grey">
+    <origin xyz="${rotor_pos_x} ${rotor_pos_y} ${rotor_offset_top-0.2}" rpy="0 0 0" />
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:support>
+
+  
+  <xacro:support robot_namespace="${namespace}"
+    suffix="back_left"
+    parent="${namespace}/base_link"
+    support_number="2"
+    color="Grey">
+    <origin xyz="-${rotor_pos_x} ${rotor_pos_y} ${rotor_offset_top-0.2}" rpy="0 0 0" />
+    <xacro:insert_block name="support_inertia" />
+  </xacro:support>
+
+  <xacro:support robot_namespace="${namespace}"
+    suffix="back_right"
+    parent="${namespace}/base_link"
+    support_number="3"
+    color="Grey">
+    <origin xyz="-${rotor_pos_x} -${rotor_pos_y} ${rotor_offset_top-0.2}" rpy="0 0 0" />
+    <xacro:insert_block name="support_inertia" />
+  </xacro:support>
 
 
 </robot>
