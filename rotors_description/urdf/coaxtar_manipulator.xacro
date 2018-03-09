@@ -1,0 +1,386 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find rotors_description)/urdf/manipulator_snippets.xacro" />
+
+  <xacro:property name="link_radius" value="0.01"/>
+
+  <xacro:property name="link1_length" value="0.295"/>
+  <xacro:property name="link2_length" value="0.338"/>
+
+  <xacro:property name="coax_offset" value="0.194"/>
+
+  <xacro:property name="link0_frame">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:property>
+
+  <xacro:property name="link0_inertia">
+    <mass value="0.670"/>
+    <!-- TODO: set hebi intertia -->
+    <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+      iyy="0.0001" iyz="0.0"
+      izz="0.0001"/>
+    </xacro:property>
+
+    <xacro:property name="link1_frame">
+      <origin xyz="0 0 0" rpy="3.14 0 0"/>
+    </xacro:property>
+
+    <xacro:property name="link1_inertia">
+      <mass value="0.113"/>
+      <inertia ixx="0.003757" ixy="0.0" ixz="0.0"
+        iyy="0.000490" iyz="0.001111"
+        izz="0.003297"/>
+      </xacro:property>
+
+    <xacro:property name="link2_frame">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:property>
+
+    <xacro:property name="link2_inertia">
+      <mass value="0.059"/>
+      <inertia ixx="0.003776" ixy="0.0" ixz="0.0"
+        iyy="0.000011" iyz="0.0"
+        izz="0.003777"/>
+      </xacro:property>
+
+          <!--
+          #########################################################################################################################
+          coaxtar manipulator macro:
+          #########################################################################################################################
+        -->
+        <xacro:macro name="coaxtar_manipulator_macro"
+          params="namespace parent_link *origin">
+
+          <joint name="mounting_joint" type="fixed">
+            <parent link="${parent_link}"/>
+            <child link="${namespace}/manipulator_base_link"/>
+            <xacro:insert_block name="origin" />
+          </joint>
+
+          <!-- Here we define base link of closed kinematic chain -->
+          <link name="${namespace}/manipulator_base_link">
+            <inertial>
+              <xacro:insert_block name="link0_frame"/>
+              <xacro:insert_block name="link0_inertia"/>
+            </inertial>
+          </link>
+
+          <link name="${namespace}/link1_1">
+            <collision>
+              <origin xyz="0 0 0" rpy="0 0 0"/>
+              <geometry>
+                <mesh filename="package://rotors_description/meshes/coaxtar_manipulator/back_bottom.STL"/>
+              </geometry>
+            </collision>
+            <visual>
+              <origin xyz="0 0 0" rpy="0 0 0"/>
+              <geometry>
+                <mesh filename="package://rotors_description/meshes/coaxtar_manipulator/back_bottom.STL"/>
+              </geometry>
+            </visual>
+            <!-- <collision>
+              <origin rpy="1.57 0 0" xyz="0 ${link1_length/2} 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link1_length}" />
+              </geometry>
+      	       <material name="white"/>
+            </collision>
+            <visual>
+              <origin rpy="1.57 0 0" xyz="0 ${link1_length/2} 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link1_length}" />
+              </geometry>
+      	       <material name="white"/>
+            </visual> -->
+            <inertial>
+              <xacro:insert_block name="link1_frame"/>
+              <xacro:insert_block name="link1_inertia"/>
+            </inertial>
+          </link>
+
+          <link name="${namespace}/link1_2">
+            <collision>
+              <origin xyz="0 0 0" rpy="0 0 0"/>
+              <geometry>
+                <mesh filename="package://rotors_description/meshes/coaxtar_manipulator/back_top.STL"/>
+              </geometry>
+            </collision>
+            <visual>
+              <origin xyz="0 0 0" rpy="0 0 0"/>
+              <geometry>
+                <mesh filename="package://rotors_description/meshes/coaxtar_manipulator/back_top.STL"/>
+              </geometry>
+            </visual>
+            <!-- <collision>
+              <origin rpy="1.57 0 0" xyz="0 ${link1_length/2} 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link1_length}" />
+              </geometry>
+      	       <material name="white"/>
+            </collision>
+            <visual>
+              <origin rpy="1.57 0 0" xyz="0 ${link1_length/2} 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link1_length}" />
+              </geometry>
+      	       <material name="white"/>
+            </visual> -->
+            <inertial>
+              <xacro:insert_block name="link1_frame"/>
+              <xacro:insert_block name="link1_inertia"/>
+            </inertial>
+          </link>
+
+          <link name="${namespace}/link2_1">
+            <collision>
+              <origin xyz="0 0 0" rpy="0 0 0"/>
+              <geometry>
+                <mesh filename="package://rotors_description/meshes/coaxtar_manipulator/front_bottom.STL"/>
+              </geometry>
+            </collision>
+            <visual>
+              <origin xyz="0 0 0" rpy="0 0 0"/>
+              <geometry>
+                <mesh filename="package://rotors_description/meshes/coaxtar_manipulator/front_bottom.STL"/>
+              </geometry>
+            </visual>
+            <!-- <collision>
+              <origin rpy="1.57 0 0" xyz="0 ${link2_length/2} 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link2_length}" />
+              </geometry>
+      	       <material name="white"/>
+            </collision>
+            <visual>
+              <origin rpy="1.57 0 0" xyz="0 ${link2_length/2} 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link2_length}" />
+              </geometry>
+      	       <material name="white"/>
+            </visual> -->
+            <inertial>
+              <xacro:insert_block name="link2_frame"/>
+              <xacro:insert_block name="link2_inertia"/>
+            </inertial>
+          </link>
+
+          <link name="${namespace}/link2_2">
+            <collision>
+              <origin xyz="0 0 0" rpy="0 0 0"/>
+              <geometry>
+                <mesh filename="package://rotors_description/meshes/coaxtar_manipulator/front_top.STL"/>
+              </geometry>
+            </collision>
+            <visual>
+              <origin xyz="0 0 0" rpy="0 0 0"/>
+              <geometry>
+                <mesh filename="package://rotors_description/meshes/coaxtar_manipulator/front_top.STL"/>
+              </geometry>
+            </visual>
+            <!-- <collision>
+              <origin rpy="1.57 0 0" xyz="0 ${link2_length/2} 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link2_length}" />
+              </geometry>
+      	       <material name="white"/>
+            </collision>
+            <visual>
+              <origin rpy="1.57 0 0" xyz="0 ${link2_length/2} 0"/>
+              <geometry>
+                <cylinder radius="${link_radius}" length="${link2_length}" />
+              </geometry>
+      	       <material name="white"/>
+            </visual> -->
+            <inertial>
+              <xacro:insert_block name="link2_frame"/>
+              <xacro:insert_block name="link2_inertia"/>
+            </inertial>
+          </link>
+
+          <!-- Define joints -->
+          <xacro:revolute_joint_macro
+            namespace="${namespace}"
+            joint_name="${namespace}/joint_1"
+            parent_link="${namespace}/manipulator_base_link"
+            child_link="${namespace}/link1_1"
+            axis="0 0 -1"
+            friction="0"
+            damping="0.1">
+            <origin xyz="0 0 ${-coax_offset/2}" rpy="0 0 0"/>
+          </xacro:revolute_joint_macro>
+
+          <xacro:revolute_joint_macro
+            namespace="${namespace}"
+            joint_name="${namespace}/joint_2"
+            parent_link="${namespace}/manipulator_base_link"
+            child_link="${namespace}/link1_2"
+            axis="0 0 1"
+            friction="0"
+            damping="0.1">
+            <origin xyz="0 0 ${coax_offset/2}" rpy="0 0 0"/>
+          </xacro:revolute_joint_macro>
+
+          <xacro:revolute_joint_macro
+            namespace="${namespace}"
+            joint_name="${namespace}/joint_3"
+            parent_link="${namespace}/link1_1"
+            child_link="${namespace}/link2_1"
+            axis="0 0 -1"
+            friction="0"
+            damping="0.1">
+            <origin xyz="0 ${link1_length} ${coax_offset/2}" rpy="0 0 0"/>
+          </xacro:revolute_joint_macro>
+
+          <xacro:revolute_joint_macro
+            namespace="${namespace}"
+            joint_name="${namespace}/joint_4"
+            parent_link="${namespace}/link1_2"
+            child_link="${namespace}/link2_2"
+            axis="0 0 1"
+            friction="0"
+            damping="0.1">
+            <origin xyz="0 ${link1_length} ${-coax_offset/2}" rpy="0 0 0"/>
+          </xacro:revolute_joint_macro>
+
+          <xacro:gazebo_revolute_joint_macro
+            namespace="${namespace}"
+            joint_name="${namespace}/joint_5"
+            parent_link="${namespace}/link2_1"
+            child_link="${namespace}/link2_2"
+            pose="0 ${link2_length} 0 0 0 0"
+            axis="0 0 1"
+            friction="0"
+            damping="0.1"
+            spring_reference="0"
+            spring_stiffness="0"
+            lower_limit="-1e+16"
+            upper_limit="1e+16"
+            effort_limit="1000">
+          </xacro:gazebo_revolute_joint_macro>
+
+      <!-- Attach actuators -->
+      <xacro:property name="generic_servo_inertial">
+        <inertial>
+          <mass value="0.070"/>
+          <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+            iyy="0.001" iyz="0.0"
+            izz="0.001"/>
+          </inertial>
+        </xacro:property>
+
+        <xacro:hebi_actuator_plugin
+          namespace="${namespace}"
+          motor_name="X5-4/M1"
+          parent_link="${namespace}/manipulator_base_link"
+          actuated_joint="${namespace}/joint_1"
+          maxTorque="2"
+          noLoadSpeed="0.11"
+          Kp="30.0"
+          Kd="0.05"
+          Ki="0.40"
+          minAngle="${-pi}"
+          maxAngle="${pi}"
+          measurement_divisor="1"
+          measurement_delay="0"
+          unknown_delay="0.0"
+          noise_normal_angle="0.0"
+          noise_normal_angular_velocity="0.0"
+          noise_normal_torque="0.0"
+          noise_uniform_angle="0.0"
+          noise_uniform_angular_velocity="0.0"
+          noise_uniform_torque="0.0"
+          enable_visual="true"
+          visual_scale="1"
+          color="Red">
+          <origin xyz="0 0 ${-coax_offset/2}" rpy="0 3.14 1.57"/>
+          <xacro:insert_block name="generic_servo_inertial"/>
+        </xacro:hebi_actuator_plugin>
+
+        <xacro:hebi_actuator_plugin
+          namespace="${namespace}"
+          motor_name="X5-4/M2"
+          parent_link="${namespace}/manipulator_base_link"
+          actuated_joint="${namespace}/joint_2"
+          maxTorque="2"
+          noLoadSpeed="0.11"
+          Kp="30.0"
+          Kd="0.05"
+          Ki="0.40"
+          minAngle="${-pi}"
+          maxAngle="${pi}"
+          measurement_divisor="1"
+          measurement_delay="0"
+          unknown_delay="0.0"
+          noise_normal_angle="0.0"
+          noise_normal_angular_velocity="0.0"
+          noise_normal_torque="0.0"
+          noise_uniform_angle="0.0"
+          noise_uniform_angular_velocity="0.0"
+          noise_uniform_torque="0.0"
+          enable_visual="true"
+          visual_scale="1"
+          color="Red">
+          <origin xyz="0 0 ${coax_offset/2}" rpy="0 0 -1.57"/>
+          <xacro:insert_block name="generic_servo_inertial"/>
+        </xacro:hebi_actuator_plugin>
+
+
+        <!-- Initial configuration plugin -->
+        <gazebo>
+          <plugin name="initial_configuration" filename="librotors_gazebo_robot_initial_configuration_plugin.so">
+            <robotNamespace>${namespace}</robotNamespace>
+            <initial_configuration>
+              <config joint_name="${namespace}/joint_1"  initial_position="-0.5234"/>
+              <config joint_name="${namespace}/joint_3"  initial_position="0.975"/>
+              <config joint_name="${namespace}/joint_2"  initial_position="-0.5234"/>
+              <config joint_name="${namespace}/joint_4"  initial_position="0.975"/>
+            </initial_configuration>
+            <loop_closure_joints>
+              <joint joint_name="${namespace}/joint_5"/>
+            </loop_closure_joints>
+          </plugin>
+        </gazebo>
+
+        <!-- 6DoF shock absorber plugin -->
+        <!-- <gazebo>
+          <plugin name="6dof_shock_absorber" filename="librotors_gazebo_six_dof_shock_absorber_plugin.so">
+            <robotNamespace>${namespace}</robotNamespace>
+            <ParentLinkName>${parent_link} </ParentLinkName>
+            <ChildLinkName>${namespace}/r0 </ChildLinkName>
+            <translational_spring_constant>10 10 50</translational_spring_constant>
+            <translational_damper_constant>5 5 20</translational_damper_constant>
+            <rotational_spring_constant>8 15 8</rotational_spring_constant>
+            <rotational_damper_constant>1 1 1</rotational_damper_constant>
+          </plugin>
+        </gazebo> -->
+
+        <!-- Instantiate force sensor on end-effector -->
+      	<!-- <xacro:force_sensor_plugin_macro
+      		namespace="${namespace}"
+      		force_sensor_suffix="ee"
+      		parent_link="${namespace}/link2_2"
+      		force_sensor_topic="force_sensor"
+      		force_sensor_truth_topic="force_sensor_truth"
+      		wrench_vector_pub_topic="wrench_vector"
+      		parent_frame_id="${namespace}/link2_2"
+      		reference_frame_id="world"
+      		mass_force_sensor="0.001"
+      		lin_force_meas_enabled="true"
+      		torque_meas_enabled="false"
+      		disp_wrench_vector="true"
+      		measurement_divisor="1"
+      		measurement_delay="0"
+      		unknown_delay="0.0"
+      		cutoff_frequency="10.0"
+      		noise_normal_linear_force="0 0 0"
+      		noise_normal_torque="0 0 0"
+      		noise_uniform_linear_force="0 0 0"
+      		noise_uniform_torque="0 0 0" >
+      		<inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/> -->
+      		<!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+      		<!-- <origin xyz="0.0 ${link2_length} 0.0" rpy="1.57 0.8 0"/>
+      	</xacro:force_sensor_plugin_macro> -->
+
+      </xacro:macro>
+
+    </robot>

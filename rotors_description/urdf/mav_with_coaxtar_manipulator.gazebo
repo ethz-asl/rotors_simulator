@@ -25,7 +25,7 @@
 
   <!-- Instantiate firefly with a generic odometry sensor. -->
   <xacro:include filename="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
-  <xacro:include filename="$(find overactuated_description)/urdf/coaxtar_manipulator.xacro" />
+  <xacro:include filename="$(find rotors_description)/urdf/coaxtar_manipulator.xacro" />
 
   <!-- <link name="world"/> -->
   <!-- Mount a closed chain arm on the belly of the neo11. -->
