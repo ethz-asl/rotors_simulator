@@ -1,0 +1,19 @@
+<sdf version='1.5'>
+  <model name='windturbine'>
+    <!-- body -->
+    <pose>0 0 0 0 0 0</pose>
+    <link name='base_link'>
+      <pose frame=''>0 0 0 0 0 0</pose>
+    
+      <visual name='base_link_visual'>
+        <pose frame=''>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://windturbine/meshes/nearthlab_windturbine_A_shape.dae</uri>
+          </mesh>
+        </geometry>        
+      </visual>
+    </link>
+  </model>
+</sdf>

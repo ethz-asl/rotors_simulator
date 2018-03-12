@@ -9,6 +9,13 @@
       <uri>model://sun</uri>
     </include>
 
+    <include>
+      <uri>model://windturbine</uri>
+      <name>windturbine</name>
+      <static>true</static>
+      <pose>10 0 0 0 0 0</pose>
+    </include>
+
     <!-- Only one ROS interface plugin is required per world, as any other plugin can connect a Gazebo
          topic to a ROS topic (or vise versa). -->
     <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so"/>
@@ -24,7 +31,7 @@
       <ode>
         <solver>
           <type>quick</type>
-          <iters>50</iters> <!-- simulating iterations per one step -->
+          <iters>10</iters> <!-- simulating iterations per one step -->
           <sor>1.3</sor>
         </solver>
         <constraints>

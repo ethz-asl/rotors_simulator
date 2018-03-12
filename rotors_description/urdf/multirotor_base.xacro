@@ -155,8 +155,9 @@
       <child link="${robot_namespace}/support_${support_number}" />
     </joint>
     <link name="${robot_namespace}/support_${support_number}">
+    
       <inertial>
-        <mass value="0.001" /> <!-- [kg] -->
+        <mass value="0.1" /> [kg] 
         <xacro:insert_block name="inertia" />
       </inertial>
       <visual>
@@ -166,11 +167,42 @@
       </visual>
       <collision>
         <geometry>
-          <cylinder length="0.2" radius="0.01" /> <!-- [m] -->
+          <cylinder length="0.1" radius="0.01" /> <!-- [m] -->
         </geometry>
       </collision>
     </link>
     <gazebo reference="${robot_namespace}/support_${support_number}">
+      <material>Gazebo/${color}</material>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:macro name="cmarker"
+    params="robot_namespace suffix parent cmarker_number color *origin *inertia">
+    <joint name="${robot_namespace}/cmarker_${cmarker_number}_joint" type="continuous">
+      <xacro:insert_block name="origin" />
+      <axis xyz="0 0 1" />
+      <parent link="${parent}" />
+      <child link="${robot_namespace}/cmarker_${cmarker_number}" />
+    </joint>
+    <link name="${robot_namespace}/cmarker_${cmarker_number}">
+      <inertial>
+        <mass value="0.00001" /> <!-- [kg] -->
+        <xacro:insert_block name="inertia" />
+      </inertial>
+      <visual>
+        <geometry>
+          <cylinder length="0.2" radius="0.018"/> --> <!-- [m] -->
+        </geometry>
+      </visual>
+      <!--
+      <collision>
+        <geometry>
+          <cylinder length="0.2" radius="0.01" />
+        </geometry>
+      </collision>
+      -->
+    </link>
+    <gazebo reference="${robot_namespace}/cmarker_${cmarker_number}">
       <material>Gazebo/${color}</material>
     </gazebo>
   </xacro:macro>
