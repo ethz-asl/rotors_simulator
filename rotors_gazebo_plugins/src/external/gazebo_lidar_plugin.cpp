@@ -38,6 +38,13 @@
 
 #include "rotors_gazebo_plugins/common.h"
 
+// 3RD PARTY
+#include "mav_msgs/default_topics.h"
+
+// USER
+#include "ConnectGazeboToRosTopic.pb.h"
+ #include <sstream>
+
 using namespace gazebo;
 using namespace std;
 
@@ -46,6 +53,7 @@ GZ_REGISTER_SENSOR_PLUGIN(GazeboLidarPlugin)
 
 
 GazeboLidarPlugin::GazeboLidarPlugin()
+      : pubs_and_subs_created_(false)
 {
 }
 
@@ -101,23 +109,30 @@ void GazeboLidarPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   else
     gzwarn << "[gazebo_lidar_plugin] Please specify a robotNamespace.\n";
 
-  node_handle_ = transport::NodePtr(new transport::Node());
-  node_handle_->Init(namespace_);
+  boost::replace_all(namespace_, "/", "");
 
+  //getSdfParam<std::string>(_sdf, "lidarTopic", lidar_topic_,
+  //                         mav_msgs::default_topics::LIDAR_TOPIC);
+
+
+  node_handle_ = gazebo::transport::NodePtr(new transport::Node());
+  node_handle_->Init();
+
+  
 #if GAZEBO_MAJOR_VERSION >= 7
   const string scopedName = _parent->ParentName();
 #else
   const string scopedName = _parent->GetParentName();
 #endif
-  string topicName = "~/" + scopedName + "/lidar";
-  boost::replace_all(topicName, "::", "/");
-
-  lidar_pub_ = node_handle_->Advertise<lidar_msgs::msgs::lidar>(topicName, 10);
 }
-
 
 void GazeboLidarPlugin::OnNewLaserScans()
 {
+  if (!pubs_and_subs_created_) {
+    CreatePubsAndSubs();
+    pubs_and_subs_created_ = true;
+  }
+  
   lidar_message.set_time_msec(0);
 #if GAZEBO_MAJOR_VERSION >= 7
   lidar_message.set_min_distance(parentSensor->RangeMin());
@@ -129,5 +144,28 @@ void GazeboLidarPlugin::OnNewLaserScans()
   lidar_message.set_current_distance(parentSensor->GetRange(0));
 #endif
 
-  lidar_pub_->Publish(lidar_message);
+  std_msgs::String msg;
+  std::stringstream ss;
+  int i;
+  ss << "[ ";
+  for(i=0; i<8; i++)
+  {
+    ss << parentSensor->GetRange(i) <<" ";
+  }
+  ss << "]";
+  msg.data = ss.str();
+  lidar_pub_.publish(msg);
 }
+
+
+void GazeboLidarPlugin::CreatePubsAndSubs() 
+{
+  gzdbg << "Lidar pub , ros init = " << ros::isInitialized() << std::endl;
+  ros::NodeHandle nh;
+  //rosnode_ = new ros::NodeHandle("niv1");
+  //lidar_pub_ = nh.advertise<lidar_msgs::msgs::lidar>("/niv1/lidar", 10);
+  lidar_pub_ = nh.advertise<std_msgs::String>("/niv1/lidar", 10);
+  
+}
+
+

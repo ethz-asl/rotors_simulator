@@ -29,6 +29,12 @@
 
 #include "Lidar.pb.h"
 
+#include <mav_msgs/default_topics.h>
+#include <ros/callback_queue.h>
+#include <ros/ros.h>
+#include <tf/transform_broadcaster.h>
+#include "std_msgs/String.h"
+
 namespace gazebo
 {
   /// \brief    A Gazebo LIDAR plugin.
@@ -52,10 +58,21 @@ namespace gazebo
 
     /// \brief The parent sensor
     private: 
+      bool pubs_and_subs_created_;
+      /// \brief    Creates all required publishers and subscribers, incl. routing of messages to/from ROS if required.
+      /// \details  Call this once the first time OnUpdate() is called (can't
+      ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
+      ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
+      void CreatePubsAndSubs();
+
+      ros::NodeHandle* rosnode_;
+
       sensors::RaySensorPtr parentSensor;
       transport::NodePtr node_handle_;
-      transport::PublisherPtr lidar_pub_;
+      //transport::PublisherPtr lidar_pub_;
+      ros::Publisher lidar_pub_;
       std::string namespace_;
+      std::string lidar_topic_;
 
 
     /// \brief The connection tied to RayPlugin::OnNewLaserScans()

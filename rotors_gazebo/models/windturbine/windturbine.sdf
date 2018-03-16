@@ -14,6 +14,15 @@
           </mesh>
         </geometry>        
       </visual>
+      <collision name="collision_poll">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>2.1</radius>
+            <length>20</length>
+          </cylinder>
+        </geometry>
+      </collision>
     </link>
   </model>
 </sdf>

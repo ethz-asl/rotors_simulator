@@ -967,10 +967,10 @@
       gps_topic="gps"
       ground_speed_topic="ground_speed"
       mass_gps_sensor="0.015"
-      horizontal_pos_std_dev="3.0"
-      vertical_pos_std_dev="6.0"
-      horizontal_vel_std_dev="0.1"
-      vertical_vel_std_dev="0.1">
+      horizontal_pos_std_dev="0.0"
+      vertical_pos_std_dev="0.0"
+      horizontal_vel_std_dev="0.0"
+      vertical_vel_std_dev="0.0">
       <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:gps_plugin_macro>

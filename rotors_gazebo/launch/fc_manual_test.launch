@@ -11,6 +11,7 @@
     <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
     <!-- <arg name="debug" value="true"/> -->
     <arg name="paused" value="false"/>
+    <arg name="verbose" value="true"/>
     <!-- <arg name="gui" value="false"/> -->
   </include>
 

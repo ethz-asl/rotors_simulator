@@ -232,7 +232,7 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   // ============================================ //
   gz_gps_pub_ = node_handle_->Advertise<gz_sensor_msgs::NavSatFix>(
       "~/" + namespace_ + "/" + gps_topic_, 1);
-
+  
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
                                                    gps_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + gps_topic_);

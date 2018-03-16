@@ -32,7 +32,7 @@
   <!-- <xacro:ros_interface_plugin_macro namespace="${namespace}" />-->
   <xacro:if value="$(arg enable_mavlink_interface)">
     <!-- Instantiate mavlink telemetry interface. -->
-    <xacro:niv1_mavlink_interface namespace="${namespace}" imu_sub_topic="imu" rotor_count="6" />
+    <xacro:niv1_mavlink_interface namespace="${namespace}" imu_sub_topic="imu" rotor_count="4" />
   </xacro:if>
   <!-- Mount an ADIS16448 IMU. -->
   
@@ -49,12 +49,12 @@
     </geometry>
   </xacro:camera_joint_macro>
 
-  <!-- Camera Sensor-->
+  <!-- Camera Sensor
   <xacro:camera_macro namespace="${namespace}" parent_link="${namespace}/base_link" camera_suffix="${namespace}/camera_suffix" frame_rate="${namespace}/frame_rate" horizontal_fov="1.3962634" image_width="752" image_height="480" image_format="L8" min_distance="0.02" max_distance="30" noise_mean="0.0" noise_stddev="0.007" enable_visual="true">
     <mesh filename="package://rotors_description/meshes/vi_camera.dae" scale="1 1 1" />
     <origin xyz="0 0 -0.035" rpy="0 0 0" />
   </xacro:camera_macro>
-  
+  -->
   <xacro:if value="$(arg enable_ground_truth)">
     <xacro:ground_truth_imu_and_odometry namespace="${namespace}" parent_link="${namespace}/base_link" />
   </xacro:if>
@@ -66,10 +66,7 @@
   <!--LIDAR Sensor-->
   <xacro:lidar_macro namespace="${namespace}" parent_link="${namespace}/base_link">
     <!-- <origin xyz="0 0 -0.035" rpy="0 0 0" /> -->
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <geometry>
-      <cylinder length="0.02" radius="0.015" />
-    </geometry>
+    <origin xyz="0.6 0 0" rpy="0 0 0" />    
   </xacro:lidar_macro>
    
   <!-- Nearthlab Payload -->
@@ -79,13 +76,4 @@
         <mesh filename="package://rotors_description/meshes/nearthlab_payload.dae" scale="0.0004 0.0004 0.0004" />
       </geometry>
   </xacro:payload_macro> -->
-
-  <!-- Nearthlab Windturbine 
-  <xacro:windturbine_macro namespace="${namespace}" parent_link="${namespace}/base_link" >
-    <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://rotors_description/meshes/nearthlab_windturbine_A_shape.dae" scale="0.05 0.05 0.05" />
-      </geometry>
-  </xacro:windturbine_macro>
-  -->
 </robot>
