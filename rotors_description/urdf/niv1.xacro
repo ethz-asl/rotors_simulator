@@ -39,6 +39,7 @@
   <xacro:property name="motor_constant_for_ros_sim" value="8.54858e-05" /> <!-- [kg m/s^2]  force = real_motor_velocity * real_motor_velocity * motor_constant_-->
   <xacro:property name="motor_constant" value="1.2e-04" /> <!-- [kg m/s^2]  force = real_motor_velocity * real_motor_velocity * motor_constant_-->
   
+  <xacro:property name="moment_constant_org" value="0.025" /> <!-- [m] math::Vector3 drag_torque(0, 0, -turning_direction_ * force * moment_constant_); -->
   <xacro:property name="moment_constant" value="0.025" /> <!-- [m] math::Vector3 drag_torque(0, 0, -turning_direction_ * force * moment_constant_); -->
   
   <xacro:property name="time_constant_up" value="0.00125" /> <!-- [s] -->

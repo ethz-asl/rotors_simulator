@@ -119,7 +119,7 @@ void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
   joint_state_msg_.clear_name();
   joint_state_msg_.clear_position();
 
-  link_->SetAngularVel(link_->GetRelativeAngularVel() * (1-angular_air_resistance_)); // added by hjs
+  link_->SetAngularVel(link_->GetWorldAngularVel() * (1-angular_air_resistance_)); // added by hjs
   link_->SetLinearVel (link_->GetWorldLinearVel    () * (1- linear_air_resistance_)); // added by hjs
   
   MotorNumberToJointMap::iterator m;
