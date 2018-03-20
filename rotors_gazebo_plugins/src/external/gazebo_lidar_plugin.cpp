@@ -35,6 +35,8 @@
 #include <memory>
 #include <stdio.h>
 #include <boost/algorithm/string.hpp>
+#include "std_msgs/Float32MultiArray.h"
+#include "std_msgs/MultiArrayDimension.h"
 
 #include "rotors_gazebo_plugins/common.h"
 
@@ -144,17 +146,32 @@ void GazeboLidarPlugin::OnNewLaserScans()
   lidar_message.set_current_distance(parentSensor->GetRange(0));
 #endif
 
-  std_msgs::String msg;
-  std::stringstream ss;
-  int i;
-  ss << "[ ";
-  for(i=0; i<8; i++)
+  std_msgs::Float32MultiArray array_msg;
+  array_msg.data.clear();
+  std_msgs::MultiArrayDimension dim;
+  dim.label = "ranges";
+  dim.size = 8;
+  dim.stride = 8;
+  array_msg.layout.dim.push_back(dim);
+  std::vector<double> ranges;
+  
+  parentSensor->Ranges(ranges);
+  int count = ranges.size();
+  int resolution = count / 8;
+  int i,k;
+  float range, min_range;
+  for(i=7; i>=0; i--)
   {
-    ss << parentSensor->GetRange(i) <<" ";
+    //ss << parentSensor->GetRange(i) <<" ";
+    min_range = parentSensor->RangeMax();
+    for( k=0; k<resolution; k++ )
+    {
+      range = ranges[(i*resolution) + k];
+      if( range < min_range ){ min_range = range; }
+    }
+    array_msg.data.push_back(min_range);
   }
-  ss << "]";
-  msg.data = ss.str();
-  lidar_pub_.publish(msg);
+  lidar_pub_.publish(array_msg);
 }
 
 
@@ -164,7 +181,7 @@ void GazeboLidarPlugin::CreatePubsAndSubs()
   ros::NodeHandle nh;
   //rosnode_ = new ros::NodeHandle("niv1");
   //lidar_pub_ = nh.advertise<lidar_msgs::msgs::lidar>("/niv1/lidar", 10);
-  lidar_pub_ = nh.advertise<std_msgs::String>("/niv1/lidar", 10);
+  lidar_pub_ = nh.advertise<std_msgs::Float32MultiArray>("/niv1/lidar", 10);
   
 }
 

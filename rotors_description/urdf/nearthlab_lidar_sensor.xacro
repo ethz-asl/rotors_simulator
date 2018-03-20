@@ -1,6 +1,15 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:property name="pi" value="3.14159265359" />
+  <xacro:property name="resolution" value="3" />
+  <xacro:property name="sample" value="8" />
+  <xacro:property name="min_angle_deg" value="-24" />
+  <xacro:property name="max_angle_deg" value="24" />
+  <xacro:property name="view_angle_deg" value="${max_angle_deg-min_angle_deg}" />
+  <xacro:property name="slot_angle_deg" value="${(view_angle_deg/sample)/resolution}" />
+  
+  
+  
   <xacro:macro name="lidar_macro" params="namespace parent_link *origin">
 
     <link name="${namespace}/lidar_link">
@@ -30,10 +39,10 @@
         <ray>
           <scan>
             <horizontal>
-              <samples>8</samples>
-              <resolution>1</resolution>
-              <min_angle>${-24.0/180.0*pi}</min_angle>
-              <max_angle>${ 24.0/180.0*pi}</max_angle>
+              <samples>${sample}</samples>
+              <resolution>${resolution}</resolution>
+              <min_angle>${(min_angle_deg+(slot_angle_deg/2))/180.0*pi}</min_angle>
+              <max_angle>${(max_angle_deg-(slot_angle_deg/2))/180.0*pi}</max_angle>
             </horizontal>
           </scan>
           <range>
