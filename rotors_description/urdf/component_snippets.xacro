@@ -51,13 +51,10 @@
       </collision>
       <xacro:if value="${enable_visual}">
         <visual>
-          <!-- <origin xyz="0 0 0" rpy="0 ${pi/2} 0" /> -->
-          <!-- <origin xyz="0 0 0" rpy="0 ${pi} 0" /> -->
-          <origin xyz="0.01 0 0" rpy="0 ${pi/2} 0" />
+          <origin xyz="0 0 0" rpy="0 0 0" />
           <geometry>
             <xacro:insert_block name="geometry" />
           </geometry>
-          <material name="red" />
         </visual>
       </xacro:if>
       <inertial>
@@ -73,11 +70,11 @@
     </joint>
     <link name="${namespace}/camera_${camera_suffix}_optical_link" />
     <joint name="${namespace}/camera_${camera_suffix}_optical_joint" type="fixed" >
-      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+      <origin xyz="0.02 0 0" rpy="0 0 0" />
       <parent link="${namespace}/camera_${camera_suffix}_link" />
       <child link="${namespace}/camera_${camera_suffix}_optical_link" />
     </joint>
-    <gazebo reference="${namespace}/camera_${camera_suffix}_link">
+    <gazebo reference="${namespace}/camera_${camera_suffix}_optical_link">
       <sensor type="camera" name="${namespace}_camera_${camera_suffix}">
         <update_rate>${frame_rate}</update_rate>
         <camera name="head">

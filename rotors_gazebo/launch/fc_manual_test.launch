@@ -2,7 +2,7 @@
   <arg name="mav_name" default="niv1"/>
   <arg name="world_name" default="nlab_basic"/>
   <arg name="enable_logging" default="false" />
-  <arg name="enable_ground_truth" default="true" />
+  <arg name="enable_ground_truth" default="false" />
   <arg name="log_file" default="$(arg mav_name)" />
 
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
@@ -25,17 +25,10 @@
     </include>
     <node name="joy_node" pkg="joy" type="joy_node" />
     <node name="rotors_joy_interface" pkg="rotors_joy_interface" type="rotors_joy_interface" />
-    <!--
-    <node name="roll_pitch_yawrate_thrust_controller_node" pkg="rotors_control" type="roll_pitch_yawrate_thrust_controller_node" output="screen">
-      <rosparam
-        command="load" file="$(find rotors_gazebo)/resource/roll_pitch_yawrate_thrust_controller_$(arg mav_name).yaml" />
-      <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name).yaml" />
-      <remap from="odometry" to="odometry_sensor1/odometry" />
-    </node>
-    -->
     <node name="motor_control_publisher_node" pkg="fc_simulator_nearthlab" type="motor_control_publisher_node" >
       <param name="com_port" type="string" value="/dev/ttyUSB0"/>
     </node>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
   </group>
+  
 </launch>

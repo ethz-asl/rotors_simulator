@@ -2,7 +2,7 @@
 <sdf version="1.4">
   <world name="default">
     <include>
-      <uri>model://ground_plane</uri>
+      <uri>model://ground_plane1</uri>
     </include>
     
     <include>
@@ -48,6 +48,7 @@
     </physics>
     <scene>
       <shadows>0</shadows>
+      <background>0.1 0.4 0.8 1</background>
     </scene>
     <gui>
       <camera name="user_default">

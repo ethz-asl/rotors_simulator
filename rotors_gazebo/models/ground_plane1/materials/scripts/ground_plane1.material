@@ -1,0 +1,19 @@
+material vrc/ground_plane1
+{
+	technique
+	{
+		pass
+		{
+			ambient 0.5 0.5 0.5 1.0
+			diffuse 0.5 0.5 0.5 1.0
+			specular 0.2 0.2 0.2 1.0 12.5
+
+			texture_unit
+			{
+				texture green_block.png
+				filtering none
+				scale 1 1
+			}
+		}
+	}
+}

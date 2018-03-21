@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="ground_plane1">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>50 50 .1</size>
+          </box>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0</mu>
+              <mu2>0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <cast_shadows>false</cast_shadows>
+        <geometry>
+          <box>
+            <size>500 500 .1</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://ground_plane1/materials/scripts</uri>
+            <uri>model://ground_plane1/materials/textures</uri>
+            <name>vrc/ground_plane1</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

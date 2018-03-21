@@ -1,4 +1,7 @@
 <?xml version="1.0"?>
+<!--
+  Copyright 2018 Nearthalb Inc.
+-->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:property name="pi" value="3.14159265359" />
   <xacro:property name="resolution" value="3" />
@@ -8,36 +11,37 @@
   <xacro:property name="view_angle_deg" value="${max_angle_deg-min_angle_deg}" />
   <xacro:property name="slot_angle_deg" value="${(view_angle_deg/sample)/resolution}" />
   
-  
-  
   <xacro:macro name="lidar_macro" params="namespace parent_link *origin">
 
     <link name="${namespace}/lidar_link">
-      <inertial>
-        <pose>0 0 0 0 0 0</pose>
-        <mass value="0.01" />
-        <inertia ixx="2.1733e-6" ixy="0" ixz="0" iyy="2.1733e-6" iyz="0" izz="1.8e-7" />
-      </inertial>
       <visual name="visual">
-        <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
         <geometry>
-          <cylinder length="0.02" radius="0.015" />
-        </geometry>
-        <material name="Grey" />
+          <mesh filename="package://rotors_description/meshes/leddarvu.dae" scale="1 1 1" />
+        </geometry>        
       </visual>
-    </link>
-    <joint name="${namespace}_lidar_joint" type="fixed">
+    </link>    
+    <joint name="${namespace}/lidar_joint" type="fixed">
       <xacro:insert_block name="origin" />
       <parent link="${parent_link}" />
       <child link="${namespace}/lidar_link" />
     </joint>
-    <gazebo reference="${namespace}/lidar_link">
+    
+    <link name="${namespace}/lidar_optical_link">      
+    </link>
+    <joint name="${namespace}/lidar_optical_joint" type="fixed">
+      <origin xyz="0.03 0 0" rpy="0 0 0" />
+      <parent link="${namespace}/lidar_link" />
+      <child link="${namespace}/lidar_optical_link" />
+    </joint>
+
+    <gazebo reference="${namespace}/lidar_optical_link">      
       <sensor type="ray" name="${namespace}_lidar">
         <pose>0 0 0 0 0 0</pose>
         <visualize>true</visualize>
         <update_rate>100</update_rate>
-        <ray>
-          <scan>
+        <ray>          
+          <scan>            
             <horizontal>
               <samples>${sample}</samples>
               <resolution>${resolution}</resolution>
