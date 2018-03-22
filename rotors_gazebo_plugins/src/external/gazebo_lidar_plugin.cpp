@@ -113,8 +113,9 @@ void GazeboLidarPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   boost::replace_all(namespace_, "/", "");
 
-  //getSdfParam<std::string>(_sdf, "lidarTopic", lidar_topic_,
-  //                         mav_msgs::default_topics::LIDAR_TOPIC);
+  
+  getSdfParam<std::string>(_sdf, "lidarTopic", lidar_topic_,
+                           mav_msgs::default_topics::LIDAR_TOPIC);
 
 
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
@@ -181,7 +182,7 @@ void GazeboLidarPlugin::CreatePubsAndSubs()
   ros::NodeHandle nh;
   //rosnode_ = new ros::NodeHandle("niv1");
   //lidar_pub_ = nh.advertise<lidar_msgs::msgs::lidar>("/niv1/lidar", 10);
-  lidar_pub_ = nh.advertise<std_msgs::Float32MultiArray>("/niv1/lidar", 10);
+  lidar_pub_ = nh.advertise<std_msgs::Float32MultiArray>("/"+namespace_+"/"+lidar_topic_, 10);
   
 }
 

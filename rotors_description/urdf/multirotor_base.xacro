@@ -155,7 +155,6 @@
       <child link="${robot_namespace}/support_${support_number}" />
     </joint>
     <link name="${robot_namespace}/support_${support_number}">
-    
       <inertial>
         <mass value="0.1" /> [kg] 
         <xacro:insert_block name="inertia" />

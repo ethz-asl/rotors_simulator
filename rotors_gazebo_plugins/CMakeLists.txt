@@ -451,7 +451,12 @@ else()
   message(STATUS "Gazebo version is less than 5, not building liftdrag_plugin.cpp.")
 endif()
 
-
+add_library(gazebo_front_gimbal_plugin SHARED src/external/gazebo_front_gimbal_plugin.cpp)
+target_link_libraries(gazebo_front_gimbal_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+if (NOT NO_ROS)
+  add_dependencies(gazebo_front_gimbal_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install gazebo_front_gimbal_plugin)
 
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 if (NOT NO_ROS)

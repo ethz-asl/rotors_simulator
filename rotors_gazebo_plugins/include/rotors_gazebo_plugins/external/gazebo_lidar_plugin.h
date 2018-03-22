@@ -74,7 +74,6 @@ namespace gazebo
       std::string namespace_;
       std::string lidar_topic_;
 
-
     /// \brief The connection tied to RayPlugin::OnNewLaserScans()
     private: 
       event::ConnectionPtr newLaserScansConnection;

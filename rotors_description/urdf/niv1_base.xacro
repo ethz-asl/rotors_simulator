@@ -26,10 +26,15 @@
   
   <!-- Instantiate niv1 "mechanics" -->
   <xacro:include filename="$(find rotors_description)/urdf/niv1.xacro" />
-  <!-- Instantiate a controller. -->
+  
+    <!-- Instantiate a controller. -->
   <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />
-  <!-- Instantiate a ROS message interface -->
-  <!-- <xacro:ros_interface_plugin_macro namespace="${namespace}" />-->
+  <!-- Instantiate a ROS message interface 
+  <xacro:ros_interface_plugin_macro namespace="${namespace}" />
+  -->
+  
+  <xacro:include filename="$(find rotors_description)/urdf/gimbal_front_v1.xacro" />
+
   <xacro:if value="$(arg enable_mavlink_interface)">
     <!-- Instantiate mavlink telemetry interface. -->
     <xacro:niv1_mavlink_interface namespace="${namespace}" imu_sub_topic="imu" rotor_count="4" />
@@ -40,16 +45,25 @@
   <xacro:niv1_magnetometer namespace="${namespace}" parent_link="${namespace}/base_link" />
   <xacro:niv1_pressure_sensor namespace="${namespace}" parent_link="${namespace}/base_link" />
 
+  <xacro:gimbal_macro namespace="${namespace}" parent_link="${namespace}/base_link" >
+    <origin xyz="0.36 0 0.03" rpy="0 0 0" />
+  </xacro:gimbal_macro>
+  
   <!-- Camera Sensor -->
-  <xacro:camera_macro namespace="${namespace}" parent_link="${namespace}/base_link" camera_suffix="0" frame_rate="30" horizontal_fov="1.448622" image_width="640" image_height="480" image_format="" min_distance="0.02" max_distance="200" noise_mean="0.0" noise_stddev="0.007" enable_visual="true">
+  <xacro:camera_macro namespace="${namespace}" parent_link="${namespace}/gimbal_plate_link" camera_suffix="0" frame_rate="30" horizontal_fov="1.448622" image_width="640" image_height="480" image_format="" min_distance="0.02" max_distance="200" noise_mean="0.0" noise_stddev="0.007" enable_visual="true">
     <mesh filename="package://rotors_description/meshes/csi_camera.dae" scale="1 1 1" />
-    <origin xyz="0.45 0 0.05" rpy="0 0 0" />
+    <origin xyz="0.02 -0.02 0.02" rpy="0 0 0" />
   </xacro:camera_macro>
 
   <!--LIDAR Sensor-->
-  <xacro:lidar_macro namespace="${namespace}" parent_link="${namespace}/base_link">
+  <xacro:lidar_macro namespace="${namespace}" parent_link="${namespace}/base_link" lidar_number="0">
     <!-- <origin xyz="0 0 -0.035" rpy="0 0 0" /> -->
-    <origin xyz="0.4 0 0" rpy="0 0 0" />    
+    <origin xyz="0.34 0 -0.1" rpy="0 0 0" />    
+  </xacro:lidar_macro>
+
+  <xacro:lidar_macro namespace="${namespace}" parent_link="${namespace}/gimbal_plate_link" lidar_number="1">
+    <!-- <origin xyz="0 0 -0.035" rpy="0 0 0" /> -->
+    <origin xyz="0.0 0 -0.025" rpy="0 0 0" />    
   </xacro:lidar_macro>
    
   <!-- Nearthlab Payload -->

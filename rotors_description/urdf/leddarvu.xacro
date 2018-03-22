@@ -11,9 +11,9 @@
   <xacro:property name="view_angle_deg" value="${max_angle_deg-min_angle_deg}" />
   <xacro:property name="slot_angle_deg" value="${(view_angle_deg/sample)/resolution}" />
   
-  <xacro:macro name="lidar_macro" params="namespace parent_link *origin">
+  <xacro:macro name="lidar_macro" params="namespace parent_link lidar_number *origin">
 
-    <link name="${namespace}/lidar_link">
+    <link name="${namespace}/lidar_link_${lidar_number}">
       <visual name="visual">
         <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
         <geometry>
@@ -21,22 +21,22 @@
         </geometry>        
       </visual>
     </link>    
-    <joint name="${namespace}/lidar_joint" type="fixed">
+    <joint name="${namespace}/lidar_joint_${lidar_number}" type="fixed">
       <xacro:insert_block name="origin" />
       <parent link="${parent_link}" />
-      <child link="${namespace}/lidar_link" />
+      <child link="${namespace}/lidar_link_${lidar_number}" />
     </joint>
     
-    <link name="${namespace}/lidar_optical_link">      
+    <link name="${namespace}/lidar_optical_link_${lidar_number}">      
     </link>
-    <joint name="${namespace}/lidar_optical_joint" type="fixed">
+    <joint name="${namespace}/lidar_optical_joint_${lidar_number}" type="fixed">
       <origin xyz="0.03 0 0" rpy="0 0 0" />
-      <parent link="${namespace}/lidar_link" />
-      <child link="${namespace}/lidar_optical_link" />
+      <parent link="${namespace}/lidar_link_${lidar_number}" />
+      <child link="${namespace}/lidar_optical_link_${lidar_number}" />
     </joint>
 
-    <gazebo reference="${namespace}/lidar_optical_link">      
-      <sensor type="ray" name="${namespace}_lidar">
+    <gazebo reference="${namespace}/lidar_optical_link_${lidar_number}">      
+      <sensor type="ray" name="${namespace}_lidar_${lidar_number}">
         <pose>0 0 0 0 0 0</pose>
         <visualize>true</visualize>
         <update_rate>100</update_rate>
@@ -60,8 +60,10 @@
             <stddev>0.01</stddev>
           </noise>
         </ray>
-	      <plugin name="rotors_gazebo_lidar_plugin" filename="librotors_gazebo_lidar_plugin.so"/>
-		    <robotNamespace>${namespace}</robotNamespace>
+	      <plugin name="rotors_gazebo_lidar_plugin_${lidar_number}" filename="librotors_gazebo_lidar_plugin.so">
+		      <robotNamespace>${namespace}</robotNamespace>
+          <lidarTopic>lidar_${lidar_number}</lidarTopic>
+        </plugin>
         <always_on>1</always_on>
       </sensor>
     </gazebo>

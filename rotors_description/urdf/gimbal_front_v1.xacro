@@ -4,66 +4,80 @@
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:property name="pi" value="3.14159265359" />
-  <xacro:property name="resolution" value="3" />
-  <xacro:property name="sample" value="8" />
-  <xacro:property name="min_angle_deg" value="-24" />
-  <xacro:property name="max_angle_deg" value="24" />
-  <xacro:property name="view_angle_deg" value="${max_angle_deg-min_angle_deg}" />
-  <xacro:property name="slot_angle_deg" value="${(view_angle_deg/sample)/resolution}" />
   
-  <xacro:macro name="lidar_macro" params="namespace parent_link *origin">
+  <xacro:macro name="gimbal_macro" params="namespace parent_link *origin">
 
-    <link name="${namespace}/lidar_link">
-      <visual name="visual">
+    <link name="${namespace}/gimbal_roll_link">
+      <inertial>
+        <mass value="0.1" />  
+        <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
+        <geometry>
+          <cylinder radius="0.02" length="0.02" />
+        </geometry>        
+      </visual>
+      
+    </link>    
+    <joint name="${namespace}/gimbal_roll_joint" type="continuous">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/gimbal_roll_link" />
+      <axis xyz="1 0 0" />
+    </joint>
+  
+    <link name="${namespace}/gimbal_pitch_link">
+      <inertial>
+        <mass value="0.1" />  
+        <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01" />
+      </inertial>
+      <visual>      
         <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
         <geometry>
-          <mesh filename="package://rotors_description/meshes/leddarvu.dae" scale="1 1 1" />
+          <cylinder radius="0.02" length="0.02" />
         </geometry>        
       </visual>
     </link>    
-    <joint name="${namespace}/lidar_joint" type="fixed">
-      <xacro:insert_block name="origin" />
-      <parent link="${parent_link}" />
-      <child link="${namespace}/lidar_link" />
-    </joint>
-    
-    <link name="${namespace}/lidar_optical_link">      
-    </link>
-    <joint name="${namespace}/lidar_optical_joint" type="fixed">
-      <origin xyz="0.03 0 0" rpy="0 0 0" />
-      <parent link="${namespace}/lidar_link" />
-      <child link="${namespace}/lidar_optical_link" />
+    <joint name="${namespace}/gimbal_pitch_joint" type="continuous">
+      <origin xyz="0.1 0.1 0" rpy="0 0 0" />
+      <parent link="${namespace}/gimbal_roll_link" />
+      <child link="${namespace}/gimbal_pitch_link" />
+      <axis xyz="0 1 0" />
     </joint>
 
-    <gazebo reference="${namespace}/lidar_optical_link">      
-      <sensor type="ray" name="${namespace}_lidar">
-        <pose>0 0 0 0 0 0</pose>
-        <visualize>true</visualize>
-        <update_rate>100</update_rate>
-        <ray>          
-          <scan>            
-            <horizontal>
-              <samples>${sample}</samples>
-              <resolution>${resolution}</resolution>
-              <min_angle>${(min_angle_deg+(slot_angle_deg/2))/180.0*pi}</min_angle>
-              <max_angle>${(max_angle_deg-(slot_angle_deg/2))/180.0*pi}</max_angle>
-            </horizontal>
-          </scan>
-          <range>
-            <min>0.06</min>
-            <max>25</max>
-            <resolution>0.01</resolution>
-          </range>
-          <noise>
-            <type>gaussian</type>
-            <mean>0.0</mean>
-            <stddev>0.01</stddev>
-          </noise>
-        </ray>
-	      <plugin name="rotors_gazebo_lidar_plugin" filename="librotors_gazebo_lidar_plugin.so"/>
-		    <robotNamespace>${namespace}</robotNamespace>
-        <always_on>1</always_on>
-      </sensor>
+    <link name="${namespace}/gimbal_plate_link">
+      <inertial>
+        <mass value="0.1" />  
+        <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size ="0.05 0.1 0.005" />
+        </geometry>        
+      </visual>
+    </link>    
+    <joint name="${namespace}/gimbal_plate_joint" type="fixed">
+      <origin xyz="0 -0.1 -0.02" rpy="0 0 0" />
+      <parent link="${namespace}/gimbal_pitch_link" />
+      <child link="${namespace}/gimbal_plate_link" />
+    </joint>
+    
+    <gazebo>
+      <plugin name="front_gimbal_plugin" filename="libgazebo_front_gimbal_plugin.so">   
+      <robotNamespace>${namespace}</robotNamespace>  
+      </plugin>
+    </gazebo>
+
+    <gazebo reference="${namespace}/gimbal_roll_link">
+      <material>Gazebo/Black</material>
+    </gazebo>
+    <gazebo reference="${namespace}/gimbal_pitch_link">
+      <material>Gazebo/Black</material>
+    </gazebo>
+    <gazebo reference="${namespace}/gimbal_plate_link">
+      <material>Gazebo/Black</material>
     </gazebo>
 
   </xacro:macro>
