@@ -60,7 +60,7 @@ void FrontGimbalPlugin::Load( physics::ModelPtr model, sdf::ElementPtr sdf)
 
   _update_connection = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&FrontGimbalPlugin::OnUpdate, this, _1));
-  gzmsg << "FrontGimbalPlugin::Init"<< (_update_connection?"valid":"Invalied") << std::endl;
+  gzmsg << "FrontGimbalPlugin::Init" << std::endl;
 }
 
 void FrontGimbalPlugin::OnUpdate(const common::UpdateInfo& _info)
