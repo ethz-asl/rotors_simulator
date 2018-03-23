@@ -112,11 +112,8 @@ void GazeboLidarPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     gzwarn << "[gazebo_lidar_plugin] Please specify a robotNamespace.\n";
 
   boost::replace_all(namespace_, "/", "");
-
   
-  getSdfParam<std::string>(_sdf, "lidarTopic", lidar_topic_,
-                           mav_msgs::default_topics::LIDAR_TOPIC);
-
+  getSdfParam<std::string>(_sdf, "lidarTopic", lidar_topic_,"lidar_default");
 
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
   node_handle_->Init();
