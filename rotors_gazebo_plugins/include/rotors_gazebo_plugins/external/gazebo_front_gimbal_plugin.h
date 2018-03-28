@@ -70,7 +70,9 @@ namespace gazebo
     private:    
         ros::NodeHandle* _nodeRos;
         ros::Subscriber  _subCommand;
-        void CreateCommunicationChannels();        
+		ros::Publisher	 _pubInfo;
+        void CreateCommunicationChannels();
+		void PublishGimbalInfo(double angleRoll, double anglePitch, double validity);
   };
 }
 #endif

@@ -75,6 +75,7 @@ void FrontGimbalPlugin::OnUpdate(const common::UpdateInfo& _info)
   double errorRoll;
   double forcePitch;
   double errorPitch;
+  double validity;
 
   angleRoll = _jointPitch->GetWorldPose().rot.GetRoll() * 180.0 / 3.141592;  // TODO(burrimi): Check tf.
   anglePitch = _jointPitch->GetWorldPose().rot.GetPitch() * 180.0 / 3.141592;  // TODO(burrimi): Check tf.
@@ -89,7 +90,13 @@ void FrontGimbalPlugin::OnUpdate(const common::UpdateInfo& _info)
   errorPitch = anglePitch - _targetPitch;
   forcePitch = _pidPitch.Update( errorPitch, 0.0025);
   _jointPitch->SetForce(0,forcePitch);
-  
+  if(abs(errorRoll) < 3.0 && abs(errorPitch) < 3.0) {
+	validity= 1;
+  }
+  else {
+	validity = 0;
+  }
+  PublishGimbalInfo(angleRoll, anglePitch, validity);
 }
 
 void CommandMsgCallback(const std_msgs::Float32MultiArray::ConstPtr& msg)
@@ -108,7 +115,20 @@ void FrontGimbalPlugin::CreateCommunicationChannels()
   ros::NodeHandle nh;
   //_nodeRos = new ros::NodeHandle("niv1");
   _subCommand = nh.subscribe("/niv1/gimbal_front_cmd", 10, CommandMsgCallback);
-  
+}
+void FrontGimbalPlugin::PublishGimbalInfo(double angleRoll, double anglePitch, double validity)
+{
+  static bool created = false;
+  if(!created) {
+	  ros::NodeHandle nh;
+	  _pubInfo = nh.advertise<std_msgs::Float32MultiArray>("/niv1/gimbal_info", 10);
+  }
+  std_msgs::Float32MultiArray infoMsg;
+  infoMsg.data.clear();
+  infoMsg.data.push_back((float) angleRoll);
+  infoMsg.data.push_back((float) anglePitch);
+  infoMsg.data.push_back((float) validity);
+  _pubInfo.publish(infoMsg);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(FrontGimbalPlugin);
