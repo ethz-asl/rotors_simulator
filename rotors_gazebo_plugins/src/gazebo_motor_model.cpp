@@ -14,7 +14,7 @@
 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.M
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -259,7 +259,10 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
              "raising the rotor_velocity_slowdown_sim_ param.\n";
   }
   double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
-  double force = real_motor_velocity * real_motor_velocity * motor_constant_;
+  // Get the direction of the rotor rotation.
+  int real_motor_velocity_sign = (real_motor_velocity > 0) - (real_motor_velocity < 0);
+  //Assuming symmetric propellers (or rotors) for the force calculation.
+  double force = turning_direction_ * real_motor_velocity_sign * real_motor_velocity * real_motor_velocity * motor_constant_;
 
 // TODO(ff): remove this?
 // Code from sitl_gazebo version of GazeboMotorModel.
@@ -319,6 +322,13 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
   double ref_motor_rot_vel;
   ref_motor_rot_vel =
       rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
+
+  // Make sure max force is set, as it may be reset to 0 by a world reset any
+  // time. (This cannot be done during Reset() because the change will be undone
+  // by the Joint's reset function afterwards.)
+  #if GAZEBO_MAJOR_VERSION < 5
+    joint_->SetMaxForce(0, max_force_);
+  #endif
   joint_->SetVelocity(
       0, turning_direction_ * ref_motor_rot_vel / rotor_velocity_slowdown_sim_);
 }

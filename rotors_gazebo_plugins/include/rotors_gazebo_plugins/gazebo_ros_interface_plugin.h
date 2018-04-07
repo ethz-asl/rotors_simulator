@@ -40,6 +40,7 @@
 #include "Actuators.pb.h"
 #include "CommandMotorSpeed.pb.h"
 #include "Float32.pb.h"
+#include "FluidPressure.pb.h"
 #include "Imu.pb.h"
 #include "JointState.pb.h"
 #include "MagneticField.pb.h"
@@ -66,6 +67,7 @@
 #include <mav_msgs/RollPitchYawrateThrust.h>
 #include <nav_msgs/Odometry.h>
 #include <rotors_comm/WindSpeed.h>
+#include <sensor_msgs/FluidPressure.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/MagneticField.h>
@@ -104,6 +106,8 @@ typedef const boost::shared_ptr<const gz_mav_msgs::RollPitchYawrateThrust>
 typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
 typedef const boost::shared_ptr<const gz_sensor_msgs::Actuators>
     GzActuatorsMsgPtr;
+typedef const boost::shared_ptr<const gz_sensor_msgs::FluidPressure>
+    GzFluidPressureMsgPtr;
 typedef const boost::shared_ptr<const gz_sensor_msgs::Imu> GzImuPtr;
 typedef const boost::shared_ptr<const gz_sensor_msgs::JointState>
     GzJointStateMsgPtr;
@@ -216,6 +220,11 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   void GzFloat32MsgCallback(GzFloat32MsgPtr& gz_float_32_msg,
                             ros::Publisher ros_publisher);
   std_msgs::Float32 ros_float_32_msg_;
+
+  // FLUID PRESSURE
+  void GzFluidPressureMsgCallback(GzFluidPressureMsgPtr& gz_fluid_pressure_msg,
+                                  ros::Publisher ros_publisher);
+  sensor_msgs::FluidPressure ros_fluid_pressure_msg_;
 
   // IMU
   void GzImuMsgCallback(GzImuPtr& gz_imu_msg, ros::Publisher ros_publisher);

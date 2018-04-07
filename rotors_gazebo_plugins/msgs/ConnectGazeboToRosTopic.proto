@@ -17,18 +17,19 @@ message ConnectGazeboToRosTopic
   enum MsgType {
   	ACTUATORS = 0;
     FLOAT_32 = 1;
-    IMU = 2;
-    JOINT_STATE = 3;
-    MAGNETIC_FIELD = 4;
-    NAV_SAT_FIX = 5;
-    ODOMETRY = 6;
-    POSE = 7;
-    POSE_WITH_COVARIANCE_STAMPED = 8;
-    TRANSFORM_STAMPED = 9;
-    TWIST_STAMPED = 10;
-    VECTOR_3D_STAMPED = 11;
-    WIND_SPEED = 12;
-    WRENCH_STAMPED = 13;
+    FLUID_PRESSURE = 2;
+    IMU = 3;
+    JOINT_STATE = 4;
+    MAGNETIC_FIELD = 5;
+    NAV_SAT_FIX = 6;
+    ODOMETRY = 7;
+    POSE = 8;
+    POSE_WITH_COVARIANCE_STAMPED = 9;
+    TRANSFORM_STAMPED = 10;
+    TWIST_STAMPED = 11;
+    VECTOR_3D_STAMPED = 12;
+    WIND_SPEED = 13;
+    WRENCH_STAMPED = 14;
   }
   required MsgType msgType = 4;
 }

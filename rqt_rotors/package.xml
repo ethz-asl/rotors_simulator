@@ -1,0 +1,34 @@
+<package>
+  <name>rqt_rotors</name>
+  <version>2.1.1</version>
+  <description>The rqt_rotors package</description>
+
+  <maintainer email="pavelv@student.ethz.ch">Pavel Vechersky</maintainer>
+  <maintainer email="timo.hinzmann@gmail.com">Timo Hinzmann</maintainer>
+
+  <author>Pavel Vechersky</author>
+
+  <license>ASL 2.0</license>
+
+  <url type="website">https://github.com/ethz-asl/rotors_simulator</url>
+  <url type="bugtracker">https://github.com/ethz-asl/rotors_simulator/issues</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Dependencies needed to compile this package. -->
+  <build_depend>mavros_msgs</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>rqt_gui</build_depend>
+  <build_depend>rqt_gui_py</build_depend>
+
+  <!-- Dependencies needed after this package is compiled. -->
+  <run_depend>mavros_msgs</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>rqt_gui</run_depend>
+  <run_depend>rqt_gui_py</run_depend>
+
+  <export>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+
+</package>

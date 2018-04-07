@@ -115,10 +115,12 @@ message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 find_package(Eigen REQUIRED)
 find_package(gazebo REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(Glog REQUIRED)
 link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(${GAZEBO_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 
 # if (BUILD_MAVLINK_INTERFACE_PLUGIN)
 #   include_directories(${mavros_msgs_INCLUDE_DIRS})
@@ -129,8 +131,16 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # =================== YAML_CPP ================= #
 # ============================================== #
 
-find_package(YamlCpp REQUIRED)
-include_directories(${YAML_CPP_INCLUDE_DIR})
+find_package(yaml_cpp_catkin QUIET)
+if(${yaml_cpp_catkin_FOUND})
+  message(STATUS "Found yaml_cpp_catkin, using instead of system library.")
+  set(YamlCpp_LIBRARIES ${yaml_cpp_catkin_LIBRARIES})
+  set(YamlCpp_INCLUDE_DIRS ${yaml_cpp_catkin_INCLUDE_DIRS})
+else()
+  message(STATUS "No yaml_cpp_catkin, using yaml-cpp system library instead.")
+  pkg_check_modules(YamlCpp REQUIRED yaml-cpp>=0.5)
+endif()
+include_directories(${YamlCpp_INCLUDE_DIR})
 
 # ============================================== #
 # =================== PROTOBUF ================= #
@@ -186,7 +196,7 @@ link_libraries(mav_msgs)
 
 if (NOT NO_ROS)
   catkin_package(
-    INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS} ${CATKIN_DEVEL_PREFIX}/include/${PACKAGE_NAME}
+    INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
     LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
     CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf
     DEPENDS eigen gazebo octomap opencv
@@ -242,7 +252,7 @@ endif()
 
 #===================================== FW DYNAMICS PLUGIN =======================================//
 add_library(rotors_gazebo_fw_dynamics_plugin SHARED src/gazebo_fw_dynamics_plugin.cpp)
-target_link_libraries(rotors_gazebo_fw_dynamics_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${YAML_CPP_LIBRARY})
+target_link_libraries(rotors_gazebo_fw_dynamics_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${YamlCpp_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_fw_dynamics_plugin ${catkin_EXPORTED_TARGETS})
 endif()
@@ -307,10 +317,10 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
   else()
 
     message(STATUS "MAVLINK_HEADER_DIR not provided, falling back to looking at default paths...")
-    # If ROS indigo is installed, we should be able to find them at the path below
-    if(EXISTS /opt/ros/indigo/include/mavlink/v1.0/)
-      message(STATUS "Found MAVLink headers at '/opt/ros/indigo/include/mavlink/v1.0/'.")
-      include_directories("/opt/ros/indigo/include/mavlink/v1.0/")
+    # If ROS is installed, we should be able to find them at the path below
+    if(EXISTS /opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/)
+      message(STATUS "Found MAVLink headers at '/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/'.")
+      include_directories("/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/")
       set(MAVLINK_HEADERS_FOUND TRUE)
     endif()
 
@@ -395,6 +405,14 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   list(APPEND targets_to_install rotors_gazebo_optical_flow_plugin)
 endif()
 
+#======================================= PRESSURE PLUGIN ========================================//
+add_library(rotors_gazebo_pressure_plugin SHARED src/gazebo_pressure_plugin.cpp)
+target_link_libraries(rotors_gazebo_pressure_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${GLOG_LIBRARIES})
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_pressure_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_pressure_plugin)
+
 #===================================== ROS INTERFACE PLUGIN =====================================//
 # This entire plugin is only built if ROS is a dependency
 if (NOT NO_ROS)
@@ -452,11 +470,5 @@ install(
   DESTINATION ${BIN_DESTINATION}
   LIBRARY DESTINATION ${LIB_DESTINATION}
 )
-
-# Copy over all converted protobuf files (*.pb.h and *.pb.c) from the src directory to
-# the devel directory. This is required so that you can include the protobuf header files from other C++ files.
-if (NOT NO_ROS)
-  file(COPY ${CMAKE_CURRENT_BINARY_DIR}/ DESTINATION ${CATKIN_DEVEL_PREFIX}/include/${PACKAGE_NAME} FILES_MATCHING PATTERN "*.pb.*")
-endif()
 
 #message(FATAL_ERROR "Reached EOF.")
