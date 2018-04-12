@@ -28,6 +28,7 @@
 // 3RD PARTY
 #include <boost/bind.hpp>
 #include <Eigen/Eigen>
+#include <Eigen/Core>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
@@ -71,6 +72,8 @@ static constexpr double kDefaulMaxRotVelocity = 838.0;
 static constexpr double kDefaultRotorDragCoefficient = 1.0e-4;
 static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
 
+static constexpr char kMotorPositionPubTopic[] = "motor_position";
+
 class GazeboMotorModel : public MotorModel, public ModelPlugin {
 
  public:
@@ -80,6 +83,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         command_sub_topic_(mav_msgs::default_topics::COMMAND_ACTUATORS),
         wind_speed_sub_topic_(mav_msgs::default_topics::WIND_SPEED),
         motor_speed_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
+        motor_position_pub_topic_(kMotorPositionPubTopic),
         motor_number_(0),
         turning_direction_(turning_direction::CW),
         motor_type_(motor_type::VELOCITY),
@@ -124,6 +128,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   std::string joint_name_;
   std::string link_name_;
   std::string motor_speed_pub_topic_;
+  std::string motor_position_pub_topic_;
   std::string namespace_;
 
   int motor_number_;
@@ -147,6 +152,8 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
 
   gazebo::transport::PublisherPtr motor_velocity_pub_;
 
+  gazebo::transport::PublisherPtr motor_position_pub_;
+
   gazebo::transport::SubscriberPtr command_sub_;
 
   gazebo::transport::SubscriberPtr wind_speed_sub_;
@@ -163,6 +170,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   void QueueThread();
 
   gz_std_msgs::Float32 turning_velocity_msg_;
+  gz_std_msgs::Float32 position_msg_;
 
   void ControlVelocityCallback(GzCommandMotorSpeedMsgPtr& command_motor_speed_msg);
 
