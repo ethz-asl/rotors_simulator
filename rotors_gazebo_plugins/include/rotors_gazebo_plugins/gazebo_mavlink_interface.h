@@ -108,7 +108,7 @@ class GazeboMavlinkInterface : public ModelPlugin {
 
  private:
 
-  bool received_first_referenc_;
+  bool received_first_reference_;
   Eigen::VectorXd input_reference_;
 
   std::string namespace_;
