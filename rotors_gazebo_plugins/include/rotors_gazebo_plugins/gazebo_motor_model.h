@@ -46,6 +46,12 @@ const static int CCW = 1;
 const static int CW = -1;
 } // namespace turning_direction
 
+namespace motor_type {
+const static int VELOCITY = 1;
+const static int POSITION = 2;
+const static int FORCE = 3;
+} // namespace motor_type
+
 namespace gazebo {
 
 // Default values
@@ -76,11 +82,12 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         motor_speed_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
         motor_number_(0),
         turning_direction_(turning_direction::CW),
+        motor_type_(motor_type::VELOCITY),
         max_force_(kDefaultMaxForce),
         max_rot_velocity_(kDefaulMaxRotVelocity),
         moment_constant_(kDefaultMomentConstant),
         motor_constant_(kDefaultMotorConstant),
-        ref_motor_rot_vel_(0.0),
+        ref_motor_input_(0.0),
         rolling_moment_coefficient_(kDefaultRollingMomentCoefficient),
         rotor_drag_coefficient_(kDefaultRotorDragCoefficient),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
@@ -121,17 +128,20 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
 
   int motor_number_;
   int turning_direction_;
+  int motor_type_;
 
   double max_force_;
   double max_rot_velocity_;
   double moment_constant_;
   double motor_constant_;
-  double ref_motor_rot_vel_;
+  double ref_motor_input_;
   double rolling_moment_coefficient_;
   double rotor_drag_coefficient_;
   double rotor_velocity_slowdown_sim_;
   double time_constant_down_;
   double time_constant_up_;
+
+  common::PID pids_;
 
   gazebo::transport::NodePtr node_handle_;
 
