@@ -104,9 +104,10 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       motor_type_ = motor_type::VELOCITY;
     else if (motor_type == "position")
       motor_type_ = motor_type::POSITION;
-    else if (motor_type == "force")
-    gzwarn << "[gazebo_motor_model] motorType 'force' not yet implemented... coming soon!.\n";
+    else if (motor_type == "force"){
       motor_type_ = motor_type::FORCE;
+      gzwarn << "[gazebo_motor_model] motorType 'force' not yet implemented. Coming soon...\n";
+    }
     else
       gzerr << "[gazebo_motor_model] Please only use 'velocity', 'position' or "
                "'force' as motorType.\n";
