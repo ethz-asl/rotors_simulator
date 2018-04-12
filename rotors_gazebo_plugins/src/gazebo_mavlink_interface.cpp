@@ -506,7 +506,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
   handle_control(dt);
 
-  if(received_first_referenc_) {
+  if(received_first_reference_) {
 
     gz_mav_msgs::CommandMotorSpeed turning_velocities_msg;
 
@@ -971,7 +971,7 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
       }
     }
 
-    received_first_referenc_ = true;
+    received_first_reference_ = true;
     break;
   }
 }
