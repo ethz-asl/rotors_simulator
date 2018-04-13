@@ -292,7 +292,7 @@ void GazeboMotorModel::CreatePubsAndSubs() {
 
   command_sub_ =
       node_handle_->Subscribe("~/" + namespace_ + "/" + command_sub_topic_,
-                              &GazeboMotorModel::ControlVelocityCallback, this);
+                              &GazeboMotorModel::ControlCommandCallback, this);
 
   connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
                                                 command_sub_topic_);
@@ -322,7 +322,7 @@ void GazeboMotorModel::CreatePubsAndSubs() {
                                               true);
 }
 
-void GazeboMotorModel::ControlVelocityCallback(
+void GazeboMotorModel::ControlCommandCallback(
     GzCommandMotorSpeedMsgPtr &command_motor_speed_msg) {
   if (kPrintOnMsgCallback) {
     gzdbg << __FUNCTION__ << "() called." << std::endl;
