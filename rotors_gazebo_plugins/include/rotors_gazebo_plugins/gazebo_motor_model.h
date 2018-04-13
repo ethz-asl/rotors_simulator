@@ -80,8 +80,9 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         motor_speed_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
         motor_position_pub_topic_(mav_msgs::default_topics::MOTOR_POSITION_MEASUREMENT),
         motor_force_pub_topic_(mav_msgs::default_topics::MOTOR_FORCE_MEASUREMENT),
-        is_position_publisher_(false),
-        is_force_publisher_(false),
+        publish_speed_(true),
+        publish_position_(false),
+        publish_force_(false),
         motor_number_(0),
         turning_direction_(turning_direction::CW),
         motor_type_(VELOCITY),
@@ -130,8 +131,9 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   std::string motor_force_pub_topic_;
   std::string namespace_;
 
-  bool is_position_publisher_;
-  bool is_force_publisher_;
+  bool publish_speed_;
+  bool publish_position_;
+  bool publish_force_;
 
   int motor_number_;
   int turning_direction_;
