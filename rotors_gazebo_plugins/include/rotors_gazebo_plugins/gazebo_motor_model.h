@@ -72,9 +72,6 @@ static constexpr double kDefaulMaxRotVelocity = 838.0;
 static constexpr double kDefaultRotorDragCoefficient = 1.0e-4;
 static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
 
-static constexpr char kMotorPositionPubTopic[] = "motor_position";
-static constexpr char kMotorForcePubTopic[] = "motor_force";
-
 class GazeboMotorModel : public MotorModel, public ModelPlugin {
 
  public:
@@ -84,8 +81,8 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         command_sub_topic_(mav_msgs::default_topics::COMMAND_ACTUATORS),
         wind_speed_sub_topic_(mav_msgs::default_topics::WIND_SPEED),
         motor_speed_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
-        motor_position_pub_topic_(kMotorPositionPubTopic),
-        motor_force_pub_topic_(kMotorForcePubTopic),
+        motor_position_pub_topic_(mav_msgs::default_topics::MOTOR_POSITION_MEASUREMENT),
+        motor_force_pub_topic_(mav_msgs::default_topics::MOTOR_FORCE_MEASUREMENT),
         is_position_publisher_(false),
         is_force_publisher_(false),
         motor_number_(0),
