@@ -21,7 +21,6 @@
 
 #include "rotors_gazebo_plugins/gazebo_motor_model.h"
 
-#include "CommandMotorSpeed.pb.h"
 #include "ConnectGazeboToRosTopic.pb.h"
 #include "ConnectRosToGazeboTopic.pb.h"
 
@@ -323,28 +322,28 @@ void GazeboMotorModel::CreatePubsAndSubs() {
 }
 
 void GazeboMotorModel::ControlCommandCallback(
-    GzCommandMotorSpeedMsgPtr &command_motor_speed_msg) {
+    GzCommandMotorInputMsgPtr &command_motor_input_msg) {
   if (kPrintOnMsgCallback) {
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
 
-  if (motor_number_ > command_motor_speed_msg->motor_speed_size() - 1) {
+  if (motor_number_ > command_motor_input_msg->motor_speed_size() - 1) {
     gzerr << "You tried to access index " << motor_number_
           << " of the MotorSpeed message array which is of size "
-          << command_motor_speed_msg->motor_speed_size();
+          << command_motor_input_msg->motor_speed_size();
   }
 
   if (motor_type_ == VELOCITY) {
     ref_motor_input_ =
         std::min(static_cast<double>(
-                     command_motor_speed_msg->motor_speed(motor_number_)),
+                     command_motor_input_msg->motor_speed(motor_number_)),
                  static_cast<double>(max_rot_velocity_));
   } else if (motor_type_ == POSITION) {
-    ref_motor_input_ = command_motor_speed_msg->motor_speed(motor_number_);
+    ref_motor_input_ = command_motor_input_msg->motor_speed(motor_number_);
   } else { // if (motor_type_ == FORCE) {
     ref_motor_input_ =
         std::min(static_cast<double>(
-                     command_motor_speed_msg->motor_speed(motor_number_)),
+                     command_motor_input_msg->motor_speed(motor_number_)),
                  static_cast<double>(max_force_));
   }
 }

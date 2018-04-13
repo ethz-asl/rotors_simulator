@@ -55,11 +55,8 @@ enum motor_type {
 
 namespace gazebo {
 
-// Default values
-//static const std::string kDefaultCommandSubTopic = "gazebo/command/motor_speed";
-//static const std::string kDefaultWindSpeedSubTopic = "gazebo/wind_speed";
-
-typedef const boost::shared_ptr<const gz_mav_msgs::CommandMotorSpeed> GzCommandMotorSpeedMsgPtr;
+// Changed name from speed to input for more generality. TODO: integrate general actuator command.
+typedef const boost::shared_ptr<const gz_mav_msgs::CommandMotorSpeed> GzCommandMotorInputMsgPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
 
 // Set the max_force_ to the max double value. The limitations get handled by the FirstOrderFilter.
@@ -180,7 +177,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   gz_std_msgs::Float32 position_msg_;
   gz_std_msgs::Float32 force_msg_;
 
-  void ControlCommandCallback(GzCommandMotorSpeedMsgPtr& command_motor_speed_msg);
+  void ControlCommandCallback(GzCommandMotorInputMsgPtr& command_motor_input_msg);
 
   void WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg);
 
