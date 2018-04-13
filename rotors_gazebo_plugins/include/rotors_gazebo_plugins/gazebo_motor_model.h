@@ -47,11 +47,11 @@ const static int CCW = 1;
 const static int CW = -1;
 } // namespace turning_direction
 
-namespace motor_type {
-const static int VELOCITY = 1;
-const static int POSITION = 2;
-const static int FORCE = 3;
-} // namespace motor_type
+enum motor_type {
+  VELOCITY = 1,
+  POSITION = 2,
+  FORCE = 3
+};
 
 namespace gazebo {
 
@@ -87,7 +87,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         is_force_publisher_(false),
         motor_number_(0),
         turning_direction_(turning_direction::CW),
-        motor_type_(motor_type::VELOCITY),
+        motor_type_(VELOCITY),
         max_force_(kDefaultMaxForce),
         max_rot_velocity_(kDefaulMaxRotVelocity),
         moment_constant_(kDefaultMomentConstant),
