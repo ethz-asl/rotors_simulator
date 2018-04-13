@@ -73,6 +73,7 @@ static constexpr double kDefaultRotorDragCoefficient = 1.0e-4;
 static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
 
 static constexpr char kMotorPositionPubTopic[] = "motor_position";
+static constexpr char kMotorForcePubTopic[] = "motor_force";
 
 class GazeboMotorModel : public MotorModel, public ModelPlugin {
 
@@ -84,6 +85,9 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         wind_speed_sub_topic_(mav_msgs::default_topics::WIND_SPEED),
         motor_speed_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
         motor_position_pub_topic_(kMotorPositionPubTopic),
+        motor_force_pub_topic_(kMotorForcePubTopic),
+        is_position_publisher_(false),
+        is_force_publisher_(false),
         motor_number_(0),
         turning_direction_(turning_direction::CW),
         motor_type_(motor_type::VELOCITY),
@@ -129,7 +133,11 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   std::string link_name_;
   std::string motor_speed_pub_topic_;
   std::string motor_position_pub_topic_;
+  std::string motor_force_pub_topic_;
   std::string namespace_;
+
+  bool is_position_publisher_;
+  bool is_force_publisher_;
 
   int motor_number_;
   int turning_direction_;
@@ -154,6 +162,8 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
 
   gazebo::transport::PublisherPtr motor_position_pub_;
 
+  gazebo::transport::PublisherPtr motor_force_pub_;
+
   gazebo::transport::SubscriberPtr command_sub_;
 
   gazebo::transport::SubscriberPtr wind_speed_sub_;
@@ -171,6 +181,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
 
   gz_std_msgs::Float32 turning_velocity_msg_;
   gz_std_msgs::Float32 position_msg_;
+  gz_std_msgs::Float32 force_msg_;
 
   void ControlVelocityCallback(GzCommandMotorSpeedMsgPtr& command_motor_speed_msg);
 

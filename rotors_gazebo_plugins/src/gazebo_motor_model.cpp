@@ -30,13 +30,16 @@ namespace gazebo {
 GazeboMotorModel::~GazeboMotorModel() {
   event::Events::DisconnectWorldUpdateBegin(updateConnection_);
 }
-
 void GazeboMotorModel::InitializeParams() {}
 
 void GazeboMotorModel::Publish() {
-  if (motor_type_ == motor_type::POSITION) {
+  if (is_position_publisher_) {
     position_msg_.set_data(joint_->GetAngle(0).Radian());
     motor_position_pub_->Publish(position_msg_);
+  }
+  if (is_force_publisher_) {
+    force_msg_.set_data(joint_->GetForce(0));
+    motor_force_pub_->Publish(force_msg_);
   }
   turning_velocity_msg_.set_data(joint_->GetVelocity(0));
   motor_velocity_pub_->Publish(turning_velocity_msg_);
@@ -109,8 +112,6 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       motor_type_ = motor_type::POSITION;
     else if (motor_type == "force") {
       motor_type_ = motor_type::FORCE;
-      gzwarn << "[gazebo_motor_model] motorType 'force' not yet implemented. "
-                "Coming soon...\n";
     } else
       gzerr << "[gazebo_motor_model] Please only use 'velocity', 'position' or "
                "'force' as motorType.\n";
@@ -154,8 +155,19 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
                            wind_speed_sub_topic_);
   getSdfParam<std::string>(_sdf, "motorSpeedPubTopic", motor_speed_pub_topic_,
                            motor_speed_pub_topic_);
-  getSdfParam<std::string>(_sdf, "motorPositionPubTopic", motor_position_pub_topic_,
-                           motor_position_pub_topic_);
+
+  // Only publish position and force messages if a topic is specified in the
+  // sdf.
+  if (_sdf->HasElement("motorPositionPubTopic")) {
+    is_position_publisher_ = true;
+    motor_position_pub_topic_ =
+        _sdf->GetElement("motorPositionPubTopic")->Get<std::string>();
+  }
+  if (_sdf->HasElement("motorForcePubTopic")) {
+    is_force_publisher_ = true;
+    motor_force_pub_topic_ =
+        _sdf->GetElement("motorForcePubTopic")->Get<std::string>();
+  }
 
   getSdfParam<double>(_sdf, "rotorDragCoefficient", rotor_drag_coefficient_,
                       rotor_drag_coefficient_);
@@ -238,24 +250,44 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg,
                                               true);
 
+  // =============================================== //
+  //  ACTUAL MOTOR POSITION MSG SETUP (GAZEBO->ROS)  //
+  // =============================================== //
+
+  if (is_position_publisher_) {
+    motor_position_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>(
+        "~/" + namespace_ + "/" + motor_position_pub_topic_, 1);
+
+    connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
+                                                     motor_position_pub_topic_);
+    connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" +
+                                                  motor_position_pub_topic_);
+    connect_gazebo_to_ros_topic_msg.set_msgtype(
+        gz_std_msgs::ConnectGazeboToRosTopic::FLOAT_32);
+    gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg,
+                                                true);
+  }
+
   // ============================================ //
-  //  ACTUAL MOTOR SPEED MSG SETUP (GAZEBO->ROS)  //
+  //  ACTUAL MOTOR FORCE MSG SETUP (GAZEBO->ROS)  //
   // ============================================ //
 
-  motor_position_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>(
-      "~/" + namespace_ + "/" + motor_position_pub_topic_, 1);
+  if (is_force_publisher_) {
+    motor_force_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>(
+        "~/" + namespace_ + "/" + motor_force_pub_topic_, 1);
 
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
-                                                   motor_position_pub_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" +
-                                                motor_position_pub_topic_);
-  connect_gazebo_to_ros_topic_msg.set_msgtype(
-      gz_std_msgs::ConnectGazeboToRosTopic::FLOAT_32);
-  gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg,
-                                              true);
+    connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
+                                                     motor_force_pub_topic_);
+    connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" +
+                                                  motor_force_pub_topic_);
+    connect_gazebo_to_ros_topic_msg.set_msgtype(
+        gz_std_msgs::ConnectGazeboToRosTopic::FLOAT_32);
+    gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg,
+                                                true);
+  }
 
   // ============================================ //
-  // = CONTROL VELOCITY MSG SETUP (ROS->GAZEBO) = //
+  // = CONTROL COMMAND MSG SETUP (ROS->GAZEBO) = //
   // ============================================ //
 
   command_sub_ =
@@ -330,22 +362,34 @@ void GazeboMotorModel::WindSpeedCallback(GzWindSpeedMsgPtr &wind_speed_msg) {
 }
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
-  if (motor_type_ == motor_type::VELOCITY) {
 
+  switch (motor_type_) {
+  case (motor_type::POSITION): {
+    double err = joint_->GetAngle(0).Radian() - ref_motor_input_;
+    double force = pids_.Update(err, sampling_time_);
+    joint_->SetForce(0, force);
+  } break;
+
+  case (motor_type::FORCE):
+    joint_->SetForce(0, std::min(ref_motor_input_, max_force_));
+    break;
+
+  default: // motor_type::VELOCITY
+  {
     motor_rot_vel_ = joint_->GetVelocity(0);
     if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_)) {
-      gzerr
-          << "Aliasing on motor [" << motor_number_
-          << "] might occur. Consider making smaller simulation time steps or "
-             "raising the rotor_velocity_slowdown_sim_ param.\n";
+      gzerr << "Aliasing on motor [" << motor_number_
+            << "] might occur. Consider making smaller simulation time "
+               "steps or "
+               "raising the rotor_velocity_slowdown_sim_ param.\n";
     }
     double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
     // Get the direction of the rotor rotation.
     int real_motor_velocity_sign =
         (real_motor_velocity > 0) - (real_motor_velocity < 0);
-    // Assuming symmetric propellers (or rotors) for the force calculation.
-    double force = turning_direction_ * real_motor_velocity_sign *
-                   real_motor_velocity * real_motor_velocity * motor_constant_;
+    // Assuming symmetric propellers (or rotors) for the thrust calculation.
+    double thrust = turning_direction_ * real_motor_velocity_sign *
+                    real_motor_velocity * real_motor_velocity * motor_constant_;
 
 // TODO(ff): remove this?
 // Code from sitl_gazebo version of GazeboMotorModel.
@@ -353,18 +397,18 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
 // into account the direction of the wind (e.g. is it moving
 // in the direction of propulsion, against?)
 #if 0
-  // scale down force linearly with forward speed
-  // XXX this has to be modelled better
-  math::Vector3 body_velocity = link_->GetWorldLinearVel();
-  double vel = body_velocity.GetLength();
-  double scalar = 1 - vel / 25.0; // at 50 m/s the rotor will not produce any force anymore
-  scalar = math::clamp(scalar, 0.0, 1.0);
-  // Apply a force to the link.
-  link_->AddRelativeForce(math::Vector3(0, 0, force * scalar));
+        // scale down force linearly with forward speed
+        // XXX this has to be modelled better
+        math::Vector3 body_velocity = link_->GetWorldLinearVel();
+        double vel = body_velocity.GetLength();
+        double scalar = 1 - vel / 25.0; // at 50 m/s the rotor will not produce any force anymore
+        scalar = math::clamp(scalar, 0.0, 1.0);
+        // Apply a force to the link.
+        link_->AddRelativeForce(math::Vector3(0, 0, force * scalar));
 #endif
 
     // Apply a force to the link.
-    link_->AddRelativeForce(math::Vector3(0, 0, force));
+    link_->AddRelativeForce(math::Vector3(0, 0, thrust));
 
     // Forces from Philppe Martin's and Erwan Salaün's
     // 2010 IEEE Conference on Robotics and Automation paper
@@ -383,7 +427,8 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
     // Apply air_drag to link.
     link_->AddForce(air_drag);
     // Moments
-    // Getting the parent link, such that the resulting torques can be applied
+    // Getting the parent link, such that the resulting torques can be
+    // applied
     // to
     // it.
     physics::Link_V parent_links = link_->GetParentJointsLinks();
@@ -391,8 +436,9 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
     math::Pose pose_difference =
         link_->GetWorldCoGPose() - parent_links.at(0)->GetWorldCoGPose();
     math::Vector3 drag_torque(0, 0,
-                              -turning_direction_ * force * moment_constant_);
-    // Transforming the drag torque into the parent frame to handle arbitrary
+                              -turning_direction_ * thrust * moment_constant_);
+    // Transforming the drag torque into the parent frame to handle
+    // arbitrary
     // rotor orientations.
     math::Vector3 drag_torque_parent_frame =
         pose_difference.rot.RotateVector(drag_torque);
@@ -416,17 +462,8 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
 #endif
     joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel /
                                rotor_velocity_slowdown_sim_);
-  } else if (motor_type_ == motor_type::POSITION) {
-    double target = ref_motor_input_;
-    double current = joint_->GetAngle(0).Radian();
-    double err = current - target;
-    double force = pids_.Update(err, sampling_time_);
-    joint_->SetForce(0, force);
   }
-  // TODO: implement force joint
-  // else if (motor_type_ == motor_type::FORCE){
-  //   joints_->SetForce(0, std::min(force, max_force_));
-  // }
+  }
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboMotorModel);
