@@ -364,106 +364,86 @@ void GazeboMotorModel::WindSpeedCallback(GzWindSpeedMsgPtr &wind_speed_msg) {
 void GazeboMotorModel::UpdateForcesAndMoments() {
 
   switch (motor_type_) {
-  case (POSITION): {
-    double err = joint_->GetAngle(0).Radian() - ref_motor_input_;
-    double force = pids_.Update(err, sampling_time_);
-    joint_->SetForce(0, force);
-    break;
-  }
-  case (FORCE): {
-    joint_->SetForce(0, ref_motor_input_);
-    break;
-  }
-
-  default: // VELOCITY
-  {
-    motor_rot_vel_ = joint_->GetVelocity(0);
-    if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_)) {
-      gzerr << "Aliasing on motor [" << motor_number_
-            << "] might occur. Consider making smaller simulation time "
-               "steps or "
-               "raising the rotor_velocity_slowdown_sim_ param.\n";
+    case (POSITION):
+    {
+      double err = joint_->GetAngle(0).Radian() - ref_motor_input_;
+      double force = pids_.Update(err, sampling_time_);
+      joint_->SetForce(0, force);
+      break;
     }
-    double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
-    // Get the direction of the rotor rotation.
-    int real_motor_velocity_sign =
-        (real_motor_velocity > 0) - (real_motor_velocity < 0);
-    // Assuming symmetric propellers (or rotors) for the thrust calculation.
-    double thrust = turning_direction_ * real_motor_velocity_sign *
-                    real_motor_velocity * real_motor_velocity * motor_constant_;
+    case (FORCE):
+    {
+      joint_->SetForce(0, ref_motor_input_);
+      break;
+    }
+    default: // VELOCITY
+    {
+      motor_rot_vel_ = joint_->GetVelocity(0);
+      if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_)) {
+        gzerr << "Aliasing on motor [" << motor_number_
+              << "] might occur. Consider making smaller simulation time "
+                 "steps or raising the rotor_velocity_slowdown_sim_ param.\n";
+      }
+      double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
+      // Get the direction of the rotor rotation.
+      int real_motor_velocity_sign =
+          (real_motor_velocity > 0) - (real_motor_velocity < 0);
+      // Assuming symmetric propellers (or rotors) for the thrust calculation.
+      double thrust = turning_direction_ * real_motor_velocity_sign *
+                      real_motor_velocity * real_motor_velocity * motor_constant_;
 
-// TODO(ff): remove this?
-// Code from sitl_gazebo version of GazeboMotorModel.
-// Not active as model is imprecise, and does not take
-// into account the direction of the wind (e.g. is it moving
-// in the direction of propulsion, against?)
-#if 0
-        // scale down force linearly with forward speed
-        // XXX this has to be modelled better
-        math::Vector3 body_velocity = link_->GetWorldLinearVel();
-        double vel = body_velocity.GetLength();
-        double scalar = 1 - vel / 25.0; // at 50 m/s the rotor will not produce any force anymore
-        scalar = math::clamp(scalar, 0.0, 1.0);
-        // Apply a force to the link.
-        link_->AddRelativeForce(math::Vector3(0, 0, force * scalar));
-#endif
+      // Apply a force to the link.
+      link_->AddRelativeForce(math::Vector3(0, 0, thrust));
 
-    // Apply a force to the link.
-    link_->AddRelativeForce(math::Vector3(0, 0, thrust));
+      // Forces from Philppe Martin's and Erwan Salaün's
+      // 2010 IEEE Conference on Robotics and Automation paper
+      // The True Role of Accelerometer Feedback in Quadrotor Control
+      // - \omega * \lambda_1 * V_A^{\perp}
+      math::Vector3 joint_axis = joint_->GetGlobalAxis(0);
+      math::Vector3 body_velocity_W = link_->GetWorldLinearVel();
+      math::Vector3 relative_wind_velocity_W = body_velocity_W - wind_speed_W_;
+      math::Vector3 body_velocity_perpendicular =
+          relative_wind_velocity_W -
+          (relative_wind_velocity_W.Dot(joint_axis) * joint_axis);
+      math::Vector3 air_drag = -std::abs(real_motor_velocity) *
+                               rotor_drag_coefficient_ *
+                               body_velocity_perpendicular;
 
-    // Forces from Philppe Martin's and Erwan Salaün's
-    // 2010 IEEE Conference on Robotics and Automation paper
-    // The True Role of Accelerometer Feedback in Quadrotor Control
-    // - \omega * \lambda_1 * V_A^{\perp}
-    math::Vector3 joint_axis = joint_->GetGlobalAxis(0);
-    math::Vector3 body_velocity_W = link_->GetWorldLinearVel();
-    math::Vector3 relative_wind_velocity_W = body_velocity_W - wind_speed_W_;
-    math::Vector3 body_velocity_perpendicular =
-        relative_wind_velocity_W -
-        (relative_wind_velocity_W.Dot(joint_axis) * joint_axis);
-    math::Vector3 air_drag = -std::abs(real_motor_velocity) *
-                             rotor_drag_coefficient_ *
-                             body_velocity_perpendicular;
+      // Apply air_drag to link.
+      link_->AddForce(air_drag);
+      // Moments get the parent link, such that the resulting torques can be
+      // applied.
+      physics::Link_V parent_links = link_->GetParentJointsLinks();
+      // The tansformation from the parent_link to the link_.
+      math::Pose pose_difference =
+          link_->GetWorldCoGPose() - parent_links.at(0)->GetWorldCoGPose();
+      math::Vector3 drag_torque(0, 0,
+                                -turning_direction_ * thrust * moment_constant_);
+      // Transforming the drag torque into the parent frame to handle
+      // arbitrary rotor orientations.
+      math::Vector3 drag_torque_parent_frame =
+          pose_difference.rot.RotateVector(drag_torque);
+      parent_links.at(0)->AddRelativeTorque(drag_torque_parent_frame);
 
-    // Apply air_drag to link.
-    link_->AddForce(air_drag);
-    // Moments
-    // Getting the parent link, such that the resulting torques can be
-    // applied
-    // to
-    // it.
-    physics::Link_V parent_links = link_->GetParentJointsLinks();
-    // The tansformation from the parent_link to the link_.
-    math::Pose pose_difference =
-        link_->GetWorldCoGPose() - parent_links.at(0)->GetWorldCoGPose();
-    math::Vector3 drag_torque(0, 0,
-                              -turning_direction_ * thrust * moment_constant_);
-    // Transforming the drag torque into the parent frame to handle
-    // arbitrary
-    // rotor orientations.
-    math::Vector3 drag_torque_parent_frame =
-        pose_difference.rot.RotateVector(drag_torque);
-    parent_links.at(0)->AddRelativeTorque(drag_torque_parent_frame);
+      math::Vector3 rolling_moment;
+      // - \omega * \mu_1 * V_A^{\perp}
+      rolling_moment = -std::abs(real_motor_velocity) *
+                       rolling_moment_coefficient_ * body_velocity_perpendicular;
+      parent_links.at(0)->AddTorque(rolling_moment);
+      // Apply the filter on the motor's velocity.
+      double ref_motor_rot_vel;
+      ref_motor_rot_vel =
+          rotor_velocity_filter_->updateFilter(ref_motor_input_, sampling_time_);
 
-    math::Vector3 rolling_moment;
-    // - \omega * \mu_1 * V_A^{\perp}
-    rolling_moment = -std::abs(real_motor_velocity) *
-                     rolling_moment_coefficient_ * body_velocity_perpendicular;
-    parent_links.at(0)->AddTorque(rolling_moment);
-    // Apply the filter on the motor's velocity.
-    double ref_motor_rot_vel;
-    ref_motor_rot_vel =
-        rotor_velocity_filter_->updateFilter(ref_motor_input_, sampling_time_);
-
-// Make sure max force is set, as it may be reset to 0 by a world reset any
-// time. (This cannot be done during Reset() because the change will be undone
-// by the Joint's reset function afterwards.)
-#if GAZEBO_MAJOR_VERSION < 5
-    joint_->SetMaxForce(0, max_force_);
-#endif
-    joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel /
-                               rotor_velocity_slowdown_sim_);
-  }
+      // Make sure max force is set, as it may be reset to 0 by a world reset any
+      // time. (This cannot be done during Reset() because the change will be undone
+      // by the Joint's reset function afterwards.)
+      #if GAZEBO_MAJOR_VERSION < 5
+          joint_->SetMaxForce(0, max_force_);
+      #endif
+          joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel /
+                                     rotor_velocity_slowdown_sim_);
+    }
   }
 }
 
