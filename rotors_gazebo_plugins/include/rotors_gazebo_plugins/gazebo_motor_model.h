@@ -183,7 +183,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   gz_std_msgs::Float32 position_msg_;
   gz_std_msgs::Float32 force_msg_;
 
-  void ControlVelocityCallback(GzCommandMotorSpeedMsgPtr& command_motor_speed_msg);
+  void ControlCommandCallback(GzCommandMotorSpeedMsgPtr& command_motor_speed_msg);
 
   void WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg);
 
