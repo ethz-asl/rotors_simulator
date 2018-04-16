@@ -74,7 +74,7 @@ class GazeboMavlinkInterface : public ModelPlugin {
   GazeboMavlinkInterface()
       : ModelPlugin(),
 
-        received_first_referenc_(false),
+        received_first_reference_(false),
         namespace_(kDefaultNamespace),
         motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferencePubTopic),
         imu_sub_topic_(kDefaultImuTopic),
@@ -108,7 +108,7 @@ class GazeboMavlinkInterface : public ModelPlugin {
 
  private:
 
-  bool received_first_referenc_;
+  bool received_first_reference_;
   Eigen::VectorXd input_reference_;
 
   std::string namespace_;
@@ -173,7 +173,7 @@ class GazeboMavlinkInterface : public ModelPlugin {
   std::string imu_sub_topic_;
   std::string lidar_sub_topic_;
   std::string opticalFlow_sub_topic_;
-  
+
   common::Time last_time_;
   common::Time last_gps_time_;
   common::Time last_actuator_time_;

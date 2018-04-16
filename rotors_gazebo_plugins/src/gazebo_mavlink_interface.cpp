@@ -122,7 +122,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
               gztopic_[index] = "~/"+ model_->GetName() + channel->Get<std::string>("gztopic");
             else
               gztopic_[index] = "control_position_gztopic_" + std::to_string(index);
-            #if GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4
+            #if (GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4) || GAZEBO_MAJOR_VERSION >= 8
               /// only gazebo 7.4 and above support Any
               joint_control_pub_[index] = node_handle_->Advertise<gazebo::msgs::Any>(
                 gztopic_[index]);
@@ -422,7 +422,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
   gzdbg << "Creating Gazebo subscriber on topic \"" << "~/" + namespace_ + "/" + opticalFlow_sub_topic_ << "\"." << std::endl;
   opticalFlow_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
-  
+
   // Publish gazebo's motor_speed message
   gzdbg << "Creating Gazebo publisher on topic \"" << "~/" + namespace_ + "/" + motor_velocity_reference_pub_topic_ << "\"." << std::endl;
   motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + namespace_ + "/" + motor_velocity_reference_pub_topic_, 1);
@@ -506,7 +506,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
   handle_control(dt);
 
-  if(received_first_referenc_) {
+  if(received_first_reference_) {
 
     gz_mav_msgs::CommandMotorSpeed turning_velocities_msg;
 
@@ -971,7 +971,7 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
       }
     }
 
-    received_first_referenc_ = true;
+    received_first_reference_ = true;
     break;
   }
 }
@@ -1004,7 +1004,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         }
         else if (joint_control_type_[i] == "position_gztopic")
         {
-          #if GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4
+          #if (GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4) || GAZEBO_MAJOR_VERSION >= 8
             /// only gazebo 7.4 and above support Any
             gazebo::msgs::Any m;
             m.set_type(gazebo::msgs::Any_ValueType_DOUBLE);
