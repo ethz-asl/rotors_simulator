@@ -47,15 +47,15 @@ const static int CCW = 1;
 const static int CW = -1;
 } // namespace turning_direction
 
-enum motor_type {
-  VELOCITY = 1,
-  POSITION = 2,
-  FORCE = 3
+enum class MotorType {
+  kVelocity,
+  kPosition,
+  kForce
 };
 
 namespace gazebo {
 
-// Changed name from speed to input for more generality. TODO: integrate general actuator command.
+// Changed name from speed to input for more generality. TODO(kajabo): integrate general actuator command.
 typedef const boost::shared_ptr<const gz_mav_msgs::CommandMotorSpeed> GzCommandMotorInputMsgPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
 
@@ -85,7 +85,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         publish_force_(false),
         motor_number_(0),
         turning_direction_(turning_direction::CW),
-        motor_type_(VELOCITY),
+        motor_type_(MotorType::kVelocity),
         max_force_(kDefaultMaxForce),
         max_rot_velocity_(kDefaulMaxRotVelocity),
         moment_constant_(kDefaultMomentConstant),
@@ -137,7 +137,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
 
   int motor_number_;
   int turning_direction_;
-  int motor_type_;
+  MotorType motor_type_;
 
   double max_force_;
   double max_rot_velocity_;

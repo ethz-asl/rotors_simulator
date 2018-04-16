@@ -110,21 +110,21 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   if (_sdf->HasElement("motorType")) {
     std::string motor_type = _sdf->GetElement("motorType")->Get<std::string>();
     if (motor_type == "velocity")
-      motor_type_ = VELOCITY;
+      motor_type_ = MotorType::kVelocity;
     else if (motor_type == "position")
-      motor_type_ = POSITION;
+      motor_type_ = MotorType::kPosition;
     else if (motor_type == "force") {
-      motor_type_ = FORCE;
+      motor_type_ = MotorType::kForce;
     } else
       gzerr << "[gazebo_motor_model] Please only use 'velocity', 'position' or "
                "'force' as motorType.\n";
   } else {
     gzwarn << "[gazebo_motor_model] motorType not specified, using velocity.\n";
-    motor_type_ = VELOCITY;
+    motor_type_ = MotorType::kVelocity;
   }
 
   // Set up joint control PID to control joint.
-  if (motor_type_ == POSITION) {
+  if (motor_type_ == MotorType::kPosition) {
     if (_sdf->HasElement("joint_control_pid")) {
       sdf::ElementPtr pid = _sdf->GetElement("joint_control_pid");
       double p = 0;
@@ -347,14 +347,14 @@ void GazeboMotorModel::ControlCommandCallback(
           << command_motor_input_msg->motor_speed_size();
   }
 
-  if (motor_type_ == VELOCITY) {
+  if (motor_type_ == MotorType::kVelocity) {
     ref_motor_input_ = std::min(
         static_cast<double>(
             command_motor_input_msg->motor_speed(motor_number_)),
         static_cast<double>(max_rot_velocity_));
-  } else if (motor_type_ == POSITION) {
+  } else if (motor_type_ == MotorType::kPosition) {
     ref_motor_input_ = command_motor_input_msg->motor_speed(motor_number_);
-  } else {  // if (motor_type_ == FORCE) {
+  } else {  // if (motor_type_ == MotorType::kForce) {
     ref_motor_input_ = std::min(
         static_cast<double>(
             command_motor_input_msg->motor_speed(motor_number_)),
@@ -376,17 +376,17 @@ void GazeboMotorModel::WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg) {
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
   switch (motor_type_) {
-    case (POSITION): {
+    case (MotorType::kPosition): {
       double err = joint_->GetAngle(0).Radian() - ref_motor_input_;
       double force = pids_.Update(err, sampling_time_);
       joint_->SetForce(0, force);
       break;
     }
-    case (FORCE): {
+    case (MotorType::kForce): {
       joint_->SetForce(0, ref_motor_input_);
       break;
     }
-    default:  // VELOCITY
+    default:  // MotorType::kVelocity
     {
       motor_rot_vel_ = joint_->GetVelocity(0);
       if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_)) {
