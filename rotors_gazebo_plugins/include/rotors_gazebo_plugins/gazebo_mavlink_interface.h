@@ -153,7 +153,7 @@ class GazeboMavlinkInterface : public ModelPlugin {
   void handle_message(mavlink_message_t *msg);
   void pollForMAVLinkMessages(double _dt, uint32_t _timeoutMs);
 
-  static const unsigned kNOutMax = 16;
+  static const unsigned kNOutMax = 18;
 
   unsigned rotor_count_;
 
