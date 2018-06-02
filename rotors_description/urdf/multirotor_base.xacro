@@ -39,7 +39,13 @@
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro"
     params="robot_namespace mass body_width body_height use_mesh_file mesh_file *inertia">
+<link name="world" />
     <link name="${robot_namespace}/base_link"></link>
+<joint name="world_joint"  type="fixed">
+    <origin xyz="2 0 1.5" rpy="0 0 0" />
+    <parent link="world"/>
+    <child link="${robot_namespace}/base_link"/>
+</joint>
 
     <joint name="${robot_namespace}/base_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -56,14 +62,6 @@
 
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-          <xacro:if value="${use_mesh_file}">
-            <mesh filename="${mesh_file}" scale="1 1 1" />
-          </xacro:if>
-          <xacro:unless value="${use_mesh_file}">
-            <box size="${body_width} ${body_width} ${body_height}"/> <!-- [m] [m] [m] -->
-          </xacro:unless>
-        </geometry>
       </visual>
 
       <collision>
@@ -101,18 +99,6 @@
         <xacro:insert_block name="inertia" />
       </inertial>
       <visual>
-        <geometry>
-          <!-- <cylinder length="0.005" radius="${radius_rotor}"/> --> <!-- [m] -->
-          <xacro:if value="${use_own_mesh}">
-            <mesh filename="${mesh}"
-              scale="1 1 1" />
-          </xacro:if>
-          <xacro:unless value="${use_own_mesh}">
-            <mesh filename="package://rotors_description/meshes/propeller_${direction}.dae"
-              scale="${radius_rotor} ${radius_rotor} ${radius_rotor}" /> <!-- The propeller meshes have a radius of 1m -->
-            <!-- <box size="${2*radius_rotor} 0.01 0.005"/> -->
-          </xacro:unless>
-        </geometry>
       </visual>
       <collision>
         <geometry>
