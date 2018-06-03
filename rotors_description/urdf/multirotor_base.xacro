@@ -39,13 +39,7 @@
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro"
     params="robot_namespace mass body_width body_height use_mesh_file mesh_file *inertia">
-<link name="world" />
     <link name="${robot_namespace}/base_link"></link>
-<joint name="world_joint"  type="fixed">
-    <origin xyz="2 0 1.5" rpy="0 0 0" />
-    <parent link="world"/>
-    <child link="${robot_namespace}/base_link"/>
-</joint>
 
     <joint name="${robot_namespace}/base_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0" />
