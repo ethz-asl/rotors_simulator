@@ -41,8 +41,8 @@ void FrontGimbalPlugin::Load( physics::ModelPtr model, sdf::ElementPtr sdf)
 
   _targetRoll  = 0;
   _targetPitch = 0;
-  _pidRoll.Init(1, 0.1, 0.2, 100, -100, 50, -50);
-  _pidPitch.Init(1, 0.1, 0.2, 100, -100, 50, -50);
+  _pidRoll.Init(0.2, 0, 0, 1, -1, 50, -50);
+  _pidPitch.Init(0.2, 0, 0, 1, -1, 50, -50);
   
   std::string strRollName = "niv1/gimbal_roll_joint";
   _jointRoll = _model->GetJoint(strRollName);
@@ -69,6 +69,7 @@ void FrontGimbalPlugin::OnUpdate(const common::UpdateInfo& _info)
 
   CreateCommunicationChannels();
 
+  double angleYaw1, angleYaw2, diffYaw;
   double angleRoll;
   double anglePitch;
   double forceRoll;
@@ -77,25 +78,55 @@ void FrontGimbalPlugin::OnUpdate(const common::UpdateInfo& _info)
   double errorPitch;
   double validity;
 
-  angleRoll = _jointPitch->GetWorldPose().rot.GetRoll() * 180.0 / 3.141592;  // TODO(burrimi): Check tf.
-  anglePitch = _jointPitch->GetWorldPose().rot.GetPitch() * 180.0 / 3.141592;  // TODO(burrimi): Check tf.
-
+  common::Time time = this->_model->GetWorld()->GetSimTime();
+  static common::Time lastUpdatedTime = 0;
+  if (lastUpdatedTime == 0 || time <= lastUpdatedTime )
+  {
+    lastUpdatedTime = time;
+    return;
+  }
+  
+  double dt = (time - lastUpdatedTime).Double();
+  lastUpdatedTime = time;
+  
+  angleRoll = _jointRoll->GetWorldPose().rot.GetRoll() * 180.0f / 3.141592f;  // TODO(burrimi): Check tf.
+  anglePitch = _jointPitch->GetWorldPose().rot.GetPitch() * 180.0f / 3.141592f;  // TODO(burrimi): Check tf.
+  angleYaw1 = _jointRoll->GetWorldPose().rot.GetYaw() * 180.0f / 3.141592f;
+  angleYaw2 = _jointPitch->GetWorldPose().rot.GetYaw() * 180.0f / 3.141592f;
+  diffYaw = angleYaw1 - angleYaw2;
+  while( diffYaw < -180.0f ) { diffYaw += 360.0f; }
+  while( diffYaw >  180.0f ) { diffYaw -= 360.0f; }
+  if( abs(diffYaw) > 90 ) 
+  { 
+    if( anglePitch  > 0 ){ anglePitch = 180 - anglePitch;} 
+    else                 { anglePitch = -180 - anglePitch;}
+  }
 
   _targetRoll = cmdTargetRoll;
   errorRoll = angleRoll - _targetRoll;
-  forceRoll = _pidRoll.Update( errorRoll, 0.0025);
-  _jointRoll->SetForce(0,forceRoll);
-
+  while( errorRoll < -180.0f ) { errorRoll += 360.0f; }
+  while( errorRoll >  180.0f ) { errorRoll -= 360.0f; }
+ 
+  forceRoll = _pidRoll.Update( errorRoll, dt);
+  _jointRoll->SetVelocity(0,forceRoll);
+    
   _targetPitch = cmdTargetPitch;
   errorPitch = anglePitch - _targetPitch;
-  forcePitch = _pidPitch.Update( errorPitch, 0.0025);
-  _jointPitch->SetForce(0,forcePitch);
-  if(abs(errorRoll) < 3.0 && abs(errorPitch) < 3.0) {
-	validity= 1;
+  while( errorPitch < -180.0f ) { errorPitch += 360.0f; }
+  while( errorPitch >  180.0f ) { errorPitch -= 360.0f; }  
+
+  forcePitch = _pidPitch.Update( errorPitch, dt);
+  _jointPitch->SetVelocity(0,forcePitch);
+  
+  if(abs(errorRoll) < 3.0 && abs(errorPitch) < 3.0) 
+  {
+	  validity= 1;
   }
-  else {
-	validity = 0;
+  else 
+  {
+	  validity = 0;
   }
+
   PublishGimbalInfo(angleRoll, anglePitch, validity);
 }
 
