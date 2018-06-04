@@ -601,6 +601,7 @@
   <!-- Macro to add a VI-sensor stereo camera. -->
   <xacro:macro name="vi_sensor_stereo_camera_macro"
     params="namespace parent_link frame_rate origin_offset_x baseline_y origin_offset_z max_range">
+		<!-- image_format seems to be ignored -->
     <xacro:stereo_camera_macro
       namespace="${namespace}"
       camera_name="vi_sensor"
@@ -735,7 +736,7 @@
     <xacro:if value="${enable_depth}">
       <xacro:vi_sensor_depth_macro
         namespace="${namespace}" parent_link="${namespace}/vi_sensor_link"
-        camera_suffix="depth" frame_rate="30.0" max_range="10.0">
+        camera_suffix="depth" frame_rate="30.0" max_range="30.0">
         <origin xyz="0.015 0.055 0.0065" rpy="0 0 0" />
       </xacro:vi_sensor_depth_macro>
     </xacro:if>
