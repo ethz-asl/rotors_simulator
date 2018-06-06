@@ -55,15 +55,22 @@ Installation Instructions - Ubuntu 16.04 with ROS Kinetic
  ```
 
   > **Note** On OS X you need to install yaml-cpp using Homebrew `brew install yaml-cpp`.
+  
+ 3. Install required dependancies 
 
- 3. Build your workspace with `python_catkin_tools` (therefore you need `python_catkin_tools`)
+   ```
+   $ sudo -H pip install future 
+   $ sudo apt-get install ros-kinetic-octomap-msgs ros-kinetic-octomap-mapping libgoogle-glog-dev ros-kinetic-control-toolbox protobuf-compiler protobuf-c-compiler python-catkin-tools
+   ```
+
+ 4. Build your workspace with `python_catkin_tools`
 
    ```
    $ cd ~/catkin_ws/
    $ catkin build
    ```
 
- 4. Add sourcing to your `.bashrc` file
+ 5. Add sourcing to your `.bashrc` file
 
    ```
    $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
