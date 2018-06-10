@@ -84,7 +84,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     color="Red"
-    use_own_mesh="false"
+    use_own_mesh="true"
     mesh="">
     <origin xyz="${cos30*arm_length} ${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -106,7 +106,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     color="Blue"
-    use_own_mesh="false"
+    use_own_mesh="true"
     mesh="">
     <origin xyz="0 ${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -127,7 +127,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     color="Blue"
-    use_own_mesh="false"
+    use_own_mesh="true"
     mesh="">
     <origin xyz="-${cos30*arm_length} ${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -148,7 +148,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     color="Blue"
-    use_own_mesh="false"
+    use_own_mesh="true"
     mesh="">
     <origin xyz="-${cos30*arm_length} -${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -170,7 +170,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     color="Blue"
-    use_own_mesh="false"
+    use_own_mesh="true"
     mesh="">
     <origin xyz="0 -${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
@@ -192,7 +192,7 @@
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     color="Red"
-    use_own_mesh="false"
+    use_own_mesh="true"
     mesh="">
     <origin xyz="${cos30*arm_length} -${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
