@@ -727,8 +727,8 @@
       <!-- Insert stereo pair. -->
       <xacro:vi_sensor_stereo_camera_macro
         namespace="${namespace}" parent_link="${namespace}/vi_sensor_link"
-        frame_rate="30.0" origin_offset_x="0.015" baseline_y="${0.055*2}"
-        origin_offset_z="0.0065" max_range="30.0">
+        frame_rate="8.0" origin_offset_x="0.015" baseline_y="${0.055*2}"
+        origin_offset_z="0.0065" max_range="40.0">
       </xacro:vi_sensor_stereo_camera_macro>
     </xacro:if>
 
@@ -736,7 +736,7 @@
     <xacro:if value="${enable_depth}">
       <xacro:vi_sensor_depth_macro
         namespace="${namespace}" parent_link="${namespace}/vi_sensor_link"
-        camera_suffix="depth" frame_rate="30.0" max_range="30.0">
+        camera_suffix="depth" frame_rate="8.0" max_range="40.0">
         <origin xyz="0.015 0.055 0.0065" rpy="0 0 0" />
       </xacro:vi_sensor_depth_macro>
     </xacro:if>
