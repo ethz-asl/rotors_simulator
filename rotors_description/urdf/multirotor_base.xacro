@@ -115,9 +115,9 @@
         </geometry>
       </visual>
       <collision>
-        <geometry>
-          <cylinder length="0.005" radius="${radius_rotor}" /> <!-- [m] -->
-        </geometry>
+        <!--<geometry>
+          <cylinder length="0.005" radius="${radius_rotor}" /> <!- [m] ->
+        </geometry>-->
       </collision>
     </link>
     <gazebo>
