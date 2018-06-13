@@ -130,7 +130,7 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   // Get the contact manager.
   std::vector<std::string> collisions;
-  contact_mgr_ = world_->GetPhysicsEngine()->GetContactManager();
+  contact_mgr_ = world_->PhysicsEngine()->GetContactManager();
   for (unsigned int i = 0; i < link_->GetCollisions().size(); ++i) {
     physics::CollisionPtr collision = link_->GetCollision(i);
     collisions.push_back(collision->GetScopedName());
@@ -351,8 +351,8 @@ void GazeboBagPlugin::LogGroundTruth(const common::Time now) {
   writeBag(namespace_ + "/" + ground_truth_pose_topic_, ros_now, pose_msg);
 
   // Get twist and update the message.
-  math::Vector3 linear_veloctiy = link_->GetWorldLinearVel();
-  math::Vector3 angular_veloctiy = link_->GetWorldAngularVel();
+  ignition::math::Vector3d  linear_veloctiy = link_->GetWorldLinearVel();
+  ignition::math::Vector3d  angular_veloctiy = link_->GetWorldAngularVel();
   twist_msg.header.frame_id = frame_id_;
   twist_msg.header.stamp.sec = now.sec;
   twist_msg.header.stamp.nsec = now.nsec;

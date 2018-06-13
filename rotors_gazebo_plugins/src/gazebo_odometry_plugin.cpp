@@ -247,20 +247,20 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // C denotes child frame, P parent frame, and W world frame.
   // Further C_pose_W_P denotes pose of P wrt. W expressed in C.
   math::Pose W_pose_W_C = link_->GetWorldCoGPose();
-  math::Vector3 C_linear_velocity_W_C = link_->GetRelativeLinearVel();
-  math::Vector3 C_angular_velocity_W_C = link_->GetRelativeAngularVel();
+  ignition::math::Vector3d  C_linear_velocity_W_C = link_->GetRelativeLinearVel();
+  ignition::math::Vector3d  C_angular_velocity_W_C = link_->GetRelativeAngularVel();
 
-  math::Vector3 gazebo_linear_velocity = C_linear_velocity_W_C;
-  math::Vector3 gazebo_angular_velocity = C_angular_velocity_W_C;
+  ignition::math::Vector3d  gazebo_linear_velocity = C_linear_velocity_W_C;
+  ignition::math::Vector3d  gazebo_angular_velocity = C_angular_velocity_W_C;
   math::Pose gazebo_pose = W_pose_W_C;
 
   if (parent_frame_id_ != kDefaultParentFrameId) {
     math::Pose W_pose_W_P = parent_link_->GetWorldPose();
-    math::Vector3 P_linear_velocity_W_P = parent_link_->GetRelativeLinearVel();
-    math::Vector3 P_angular_velocity_W_P =
+    ignition::math::Vector3d  P_linear_velocity_W_P = parent_link_->GetRelativeLinearVel();
+    ignition::math::Vector3d  P_angular_velocity_W_P =
         parent_link_->GetRelativeAngularVel();
     math::Pose C_pose_P_C_ = W_pose_W_C - W_pose_W_P;
-    math::Vector3 C_linear_velocity_P_C;
+    ignition::math::Vector3d  C_linear_velocity_P_C;
     // \prescript{}{C}{\dot{r}}_{PC} = -R_{CP}
     //       \cdot \prescript{}{P}{\omega}_{WP} \cross \prescript{}{P}{r}_{PC}
     //       + \prescript{}{C}{v}_{WC}

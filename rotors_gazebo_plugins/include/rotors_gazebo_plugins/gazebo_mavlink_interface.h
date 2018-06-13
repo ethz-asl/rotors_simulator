@@ -182,9 +182,9 @@ class GazeboMavlinkInterface : public ModelPlugin {
   double lon_rad_;
   void handle_control(double _dt);
 
-  math::Vector3 gravity_W_;
-  math::Vector3 velocity_prev_W_;
-  math::Vector3 mag_d_;
+  ignition::math::Vector3d  gravity_W_;
+  ignition::math::Vector3d  velocity_prev_W_;
+  ignition::math::Vector3d  mag_d_;
 
   std::default_random_engine random_generator_;
   std::normal_distribution<float> standard_normal_distribution_;

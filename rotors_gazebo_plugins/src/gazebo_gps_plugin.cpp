@@ -172,10 +172,10 @@ void GazeboGpsPlugin::OnUpdate() {
   common::Time current_time;
 
   // Get the linear velocity in the world frame.
-  math::Vector3 W_ground_speed_W_L = link_->GetWorldLinearVel();
+  ignition::math::Vector3d  W_ground_speed_W_L = link_->GetWorldLinearVel();
 
   // Apply noise to ground speed.
-  W_ground_speed_W_L += math::Vector3(ground_speed_n_[0](random_generator_),
+  W_ground_speed_W_L += ignition::math::Vector3d (ground_speed_n_[0](random_generator_),
                                       ground_speed_n_[1](random_generator_),
                                       ground_speed_n_[2](random_generator_));
 

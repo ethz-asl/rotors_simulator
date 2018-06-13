@@ -438,7 +438,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   last_gps_time_ = world_->GetSimTime();
   gps_update_interval_ = 0.2;  // in seconds for 5Hz
 
-  gravity_W_ = world_->GetPhysicsEngine()->GetGravity();
+  gravity_W_ = world_->PhysicsEngine()->GetGravity();
 
   // Magnetic field data for Zurich from WMM2015 (10^5xnanoTesla (N, E D) n-frame )
   // mag_n_ = {0.21523, 0.00771, -0.42741};
@@ -530,11 +530,11 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
   //send gps
   math::Pose T_W_I = model_->GetWorldPose(); //TODO(burrimi): Check tf.
-  math::Vector3 pos_W_I = T_W_I.pos;  // Use the models' world position for GPS and pressure alt.
+  ignition::math::Vector3d  pos_W_I = T_W_I.pos;  // Use the models' world position for GPS and pressure alt.
 
-  math::Vector3 velocity_current_W = model_->GetWorldLinearVel();  // Use the models' world position for GPS velocity.
+  ignition::math::Vector3d  velocity_current_W = model_->GetWorldLinearVel();  // Use the models' world position for GPS velocity.
 
-  math::Vector3 velocity_current_W_xy = velocity_current_W;
+  ignition::math::Vector3d  velocity_current_W_xy = velocity_current_W;
   velocity_current_W_xy.z = 0;
 
   // TODO: Remove GPS message from IMU plugin. Added gazebo GPS plugin. This is temp here.
@@ -697,35 +697,35 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
   math::Quaternion q_gb = q_gr*q_br.GetInverse();
   math::Quaternion q_nb = q_ng*q_gb;
 
-  math::Vector3 pos_g = model_->GetWorldPose().pos;
-  math::Vector3 pos_n = q_ng.RotateVector(pos_g);
+  ignition::math::Vector3d  pos_g = model_->GetWorldPose().pos;
+  ignition::math::Vector3d  pos_n = q_ng.RotateVector(pos_g);
 
   //gzerr << "got imu: " << C_W_I << "\n";
   //gzerr << "got pose: " << T_W_I.rot << "\n";
   float declination = get_mag_declination(lat_rad_, lon_rad_);
 
   math::Quaternion q_dn(0.0, 0.0, declination);
-  math::Vector3 mag_n = q_dn.RotateVectorReverse(mag_d_);
+  ignition::math::Vector3d  mag_n = q_dn.RotateVectorReverse(mag_d_);
 
-  math::Vector3 vel_b = q_br.RotateVector(model_->GetRelativeLinearVel());
-  math::Vector3 vel_n = q_ng.RotateVector(model_->GetWorldLinearVel());
-  math::Vector3 omega_nb_b = q_br.RotateVector(model_->GetRelativeAngularVel());
+  ignition::math::Vector3d  vel_b = q_br.RotateVector(model_->GetRelativeLinearVel());
+  ignition::math::Vector3d  vel_n = q_ng.RotateVector(model_->GetWorldLinearVel());
+  ignition::math::Vector3d  omega_nb_b = q_br.RotateVector(model_->GetRelativeAngularVel());
 
   standard_normal_distribution_ = std::normal_distribution<float>(0, 0.01f);
-  math::Vector3 mag_noise_b(
+  ignition::math::Vector3d  mag_noise_b(
     standard_normal_distribution_(random_generator_),
     standard_normal_distribution_(random_generator_),
     standard_normal_distribution_(random_generator_));
 
-  math::Vector3 accel_b = q_br.RotateVector(math::Vector3(
+  ignition::math::Vector3d  accel_b = q_br.RotateVector(ignition::math::Vector3d (
     imu_message->linear_acceleration().x(),
     imu_message->linear_acceleration().y(),
     imu_message->linear_acceleration().z()));
-  math::Vector3 gyro_b = q_br.RotateVector(math::Vector3(
+  ignition::math::Vector3d  gyro_b = q_br.RotateVector(ignition::math::Vector3d (
     imu_message->angular_velocity().x(),
     imu_message->angular_velocity().y(),
     imu_message->angular_velocity().z()));
-  math::Vector3 mag_b = q_nb.RotateVectorReverse(mag_n) + mag_noise_b;
+  ignition::math::Vector3d  mag_b = q_nb.RotateVectorReverse(mag_n) + mag_noise_b;
 
   mavlink_hil_sensor_t sensor_msg;
   sensor_msg.time_usec = world_->GetSimTime().nsec/1000;
@@ -788,7 +788,7 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
   send_mavlink_message(MAVLINK_MSG_ID_HIL_SENSOR, &sensor_msg, 200);
 
   // ground truth
-  math::Vector3 accel_true_b = q_br.RotateVector(model_->GetRelativeLinearAccel());
+  ignition::math::Vector3d  accel_true_b = q_br.RotateVector(model_->GetRelativeLinearAccel());
 
   // send ground truth
   mavlink_hil_state_quaternion_t hil_state_quat;
