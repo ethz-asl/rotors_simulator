@@ -27,7 +27,6 @@
 namespace gazebo {
 
 GazeboControllerInterface::~GazeboControllerInterface() {
-  event::Events::DisconnectWorldUpdateBegin(updateConnection_);
 }
 
 void GazeboControllerInterface::Load(physics::ModelPtr _model,

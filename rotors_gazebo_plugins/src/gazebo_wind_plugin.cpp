@@ -29,7 +29,7 @@
 namespace gazebo {
 
 GazeboWindPlugin::~GazeboWindPlugin() {
-  event::Events::DisconnectWorldUpdateBegin(update_connection_);
+  
 }
 
 void GazeboWindPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
@@ -177,7 +177,7 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
     wind_velocity = wind_speed_mean_ * wind_direction_;
   } else {
     // Get the current position of the aircraft in world coordinates.
-    ignition::math::Vector3d  link_position = link_->WorldPose().Pos;
+    ignition::math::Vector3d  link_position = link_->WorldPose().Pos();
 
     // Calculate the x, y index of the grid points with x, y-coordinate 
     // just smaller than or equal to aircraft x, y position.

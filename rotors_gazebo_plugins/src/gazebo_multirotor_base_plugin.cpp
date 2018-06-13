@@ -30,7 +30,7 @@
 namespace gazebo {
 
 GazeboMultirotorBasePlugin::~GazeboMultirotorBasePlugin() {
-  event::Events::DisconnectWorldUpdateBegin(update_connection_);
+  
 }
 
 void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model,

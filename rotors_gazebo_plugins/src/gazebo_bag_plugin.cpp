@@ -28,7 +28,7 @@
 namespace gazebo {
 
 GazeboBagPlugin::~GazeboBagPlugin() {
-  event::Events::DisconnectWorldUpdateBegin(update_connection_);
+  
   if (node_handle_) {
     node_handle_->shutdown();
     delete node_handle_;
@@ -244,7 +244,7 @@ void GazeboBagPlugin::StopRecording() {
   wind_speed_sub_.shutdown();
 
   // Disconnect the update event.
-  event::Events::DisconnectWorldUpdateBegin(update_connection_);
+  
 
   // Close the bag.
   bag_.close();

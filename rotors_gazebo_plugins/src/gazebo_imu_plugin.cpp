@@ -191,7 +191,7 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     }
   }
 
-  gravity_W_ = world_->Physics()->Gravity();
+  gravity_W_ = world_->Gravity();
   imu_parameters_.gravity_magnitude = gravity_W_.Length();
 
   standard_normal_distribution_ = std::normal_distribution<double>(0.0, 1.0);
@@ -278,8 +278,8 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   last_time_ = current_time;
   double t = current_time.Double();
 
-  ignition::math::Pose3d T_W_I = link_->GetWorldPose();  // TODO(burrimi): Check tf.
-  ignition::math::Quaterniond C_W_I = T_W_I.rot;
+  ignition::math::Pose3d T_W_I = link_->WorldPose();  // TODO(burrimi): Check tf.
+  ignition::math::Quaterniond C_W_I = T_W_I.Rot();
 
 #if GAZEBO_MAJOR_VERSION < 5
   ignition::math::Vector3d  velocity_current_W = link_->GetWorldLinearVel();

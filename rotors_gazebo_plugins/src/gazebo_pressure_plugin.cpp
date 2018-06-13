@@ -106,7 +106,7 @@ void GazeboPressurePlugin::OnUpdate(const common::UpdateInfo& _info) {
   common::Time current_time = world_->SimTime();
 
   // Get the current geometric height.
-  double height_geometric_m = ref_alt_ + model_->WorldPose().Pos.Z();
+  double height_geometric_m = ref_alt_ + model_->WorldPose().Pos().Z();
 
   // Compute the geopotential height.
   double height_geopotential_m = kEarthRadiusMeters * height_geometric_m /
