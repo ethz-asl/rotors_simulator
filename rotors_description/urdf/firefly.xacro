@@ -26,8 +26,8 @@
   <xacro:property name="use_mesh_file" value="false" />
   <xacro:property name="mesh_file" value="package://rotors_description/meshes/firefly.dae" />
   <xacro:property name="mass" value="1.5" /> <!-- [kg] -->
-  <xacro:property name="body_width" value="0.05" /> <!-- [m] -->
-  <xacro:property name="body_height" value="0.08" /> <!-- [m] -->
+  <xacro:property name="body_width" value="0.10" /> <!-- [m] -->
+  <xacro:property name="body_height" value="0.16" /> <!-- [m] -->
   <xacro:property name="mass_rotor" value="0.005" /> <!-- [kg] -->
   <xacro:property name="arm_length" value="0.215" /> <!-- [m] -->
   <xacro:property name="rotor_offset_top" value="0.037" /> <!-- [m] -->

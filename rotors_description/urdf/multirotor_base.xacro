@@ -115,8 +115,8 @@
         </geometry>
       </visual>
       <collision>
-        <!--<geometry>
-          <cylinder length="0.005" radius="${radius_rotor}" /> <!- [m] ->
+<!--        <geometry>
+          <cylinder length="0.001" radius="0.001" /> <!- [m] ->
         </geometry>-->
       </collision>
     </link>
