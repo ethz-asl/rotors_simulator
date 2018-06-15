@@ -72,7 +72,7 @@ void LiftDragPlugin::Load(physics::ModelPtr _model,
   this->world = this->model->GetWorld();
   GZ_ASSERT(this->world, "LiftDragPlugin world pointer is NULL");
 
-  this->physics = this->world->PhysicsEngine();
+  this->physics = this->world->Physics();
   GZ_ASSERT(this->physics, "LiftDragPlugin physics pointer is NULL");
 
   GZ_ASSERT(_sdf, "LiftDragPlugin _sdf pointer is NULL");
@@ -162,7 +162,7 @@ void LiftDragPlugin::OnUpdate()
 {
   GZ_ASSERT(this->link, "Link was NULL");
   // get linear velocity at cp in inertial frame
-  ignition::math::Vector3d  vel = this->link->GetWorldLinearVel(this->cp);
+  ignition::math::Vector3d  vel = this->link->WorldLinearVel(this->cp);
   ignition::math::Vector3d  velI = vel;
   velI.Normalize();
 
@@ -171,14 +171,14 @@ void LiftDragPlugin::OnUpdate()
   // this->velSmooth = e*vel + (1.0 - e)*velSmooth;
   // vel = this->velSmooth;
 
-  if (vel.GetLength() <= 0.01)
+  if (vel.Length() <= 0.01)
     return;
 
   // pose of body
-  math::Pose pose = this->link->GetWorldPose();
+  ignition::math::Pose3d pose = this->link->WorldPose();
 
   // rotate forward and upward vectors into inertial frame
-  ignition::math::Vector3d  forwardI = pose.rot.RotateVector(this->forward);
+  ignition::math::Vector3d  forwardI = pose.Rot().RotateVector(this->forward);
 
   ignition::math::Vector3d  upwardI;
   if (this->radialSymmetry)
@@ -190,7 +190,7 @@ void LiftDragPlugin::OnUpdate()
   }
   else
   {
-    upwardI = pose.rot.RotateVector(this->upward);
+    upwardI = pose.Rot().RotateVector(this->upward);
   }
 
   // spanwiseI: a vector normal to lift-drag-plane described in inertial frame
@@ -199,7 +199,7 @@ void LiftDragPlugin::OnUpdate()
   const double minRatio = -1.0;
   const double maxRatio = 1.0;
   // check sweep (angle between velI and lift-drag-plane)
-  double sinSweepAngle = math::clamp(
+  double sinSweepAngle = ignition::math::clamp(
       spanwiseI.Dot(velI), minRatio, maxRatio);
 
   // get cos from trig identity
@@ -238,7 +238,7 @@ void LiftDragPlugin::OnUpdate()
   //   cos(theta) = a.Dot(b)/(a.Length()*b.Lenghth())
   // given upwardI and liftI are both unit vectors, we can drop the denominator
   //   cos(theta) = a.Dot(b)
-  double cosAlpha = math::clamp(liftI.Dot(upwardI), minRatio, maxRatio);
+  double cosAlpha = ignition::math::clamp(liftI.Dot(upwardI), minRatio, maxRatio);
 
   // Is alpha positive or negative? Test:
   // forwardI points toward zero alpha
@@ -255,7 +255,7 @@ void LiftDragPlugin::OnUpdate()
                                   : this->alpha + M_PI;
 
   // compute dynamic pressure
-  double speedInLDPlane = velInLDPlane.GetLength();
+  double speedInLDPlane = velInLDPlane.Length();
   double q = 0.5 * this->rho * speedInLDPlane * speedInLDPlane;
 
   // compute cl at cp, check for stall, correct for sweep
@@ -282,7 +282,7 @@ void LiftDragPlugin::OnUpdate()
   // modify cl per control joint value
   if (this->controlJoint)
   {
-    double controlAngle = this->controlJoint->GetAngle(0).Radian();
+    double controlAngle = this->controlJoint->Position(0);
     cl = cl + this->controlJointRadToCL * controlAngle;
     /// \TODO: also change cm and cd
   }
@@ -342,8 +342,8 @@ void LiftDragPlugin::OnUpdate()
   ignition::math::Vector3d  moment = cm * q * this->area * momentDirection;
 
   // moment arm from cg to cp in inertial plane
-  ignition::math::Vector3d  momentArm = pose.rot.RotateVector(
-    this->cp - this->link->GetInertial()->GetCoG());
+  ignition::math::Vector3d  momentArm = pose.Rot().RotateVector(
+    this->cp - this->link->GetInertial()->CoG());
   // gzerr << this->cp << " : " << this->link->GetInertial()->GetCoG() << "\n";
 
   // force and torque about cg in inertial frame
@@ -366,9 +366,9 @@ void LiftDragPlugin::OnUpdate()
     gzdbg << "Link: [" << this->link->GetName()
           << "] pose: [" << pose
           << "] dynamic pressure: [" << q << "]\n";
-    gzdbg << "spd: [" << vel.GetLength()
+    gzdbg << "spd: [" << vel.Length()
           << "] vel: [" << vel << "]\n";
-    gzdbg << "LD plane spd: [" << velInLDPlane.GetLength()
+    gzdbg << "LD plane spd: [" << velInLDPlane.Length()
           << "] vel : [" << velInLDPlane << "]\n";
     gzdbg << "forward (inertial): " << forwardI << "\n";
     gzdbg << "upward (inertial): " << upwardI << "\n";

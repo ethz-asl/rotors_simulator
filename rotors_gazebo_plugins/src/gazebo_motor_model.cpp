@@ -27,8 +27,8 @@
 namespace gazebo {
 
 GazeboMotorModel::~GazeboMotorModel() {
-  event::Events::DisconnectWorldUpdateBegin(updateConnection_);
 }
+
 void GazeboMotorModel::InitializeParams() {}
 
 void GazeboMotorModel::Publish() {
@@ -37,7 +37,7 @@ void GazeboMotorModel::Publish() {
     motor_velocity_pub_->Publish(turning_velocity_msg_);
   }
   if (publish_position_) {
-    position_msg_.set_data(joint_->GetAngle(0).Radian());
+    position_msg_.set_data(joint_->Position(0));
     motor_position_pub_->Publish(position_msg_);
   }
   if (publish_force_) {
@@ -369,15 +369,15 @@ void GazeboMotorModel::WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg) {
 
   // TODO(burrimi): Transform velocity to world frame if frame_id is set to
   // something else.
-  wind_speed_W_.x = wind_speed_msg->velocity().x();
-  wind_speed_W_.y = wind_speed_msg->velocity().y();
-  wind_speed_W_.z = wind_speed_msg->velocity().z();
+  wind_speed_W_.X() = wind_speed_msg->velocity().x();
+  wind_speed_W_.Y() = wind_speed_msg->velocity().y();
+  wind_speed_W_.Z() = wind_speed_msg->velocity().z();
 }
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
   switch (motor_type_) {
     case (MotorType::kPosition): {
-      double err = joint_->GetAngle(0).Radian() - ref_motor_input_;
+      double err = joint_->Position(0) - ref_motor_input_;
       double force = pids_.Update(err, sampling_time_);
       joint_->SetForce(0, force);
       break;
@@ -411,8 +411,8 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
       // 2010 IEEE Conference on Robotics and Automation paper
       // The True Role of Accelerometer Feedback in Quadrotor Control
       // - \omega * \lambda_1 * V_A^{\perp}
-      ignition::math::Vector3d  joint_axis = joint_->GetGlobalAxis(0);
-      ignition::math::Vector3d  body_velocity_W = link_->GetWorldLinearVel();
+      ignition::math::Vector3d  joint_axis = joint_->GlobalAxis(0);
+      ignition::math::Vector3d  body_velocity_W = link_->WorldLinearVel();
       ignition::math::Vector3d  relative_wind_velocity_W = body_velocity_W - wind_speed_W_;
       ignition::math::Vector3d  body_velocity_perpendicular =
           relative_wind_velocity_W -
@@ -427,14 +427,14 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
       // applied.
       physics::Link_V parent_links = link_->GetParentJointsLinks();
       // The tansformation from the parent_link to the link_.
-      math::Pose pose_difference =
-          link_->GetWorldCoGPose() - parent_links.at(0)->GetWorldCoGPose();
+      ignition::math::Pose3d pose_difference =
+          link_->WorldCoGPose() - parent_links.at(0)->WorldCoGPose();
       ignition::math::Vector3d  drag_torque(
           0, 0, -turning_direction_ * thrust * moment_constant_);
       // Transforming the drag torque into the parent frame to handle
       // arbitrary rotor orientations.
       ignition::math::Vector3d  drag_torque_parent_frame =
-          pose_difference.rot.RotateVector(drag_torque);
+          pose_difference.Rot().RotateVector(drag_torque);
       parent_links.at(0)->AddRelativeTorque(drag_torque_parent_frame);
 
       ignition::math::Vector3d  rolling_moment;
