@@ -13,11 +13,11 @@
     <!-- <arg name="debug" value="true"/> -->
     <arg name="paused" value="$(arg paused)"/>
     <!-- <arg name="gui" value="false"/> -->
-    
+
     <!-- The following line causes gzmsg and gzerr messages to be printed to the console
     (even when Gazebo is started through roslaunch) -->
     <arg name="verbose" value="true"/>
-    
+
   </include>
 
   <group ns="$(arg mav_name)">
@@ -37,4 +37,11 @@
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
   </group>
+  <!-- <group ns="$(arg mav_name)">
+    <node name="joystick_navigation" pkg="mav_joyful" type="joystick_navigation" output="screen">
+      <remap from="odometry" to="ground_truth/odometry" />
+      <remap from="joy" to="/joy" />
+      <param name="command_timeout_sec" value="10000"/>
+    </node>
+  </group> -->
 </launch>

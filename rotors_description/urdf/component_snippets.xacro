@@ -261,11 +261,11 @@
       </plugin>
     </gazebo>
   </xacro:macro>
-  
+
   <!-- =============================================================== -->
   <!-- ==================== ROS INTERFACE MACRO ====================== -->
   <!-- =============================================================== -->
-  <!-- <xacro:macro 
+  <!-- <xacro:macro
   		name="ros_interface_plugin_macro"
   		params="namespace">
     <gazebo>
@@ -278,10 +278,10 @@
   <!-- =============================================================== -->
   <!-- ================== MAVLINK INTERFACE MACRO ==================== -->
   <!-- =============================================================== -->
-  <xacro:macro name="mavlink_interface_macro" 
-    params="namespace mavlink_sub_topic imu_sub_topic mavlink_pub_topic 
-      motors_speeds_pub_topic gps_update_freq rotor_count reference_magnetic_field_north 
-      reference_magnetic_field_east reference_magnetic_field_down reference_latitude 
+  <xacro:macro name="mavlink_interface_macro"
+    params="namespace mavlink_sub_topic imu_sub_topic mavlink_pub_topic
+      motors_speeds_pub_topic gps_update_freq rotor_count reference_magnetic_field_north
+      reference_magnetic_field_east reference_magnetic_field_down reference_latitude
       reference_longitude reference_altitude">
     <gazebo>
       <plugin name="mavlink_interface" filename="librotors_gazebo_mavlink_interface.so">
@@ -294,7 +294,7 @@
 	<rotorCount>${rotor_count}</rotorCount>
         <!-- [Gauss] Below are the North, East, and Down components of the Earth's magnetic field at the reference location.
              The default reference location is Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84).
-	     You can obtain the magnetic field strength for your location using the World Magnetic Model: 
+	     You can obtain the magnetic field strength for your location using the World Magnetic Model:
              https://www.ngdc.noaa.gov/geomag/WMM/calculators.shtml -->
         <referenceMagNorth>${reference_magnetic_field_north}</referenceMagNorth>
         <referenceMagEast>${reference_magnetic_field_east}</referenceMagEast>
@@ -484,7 +484,7 @@
   <!-- Macro to add a magnetometer. -->
   <xacro:macro name="magnetometer_plugin_macro"
     params="namespace magnetometer_suffix parent_link magnetometer_topic
-      mass_magnetometer_sensor ref_mag_north ref_mag_east ref_mag_down 
+      mass_magnetometer_sensor ref_mag_north ref_mag_east ref_mag_down
       noise_normal noise_uniform_initial_bias *inertia *origin">
     <!-- Magnetometer link -->
     <link name="${namespace}/magnetometer${magnetometer_suffix}_link">
@@ -508,7 +508,7 @@
         <magnetometerTopic>${magnetometer_topic}</magnetometerTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to 'magnetic_field') -->
         <!-- [Tesla] Below is the reference Earth's magnetic field at the reference location in NED frame.
              The default reference location is Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84).
-	     You can obtain the magnetic field strength for your location using the World Magnetic Model: 
+	     You can obtain the magnetic field strength for your location using the World Magnetic Model:
              http://www.ngdc.noaa.gov/geomag-web/#igrfwmm -->
         <refMagNorth>${ref_mag_north}</refMagNorth>
         <refMagEast>${ref_mag_east}</refMagEast>
@@ -551,7 +551,7 @@
       camera_suffix="${camera_suffix}"
       frame_rate="${frame_rate}"
       horizontal_fov="1.3962634"
-      image_width="752"
+      image_width="640"
       image_height="480"
       image_format="L8"
       min_distance="0.02"
@@ -573,7 +573,7 @@
       parent_link="${parent_link}"
       frame_rate="${frame_rate}"
       horizontal_fov="1.3962634"
-      image_width="752"
+      image_width="640"
       image_height="480"
       image_format="L8"
       min_distance="0.02"
@@ -625,7 +625,7 @@
         <camera>
           <horizontal_fov>2</horizontal_fov>
           <image>
-            <format>L8</format>
+            <format>R8G8B8</format>
             <width>640</width>
             <height>480</height>
           </image>
@@ -640,9 +640,9 @@
           <baseline>0.11</baseline>
           <updateRate>${frame_rate}</updateRate>
           <cameraName>camera_${camera_suffix}</cameraName>
-          <imageTopicName>camera/image_raw</imageTopicName>
-          <cameraInfoTopicName>camera/camera_info</cameraInfoTopicName>
-          <depthImageTopicName>depth/disparity</depthImageTopicName>
+          <imageTopicName>rgb/image_raw</imageTopicName>
+          <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>depth/image_raw</depthImageTopicName>
           <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
           <pointCloudTopicName>depth/points</pointCloudTopicName>
           <frameName>camera_${camera_suffix}_optical_center_link</frameName>
@@ -677,7 +677,7 @@
       </visual>
 
       <inertial>
-        <mass value="0.13" />
+        <mass value="0.005" />
         <origin xyz="0 0 0" rpy="0 0 0" />
         <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
       </inertial>
@@ -701,7 +701,7 @@
     <xacro:if value="${enable_depth}">
       <xacro:vi_sensor_depth_macro
         namespace="${namespace}" parent_link="${namespace}/vi_sensor_link"
-        camera_suffix="depth" frame_rate="30.0" max_range="10.0">
+        camera_suffix="depth" frame_rate="5.0" max_range="10.0">
         <origin xyz="0.015 0.055 0.0065" rpy="0 0 0" />
       </xacro:vi_sensor_depth_macro>
     </xacro:if>
