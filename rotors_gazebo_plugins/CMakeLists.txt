@@ -22,8 +22,12 @@ project(rotors_gazebo_plugins)
 # ========================== SET DEFAULTS FOR PASSED-IN VARIABLES =============================== #
 # =============================================================================================== #
 
-if(NOT DEFINED BUILD_MAVLINK_INTERFACE_PLUGIN)
-  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN variable not provided, setting to FALSE.")
+find_package(mavlink)
+if(${mavlink_FOUND})
+  message(STATUS "mavlink found, building MAVLINK_INTERFACE_PLUGIN.")
+  set(BUILD_MAVLINK_INTERFACE_PLUGIN TRUE)
+else()
+  message(STATUS "mavlink not found, not building MAVLINK_INTERFACE_PLUGIN.")
   set(BUILD_MAVLINK_INTERFACE_PLUGIN FALSE)
 endif()
 
