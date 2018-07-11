@@ -960,7 +960,7 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
     // set rotor speeds, controller targets
     if (controls.flags == 1) {
       input_reference_.resize(kNOutMax);
-      for (int i = 0; i < input_reference_.size(); i++) {
+      for (int i = 0; i < 12; i++) {
         if (armed) {
           input_reference_[i] = (controls.controls[input_index_[i]] + input_offset_[i]) * input_scaling_[i] + zero_position_armed_[i];
           // if (joints_[i])
