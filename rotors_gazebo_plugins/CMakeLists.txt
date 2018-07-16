@@ -22,8 +22,8 @@ project(rotors_gazebo_plugins)
 # =============================================================================================== #
 
 if(NOT DEFINED BUILD_MAVLINK_INTERFACE_PLUGIN)
-  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN variable not provided, setting to TRUE.")
-  set(BUILD_MAVLINK_INTERFACE_PLUGIN TRUE)
+  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN variable not provided, setting to FALSE.")
+  set(BUILD_MAVLINK_INTERFACE_PLUGIN FALSE)
 endif()
 
 if(NOT DEFINED BUILD_OCTOMAP_PLUGIN)
