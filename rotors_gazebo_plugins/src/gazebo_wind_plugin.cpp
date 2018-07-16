@@ -136,17 +136,17 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Get the current simulation time.
   common::Time now = world_->SimTime();
   
-  ignition::math::Vector3d  wind_velocity(0.0, 0.0, 0.0);
+  ignition::math::Vector3d wind_velocity(0.0, 0.0, 0.0);
 
   // Choose user-specified method for calculating wind velocity.
   if (!use_custom_static_wind_field_) {
     // Calculate the wind force.
     double wind_strength = wind_force_mean_;
-    ignition::math::Vector3d  wind = wind_strength * wind_direction_;
+    ignition::math::Vector3d wind = wind_strength * wind_direction_;
     // Apply a force from the constant wind to the link.
     link_->AddForceAtRelativePosition(wind, xyz_offset_);
 
-    ignition::math::Vector3d  wind_gust(0.0, 0.0, 0.0);
+    ignition::math::Vector3d wind_gust(0.0, 0.0, 0.0);
     // Calculate the wind gust force.
     if (now >= wind_gust_start_ && now < wind_gust_end_) {
       double wind_gust_strength = wind_gust_force_mean_;
@@ -177,7 +177,7 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
     wind_velocity = wind_speed_mean_ * wind_direction_;
   } else {
     // Get the current position of the aircraft in world coordinates.
-    ignition::math::Vector3d  link_position = link_->WorldPose().Pos();
+    ignition::math::Vector3d link_position = link_->WorldPose().Pos();
 
     // Calculate the x, y index of the grid points with x, y-coordinate 
     // just smaller than or equal to aircraft x, y position.
@@ -252,7 +252,7 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
       }
 
       // Extract the wind velocities corresponding to each vertex.
-      ignition::math::Vector3d  wind_at_vertices[n_vertices];
+      ignition::math::Vector3d wind_at_vertices[n_vertices];
       for (std::size_t i = 0u; i < n_vertices; ++i) {
         wind_at_vertices[i].X() = u_[idx_x[i] + idx_y[i] * n_x_ + idx_z[i] * n_x_ * n_y_];
         wind_at_vertices[i].Y() = v_[idx_x[i] + idx_y[i] * n_x_ + idx_z[i] * n_x_ * n_y_];
@@ -406,28 +406,28 @@ void GazeboWindPlugin::ReadCustomWindField(std::string& custom_wind_field_path) 
 
 }
 
-ignition::math::Vector3d  GazeboWindPlugin::LinearInterpolation(
+ignition::math::Vector3d GazeboWindPlugin::LinearInterpolation(
   double position, ignition::math::Vector3d * values, double* points) const {
-  ignition::math::Vector3d  value = values[0] + (values[1] - values[0]) /
+  ignition::math::Vector3d value = values[0] + (values[1] - values[0]) /
                         (points[1] - points[0]) * (position - points[0]);
   return value;
 }
 
-ignition::math::Vector3d  GazeboWindPlugin::BilinearInterpolation(
+ignition::math::Vector3d GazeboWindPlugin::BilinearInterpolation(
   double* position, ignition::math::Vector3d * values, double* points) const {
-  ignition::math::Vector3d  intermediate_values[2] = { LinearInterpolation(
+  ignition::math::Vector3d intermediate_values[2] = { LinearInterpolation(
                                              position[0], &(values[0]), &(points[0])),
                                            LinearInterpolation(
                                              position[0], &(values[2]), &(points[2])) };
-  ignition::math::Vector3d  value = LinearInterpolation(
+  ignition::math::Vector3d value = LinearInterpolation(
                           position[1], intermediate_values, &(points[4]));
   return value;
 }
 
-ignition::math::Vector3d  GazeboWindPlugin::TrilinearInterpolation(
-  ignition::math::Vector3d  link_position, ignition::math::Vector3d * values, double* points) const {
+ignition::math::Vector3d GazeboWindPlugin::TrilinearInterpolation(
+  ignition::math::Vector3d link_position, ignition::math::Vector3d * values, double* points) const {
   double position[3] = {link_position.X(),link_position.Y(),link_position.Z()};
-  ignition::math::Vector3d  intermediate_values[4] = { LinearInterpolation(
+  ignition::math::Vector3d intermediate_values[4] = { LinearInterpolation(
                                              position[2], &(values[0]), &(points[0])),
                                            LinearInterpolation(
                                              position[2], &(values[2]), &(points[2])),
@@ -435,7 +435,7 @@ ignition::math::Vector3d  GazeboWindPlugin::TrilinearInterpolation(
                                              position[2], &(values[4]), &(points[4])),
                                            LinearInterpolation(
                                              position[2], &(values[6]), &(points[6])) };
-  ignition::math::Vector3d  value = BilinearInterpolation(
+  ignition::math::Vector3d value = BilinearInterpolation(
     &(position[0]), intermediate_values, &(points[8]));
   return value;
 }

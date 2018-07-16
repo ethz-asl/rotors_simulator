@@ -86,25 +86,14 @@ bool OctomapFromGazeboWorld::ServiceCallback(
   }
 
   common::SphericalCoordinatesPtr sphericalCoordinates = world_->GetSphericalCoordinates();
-#if GAZEBO_MAJOR_VERSION >= 6
-  ignition::ignition::math::Vector3d d origin_cartesian(0.0, 0.0, 0.0);
-  ignition::ignition::math::Vector3d d origin_spherical = sphericalCoordinates->
+  ignition::ignition::math::Vector3d origin_cartesian(0.0, 0.0, 0.0);
+  ignition::ignition::math::Vector3d origin_spherical = sphericalCoordinates->
       SphericalFromLocal(origin_cartesian);
 
   res.origin_latitude = origin_spherical.X();
   res.origin_longitude = origin_spherical.Y();
   res.origin_altitude = origin_spherical.Z();
   return true;
-#else
-  ignition::math::Vector3d  origin_cartesian(0.0, 0.0, 0.0);
-  ignition::math::Vector3d  origin_spherical = sphericalCoordinates->
-         SphericalFromLocal(origin_cartesian);
-
-  res.origin_latitude = origin_spherical.x;
-  res.origin_longitude = origin_spherical.y;
-  res.origin_altitude = origin_spherical.z;
-  return true;
-#endif
 }
 
 void OctomapFromGazeboWorld::FloodFill(
@@ -119,7 +108,7 @@ void OctomapFromGazeboWorld::FloodFill(
   to_check.push(octoignition::math::Vector3d (seed_point.x, seed_point.y, seed_point.z));
 
   while (to_check.size() > 0) {
-    octoignition::math::Vector3d  p = to_check.top();
+    octoignition::math::Vector3d p = to_check.top();
 
     if ((p.x() > bounding_box_origin.x - bounding_box_lengths.x / 2) &&
         (p.x() < bounding_box_origin.x + bounding_box_lengths.x / 2) &&
@@ -146,8 +135,8 @@ void OctomapFromGazeboWorld::FloodFill(
 bool OctomapFromGazeboWorld::CheckIfInterest(const ignition::math::Vector3d & central_point,
                                              gazebo::physics::RayShapePtr ray,
                                              const double leaf_size) {
-  ignition::math::Vector3d  start_point = central_point;
-  ignition::math::Vector3d  end_point = central_point;
+  ignition::math::Vector3d start_point = central_point;
+  ignition::math::Vector3d end_point = central_point;
 
   double dist;
   std::string entity_name;
@@ -184,12 +173,12 @@ void OctomapFromGazeboWorld::CreateOctomap(
     const rotors_comm::Octomap::Request& msg) {
   const double epsilon = 0.00001;
   const int far_away = 100000;
-  ignition::math::Vector3d  bounding_box_origin(msg.bounding_box_origin.x,
+  ignition::math::Vector3d bounding_box_origin(msg.bounding_box_origin.x,
                                     msg.bounding_box_origin.y,
                                     msg.bounding_box_origin.z);
   // epsilion prevents undefiened behaviour if a point is inserted exactly
   // between two octomap cells
-  ignition::math::Vector3d  bounding_box_lengths(msg.bounding_box_lengths.x + epsilon,
+  ignition::math::Vector3d bounding_box_lengths(msg.bounding_box_lengths.x + epsilon,
                                      msg.bounding_box_lengths.y + epsilon,
                                      msg.bounding_box_lengths.z + epsilon);
   double leaf_size = msg.leaf_size;
@@ -226,7 +215,7 @@ void OctomapFromGazeboWorld::CreateOctomap(
                       bounding_box_lengths.z / 2;
            z < bounding_box_origin.z + bounding_box_lengths.z / 2;
            z += leaf_size) {
-        ignition::math::Vector3d  point(x, y, z);
+        ignition::math::Vector3d point(x, y, z);
         if (CheckIfInterest(point, ray, leaf_size)) {
           octomap_->setNodeValue(x, y, z, 1);
         }

@@ -138,9 +138,9 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
   // B denotes body frame and W world frame ... e.g., W_rot_W_B denotes
   // rotation of B wrt. W expressed in W.
   ignition::math::Quaterniond W_rot_W_B = link_->WorldPose().Rot();
-  ignition::math::Vector3d  B_air_speed_W_B = W_rot_W_B.RotateVectorReverse(
+  ignition::math::Vector3d B_air_speed_W_B = W_rot_W_B.RotateVectorReverse(
       link_->WorldLinearVel() - W_wind_speed_W_B_);
-  ignition::math::Vector3d  B_angular_velocity_W_B = link_->RelativeAngularVel();
+  ignition::math::Vector3d B_angular_velocity_W_B = link_->RelativeAngularVel();
 
   // Traditionally, fixed-wing aerodynamics use NED (North-East-Down) frame,
   // but since our model's body frame is in North-West-Up frame we rotate the
@@ -271,9 +271,9 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
 
   // Once again account for the difference between our body frame orientation
   // and the traditional aerodynamics frame.
-  const ignition::math::Vector3d  forces =
+  const ignition::math::Vector3d forces =
       ignition::math::Vector3d (forces_B[0], -forces_B[1], -forces_B[2]);
-  const ignition::math::Vector3d  moments =
+  const ignition::math::Vector3d moments =
       ignition::math::Vector3d (moments_B[0], -moments_B[1], -moments_B[2]);
 
   // Apply the calculated forced and moments to the main body link.

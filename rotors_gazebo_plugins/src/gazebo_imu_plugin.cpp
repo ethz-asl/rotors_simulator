@@ -281,22 +281,10 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   ignition::math::Pose3d T_W_I = link_->WorldPose();  // TODO(burrimi): Check tf.
   ignition::math::Quaterniond C_W_I = T_W_I.Rot();
 
-#if GAZEBO_MAJOR_VERSION < 5
-  ignition::math::Vector3d  velocity_current_W = link_->GetWorldLinearVel();
-  // link_->GetRelativeLinearAccel() does not work sometimes with old gazebo
-  // versions.
-  // This issue is solved in gazebo 5.
-  ignition::math::Vector3d  acceleration = (velocity_current_W - velocity_prev_W_) / dt;
-  ignition::math::Vector3d  acceleration_I =
-      C_W_I.RotateVectorReverse(acceleration - gravity_W_);
-
-  velocity_prev_W_ = velocity_current_W;
-#else
-  ignition::math::Vector3d  acceleration_I =
+  ignition::math::Vector3d acceleration_I =
       link_->RelativeLinearAccel() - C_W_I.RotateVectorReverse(gravity_W_);
-#endif
 
-  ignition::math::Vector3d  angular_vel_I = link_->RelativeAngularVel();
+  ignition::math::Vector3d angular_vel_I = link_->RelativeAngularVel();
 
   Eigen::Vector3d linear_acceleration_I(acceleration_I.X(), acceleration_I.Y(),
                                         acceleration_I.Z());

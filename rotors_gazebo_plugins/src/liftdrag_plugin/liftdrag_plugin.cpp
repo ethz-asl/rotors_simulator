@@ -162,8 +162,8 @@ void LiftDragPlugin::OnUpdate()
 {
   GZ_ASSERT(this->link, "Link was NULL");
   // get linear velocity at cp in inertial frame
-  ignition::math::Vector3d  vel = this->link->WorldLinearVel(this->cp);
-  ignition::math::Vector3d  velI = vel;
+  ignition::math::Vector3d vel = this->link->WorldLinearVel(this->cp);
+  ignition::math::Vector3d velI = vel;
   velI.Normalize();
 
   // smoothing
@@ -178,14 +178,14 @@ void LiftDragPlugin::OnUpdate()
   ignition::math::Pose3d pose = this->link->WorldPose();
 
   // rotate forward and upward vectors into inertial frame
-  ignition::math::Vector3d  forwardI = pose.Rot().RotateVector(this->forward);
+  ignition::math::Vector3d forwardI = pose.Rot().RotateVector(this->forward);
 
-  ignition::math::Vector3d  upwardI;
+  ignition::math::Vector3d upwardI;
   if (this->radialSymmetry)
   {
     // use inflow velocity to determine upward direction
     // which is the component of inflow perpendicular to forward direction.
-    ignition::math::Vector3d  tmp = forwardI.Cross(velI);
+    ignition::math::Vector3d tmp = forwardI.Cross(velI);
     upwardI = forwardI.Cross(tmp).Normalize();
   }
   else
@@ -194,7 +194,7 @@ void LiftDragPlugin::OnUpdate()
   }
 
   // spanwiseI: a vector normal to lift-drag-plane described in inertial frame
-  ignition::math::Vector3d  spanwiseI = forwardI.Cross(upwardI).Normalize();
+  ignition::math::Vector3d spanwiseI = forwardI.Cross(upwardI).Normalize();
 
   const double minRatio = -1.0;
   const double maxRatio = 1.0;
@@ -220,18 +220,18 @@ void LiftDragPlugin::OnUpdate()
   //
   // so,
   // removing spanwise velocity from vel
-  ignition::math::Vector3d  velInLDPlane = vel - vel.Dot(spanwiseI)*velI;
+  ignition::math::Vector3d velInLDPlane = vel - vel.Dot(spanwiseI)*velI;
 
   // get direction of drag
-  ignition::math::Vector3d  dragDirection = -velInLDPlane;
+  ignition::math::Vector3d dragDirection = -velInLDPlane;
   dragDirection.Normalize();
 
   // get direction of lift
-  ignition::math::Vector3d  liftI = spanwiseI.Cross(velInLDPlane);
+  ignition::math::Vector3d liftI = spanwiseI.Cross(velInLDPlane);
   liftI.Normalize();
 
   // get direction of moment
-  ignition::math::Vector3d  momentDirection = spanwiseI;
+  ignition::math::Vector3d momentDirection = spanwiseI;
 
   // compute angle between upwardI and liftI
   // in general, given vectors a and b:
@@ -288,7 +288,7 @@ void LiftDragPlugin::OnUpdate()
   }
 
   // compute lift force at cp
-  ignition::math::Vector3d  lift = cl * q * this->area * liftI;
+  ignition::math::Vector3d lift = cl * q * this->area * liftI;
 
   // compute cd at cp, check for stall, correct for sweep
   double cd;
@@ -311,7 +311,7 @@ void LiftDragPlugin::OnUpdate()
   cd = fabs(cd);
 
   // drag at cp
-  ignition::math::Vector3d  drag = cd * q * this->area * dragDirection;
+  ignition::math::Vector3d drag = cd * q * this->area * dragDirection;
 
   // compute cm at cp, check for stall, correct for sweep
   double cm;
@@ -339,18 +339,18 @@ void LiftDragPlugin::OnUpdate()
   cm = 0.0;
 
   // compute moment (torque) at cp
-  ignition::math::Vector3d  moment = cm * q * this->area * momentDirection;
+  ignition::math::Vector3d moment = cm * q * this->area * momentDirection;
 
   // moment arm from cg to cp in inertial plane
-  ignition::math::Vector3d  momentArm = pose.Rot().RotateVector(
+  ignition::math::Vector3d momentArm = pose.Rot().RotateVector(
     this->cp - this->link->GetInertial()->CoG());
   // gzerr << this->cp << " : " << this->link->GetInertial()->GetCoG() << "\n";
 
   // force and torque about cg in inertial frame
-  ignition::math::Vector3d  force = lift + drag;
+  ignition::math::Vector3d force = lift + drag;
   // + moment.Cross(momentArm);
 
-  ignition::math::Vector3d  torque = moment;
+  ignition::math::Vector3d torque = moment;
   // - lift.Cross(momentArm) - drag.Cross(momentArm);
 
   // debug

@@ -41,13 +41,8 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   }
 
 // Store the pointer to the parent sensor.
-#if GAZEBO_MAJOR_VERSION > 6
   parent_sensor_ = std::dynamic_pointer_cast<sensors::GpsSensor>(_sensor);
   world_ = physics::get_world(parent_sensor_->WorldName());
-#else
-  parent_sensor_ = boost::dynamic_pointer_cast<sensors::GpsSensor>(_sensor);
-  world_ = physics::get_world(parent_sensor_->GetWorldName());
-#endif
 
   //==============================================//
   //========== READ IN PARAMS FROM SDF ===========//
@@ -171,29 +166,19 @@ void GazeboGpsPlugin::OnUpdate() {
   common::Time current_time;
 
   // Get the linear velocity in the world frame.
-  ignition::math::Vector3d  W_ground_speed_W_L = link_->WorldLinearVel();
+  ignition::math::Vector3d W_ground_speed_W_L = link_->WorldLinearVel();
 
   // Apply noise to ground speed.
   W_ground_speed_W_L += ignition::math::Vector3d (ground_speed_n_[0](random_generator_),
                                       ground_speed_n_[1](random_generator_),
                                       ground_speed_n_[2](random_generator_));
 
-// Fill the GPS message.
-#if GAZEBO_MAJOR_VERSION > 6
+  // Fill the GPS message.
   current_time = parent_sensor_->LastMeasurementTime();
 
   gz_gps_message_.set_latitude(parent_sensor_->Latitude().Degree());
   gz_gps_message_.set_longitude(parent_sensor_->Longitude().Degree());
   gz_gps_message_.set_altitude(parent_sensor_->Altitude());
-
-#else
-  current_time = parent_sensor_->GetLastMeasurementTime();
-
-  gz_gps_message_.set_latitude(parent_sensor_->GetLatitude().Degree());
-  gz_gps_message_.set_longitude(parent_sensor_->GetLongitude().Degree());
-  gz_gps_message_.set_altitude(parent_sensor_->GetAltitude());
-
-#endif
 
   gz_gps_message_.mutable_header()->mutable_stamp()->set_sec(current_time.sec);
   gz_gps_message_.mutable_header()->mutable_stamp()->set_nsec(

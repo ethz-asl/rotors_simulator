@@ -121,14 +121,8 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
               gztopic_[index] = "~/"+ model_->GetName() + channel->Get<std::string>("gztopic");
             else
               gztopic_[index] = "control_position_gztopic_" + std::to_string(index);
-            #if (GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4) || GAZEBO_MAJOR_VERSION >= 8
-              /// only gazebo 7.4 and above support Any
               joint_control_pub_[index] = node_handle_->Advertise<gazebo::msgs::Any>(
                 gztopic_[index]);
-            #else
-              joint_control_pub_[index] = node_handle_->Advertise<gazebo::msgs::GzString>(
-                gztopic_[index]);
-            #endif
           }
 
           if (channel->HasElement("joint_name"))
@@ -529,11 +523,11 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
 
   //send gps
   ignition::math::Pose3d T_W_I = model_->WorldPose(); //TODO(burrimi): Check tf.
-  ignition::math::Vector3d  pos_W_I = T_W_I.Pos();  // Use the models' world position for GPS and pressure alt.
+  ignition::math::Vector3d pos_W_I = T_W_I.Pos();  // Use the models' world position for GPS and pressure alt.
 
-  ignition::math::Vector3d  velocity_current_W = model_->WorldLinearVel();  // Use the models' world position for GPS velocity.
+  ignition::math::Vector3d velocity_current_W = model_->WorldLinearVel();  // Use the models' world position for GPS velocity.
 
-  ignition::math::Vector3d  velocity_current_W_xy = velocity_current_W;
+  ignition::math::Vector3d velocity_current_W_xy = velocity_current_W;
   velocity_current_W_xy.Z() = 0;
 
   // TODO: Remove GPS message from IMU plugin. Added gazebo GPS plugin. This is temp here.
@@ -696,35 +690,35 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
   ignition::math::Quaterniond q_gb = q_gr*q_br.Inverse();
   ignition::math::Quaterniond q_nb = q_ng*q_gb;
 
-  ignition::math::Vector3d  pos_g = model_->WorldPose().Pos();
-  ignition::math::Vector3d  pos_n = q_ng.RotateVector(pos_g);
+  ignition::math::Vector3d pos_g = model_->WorldPose().Pos();
+  ignition::math::Vector3d pos_n = q_ng.RotateVector(pos_g);
 
   //gzerr << "got imu: " << C_W_I << "\n";
   //gzerr << "got pose: " << T_W_I.rot << "\n";
   float declination = get_mag_declination(lat_rad_, lon_rad_);
 
   ignition::math::Quaterniond q_dn(0.0, 0.0, declination);
-  ignition::math::Vector3d  mag_n = q_dn.RotateVectorReverse(mag_d_);
+  ignition::math::Vector3d mag_n = q_dn.RotateVectorReverse(mag_d_);
 
-  ignition::math::Vector3d  vel_b = q_br.RotateVector(model_->RelativeLinearVel());
-  ignition::math::Vector3d  vel_n = q_ng.RotateVector(model_->WorldLinearVel());
-  ignition::math::Vector3d  omega_nb_b = q_br.RotateVector(model_->RelativeAngularVel());
+  ignition::math::Vector3d vel_b = q_br.RotateVector(model_->RelativeLinearVel());
+  ignition::math::Vector3d vel_n = q_ng.RotateVector(model_->WorldLinearVel());
+  ignition::math::Vector3d omega_nb_b = q_br.RotateVector(model_->RelativeAngularVel());
 
   standard_normal_distribution_ = std::normal_distribution<float>(0, 0.01f);
-  ignition::math::Vector3d  mag_noise_b(
+  ignition::math::Vector3d mag_noise_b(
     standard_normal_distribution_(random_generator_),
     standard_normal_distribution_(random_generator_),
     standard_normal_distribution_(random_generator_));
 
-  ignition::math::Vector3d  accel_b = q_br.RotateVector(ignition::math::Vector3d (
+  ignition::math::Vector3d accel_b = q_br.RotateVector(ignition::math::Vector3d (
     imu_message->linear_acceleration().x(),
     imu_message->linear_acceleration().y(),
     imu_message->linear_acceleration().z()));
-  ignition::math::Vector3d  gyro_b = q_br.RotateVector(ignition::math::Vector3d (
+  ignition::math::Vector3d gyro_b = q_br.RotateVector(ignition::math::Vector3d (
     imu_message->angular_velocity().x(),
     imu_message->angular_velocity().y(),
     imu_message->angular_velocity().z()));
-  ignition::math::Vector3d  mag_b = q_nb.RotateVectorReverse(mag_n) + mag_noise_b;
+  ignition::math::Vector3d mag_b = q_nb.RotateVectorReverse(mag_n) + mag_noise_b;
 
   mavlink_hil_sensor_t sensor_msg;
   sensor_msg.time_usec = world_->SimTime().nsec/1000;
@@ -787,7 +781,7 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
   send_mavlink_message(MAVLINK_MSG_ID_HIL_SENSOR, &sensor_msg, 200);
 
   // ground truth
-  ignition::math::Vector3d  accel_true_b = q_br.RotateVector(model_->RelativeLinearAccel());
+  ignition::math::Vector3d accel_true_b = q_br.RotateVector(model_->RelativeLinearAccel());
 
   // send ground truth
   mavlink_hil_state_quaternion_t hil_state_quat;
@@ -1003,17 +997,10 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         }
         else if (joint_control_type_[i] == "position_gztopic")
         {
-          #if (GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4) || GAZEBO_MAJOR_VERSION >= 8
-            /// only gazebo 7.4 and above support Any
-            gazebo::msgs::Any m;
-            m.set_type(gazebo::msgs::Any_ValueType_DOUBLE);
-            m.set_double_value(target);
-          #else
-            std::stringstream ss;
-            gazebo::msgs::GzString m;
-            ss << target;
-            m.set_data(ss.str());
-          #endif
+          gazebo::msgs::Any m;
+          m.set_type(gazebo::msgs::Any_ValueType_DOUBLE);
+          m.set_double_value(target);
+        
           joint_control_pub_[i]->Publish(m);
         }
         else if (joint_control_type_[i] == "position_kinematic")
@@ -1021,11 +1008,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
           /// really not ideal if your drone is moving at all,
           /// mixing kinematic updates with dynamics calculation is
           /// non-physical.
-          #if GAZEBO_MAJOR_VERSION >= 6
             joints_[i]->SetPosition(0, input_reference_[i]);
-          #else
-            joints_[i]->SetAngle(0, input_reference_[i]);
-          #endif
         }
         else
         {
