@@ -13,7 +13,7 @@ find_package(gazebo REQUIRED)
 
 if(${gazebo_VERSION_MAJOR} GREATER 2)
     message(STATUS "Building iris.sdf.")
-    
+
     set(enable_mavlink_interface "true")
     set(enable_ground_truth "false")
     set(enable_logging "false")
@@ -21,7 +21,7 @@ if(${gazebo_VERSION_MAJOR} GREATER 2)
     set(enable_wind "false")
     set(rotors_description_dir "${CMAKE_CURRENT_SOURCE_DIR}/models/rotors_description")
     set(scripts_dir "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
-    
+
     # Creates shell commands to generate .sdf file
     add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.sdf
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -43,7 +43,10 @@ if(NO_ROS)
   return()
 endif()
 
-find_package(catkin REQUIRED COMPONENTS gazebo_msgs geometry_msgs mav_msgs roscpp sensor_msgs)
+find_package(catkin REQUIRED COMPONENTS cmake_modules gazebo_msgs geometry_msgs mav_msgs roscpp sensor_msgs)
+
+find_package(Eigen REQUIRED)
+include_directories(${EIGEN_INCLUDE_DIRS})
 
 catkin_package(
   CATKIN_DEPENDS
