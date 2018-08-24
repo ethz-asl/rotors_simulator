@@ -302,6 +302,21 @@ else()
   message(STATUS "Gazebo version is less than 5, not building gazebo_lidar_plugin.cpp.")
 endif()
 
+#======================================== LIDAR_CE30D PLUGIN ==========================================//
+if(${gazebo_VERSION_MAJOR} GREATER 4)
+  add_executable(ce30d_manager src/ce30d_manager.cpp)
+  target_link_libraries(ce30d_manager ${catkin_LIBRARIES})
+  
+  add_library(rotors_gazebo_lidar_ce30d_plugin SHARED src/external/gazebo_lidar_ce30d_plugin.cpp)
+  target_link_libraries(rotors_gazebo_lidar_ce30d_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+  if (NOT NO_ROS)
+    add_dependencies(rotors_gazebo_lidar_ce30d_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install rotors_gazebo_lidar_ce30d_plugin)
+else()
+  message(STATUS "Gazebo version is less than 5, not building gazebo_lidar_plugin.cpp.")
+endif()
+
 #===================================== MAGNETOMETER PLUGIN ======================================//
 add_library(rotors_gazebo_magnetometer_plugin SHARED src/gazebo_magnetometer_plugin.cpp)
 target_link_libraries(rotors_gazebo_magnetometer_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
