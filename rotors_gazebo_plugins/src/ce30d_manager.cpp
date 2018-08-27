@@ -4,13 +4,14 @@
 
 #include <sstream>
 
-float terabee_data[8];
+float data[20][320];
 
 void chatterCallback(const std_msgs::Float32MultiArray::ConstPtr& msg) {
   ROS_INFO("--------------");
   for (int y = 0; y < 20; y++) {
     std::string t = "";
     for (int x = 0; x < 320; x++) {
+      data[y][x] = msg->data[320*y+x];
       t += " " + std::to_string(msg->data[320 * y + x]);
     }
     ROS_INFO(t.c_str());
