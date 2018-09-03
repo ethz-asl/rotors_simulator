@@ -22,8 +22,8 @@ int main(int argc, char **argv)
 
   ros::Subscriber sub[8];
   for(int i = 0; i<8; i++){
-    sub[i] = n.subscribe("/niv1/lidar_"+std::to_string(i), 1000, chatterCallback); 
-    ROS_INFO("subscribe /niv1/lidar_%d", i);
+    sub[i] = n.subscribe("/niv1/terabee_lidar_"+std::to_string(i), 1000, chatterCallback); 
+    ROS_INFO("subscribe /niv1/terabee_lidar_%d", i);
   }
 
   ros::Rate loop_rate(120);

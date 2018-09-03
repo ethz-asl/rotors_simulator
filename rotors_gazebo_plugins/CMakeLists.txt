@@ -288,7 +288,6 @@ else()
 endif()
 
 #======================================== LIDAR_TERABEE PLUGIN ==========================================//
-
 if(${gazebo_VERSION_MAJOR} GREATER 4)
   add_executable(terabee_manager src/terabee_manager.cpp)
   target_link_libraries(terabee_manager ${catkin_LIBRARIES})
@@ -304,7 +303,6 @@ else()
 endif()
 
 #======================================== LIDAR_CE30D PLUGIN ==========================================//
-
 if(${gazebo_VERSION_MAJOR} GREATER 4)
   add_executable(ce30d_manager src/ce30d_manager.cpp)
   target_link_libraries(ce30d_manager ${catkin_LIBRARIES})
