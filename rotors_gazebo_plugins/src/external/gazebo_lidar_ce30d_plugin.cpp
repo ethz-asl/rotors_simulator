@@ -19,7 +19,7 @@
  * Author: Nate Koenig mod by John Hsu
  */
 
-#include "rotors_gazebo_plugins/external/gazebo_lidar_plugin.h"
+#include "rotors_gazebo_plugins/external/gazebo_lidar_ce30d_plugin.h"
 #include "gazebo/physics/physics.hh"
 
 #include <gazebo/common/Plugin.hh>
@@ -36,7 +36,6 @@
 #include <iostream>
 #include <memory>
 #include "std_msgs/Float32MultiArray.h"
-#include "std_msgs/MultiArrayDimension.h"
 
 #include "rotors_gazebo_plugins/common.h"
 
@@ -51,11 +50,12 @@ using namespace gazebo;
 using namespace std;
 
 // Register this plugin with the simulator
-GZ_REGISTER_SENSOR_PLUGIN(GazeboLidarPlugin)
+GZ_REGISTER_SENSOR_PLUGIN(GazeboLidarCE30DPlugin)
 
-GazeboLidarPlugin::GazeboLidarPlugin() : pubs_and_subs_created_(false) {}
+GazeboLidarCE30DPlugin::GazeboLidarCE30DPlugin()
+    : pubs_and_subs_created_(false) {}
 
-GazeboLidarPlugin::~GazeboLidarPlugin() {
+GazeboLidarCE30DPlugin::~GazeboLidarCE30DPlugin() {
 #if GAZEBO_MAJOR_VERSION >= 7
   this->parentSensor->LaserShape()->DisconnectNewLaserScans(
 #else
@@ -68,11 +68,11 @@ GazeboLidarPlugin::~GazeboLidarPlugin() {
   this->world.reset();
 }
 
-void GazeboLidarPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
+void GazeboLidarCE30DPlugin::Load(sensors::SensorPtr _parent,
+                                    sdf::ElementPtr _sdf) {
   if (kPrintOnPluginLoad) {
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
-
   // Get then name of the parent sensor
   this->parentSensor =
 #if GAZEBO_MAJOR_VERSION >= 7
@@ -96,7 +96,7 @@ void GazeboLidarPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
 #else
       this->parentSensor->GetLaserShape()->ConnectNewLaserScans(
 #endif
-          boost::bind(&GazeboLidarPlugin::OnNewLaserScans, this));
+          boost::bind(&GazeboLidarCE30DPlugin::OnNewLaserScans, this));
 
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
@@ -106,6 +106,7 @@ void GazeboLidarPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
   boost::replace_all(namespace_, "/", "");
 
   getSdfParam<std::string>(_sdf, "lidarTopic", lidar_topic_, "lidar_default");
+  
 
   node_handle_ = gazebo::transport::NodePtr(new transport::Node());
   node_handle_->Init();
@@ -117,8 +118,7 @@ void GazeboLidarPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
 #endif
 }
 
-void GazeboLidarPlugin::OnNewLaserScans()
-{
+void GazeboLidarCE30DPlugin::OnNewLaserScans() {
   if (!pubs_and_subs_created_) {
     CreatePubsAndSubs();
     pubs_and_subs_created_ = true;
@@ -135,35 +135,45 @@ void GazeboLidarPlugin::OnNewLaserScans()
   lidar_message.set_current_distance(parentSensor->GetRange(0));
 #endif
 
-  std_msgs::Float32MultiArray array_msg;
-  array_msg.data.clear();
-  std_msgs::MultiArrayDimension dim;
-  dim.label = "ranges";
-  dim.size = 8;
-  dim.stride = 8;
-  array_msg.layout.dim.push_back(dim);
   std::vector<double> ranges;
 
+  std_msgs::Float32MultiArray array_msg;
+  array_msg.data.clear();
+  std_msgs::MultiArrayDimension dim[2];
+  dim[0].label = "height";
+  dim[0].size = 20;
+  dim[0].stride = 320*20;
+  dim[1].label = "width";
+  dim[1].size = 320;
+  dim[1].stride = 320;
+  array_msg.layout.dim.push_back(dim[0]);
+  array_msg.layout.dim.push_back(dim[1]);
+
   parentSensor->Ranges(ranges);
-  int count = ranges.size();
-  int resolution = count / 8;
-  int i, k;
-  float range, min_range;
-  for (i = 7; i >= 0; i--) {
-    // ss << parentSensor->GetRange(i) <<" ";
-    min_range = parentSensor->RangeMax();
-    for (k = 0; k < resolution; k++) {
-      range = ranges[(i * resolution) + k];
-      if (range < min_range) {
-        min_range = range;
-      }
+  int resolution = ranges.size();  // number of rays
+
+  // ss << parentSensor->GetRange(i) <<" ";
+
+  if(resolution != 6400)
+    return;
+  
+  double row[320];
+  int i = 0;
+  
+  for(int y = 0; y<20 ;y++){
+    for(int x = 0; x<320; x++){
+      row[x] = ranges[320*y+x];
+      if(row[x] == INFINITY) row[x] = 30.0;
     }
-    array_msg.data.push_back(min_range);
+    for(int x = 319; x>=0; x--){
+      array_msg.data.push_back(row[x]);
+    }
   }
+
   lidar_pub_.publish(array_msg);
 }
 
-void GazeboLidarPlugin::CreatePubsAndSubs() {
+void GazeboLidarCE30DPlugin::CreatePubsAndSubs() {
   gzdbg << "Lidar pub , ros init = " << ros::isInitialized() << std::endl;
   ros::NodeHandle nh;
   // rosnode_ = new ros::NodeHandle("niv1");
