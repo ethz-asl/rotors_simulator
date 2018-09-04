@@ -22,7 +22,7 @@
   <!-- Dependencies needed to compile this package. -->
   <build_depend>cmake_modules</build_depend>
   <build_depend>cv_bridge</build_depend>
-  <build_depend>gazebo</build_depend>
+  <build_depend>gazebo_dev</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>libgoogle-glog-dev</build_depend>
   <build_depend>mav_msgs</build_depend>
@@ -36,11 +36,10 @@
   <build_depend>std_srvs</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>yaml-cpp</build_depend>
-  <build_depend>protobuf-dev</build_depend>
-
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>cv_bridge</run_depend>
+  <run_depend>gazebo_dev</run_depend>
   <run_depend>gazebo_ros</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>libgoogle-glog-dev</run_depend>

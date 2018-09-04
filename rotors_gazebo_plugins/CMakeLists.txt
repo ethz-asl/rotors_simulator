@@ -10,6 +10,7 @@
 
 cmake_minimum_required(VERSION 2.8.3)
 project(rotors_gazebo_plugins)
+
 #
 #if ( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR} )
 #  message( FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt." )
@@ -110,7 +111,7 @@ endif()
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 
 find_package(Eigen REQUIRED)
-find_package(gazebo REQUIRED)
+find_package(gazebo_dev REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Glog REQUIRED)
 link_directories(${GAZEBO_LIBRARY_DIRS})
@@ -196,7 +197,7 @@ if (NOT NO_ROS)
     INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
     LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
     CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf
-    DEPENDS Eigen GAZEBO octomap OpenCV
+    DEPENDS Eigen gazebo_dev octomap OpenCV
     #CFG_EXTRAS rotors_gazebo_plugins.cmake
   )
 endif()
@@ -447,8 +448,6 @@ else()
   message(STATUS "Gazebo version is less than 5, not building liftdrag_plugin.cpp.")
 endif()
 
-
-
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 if (NOT NO_ROS)
   set(BIN_DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
@@ -457,7 +456,6 @@ else()
   set(BIN_DESTINATION ${CMAKE_BINARY_DIR})
   set(LIB_DESTINATION ${CMAKE_BINARY_DIR})
 endif()
-
 
 # Install all targets that were defined above (some conditionally) and added to the
 # variable targets_to_install
