@@ -23,8 +23,8 @@ project(rotors_gazebo_plugins)
 # =============================================================================================== #
 
 if(NOT DEFINED BUILD_MAVLINK_INTERFACE_PLUGIN)
-  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN variable not provided, setting to FALSE.")
-  set(BUILD_MAVLINK_INTERFACE_PLUGIN FALSE)
+  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN variable not provided, but anyway setting to TRUE.")
+  set(BUILD_MAVLINK_INTERFACE_PLUGIN TRUE)
 endif()
 
 if(NOT DEFINED BUILD_OCTOMAP_PLUGIN)
@@ -394,7 +394,7 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   target_include_directories(rotors_gazebo_optical_flow_plugin PUBLIC ${OpticalFlow_INCLUDE_DIRS})
   target_link_libraries(rotors_gazebo_optical_flow_plugin
     ${catkin_LIBRARIES}
-    
+
     ${Boost_LIBRARIES}
     ${OpticalFlow_LIBRARIES})
   if (NOT NO_ROS)
