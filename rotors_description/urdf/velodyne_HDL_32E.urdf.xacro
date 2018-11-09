@@ -1,0 +1,120 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="HDL-32E">
+  <xacro:property name="M_PI" value="3.1415926535897931" />
+  <xacro:macro name="HDL-32E" params="*origin parent:=world sensor_name:=velodyne topic:=/velodyne_points horizontal_angular_resolution_deg:=1.0 spin_frequency_hz:=0.5 lidar_base_frame:=velodyne_base lidar_points_frame:=velodyne_top model_name:=example">
+
+  <gazebo>
+    <plugin name="JointController" filename="libgazebo_ros_continous_joint_controller_plugin.so">
+      <joint>${sensor_name}_joint</joint>
+      <default_velocity_limit>100</default_velocity_limit>
+      <spin_frequency_hz>${spin_frequency_hz}</spin_frequency_hz>
+    </plugin>
+  </gazebo>
+
+  <link name="${lidar_base_frame}">
+    <inertial>
+      <mass value="1.2"/>
+      <origin rpy="0 0 0" xyz="0 0 0.029335"/>
+      <inertia ixx="0.001087473" ixy="0" ixz="0" iyy="0.001087473" iyz="0" izz="0.001092437"/>
+    </inertial>
+    <collision name="${lidar_base_frame}_collision">
+      <origin rpy="0 0 0" xyz="0 0 0.02933"/>
+      <geometry>
+        <cylinder length=".05867" radius=".04267"/>
+      </geometry>
+    </collision>
+    <visual name="${lidar_base_frame}_visual">
+      <origin rpy="0 0 0" xyz="0 0 -0.029335"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/velodyne_base.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="${lidar_points_frame}">
+    <inertial>
+      <mass value="0.1"/>
+      <origin rpy="0 0 0" xyz="0 0 0.095455"/>
+      <inertia ixx="0.000090623" ixy="0" ixz="0" iyy="0.000090623" iyz="0" izz="0.000091036"/>
+    </inertial>
+    <collision name="${sensor_name}_top_collision">
+      <origin rpy="0 0 0" xyz="0 0 0.03678"/>
+      <geometry>
+        <cylinder length="0.07357" radius="0.04267"/>
+      </geometry>
+    </collision>
+    <visual name="${sensor_name}_top_visual">
+      <origin rpy="0 0 ${M_PI/2}" xyz="0 0 -0.0376785"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/velodyne_top.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="${lidar_base_frame}_mount_joint" type="fixed">
+    <parent link="${parent}"/>
+    <child link="${lidar_base_frame}"/>
+  </joint>
+
+  <joint name="${sensor_name}_joint" type="continuous">
+    <parent link="${lidar_base_frame}"/>
+    <child link="${lidar_points_frame}"/>
+    <origin rpy="0 0 0" xyz="0 0 0.05867"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="100.0" velocity="100.0"/>
+  </joint>
+
+  <gazebo reference="${lidar_points_frame}">
+    <!-- Add a ray sensor, and give it a name -->
+    <sensor type="ray" name="sensor">
+      <pose>0 0 -0.004645 0 0 0</pose>
+      <!-- Enable visualization to see the rays in the GUI -->
+      <visualize>true</visualize>
+
+      <!-- Set the update rate of the sensor -->
+      <update_rate>${360.0/horizontal_angular_resolution_deg*spin_frequency_hz}</update_rate>
+      <ray>
+        <noise>
+          <!-- Use gaussian noise -->
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.02</stddev>
+        </noise>
+        <scan>
+          <horizontal>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>${2*M_PI}</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>32</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.53529248</min_angle>
+            <max_angle>0.18622663</max_angle>
+          </vertical>
+        </scan>
+
+        <!-- Range defines characteristics of an individual beam -->
+        <range>
+          <!-- Minimum distance of the beam -->
+          <min>0.05</min>
+          <!-- Maximum distance of the beam -->
+          <max>70</max>
+          <!-- Linear resolution of the beam -->
+          <resolution>0.02</resolution>
+        </range>
+      </ray>
+      <plugin name="gazebo_ros_laser_plugin" filename="libgazebo_ros_laser_plugin.so">
+        <model_name>${model_name}</model_name>
+        <joint_name>${sensor_name}_joint</joint_name>
+        <topic_name>${topic}</topic_name>
+        <frame_name>${lidar_points_frame}</frame_name>
+        <min_range>0.05</min_range>
+        <max_range>70</max_range>
+        <gaussian_noise>0.02</gaussian_noise>
+      </plugin>
+    </sensor>
+  </gazebo>
+  </xacro:macro>
+</robot>

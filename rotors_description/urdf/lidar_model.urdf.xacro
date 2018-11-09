@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!-- Provides a world frame and mounts the lidar sensor to it. -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="lidar_model">
+  <xacro:arg name="sensor_name" default="velodyne"/>
+  <xacro:arg name="topic" default="/velodyne_points" />
+  <xacro:arg name="horizontal_angular_resolution_deg" default="1.0" />
+  <xacro:arg name="spin_frequency_hz" default="0.5" />
+  <xacro:arg name="lidar_base_frame" default="velodyne_base" />
+  <xacro:arg name="lidar_points_frame" default="velodyne_top" />
+  <xacro:arg name="joint_state_topic" default="velodyne/joint_state" />
+  <xacro:arg name="world_frame" default="world" />
+
+  <link name="$(arg world_frame)" />
+  <xacro:include filename="$(find rotors_description)/urdf/velodyne_HDL_32E.urdf.xacro"/>
+  <HDL-32E parent="$(arg world_frame)"
+           sensor_name="$(arg sensor_name)"
+           topic="$(arg topic)"
+           horizontal_angular_resolution_deg="$(arg horizontal_angular_resolution_deg)"
+           spin_frequency_hz="$(arg spin_frequency_hz)"
+           lidar_base_frame="$(arg lidar_base_frame)"
+           lidar_points_frame="$(arg lidar_points_frame)"
+           model_name="lidar_model">
+    <origin xyz="0 0 0.7" rpy="0 0 0" />
+  </HDL-32E>
+</robot>

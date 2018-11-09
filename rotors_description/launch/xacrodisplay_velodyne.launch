@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<launch>
+  <arg name="sensor_name" default="velodyne"/>
+  <arg name="horizontal_angular_resolution_deg" default="1.0"/>
+  <!-- Number of full sensor spins per second. -->
+  <arg name="spin_frequency_hz" default="0.5" />
+  <!-- The ID of the fixed world frame. -->
+  <arg name="world_frame" default="world" />
+  <!-- The ID of the frame attached to the lidar base. -->
+  <arg name="vehicle_base_frame_id" default="$(arg sensor_name)_base"/>
+  <!-- The ID of the frame in which the lidar measurements are taken. -->
+  <arg name="lidar_points_frame_id" default="$(arg sensor_name)_top" />
+  <!-- Assemble point clouds without IMU and odometry. -->
+  <arg name="naive_assembling" default="true"/>
+  <!-- Topic to listen to for velodyne packets. -->
+  <arg name="lidar_topic" default="/$(arg sensor_name)_points"/>
+  <!-- Topic to publish assembled point clouds. -->
+  <arg name="assembled_cloud" default="/$(arg sensor_name)_assembled_cloud"/>
+
+  <!-- Start gazebo and load the world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch" >
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/unitbox.world"/>
+  </include>
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find rotors_description)/urdf/lidar_model.urdf.xacro' sensor_name:=$(arg sensor_name) topic:=$(arg lidar_topic) horizontal_angular_resolution_deg:=$(arg horizontal_angular_resolution_deg) spin_frequency_hz:=$(arg spin_frequency_hz) lidar_base_frame:=$(arg vehicle_base_frame_id) lidar_points_frame:=$(arg lidar_points_frame_id) world_frame:=$(arg world_frame)" />
+
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_model" args="-urdf -param /robot_description -model lidar_model"/>
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="180.0" />
+  </node>
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" type="bool" value="false" />
+    <param name="rate" type="double" value="180.0" />
+  </node>
+  <!-- RViz -->
+  <arg name="rviz" default="true"/>
+  <node if="$(arg rviz)" pkg="rviz" type="rviz" name="$(anon rviz)" respawn="false" output="screen" args="-d $(find rotors_description)/rviz/hdl32.rviz" />
+
+  <!-- velodyne_assembler node-->
+  <node name="velodyne_assembler" pkg="velodyne_assembler" type="velodyne_assembler_node" output="screen" respawn="false">
+    <param name="naive_assembling" value="$(arg naive_assembling)"/>
+    <param name="fixed_frame_id" value="$(arg world_frame)"/>
+    <param name="vehicle_base_frame_id" value="$(arg vehicle_base_frame_id)"/>
+    <param name="sensor_frame_id" value="$(arg lidar_points_frame_id)"/>
+    <param name="input_points" value="$(arg lidar_topic)"/>
+    <param name="assembled_cloud" value="$(arg assembled_cloud)"/>
+  </node>
+
+</launch>
