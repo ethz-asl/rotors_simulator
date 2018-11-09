@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+	<!-- Macro to add a camera. -->
+  <xacro:macro name="pccase_macro"
+    params="namespace parent_link *origin">
+		<joint name="${namespace}/pc_case_joint" type="fixed">
+			<xacro:insert_block name="origin" />
+		  <parent link="${parent_link}"/>
+		  <child link="${namespace}/pc_case_link"/>
+		</joint>
+
+		<link name="${namespace}/pc_case_link">
+		<collision>
+			<origin xyz="0 0 0.0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.114308 0.125194 0.044000" />
+			</geometry>
+		</collision>
+		<visual>
+			<origin xyz="0 0 0" />
+			<geometry>
+				<mesh filename="package://rotors_description/meshes/m100_pccase.dae" />
+			</geometry>
+		</visual>
+		<inertial>
+			<mass value="0.001" />
+			<origin xyz="0 0 0" rpy="0 0 0" />
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+		</inertial>
+		</link>
+	
+    <gazebo reference="${namespace}/pc_case_link">
+      <material>Gazebo/Black</material>
+    </gazebo>
+	</xacro:macro>
+
+</robot>
