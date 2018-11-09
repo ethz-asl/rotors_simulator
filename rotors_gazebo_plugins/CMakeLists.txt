@@ -234,6 +234,14 @@ if (NOT NO_ROS)
 endif()
 list(APPEND targets_to_install rotors_gazebo_controller_interface)
 
+#================================= CONTINOUS JOINT CONTROLLER PLUGIN ==================================//
+add_library(gazebo_ros_continous_joint_controller_plugin SHARED src/gazebo_ros_continous_joint_controller_plugin.cpp)
+target_link_libraries(gazebo_ros_continous_joint_controller_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+if (NOT NO_ROS)
+  add_dependencies(gazebo_ros_continous_joint_controller_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install gazebo_ros_continous_joint_controller_plugin)
+
 #=================================== GEOTAGGED IMAGES PLUGIN ====================================//
 
 message(STATUS "GAZEBO ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}")
@@ -273,6 +281,18 @@ if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 list(APPEND targets_to_install rotors_gazebo_imu_plugin)
+
+#======================================== LASER ROS PLUGIN ==========================================//
+if(${gazebo_VERSION_MAJOR} GREATER 4)
+  add_library(gazebo_ros_laser_plugin SHARED src/gazebo_ros_laser_plugin.cpp)
+  target_link_libraries(gazebo_ros_laser_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} RayPlugin)
+  if (NOT NO_ROS)
+    add_dependencies(gazebo_ros_laser_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install gazebo_ros_laser_plugin)
+else()
+  message(STATUS "Gazebo version is less than 5, not building gazebo_ros_laser_plugin.cpp.")
+endif()
 
 #======================================== LIDAR PLUGIN ==========================================//
 if(${gazebo_VERSION_MAJOR} GREATER 4)
