@@ -15,7 +15,9 @@
   <!-- Topic to listen to for velodyne packets. -->
   <arg name="lidar_topic" default="/$(arg sensor_name)_points"/>
   <!-- Topic to publish assembled point clouds. -->
-  <arg name="assembled_cloud" default="/$(arg sensor_name)_assembled_cloud"/>
+  <arg name="assembled_cloud" default="/$(arg sensor_name)_assembled_cloud"/>  
+  <!-- Decide whether to run the assembler. -->
+  <arg name="assembler_enabled" default="False"/>
 
   <!-- Start gazebo and load the world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch" >
@@ -36,7 +38,7 @@
   <node if="$(arg rviz)" pkg="rviz" type="rviz" name="$(anon rviz)" respawn="false" output="screen" args="-d $(find rotors_description)/rviz/hdl32.rviz" />
 
   <!-- velodyne_assembler node-->
-  <node name="velodyne_assembler" pkg="velodyne_assembler" type="velodyne_assembler_node" output="screen" respawn="false">
+  <node if="$(arg assembler_enabled)" name="velodyne_assembler" pkg="velodyne_assembler" type="velodyne_assembler_node" output="screen" respawn="false">
     <param name="naive_assembling" value="$(arg naive_assembling)"/>
     <param name="fixed_frame_id" value="$(arg world_frame)"/>
     <param name="vehicle_base_frame_id" value="$(arg vehicle_base_frame_id)"/>
