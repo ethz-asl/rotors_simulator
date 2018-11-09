@@ -1,4 +1,5 @@
-#include <rotors_gazebo_plugins/gazebo_ros_laser_plugin.h>
+#include "rotors_gazebo_plugins/gazebo_ros_laser_plugin.h"
+#include "rotors_gazebo_plugins/common.h"
 
 #if GAZEBO_GPU_RAY
 #include <gazebo/sensors/GpuRaySensor.hh>
@@ -54,15 +55,15 @@ void ROSLaserPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
                                 << STR_Gpu << "Ray Sensor as its parent");
   }
   // Get the parameters
-  robot_namespace_ = GetValueFromElement<std::string>(_sdf, "robot_namespace", "/");
-  frame_name_ = GetValueFromElement<std::string>(_sdf, "frame_name", "/world");
-  topic_name_ = GetValueFromElement<std::string>(_sdf, "topic_name", "/points");
-  gaussian_noise_ = GetValueFromElement<double>(_sdf, "gaussian_noise", 0.0);
-  min_range_ = GetValueFromElement<double>(_sdf, "min_range", 0.0);
-  max_range_ = GetValueFromElement<double>(_sdf, "max_range", INFINITY);
+  getSdfParam<std::string>(_sdf, "robot_namespace", robot_namespace_, "/");
+  getSdfParam<std::string>(_sdf, "frame_name", frame_name_, "/world");
+  getSdfParam<std::string>(_sdf, "topic_name", topic_name_, "/points");
+  getSdfParam<double>(_sdf, "gaussian_noise", gaussian_noise_, 0.0);
+  getSdfParam<double>(_sdf, "min_range", min_range_, 0.0);
+  getSdfParam<double>(_sdf, "max_range", max_range_, INFINITY);
 
-  model_name_ = GetValueFromElement<std::string>(_sdf, "model_name", "lidar_sensor");
-  joint_name_ = GetValueFromElement<std::string>(_sdf, "joint_name", "joint");
+  getSdfParam<std::string>(_sdf, "model_name", model_name_, "lidar_sensor");
+  getSdfParam<std::string>(_sdf, "joint_name", joint_name_, "joint");
   joint_ = world->GetModel(model_name_)->GetJoint(joint_name_);
 
   // Make sure the ROS node for Gazebo has already been initialized
@@ -288,17 +289,6 @@ double ROSLaserPlugin::GaussianKernel(double mu, double sigma) {
   double V =
       (double)rand() / (double)RAND_MAX;  // normalized uniform random variable
   return sigma * (sqrt(-2.0 * ::log(U)) * cos(2.0 * M_PI * V)) + mu;
-}
-
-template <typename T>
-T ROSLaserPlugin::GetValueFromElement(const sdf::ElementPtr& sdf,
-                                      const std::string& name, T defaultValue) {
-  if (sdf->HasElement(name)) {
-    return sdf->GetElement(name)->Get<T>();
-  } else{
-    ROS_INFO("parameter <%s> was not set. Using default value instead.", name.c_str());
-    return defaultValue;
-  }
 }
 
 // Register this plugin with the simulator

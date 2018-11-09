@@ -1,4 +1,5 @@
 #include "rotors_gazebo_plugins/gazebo_ros_continous_joint_controller_plugin.h"
+#include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
 
@@ -22,8 +23,14 @@ void ContinousJointControllerPlugin::Load(physics::ModelPtr _model,
     this->joint_ = _model->GetJoints()[0];
     ROS_INFO("No joint name provided, therefore the first joint is used.");
   }
-  // Setup a P-controller, with a gain of 0.1.
-  this->pid_ = common::PID(0.1, 0, 0);
+
+  double p_term, i_term, d_term;
+  getSdfParam<double>(_sdf, "p_term", p_term, 0.1);
+  getSdfParam<double>(_sdf, "i_term", i_term, 0.0);
+  getSdfParam<double>(_sdf, "d_term", d_term, 0.0);
+
+  // Setup a PID-controller.
+  this->pid_ = common::PID(p_term, i_term, d_term);
 
   // Apply the P-controller to the joint.
   this->model_->GetJointController()->SetVelocityPID(

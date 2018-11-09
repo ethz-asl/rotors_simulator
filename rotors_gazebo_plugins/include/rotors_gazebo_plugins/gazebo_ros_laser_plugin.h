@@ -99,9 +99,6 @@ class ROSLaserPlugin : public RayPlugin {
   /// \brief Gaussian noise generator
   static double GaussianKernel(double mu, double sigma);
 
-  ///\brief Read SDF parameters and assign default value if it could not be found
-  template<typename T> T GetValueFromElement(const sdf::ElementPtr& sdf, const std::string& name, T defaultValue);
-
   /// \brief Custom callback queue thread
   void LaserQueueThread();
 
