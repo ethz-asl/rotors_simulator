@@ -52,6 +52,7 @@
   </link>
 
   <joint name="${lidar_base_frame}_mount_joint" type="fixed">
+    <xacro:insert_block name="origin" />
     <parent link="${parent}"/>
     <child link="${lidar_base_frame}"/>
   </joint>
