@@ -5,10 +5,11 @@
 
   <gazebo>
     <plugin name="JointController" filename="libgazebo_ros_continous_joint_controller_plugin.so">
-      <joint>${sensor_name}_joint</joint>
-      <default_velocity_limit>100</default_velocity_limit>
-      <spin_frequency_hz>${spin_frequency_hz}</spin_frequency_hz>
-    </plugin>
+        <joint>${sensor_name}_joint</joint>
+	<robot_namespace>${model_name}</robot_namespace>
+	<default_velocity_limit>100</default_velocity_limit>
+        <spin_frequency_hz>${spin_frequency_hz}</spin_frequency_hz>
+      </plugin>
   </gazebo>
 
   <link name="${lidar_base_frame}">

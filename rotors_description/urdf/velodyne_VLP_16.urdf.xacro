@@ -1,0 +1,163 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="VLP-16">
+  <xacro:property name="M_PI" value="3.1415926535897931" />
+  <xacro:property name="m1" value="0.4"/>
+  <xacro:property name="r1" value="0.0516"/>
+  <xacro:property name="l1" value="0.0168"/>
+  <xacro:property name="m2" value="0.1"/>
+  <xacro:property name="r2" value="0.0516"/>
+  <xacro:property name="l2" value="0.0381"/>
+  <xacro:macro name="VLP-16" params="*origin parent:=world sensor_name:=velodyne topic:=/velodyne_points horizontal_angular_resolution_deg:=1.0 spin_frequency_hz:=0.5 lidar_base_frame:=velodyne_base lidar_points_frame:=velodyne_top model_name:=example">
+
+    <gazebo>
+      <plugin name="JointController" filename="libgazebo_ros_continous_joint_controller_plugin.so">
+        <joint>${sensor_name}_joint</joint>
+	<robot_namespace>${model_name}</robot_namespace>
+	<default_velocity_limit>100</default_velocity_limit>
+        <spin_frequency_hz>${spin_frequency_hz}</spin_frequency_hz>
+      </plugin>
+    </gazebo>
+
+    <joint name="${lidar_base_frame}_mount_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}"/>
+      <child link="${lidar_base_frame}"/>
+    </joint>
+
+    <link name="${lidar_base_frame}">
+      <inertial>
+        <mass value="${m1}"/>
+        <origin rpy="0 0 0" xyz="0 0 ${l1*0.5}"/>
+        <inertia ixx="${(m1 * (3.0*r1*r1 + l1*l1)) / 12.0}" ixy="0" ixz="0"
+                 iyy="${(m1 * (3.0*r1*r1 + l1*l1)) / 12.0}" iyz="0"
+                 izz="${0.5 * m1 * (r1*r1)}"/>
+      </inertial>
+      <collision name="${lidar_base_frame}_collision">
+        <origin rpy="0 0 0" xyz="0 0 ${l1*0.5}"/>
+        <geometry>
+          <cylinder length="${l1}" radius="${r1}"/>
+        </geometry>
+      </collision>
+      <visual name="${lidar_base_frame}_visual">
+        <origin rpy="0 0 0" xyz="0 0 ${l1*0.5}"/>
+        <geometry>
+          <cylinder length="${l1}" radius="${r1}"/>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="${sensor_name}_joint" type="continuous">
+      <parent link="${lidar_base_frame}"/>
+      <child link="${lidar_points_frame}"/>
+      <origin rpy="0 0 0" xyz="0 0 ${l1+l2*0.5}"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="100.0" velocity="100.0"/>
+    </joint>
+
+    <link name="${lidar_points_frame}">
+      <inertial>
+        <mass value="${m2}"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <inertia ixx="${(m2 * (3.0*r2*r2 + l2*l2)) / 12.0}" ixy="0" ixz="0"
+                 iyy="${(m2 * (3.0*r2*r2 + l2*l2)) / 12.0}" iyz="0"
+                 izz="${0.5 * m2 * (r2*r2)}"/>
+      </inertial>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <cylinder length="${l2}" radius="${r2}"/>
+        </geometry>
+      </collision>
+      <visual name="${lidar_points_frame}_visual">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <cylinder length="${l2}" radius="${r2}"/>
+        </geometry>
+      </visual>
+    </link>
+    <gazebo reference="${lidar_points_frame}">
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+    <joint name="${sensor_name}_joint_hat" type="fixed">
+      <parent link="${lidar_base_frame}"/>
+      <child link="${lidar_base_frame}_hat"/>
+      <origin rpy="0 0 0" xyz="0 0 ${l1+l2*0.5}"/>
+    </joint>
+
+    <link name="${lidar_base_frame}_hat">
+      <inertial>
+        <mass value="${m1}"/>
+        <origin rpy="0 0 0" xyz="0 0 ${(l1+l2)*0.5}"/>
+        <inertia ixx="${(m1 * (3.0*r1*r1 + l1*l1)) / 12.0}" ixy="0" ixz="0"
+                 iyy="${(m1 * (3.0*r1*r1 + l1*l1)) / 12.0}" iyz="0"
+                 izz="${0.5 * m1 * (r1*r1)}"/>
+      </inertial>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 ${(l1+l2)*0.5}"/>
+        <geometry>
+          <cylinder length="${l1}" radius="${r1}"/>
+        </geometry>
+      </collision>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 ${(l1+l2)*0.5}"/>
+        <geometry>
+          <cylinder length="${l1}" radius="${r1}"/>
+        </geometry>
+      </visual>
+    </link>
+
+    <gazebo reference="${lidar_points_frame}">
+      <!-- Add a ray sensor, and give it a name -->
+      <sensor type="ray" name="sensor">
+        <pose>0 0 0 0 0 0</pose>
+        <!-- Enable visualization to see the rays in the GUI -->
+        <visualize>true</visualize>
+
+        <!-- Set the update rate of the sensor -->
+        <update_rate>${360.0/horizontal_angular_resolution_deg*spin_frequency_hz}</update_rate>
+        <ray>
+          <noise>
+            <!-- Use gaussian noise -->
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.02</stddev>
+          </noise>
+          <scan>
+            <horizontal>
+              <samples>1</samples>
+              <resolution>1</resolution>
+              <min_angle>0</min_angle>
+              <max_angle>${2*M_PI}</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-${15.0*M_PI/180.0}</min_angle>
+              <max_angle>${15.0*M_PI/180.0}</max_angle>
+            </vertical>
+          </scan>
+
+          <!-- Range defines characteristics of an individual beam -->
+          <range>
+            <!-- Minimum distance of the beam -->
+            <min>${r1+0.05}</min>
+            <!-- Maximum distance of the beam -->
+            <max>70</max>
+            <!-- Linear resolution of the beam -->
+            <resolution>0.02</resolution>
+          </range>
+        </ray>
+        <plugin name="gazebo_ros_laser_plugin" filename="libgazebo_ros_laser_plugin.so">
+          <model_name>${model_name}</model_name>
+          <joint_name>${sensor_name}_joint</joint_name>
+          <topic_name>${topic}</topic_name>
+          <frame_name>${lidar_points_frame}</frame_name>
+          <min_range>${r1+0.05}</min_range>
+          <max_range>70</max_range>
+          <gaussian_noise>0.02</gaussian_noise>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+</robot>

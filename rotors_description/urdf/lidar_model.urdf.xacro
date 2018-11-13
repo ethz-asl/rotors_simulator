@@ -7,7 +7,6 @@
   <xacro:arg name="spin_frequency_hz" default="0.5" />
   <xacro:arg name="lidar_base_frame" default="velodyne_base" />
   <xacro:arg name="lidar_points_frame" default="velodyne_top" />
-  <xacro:arg name="joint_state_topic" default="velodyne/joint_state" />
   <xacro:arg name="world_frame" default="world" />
 
   <link name="$(arg world_frame)" />
