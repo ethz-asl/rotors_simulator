@@ -24,14 +24,18 @@
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
       <arg name="log_file" value="$(arg log_file)"/>
     </include>
-    <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">      
+    <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node" output="screen">
       <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_$(arg mav_name).yaml"/>
       <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name).yaml"/>
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
     <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+      <param name="publish_frequency" type="double" value="360.0" />
+    </node>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <param name="rate" type="double" value="360.0" />
+    </node>
     <node if="$(arg assembler)" name="velodyne_assembler" pkg="velodyne_assembler" type="velodyne_assembler_node" output="screen" respawn="false">
       <param name="naive_assembling" value="true)"/>
       <param name="fixed_frame_id" value="world"/>
