@@ -1,21 +1,26 @@
-//
-// Created by nico on 08.11.18.
-// Based on the gazebo tutorial
-// "http://gazebosim.org/tutorials?cat=guided_i&tut=guided_i1"
-//
 #ifndef ROTORS_GAZEBO_PLUGINS_GAZEBO_ROS_CONTINOUS_JOINT_CONTROLLER_PLUGIN_H_
 #define ROTORS_GAZEBO_PLUGINS_GAZEBO_ROS_CONTINOUS_JOINT_CONTROLLER_PLUGIN_H_
+//
+// Created by nico on 08.11.18.
+//
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/msgs/msgs.hh>
+#include "motor_state.h"
+
+#include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
-#include <gazebo/transport/transport.hh>
-#include <thread>
-#include "ros/callback_queue.h"
-#include "ros/ros.h"
-#include "ros/subscribe_options.h"
-#include "std_msgs/Float64.h"
-#include "rotors_comm/SetFrequency.h"
+
+// ROS
+#include <ros/ros.h>
+#include <sensor_msgs/JointState.h>
+
+#include <ros/advertise_options.h>
+#include <ros/callback_queue.h>
+
+// Boost
+#include <boost/bind.hpp>
+#include <boost/thread.hpp>
+
+#include <ros/ros.h>
 
 namespace gazebo {
 
@@ -25,47 +30,47 @@ class ContinousJointControllerPlugin : public ModelPlugin {
 
   /// \brief Constructor
  public:
-  ContinousJointControllerPlugin() {}
+  ContinousJointControllerPlugin();
+  ~ContinousJointControllerPlugin();
 
-  /// \brief The load function is called by Gazebo when the plugin is
+  void InitServices();
   /// inserted into simulation
   /// \param[in] _model A pointer to the model that this plugin is
   /// attached to.
   /// \param[in] _sdf A pointer to the plugin's SDF element.
-  virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+  void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
+
+  MotorState ReadMotor() const;
+
+  void UpdateMotor(const MotorState& read_motor_state);
+
+  void OnWorldUpdate();
+
+ protected:
+  void Shutdown();
 
  private:
-  /// \brief Handle an incoming message from ROS
-  /// \param[in] _msg A float value that is used to set the velocity
-  /// of the joint.
-  bool OnServiceCall(rotors_comm::SetFrequencyRequest &request,
-                     rotors_comm::SetFrequencyResponse &response);
+  physics::WorldPtr world_;
+  physics::ModelPtr parent_;
+  ros::ServiceServer set_frequency_service_;
+  ros::NodeHandle* nh_;
 
-  /// \brief Set the velocity of the joint
-  /// \param[in] spin_frequency_hz The target frequency at which the joint
-  /// should rotate
-  void SetVelocity(const double spin_frequency_hz);
+  std::string robot_namespace_;
+  std::string service_name_;
 
-  /// \brief A node use for ROS transport
-  std::unique_ptr<ros::NodeHandle> ros_node_;
-
-  /// \brief The ROS service provider
-  ros::ServiceServer ros_service_;
-
-  /// \brief A node used for transport
-  transport::NodePtr node_;
-
-  /// \brief Pointer to the model.
-  physics::ModelPtr model_;
-
-  /// \brief Pointer to the joint.
+  bool alive_;
   physics::JointPtr joint_;
 
-  /// \brief A PID controller for the joint.
-  common::PID pid_;
-
-  /// \brief The frequency [HZ] at which the joint should rotate
   double spin_frequency_;
+
+  event::ConnectionPtr update_connection_;
+  MotorState current_motor_state_;
+
+  physics::JointPtr GetReferencedJoint(physics::ModelPtr parent,
+                                       sdf::ElementPtr sdf,
+                                       const std::string& jointName);
+
+  void SetVelocity(double spin_frequency);
 };
 }
 #endif  // ROTORS_GAZEBO_PLUGINS_GAZEBO_ROS_CONTINOUS_JOINT_CONTROLLER_PLUGIN_H_

@@ -1,92 +1,166 @@
-#include "rotors_gazebo_plugins/gazebo_ros_continous_joint_controller_plugin.h"
+/*
+ * Copyright (c) 2014 Team DIANA
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *      * Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *      * Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *      * Neither the name of the <organization> nor the
+ *      names of its contributors may be used to endorse or promote products
+ *      derived from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY Antons Rebguns <email> ''AS IS'' AND ANY
+ *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL Antons Rebguns <email> BE LIABLE FOR ANY
+ *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ *THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+#include <math.h>
+#include <boost/bind.hpp>
+#include <boost/thread/mutex.hpp>
+#include <sdf/sdf.hh>
+#include "rotors_comm/SetFrequency.h"
 #include "rotors_gazebo_plugins/common.h"
+#include "rotors_gazebo_plugins/motor_state.h"
+#include "rotors_gazebo_plugins/gazebo_ros_continous_joint_controller_plugin.h"
 
 namespace gazebo {
 
-void ContinousJointControllerPlugin::Load(physics::ModelPtr _model,
-                                          sdf::ElementPtr _sdf) {
-  // Safety check
-  if (_model->GetJointCount() == 0) {
-    std::cerr << "Invalid joint count, joint controller plugin not loaded\n";
+ContinousJointControllerPlugin::ContinousJointControllerPlugin()
+    : alive_(true) {}
+
+// Destructor
+ContinousJointControllerPlugin::~ContinousJointControllerPlugin() {
+  delete nh_;
+}
+
+// Load the controller
+void ContinousJointControllerPlugin::Load(physics::ModelPtr parent,
+                                          sdf::ElementPtr sdf) {
+  this->parent_ = parent;
+  this->world_ = parent->GetWorld();
+  ROS_INFO("model name: %s", parent->GetName().c_str());
+  getSdfParam<std::string>(sdf, "robot_namespace", robot_namespace_, "");
+
+  joint_ = GetReferencedJoint(parent, sdf, "joint");
+
+  if (joint_ == nullptr) {
+    ROS_FATAL("No joint was found");
     return;
   }
 
-  // Store the model pointer for convenience.
-  this->model_ = _model;
-
-  // Get the first joint. We are making an assumption about the model
-  // having one joint that is the rotational joint.
-  if (_sdf->HasElement("joint")) {
-    std::string jointName = _sdf->Get<std::string>("joint");
-    this->joint_ = _model->GetJoint(jointName);
-  } else {
-    this->joint_ = _model->GetJoints()[0];
-    ROS_INFO("No joint name provided, therefore the first joint is used.");
+  // Make sure the ROS node for Gazebo has already been initialized
+  if (!ros::isInitialized()) {
+    ROS_FATAL_STREAM(
+        "A ROS node for Gazebo has not been initialized, unable to load "
+        "plugin. "
+        << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the "
+           "gazebo_ros package)");
+    return;
   }
 
-  double p_term, i_term, d_term;
-  getSdfParam<double>(_sdf, "p_term", p_term, 0.1);
-  getSdfParam<double>(_sdf, "i_term", i_term, 0.0);
-  getSdfParam<double>(_sdf, "d_term", d_term, 0.0);
+  nh_ = new ros::NodeHandle(this->robot_namespace_);
 
-  // Setup a PID-controller.
-  this->pid_ = common::PID(p_term, i_term, d_term);
+  // no need for position control here
+  current_motor_state_.mode = MotorStateMode::Velocity;
+  current_motor_state_.torque_enabled = true;
 
-  // Apply the P-controller to the joint.
-  this->model_->GetJointController()->SetVelocityPID(
-      this->joint_->GetScopedName(), this->pid_);
+  // read sdf parameters
+  getSdfParam<double>(sdf, "default_pos", current_motor_state_.goal_pos_rad,
+                      0.0);
+  current_motor_state_.current_pos_rad = current_motor_state_.goal_pos_rad;
+  getSdfParam<double>(sdf, "default_velocity_limit",
+                      current_motor_state_.velocity_limit_rad_s, 100.0);
+  getSdfParam<double>(sdf, "default_torque_limit",
+                      current_motor_state_.torque_limit, 10);
+  getSdfParam<std::string>(sdf, "frequency_service_name", service_name_,
+                           "set_frequency");
 
-  // Check that the velocity element exists, then read the value
-  if (_sdf->HasElement("spin_frequency_hz")) {
-    spin_frequency_ = _sdf->Get<double>("spin_frequency_hz");
-  } else {
-    spin_frequency_ = 0.0;
-  }
+  std::string joint_state_topic_name;
+  getSdfParam<std::string>(sdf, "joint_state_topic_name",
+                           joint_state_topic_name, "joint_state");
+  joint_->SetPosition(0, current_motor_state_.current_pos_rad);
+  getSdfParam<double>(sdf, "spin_frequency_hz", spin_frequency_, 1.0);
 
   SetVelocity(spin_frequency_);
 
-  // Create the node
-  this->node_ = transport::NodePtr(new transport::Node());
-#if GAZEBO_MAJOR_VERSION < 8
-  this->node_->Init(this->model_->GetWorld()->GetName());
-#else
-  this->node->Init(this->model->GetWorld()->Name());
-#endif
+  InitServices();
 
-  // Create a topic name
-  std::string serviceName = "/" + this->model_->GetName() + "/frequency_cmd";
+  // listen to the update event (broadcast every simulation iteration)
+  update_connection_ = event::Events::ConnectWorldUpdateBegin(
+      boost::bind(&ContinousJointControllerPlugin::OnWorldUpdate, this));
+  ROS_INFO("Motor control plugin loaded");
+}
 
-  // Initialize ros, if it has not already bee initialized.
-  if (!ros::isInitialized()) {
-    int argc = 0;
-    char **argv = NULL;
-    ros::init(argc, argv, "gazebo_client", ros::init_options::NoSigintHandler);
+void ContinousJointControllerPlugin::SetVelocity(double spin_frequency) {
+  current_motor_state_.velocity_rad_s = 2.0 * M_PI * spin_frequency;
+}
+
+void ContinousJointControllerPlugin::InitServices() {
+  set_frequency_service_ = nh_->advertiseService(
+      service_name_,
+      (boost::function<bool(rotors_comm::SetFrequencyRequest&,
+                            rotors_comm::SetFrequencyResponse&)>)([&](
+          rotors_comm::SetFrequencyRequest& req,
+          rotors_comm::SetFrequencyResponse& res) {
+        SetVelocity(req.frequency);
+        current_motor_state_.mode = MotorStateMode::Velocity;
+        return true;
+      }));
+}
+
+// Finalize the controller
+void ContinousJointControllerPlugin::Shutdown() {
+  alive_ = false;
+  nh_->shutdown();
+}
+
+MotorState gazebo::ContinousJointControllerPlugin::ReadMotor() const {
+  MotorState read_motor_state = current_motor_state_;
+  read_motor_state.current_pos_rad = joint_->GetAngle(0).Radian();
+  read_motor_state.is_moving =
+      read_motor_state.velocity_rad_s != 0 && read_motor_state.torque_enabled;
+  read_motor_state.load = joint_->GetForceTorque(0).body2Torque.x;
+  return read_motor_state;
+}
+
+void ContinousJointControllerPlugin::UpdateMotor(
+    const MotorState& read_motor_state) {
+  if (joint_->GetParam("vel", 0) != current_motor_state_.velocity_rad_s) {
+    joint_->SetParam("vel", 0, current_motor_state_.velocity_rad_s);
+    ROS_INFO("target velocity set to %f", current_motor_state_.velocity_rad_s);
   }
 
-  // Create our ROS node. This acts in a similar manner to
-  // the Gazebo node
-  this->ros_node_.reset(new ros::NodeHandle("gazebo_client"));
-
-  // Create a service to alter the velocity
-  ros_service_ = this->ros_node_->advertiseService(
-      serviceName, &ContinousJointControllerPlugin::OnServiceCall, this);
-  ROS_INFO("Joint controller plugin for continous joint <%s> loaded.", this->joint_->GetScopedName().c_str());
+  if (read_motor_state.torque_enabled) {
+    joint_->SetParam("fmax", 0, read_motor_state.torque_limit);
+  } else {
+    joint_->SetParam("fmax", 0, 0.0);
+  }
 }
 
-bool ContinousJointControllerPlugin::OnServiceCall(
-    rotors_comm::SetFrequencyRequest &request,
-    rotors_comm::SetFrequencyResponse &response) {
-  this->SetVelocity(request.frequency);
-  return true;
+void ContinousJointControllerPlugin::OnWorldUpdate() {
+  current_motor_state_ = ReadMotor();
+  UpdateMotor(current_motor_state_);
 }
 
-void ContinousJointControllerPlugin::SetVelocity(
-    const double spin_frequency_hz) {
-  // calculate update rate and set it
-  this->model_->GetJointController()->SetVelocityTarget(
-      this->joint_->GetScopedName(), 2.0 * M_PI * spin_frequency_hz);
+physics::JointPtr ContinousJointControllerPlugin::GetReferencedJoint(
+    physics::ModelPtr parent, sdf::ElementPtr sdf,
+    const std::string& jointParameterName) {
+  std::string jointName;
+  getSdfParam<std::string>(sdf, jointParameterName, jointName, "");
+  return parent->GetJoint(jointName);
 }
 
-// Tell Gazebo about this plugin, so that Gazebo can call Load on this plugin.
 GZ_REGISTER_MODEL_PLUGIN(ContinousJointControllerPlugin)
 }
