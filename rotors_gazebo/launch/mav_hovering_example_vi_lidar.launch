@@ -5,7 +5,7 @@
   <arg name="enable_logging" default="false" />
   <arg name="enable_ground_truth" default="true" />
   <arg name="log_file" default="$(arg mav_name)" />
-  <arg name="assembler" default="true" />
+  <arg name="assembler" default="false" />
 
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
@@ -37,11 +37,11 @@
       <param name="rate" type="double" value="360.0" />
     </node>
     <node if="$(arg assembler)" name="velodyne_assembler" pkg="velodyne_assembler" type="velodyne_assembler_node" output="screen" respawn="false">
-      <param name="naive_assembling" value="true)"/>
+      <param name="naive_assembling" value="false"/>
       <param name="fixed_frame_id" value="world"/>
       <param name="vehicle_base_frame_id" value="$(arg mav_name)/base_link"/>
-      <param name="sensor_frame_id" value="os1_top"/>
-      <param name="input_points" value="/os1_points"/>
+      <param name="sensor_frame_id" value="$(arg mav_name)/os1_top"/>
+      <param name="input_points" value="os1_points"/>
       <param name="assembled_cloud" value="os1_assembled"/>
     </node>
   </group>

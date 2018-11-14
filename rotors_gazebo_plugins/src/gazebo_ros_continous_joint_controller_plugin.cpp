@@ -50,7 +50,6 @@ void ContinousJointControllerPlugin::Load(physics::ModelPtr parent,
                                           sdf::ElementPtr sdf) {
   this->parent_ = parent;
   this->world_ = parent->GetWorld();
-  ROS_INFO("model name: %s", parent->GetName().c_str());
   getSdfParam<std::string>(sdf, "robot_namespace", robot_namespace_, "");
 
   joint_ = GetReferencedJoint(parent, sdf, "joint");

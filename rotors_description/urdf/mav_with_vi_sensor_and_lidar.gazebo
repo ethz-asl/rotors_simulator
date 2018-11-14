@@ -42,7 +42,7 @@
   </xacro:vi_sensor_macro>
   <!-- Mount a Lidar on the Firefly. -->
   <xacro:include filename="$(find rotors_description)/urdf/ouster_os1.urdf.xacro"/>
-  <OS-1 parent="${namespace}/base_link"
+  <xacro:OS-1 parent="${namespace}/base_link"
            sensor_name="$(arg lidar_name)"
            topic="$(arg topic)"
            horizontal_angular_resolution_deg="$(arg horizontal_angular_resolution_deg)"
@@ -50,8 +50,8 @@
            lidar_base_frame="$(arg lidar_base_frame)"
            lidar_points_frame="$(arg lidar_points_frame)"
            min_range="$(arg min_range)"
-           model_name="${namespace}">
+           namespace="${namespace}">
     <!--Mounted upside down and tilted 10deg towards the floor-->
     <origin xyz="0 0 -0.07" rpy="3.14 0.17 0" />
-  </OS-1>
+  </xacro:OS-1>
 </robot>
