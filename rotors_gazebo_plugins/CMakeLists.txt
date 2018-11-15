@@ -235,12 +235,16 @@ endif()
 list(APPEND targets_to_install rotors_gazebo_controller_interface)
 
 #================================= CONTINOUS JOINT CONTROLLER PLUGIN ==================================//
-add_library(gazebo_ros_continous_joint_controller_plugin SHARED src/gazebo_ros_continous_joint_controller_plugin.cpp)
-target_link_libraries(gazebo_ros_continous_joint_controller_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-if (NOT NO_ROS)
-  add_dependencies(gazebo_ros_continous_joint_controller_plugin ${catkin_EXPORTED_TARGETS})
+if(${gazebo_VERSION_MAJOR} GREATER 4)
+  add_library(gazebo_ros_continous_joint_controller_plugin SHARED src/gazebo_ros_continous_joint_controller_plugin.cpp)
+  target_link_libraries(gazebo_ros_continous_joint_controller_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+  if (NOT NO_ROS)
+    add_dependencies(gazebo_ros_continous_joint_controller_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install gazebo_ros_continous_joint_controller_plugin)
+else()
+  message(STATUS "Gazebo version is less than 5, not building gazebo_ros_continous_joint_controller_plugin.cpp.")
 endif()
-list(APPEND targets_to_install gazebo_ros_continous_joint_controller_plugin)
 
 #=================================== GEOTAGGED IMAGES PLUGIN ====================================//
 
