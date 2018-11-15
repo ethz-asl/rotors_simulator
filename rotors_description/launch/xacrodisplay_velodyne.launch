@@ -37,7 +37,7 @@
   </node>
   <!-- RViz -->
   <arg name="rviz" default="true"/>
-  <node if="$(arg rviz)" pkg="rviz" type="rviz" name="$(anon rviz)" respawn="false" output="screen" args="-d $(find rotors_description)/rviz/hdl32.rviz" />
+  <node if="$(arg rviz)" pkg="rviz" type="rviz" name="$(anon rviz)" respawn="false" output="screen" args="-d $(find rotors_description)/resources/rviz/hdl32.rviz" />
 
   <!-- velodyne_assembler node-->
   <node if="$(arg assembler_enabled)" name="velodyne_assembler" pkg="velodyne_assembler" type="velodyne_assembler_node" output="screen" respawn="false">
