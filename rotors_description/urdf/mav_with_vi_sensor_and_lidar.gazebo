@@ -22,12 +22,11 @@
 <robot name="$(arg mav_name)" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:arg name="lidar_name" default="os1"/>
   <xacro:arg name="topic" default="os1_points" />
-  <xacro:arg name="horizontal_angular_resolution_deg" default="1.0" />
-  <xacro:arg name="spin_frequency_hz" default="0.5" />
+  <xacro:arg name="spin_frequency_hz" default="10.0" />
   <xacro:arg name="lidar_base_frame" default="os1_base" />
   <xacro:arg name="lidar_points_frame" default="os1_top" />
   <!--To erase all the readings resulting from laser beams hitting the mav itself-->
-  <xacro:arg name="min_range" default="0.15" />
+  <xacro:arg name="min_range" default="0.5" />
   <!-- Instantiate the mav with a generic odometry sensor. -->
   <xacro:include filename="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
 
@@ -45,7 +44,6 @@
   <xacro:OS-1 parent="${namespace}/base_link"
            sensor_name="$(arg lidar_name)"
            topic="$(arg topic)"
-           horizontal_angular_resolution_deg="$(arg horizontal_angular_resolution_deg)"
            spin_frequency_hz="$(arg spin_frequency_hz)"
            lidar_base_frame="$(arg lidar_base_frame)"
            lidar_points_frame="$(arg lidar_points_frame)"
