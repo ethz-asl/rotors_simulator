@@ -27,7 +27,6 @@ namespace gazebo {
 /// \brief A plugin to control a continous joint at a constant rotational
 /// frequency.
 class ContinousJointControllerPlugin : public ModelPlugin {
-
   /// \brief Constructor
  public:
   ContinousJointControllerPlugin();
