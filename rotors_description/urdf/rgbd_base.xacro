@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<robot name="rgbd_camera" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="namespace" value="rgbd_camera" />
+  <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
+
+  <link name="rgbd_camera/base_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+              <mesh filename="package://rotors_description/meshes/d435_simple.dae" scale="1 1 1" />
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+              <mesh filename="package://rotors_description/meshes/d435_simple.dae" scale="1 1 1" />
+      </geometry>
+      <material name="black" />
+    </visual>
+
+    <inertial>
+      <mass value="100" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
+    </inertial>
+  </link>
+
+
+
+
+
+ 
+<!-- Macro to add a depth camera on the VI-sensor. -->
+  <xacro:macro name="rgbd_sensor_depth_macro"
+    params="namespace parent_link camera_suffix frame_rate max_range *origin">
+    <link name="${namespace}/camera_${camera_suffix}_link">
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <cylinder length="0.01" radius="0.007" />
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
+    <joint name="${namespace}/camera_${camera_suffix}_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/camera_${camera_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+    <!-- Optical center of camera -->
+    <link name="${namespace}/camera_${camera_suffix}_optical_center_link" />
+    <joint name="${namespace}/camera_${camera_suffix}_optical_center_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+      <parent link="${namespace}/camera_${camera_suffix}_link" />
+      <child link="${namespace}/camera_${camera_suffix}_optical_center_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+    <gazebo reference="${namespace}/camera_${camera_suffix}_link">
+      <sensor type="depth" name="${namespace}_camera_{camera_suffix}">
+        <always_on>true</always_on>
+        <update_rate>${frame_rate}</update_rate>
+        <camera>
+          <horizontal_fov>1.3962634</horizontal_fov>
+          <image>
+            <format>L8</format>
+            <width>640</width>
+            <height>480</height>
+          </image>
+          <clip>
+            <near>0.01</near>
+            <far>${max_range}</far>
+          </clip>
+        </camera>
+        <plugin name="${namespace}_camera_{camera_suffix}" filename="librotors_gazebo_noisydepth_plugin.so">
+          <robotNamespace>${namespace}</robotNamespace>
+          <alwaysOn>true</alwaysOn>
+          <baseline>0.11</baseline>
+          <updateRate>${frame_rate}</updateRate>
+          <cameraName>camera_${camera_suffix}</cameraName>
+          <imageTopicName>camera/image_raw</imageTopicName>
+          <cameraInfoTopicName>camera/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>depth/image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>depth/points</pointCloudTopicName>
+          <frameName>camera_${camera_suffix}_optical_center_link</frameName>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+  <!-- Depth Sensor -->
+
+      <xacro:rgbd_sensor_depth_macro
+        namespace="${namespace}" parent_link="${namespace}/base_link"
+        camera_suffix="depth" frame_rate="30.0" max_range="10.0">
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+      </xacro:rgbd_sensor_depth_macro>
+
+    <xacro:camera_macro
+      namespace="${namespace}"
+      parent_link="${namespace}/base_link"
+      camera_suffix="rgb"
+      frame_rate="30.0"
+      horizontal_fov="1.3962634"
+      image_width="640"
+      image_height="480"
+      image_format="R8G8B8"
+      min_distance="0.02"
+      max_distance="300"
+      noise_mean="0.0"
+      noise_stddev="0.007"
+      enable_visual="false">
+              <mesh filename="package://rotors_description/meshes/d435_simple.dae" scale="1 1 1" />
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+    </xacro:camera_macro>
+
+
+</robot>
