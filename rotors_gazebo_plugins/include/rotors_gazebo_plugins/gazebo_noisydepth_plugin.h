@@ -48,6 +48,7 @@
 #include <gazebo/common/Time.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/plugins/DepthCameraPlugin.hh>
+#include <rotors_gazebo_plugins/depth_noise_model.hpp>
 
 // dynamic reconfigure stuff
 #include <gazebo_plugins/GazeboRosOpenniKinectConfig.h>
@@ -87,45 +88,31 @@ namespace gazebo
                                             unsigned int _width, unsigned int _height,
                                             unsigned int _depth, const std::string &_format);
 
-        /// \brief push point cloud data into ros topic
-    private: void FillPointdCloud(const float *_src);
 
         /// \brief push depth image data into ros topic
     private: void FillDepthImage(const float *_src);
 
-        /// \brief Keep track of number of connctions for point clouds
-    private: int point_cloud_connect_count_;
-    private: void PointCloudConnect();
-    private: void PointCloudDisconnect();
 
         /// \brief Keep track of number of connctions for point clouds
     private: int depth_image_connect_count_;
     private: void DepthImageConnect();
     private: void DepthImageDisconnect();
 
-    private: bool FillPointCloudHelper(sensor_msgs::PointCloud2 &point_cloud_msg,
-                                       uint32_t rows_arg, uint32_t cols_arg,
-                                       uint32_t step_arg, void* data_arg);
-
     private: bool FillDepthImageHelper( sensor_msgs::Image& image_msg,
                                         uint32_t height, uint32_t width,
                                         uint32_t step, void* data_arg);
 
+
+    private: std::unique_ptr<DepthNoiseModel> noise_model;
         /// \brief A pointer to the ROS node.  A node will be instantiated if it does not exist.
-    private: ros::Publisher point_cloud_pub_;
     private: ros::Publisher depth_image_pub_;
 
-        /// \brief PointCloud2 point cloud message
-    private: sensor_msgs::PointCloud2 point_cloud_msg_;
     private: sensor_msgs::Image depth_image_msg_;
 
         /// \brief Minimum range of the point cloud
-    private: double point_cloud_cutoff_;
+    private: double depth_cutoff_min_;
         /// \brief Maximum range of the point cloud
-    private: double point_cloud_cutoff_max_;
-
-        /// \brief ROS image topic name
-    private: std::string point_cloud_topic_name_;
+    private: double depth_cutoff_max_;
 
 
         /// \brief image where each pixel contains the depth data

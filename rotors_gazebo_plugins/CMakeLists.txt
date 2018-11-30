@@ -273,7 +273,8 @@ endif()
 list(APPEND targets_to_install rotors_gazebo_imu_plugin)
 
 #========================================= NoisyDepth PLUGIN ======================================//
-add_library(rotors_gazebo_noisydepth_plugin SHARED src/gazebo_noisydepth_plugin.cpp)
+add_library(rotors_gazebo_noisydepth_plugin SHARED src/gazebo_noisydepth_plugin.cpp
+        src/depth_noise_model.cpp)
 
 # there seems to be no cleaner way to get these plugins..
 # they're path is not part of gazebo_plugins or gazebo_ros_plugins
