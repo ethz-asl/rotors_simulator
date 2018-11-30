@@ -12,7 +12,7 @@
     </collision>
 
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 -0.0175 0" rpy="${pi/2} 0 ${pi/2}" />
       <geometry>
               <mesh filename="package://rotors_description/meshes/d435_simple.dae" scale="1 1 1" />
       </geometry>
@@ -20,7 +20,7 @@
     </visual>
 
     <inertial>
-      <mass value="100" />
+      <mass value="0" />
       <origin xyz="0 0 0" rpy="0 0 0" />
       <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
     </inertial>
@@ -119,8 +119,9 @@
       max_distance="300"
       noise_mean="0.0"
       noise_stddev="0.007"
-      enable_visual="false">
-              <mesh filename="package://rotors_description/meshes/d435_simple.dae" scale="1 1 1" />
+      enable_visual="true">
+          <box size="0.01 0.01 0.1" />
+
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
     </xacro:camera_macro>
 
