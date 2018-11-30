@@ -92,7 +92,7 @@ add_definitions(-DROS_ASSERT_ENABLED)
 
 if (NOT NO_ROS)
   find_package(catkin REQUIRED COMPONENTS
-    cmake_modules
+    gazebo_plugins
     cv_bridge
     geometry_msgs
     mav_msgs
@@ -271,6 +271,23 @@ if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 list(APPEND targets_to_install rotors_gazebo_imu_plugin)
+
+#========================================= NoisyDepth PLUGIN ======================================//
+add_library(rotors_gazebo_noisydepth_plugin SHARED src/gazebo_noisydepth_plugin.cpp)
+
+# there seems to be no cleaner way to get these plugins..
+# they're path is not part of gazebo_plugins or gazebo_ros_plugins
+foreach(subdir ${gazebo_dev_LIBRARY_DIRS})
+  if (${subdir} MATCHES "gazebo.*plugins")
+    set(gazebo_dev_DEPTHCAMERA_LIB ${subdir}/libDepthCameraPlugin.so)
+  endif()
+endforeach()
+
+target_link_libraries(rotors_gazebo_noisydepth_plugin ${catkin_LIBRARIES} ${gazebo_dev_DEPTHCAMERA_LIB})
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_noisydepth_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_noisydepth_plugin)
 
 #======================================== LIDAR PLUGIN ==========================================//
 if(${gazebo_VERSION_MAJOR} GREATER 4)
