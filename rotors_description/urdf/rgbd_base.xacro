@@ -119,7 +119,7 @@
       max_distance="300"
       noise_mean="0.0"
       noise_stddev="0.007"
-      enable_visual="true">
+      enable_visual="false">
           <box size="0.01 0.01 0.1" />
 
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
