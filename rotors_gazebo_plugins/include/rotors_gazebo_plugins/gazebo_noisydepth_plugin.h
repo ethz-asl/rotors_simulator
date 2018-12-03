@@ -1,7 +1,7 @@
 /*
  * Copyright 2018 Michael Pantic, ASL, ETH Zurich, Switzerland
  *
- * Forked from GazeboNoisyDepth Plugin, retaining original copyright header:
+ * Forked from Openni/Kinect Depth Plugin, retaining original copyright header:
  *
  * Copyright (C) 2012-2014 Open Source Robotics Foundation
  *
