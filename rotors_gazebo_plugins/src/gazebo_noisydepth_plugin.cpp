@@ -21,8 +21,8 @@
 
 /*
    Desc: GazeboNoisyDepth plugin for simulating cameras in Gazebo
-   Author: John Hsu
-   Date: 24 Sept 2008
+   Author: Michael Pantic / John Hsu (original Depth Plugin)
+   Date: 03 Dez 18
  */
 
 #include <algorithm>
@@ -36,254 +36,274 @@
 #include <sdf/sdf.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
-
 #include <tf/tf.h>
 
-namespace gazebo
-{
+namespace gazebo {
 // Register this plugin with the simulator
-    GZ_REGISTER_SENSOR_PLUGIN(GazeboNoisyDepth)
+GZ_REGISTER_SENSOR_PLUGIN(GazeboNoisyDepth)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constructor
-    GazeboNoisyDepth::GazeboNoisyDepth()
-    {
-        this->depth_info_connect_count_ = 0;
-        this->depth_image_connect_count_ = 0;
-        this->last_depth_image_camera_info_update_time_ = common::Time(0);
-    }
+GazeboNoisyDepth::GazeboNoisyDepth() {
+  this->depth_info_connect_count_ = 0;
+  this->depth_image_connect_count_ = 0;
+  this->last_depth_image_camera_info_update_time_ = common::Time(0);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Destructor
-    GazeboNoisyDepth::~GazeboNoisyDepth()
-    {
-    }
+GazeboNoisyDepth::~GazeboNoisyDepth() {
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Load the controller
-    void GazeboNoisyDepth::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
-    {
-        DepthCameraPlugin::Load(_parent, _sdf);
+void GazeboNoisyDepth::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
+  DepthCameraPlugin::Load(_parent, _sdf);
 
-        // copying from DepthCameraPlugin into GazeboRosCameraUtils
-        this->parentSensor_ = this->parentSensor;
-        this->width_ = this->width;
-        this->height_ = this->height;
-        this->depth_ = this->depth;
-        this->format_ = this->format;
-        this->camera_ = this->depthCamera;
-        this->camera_->SetClipDist(0.2,100.0);
+  // copying from DepthCameraPlugin into GazeboRosCameraUtils
+  this->parentSensor_ = this->parentSensor;
+  this->width_ = this->width;
+  this->height_ = this->height;
+  this->depth_ = this->depth;
+  this->format_ = this->format;
+  this->camera_ = this->depthCamera;
 
-        // using a different default
-        if (!_sdf->HasElement("imageTopicName"))
-            this->image_topic_name_ = "ir/image_raw";
-        if (!_sdf->HasElement("cameraInfoTopicName"))
-            this->camera_info_topic_name_ = "ir/camera_info";
+  // using a different default
+  if (!_sdf->HasElement("imageTopicName"))
+    this->image_topic_name_ = "ir/image_raw";
+  if (!_sdf->HasElement("cameraInfoTopicName"))
+    this->camera_info_topic_name_ = "ir/camera_info";
 
 
-        // depth image stuff
-        if (!_sdf->HasElement("depthImageTopicName"))
-            this->depth_image_topic_name_ = "depth/image_raw";
-        else
-            this->depth_image_topic_name_ = _sdf->GetElement("depthImageTopicName")->Get<std::string>();
+  // depth image stuff
+  if (!_sdf->HasElement("depthImageTopicName"))
+    this->depth_image_topic_name_ = "depth/image_raw";
+  else
+    this->depth_image_topic_name_ = _sdf->GetElement("depthImageTopicName")->Get<std::string>();
 
-        if (!_sdf->HasElement("depthImageCameraInfoTopicName"))
-            this->depth_image_camera_info_topic_name_ = "depth/camera_info";
-        else
-            this->depth_image_camera_info_topic_name_ = _sdf->GetElement("depthImageCameraInfoTopicName")->Get<std::string>();
+  if (!_sdf->HasElement("depthImageCameraInfoTopicName"))
+    this->depth_image_camera_info_topic_name_ = "depth/camera_info";
+  else
+    this->depth_image_camera_info_topic_name_ = _sdf->GetElement("depthImageCameraInfoTopicName")->Get<std::string>();
 
 
-        load_connection_ = GazeboRosCameraUtils::OnLoad(boost::bind(&GazeboNoisyDepth::Advertise, this));
-        this->depth_cutoff_min_ = 0.2;
-        this->depth_cutoff_max_ = 20;
-        this->noise_model.reset(new KinectDepthNoiseModel());
-        GazeboRosCameraUtils::Load(_parent, _sdf);
 
+  // noise model stuff
+  std::string noise_model;
+  if (!_sdf->HasElement("depthNoiseModelName")) {
+    noise_model = "Kinect";
+    ROS_WARN_NAMED("NoisyDepth", "depthNoiseModelName not defined, assuming 'Kinect'");
+  } else {
+    noise_model = _sdf->GetElement("depthNoiseModelName")->Get<std::string>();
+  }
+
+  if (boost::iequals(noise_model, "Kinect")) {
+    this->noise_model.reset(new KinectDepthNoiseModel());
+
+    /* no other properties for Kinect */
+  } else if (boost::iequals(noise_model, "D435")) {
+    D435DepthNoiseModel *model = new D435DepthNoiseModel();
+    this->noise_model.reset(model);
+
+    if (_sdf->HasElement("horizontal_fov")) {
+      model->h_fov = _sdf->GetElement("horizontal_fov")->Get<float>();
     }
 
-    void GazeboNoisyDepth::Advertise()
-    {
-
-        ros::AdvertiseOptions depth_image_ao =
-                ros::AdvertiseOptions::create< sensor_msgs::Image >(
-                        this->depth_image_topic_name_,1,
-                        boost::bind( &GazeboNoisyDepth::DepthImageConnect,this),
-                        boost::bind( &GazeboNoisyDepth::DepthImageDisconnect,this),
-                        ros::VoidPtr(), &this->camera_queue_);
-        this->depth_image_pub_ = this->rosnode_->advertise(depth_image_ao);
-
-        ros::AdvertiseOptions depth_image_camera_info_ao =
-                ros::AdvertiseOptions::create<sensor_msgs::CameraInfo>(
-                        this->depth_image_camera_info_topic_name_,1,
-                        boost::bind( &GazeboNoisyDepth::DepthInfoConnect,this),
-                        boost::bind( &GazeboNoisyDepth::DepthInfoDisconnect,this),
-                        ros::VoidPtr(), &this->camera_queue_);
-        this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
+    if (_sdf->HasElement("baseline")) {
+      model->baseline = _sdf->GetElement("baseline")->Get<float>();
     }
 
+    /* Load D435 specific noise params if available*/
+    if (_sdf->HasElement("D435NoiseSubpixelErr")) {
+      model->subpixel_err = _sdf->GetElement("D435NoiseSubpixelErr")->Get<float>();
+    }
+
+    if (_sdf->HasElement("D435MaxStdev")) {
+      model->max_stdev = _sdf->GetElement("D435MaxStdev")->Get<float>();
+    }
+
+    ROS_INFO_STREAM_NAMED("NoisyDepth", "D435 Depth noise configuration: " <<
+                                                                           "\tHorizontal FoV: " << model->h_fov
+                                                                           << std::endl <<
+                                                                           "\tBaseline: " << model->baseline
+                                                                           << std::endl <<
+                                                                           "\tSubpixel Err: " << model->subpixel_err
+                                                                           << std::endl <<
+                                                                           "\tNoise StDev cutoff: "
+                                                                           << model->max_stdev);
+  } else {
+    ROS_WARN_NAMED("NoisyDepth", "Invalid depthNoiseModelName (%s), assuming 'Kinect'", noise_model.c_str());
+    this->noise_model.reset(new KinectDepthNoiseModel());
+  }
+
+  /* Load properties that apply for all noise model */
+  /* Note that these min/max values may not be the same as near/far clip range of the camera */
+  if (_sdf->HasElement("depthNoiseMinDist")) {
+    this->noise_model->min_depth = _sdf->GetElement("depthNoiseMinDist")->Get<float>();
+  }
+
+  if (_sdf->HasElement("depthNoiseMaxDist")) {
+    this->noise_model->max_depth = _sdf->GetElement("depthNoiseMaxDist")->Get<float>();
+  }
+
+  load_connection_ = GazeboRosCameraUtils::OnLoad(boost::bind(&GazeboNoisyDepth::Advertise, this));
+  GazeboRosCameraUtils::Load(_parent, _sdf);
+
+}
+
+void GazeboNoisyDepth::Advertise() {
+
+  ros::AdvertiseOptions depth_image_ao =
+      ros::AdvertiseOptions::create<sensor_msgs::Image>(
+          this->depth_image_topic_name_, 1,
+          boost::bind(&GazeboNoisyDepth::DepthImageConnect, this),
+          boost::bind(&GazeboNoisyDepth::DepthImageDisconnect, this),
+          ros::VoidPtr(), &this->camera_queue_);
+  this->depth_image_pub_ = this->rosnode_->advertise(depth_image_ao);
+
+  ros::AdvertiseOptions depth_image_camera_info_ao =
+      ros::AdvertiseOptions::create<sensor_msgs::CameraInfo>(
+          this->depth_image_camera_info_topic_name_, 1,
+          boost::bind(&GazeboNoisyDepth::DepthInfoConnect, this),
+          boost::bind(&GazeboNoisyDepth::DepthInfoDisconnect, this),
+          ros::VoidPtr(), &this->camera_queue_);
+  this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Increment count
-    void GazeboNoisyDepth::DepthImageConnect()
-    {
-        this->depth_image_connect_count_++;
-        this->parentSensor->SetActive(true);
-    }
+void GazeboNoisyDepth::DepthImageConnect() {
+  this->depth_image_connect_count_++;
+  this->parentSensor->SetActive(true);
+}
 ////////////////////////////////////////////////////////////////////////////////
 // Decrement count
-    void GazeboNoisyDepth::DepthImageDisconnect()
-    {
-        this->depth_image_connect_count_--;
-    }
+void GazeboNoisyDepth::DepthImageDisconnect() {
+  this->depth_image_connect_count_--;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Increment count
-    void GazeboNoisyDepth::DepthInfoConnect()
-    {
-        this->depth_info_connect_count_++;
-    }
+void GazeboNoisyDepth::DepthInfoConnect() {
+  this->depth_info_connect_count_++;
+}
 ////////////////////////////////////////////////////////////////////////////////
 // Decrement count
-    void GazeboNoisyDepth::DepthInfoDisconnect()
-    {
-        this->depth_info_connect_count_--;
-    }
+void GazeboNoisyDepth::DepthInfoDisconnect() {
+  this->depth_info_connect_count_--;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Update the controller
-    void GazeboNoisyDepth::OnNewDepthFrame(const float *_image,
-                                                unsigned int _width, unsigned int _height, unsigned int _depth,
-                                                const std::string &_format)
-    {
-        if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
-            return;
+void GazeboNoisyDepth::OnNewDepthFrame(const float *_image,
+                                       unsigned int _width, unsigned int _height, unsigned int _depth,
+                                       const std::string &_format) {
+  if (!this->initialized_ || this->height_ <= 0 || this->width_ <= 0)
+    return;
 
-        this->depth_sensor_update_time_ = this->parentSensor->LastMeasurementTime();
-        if (this->parentSensor->IsActive())
-        {
-            if (this->depth_image_connect_count_ <= 0 &&
-                (*this->image_connect_count_) <= 0)
-            {
-                this->parentSensor->SetActive(false);
-            }
-            else
-            {
-                if (this->depth_image_connect_count_ > 0)
-                    this->FillDepthImage(_image);
-            }
-        }
-        else
-        {
-            if (this->depth_image_connect_count_ <= 0)
-                // do this first so there's chance for sensor to run 1 frame after activate
-                this->parentSensor->SetActive(true);
-        }
-        PublishCameraInfo();
+  this->depth_sensor_update_time_ = this->parentSensor->LastMeasurementTime();
+  if (this->parentSensor->IsActive()) {
+    if (this->depth_image_connect_count_ <= 0 &&
+        (*this->image_connect_count_) <= 0) {
+      this->parentSensor->SetActive(false);
+    } else {
+      if (this->depth_image_connect_count_ > 0)
+        this->FillDepthImage(_image);
     }
+  } else {
+    if (this->depth_image_connect_count_ <= 0)
+      // do this first so there's chance for sensor to run 1 frame after activate
+      this->parentSensor->SetActive(true);
+  }
+  PublishCameraInfo();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Update the controller
-    void GazeboNoisyDepth::OnNewImageFrame(const unsigned char *_image,
-                                                unsigned int _width, unsigned int _height, unsigned int _depth,
-                                                const std::string &_format)
-    {
-        if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
-            return;
+void GazeboNoisyDepth::OnNewImageFrame(const unsigned char *_image,
+                                       unsigned int _width, unsigned int _height, unsigned int _depth,
+                                       const std::string &_format) {
+  if (!this->initialized_ || this->height_ <= 0 || this->width_ <= 0)
+    return;
 
-        //ROS_ERROR_NAMED("openni_kinect", "camera_ new frame %s %s",this->parentSensor_->Name().c_str(),this->frame_name_.c_str());
-        this->sensor_update_time_ = this->parentSensor_->LastMeasurementTime();
+  //ROS_ERROR_NAMED("openni_kinect", "camera_ new frame %s %s",this->parentSensor_->Name().c_str(),this->frame_name_.c_str());
+  this->sensor_update_time_ = this->parentSensor_->LastMeasurementTime();
 
-        if (this->parentSensor->IsActive())
-        {
-            if (this->depth_image_connect_count_ <= 0 &&
-                (*this->image_connect_count_) <= 0)
-            {
-                this->parentSensor->SetActive(false);
-            }
-            else
-            {
-                if ((*this->image_connect_count_) > 0)
-                    this->PutCameraData(_image);
-            }
-        }
-        else
-        {
-            if ((*this->image_connect_count_) > 0)
-                // do this first so there's chance for sensor to run 1 frame after activate
-                this->parentSensor->SetActive(true);
-        }
+  if (this->parentSensor->IsActive()) {
+    if (this->depth_image_connect_count_ <= 0 &&
+        (*this->image_connect_count_) <= 0) {
+      this->parentSensor->SetActive(false);
+    } else {
+      if ((*this->image_connect_count_) > 0)
+        this->PutCameraData(_image);
     }
-
+  } else {
+    if ((*this->image_connect_count_) > 0)
+      // do this first so there's chance for sensor to run 1 frame after activate
+      this->parentSensor->SetActive(true);
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Put depth image data to the interface
-    void GazeboNoisyDepth::FillDepthImage(const float *_src)
-    {
-        this->lock_.lock();
-        // copy data into image
-        this->depth_image_msg_.header.frame_id = this->frame_name_;
-        this->depth_image_msg_.header.stamp.sec = this->depth_sensor_update_time_.sec;
-        this->depth_image_msg_.header.stamp.nsec = this->depth_sensor_update_time_.nsec;
+void GazeboNoisyDepth::FillDepthImage(const float *_src) {
+  this->lock_.lock();
+  // copy data into image
+  this->depth_image_msg_.header.frame_id = this->frame_name_;
+  this->depth_image_msg_.header.stamp.sec = this->depth_sensor_update_time_.sec;
+  this->depth_image_msg_.header.stamp.nsec = this->depth_sensor_update_time_.nsec;
 
-        ///copy from depth to depth image message
-        FillDepthImageHelper(this->depth_image_msg_,
-                             this->height,
-                             this->width,
-                             this->skip_,
-                             (void*)_src );
+  ///copy from depth to depth image message
+  FillDepthImageHelper(this->depth_image_msg_,
+                       this->height,
+                       this->width,
+                       this->skip_,
+                       (void *) _src);
 
-        this->depth_image_pub_.publish(this->depth_image_msg_);
+  this->depth_image_pub_.publish(this->depth_image_msg_);
 
-        this->lock_.unlock();
-    }
-
-
+  this->lock_.unlock();
+}
 
 // Fill depth information
-    bool GazeboNoisyDepth::FillDepthImageHelper(
-            sensor_msgs::Image& image_msg,
-            uint32_t rows_arg, uint32_t cols_arg,
-            uint32_t step_arg, void* data_arg)
-    {
-        image_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
-        image_msg.height = rows_arg;
-        image_msg.width = cols_arg;
-        image_msg.step = sizeof(float) * cols_arg;
-        image_msg.data.resize(rows_arg * cols_arg * sizeof(float));
-        image_msg.is_bigendian = 0;
+bool GazeboNoisyDepth::FillDepthImageHelper(
+    sensor_msgs::Image &image_msg,
+    uint32_t rows_arg, uint32_t cols_arg,
+    uint32_t step_arg, void *data_arg) {
+  image_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
+  image_msg.height = rows_arg;
+  image_msg.width = cols_arg;
+  image_msg.step = sizeof(float) * cols_arg;
+  image_msg.data.resize(rows_arg * cols_arg * sizeof(float));
+  image_msg.is_bigendian = 0;
 
+  float *dest = (float *) (&(image_msg.data[0]));
+  float *toCopyFrom = (float *) data_arg;
+  int index = 0;
 
-        float* dest = (float*)(&(image_msg.data[0]));
-        float* toCopyFrom = (float*)data_arg;
-        int index = 0;
+  memcpy(dest, toCopyFrom, sizeof(float) * width * height);
 
-        memcpy(dest, toCopyFrom, sizeof(float)*width*height);
+  noise_model->ApplyNoise(dest, width, height);
 
-        noise_model->ApplyNoise(dest, width, height);
+  return true;
+}
 
-        return true;
-    }
+void GazeboNoisyDepth::PublishCameraInfo() {
+  ROS_DEBUG_NAMED("NoisyDepth", "publishing default camera info, then openni kinect camera info");
+  GazeboRosCameraUtils::PublishCameraInfo();
 
-    void GazeboNoisyDepth::PublishCameraInfo()
-    {
-        ROS_DEBUG_NAMED("openni_kinect", "publishing default camera info, then openni kinect camera info");
-        GazeboRosCameraUtils::PublishCameraInfo();
-
-        if (this->depth_info_connect_count_ > 0)
-        {
-            this->sensor_update_time_ = this->parentSensor_->LastMeasurementTime();
+  if (this->depth_info_connect_count_ > 0) {
+    this->sensor_update_time_ = this->parentSensor_->LastMeasurementTime();
 #if GAZEBO_MAJOR_VERSION >= 8
-            common::Time cur_time = this->world_->SimTime();
+    common::Time cur_time = this->world_->SimTime();
 #else
-            common::Time cur_time = this->world_->GetSimTime();
+    common::Time cur_time = this->world_->GetSimTime();
 #endif
-            if (this->sensor_update_time_ - this->last_depth_image_camera_info_update_time_ >= this->update_period_)
-            {
-                this->PublishCameraInfo(this->depth_image_camera_info_pub_);
-                this->last_depth_image_camera_info_update_time_ = this->sensor_update_time_;
-            }
-        }
+    if (this->sensor_update_time_ - this->last_depth_image_camera_info_update_time_ >= this->update_period_) {
+      this->PublishCameraInfo(this->depth_image_camera_info_pub_);
+      this->last_depth_image_camera_info_update_time_ = this->sensor_update_time_;
     }
-
+  }
+}
 
 }

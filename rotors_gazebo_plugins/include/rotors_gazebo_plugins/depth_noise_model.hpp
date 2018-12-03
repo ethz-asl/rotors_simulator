@@ -25,12 +25,20 @@ class DepthNoiseModel {
 
  public:
   DepthNoiseModel() :
+      max_depth(1000),
+      min_depth(0.2),
       gen(std::random_device{}()) {
-
   }
+
   virtual void ApplyNoise(float *data, int width, int height) = 0;
 
+  float max_depth;  // [m]
+  float min_depth;  // [m]  - Values smaller/larger than these two are replaced by NaN
+
  protected:
+  bool InRange(float depth);
+
+  const float bad_point = std::numeric_limits<float>::quiet_NaN();
   std::normal_distribution<float> dist;
   std::mt19937 gen;
 };
@@ -46,34 +54,26 @@ class KinectDepthNoiseModel : public DepthNoiseModel {
   void ApplyNoise(float *data, int width, int height);
 };
 
-
 class D435DepthNoiseModel : public DepthNoiseModel {
 
  public:
 
   D435DepthNoiseModel() :
-      h_fov(M_PI_2), // Default 90deg for D435
-      baseline(50),  // Default 50 mm for D435
+      h_fov(M_PI_2),     // Default 90deg for D435
+      baseline(0.05),    // Default 50 mm for D435
       subpixel_err(0.1), // Default subpixel calibration error
-      max_depth(100),
-      min_depth(0.2),
       max_stdev(3.0),
       DepthNoiseModel() {
-
   }
 
   void ApplyNoise(float *data, int width, int height);
 
- private:
-
-  const float bad_point = std::numeric_limits<float>::quiet_NaN();
-  float min_depth;    // [m]
-  float max_depth;    // [m]
-  // parameters
+  // public params...
   float h_fov;        // [rad]
-  float baseline;     // [mm]
+  float baseline;     // [m]
   float subpixel_err; // [pixel] Calibration error
-  float max_stdev;    // [m] cutoff for distance covariance
+  float max_stdev;    // [m] cutoff for distance standard deviation
+  //     - if modeled standard deviation becomes bigger, it is replaced with this value.
 
 };
 

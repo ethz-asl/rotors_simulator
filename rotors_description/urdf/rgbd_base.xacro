@@ -5,6 +5,9 @@
   <!-- Note that whenever possible, values from Realsense D435 were used.
        See Intel Document 337029-004: Intel RealSense TM D400 Series Product Family Datasheet.
        https://www.intel.com/content/dam/support/us/en/documents/emerging-technologies/intel-realsense-technology/Intel-RealSense-D400-Series-Datasheet.pdf
+
+       Here, RGBD camera baselink frame corresponds to the left IR camera center, which is also the camera
+       the sensor is calibrated to in real life and the point cloud is registered to.
   -->
 
   <link name="rgbd_camera/base_link">
@@ -97,6 +100,12 @@
           <baseline>${baseline}</baseline>
           <updateRate>${frame_rate}</updateRate>
           <cameraName>camera_${camera_suffix}</cameraName>
+          <horizontal_fov>${fov}</horizontal_fov>
+ 	  <depthNoiseModelName>D435</depthNoiseModelName>
+ 	  <depthNoiseMinDist>0.02</depthNoiseMinDist>
+ 	  <depthNoiseMaxDist>50.0</depthNoiseMaxDist>
+	  <D435NoiseSubpixelErr>0.25</D435NoiseSubpixelErr> 
+	  <D435MaxStdev>3</D435MaxStdev> 
           <imageTopicName>camera/image_raw</imageTopicName>
           <cameraInfoTopicName>camera/camera_info</cameraInfoTopicName>
           <depthImageTopicName>depth/image_raw</depthImageTopicName>
@@ -132,8 +141,5 @@
     min_range="0.195">
     <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
   </xacro:rgbd_sensor_depth_macro>
-
-
-
 
 </robot>
