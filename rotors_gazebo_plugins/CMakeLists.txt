@@ -276,8 +276,8 @@ list(APPEND targets_to_install rotors_gazebo_imu_plugin)
 add_library(rotors_gazebo_noisydepth_plugin SHARED src/gazebo_noisydepth_plugin.cpp
         src/depth_noise_model.cpp)
 
-# there seems to be no cleaner way to get these plugins..
-# they're path is not part of gazebo_plugins or gazebo_ros_plugins
+# As the depth camera plugins .so's are not part of any cmake accessible library,
+# but the plugin path is path is, we iterate over all paths until plugin folder is found.
 foreach(subdir ${gazebo_dev_LIBRARY_DIRS})
   if (${subdir} MATCHES "gazebo.*plugins")
     set(gazebo_dev_DEPTHCAMERA_LIB ${subdir}/libDepthCameraPlugin.so)

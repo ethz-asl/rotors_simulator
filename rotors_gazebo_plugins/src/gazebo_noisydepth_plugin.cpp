@@ -282,7 +282,7 @@ bool GazeboNoisyDepth::FillDepthImageHelper(
 
   memcpy(dest, toCopyFrom, sizeof(float) * width * height);
 
-  noise_model->ApplyNoise(dest, width, height);
+  noise_model->ApplyNoise(width, height, dest);
 
   return true;
 }

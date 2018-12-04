@@ -13,30 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 #ifndef ROTORS_GAZEBO_PLUGINS_DEPTH_NOISE_MODEL_H
 #define ROTORS_GAZEBO_PLUGINS_DEPTH_NOISE_MODEL_H
 
-#include <random>
 #include <Eigen/Eigen>
+#include <random>
 
 class DepthNoiseModel {
 
  public:
   DepthNoiseModel() :
-      max_depth(1000),
-      min_depth(0.2),
+      max_depth(1000.0f),
+      min_depth(0.2f),
       gen(std::random_device{}()) {
   }
 
-  virtual void ApplyNoise(float *data, int width, int height) = 0;
+  virtual void ApplyNoise(uint32_t width, uint32_t height, float *data) = 0;
 
   float max_depth;  // [m]
   float min_depth;  // [m]  - Values smaller/larger than these two are replaced by NaN
 
  protected:
-  bool InRange(float depth);
+  bool InRange(float depth) const;
 
   const float bad_point = std::numeric_limits<float>::quiet_NaN();
   std::normal_distribution<float> dist;
@@ -48,33 +46,31 @@ class KinectDepthNoiseModel : public DepthNoiseModel {
  public:
   KinectDepthNoiseModel() :
       DepthNoiseModel() {
-
   }
 
-  void ApplyNoise(float *data, int width, int height);
+  void ApplyNoise(uint32_t width, uint32_t height, float *data);
 };
+
 
 class D435DepthNoiseModel : public DepthNoiseModel {
 
  public:
-
   D435DepthNoiseModel() :
       h_fov(M_PI_2),     // Default 90deg for D435
-      baseline(0.05),    // Default 50 mm for D435
-      subpixel_err(0.1), // Default subpixel calibration error
-      max_stdev(3.0),
+      baseline(0.05f),    // Default 50 mm for D435
+      subpixel_err(0.1f), // Default subpixel calibration error
+      max_stdev(3.0f),
       DepthNoiseModel() {
   }
 
-  void ApplyNoise(float *data, int width, int height);
+  void ApplyNoise(uint32_t width, uint32_t height, float *data);
 
   // public params...
   float h_fov;        // [rad]
   float baseline;     // [m]
   float subpixel_err; // [pixel] Calibration error
-  float max_stdev;    // [m] cutoff for distance standard deviation
-  //     - if modeled standard deviation becomes bigger, it is replaced with this value.
-
+  float max_stdev;    // [m] cutoff for distance standard deviation:
+                      //     If modeled standard deviation becomes bigger, it is replaced with this value.
 };
 
 #endif // ROTORS_GAZEBO_PLUGINS_DEPTH_NOISE_MODEL_H
