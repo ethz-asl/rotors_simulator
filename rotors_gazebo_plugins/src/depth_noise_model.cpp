@@ -18,13 +18,13 @@
 
 #include <rotors_gazebo_plugins/depth_noise_model.hpp>
 
-
-inline bool DepthNoiseModel::InRange(const float depth ) const {
+inline bool DepthNoiseModel::InRange(const float depth) const {
   return depth > this->min_depth && depth < this->max_depth;
 }
 
-void D435DepthNoiseModel::ApplyNoise(const uint32_t width, const uint32_t height, float *data) {
-  if(data == nullptr){
+void D435DepthNoiseModel::ApplyNoise(const uint32_t width,
+                                     const uint32_t height, float *data) {
+  if (data == nullptr) {
     return;
   }
 
@@ -38,35 +38,39 @@ void D435DepthNoiseModel::ApplyNoise(const uint32_t width, const uint32_t height
   Eigen::VectorXf rms_noise = (data_vector_map * 1000.0).array().square() * multiplier;
   Eigen::VectorXf noise = rms_noise.array().square();
 
-  // Sample noise for each pixel and transform variance according to error at this depth.
-  for (int i = 0; i < width * height; i++) {
+  // Sample noise for each pixel and transform variance according to error at
+  // this depth.
+  for (int i = 0; i < width * height; ++i) {
     if (InRange(data_vector_map[i])) {
-      data_vector_map[i] += this->dist(this->gen) * std::min(((float) noise(i)), max_stdev);
+      data_vector_map[i] +=
+          this->dist(this->gen) * std::min(((float)noise(i)), max_stdev);
     } else {
       data_vector_map[i] = this->bad_point;
     }
   }
 }
 
-void KinectDepthNoiseModel::ApplyNoise(const uint32_t width, const uint32_t height, float *data) {
-  if(data == nullptr){
+void KinectDepthNoiseModel::ApplyNoise(const uint32_t width,
+                                       const uint32_t height, float *data) {
+  if (data == nullptr) {
     return;
   }
 
-  // Axial noise model from https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=6375037,
-  // Nguyen, Izadi & Lovell: "Modeling Kinect Sensor Noise for Improved 3D Reconstrucion and Tracking", 3DIM/3DPVT, 2012.
+  // Axial noise model from
+  // https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=6375037,
+  // Nguyen, Izadi & Lovell: "Modeling Kinect Sensor Noise for Improved 3D
+  // Reconstrucion and Tracking", 3DIM/3DPVT, 2012.
   // We are using the 10-60 Degree model as an approximation.
   Eigen::Map<Eigen::VectorXf> data_vector_map(data, width * height);
   Eigen::VectorXf var_noise = 0.0012f + 0.0019f * (data_vector_map.array() - 0.4f).array().square();
 
-  // Sample noise for each pixel and transform variance according to error at this depth.
-  for (int i = 0; i < width * height; i++) {
+  // Sample noise for each pixel and transform variance according to error at
+  // this depth.
+  for (int i = 0; i < width * height; ++i) {
     if (InRange(data_vector_map[i])) {
       data_vector_map[i] += this->dist(this->gen) * var_noise(i);
     } else {
       data_vector_map[i] = this->bad_point;
     }
   }
-
 }
-
