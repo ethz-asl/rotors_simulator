@@ -168,7 +168,6 @@ void GazeboNoisyDepth::Advertise() {
   this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
 }
 
-
 void GazeboNoisyDepth::DepthImageConnect() {
   ++this->depth_image_connect_count_;
   this->parentSensor->SetActive(true);
@@ -181,7 +180,6 @@ void GazeboNoisyDepth::DepthImageDisconnect() {
 void GazeboNoisyDepth::DepthInfoConnect() {
   ++this->depth_info_connect_count_;
 }
-
 
 void GazeboNoisyDepth::DepthInfoDisconnect() {
   --this->depth_info_connect_count_;
