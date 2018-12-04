@@ -19,142 +19,91 @@
  *
 */
 /*
- * Desc: A dynamic controller plugin that publishes ROS image_raw camera_info topic for generic camera sensor.
+ * Desc: A dynamic controller plugin that publishes ROS image_raw camera_info
+ * topic for generic camera sensor.
  * Author: John Hsu
  * Date: 24 Sept 2008
  */
 
-#ifndef ROTORS_GAZEBO_ROS_OPENNI_KINECT_HH
-#define ROTORS_GAZEBO_ROS_OPENNI_KINECT_HH
+#ifndef ROTORS_GAZEBO_PLUGINS_GAZEBO_NOISYDEPTH_PLUGIN_H
+#define ROTORS_GAZEBO_PLUGINS_GAZEBO_NOISYDEPTH_PLUGIN_H
 
-// ros stuff
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
-#include <ros/advertise_options.h>
-
-// ros messages stuff
-#include <sensor_msgs/PointCloud2.h>
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/CameraInfo.h>
-#include <sensor_msgs/fill_image.h>
-#include <std_msgs/Float64.h>
-#include <image_transport/image_transport.h>
-
-// gazebo stuff
-#include <sdf/Param.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/transport/TransportTypes.hh>
-#include <gazebo/msgs/MessageTypes.hh>
-#include <gazebo/common/Time.hh>
-#include <gazebo/sensors/SensorTypes.hh>
-#include <gazebo/plugins/DepthCameraPlugin.hh>
-#include <rotors_gazebo_plugins/depth_noise_model.hpp>
-
-// dynamic reconfigure stuff
-#include <gazebo_plugins/GazeboRosOpenniKinectConfig.h>
 #include <dynamic_reconfigure/server.h>
-
-// boost stuff
 #include <boost/thread/mutex.hpp>
 
-// camera stuff
+#include <gazebo_plugins/GazeboRosOpenniKinectConfig.h>
 #include <gazebo_plugins/gazebo_ros_camera_utils.h>
+#include <gazebo/common/Time.hh>
+#include <gazebo/msgs/MessageTypes.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/plugins/DepthCameraPlugin.hh>
+#include <gazebo/sensors/SensorTypes.hh>
+#include <gazebo/transport/TransportTypes.hh>
+
+#include <image_transport/image_transport.h>
+#include <ros/advertise_options.h>
+#include <ros/callback_queue.h>
+#include <ros/ros.h>
+
+#include <sdf/Param.hh>
+
+#include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/fill_image.h>
+#include <std_msgs/Float64.h>
+
+#include <rotors_gazebo_plugins/depth_noise_model.hpp>
 
 namespace gazebo {
 class GazeboNoisyDepth : public DepthCameraPlugin, GazeboRosCameraUtils {
-  /// \brief Constructor
-  /// \param parent The parent entity, must be a Model or a Sensor
  public:
   GazeboNoisyDepth();
 
-  /// \brief Destructor
- public:
   ~GazeboNoisyDepth();
 
   /// \brief Load the plugin
   /// \param take in SDF root element
- public:
   virtual void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
 
-  /// \brief Advertise point cloud and depth image
- public:
+  /// \brief Advertise depth image
   virtual void Advertise();
 
-  /// \brief Update the controller
+  virtual void OnNewDepthFrame(const float *_image, unsigned int _width,
+                               unsigned int _height, unsigned int _depth,
+                               const std::string &_format);
+
  protected:
-  virtual void OnNewDepthFrame(const float *_image,
-                               unsigned int _width, unsigned int _height,
-                               unsigned int _depth, const std::string &_format);
+  virtual void OnNewImageFrame(const unsigned char *_image, unsigned int _width,
+                               unsigned int _height, unsigned int _depth,
+                               const std::string &_format);
 
-  /// \brief Update the controller
- protected:
-  virtual void OnNewImageFrame(const unsigned char *_image,
-                               unsigned int _width, unsigned int _height,
-                               unsigned int _depth, const std::string &_format);
-
-
-  /// \brief push depth image data into ros topic
- private:
-  void FillDepthImage(const float *_src);
-
-
-  /// \brief Keep track of number of connctions for point clouds
- private:
-  int depth_image_connect_count_;
  private:
   void DepthImageConnect();
- private:
   void DepthImageDisconnect();
-
- private:
-  bool FillDepthImageHelper(sensor_msgs::Image &image_msg,
-                            uint32_t height, uint32_t width,
-                            uint32_t step, void *data_arg);
-
- private:
-  std::unique_ptr<DepthNoiseModel> noise_model;
-  /// \brief A pointer to the ROS node.  A node will be instantiated if it does not exist.
- private:
-  ros::Publisher depth_image_pub_;
-
- private:
-  sensor_msgs::Image depth_image_msg_;
-
-  /// \brief Minimum range of the point cloud
- private:
-  double depth_cutoff_min_;
-  /// \brief Maximum range of the point cloud
- private:
-  double depth_cutoff_max_;
-
-
-  /// \brief image where each pixel contains the depth data
- private:
-  std::string depth_image_topic_name_;
- private:
-  common::Time depth_sensor_update_time_;
-
-  // overload with our own
- private:
-  std::string depth_image_camera_info_topic_name_;
- private:
-  int depth_info_connect_count_;
- private:
   void DepthInfoConnect();
- private:
   void DepthInfoDisconnect();
- private:
-  common::Time last_depth_image_camera_info_update_time_;
- protected:
-  ros::Publisher depth_image_camera_info_pub_;
+  void FillDepthImage(const float *_src);
+  bool FillDepthImageHelper(sensor_msgs::Image &image_msg, uint32_t height,
+                            uint32_t width, uint32_t step, void *data_arg);
 
-  using GazeboRosCameraUtils::PublishCameraInfo;
- protected:
   virtual void PublishCameraInfo();
 
- private:
   event::ConnectionPtr load_connection_;
-};
+  std::unique_ptr<DepthNoiseModel> noise_model;
 
+  ros::Publisher depth_image_pub_;
+  ros::Publisher depth_image_camera_info_pub_;
+
+  int depth_image_connect_count_;
+  int depth_info_connect_count_;
+
+  std::string depth_image_topic_name_;
+  std::string depth_image_camera_info_topic_name_;
+
+  common::Time depth_sensor_update_time_;
+  common::Time last_depth_image_camera_info_update_time_;
+  sensor_msgs::Image depth_image_msg_;
+};
 }
-#endif
+#endif  // ROTORS_GAZEBO_PLUGINS_GAZEBO_NOISYDEPTH_PLUGIN_H
