@@ -84,8 +84,11 @@ class GazeboNoisyDepth : public DepthCameraPlugin, GazeboRosCameraUtils {
   void DepthInfoConnect();
   void DepthInfoDisconnect();
   void FillDepthImage(const float *_src);
-  bool FillDepthImageHelper(sensor_msgs::Image &image_msg, uint32_t height,
-                            uint32_t width, uint32_t step, void *data_arg);
+  bool FillDepthImageHelper(const uint32_t rows_arg,
+                            const uint32_t cols_arg,
+                            const uint32_t step_arg,
+                            const float *data_arg,
+                            sensor_msgs::Image *image_msg);
 
   virtual void PublishCameraInfo();
 
