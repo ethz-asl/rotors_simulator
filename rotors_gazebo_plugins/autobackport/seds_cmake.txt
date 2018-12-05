@@ -1,0 +1,5 @@
+# find_packages
+s/gazebo_plugins/cmake_modules/g
+s/find_package\(gazebo_dev /find_package\(gazebo /g
+s/DEPENDS Eigen gazebo_dev octomap OpenCV/DEPENDS eigen gazebo octomap opencv/g
+s/\$\{catkin\_LIBRARIES\}/\$\{catkin\_LIBRARIES\} \$\{GAZEBO\_LIBRARIES\}/g
