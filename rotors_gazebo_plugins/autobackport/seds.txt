@@ -19,6 +19,7 @@ s/([^q](->|\.))X(\(\))/\1x/g
 s/([^q](->|\.))Y(\(\))/\1y/g
 s/([^q](->|\.))Z(\(\))/\1z/g
 s/([^q](->|\.))Rot(\(\))/\1rot/g
+s/([^q](->|\.))Pos(\(\))/\1pos/g
 
 #[^q] is for the one time we modify a quaternion that we don't want to change
 
