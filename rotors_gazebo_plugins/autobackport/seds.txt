@@ -1,8 +1,9 @@
 # ignition math namespaces
-s/( |^)ignition::math::Vector3d/\1math::Vector3/g
-s/( |^)ignition::math::Quaterniond/\1math::Quaternion/g
-s/( |^)octoignition::math::Vector3d/\octomath::Vector3/g
-s/( |^)ignition::ignition::math::Vector3d/\1ignition::math::Vector3d/g
+s/( |^|<|\()ignition::math::Vector3d/\1math::Vector3/g
+s/( |^|<|\()ignition::math::Pose3d/\1math::Pose/g
+s/( |^|<|\()ignition::math::Quaterniond/\1math::Quaternion/g
+s/( |^|<|\()octoignition::math::Vector3d/\octomath::Vector3/g
+s/( |^|<|\()ignition::ignition::math::Vector3d/\1ignition::math::Vector3d/g
 
 #removals 
 s/event::Events::DisconnectWorldUpdateBegin\(.*?\)\;//g
@@ -14,10 +15,10 @@ s/(#include +)"ignition\/math\/Vector3.hh"/\1"gazebo\/math\/Vector3.hh"/g
 s/std::dynamic_pointer_cast</boost::dynamic_pointer_cast</g
 
 #vector members
-s/[^q](->|\.)X(\(\))/\1x/g
-s/[^q](->|\.)Y(\(\))/\1y/g
-s/[^q](->|\.)Z(\(\))/\1z/g
-s/[^q](->|\.)Rot(\(\))/\1rot/g
+s/([^q](->|\.))X(\(\))/\1x/g
+s/([^q](->|\.))Y(\(\))/\1y/g
+s/([^q](->|\.))Z(\(\))/\1z/g
+s/([^q](->|\.))Rot(\(\))/\1rot/g
 
 #[^q] is for the one time we modify a quaternion that we don't want to change
 
