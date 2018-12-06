@@ -112,10 +112,20 @@ if (NOT NO_ROS)
 endif()
 
 
-message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
+message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}" )
+
 
 find_package(Eigen REQUIRED)
 find_package(gazebo_dev REQUIRED)
+
+if(${gazebo_VERSION_MAJOR} LESS 9)
+  message(WARN "GAZEBO Version ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}")
+  message(WARN "GAZEBO older than v9 detected. Autobackporting source files")
+
+  execute_process(COMMAND "sh" "${CMAKE_CURRENT_SOURCE_DIR}/autobackport/command.sh" WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" RESULT_VARIABLE git_result)
+
+endif()
+
 find_package(OpenCV REQUIRED)
 find_package(Glog REQUIRED)
 link_directories(${GAZEBO_LIBRARY_DIRS})
