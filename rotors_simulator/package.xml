@@ -21,15 +21,15 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
-  <depend>rotors_comm</depend>
-  <depend>rotors_control</depend>
-  <depend>rotors_description</depend>
-  <depend>rotors_evaluation</depend>
-  <depend>rotors_gazebo</depend>
-  <depend>rotors_gazebo_plugins</depend>
-  <depend>rotors_hil_interface</depend>
-  <depend>rotors_joy_interface</depend>
-  <depend>rqt_rotors</depend>
+  <exec_depend>rotors_comm</exec_depend>
+  <exec_depend>rotors_control</exec_depend>
+  <exec_depend>rotors_description</exec_depend>
+  <exec_depend>rotors_evaluation</exec_depend>
+  <exec_depend>rotors_gazebo</exec_depend>
+  <exec_depend>rotors_gazebo_plugins</exec_depend>
+  <exec_depend>rotors_hil_interface</exec_depend>
+  <exec_depend>rotors_joy_interface</exec_depend>
+  <exec_depend>rqt_rotors</exec_depend>
 
   <export>
     <metapackage/>
