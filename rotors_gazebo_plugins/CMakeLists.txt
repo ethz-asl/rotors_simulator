@@ -209,7 +209,7 @@ link_libraries(mav_msgs)
 
 if (NOT NO_ROS)
 
-  if(gazebo_dev_FOUND)
+  if(${gazebo_dev_FOUND})
     catkin_package(
       INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
       LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
