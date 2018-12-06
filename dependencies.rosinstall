@@ -1,5 +1,5 @@
 - git: {local-name: mav_comm, uri: 'https://github.com/ethz-asl/mav_comm.git'}
-- git: {local-name: mavros, uri: 'https://github.com/ethz-asl/mavros.git'}
+- git: {local-name: mavros, uri: 'https://github.com/ethz-asl/mavros.git', version:0880a97575f8c6b705096aca17ca04c6c6dcfc02}
 - git: {local-name: glog_catkin, uri: 'https://github.com/ethz-asl/glog_catkin.git'}
 - git: {local-name: mav_tools, uri: 'git@github.com:ethz-asl/mav_tools.git'}
 - git: {local-name: gps_umd, uri: 'https://github.com/swri-robotics/gps_umd.git'}
