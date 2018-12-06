@@ -22,8 +22,12 @@ project(rotors_gazebo_plugins)
 # ========================== SET DEFAULTS FOR PASSED-IN VARIABLES =============================== #
 # =============================================================================================== #
 
-if(NOT DEFINED BUILD_MAVLINK_INTERFACE_PLUGIN)
-  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN variable not provided, setting to FALSE.")
+find_package(mavlink)
+if(${mavlink_FOUND})
+  message(STATUS " mavlink found, building MAVLINK_INTERFACE_PLUGIN.")
+  set(BUILD_MAVLINK_INTERFACE_PLUGIN TRUE)
+else()
+  message(STATUS " mavlink not found, not building MAVLINK_INTERFACE_PLUGIN.")
   set(BUILD_MAVLINK_INTERFACE_PLUGIN FALSE)
 endif()
 
@@ -112,7 +116,8 @@ message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}" )
 
 
 find_package(Eigen REQUIRED)
-find_package(gazebo_dev REQUIRED)
+find_package(gazebo QUIET)
+find_package(gazebo_dev QUIET)
 
 if(${gazebo_VERSION_MAJOR} LESS 9)
   message(WARN "GAZEBO Version ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}")
@@ -203,13 +208,25 @@ link_libraries(mav_msgs)
 # ============================================== #
 
 if (NOT NO_ROS)
-  catkin_package(
-    INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
-    LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
-    CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf
-    DEPENDS Eigen gazebo_dev octomap OpenCV
-    #CFG_EXTRAS rotors_gazebo_plugins.cmake
-  )
+
+  if(${gazebo_dev_FOUND})
+    catkin_package(
+      INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
+      LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
+      CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf
+      DEPENDS Eigen gazebo_dev octomap OpenCV
+      #CFG_EXTRAS rotors_gazebo_plugins.cmake
+    )
+  else()
+    catkin_package(
+      INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
+      LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
+      CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp rotors_comm rotors_control std_srvs tf
+      DEPENDS Eigen gazebo octomap OpenCV
+      #CFG_EXTRAS rotors_gazebo_plugins.cmake
+    )
+
+  endif()
 endif()
 
 
@@ -283,22 +300,26 @@ endif()
 list(APPEND targets_to_install rotors_gazebo_imu_plugin)
 
 #========================================= NoisyDepth PLUGIN ======================================//
-add_library(rotors_gazebo_noisydepth_plugin SHARED src/gazebo_noisydepth_plugin.cpp
-        src/depth_noise_model.cpp)
+if(${gazebo_dev_FOUND})
+  add_library(rotors_gazebo_noisydepth_plugin SHARED src/gazebo_noisydepth_plugin.cpp
+          src/depth_noise_model.cpp)
 
-# As the depth camera plugins .so's are not part of any cmake accessible library,
-# but the plugin path is path is, we iterate over all paths until plugin folder is found.
-foreach(subdir ${gazebo_dev_LIBRARY_DIRS})
-  if (${subdir} MATCHES "gazebo.*plugins")
-    set(gazebo_dev_DEPTHCAMERA_LIB ${subdir}/libDepthCameraPlugin.so)
+  # As the depth camera plugins .so's are not part of any cmake accessible library,
+  # but the plugin path is path is, we iterate over all paths until plugin folder is found.
+  foreach(subdir ${gazebo_dev_LIBRARY_DIRS})
+    if (${subdir} MATCHES "gazebo.*plugins")
+      set(gazebo_dev_DEPTHCAMERA_LIB ${subdir}/libDepthCameraPlugin.so)
+    endif()
+  endforeach()
+
+  target_link_libraries(rotors_gazebo_noisydepth_plugin ${catkin_LIBRARIES} ${gazebo_dev_DEPTHCAMERA_LIB})
+  if (NOT NO_ROS)
+    add_dependencies(rotors_gazebo_noisydepth_plugin ${catkin_EXPORTED_TARGETS})
   endif()
-endforeach()
-
-target_link_libraries(rotors_gazebo_noisydepth_plugin ${catkin_LIBRARIES} ${gazebo_dev_DEPTHCAMERA_LIB})
-if (NOT NO_ROS)
-  add_dependencies(rotors_gazebo_noisydepth_plugin ${catkin_EXPORTED_TARGETS})
+  list(APPEND targets_to_install rotors_gazebo_noisydepth_plugin)
+else()
+  message(STATUS "Gazebo version too old (no gazebo_dev package), not building gazebo_noisydepth_plugin.cpp.")
 endif()
-list(APPEND targets_to_install rotors_gazebo_noisydepth_plugin)
 
 #======================================== LIDAR PLUGIN ==========================================//
 if(${gazebo_VERSION_MAJOR} GREATER 4)
@@ -422,7 +443,7 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   target_include_directories(rotors_gazebo_optical_flow_plugin PUBLIC ${OpticalFlow_INCLUDE_DIRS})
   target_link_libraries(rotors_gazebo_optical_flow_plugin
     ${catkin_LIBRARIES}
-    
+
     ${Boost_LIBRARIES}
     ${OpticalFlow_LIBRARIES})
   if (NOT NO_ROS)
