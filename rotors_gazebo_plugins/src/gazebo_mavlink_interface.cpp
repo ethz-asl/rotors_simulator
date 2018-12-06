@@ -121,8 +121,14 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
               gztopic_[index] = "~/"+ model_->GetName() + channel->Get<std::string>("gztopic");
             else
               gztopic_[index] = "control_position_gztopic_" + std::to_string(index);
+	    #if (GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4) || GAZEBO_MAJOR_VERSION >= 8
+              /// only gazebo 7.4 and above support Any
               joint_control_pub_[index] = node_handle_->Advertise<gazebo::msgs::Any>(
                 gztopic_[index]);
+            #else
+              joint_control_pub_[index] = node_handle_->Advertise<gazebo::msgs::GzString>(
+                gztopic_[index]);
+            #endif
           }
 
           if (channel->HasElement("joint_name"))
@@ -1031,9 +1037,17 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         }
         else if (joint_control_type_[i] == "position_gztopic")
         {
-          gazebo::msgs::Any m;
-          m.set_type(gazebo::msgs::Any_ValueType_DOUBLE);
-          m.set_double_value(target);
+          #if (GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4) || GAZEBO_MAJOR_VERSION >= 8
+            /// only gazebo 7.4 and above support Any
+            gazebo::msgs::Any m;
+            m.set_type(gazebo::msgs::Any_ValueType_DOUBLE);
+            m.set_double_value(target);
+          #else
+            std::stringstream ss;
+            gazebo::msgs::GzString m;
+            ss << target;
+            m.set_data(ss.str());
+          #endif
 
           joint_control_pub_[i]->Publish(m);
         }
