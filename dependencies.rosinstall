@@ -3,3 +3,4 @@
 - git: {local-name: glog_catkin, uri: 'https://github.com/ethz-asl/glog_catkin.git'}
 - git: {local-name: mav_tools, uri: 'git@github.com:ethz-asl/mav_tools.git'}
 - git: {local-name: gps_umd, uri: 'https://github.com/swri-robotics/gps_umd.git'}
+- git: {local-name: geographic_info, uri: 'git@github.com:ros-geographic-info/geographic_info.git'}
