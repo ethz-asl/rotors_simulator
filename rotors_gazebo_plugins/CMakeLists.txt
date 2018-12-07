@@ -120,10 +120,18 @@ if (NOT GAZEBO_DEV_FOUND)
 endif()
 
 if(${gazebo_VERSION_MAJOR} LESS 9)
-  message(WARN "GAZEBO Version ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}")
-  message(WARN "GAZEBO older than v9 detected. Autobackporting source files")
+  if(${gazebo_VERSION_MAJOR} LESS 7)
+    message(WARN "GAZEBO Version ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}")
+    message(WARN "GAZEBO older than v9 detected. Autobackporting source files")
 
-  execute_process(COMMAND "sh" "${CMAKE_CURRENT_SOURCE_DIR}/autobackport/command.sh" WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" RESULT_VARIABLE git_result)
+    execute_process(COMMAND "sh" "${CMAKE_CURRENT_SOURCE_DIR}/autobackport/commandpre7.sh" WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" RESULT_VARIABLE git_result)
+
+  else()
+    message(WARN "GAZEBO Version ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}"
+    message(WARN "GAZEBO older than v9 detected. Autobackporting source files")
+
+    execute_process(COMMAND "sh" "${CMAKE_CURRENT_SOURCE_DIR}/autobackport/command.sh" WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" RESULT_VARIABLE git_result)
+  endif()
 
 endif()
 
