@@ -382,15 +382,16 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
 
   endif()
 
-  if(NOT MAVLINK_HEADERS_FOUND)
-    message(FATAL_ERROR "MAVLink headers were not found. They are required for building MavlinkInterfacePlugin.")
+  if(MAVLINK_HEADERS_FOUND)
+   # Note that this library includes TWO .cpp files.
+   add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/geo_mag_declination.cpp)
+   target_link_libraries(rotors_gazebo_mavlink_interface ${target_linking_LIBRARIES}  ${mav_msgs})
+   #add_dependencies(rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
+   list(APPEND targets_to_install rotors_gazebo_mavlink_interface)
+  else()
+    message(ERROR "MAVLink headers were not found. They are required for building MavlinkInterfacePlugin. Not building MavlinkInterfacePlugin.")
   endif()
 
-  # Note that this library includes TWO .cpp files.
-  add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/geo_mag_declination.cpp)
-  target_link_libraries(rotors_gazebo_mavlink_interface ${target_linking_LIBRARIES}  ${mav_msgs})
-  #add_dependencies(rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
-  list(APPEND targets_to_install rotors_gazebo_mavlink_interface)
 endif()
 
 #==================================== MOTOR MODEL PLUGIN ========================================//
