@@ -1,6 +1,7 @@
 # ignition math namespaces
 s/( |^|<|\()ignition::math::Vector3d/\1math::Vector3/g
 s/( |^|<|\()ignition::math::Pose3d/\1math::Pose/g
+s/( |^|<|\()ignition::math::clamp/\1math::clamp/g
 s/( |^|<|\()ignition::math::Quaterniond/\1math::Quaternion/g
 s/( |^|<|\()octoignition::math::Vector3d/\octomath::Vector3/g
 s/( |^|<|\()ignition::ignition::math::Vector3d/\1ignition::math::Vector3d/g
