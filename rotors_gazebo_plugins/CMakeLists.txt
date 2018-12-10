@@ -119,7 +119,7 @@ if (NOT GAZEBO_DEV_FOUND)
   find_package(gazebo REQUIRED)
 endif()
 
-if(${gazebo_VERSION_MAJOR} LESS 10)
+if(${gazebo_VERSION_MAJOR} LESS 9)
   if(${gazebo_VERSION_MAJOR} LESS 7)
     message(WARN "GAZEBO Version ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}")
     message(WARN "GAZEBO older than v9 detected. Autobackporting source files")
