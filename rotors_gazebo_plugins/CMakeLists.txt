@@ -234,7 +234,7 @@ if (NOT NO_ROS)
       DEPENDS Eigen octomap OpenCV
       #CFG_EXTRAS rotors_gazebo_plugins.cmake
     )
-    set(catkin_LIBRARIES ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+    set(target_linking_LIBRARIES ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   endif()
 endif()
 
