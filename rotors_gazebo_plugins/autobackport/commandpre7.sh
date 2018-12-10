@@ -1,3 +1,4 @@
+#/bin/bash
 if [[ "$OSTYPE" == "darwin"* ]]; then
   find . -type f -name "*.cpp" | xargs sed -i.bak -E -f autobackport/seds_pre7.txt
   find . -type f -name "*.h" | xargs sed -i.bak -E -f autobackport/seds_pre7.txt
