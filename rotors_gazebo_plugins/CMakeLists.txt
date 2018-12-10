@@ -114,15 +114,10 @@ endif()
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}" )
 
 find_package(Eigen REQUIRED)
-<<<<<<< HEAD
-find_package(gazebo QUIET)
-find_package(gazebo_dev QUIET)
-=======
 find_package(gazebo_dev QUIET)
 if (NOT GAZEBO_DEV_FOUND)
   find_package(gazebo REQUIRED)
 endif()
->>>>>>> feature/gazebo9-autobackport
 
 if(${gazebo_VERSION_MAJOR} LESS 9)
   if(${gazebo_VERSION_MAJOR} LESS 7)
@@ -462,12 +457,7 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   add_library(rotors_gazebo_optical_flow_plugin SHARED src/external/gazebo_optical_flow_plugin.cpp)
   target_include_directories(rotors_gazebo_optical_flow_plugin PUBLIC ${OpticalFlow_INCLUDE_DIRS})
   target_link_libraries(rotors_gazebo_optical_flow_plugin
-<<<<<<< HEAD
-    ${catkin_LIBRARIES}
-
-=======
     ${target_linking_LIBRARIES}
->>>>>>> feature/gazebo9-autobackport
     ${Boost_LIBRARIES}
     ${OpticalFlow_LIBRARIES})
   if (NOT NO_ROS)
