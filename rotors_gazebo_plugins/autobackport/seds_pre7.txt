@@ -27,8 +27,8 @@ s/([^q](->|\.))Pos(\(\))/\1pos/g
 #special function calls (manually added)
 s/(->|\.)Physics(\()/\1GetPhysicsEngine\2/g
 s/(->|\.)Gravity(\()/\1GetPhysicsEngine\(\)->GetGravity\2/g
-s/(->|\.)EntityByName(\(.*?name)/\1GetByName\2/g
-s/(->|\.)EntityByName(\(.*?id)/\1GetEntity\2/g
+s/(->|\.)EntityByName(\([^n]*name)/\1GetByName\2/g
+s/(->|\.)EntityByName(\([^i]*id)/\1GetEntity\2/g
 s/(->|\.)Position(\(0)/\1GetAngle(0).Radian(/g
 
 #function calls! (automatically generated)
