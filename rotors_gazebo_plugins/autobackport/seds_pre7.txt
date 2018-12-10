@@ -13,7 +13,7 @@ s/event::Events::DisconnectWorldUpdateBegin\(.*\)\;//g
 s/(#include +)"ignition\/math\/Vector3.hh"/\1"gazebo\/math\/Vector3.hh"/g
 
 # pointer casting
-#Gazebo pre 7 s/std::dynamic_pointer_cast</boost::dynamic_pointer_cast</g
+s/std::dynamic_pointer_cast</boost::dynamic_pointer_cast</g
 
 #vector members
 s/([^q](->|\.))X(\(\))/\1x/g
@@ -33,7 +33,7 @@ s/(->|\.)EntityByName(\(.*id)/\1GetEntity\2/g
 s/(->|\.)Position(\(0)/\1GetAngle(0).Radian(/g
 
 #function calls! (automatically generated)
-#s/(->|\.)Altitude(\()/\1GetAltitude\2/g
+s/(->|\.)Altitude(\()/\1GetAltitude\2/g
 s/(->|\.)AvgFPS(\()/\1GetAvgFPS\2/g
 s/(->|\.)Camera(\()/\1GetCamera\2/g
 s/(->|\.)CoG(\()/\1GetCoG\2/g
@@ -48,10 +48,10 @@ s/(->|\.)Inverse(\()/\1GetInverse\2/g
 s/(->|\.)LaserShape(\()/\1GetLaserShape\2/g
 s/(->|\.)LastMeasurementTime(\()/\1GetLastMeasurementTime\2/g
 s/(->|\.)LastRenderWallTime(\()/\1GetLastRenderWallTime\2/g
-#s/(->|\.)Latitude(\()/\1GetLatitude\2/g
+s/(->|\.)Latitude(\()/\1GetLatitude\2/g
 s/(->|\.)Length(\()/\1GetLength\2/g
 s/(->|\.)Link(\()/\1GetLink\2/g
-#s/(->|\.)Longitude(\()/\1GetLongitude\2/g
+s/(->|\.)Longitude(\()/\1GetLongitude\2/g
 s/(->|\.)ParentName(\()/\1GetParentName\2/g
 s/(->|\.)Range(\()/\1GetRange\2/g
 s/(->|\.)RangeMax(\()/\1GetRangeMax\2/g
@@ -61,7 +61,7 @@ s/(->|\.)RelativeLinearAccel(\()/\1GetRelativeLinearAccel\2/g
 s/(->|\.)RelativeLinearVel(\()/\1GetRelativeLinearVel\2/g
 s/(->|\.)RenderRate(\()/\1GetRenderRate\2/g
 s/(->|\.)SimTime(\()/\1GetSimTime\2/g
-#s/(->|\.)SetPosition(\()/\1SetAngle\2/g
+s/(->|\.)SetPosition(\()/\1SetAngle\2/g
 s/(->|\.)WorldAngularVel(\()/\1GetWorldAngularVel\2/g
 s/(->|\.)WorldCoGPose(\()/\1GetWorldCoGPose\2/g
 s/(->|\.)WorldLinearVel(\()/\1GetWorldLinearVel\2/g

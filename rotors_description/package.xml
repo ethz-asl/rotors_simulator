@@ -1,4 +1,4 @@
-<package>
+<package format="2">
   <name>rotors_description</name>
   <version>2.1.1</version>
   <description>The rotors_description package provides URDF models of the AscTec multicopters.</description>
