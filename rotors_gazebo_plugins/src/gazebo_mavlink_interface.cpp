@@ -958,54 +958,20 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
     }
 
     // set rotor speeds, controller targets
-
-    // Interpret flag 1 as rotor speeds, controller targets for VoliroX system
-    // (12 commands)
-    if (controls.flags == 1) {
-      input_reference_.resize(kNOutMax);
-      for (int i = 0; i < 12; i++) {
-        if (armed) {
-          input_reference_[i] =
-              (controls.controls[input_index_[i]] + input_offset_[i]) *
-                  input_scaling_[i] +
-              zero_position_armed_[i];
-        } else {
-          input_reference_[i] = zero_position_disarmed_[i];
-        }
-      }
-      received_first_reference_ = true;
-    }
-    // Interpret flag 2 as a servo position message for voliroX system
-    // (indices 12 - 17).
-    else if (controls.flags == 2) {
-      for (int i = 12; i < 18; i++) {
-        if (armed) {
-          input_reference_[i] =
-              (controls.controls[input_index_[i - 12]] + input_offset_[i]) *
-                  input_scaling_[i] +
-              zero_position_armed_[i];
-        } else {
-          input_reference_[i] = zero_position_disarmed_[i];
-        }
+    input_reference_.resize(kNOutMax);
+    for (int i = 0; i < input_reference_.size(); i++) {
+      if (armed) {
+        input_reference_[i] = (controls.controls[input_index_[i]] + input_offset_[i])
+          * input_scaling_[i] + zero_position_armed_[i];
+        // if (joints_[i])
+        //   gzerr << i << " : " << input_index_[i] << " : " << controls.controls[input_index_[i]] << " : " << input_reference_[i] << "\n";
+      } else {
+        input_reference_[i] = zero_position_disarmed_[i];
       }
     }
 
-    // Set rotor speeds, controller targets for standard system.
-    else {
-      input_reference_.resize(kNOutMax);
-      for (int i = 0; i < kNOutMax; i++) {
-        if (armed) {
-          input_reference_[i] =
-              (controls.controls[input_index_[i]] + input_offset_[i]) *
-                  input_scaling_[i] +
-              zero_position_armed_[i];
-        } else {
-          input_reference_[i] = zero_position_disarmed_[i];
-        }
-      }
-      received_first_reference_ = true;
-    }
-      break;
+    received_first_reference_ = true;
+    break;
   }
 }
 
