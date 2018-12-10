@@ -2,8 +2,8 @@
 Changelog for package rotors_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.0 (2018-12-10)
+------------------
 * fixed xmlns:xacro link
 * switch to xacro from xacro.py
 * switch to package format 2

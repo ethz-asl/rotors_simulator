@@ -2,8 +2,8 @@
 Changelog for package rotors_hil_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.0 (2018-12-10)
+------------------
 * Merge pull request `#430 <https://github.com/ethz-asl/rotors_simulator/issues/430>`_ from ethz-asl/fix/hil_eigen
   Fix compile error with new Eigen on implicit Eigen typecasts.
 * Fix compile error with new Eigen on implicit Eigen typecasts.

@@ -2,8 +2,8 @@
 Changelog for package rqt_rotors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.0 (2018-12-10)
+------------------
 * switch to package format 2
 * Merge pull request `#411 <https://github.com/ethz-asl/rotors_simulator/issues/411>`_ from ethz-asl/fix/hil_gui_element_access
   Fixing GUI element access in rqt_rotors

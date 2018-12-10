@@ -2,8 +2,8 @@
 Changelog for package rotors_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.0 (2018-12-10)
+------------------
 * fixed xmlns:xacro link
 * switch to package format 2
 * Merge pull request `#529 <https://github.com/ethz-asl/rotors_simulator/issues/529>`_ from ethz-asl/feature/gazebo9-noisydepth

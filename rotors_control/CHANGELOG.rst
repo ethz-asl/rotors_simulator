@@ -2,8 +2,8 @@
 Changelog for package rotors_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.0 (2018-12-10)
+------------------
 * switch to package format 2
 * switch to Eigen3 from Eigen
 * Merge pull request `#466 <https://github.com/ethz-asl/rotors_simulator/issues/466>`_ from ethz-asl/fix/lee_position_controller_nodehandle

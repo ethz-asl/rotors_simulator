@@ -2,8 +2,8 @@
 Changelog for package rotors_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.0 (2018-12-10)
+------------------
 * Major changes in CMakeLists and package definition for Gazebo version compatibility
 * Code updated to Gazebo9 API
 * Automatic backport script added for pre-9 compatibility
