@@ -6,7 +6,7 @@ s/( |^|<|\()octoignition::math::Vector3d/\octomath::Vector3/g
 s/( |^|<|\()ignition::ignition::math::Vector3d/\1ignition::math::Vector3d/g
 
 #removals 
-s/event::Events::DisconnectWorldUpdateBegin\(.*?\)\;//g
+s/event::Events::DisconnectWorldUpdateBegin\([^\)]*\)\;//g
 
 # includes
 s/(#include +)"ignition\/math\/Vector3.hh"/\1"gazebo\/math\/Vector3.hh"/g
@@ -60,6 +60,7 @@ s/(->|\.)RelativeLinearAccel(\()/\1GetRelativeLinearAccel\2/g
 s/(->|\.)RelativeLinearVel(\()/\1GetRelativeLinearVel\2/g
 s/(->|\.)RenderRate(\()/\1GetRenderRate\2/g
 s/(->|\.)SimTime(\()/\1GetSimTime\2/g
+#s/(->|\.)SetPosition(\()/\1SetAngle\2/g
 s/(->|\.)WorldAngularVel(\()/\1GetWorldAngularVel\2/g
 s/(->|\.)WorldCoGPose(\()/\1GetWorldCoGPose\2/g
 s/(->|\.)WorldLinearVel(\()/\1GetWorldLinearVel\2/g

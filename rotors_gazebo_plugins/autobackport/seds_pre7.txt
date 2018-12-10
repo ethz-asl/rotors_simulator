@@ -6,7 +6,7 @@ s/( |^|<|\()octoignition::math::Vector3d/\octomath::Vector3/g
 s/( |^|<|\()ignition::ignition::math::Vector3d/\1ignition::math::Vector3d/g
 
 #removals 
-s/event::Events::DisconnectWorldUpdateBegin\(.*?\)\;//g
+s/event::Events::DisconnectWorldUpdateBegin\([^\)]*\)\;//g
 
 # includes
 s/(#include +)"ignition\/math\/Vector3.hh"/\1"gazebo\/math\/Vector3.hh"/g
