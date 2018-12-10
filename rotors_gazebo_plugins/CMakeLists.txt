@@ -363,18 +363,22 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
   # We need the MAVLink headers.
   set(MAVLINK_HEADERS_FOUND FALSE)
 
+
+
   # First, check to see if MAVLink headers were passed in as variable
   if(NOT ${MAVLINK_HEADER_DIR} STREQUAL "")
-
-    message(STATUS "MAVLINK_HEADER_DIR provided as '${MAVLINK_HEADER_DIR}'.")
+    message(WARN "MAVLINK_HEADER_DIR provided as '${MAVLINK_HEADER_DIR}'.")
     include_directories(${MAVLINK_HEADER_DIR})
     set(MAVLINK_HEADERS_FOUND TRUE)
-
   else()
-
-    message(STATUS "MAVLINK_HEADER_DIR not provided, falling back to looking at default paths...")
+    message(WARN "MAVLINK_HEADER_DIR not provided, falling back to looking at default paths...")
+    # fist check if there's a mavlink dir in the current workspace
+    if(EXISTS ${mavlink_INCLUDE_DIRS}/mavlink/v1.0)
+      message(WARN "Found MAVLink headers in workspace at ' ${mavlink_INCLUDE_DIRS}/mavlink/v1.0'.")
+      include_directories("${mavlink_INCLUDE_DIRS}/mavlink/v1.0")
+      set(MAVLINK_HEADERS_FOUND TRUE)
     # If ROS is installed, we should be able to find them at the path below
-    if(EXISTS /opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/)
+    elseif(EXISTS /opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/)
       message(STATUS "Found MAVLink headers at '/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/'.")
       include_directories("/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/")
       set(MAVLINK_HEADERS_FOUND TRUE)
