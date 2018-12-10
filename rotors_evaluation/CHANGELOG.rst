@@ -2,6 +2,13 @@
 Changelog for package rotors_evaluation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* switch to package format 2
+* Merge pull request `#397 <https://github.com/ethz-asl/rotors_simulator/issues/397>`_ from ethz-asl/v2.1.1
+  update to 2.1.1
+* Contributors: Fadri Furrer, Mina Kamel
+
 2.1.1 (2017-04-27)
 -----------
 * update maintainers

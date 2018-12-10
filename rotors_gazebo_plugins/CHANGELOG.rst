@@ -2,6 +2,14 @@
 Changelog for package rotors_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Major changes in CMakeLists and package definition for Gazebo version compatibility
+* Code updated to Gazebo9 API
+* Automatic backport script added for pre-9 compatibility
+* Added NoisyDepth Plugin
+* Contributors: Fadri Furrer, Helen Oleynikova, Michael Pantic, Mina Kamel, Nicolas El Hayek, Timo Hinzmann, Zachary Taylor, fmina, kajabo, michaelpantic, nelhayek, orangelynx, ptrkfry
+
 2.1.1 (2017-04-27)
 -----------
 * Merge pull request `#377 <https://github.com/ethz-asl/rotors_simulator/issues/377>`_ from ethz-asl/feature/pressure-plugin
