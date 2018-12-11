@@ -22,7 +22,7 @@ project(rotors_gazebo_plugins)
 # ========================== SET DEFAULTS FOR PASSED-IN VARIABLES =============================== #
 # =============================================================================================== #
 
-find_package(mavlink)
+find_package(mavlink QUIET)
 if(${mavlink_FOUND})
   message(STATUS " mavlink found, building MAVLINK_INTERFACE_PLUGIN.")
   set(BUILD_MAVLINK_INTERFACE_PLUGIN TRUE)
