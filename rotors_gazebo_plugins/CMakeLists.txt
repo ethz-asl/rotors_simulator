@@ -143,10 +143,10 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 
-# if (BUILD_MAVLINK_INTERFACE_PLUGIN)
-#   include_directories(${mavros_msgs_INCLUDE_DIRS})
-#   include_directories(${libmavconn_INCLUDE_DIRS})
-# endif()
+if (BUILD_MAVLINK_INTERFACE_PLUGIN)
+  include_directories(${mavros_msgs_INCLUDE_DIRS})
+  include_directories(${libmavconn_INCLUDE_DIRS})
+endif()
 
 # ============================================== #
 # =================== YAML_CPP ================= #
