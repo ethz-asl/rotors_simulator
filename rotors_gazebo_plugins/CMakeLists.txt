@@ -355,6 +355,8 @@ list(APPEND targets_to_install rotors_gazebo_magnetometer_plugin)
 
 if(BUILD_MAVLINK_INTERFACE_PLUGIN)
   message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN = TRUE, adding mavros dependency and building mavlink_interface_plugin.")
+  find_package(mavros QUIET)
+  message(WARN "MAVROS version ${mavros_VERSION_MAJOR} ${mavros_VERSION_MINOR}")
 else ()
   message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN = FALSE, NOT adding mavros dependency and NOT building mavlink_interface_plugin.")
 endif ()
@@ -363,8 +365,6 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
 
   # We need the MAVLink headers.
   set(MAVLINK_HEADERS_FOUND FALSE)
-
-
 
   # First, check to see if MAVLink headers were passed in as variable
   if(NOT ${MAVLINK_HEADER_DIR} STREQUAL "")
@@ -391,7 +391,7 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
    # Note that this library includes TWO .cpp files.
    add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/geo_mag_declination.cpp)
    target_link_libraries(rotors_gazebo_mavlink_interface ${target_linking_LIBRARIES}  ${mav_msgs})
-   #add_dependencies(rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
+   add_dependencies(rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
    list(APPEND targets_to_install rotors_gazebo_mavlink_interface)
   else()
     message(ERROR "MAVLink headers were not found. They are required for building MavlinkInterfacePlugin. Not building MavlinkInterfacePlugin.")
