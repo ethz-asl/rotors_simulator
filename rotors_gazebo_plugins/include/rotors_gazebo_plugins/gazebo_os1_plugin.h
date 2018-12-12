@@ -42,6 +42,7 @@ namespace gazebo {
 
 #define M2_PI 2.0 * M_PI
 
+/// /brief A plugin publishing simulated Lidar data in the same fashion as the OS-1 ROS drivers provided by ouster
 class GazeboOS1Plugin : public RayPlugin {
   /// \brief Constructor
   /// \param parent The parent entity, must be a Model or a Sensor
