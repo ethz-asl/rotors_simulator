@@ -26,6 +26,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+#include "rotors_gazebo_plugins/gazebo_ros_continous_joint_controller_plugin.h"
 #include <math.h>
 #include <boost/bind.hpp>
 #include <boost/thread/mutex.hpp>
@@ -33,7 +34,6 @@
 #include "rotors_comm/SetFrequency.h"
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/motor_state.h"
-#include "rotors_gazebo_plugins/gazebo_ros_continous_joint_controller_plugin.h"
 
 namespace gazebo {
 

@@ -4,10 +4,7 @@
 #include <cstdint>
 
 namespace MotorStateMode {
-    enum MotorStateMode {
-    Position,
-    Velocity
-  };
+enum MotorStateMode { Position, Velocity };
 }
 
 struct MotorState {
@@ -28,4 +25,4 @@ struct MotorState {
   bool torque_enabled;
 };
 
-#endif // ROTORS_GAZEBO_PLUGINS_MOTOR_STATE_H_
+#endif  // ROTORS_GAZEBO_PLUGINS_MOTOR_STATE_H_

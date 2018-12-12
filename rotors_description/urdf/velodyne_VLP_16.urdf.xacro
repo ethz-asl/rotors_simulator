@@ -7,8 +7,9 @@
   <xacro:property name="m2" value="0.1"/>
   <xacro:property name="r2" value="0.0516"/>
   <xacro:property name="l2" value="0.0381"/>
-  <xacro:macro name="VLP-16" params="*origin parent:=world sensor_name:=velodyne topic:=/velodyne_points horizontal_angular_resolution_deg:=1.0 spin_frequency_hz:=0.5 lidar_base_frame:=velodyne_base lidar_points_frame:=velodyne_top namespace:=example min_range:=0.06">
+  <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro" />
 
+  <xacro:macro name="VLP-16" params="*origin parent:=world sensor_name:=velodyne topic:=/velodyne_points horizontal_angular_resolution_deg:=1.0 spin_frequency_hz:=0.5 lidar_base_frame:=velodyne_base lidar_points_frame:=velodyne_top namespace:=example min_range:=0.06">
     <gazebo>
       <plugin name="JointController" filename="libgazebo_ros_continous_joint_controller_plugin.so">
         <joint>${namespace}/${sensor_name}_joint</joint>
@@ -24,27 +25,10 @@
       <child link="${namespace}/${lidar_base_frame}"/>
     </joint>
 
-    <link name="${namespace}/${lidar_base_frame}">
-      <inertial>
-        <mass value="${m1}"/>
+    <xacro:cylinder_link_complete link_name="${namespace}/${lidar_base_frame}"
+      mass="${m1}" length="${l1}" radius="${r1}">
         <origin rpy="0 0 0" xyz="0 0 ${l1*0.5}"/>
-        <inertia ixx="${(m1 * (3.0*r1*r1 + l1*l1)) / 12.0}" ixy="0" ixz="0"
-                 iyy="${(m1 * (3.0*r1*r1 + l1*l1)) / 12.0}" iyz="0"
-                 izz="${0.5 * m1 * (r1*r1)}"/>
-      </inertial>
-      <collision name="${namespace}/${lidar_base_frame}_collision">
-        <origin rpy="0 0 0" xyz="0 0 ${l1*0.5}"/>
-        <geometry>
-          <cylinder length="${l1}" radius="${r1}"/>
-        </geometry>
-      </collision>
-      <visual name="${namespace}/${lidar_base_frame}_visual">
-        <origin rpy="0 0 0" xyz="0 0 ${l1*0.5}"/>
-        <geometry>
-          <cylinder length="${l1}" radius="${r1}"/>
-        </geometry>
-      </visual>
-    </link>
+    </xacro:cylinder_link_complete>
 
     <joint name="${namespace}/${sensor_name}_joint" type="continuous">
       <parent link="${namespace}/${lidar_base_frame}"/>
@@ -54,27 +38,10 @@
       <limit effort="100.0" velocity="100.0"/>
     </joint>
 
-    <link name="${namespace}/${lidar_points_frame}">
-      <inertial>
-        <mass value="${m2}"/>
+    <xacro:cylinder_link_complete link_name="${namespace}/${lidar_points_frame}"
+      mass="${m2}" length="${l2}" radius="${r2}">
         <origin rpy="0 0 0" xyz="0 0 0"/>
-        <inertia ixx="${(m2 * (3.0*r2*r2 + l2*l2)) / 12.0}" ixy="0" ixz="0"
-                 iyy="${(m2 * (3.0*r2*r2 + l2*l2)) / 12.0}" iyz="0"
-                 izz="${0.5 * m2 * (r2*r2)}"/>
-      </inertial>
-      <collision>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
-        <geometry>
-          <cylinder length="${l2}" radius="${r2}"/>
-        </geometry>
-      </collision>
-      <visual name="${namespace}/${lidar_points_frame}_visual">
-        <origin rpy="0 0 0" xyz="0 0 0"/>
-        <geometry>
-          <cylinder length="${l2}" radius="${r2}"/>
-        </geometry>
-      </visual>
-    </link>
+    </xacro:cylinder_link_complete>
     <gazebo reference="${namespace}/${lidar_points_frame}">
       <material>Gazebo/Black</material>
     </gazebo>
@@ -85,27 +52,10 @@
       <origin rpy="0 0 0" xyz="0 0 ${l1+l2*0.5}"/>
     </joint>
 
-    <link name="${namespace}/${lidar_base_frame}_hat">
-      <inertial>
-        <mass value="${m1}"/>
+    <xacro:cylinder_link_complete link_name="${namespace}/${lidar_base_frame}_hat"
+      mass="${m1}" length="${l1}" radius="${r1}">
         <origin rpy="0 0 0" xyz="0 0 ${(l1+l2)*0.5}"/>
-        <inertia ixx="${(m1 * (3.0*r1*r1 + l1*l1)) / 12.0}" ixy="0" ixz="0"
-                 iyy="${(m1 * (3.0*r1*r1 + l1*l1)) / 12.0}" iyz="0"
-                 izz="${0.5 * m1 * (r1*r1)}"/>
-      </inertial>
-      <collision>
-        <origin rpy="0 0 0" xyz="0 0 ${(l1+l2)*0.5}"/>
-        <geometry>
-          <cylinder length="${l1}" radius="${r1}"/>
-        </geometry>
-      </collision>
-      <visual>
-        <origin rpy="0 0 0" xyz="0 0 ${(l1+l2)*0.5}"/>
-        <geometry>
-          <cylinder length="${l1}" radius="${r1}"/>
-        </geometry>
-      </visual>
-    </link>
+    </xacro:cylinder_link_complete>
 
     <gazebo reference="${namespace}/${lidar_points_frame}">
       <!-- Add a ray sensor, and give it a name -->

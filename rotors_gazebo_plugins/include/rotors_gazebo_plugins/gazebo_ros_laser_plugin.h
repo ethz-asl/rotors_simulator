@@ -47,8 +47,8 @@
 
 #include <gazebo/msgs/MessageTypes.hh>
 #include <gazebo/physics/physics.hh>
-#include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/transport/Node.hh>
+#include <gazebo/transport/TransportTypes.hh>
 #include <sdf/Param.hh>
 
 #include <gazebo/common/Plugin.hh>
