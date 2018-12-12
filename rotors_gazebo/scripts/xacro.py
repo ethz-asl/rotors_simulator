@@ -678,7 +678,7 @@ def main():
         sys.stderr.write("Expat parsing error.  Check that:\n")
         sys.stderr.write(" - Your XML is correctly formed\n")
         sys.stderr.write(" - You have the xacro xmlns declaration: " +
-                         "xmlns:xacro=\"http://www.ros.org/wiki/xacro\"\n")
+                         "xmlns:xacro=\"http://ros.org/wiki/xacro\"\n")
         sys.stderr.write("\n")
         raise
     finally:

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="OS-1">
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="OS-1">
   <xacro:property name="M_PI" value="3.1415926535897931" />
   <xacro:property name="m1" value="0.15"/>
   <xacro:property name="r1" value="0.0425"/>
