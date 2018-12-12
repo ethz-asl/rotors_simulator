@@ -2,8 +2,8 @@
 Changelog for package rotors_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.2 (2018-12-12)
+------------------
 * Fixes issues with build on buildfarm and old ubuntu systems (added MAVROS dependencies, version checking, protobuf-dev etc)
 * Contributors: michaelpantic
 
