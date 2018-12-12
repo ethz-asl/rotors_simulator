@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- Provides a world frame and mounts the lidar sensor to it. -->
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="lidar_model">
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="lidar_model">
   <xacro:arg name="sensor_name" default="velodyne"/>
   <xacro:arg name="topic" default="velodyne_points" />
   <xacro:arg name="horizontal_angular_resolution_deg" default="1.0" />

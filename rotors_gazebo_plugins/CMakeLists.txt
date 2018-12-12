@@ -429,6 +429,18 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   list(APPEND targets_to_install rotors_gazebo_optical_flow_plugin)
 endif()
 
+#======================================== OS1 ROS PLUGIN ==========================================//
+if(${gazebo_VERSION_MAJOR} GREATER 4)
+  add_library(rotors_gazebo_os1_plugin SHARED src/gazebo_os1_plugin.cpp)
+  target_link_libraries(rotors_gazebo_os1_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} RayPlugin)
+  if (NOT NO_ROS)
+    add_dependencies(rotors_gazebo_os1_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install rotors_gazebo_os1_plugin)
+else()
+  message(STATUS "Gazebo version is less than 5, not building gazebo_os1_plugin.cpp.")
+endif()
+
 #======================================= PRESSURE PLUGIN ========================================//
 add_library(rotors_gazebo_pressure_plugin SHARED src/gazebo_pressure_plugin.cpp)
 target_link_libraries(rotors_gazebo_pressure_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${GLOG_LIBRARIES})
