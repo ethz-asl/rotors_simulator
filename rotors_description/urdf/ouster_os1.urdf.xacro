@@ -25,6 +25,7 @@
     <joint name="${namespace}/${sensor_name}_joint" type="fixed">
       <parent link="${namespace}/${lidar_base_frame}"/>
       <child link="${namespace}/${lidar_points_frame}"/>
+      <origin rpy="0 0 0" xyz="0 0 ${l1+l2*0.5}"/>
     </joint>
 
     <xacro:cylinder_link_complete link_name="${namespace}/${lidar_points_frame}"
