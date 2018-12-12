@@ -49,7 +49,7 @@ void GazeboOS1Plugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
 #endif
   if (!parent_ray_sensor_) {
     gzthrow("GazeboRosOS1" << STR_Gpu << "Laser controller requires a "
-                                << STR_Gpu << "Ray Sensor as its parent");
+                           << STR_Gpu << "Ray Sensor as its parent");
   }
   // Get the parameters
   getSdfParam<std::string>(_sdf, "robot_namespace", robot_namespace_, "/");
@@ -58,7 +58,8 @@ void GazeboOS1Plugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
   getSdfParam<double>(_sdf, "gaussian_noise", gaussian_noise_, 0.0);
   getSdfParam<double>(_sdf, "min_range", min_range_, 0.0);
   getSdfParam<double>(_sdf, "max_range", max_range_, INFINITY);
-  getSdfParam<double>(_sdf, "rotational_frequency_hz_", rotational_frequency_hz_, 10.0);
+  getSdfParam<double>(_sdf, "rotational_frequency_hz_",
+                      rotational_frequency_hz_, 10.0);
 
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized()) {
@@ -131,7 +132,7 @@ void GazeboOS1Plugin::ConnectCb() {
   }
 }
 
-void GazeboOS1Plugin::OnScan(const ConstLaserScanStampedPtr& _msg) {
+void GazeboOS1Plugin::OnScan(const ConstLaserScanStampedPtr &_msg) {
 #if GAZEBO_MAJOR_VERSION >= 7
   const ignition::math::Angle maxAngle = parent_ray_sensor_->AngleMax();
   const ignition::math::Angle minAngle = parent_ray_sensor_->AngleMin();
@@ -145,8 +146,10 @@ void GazeboOS1Plugin::OnScan(const ConstLaserScanStampedPtr& _msg) {
   const int verticalRayCount = parent_ray_sensor_->VerticalRayCount();
   const int verticalRangeCount = parent_ray_sensor_->VerticalRangeCount();
 
-  const ignition::math::Angle verticalMaxAngle = parent_ray_sensor_->VerticalAngleMax();
-  const ignition::math::Angle verticalMinAngle = parent_ray_sensor_->VerticalAngleMin();
+  const ignition::math::Angle verticalMaxAngle =
+      parent_ray_sensor_->VerticalAngleMax();
+  const ignition::math::Angle verticalMinAngle =
+      parent_ray_sensor_->VerticalAngleMin();
 #else
   math::Angle maxAngle = parent_ray_sensor_->GetAngleMax();
   math::Angle minAngle = parent_ray_sensor_->GetAngleMin();
@@ -160,8 +163,10 @@ void GazeboOS1Plugin::OnScan(const ConstLaserScanStampedPtr& _msg) {
   const int verticalRayCount = parent_ray_sensor_->GetVerticalRayCount();
   const int verticalRangeCount = parent_ray_sensor_->GetVerticalRangeCount();
 
-  const math::Angle verticalMaxAngle = parent_ray_sensor_->GetVerticalAngleMax();
-  const math::Angle verticalMinAngle = parent_ray_sensor_->GetVerticalAngleMin();
+  const math::Angle verticalMaxAngle =
+      parent_ray_sensor_->GetVerticalAngleMax();
+  const math::Angle verticalMinAngle =
+      parent_ray_sensor_->GetVerticalAngleMin();
 #endif
 
   const double yDiff = maxAngle.Radian() - minAngle.Radian();
@@ -171,7 +176,8 @@ void GazeboOS1Plugin::OnScan(const ConstLaserScanStampedPtr& _msg) {
   const double MAX_RANGE = std::min(max_range_, maxRange);
 
   // time for one revolution (us) / number of horizontal rays
-  const int32_t time_offset_per_beam_us = round(1e6 / (rotational_frequency_hz_ * rayCount));
+  const int32_t time_offset_per_beam_us =
+      round(1e6 / (rotational_frequency_hz_ * rayCount));
 
   // Populate message fields
   const uint32_t POINT_STEP = 32;
@@ -214,7 +220,6 @@ void GazeboOS1Plugin::OnScan(const ConstLaserScanStampedPtr& _msg) {
   for (i = 0; i < rangeCount; i++) {
     int32_t time_offset = i * time_offset_per_beam_us;
     for (j = 0; j < verticalRangeCount; j++) {
-
       // Range
       double r = _msg->scan().ranges(i + j * rangeCount);
       if ((MIN_RANGE >= r) || (r >= MAX_RANGE)) {
@@ -223,7 +228,7 @@ void GazeboOS1Plugin::OnScan(const ConstLaserScanStampedPtr& _msg) {
 
       // Noise
       if (gaussian_noise_ != 0.0) {
-        r += GaussianKernel(0,gaussian_noise_);
+        r += GaussianKernel(0, gaussian_noise_);
       }
 
       // Intensity
@@ -234,34 +239,35 @@ void GazeboOS1Plugin::OnScan(const ConstLaserScanStampedPtr& _msg) {
       double pAngle;
 
       if (rangeCount > 1) {
-        yAngle = i * yDiff / (rangeCount -1) + minAngle.Radian();
+        yAngle = i * yDiff / (rangeCount - 1) + minAngle.Radian();
       } else {
         yAngle = minAngle.Radian();
       }
 
       if (verticalRayCount > 1) {
-        pAngle = j * pDiff / (verticalRangeCount -1) + verticalMinAngle.Radian();
+        pAngle =
+            j * pDiff / (verticalRangeCount - 1) + verticalMinAngle.Radian();
       } else {
         pAngle = verticalMinAngle.Radian();
       }
 
       // pAngle is rotated by yAngle:
       if ((MIN_RANGE < r) && (r < MAX_RANGE)) {
-        *((float*)(ptr + 0)) = r * cos(pAngle) * cos(yAngle);
-        *((float*)(ptr + 4)) = r * cos(pAngle) * sin(yAngle);
+        *((float *)(ptr + 0)) = r * cos(pAngle) * cos(yAngle);
+        *((float *)(ptr + 4)) = r * cos(pAngle) * sin(yAngle);
 #if GAZEBO_MAJOR_VERSION > 2
-        *((float*)(ptr + 8)) = r * sin(pAngle);
+        *((float *)(ptr + 8)) = r * sin(pAngle);
 #else
-        *((float*)(ptr + 8)) = -r * sin(pAngle);
+        *((float *)(ptr + 8)) = -r * sin(pAngle);
 #endif
         *((int32_t *)(ptr + 16)) = time_offset;
-        *((uint16_t*)(ptr + 20)) = 0u; // reflectivity placeholder
-        *((uint16_t*)(ptr + 22)) = intensity;
+        *((uint16_t *)(ptr + 20)) = 0u;  // reflectivity placeholder
+        *((uint16_t *)(ptr + 22)) = intensity;
 
 #if GAZEBO_MAJOR_VERSION > 2
-        *((uint16_t*)(ptr + 24)) = j; // ring
+        *((uint16_t *)(ptr + 24)) = j;  // ring
 #else
-        *((uint16_t*)(ptr + 20)) = verticalRangeCount - 1 - j; // ring
+        *((uint16_t *)(ptr + 20)) = verticalRangeCount - 1 - j;  // ring
 #endif
         ptr += POINT_STEP;
       }
@@ -274,7 +280,7 @@ void GazeboOS1Plugin::OnScan(const ConstLaserScanStampedPtr& _msg) {
   msg.width = msg.row_step / POINT_STEP;
   msg.is_bigendian = false;
   msg.is_dense = true;
-  msg.data.resize(msg.row_step); // Shrink to actual size
+  msg.data.resize(msg.row_step);  // Shrink to actual size
 
   // Publish output
   pub_.publish(msg);
