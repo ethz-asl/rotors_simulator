@@ -27,6 +27,7 @@
   <depend>geometry_msgs</depend>
   <depend>libgoogle-glog-dev</depend>
   <depend>protobuf-dev</depend>
+  <depend>mavros</depend>
   <depend>mav_msgs</depend>
   <depend>octomap_msgs</depend>
   <depend>octomap_ros</depend>

@@ -360,6 +360,9 @@ else ()
 endif ()
 
 if (BUILD_MAVLINK_INTERFACE_PLUGIN)
+  # needed to ensure mavros is actually built by the time we call find_package
+  add_custom_target("mavros_dummy_target" DEPENDS mavros)
+
   find_package(mavros QUIET)
 
   # We need the MAVLink headers.
