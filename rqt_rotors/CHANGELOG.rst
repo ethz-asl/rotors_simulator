@@ -2,6 +2,9 @@
 Changelog for package rqt_rotors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.2.0 (2018-12-10)
 ------------------
 * switch to package format 2

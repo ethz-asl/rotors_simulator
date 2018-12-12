@@ -2,6 +2,11 @@
 Changelog for package rotors_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixes issues with build on buildfarm and old ubuntu systems (added MAVROS dependencies, version checking, protobuf-dev etc)
+* Contributors: michaelpantic
+
 2.2.0 (2018-12-10)
 ------------------
 * Major changes in CMakeLists and package definition for Gazebo version compatibility
