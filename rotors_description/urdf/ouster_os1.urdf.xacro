@@ -8,16 +8,8 @@
   <xacro:property name="r2" value="0.0425"/>
   <xacro:property name="l2" value="0.0305"/>
   <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro" />
-  
-  <xacro:macro name="OS-1" params="*origin parent:=world sensor_name:=os1 topic:=/os1_points horizontal_angular_resolution_deg:=0.18 spin_frequency_hz:=10 lidar_base_frame:=os1_base lidar_points_frame:=os1_top namespace:=example min_range:=0.05">
-    <gazebo>
-      <plugin name="JointController" filename="libgazebo_ros_continous_joint_controller_plugin.so">
-        <joint>${namespace}/${sensor_name}_joint</joint>
-	      <robot_namespace>${namespace}</robot_namespace>
-	      <default_velocity_limit>100</default_velocity_limit>
-        <spin_frequency_hz>${spin_frequency_hz}</spin_frequency_hz>
-      </plugin>
-    </gazebo>
+
+  <xacro:macro name="OS-1" params="*origin parent:=world sensor_name:=os1 topic:=/os1_points spin_frequency_hz:=10 lidar_base_frame:=os1_base lidar_points_frame:=os1_top namespace:=example min_range:=0.05">
 
     <joint name="${namespace}/${lidar_base_frame}_mount_joint" type="fixed">
       <xacro:insert_block name="origin" />
@@ -30,12 +22,9 @@
         <origin rpy="0 0 0" xyz="0 0 ${l1*0.5}"/>
     </xacro:cylinder_link_complete>
 
-    <joint name="${namespace}/${sensor_name}_joint" type="continuous">
+    <joint name="${namespace}/${sensor_name}_joint" type="fixed">
       <parent link="${namespace}/${lidar_base_frame}"/>
       <child link="${namespace}/${lidar_points_frame}"/>
-      <origin rpy="0 0 0" xyz="0 0 ${l1+l2*0.5}"/>
-      <axis xyz="0 0 1"/>
-      <limit effort="100.0" velocity="100.0"/>
     </joint>
 
     <xacro:cylinder_link_complete link_name="${namespace}/${lidar_points_frame}"
@@ -62,10 +51,10 @@
       <sensor type="ray" name="sensor">
         <pose>0 0 0 0 0 0</pose>
         <!-- Enable visualization to see the rays in the GUI -->
-        <visualize>true</visualize>
+        <visualize>false</visualize>
 
         <!-- Set the update rate of the sensor -->
-        <update_rate>${360.0/horizontal_angular_resolution_deg*spin_frequency_hz}</update_rate>
+        <update_rate>${spin_frequency_hz}</update_rate>
         <ray>
           <noise>
             <!-- Use gaussian noise -->
@@ -75,7 +64,7 @@
           </noise>
           <scan>
             <horizontal>
-              <samples>1</samples>
+              <samples>1024</samples>
               <resolution>1</resolution>
               <min_angle>0</min_angle>
               <max_angle>${2*M_PI}</max_angle>
@@ -98,9 +87,8 @@
             <resolution>0.02</resolution>
           </range>
         </ray>
-        <plugin name="gazebo_ros_laser_plugin" filename="libgazebo_ros_laser_plugin.so">
+        <plugin name="gazebo_ros_lidar_plugin" filename="librotors_gazebo_os1_plugin.so">
           <robot_namespace>${namespace}</robot_namespace>
-          <joint_name>${namespace}/${sensor_name}_joint</joint_name>
           <topic_name>${topic}</topic_name>
           <frame_name>${lidar_points_frame}</frame_name>
           <min_range>${min_range}</min_range>
@@ -111,4 +99,3 @@
     </gazebo>
   </xacro:macro>
 </robot>
-

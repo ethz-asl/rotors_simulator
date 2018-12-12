@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="OS-1">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="OS-1-spinning">
   <xacro:property name="M_PI" value="3.1415926535897931" />
   <xacro:property name="m1" value="0.15"/>
   <xacro:property name="r1" value="0.0425"/>
@@ -7,7 +7,17 @@
   <xacro:property name="m2" value="0.08"/>
   <xacro:property name="r2" value="0.0425"/>
   <xacro:property name="l2" value="0.0305"/>
-  <xacro:macro name="OS-1" params="*origin parent:=world sensor_name:=os1 topic:=/os1_points spin_frequency_hz:=10 lidar_base_frame:=os1_base lidar_points_frame:=os1_top namespace:=example min_range:=0.05">
+  <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro" />
+
+  <xacro:macro name="OS-1" params="*origin parent:=world sensor_name:=os1 topic:=/os1_points horizontal_angular_resolution_deg:=0.18 spin_frequency_hz:=10 lidar_base_frame:=os1_base lidar_points_frame:=os1_top namespace:=example min_range:=0.05">
+    <gazebo>
+      <plugin name="JointController" filename="libgazebo_ros_continous_joint_controller_plugin.so">
+        <joint>${namespace}/${sensor_name}_joint</joint>
+	      <robot_namespace>${namespace}</robot_namespace>
+	      <default_velocity_limit>100</default_velocity_limit>
+        <spin_frequency_hz>${spin_frequency_hz}</spin_frequency_hz>
+      </plugin>
+    </gazebo>
 
     <joint name="${namespace}/${lidar_base_frame}_mount_joint" type="fixed">
       <xacro:insert_block name="origin" />
@@ -15,54 +25,23 @@
       <child link="${namespace}/${lidar_base_frame}"/>
     </joint>
 
-    <link name="${namespace}/${lidar_base_frame}">
-      <inertial>
-        <mass value="${m1}"/>
+    <xacro:cylinder_link_complete link_name="${namespace}/${lidar_base_frame}"
+      mass="${m1}" length="${l1}" radius="${r1}">
         <origin rpy="0 0 0" xyz="0 0 ${l1*0.5}"/>
-        <inertia ixx="${(m1 * (3.0*r1*r1 + l1*l1)) / 12.0}" ixy="0" ixz="0"
-                 iyy="${(m1 * (3.0*r1*r1 + l1*l1)) / 12.0}" iyz="0"
-                 izz="${0.5 * m1 * (r1*r1)}"/>
-      </inertial>
-      <collision name="${namespace}/${lidar_base_frame}_collision">
-        <origin rpy="0 0 0" xyz="0 0 ${l1*0.5}"/>
-        <geometry>
-          <cylinder length="${l1}" radius="${r1}"/>
-        </geometry>
-      </collision>
-      <visual name="${namespace}/${lidar_base_frame}_visual">
-        <origin rpy="0 0 0" xyz="0 0 ${l1*0.5}"/>
-        <geometry>
-          <cylinder length="${l1}" radius="${r1}"/>
-        </geometry>
-      </visual>
-    </link>
+    </xacro:cylinder_link_complete>
 
-    <joint name="${namespace}/${sensor_name}_joint" type="fixed">
+    <joint name="${namespace}/${sensor_name}_joint" type="continuous">
       <parent link="${namespace}/${lidar_base_frame}"/>
       <child link="${namespace}/${lidar_points_frame}"/>
+      <origin rpy="0 0 0" xyz="0 0 ${l1+l2*0.5}"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="100.0" velocity="100.0"/>
     </joint>
 
-    <link name="${namespace}/${lidar_points_frame}">
-      <inertial>
-        <mass value="${m2}"/>
+    <xacro:cylinder_link_complete link_name="${namespace}/${lidar_points_frame}"
+      mass="${m2}" length="${l2}" radius="${r2}">
         <origin rpy="0 0 0" xyz="0 0 0"/>
-        <inertia ixx="${(m2 * (3.0*r2*r2 + l2*l2)) / 12.0}" ixy="0" ixz="0"
-                 iyy="${(m2 * (3.0*r2*r2 + l2*l2)) / 12.0}" iyz="0"
-                 izz="${0.5 * m2 * (r2*r2)}"/>
-      </inertial>
-      <collision>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
-        <geometry>
-          <cylinder length="${l2}" radius="${r2}"/>
-        </geometry>
-      </collision>
-      <visual name="${namespace}/${lidar_points_frame}_visual">
-        <origin rpy="0 0 0" xyz="0 0 0"/>
-        <geometry>
-          <cylinder length="${l2}" radius="${r2}"/>
-        </geometry>
-      </visual>
-    </link>
+    </xacro:cylinder_link_complete>
     <gazebo reference="${namespace}/${lidar_points_frame}">
       <material>Gazebo/Black</material>
     </gazebo>
@@ -73,37 +52,20 @@
       <origin rpy="0 0 0" xyz="0 0 ${l1+l2*0.5}"/>
     </joint>
 
-    <link name="${namespace}/${lidar_base_frame}_hat">
-      <inertial>
-        <mass value="${m1}"/>
+    <xacro:cylinder_link_complete link_name="${namespace}/${lidar_base_frame}_hat"
+      mass="${m1}" length="${l1}" radius="${r1}">
         <origin rpy="0 0 0" xyz="0 0 ${(l1+l2)*0.5}"/>
-        <inertia ixx="${(m1 * (3.0*r1*r1 + l1*l1)) / 12.0}" ixy="0" ixz="0"
-                 iyy="${(m1 * (3.0*r1*r1 + l1*l1)) / 12.0}" iyz="0"
-                 izz="${0.5 * m1 * (r1*r1)}"/>
-      </inertial>
-      <collision>
-        <origin rpy="0 0 0" xyz="0 0 ${(l1+l2)*0.5}"/>
-        <geometry>
-          <cylinder length="${l1}" radius="${r1}"/>
-        </geometry>
-      </collision>
-      <visual>
-        <origin rpy="0 0 0" xyz="0 0 ${(l1+l2)*0.5}"/>
-        <geometry>
-          <cylinder length="${l1}" radius="${r1}"/>
-        </geometry>
-      </visual>
-    </link>
+    </xacro:cylinder_link_complete>
 
     <gazebo reference="${namespace}/${lidar_points_frame}">
       <!-- Add a ray sensor, and give it a name -->
       <sensor type="ray" name="sensor">
         <pose>0 0 0 0 0 0</pose>
         <!-- Enable visualization to see the rays in the GUI -->
-        <visualize>false</visualize>
+        <visualize>true</visualize>
 
         <!-- Set the update rate of the sensor -->
-        <update_rate>${spin_frequency_hz}</update_rate>
+        <update_rate>${360.0/horizontal_angular_resolution_deg*spin_frequency_hz}</update_rate>
         <ray>
           <noise>
             <!-- Use gaussian noise -->
@@ -113,7 +75,7 @@
           </noise>
           <scan>
             <horizontal>
-              <samples>1024</samples>
+              <samples>1</samples>
               <resolution>1</resolution>
               <min_angle>0</min_angle>
               <max_angle>${2*M_PI}</max_angle>
@@ -136,8 +98,9 @@
             <resolution>0.02</resolution>
           </range>
         </ray>
-        <plugin name="gazebo_ros_lidar_plugin" filename="librotors_gazebo_os1_plugin.so">
+        <plugin name="gazebo_ros_laser_plugin" filename="libgazebo_ros_laser_plugin.so">
           <robot_namespace>${namespace}</robot_namespace>
+          <joint_name>${namespace}/${sensor_name}_joint</joint_name>
           <topic_name>${topic}</topic_name>
           <frame_name>${lidar_points_frame}</frame_name>
           <min_range>${min_range}</min_range>
