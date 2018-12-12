@@ -1,0 +1,7 @@
+- git: {local-name: mav_comm, uri: 'git@github.com:ethz-asl/mav_comm.git'}
+- git: {local-name: mavlink, uri: 'git@github.com:mavlink/mavlink-gbp-release.git', version: debian/melodic/mavlink}
+- git: {local-name: mavros, uri: 'git@github.com:ethz-asl/mavros.git', version: 0880a97575f8c6b705096aca17ca04c6c6dcfc02}
+- git: {local-name: glog_catkin, uri: 'git@github.com:ethz-asl/glog_catkin.git'}
+- git: {local-name: mav_tools, uri: 'git@github.com:ethz-asl/mav_tools.git'}
+- git: {local-name: gps_umd, uri: 'git@github.com:swri-robotics/gps_umd.git'}
+- git: {local-name: geographic_info, uri: 'git@github.com:ros-geographic-info/geographic_info.git'}

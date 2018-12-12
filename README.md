@@ -140,7 +140,7 @@ Launch the simulator with a hex-rotor helicopter model, in our case, the AscTec 
 $ roslaunch rotors_gazebo mav_hovering_example.launch mav_name:=firefly world_name:=basic
 ```
 
-> **Note** The first run of gazebo might take considerably long, as it will download some models from an online database.
+> **Note** The first run of gazebo might take considerably long, as it will download some models from an online database. Should you receive a timeout error, try running gazebo by itself (e.g. roslaunch gazebo_ros empty_world.launch ) so it has sufficient time to actually download all of the models.
 
 The simulator starts by default in paused mode. To start it you can either
  - use the Gazebo GUI and press the play button
