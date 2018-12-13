@@ -2,6 +2,9 @@
 Changelog for package rotors_hil_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.2.2 (2018-12-12)
 ------------------
 * Merge branch 'feature/hil_mavros_fix' into feature/gazebo9-autobackport
