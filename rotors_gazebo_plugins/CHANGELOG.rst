@@ -2,8 +2,8 @@
 Changelog for package rotors_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.3 (2018-12-13)
+------------------
 * Added dependencies to gazebo_plugins
 * Contributors: michaelpantic
 
