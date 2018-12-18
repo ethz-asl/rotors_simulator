@@ -998,7 +998,7 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
       }
       received_first_reference_ = true;
     }
-      break;
+    break;
   }
 }
 
