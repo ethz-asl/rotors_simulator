@@ -959,7 +959,7 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
     // Set rotor speeds and controller targets for flagged messages.
     if (controls.flags == kMotorSpeedFlag) {
       input_reference_.resize(kNOutMax);
-      for (int i = 0; i < kNumMotors; i++) {
+      for (unsigned i = 0; i < kNumMotors; ++i) {
         if (armed) {
           input_reference_[i] =
               (controls.controls[input_index_[i]] + input_offset_[i]) *
@@ -972,7 +972,7 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
       received_first_reference_ = true;
     }
     else if (controls.flags == kServoPositionFlag) {
-      for (int i = kNumMotors; i < (kNumMotors + kNumServos); i++) {
+      for (unsigned i = kNumMotors; i < (kNumMotors + kNumServos); ++i) {
         if (armed) {
           input_reference_[i] =
               (controls.controls[input_index_[i - kNumMotors]] + input_offset_[i]) *
@@ -986,7 +986,7 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
     // Set rotor speeds, controller targets for unflagged messages.
     else {
       input_reference_.resize(kNOutMax);
-      for (int i = 0; i < kNOutMax; i++) {
+      for (unsigned i = 0; i < kNOutMax; ++i) {
         if (armed) {
           input_reference_[i] =
               (controls.controls[input_index_[i]] + input_offset_[i]) *
