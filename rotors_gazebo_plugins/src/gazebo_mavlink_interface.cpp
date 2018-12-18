@@ -42,7 +42,6 @@ static const double kAltZurich_m = 488.0; // meters
 // static const double alt_zurich = 86.0; // meters
 static const float kEarthRadius_m = 6353000;  // m
 
-
 GZ_REGISTER_MODEL_PLUGIN(GazeboMavlinkInterface);
 
 GazeboMavlinkInterface::~GazeboMavlinkInterface() {
@@ -957,13 +956,10 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
       input_index_[i] = i;
     }
 
-    // set rotor speeds, controller targets
-
-    // Interpret flag 1 as rotor speeds, controller targets for VoliroX system
-    // (12 commands)
-    if (controls.flags == 1) {
+    // Set rotor speeds and controller targets for flagged messages.
+    if (controls.flags == kMotorSpeedFlag) {
       input_reference_.resize(kNOutMax);
-      for (int i = 0; i < 12; i++) {
+      for (int i = 0; i < kNumMotors; i++) {
         if (armed) {
           input_reference_[i] =
               (controls.controls[input_index_[i]] + input_offset_[i]) *
@@ -975,13 +971,11 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
       }
       received_first_reference_ = true;
     }
-    // Interpret flag 2 as a servo position message for voliroX system
-    // (indices 12 - 17).
-    else if (controls.flags == 2) {
-      for (int i = 12; i < 18; i++) {
+    else if (controls.flags == kServoPositionFlag) {
+      for (int i = kNumMotors; i < (kNumMotors + kNumServos); i++) {
         if (armed) {
           input_reference_[i] =
-              (controls.controls[input_index_[i - 12]] + input_offset_[i]) *
+              (controls.controls[input_index_[i - kNumMotors]] + input_offset_[i]) *
                   input_scaling_[i] +
               zero_position_armed_[i];
         } else {
@@ -989,8 +983,7 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
         }
       }
     }
-
-    // Set rotor speeds, controller targets for standard system.
+    // Set rotor speeds, controller targets for unflagged messages.
     else {
       input_reference_.resize(kNOutMax);
       for (int i = 0; i < kNOutMax; i++) {

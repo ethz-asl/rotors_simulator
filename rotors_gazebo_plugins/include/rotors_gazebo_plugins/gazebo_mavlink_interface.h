@@ -153,7 +153,16 @@ class GazeboMavlinkInterface : public ModelPlugin {
   void handle_message(mavlink_message_t *msg);
   void pollForMAVLinkMessages(double _dt, uint32_t _timeoutMs);
 
-  static const unsigned kNOutMax = 18;
+  constexpr size_t kNOutMax = 18u;
+
+  // Set the number of BLDC motors and tilting servos,
+  // if using flags to differentiate.
+  constexpr size_t kNumMotors = 12u;
+  constexpr size_t kNumServos = 6u;
+
+  constexpr unit32_t kMotorSpeedFlag = 1;
+  constexpr unit32_t kServoPositionFlag = 2;
+
 
   unsigned rotor_count_;
 
