@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<robot name="calibration_chess_pattern" xmlns:xacro="http://ros.org/wiki/xacro">
+  <pose>0 0 0.6 0 0 0</pose>
+  <static>true</static>
+  <link name="calibration_chess_pattern_body">
+    <visual>
+      <pose>0 0 0 0 0 0</pose>
+			<geometry>
+				<mesh filename="package://rotors_description/meshes/chess_pattern.dae"/>
+			</geometry>
+		</visual>
+		<collision>
+      <pose>0 0 0  0 0 0</pose>
+			<geometry>
+				<mesh filename="package://rotors_description/meshes/chess_pattern.stl"/>
+			</geometry>
+		</collision>
+  </link>
+</robot>

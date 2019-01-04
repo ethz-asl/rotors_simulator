@@ -1,0 +1,102 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="OS-1">
+  <xacro:property name="M_PI" value="3.1415926535897931" />
+  <xacro:property name="m1" value="0.15"/>
+  <xacro:property name="r1" value="0.0425"/>
+  <xacro:property name="l1" value="0.0211"/>
+  <xacro:property name="m2" value="0.08"/>
+  <xacro:property name="r2" value="0.0425"/>
+  <xacro:property name="l2" value="0.0305"/>
+  <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro" />
+
+  <xacro:macro name="OS-1-16" params="*origin parent:=world sensor_name:=os1 topic:=/os1_points spin_frequency_hz:=10 lidar_base_frame:=os1_base lidar_points_frame:=os1_top namespace:=example min_range:=0.05">
+
+    <joint name="${namespace}/${lidar_base_frame}_mount_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}"/>
+      <child link="${namespace}/${lidar_base_frame}"/>
+    </joint>
+
+    <xacro:cylinder_link_complete link_name="${namespace}/${lidar_base_frame}"
+      mass="${m1}" length="${l1}" radius="${r1}">
+        <origin rpy="0 0 0" xyz="0 0 ${l1*0.5}"/>
+    </xacro:cylinder_link_complete>
+
+    <joint name="${namespace}/${sensor_name}_joint" type="fixed">
+      <parent link="${namespace}/${lidar_base_frame}"/>
+      <child link="${namespace}/${lidar_points_frame}"/>
+      <origin rpy="0 0 0" xyz="0 0 ${l1+l2*0.5}"/>
+    </joint>
+
+    <xacro:cylinder_link_complete link_name="${namespace}/${lidar_points_frame}"
+      mass="${m2}" length="${l2}" radius="${r2}">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+    </xacro:cylinder_link_complete>
+    <gazebo reference="${namespace}/${lidar_points_frame}">
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+    <joint name="${sensor_name}_joint_hat" type="fixed">
+      <parent link="${namespace}/${lidar_base_frame}"/>
+      <child link="${namespace}/${lidar_base_frame}_hat"/>
+      <origin rpy="0 0 0" xyz="0 0 ${l1+l2*0.5}"/>
+    </joint>
+
+    <xacro:cylinder_link_complete link_name="${namespace}/${lidar_base_frame}_hat"
+      mass="${m1}" length="${l1}" radius="${r1}">
+        <origin rpy="0 0 0" xyz="0 0 ${(l1+l2)*0.5}"/>
+    </xacro:cylinder_link_complete>
+
+    <gazebo reference="${namespace}/${lidar_points_frame}">
+      <!-- Add a ray sensor, and give it a name -->
+      <sensor type="ray" name="sensor">
+        <pose>0 0 0 0 0 0</pose>
+        <!-- Enable visualization to see the rays in the GUI -->
+        <visualize>false</visualize>
+
+        <!-- Set the update rate of the sensor -->
+        <update_rate>${spin_frequency_hz}</update_rate>
+        <ray>
+          <noise>
+            <!-- Use gaussian noise -->
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.02</stddev>
+          </noise>
+          <scan>
+            <horizontal>
+              <samples>1024</samples>
+              <resolution>1</resolution>
+              <min_angle>0</min_angle>
+              <max_angle>${2*M_PI}</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-${16.6*M_PI/180.0}</min_angle>
+              <max_angle>${16.6*M_PI/180.0}</max_angle>
+            </vertical>
+          </scan>
+
+          <!-- Range defines characteristics of an individual beam -->
+          <range>
+            <!-- Minimum distance of the beam -->
+            <min>${min_range}</min>
+            <!-- Maximum distance of the beam -->
+            <max>120</max>
+            <!-- Linear resolution of the beam -->
+            <resolution>0.02</resolution>
+          </range>
+        </ray>
+        <plugin name="gazebo_ros_lidar_plugin" filename="librotors_gazebo_os1_plugin.so">
+          <robot_namespace>${namespace}</robot_namespace>
+          <topic_name>${topic}</topic_name>
+          <frame_name>${lidar_points_frame}</frame_name>
+          <min_range>${min_range}</min_range>
+          <max_range>120</max_range>
+          <gaussian_noise>0.02</gaussian_noise>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+</robot>

@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <model name="calibration_chess_pattern">
+      <pose>0 0 0.6 0 0 0</pose>
+      <static>true</static>
+      <link name="body">
+        <visual name="visual">
+			<pose>0 0 0 0 0 0</pose> 
+			  <geometry>
+				<mesh><uri>model://calibration_chess_pattern/meshes/chess_pattern.dae</uri></mesh>
+			  </geometry>
+		</visual>
+		  <collision name="collision">
+			<pose>0 0 0  0 0 0</pose>
+			  <geometry>
+				<mesh><uri>model://calibration_chess_pattern/meshes/chess_pattern.stl</uri></mesh>
+			  </geometry>
+		  </collision>
+      </link>
+    </model>
+</sdf>
