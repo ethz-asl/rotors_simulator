@@ -24,12 +24,26 @@
   <xacro:include filename="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
 
   <!-- Mount a VI-sensor in front of the Firefly. -->
-  <xacro:vi_sensor_macro
-    namespace="${namespace}/vi_sensor"
-    parent_link="${namespace}/base_link"
-    enable_cameras="true"
-    enable_depth="true"
-    enable_ground_truth="true">
-    <origin xyz="0.1 0.0 -0.03" rpy="0.0 0.1 0.0" />
-  </xacro:vi_sensor_macro>
+  <xacro:property name="robot_name" value="$(arg mav_name)"/>
+  <xacro:if value="${robot_name == 'm100'}">
+    <!-- Different config for M100 -->
+    <xacro:vi_sensor_macro
+      namespace="${namespace}/vi_sensor"
+      parent_link="${namespace}/base_link"
+      enable_cameras="true"
+      enable_depth="true"
+      enable_ground_truth="true">
+      <origin xyz="0.15 0.0 -0.05" rpy="0 0.3 0" />
+    </xacro:vi_sensor_macro>
+  </xacro:if>
+  <xacro:if value="${robot_name != 'm100'}">
+    <xacro:vi_sensor_macro
+      namespace="${namespace}/vi_sensor"
+      parent_link="${namespace}/base_link"
+      enable_cameras="true"
+      enable_depth="true"
+      enable_ground_truth="true">
+      <origin xyz="0.1 0.0 -0.03" rpy="0.0 0.1 0.0" />
+    </xacro:vi_sensor_macro>
+  </xacro:if>
 </robot>
