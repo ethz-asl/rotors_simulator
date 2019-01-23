@@ -27,6 +27,7 @@
   <xacro:arg name="lidar_points_frame" default="os1_top" />
   <!--To erase all the readings resulting from laser beams hitting the mav itself-->
   <xacro:arg name="min_range" default="0.5" />
+  <xacro:arg name="n_beams" default="64" />
   <!-- Instantiate the mav with a generic odometry sensor. -->
   <xacro:include filename="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
 
@@ -48,7 +49,8 @@
            lidar_base_frame="$(arg lidar_base_frame)"
            lidar_points_frame="$(arg lidar_points_frame)"
            min_range="$(arg min_range)"
-           namespace="${namespace}">
+           namespace="${namespace}"
+           n_beams="${arg n_beams}">
     <!--Mounted upside down and tilted 10deg towards the floor-->
     <origin xyz="0 0 -0.07" rpy="3.14 0.17 0" />
   </xacro:OS-1>

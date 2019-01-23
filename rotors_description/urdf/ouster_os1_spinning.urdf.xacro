@@ -9,7 +9,7 @@
   <xacro:property name="l2" value="0.0305"/>
   <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro" />
 
-  <xacro:macro name="OS-1-spinning" params="*origin parent:=world sensor_name:=os1 topic:=/os1_points horizontal_angular_resolution_deg:=0.18 spin_frequency_hz:=10 lidar_base_frame:=os1_base lidar_points_frame:=os1_top namespace:=example min_range:=0.05">
+  <xacro:macro name="OS-1-spinning" params="*origin parent:=world sensor_name:=os1 topic:=/os1_points horizontal_angular_resolution_deg:=0.18 spin_frequency_hz:=10 lidar_base_frame:=os1_base lidar_points_frame:=os1_top namespace:=example min_range:=0.05 n_beams:=64">
     <gazebo>
       <plugin name="JointController" filename="libgazebo_ros_continous_joint_controller_plugin.so">
         <joint>${namespace}/${sensor_name}_joint</joint>
@@ -81,7 +81,7 @@
               <max_angle>${2*M_PI}</max_angle>
             </horizontal>
             <vertical>
-              <samples>64</samples>
+              <samples>${n_beams}</samples>
               <resolution>1</resolution>
               <min_angle>-${16.6*M_PI/180.0}</min_angle>
               <max_angle>${16.6*M_PI/180.0}</max_angle>

@@ -9,7 +9,7 @@
   <xacro:property name="l2" value="0.0305"/>
   <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro" />
 
-  <xacro:macro name="OS-1" params="*origin parent:=world sensor_name:=os1 topic:=/os1_points spin_frequency_hz:=10 lidar_base_frame:=os1_base lidar_points_frame:=os1_top namespace:=example min_range:=0.05">
+  <xacro:macro name="OS-1" params="*origin parent:=world sensor_name:=os1 topic:=/os1_points spin_frequency_hz:=10 lidar_base_frame:=os1_base lidar_points_frame:=os1_points namespace:=example min_range:=0.05 n_beams:=64">
 
     <joint name="${namespace}/${lidar_base_frame}_mount_joint" type="fixed">
       <xacro:insert_block name="origin" />
@@ -71,7 +71,7 @@
               <max_angle>${2*M_PI}</max_angle>
             </horizontal>
             <vertical>
-              <samples>64</samples>
+              <samples>${n_beams}</samples>
               <resolution>1</resolution>
               <min_angle>-${16.6*M_PI/180.0}</min_angle>
               <max_angle>${16.6*M_PI/180.0}</max_angle>
