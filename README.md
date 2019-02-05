@@ -1,46 +1,38 @@
-RotorS
+[![Build Status](https://travis-ci.org/gsilano/CrazyS.svg?branch=master)](https://travis-ci.org/gsilano/CrazyS)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+CrazyS
 ===============
 
-RotorS is a MAV gazebo simulator.
-It provides some multirotor models such as the [AscTec Hummingbird](http://www.asctec.de/en/uav-uas-drone-products/asctec-hummingbird/), the [AscTec Pelican](http://www.asctec.de/en/uav-uas-drone-products/asctec-pelican/), or the [AscTec Firefly](http://www.asctec.de/en/uav-uas-drone-products/asctec-firefly/), but the simulator is not limited for the use with these multicopters.
+CrazyS is an extension of the ROS package [RotorS](https://github.com/ethz-asl/rotors_simulator), aimed to modeling, developing and integrating the [Crazyflie 2.0](https://www.bitcraze.io/crazyflie-2/) nano-quadcopter in the physics based simulation environment Gazebo. The contribution can be also considered as a reference guide for expanding the RotorS functionalities in the UAVs field, by facilitating the integration of new aircrafts. 
 
-There are simulated sensors coming with the simulator such as an IMU, a generic odometry sensor, and the [VI-Sensor](http://wiki.ros.org/vi_sensor), which can be mounted on the multirotor.
+Such simulation platform allows to understand quickly the behavior of the flight control system by comparing and evaluating different indoor and outdoor scenarios, with a details level quite close to reality. The proposed extension expands RotorS capabilities by considering the Crazyflie 2.0 physical model and its flight control system, as well (the [2018.01.1](https://github.com/bitcraze/crazyflie-firmware/releases/tag/2018.01.1) firware release).
 
-This package also contains some example controllers, basic worlds, a joystick interface, and example launch files.
+A simple case study is considered (`crazyflie2_hovering_example.launch`) in order to show how the package works and the validity of the employed dynamical model together the control architecture of the quadcopter.
 
-Below we provide the instructions necessary for getting started. See RotorS' wiki for more instructions and examples (https://github.com/ethz-asl/rotors_simulator/wiki).
+The code is released under Apache license, thus making it available for scientific and educational activities.
 
-If you are using this simulator within the research for your publication, please cite:
-```bibtex
-@Inbook{Furrer2016,
-author="Furrer, Fadri
-and Burri, Michael
-and Achtelik, Markus
-and Siegwart, Roland",
-editor="Koubaa, Anis",
-chapter="RotorS---A Modular Gazebo MAV Simulator Framework",
-title="Robot Operating System (ROS): The Complete Reference (Volume 1)",
-year="2016",
-publisher="Springer International Publishing",
-address="Cham",
-pages="595--625",
-isbn="978-3-319-26054-9",
-doi="10.1007/978-3-319-26054-9_23",
-url="http://dx.doi.org/10.1007/978-3-319-26054-9_23"
-}
-```
+The platform has been developed by using Ubuntu 16.04 and the Kinetic Kame version of ROS. Although the platform is fully compatible with Indigo Igloo version of ROS and Ubuntu 14.04, such configuration is not recommended since the ROS support will close in April 2019.
+
+Below we provide the instructions necessary for getting started. See [CrazyS' wiki](https://github.com/gsilano/CrazyS/wiki) for more instructions and examples.
+
+If you are using this simulator within the research for your publication, please take a look at the [Publications page](https://github.com/gsilano/CrazyS/wiki/Publications). The page contains core papers and all linked works (using the platform).
+
 Installation Instructions - Ubuntu 16.04 with ROS Kinetic
 ---------------------------------------------------------
  1. Install and initialize ROS kinetic desktop full, additional ROS packages, catkin-tools, and wstool:
 
  ```
- $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
- $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
- $ sudo apt-get update
- $ sudo apt-get install ros-kinetic-desktop-full ros-kinetic-joy ros-kinetic-octomap-ros ros-kinetic-mavlink python-wstool python-catkin-tools protobuf-compiler libgoogle-glog-dev ros-kinetic-control-toolbox
- $ sudo rosdep init
- $ rosdep update
- $ source /opt/ros/kinetic/setup.bash
+$ sudo sh -c ’echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list’
+$ sudo apt-key adv --keyserver hkp://ha.pool.skskeyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+$ sudo apt-get update
+$ sudo apt-get install ros-kinetic-desktop-full ros-kinetic-joy ros-kinetic-octomap-ros ros-kinetic-mavlink python-catkin-tools protobuf-compiler libgoogle-glog-dev ros-kinetic-control-toolbox
+$ sudo rosdep init
+$ rosdep update
+$ echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
+$ source ~/.bashrc
+$ sudo apt-get install python-rosinstall pythonrosinstall-
+generator python-wstool build-essential
  ```
  2. If you don't have ROS workspace yet you can do so by
 
@@ -48,10 +40,14 @@ Installation Instructions - Ubuntu 16.04 with ROS Kinetic
  $ mkdir -p ~/catkin_ws/src
  $ cd ~/catkin_ws/src
  $ catkin_init_workspace  # initialize your catkin workspace
- $ wstool init
- $ wget https://raw.githubusercontent.com/ethz-asl/rotors_simulator/master/rotors_hil.rosinstall
- $ wstool merge rotors_hil.rosinstall
- $ wstool update
+ $ catkin init
+ $ git clone https://github.com/gsilano/CrazyS.git
+ $ git clone https://github.com/gsilano/mav_comm.git
+ $ cd ~/catkin_ws/src/mav_comm & git checkout crazys
+ $ rosdep update
+ $ cd ~/catkin_ws
+ $ rosdep install --from-paths src -i
+ $ catkin build
  ```
 
   > **Note** On OS X you need to install yaml-cpp using Homebrew `brew install yaml-cpp`.
@@ -69,20 +65,21 @@ Installation Instructions - Ubuntu 16.04 with ROS Kinetic
    $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
    $ source ~/.bashrc
    ```
-
 Installation Instructions - Ubuntu 14.04 with ROS Indigo
 --------------------------------------------------------
 
  1. Install and initialize ROS indigo desktop full, additional ROS packages, catkin-tools, and wstool:
 
  ```
- $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
- $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+ $ sudo sh -c ’echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list’
+ $ sudo apt-key adv --keyserver hkp://ha.pool.skskeyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
  $ sudo apt-get update
- $ sudo apt-get install ros-indigo-desktop-full ros-indigo-joy ros-indigo-octomap-ros python-wstool python-catkin-tools protobuf-compiler libgoogle-glog-dev
+ $ sudo apt-get install ros-indigo-desktop-full ros-indigo-joy ros-indigo-octomap-ros python-wstool python-catkin-tools protobuf compiler libgoogle-glog-dev
  $ sudo rosdep init
  $ rosdep update
- $ source /opt/ros/indigo/setup.bash
+ $ echo "source /opt/ros/indigo/setup.bash" >> ~/.bashrc
+ $ source ~/.bashrc
+ $ sudo apt-get install python-rosinstall
  ```
  2. If you don't have ROS workspace yet you can do so by
 
@@ -90,15 +87,19 @@ Installation Instructions - Ubuntu 14.04 with ROS Indigo
  $ mkdir -p ~/catkin_ws/src
  $ cd ~/catkin_ws/src
  $ catkin_init_workspace  # initialize your catkin workspace
- $ wstool init
+ $ catkin init
  ```
- > **Note** for setups with multiple workspaces please refer to the official documentation at http://docs.ros.org/independent/api/rosinstall/html/ by replacing `rosws` by `wstool`.
+ > **Note** for setups with multiple workspaces please refer to the [official documentation](http://docs.ros.org/independent/api/rosinstall/html/) by replacing `rosws` by `wstool`.
  3. Get the simulator and additional dependencies
 
  ```
  $ cd ~/catkin_ws/src
- $ git clone git@github.com:ethz-asl/rotors_simulator.git
- $ git clone git@github.com:ethz-asl/mav_comm.git
+ $ git clone https://github.com/gsilano/CrazyS.git
+ $ git clone https://github.com/gsilano/mav_comm.git
+ $ cd ~/catkin_ws/src/mav_comm & git checkout crazys
+ $ rosdep update
+ $ cd ~/catkin_ws
+ $ rosdep install --from-paths src -i
  ```
   > **Note** On OS X you need to install yaml-cpp using Homebrew `brew install yaml-cpp`.
 
@@ -130,82 +131,30 @@ Installation Instructions - Ubuntu 14.04 with ROS Indigo
    $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
    $ source ~/.bashrc
    ```
-
 Basic Usage
 -----------
 
-Launch the simulator with a hex-rotor helicopter model, in our case, the AscTec Firefly in a basic world.
+Launching the simulation is quite simple, so as customizing it: it is enough to run in a terminal the command
 
 ```
-$ roslaunch rotors_gazebo mav_hovering_example.launch mav_name:=firefly world_name:=basic
+$ roslaunch rotors_gazebo crazyflie2_hovering_example.launch
 ```
 
-> **Note** The first run of gazebo might take considerably long, as it will download some models from an online database.
+> **Note** The first run of gazebo might take considerably long, as it will download some models from an online database. To avoid any problems when starting the simulation for the first time, you may run the `gazebo` command in the terminal line.
 
-The simulator starts by default in paused mode. To start it you can either
- - use the Gazebo GUI and press the play button
- - or you can send the following service call.
-
-   ```
-   $ rosservice call gazebo/unpause_physics
-   ```
-
-There are some basic launch files where you can load the different multicopters with additional sensors. They can all be found in `~/catkin_ws/src/rotors_simulator/rotors_gazebo/launch`.
-
-The `world_name` argument looks for a .world file with a corresponding name in `~/catkin_ws/src/rotors_simulator/rotors_gazebo/worlds`. By default, all launch files, with the exception of those that have the world name explicitly included in the file name, use the empty world described in `basic.world`.
-
-### Getting the multicopter to fly
-
-To let the multicopter fly you need to generate thrust with the rotors, this is achieved by sending commands to the multicopter, which make the rotors spin.
-There are currently a few ways to send commands to the multicopter, we will show one of them here.
-The rest is documented [here](../../wiki) in our Wiki.
-We will here also show how to write a stabilizing controller and how you can control the multicopter with a joystick.
-
-#### Send direct motor commands
-
-We will for now just send some constant motor velocities to the multicopter.
+By default the state estimator is disabled since on-board Crazyflie's sensors are replaced by the odometry one. For running the simulation by taking into account the Crazyflie's IMU and the complementary filter, it is enough to give a command that turns on the flag `enable state estimator`:
 
 ```
-$ rostopic pub /firefly/command/motor_speed mav_msgs/Actuators '{angular_velocities: [100, 100, 100, 100, 100, 100]}'
+$ roslaunch rotors_gazebo crazyflie2_hovering_example.launch enable_state_estimator:=true
 ```
 
-> **Note** The size of the `motor_speed` array should be equal to the number of motors you have in your model of choice (e.g. 6 in the Firefly model).
+The visual outcome will see the nano-quadcopter taking off after 5s (time after which the hovering example node publishes the trajectory to follow) and flying one meter above the ground, at the same time keeping near to zero the position components along x and y-axis.
 
-You should see (if you unpaused the simulator and you have a multicopter in it), that the rotors start spinning. The thrust generated by these motor velocities is not enough though to let the multicopter take off.
-> You can play with the numbers and will realize that the Firefly will take off with motor speeds of about 545 on each rotor. The multicopter is unstable though, since there is no controller running, if you just set the motor speeds.
+The whole process is the following: the desired trajectory coordinates (x_r, y_r, z_r and \psi_r) are published by the `hovering_example` node on the topic `command/trajectory`, to whom the `position_controller` node (i.e., the Crazyflie controller) is subscribed. The drone state (`odometry_sensor1/odometry` topic) and the references are used to run the control strategy designed for the position tracking. The outputs of the control algorithm consist into the actuation commands (\omega_1, \omega_2, \omega_3 and \omega_4) sent to Gazebo (`command/motor_speed`) for the physical simulation and the corresponding graphical rendering, so to visually update the aircraft position and orientation. When the state estimator is turned off, the drone orientation (\phi_k, \theta_k and \psi_k) and angular velocities (p_k, q_k and r_k) published on the topic odometry are replaced by the ideal values coming from the odometry sensor.
 
+There are some basic launch files where you can load the different multicopters with additional sensors. They can all be found in `~/catkin_ws/src/CrazyS/rotors_gazebo/launch`. Suche scenarios are better explained in the [RotorS](https://github.com/ethz-asl/rotors_simulator) repository.
 
-#### Let the helicopter hover with ground truth odometry
-
-You can let the helicopter hover with ground truth odometry (perfect state estimation), by launching:
-
-```
-$ roslaunch rotors_gazebo mav_hovering_example.launch mav_name:=firefly world_name:=basic
-```
-
-#### Create an attitude controller
-
-**TODO(ff):** `Write something here.`
-
-#### Usage with a joystick
-
-Connect a USB joystick to your computer and launch the simulation alongside ROS joystick driver and the RotorS joystick node:
-```
-$ roslaunch rotors_gazebo mav_with_joy.launch mav_name:=firefly world_name:=basic
-```
-
-Depending on the type of joystick and the personal preference for operation, you can assign the axis number using the `axis_<roll/pitch/thrust>_` parameter and the axis direction using the `axis_direction_<roll/pitch/thrust>` parameter.
-
-#### Usage with a keyboard
-
-First, perform a one-time setup of virtual keyboard joystick as described here: https://github.com/ethz-asl/rotors_simulator/wiki/Setup-virtual-keyboard-joystick.
-
-Launch the simulation with the keyboard interface using the following launch file:
-```
-$ roslaunch rotors_gazebo mav_with_keyboard.launch mav_name:=firefly world_name:=basic
-```
-
-If everything was setup correctly, an additional GUI should appear with bars indicating the current throttle, roll, pitch, and yaw inputs. While this window is active, the Arrows and W, A, S, D keys will generate virtual joystick inputs, which can then be processed by the RotorS joystick node in the same way as real joystick commands.
+The `world_name` argument looks for a .world file with a corresponding name in `~/catkin_ws/src/CrazyS/rotors_gazebo/worlds`. By default, all launch files, with the exception of those that have the world name explicitly included in the file name, use the empty world described in `basic.world`.
 
 Gazebo Version
 --------------
@@ -214,3 +163,18 @@ At a minimum, Gazebo `v2.x` is required (which is installed by default with ROS 
 
 1. `iris.sdf` can only be generated with Gazebo >= `v3.0`, as it requires use of the `gz sdf ...` tool. If this requirement is not met, you will not be able to use the Iris MAV in any of the simulations.
 2. The Gazebo plugins `GazeboGeotaggedImagesPlugin`, `LidarPlugin` and the `LiftDragPlugin` all require Gazebo >= `v5.0`, and will not be built if this requirement is not met.
+
+Bugs & Feature Requests
+--------------
+
+Please report bugs and request features by using the [Issue Tracker](https://github.com/gsilano/CrazyS/issues). Furthermore, please see
+the [Contributing.md](https://github.com/gsilano/CrazyS/blob/master/CONTRIBUTING.md) file if you plan to help us to improve 
+CrazyS features.
+
+YouTube videos
+--------------
+
+In this section a video providing the effectiveness of the platform and how it works is reported. Further videos can be found in the related YouTube channel. Have fun! :)
+
+[![CrazyS, an exntension of the ROS pakcage RotrS aimed to modeling, developing and integrating the Crazyflie 2.0 nano-quadcopter](https://github.com/gsilano/CrazyS/wiki/img/img_YouTube_MED18.png)](https://youtu.be/qsrYCUSQ-S4 "CrazyS, an exntension of the ROS pakcage RotrS aimed to modeling, developing and integrating the Crazyflie 2.0 nano-quadcopter")
+

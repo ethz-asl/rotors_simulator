@@ -49,20 +49,21 @@
 
 namespace rotors_control {
 
-class ComplementaryFilterCrazyflie2 {
-  public:
-    ComplementaryFilterCrazyflie2();
-    ~ComplementaryFilterCrazyflie2();
+	class ComplementaryFilterCrazyflie2 {
+	  public:
+	    ComplementaryFilterCrazyflie2();
+	    ~ComplementaryFilterCrazyflie2();
 
-    void EstimatorComplementary(state_t* state, sensorData_t* sensorData);
+	    void EstimateRate(state_t* state, sensorData_t* sensorData);
+	    void EstimateAttitude(state_t* state, sensorData_t* sensorData);
 
-  private:
+	  private:
 
-    SensFusion sensors_fusion_;
-
-    void PositionUpdateVelocity(double* angularVelocityY, double* angularVelocityX, double* angularAccY, double* angularAccX);
-
-};
+	    SensFusion sensors_fusion_;
+	 
+	    void PositionUpdateAngularVelocity(double* angularVelocityZ, double* angularVelocityY,          
+		   double* angularVelocityX, double* angularAccZ, double* angularAccY, double* angularAccX);
+	};
 
 }
 

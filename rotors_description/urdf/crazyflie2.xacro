@@ -19,6 +19,7 @@
 -->
 
 <robot name="crazyflie2" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Properties (Taken from Novel Dynamic Inversion Architecture Design for Quadrocopter Control by Jian Wang et al.) -->
   <xacro:property name="namespace" value="$(arg mav_name)" />
   <xacro:property name="rotor_velocity_slowdown_sim" value="50" />
   <xacro:property name="use_mesh_file" value="true" />
@@ -32,7 +33,7 @@
   <xacro:property name="radius_rotor" value="0.0225" /> <!-- [m] -->
   <xacro:property name="sin45" value="0.707106781186" />
   <xacro:property name="cos45" value="0.707106781186" />
-
+  <!-- Forster's -->
   <xacro:property name="motor_constant" value="1.28192e-08" /> <!-- [kg m/s^2] -->
   <xacro:property name="moment_constant" value="5.964552e-03" /> <!-- [m] -->
   <xacro:property name="time_constant_up" value="0.0125" /> <!-- [s] -->

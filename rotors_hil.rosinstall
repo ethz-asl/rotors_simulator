@@ -1,4 +1,0 @@
-- git: {local-name: mav_comm, uri: 'https://github.com/ethz-asl/mav_comm.git'}
-- git: {local-name: mavlink, uri: 'https://github.com/mavlink/mavlink-gbp-release.git', version: 'upstream'}
-- git: {local-name: mavros, uri: 'https://github.com/ethz-asl/mavros.git'}
-- git: {local-name: rotors_simulator, uri: 'https://github.com/ethz-asl/rotors_simulator.git'}

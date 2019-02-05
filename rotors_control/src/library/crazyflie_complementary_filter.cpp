@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Originally authored by BitCraze (https://github.com/bitcraze/crazyflie-firmware), commit #0ad0181 on 22 Dec 2017
+ * Originally authored by BitCraze (https://github.com/bitcraze/crazyflie-firmware), commit #0ad0181 on 20 Dec 2017
  *
  *    ||          ____  _ __
  * +------+      / __ )(_) /_______________ _____  ___
@@ -41,34 +41,36 @@
  * estimator_complementary.c - Complementary estimator
  */
 
-#include "rotors_control/complementary_filter_crazyflie2.h"
+#include "rotors_control/crazyflie_complementary_filter.h"
 #include "rotors_control/stabilizer_types.h"
 
 namespace rotors_control {
 
-#define ATTITUDE_UPDATE_RATE RATE_250_HZ
+#define ATTITUDE_UPDATE_RATE 250
 #define ATTITUDE_UPDATE_DT 1.0/ATTITUDE_UPDATE_RATE
 
 ComplementaryFilterCrazyflie2::ComplementaryFilterCrazyflie2() {}
 
 ComplementaryFilterCrazyflie2::~ComplementaryFilterCrazyflie2() {}
 
-void ComplementaryFilterCrazyflie2::PositionUpdateVelocity(double* angularVelocityY, double* angularVelocityX,
-                       double* angularAccY, double* angularAccX) {
+void ComplementaryFilterCrazyflie2::PositionUpdateAngularVelocity(double* angularVelocityZ, double* angularVelocityY,          
+           double* angularVelocityX, double* angularAccZ, double* angularAccY, double* angularAccX) {
 
   *angularVelocityY = *angularAccY;
+  *angularVelocityZ = *angularAccZ;
   *angularVelocityX = *angularAccX;
 }
 
-void ComplementaryFilterCrazyflie2::EstimatorComplementary(state_t* state, sensorData_t* sensorData){
+void ComplementaryFilterCrazyflie2::EstimateAttitude(state_t* state, sensorData_t* sensorData){
 
-  // Read sensors at full rate (1000Hz)
+  // Sensors values are read at full rate (500Hz). The IMU topic publishes data with a frequency around 800Hz but such data is passed to the position control
+  // algorithm with a frequency of 500Hz. There is a timer that manages data exchange.
   sensors_fusion_.Sensfusion6UpdateQ(&sensorData->gyro.x, &sensorData->gyro.y, &sensorData->gyro.z, &sensorData->acc.x, &sensorData->acc.y, &sensorData->acc.z, (double) ATTITUDE_UPDATE_DT);
 
-  // Save attitude, adjusted for the legacy CF2 body coordinate system
+  // Saving attitude values, adjusted for the legacy CF2 body coordinate system
   sensors_fusion_.Sensfusion6GetEulerRPY(&state->attitude.roll, &state->attitude.pitch, &state->attitude.yaw);
 
-  // Save quaternion, hopefully one day this could be used in a better controller.
+  // Saving quaternion values, hopefully one day this could be used in a better controller.
   // Note that this is not adjusted for the legacy coordinate system
   sensors_fusion_.Sensfusion6GetQuaternion(
       &state->attitudeQuaternion.x,
@@ -78,9 +80,15 @@ void ComplementaryFilterCrazyflie2::EstimatorComplementary(state_t* state, senso
 
    sensors_fusion_.Sensfusion6GetAccZWithoutGravity(&state->angularVelocity.z, &sensorData->acc.x, &sensorData->acc.y, &sensorData->acc.z);
 
-   PositionUpdateVelocity(&state->angularVelocity.y, &state->angularVelocity.x, &sensorData->gyro.y, &sensorData->gyro.x);
+}
+
+void ComplementaryFilterCrazyflie2::EstimateRate(state_t* state, sensorData_t* sensorData){
+
+   PositionUpdateAngularVelocity(&state->angularVelocity.z, &state->angularVelocity.y, &state->angularVelocity.x, &sensorData->gyro.z, &sensorData->gyro.y, &sensorData->gyro.x);
 
 }
 
 }
+
+
 

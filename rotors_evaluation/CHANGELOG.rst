@@ -2,46 +2,22 @@
 Changelog for package rotors_evaluation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.1.1 (2017-04-27)
------------
-* update maintainers
-* Contributors: fmina
-
-2.1.0 (2017-04-08)
------------
-* switch url website in package.xml to github repo
-* add/change url and cleanup of package.xml files
-  This addresses `#202 <https://github.com/ethz-asl/rotors_simulator/issues/202>`_.
-* Contributors: Fadri Furrer
-
-2.0.1 (2015-08-10)
-------------------
-* fixed the bag plugin and the evaluation
-* Contributors: Fadri Furrer
-
-2.0.0 (2015-08-09)
+4.0.6 (2019-01-04)
 ------------------
 
-1.1.6 (2015-06-11)
+4.0.5 (2018-12-17)
 ------------------
 
-1.1.5 (2015-06-09)
+4.0.4 (2018-09-30)
 ------------------
 
-1.1.4 (2015-05-28)
+4.0.3 (2018-06-04)
 ------------------
 
-1.1.3 (2015-05-28)
+4.0.2 (2018-02-23)
 ------------------
 
-1.1.2 (2015-05-27)
-------------------
-* added nav_msgs dependency and fixed rotors_evaluation's setup.py
-* rotors_evaluation: added rospy dependency
-
-1.1.1 (2015-04-24)
-------------------
-
-1.1.0 (2015-04-24)
+4.0.1 (2018-02-02)
 ------------------
 * initial Ubuntu package release
+* Contributors: Giuseppe Silano, Luigi Iannelli

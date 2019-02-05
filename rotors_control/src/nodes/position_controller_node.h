@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#ifndef ROTORS_CONTROL_POSITION_CONTROLLER_NODE_H
-#define ROTORS_CONTROL_POSITION_CONTROLLER_NODE_H
+#ifndef CRAYZFLIE_2_POSITION_CONTROLLER_NODE_H
+#define CRAYZFLIE_2_POSITION_CONTROLLER_NODE_H
 
 #include <boost/bind.hpp>
 #include <Eigen/Eigen>
@@ -33,10 +33,12 @@
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
+#include <ros/time.h>
+
 
 #include "rotors_control/common.h"
 #include "rotors_control/position_controller.h"
-#include "rotors_control/complementary_filter_crazyflie2.h"
+#include "rotors_control/crazyflie_complementary_filter.h"
 
 
 namespace rotors_control {
@@ -51,14 +53,27 @@ namespace rotors_control {
 
         private:
 
+            bool waypointHasBeenPublished_ = false;
+            bool enable_state_estimator_;
+
             PositionController position_controller_;
+            sensorData_t sensors_;
+            ros::Time imu_msg_head_stamp_;
 
             std::string namespace_;
 
+            ros::NodeHandle n_;
+            ros::Timer timer_Attitude_;
+            ros::Timer timer_highLevelControl;
+            ros::Timer timer_IMUUpdate;
+
+            //Callback functions to compute the errors among axis and angles
+            void CallbackAttitudeEstimation(const ros::TimerEvent& event);
+            void CallbackHightLevelControl(const ros::TimerEvent& event);
+            void CallbackIMUUpdate(const ros::TimerEvent& event);
+ 
             //subscribers
-            ros::Subscriber cmd_trajectory_sub_;
             ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
-            ros::Subscriber cmd_pose_sub_;
             ros::Subscriber odometry_sub_;
             ros::Subscriber imu_sub_;
 
@@ -69,11 +84,7 @@ namespace rotors_control {
             std::deque<ros::Duration> command_waiting_times_;
             ros::Timer command_timer_;
 
-            void TimedCommandCallback(const ros::TimerEvent& e);
-
             void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
-
-            void CommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg);
 
             void OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg);
 
@@ -82,4 +93,4 @@ namespace rotors_control {
     };
 }
 
-#endif // ROTORS_CONTROL_POSITION_CONTROLLER_NODE_H
+#endif // CRAZYFLIE_2_POSITION_CONTROLLER_NODE_H

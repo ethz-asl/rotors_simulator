@@ -26,14 +26,21 @@
   <!-- Instantiate a controller. -->
   <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu" />
 
+  <!-- Enable the MAVLink interface. It is useful for the HIL (Hardware-in-the-loop) tests -->
   <xacro:if value="$(arg enable_mavlink_interface)">
     <!-- Instantiate mavlink telemetry interface. -->
     <xacro:default_mavlink_interface namespace="${namespace}" imu_sub_topic="imu" rotor_count="4" />
   </xacro:if>
 
-  <!-- Mount an MPU-9250 IMU. -->
-  <xacro:crazyflie2_imu namespace="${namespace}" parent_link="${namespace}/base_link" /> 
+  <!-- Mount an MPU-9250 IMU if the state estimator is enabled, otherwise the virtual odometry sensor is used. -->
+  <xacro:if value="$(arg enable_state_estimator)">
+    <xacro:crazyflie2_imu namespace="${namespace}" parent_link="${namespace}/base_link" /> 
+  </xacro:if>
 
+  <!-- Mount a generic odometry sensor. -->
+  <xacro:crazyflie2_odometry namespace="${namespace}" parent_link="${namespace}/base_link" /> 
+
+  <!-- Mount a generic odometry sensor employed as ground truth -->
   <xacro:if value="$(arg enable_ground_truth)">
     <xacro:ground_truth_imu_and_odometry namespace="${namespace}" parent_link="${namespace}/base_link" />
   </xacro:if>

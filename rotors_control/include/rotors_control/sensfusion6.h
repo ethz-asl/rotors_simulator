@@ -46,45 +46,32 @@
 
 namespace rotors_control {
 
-static double q0 = 1.0f;
-static double q1 = 0.0f;
-static double q2 = 0.0f;
-static double q3 = 0.0f;  // quaternion of sensor frame relative to auxiliary frame [w,x,y,z]
+	class SensFusion {
+	  public:
+	    SensFusion();
+	    ~SensFusion();
 
-// The acc in Z for static position (g) in m/s^2
-// Set on first update, assuming we are in a static position since the sensors were just calibrates.
-// This value will be better the more level the copter is at calibration time
-static double baseZacc = 9.81;
+	    void Sensfusion6UpdateQ(double *gx, double *gy, double *gz, double *ax, double *ay, double *az, double dt);
+	    void Sensfusion6GetQuaternion(double* qx, double* qy, double* qz, double* qw);
+	    void Sensfusion6GetEulerRPY(double* roll, double* pitch, double* yaw);
+	    void Sensfusion6GetAccZWithoutGravity(double* angularAccZ, double* ax, double* ay, double* az);
 
-class SensFusion {
-  public:
-    SensFusion();
-    ~SensFusion();
+	  private:
+	   
+	    // quaternion of sensor frame relative to auxiliary frame [w,x,y,z]
+	    double q0_, q1_, q2_, q3_;
+	    double baseZacc_;
 
-    void Sensfusion6UpdateQ(double *gx, double *gy, double *gz, double *ax, double *ay, double *az, double dt);
-    void Sensfusion6GetQuaternion(double* qx, double* qy, double* qz, double* qw);
-    void Sensfusion6GetEulerRPY(double* roll, double* pitch, double* yaw);
-    void Sensfusion6GetAccZWithoutGravity(double* angularAccZ, double* ax, double* ay, double* az);
+	    // Unit vector in the estimated gravity direction
+	    double gravX_, gravY_, gravZ_;
 
-  private:
-   
-    double q0_ = q0;
-    double q1_ = q1;
-    double q2_ = q2;
-    double q3_ = q3;
-    double baseZacc_ = baseZacc;
-
-    // Unit vector in the estimated gravity direction
-    double gravX_, gravY_, gravZ_;
-
-    bool isCalibrated_;
-   
-    double Sensfusion6GetInvThrustCompensationForTilt();
-    double InvSqrt(double x);
-    void EstimatedGravityDirection(double* gx, double* gy, double* gz);
-    void Sensfusion6GetAccZ(double* baseZacc_, double* ax, double* ay, double* az);
-
-  };
+	    bool isCalibrated_;
+	   
+	    double Sensfusion6GetInvThrustCompensationForTilt();
+	    double InvSqrt(double x);
+	    void EstimatedGravityDirection(double* gx, double* gy, double* gz);
+	    void Sensfusion6GetAccZ(double* baseZacc_, double* ax, double* ay, double* az);
+      };
 }
 
 #endif /* SENSORFUSION6_CRAZYFLIE_H_ */

@@ -53,15 +53,20 @@ void MsgCallback(const nav_msgs::Odometry odometry_msg)
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
 
-    //We need to change the sign because the conversion is along XYZ and not ZYX, on wich the control algorithms has been 
-    //designed
-    roll = -1 * roll; 
+    double yaw_degrees = yaw * 180.0 / M_PI; // conversion to degrees
+    if( yaw_degrees < 0 ) yaw_degrees += 360.0; // convert negative to positive angles
+
+    double roll_degrees = roll * 180.0 / M_PI; // conversion to degrees
+    if( roll_degrees < 0 ) roll_degrees += 360.0; // convert negative to positive angles
+
+    double pitch_degrees = pitch * 180.0 / M_PI; // conversion to degrees
+    if( pitch_degrees < 0 ) pitch_degrees += 360.0; // convert negative to positive angles
 
     // the found angles are written in a geometry_msgs::Vector3
     geometry_msgs::Vector3 rpy;
-    rpy.x = roll * (180 / M_PI);
-    rpy.y = pitch * (180 / M_PI);
-    rpy.z = yaw * (180 / M_PI);
+    rpy.x = roll_degrees;
+    rpy.y = pitch_degrees;
+    rpy.z = yaw_degrees;
 
     // this Vector is then published:
     rpy_publisher.publish(rpy);

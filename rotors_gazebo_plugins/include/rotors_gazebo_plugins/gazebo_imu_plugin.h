@@ -5,6 +5,7 @@
  * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
  * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
  * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
+ * Copyright 2018 Giuseppe Silano, University of Sannio, Benevento, Italy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +56,9 @@ static constexpr double kDefaultAdisAccelerometerTurnOnBiasSigma =
     20.0e-3 * 9.8;
 // Earth's gravity in Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84)
 static constexpr double kDefaultGravityMagnitude = 9.8068;
+static constexpr int kDefaultMeasurementDivisor = 1;
+static constexpr int kDefaultMeasurementDelay = 0;
+static constexpr int kDefaultGazeboSequence = 0.0;
 
 // A description of the parameters:
 // https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics
@@ -78,6 +82,9 @@ struct ImuParameters {
   double accelerometer_turn_on_bias_sigma;
   /// Norm of the gravitational acceleration [m/s^2]
   double gravity_magnitude;
+  int measurement_divisor_;
+  int gazebo_sequence_;
+  int measurement_delay_;
 
   ImuParameters()
       : gyroscope_noise_density(kDefaultAdisGyroscopeNoiseDensity),
@@ -87,6 +94,9 @@ struct ImuParameters {
         gyroscope_turn_on_bias_sigma(kDefaultAdisGyroscopeTurnOnBiasSigma),
         accelerometer_noise_density(kDefaultAdisAccelerometerNoiseDensity),
         accelerometer_random_walk(kDefaultAdisAccelerometerRandomWalk),
+        measurement_divisor_(kDefaultMeasurementDivisor),
+        measurement_delay_(kDefaultMeasurementDelay),
+        gazebo_sequence_(kDefaultGazeboSequence),
         accelerometer_bias_correlation_time(
             kDefaultAdisAccelerometerBiasCorrelationTime),
         accelerometer_turn_on_bias_sigma(
@@ -96,6 +106,10 @@ struct ImuParameters {
 
 class GazeboImuPlugin : public ModelPlugin {
  public:
+
+  typedef std::deque<std::pair<int, gazebo::msgs::Quaternion*> > ImuQueueQuaternion;
+  typedef std::deque<std::pair<int, gazebo::msgs::Vector3d*> > ImuQueueAngularVelocity;
+  typedef std::deque<std::pair<int, gazebo::msgs::Vector3d*> > ImuQueueLinearAcceleration;
 
   GazeboImuPlugin();
   ~GazeboImuPlugin();
@@ -123,12 +137,15 @@ class GazeboImuPlugin : public ModelPlugin {
   ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
   bool pubs_and_subs_created_;
 
+  ImuQueueQuaternion imu_queue_quaternion_;
+  ImuQueueLinearAcceleration imu_queue_linear_acceleration_;
+  ImuQueueAngularVelocity imu_queue_angular_velocity_;
+
   /// \brief    Creates all required publishers and subscribers, incl. routing of messages to/from ROS if required.
   /// \details  Call this once the first time OnUpdate() is called (can't
   ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
   ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
   void CreatePubsAndSubs();
-
 
   std::string namespace_;
   std::string imu_topic_;
@@ -173,6 +190,7 @@ class GazeboImuPlugin : public ModelPlugin {
   Eigen::Vector3d accelerometer_turn_on_bias_;
 
   ImuParameters imu_parameters_;
+
 };
 
 }  // namespace gazebo

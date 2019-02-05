@@ -2,64 +2,40 @@
 Changelog for package rotors_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.2.0.1 (2018-02-23)
------------
+4.0.6 (2019-01-04)
+------------------
+* Changes in the position controller libray to fix issue in the building process
+* Contributors: Giuseppe Silano
+
+4.0.5 (2018-12-17)
+------------------
+* The position_controller_node_with_stateEstimator and position_controller_node_without_stateEstimator files were rewritten as an unique controller: the position_controller_node
+* The comments have been reviewed improving the readability of the code
+* Some bugs have been fixed
+* Contributors: Giuseppe Silano
+
+4.0.4 (2018-09-30)
+------------------
+* Names update. Some cpp files have been renamed in a more general way making them independent of Crazyflie (e.g., the complementary filter).
+* Contributors: Giuseppe Silano
+
+4.0.3 (2018-06-04)
+------------------
+* bug fixing in the controller position node and in the controller position, complementary filter and sensfusion6 algorithms
+* the controller position node algorithm has been split into two parts: with and without state estimator
+* the position controller algorithm now is able to handle both ideal and real simulations (with and without real sensors)
+* the control algorithm has been split into two parts: high and low level. In this way, the high level part can be restructured without changes in the low one. Indeed, the Crazyflie on board control architectured does not change unless the firmware is changed
+* Contributors: Giuseppe Silano, Luigi Iannelli
+
+4.0.2 (2018-02-23)
+------------------
 * added the Crazyflie 2.0 default state estimator: complementary filter, in according to the last firmware release 2018.01.01
 * modified the position controller in order to take into account the state estimator
 * Contributors: Giuseppe Silano, Luigi Iannelli
 
-2.2.0 (2018-02-02)
------------
+4.0.1 (2018-02-02)
+------------------
 * added Crazyflie 2.0 position controller. The lower level controller is the same of the Crazyflie 2.0 firmware (released 2018.01.01)
+* started from the 2.1.1 (2017-04-27) release version of RotorS
 * Contributors: Giuseppe Silano, Emanuele Aucone, Benjamin Rodriguez, Luigi Iannelli
 
-2.1.1 (2017-04-27)
------------
-* update maintainers
-* Contributors: fmina
-
-2.1.0 (2017-04-08)
------------
-* Removing unfinished parts of px4 dummy controller and gazebo mavlink interface. Refactoring gazebo mavlink interface.
-* set all queue lengths to 1
-* make rotors_control CMakeLists consistent with upstream
-* bring rotors_control CMakeLists closer to upstream
-* update launch and xacro files to new names, update use of odometry plugin
-* px4 dummy controller: fix include paths after merge
-* fix include dir
-* move px4 files to new directories
-* Contributors: Fadri Furrer, Thomas Gubler, pvechersky
-
-2.0.1 (2015-08-10)
-------------------
-
-2.0.0 (2015-08-09)
-------------------
-* Converted to new mav_comm messages, including new MultiDOFJointTrajectory and PoseStamped as waypoints.
-* Added subscriber for MultiDOFJointTrajectory messages and extended waypoint_publisher_file to test it. resolves `#243 <https://github.com/ethz-asl/rotors_simulator/issues/243>`_
-* Contributors: Helen Oleynikova, Markus Achtelik
-
-1.1.6 (2015-06-11)
-------------------
-
-1.1.5 (2015-06-09)
-------------------
-* added install targets
-
-1.1.4 (2015-05-28)
-------------------
-
-1.1.3 (2015-05-28)
-------------------
-* added installation of controller libraries
-
-1.1.2 (2015-05-27)
-------------------
-* added nav_msgs dependency and fixed rotors_evaluation's setup.py
-
-1.1.1 (2015-04-24)
-------------------
-
-1.1.0 (2015-04-24)
-------------------
-* initial Ubuntu package release

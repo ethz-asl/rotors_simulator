@@ -1,16 +1,11 @@
 <package>
   <name>rotors_gazebo</name>
-  <version>2.2.0</version>
+  <version>4.0.6</version>
   <description>The rotors_gazebo package</description>
 
-  <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
-  <maintainer email="mina.kamel@mavt.ethz.ch">Mina Kamel</maintainer>
+  <maintainer email="giuseppe.silano@unisannio.it">Giuseppe Silano</maintainer>
+  <maintainer email="luigi.iannelli@unisannio.it">Luigi Iannelli</maintainer>
 
-  <author>Fadri Furrer</author>
-  <author>Michael Burri</author>
-  <author>Mina Kamel</author>
-  <author>Janosch Nikolic</author>
-  <author>Markus Achtelik</author>
   <author>Giuseppe Silano</author>
   <author>Emanuele Aucone</author>
   <author>Benjamin Rodriguez</author>
@@ -18,8 +13,8 @@
 
   <license>ASL 2.0</license>
 
-  <url type="website">https://github.com/ethz-asl/rotors_simulator</url>
-  <url type="bugtracker">https://github.com/ethz-asl/rotors_simulator/issues</url>
+  <url type="website">https://github.com/gsilano/CrazyS</url>
+  <url type="bugtracker">https://github.com/gsilano/CrazyS/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 

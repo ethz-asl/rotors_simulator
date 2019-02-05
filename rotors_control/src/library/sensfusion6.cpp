@@ -49,8 +49,6 @@
 #include <math.h>
 #include <ros/ros.h>
 
-namespace rotors_control{
-
 #define GRAVITY_MAGNITUDE 9.81 // m/s^2
 
 //#define MADWICK_QUATERNION_IMU
@@ -72,22 +70,25 @@ namespace rotors_control{
   double integralFBz = 0.0f;  // integral error terms scaled by Ki
 #endif
 
+namespace rotors_control{
+
+// The acc in Z for static position (g) in m/s^2
+// Set on first update, assuming we are in a static position since the sensors were just calibrates.
+// This value will be better the more level the copter is at calibration time
 SensFusion::SensFusion()
-   : isCalibrated_(false) {
+   : isCalibrated_(false),
+    q0_(1),
+    q1_(0),
+    q2_(0),
+    q3_(0),
+    gravX_(0),
+    gravY_(0),
+    gravZ_(0),
+    baseZacc_(9.81){
 
 }
 
 SensFusion::~SensFusion() {}
-
-// Fast inverse square-root 1/sqrt(norm)
-// See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
-double SensFusion::InvSqrt(double x){
-
-  double y;
-  y = 1/sqrt(x * x);
-  return y;
-
-}
 
 
 #ifdef MADWICK_QUATERNION_IMU
@@ -96,8 +97,15 @@ double SensFusion::InvSqrt(double x){
 //
 // Date     Author          Notes
 // 29/09/2011 SOH Madgwick    Initial release
-// 02/10/2011 SOH Madgwick    Optimised for reduced CPU load
+// 02/10/2011 SOH Madgwick    Optimized for reduced CPU load
 void SensFusion::Sensfusion6UpdateQ(double* gx, double* gy, double* gz, double* ax, double* ay, double* az, double dt){
+  assert(gx);
+  assert(gy);
+  assert(gz);
+  assert(ax);
+  assert(ay);
+  assert(az);
+  assert(dt);
 
   double recipNorm;
   double s0, s1, s2, s3;
@@ -105,12 +113,14 @@ void SensFusion::Sensfusion6UpdateQ(double* gx, double* gy, double* gz, double* 
   double _2q0, _2q1, _2q2, _2q3, _4q0, _4q1, _4q2 ,_8q1, _8q2, q0q0, q1q1, q2q2, q3q3;
 
   double gx_, gy_, gz_, ax_, ay_, az_, dt_;
-  gx_ = *gx;
-  gy_ = *gy;
-  gz_ = *gz;
-  ax_ = *ax;
-  ay_ = *ay;
-  az_ = *az;
+  //The code has been developed taking into account that the gyroscope values are expressed in deg/s
+  gx_ = *gx * (180/M_PI);
+  gy_ = *gy * (180/M_PI);
+  gz_ = *gz * (180/M_PI);
+  //The code has been developed taking into account that the accelerometer values are express in G
+  ax_ = *ax/GRAVITY_MAGNITUDE; 
+  ay_ = *ay/GRAVITY_MAGNITUDE;
+  az_ = *az/GRAVITY_MAGNITUDE;
   dt_ = dt;
 
   // Rate of change of quaternion from gyroscope
@@ -119,10 +129,10 @@ void SensFusion::Sensfusion6UpdateQ(double* gx, double* gy, double* gz, double* 
   qDot3 = 0.5 * (q0_ * gy_ - q1_ * gz_ + q3_ * gx_);
   qDot4 = 0.5 * (q0_ * gz_ + q1_ * gy_ - q2_ * gx_);
 
-  // Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
+  // Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalization)
   if(!((ax == 0.0) && (ay == 0.0) && (az == 0.0))){
 
-    // Normalise accelerometer measurement
+    // Normalize accelerometer measurement
     recipNorm = InvSqrt(ax_ * ax_ + ay_ * ay_ + az_ * az_);
     ax_ *= recipNorm;
     ay_ *= recipNorm;
@@ -148,7 +158,7 @@ void SensFusion::Sensfusion6UpdateQ(double* gx, double* gy, double* gz, double* 
     s1 = _4q1 * q3q3 - _2q3 * ax_ + 4.0 * q0q0 * q1_ - _2q0 * ay_ - _4q1 + _8q1 * q1q1 + _8q1 * q2q2 + _4q1 * az_;
     s2 = 4.0 * q0q0 * q2_ + _2q0 * ax_ + _4q2 * q3q3 - _2q3 * ay_ - _4q2 + _8q2 * q1q1 + _8q2 * q2q2 + _4q2 * az_;
     s3 = 4.0 * q1q1 * q3_ - _2q1 * ax_ + 4.0 * q2q2 * q3_ - _2q2 * ay_;
-    recipNorm = InvSqrt(s0 * s0 + s1 * s1 + s2 * s2 + s3 * s3); // normalise step magnitude
+    recipNorm = InvSqrt(s0 * s0 + s1 * s1 + s2 * s2 + s3 * s3); // normalize step magnitude
     s0 *= recipNorm;
     s1 *= recipNorm;
     s2 *= recipNorm;
@@ -167,7 +177,7 @@ void SensFusion::Sensfusion6UpdateQ(double* gx, double* gy, double* gz, double* 
   q2_ += qDot3 * dt_;
   q3_ += qDot4 * dt_;
 
-  // Normalise quaternion
+  // Normalize quaternion
   recipNorm = invSqrt(q0_*q0_ + q1_*q1_ + q2_*q2_ + q3_*q3_);
   q0_ *= recipNorm;
   q1_ *= recipNorm;
@@ -189,8 +199,15 @@ void SensFusion::Sensfusion6UpdateQ(double* gx, double* gy, double* gz, double* 
 //
 // Date     Author      Notes
 // 29/09/2011 SOH Madgwick    Initial release
-// 02/10/2011 SOH Madgwick    Optimised for reduced CPU load
+// 02/10/2011 SOH Madgwick    Optimized for reduced CPU load
 void SensFusion::Sensfusion6UpdateQ(double* gx, double* gy, double* gz, double* ax, double* ay, double* az, double dt){
+  assert(gx);
+  assert(gy);
+  assert(gz);
+  assert(ax);
+  assert(ay);
+  assert(az);
+  assert(dt);
   
   double recipNorm;
   double halfvx, halfvy, halfvz;
@@ -201,12 +218,13 @@ void SensFusion::Sensfusion6UpdateQ(double* gx, double* gy, double* gz, double* 
   gx_ = *gx;
   gy_ = *gy;
   gz_ = *gz;
-  ax_ = *ax;
-  ay_ = *ay;
-  az_ = *az;
+  //The code has been developed taking into account that the accelerometer values are express in G
+  ax_ = *ax/GRAVITY_MAGNITUDE; 
+  ay_ = *ay/GRAVITY_MAGNITUDE;
+  az_ = *az/GRAVITY_MAGNITUDE;
   dt_ = dt;
 
-  // Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
+  // Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalization)
   if(!((ax_ == 0.0) && (ay_ == 0.0) && (az_ == 0.0))){
 
     // Normalise accelerometer measurement
@@ -255,12 +273,12 @@ void SensFusion::Sensfusion6UpdateQ(double* gx, double* gy, double* gz, double* 
   qa = q0_;
   qb = q1_;
   qc = q2_;
-  q0_ += (-qb * gx_ - qc * gy_ - q3 * gz_);
-  q1_ += (qa * gx_ + qc * gz_ - q3 * gy_);
-  q2_ += (qa * gy_ - qb * gz_ + q3 * gx_);
+  q0_ += (-qb * gx_ - qc * gy_ - q3_ * gz_);
+  q1_ += (qa * gx_ + qc * gz_ - q3_ * gy_);
+  q2_ += (qa * gy_ - qb * gz_ + q3_ * gx_);
   q3_ += (qa * gz_ + qb * gy_ - qc * gx_);
 
-  // Normalise quaternion
+  // Normalize quaternion
   recipNorm = InvSqrt(q0_ * q0_ + q1_ * q1_ + q2_ * q2_ + q3_ * q3_);
   q0_ *= recipNorm;
   q1_ *= recipNorm;
@@ -277,6 +295,10 @@ void SensFusion::Sensfusion6UpdateQ(double* gx, double* gy, double* gz, double* 
 #endif
 
 void SensFusion::Sensfusion6GetQuaternion(double* qx, double* qy, double* qz, double* qw){
+  assert(qx);
+  assert(qy);
+  assert(qz);
+  assert(qw);
 
   *qx = q1_;
   *qy = q2_;
@@ -291,25 +313,19 @@ void SensFusion::Sensfusion6GetEulerRPY(double* roll, double* pitch, double* yaw
     
   tf::Quaternion q(q1_, q2_, q3_, q0_);
   tf::Matrix3x3 m(q);
-  double roll_temp, pitch_temp, yaw_temp;
-  m.getRPY(roll_temp, pitch_temp, yaw_temp);
-
-  //We need to change the sign because the conversion is along XYZ and not ZYX, on wich the control algorithms has been 
-  //designed
-  *pitch = pitch_temp;
-  *yaw = yaw_temp;
-  *roll = (-1 * roll_temp); 
+  m.getRPY(*roll, *pitch, *yaw);
 
 }
 
 void SensFusion::Sensfusion6GetAccZWithoutGravity(double* angularAccZ, double* ax, double* ay, double* az){
+  assert(angularAccZ);
+  assert(ax);
+  assert(ay);
+  assert(az);
   
   // Return unbiased (baseZacc) accelerations
-  double ax_, ay_, az_, baseZacc;
-  ax_ = *ax;
-  ay_ = *ay;
-  az_ = *az;
-  Sensfusion6GetAccZ(&baseZacc, &ax_, &ay_, &az_);
+  double baseZacc;
+  Sensfusion6GetAccZ(&baseZacc, ax, ay, az);
   *angularAccZ = baseZacc - baseZacc_;
 }
 
@@ -321,11 +337,11 @@ double SensFusion::Sensfusion6GetInvThrustCompensationForTilt(){
 }
 
 
-void SensFusion::Sensfusion6GetAccZ(double* baseZacc_, double* ax, double* ay, double* az){
+void SensFusion::Sensfusion6GetAccZ(double* baseZacc, double* ax, double* ay, double* az){
 
   // return vertical acceleration
   // (A dot G) / |G|,  (|G| = 1) -> (A dot G)
-  *baseZacc_ = (*ax * gravX_)/GRAVITY_MAGNITUDE + (*ay * gravY_)/GRAVITY_MAGNITUDE + (*az * gravZ_)/GRAVITY_MAGNITUDE;
+  *baseZacc = (*ax * gravX_)/GRAVITY_MAGNITUDE + (*ay * gravY_)/GRAVITY_MAGNITUDE + (*az * gravZ_)/GRAVITY_MAGNITUDE;
 }
 
 void SensFusion::EstimatedGravityDirection(double* gx, double* gy, double* gz){
@@ -333,6 +349,16 @@ void SensFusion::EstimatedGravityDirection(double* gx, double* gy, double* gz){
   *gx = 2 * (q1_ * q3_ - q0_ * q2_);
   *gy = 2 * (q0_ * q1_ + q2_ * q3_);
   *gz = q0_ * q0_ - q1_ * q1_ - q2_ * q2_ + q3_ * q3_;
+}
+
+// Fast inverse square-root 1/sqrt(norm)
+// See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
+double SensFusion::InvSqrt(double x){
+
+  double y;
+  y = 1/sqrt(x * x);
+  return y;
+
 }
 
 }

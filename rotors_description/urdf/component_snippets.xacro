@@ -311,8 +311,8 @@
   <!-- Macro to add an IMU. -->
   <xacro:macro name="imu_plugin_macro"
     params="namespace imu_suffix parent_link imu_topic
-      mass_imu_sensor gyroscope_noise_density gyroscope_random_walk
-      gyroscope_bias_correlation_time gyroscope_turn_on_bias_sigma
+      mass_imu_sensor measurement_divisor measurement_delay gyroscope_noise_density 
+      gyroscope_random_walk gyroscope_bias_correlation_time gyroscope_turn_on_bias_sigma
       accelerometer_noise_density accelerometer_random_walk
       accelerometer_bias_correlation_time accelerometer_turn_on_bias_sigma
       *inertia *origin">
@@ -339,6 +339,8 @@
         <linkName>${namespace}/imu${imu_suffix}_link</linkName> <!-- (string, required): name of the body which holds the IMU sensor -->
         <imuTopic>${imu_topic}</imuTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
         <gyroscopeNoiseDensity>${gyroscope_noise_density}</gyroscopeNoiseDensity> <!-- Gyroscope noise density (two-sided spectrum) [rad/s/sqrt(Hz)] -->
+        <measurementDivisor>${measurement_divisor}</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
+        <measurementDelay>${measurement_delay}</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
         <gyroscopeRandomWalk>${gyroscope_random_walk}</gyroscopeRandomWalk> <!-- Gyroscope bias random walk [rad/s/s/sqrt(Hz)] -->
         <gyroscopeBiasCorrelationTime>${gyroscope_bias_correlation_time}</gyroscopeBiasCorrelationTime> <!-- Gyroscope bias correlation time constant [s] -->
         <gyroscopeTurnOnBiasSigma>${gyroscope_turn_on_bias_sigma}</gyroscopeTurnOnBiasSigma> <!-- Gyroscope turn on bias standard deviation [rad/s] -->
@@ -782,6 +784,8 @@
       imu_suffix=""
       parent_link="${namespace}/vi_sensor_link"
       imu_topic="imu"
+      measurement_delay="0"
+      measurement_divisor="1"
       mass_imu_sensor="0.015"
       gyroscope_noise_density="0.0003394"
       gyroscope_random_walk="0.000038785"
@@ -803,6 +807,8 @@
       imu_suffix="gt"
       parent_link="${parent_link}"
       imu_topic="ground_truth/imu"
+      measurement_delay="0"
+      measurement_divisor="1"
       mass_imu_sensor="0.00001"
       gyroscope_noise_density="0.0"
       gyroscope_random_walk="0.0"
@@ -855,6 +861,8 @@
       imu_suffix=""
       parent_link="${parent_link}"
       imu_topic="imu"
+      measurement_delay="0"
+      measurement_divisor="1"
       mass_imu_sensor="0.015"
       gyroscope_noise_density="0.0003394"
       gyroscope_random_walk="0.000038785"
@@ -869,6 +877,38 @@
     </xacro:imu_plugin_macro>
   </xacro:macro>
 
+  <xacro:macro name="crazyflie2_odometry" params="namespace parent_link">
+      <xacro:odometry_plugin_macro
+        namespace="${namespace}"
+        odometry_sensor_suffix=""
+        parent_link="${parent_link}"
+        pose_topic="pose"
+        pose_with_covariance_topic="pose_with_covariance"
+        position_topic="position"
+        transform_topic="transform"
+        odometry_topic="odometry"
+        parent_frame_id="world"
+        child_frame_id="${namespace}/base_link"
+        mass_odometry_sensor="0.00001"
+        measurement_divisor="10"
+        measurement_delay="0"
+        unknown_delay="0.0"
+        noise_normal_position="0 0 0"
+        noise_normal_quaternion="0 0 0"
+        noise_normal_linear_velocity="0 0 0"
+        noise_normal_angular_velocity="0 0 0"
+        noise_uniform_position="0 0 0"
+        noise_uniform_quaternion="0 0 0"
+        noise_uniform_linear_velocity="0 0 0"
+        noise_uniform_angular_velocity="0 0 0"
+        enable_odometry_map="false"
+        odometry_map=""
+        image_scale="">
+        <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      </xacro:odometry_plugin_macro>
+  </xacro:macro>
+
   <xacro:macro name="crazyflie2_imu" params="namespace parent_link">
     <!-- Mount an MPU-9250 IMU. -->
     <xacro:imu_plugin_macro
@@ -876,6 +916,8 @@
       imu_suffix=""
       parent_link="${parent_link}"
       imu_topic="imu"
+      measurement_delay="0"
+      measurement_divisor="1"
       mass_imu_sensor="0.00001"
       gyroscope_noise_density="0.000175"
       gyroscope_random_walk="0.0105"

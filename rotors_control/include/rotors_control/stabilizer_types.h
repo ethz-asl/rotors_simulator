@@ -65,9 +65,9 @@ namespace rotors_control {
 
 /** Attitude in euler angle form */
 typedef struct attitude_s {
-  double roll;
-  double pitch;
-  double yaw;
+  double roll; //rad
+  double pitch; //rad
+  double yaw;  //rad
 } attitude_t;
 
 /* x,y,z vector */
@@ -125,10 +125,10 @@ typedef struct state_s {
 } state_t;
 
 typedef struct control_s {
-  int16_t roll;
-  int16_t pitch;
-  int16_t yaw;
-  double thrust;
+  double roll; //rad
+  double pitch; //rad
+  double yawRate; //rad/s
+  double thrust; //N
 } control_t;
 
 }

@@ -2,24 +2,25 @@
 Changelog for package rotors_hil_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.1.1 (2017-04-27)
------------
-* Update maintainers.
-* Contributors: Timo Hinzmann
+4.0.6 (2019-01-04)
+------------------
 
-2.1.0 (2017-04-08)
------------
-* fixed typo in rotors_hil_interface CMakeLists.txt
-* Fix HIL interface compilation.
-* Fixed erroneous child variable name changes (unit postfixes) for MAVlink variable types.
-* Added even more unit prefixes to variables names.
-* Updated more variable names with unit prefixes.
-* Added unit suffixes to variable names.
-* Updated a u_int64_t to uint64_t. Also check to see if I have write privliages to repo.
-* Added slightly more descriptive reason as to why HIL interface would be skipped.
-* Replacing some default topic names with more general mav_comm defaults
-* Refactoring fixes
-* Fixing rotors_hil installation
-* Adding rosinstall file for HIL configuration
-* Adding the hil_interface package
-* Contributors: Fadri Furrer, Geoffrey Hunter, Helen Oleynikova, Pavel
+4.0.5 (2018-12-17)
+------------------
+
+4.0.4 (2018-09-30)
+------------------
+
+4.0.3 (2018-06-04)
+------------------
+* Fixed build issue in the Kinetic Kame version of ROS.
+* Contributors: Giuseppe Silano
+
+4.0.2 (2018-02-23)
+------------------
+
+4.0.1 (2018-02-02)
+------------------
+* initial package Ubuntu release
+* Contributors: Giuseppe Silano, Emanuele Aucone, Benjamin Rodriguez, Luigi Iannelli
+

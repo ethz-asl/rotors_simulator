@@ -1,17 +1,20 @@
 <package>
   <name>rqt_rotors</name>
-  <version>2.1.1</version>
+  <version>4.0.6</version>
   <description>The rqt_rotors package</description>
 
-  <maintainer email="pavelv@student.ethz.ch">Pavel Vechersky</maintainer>
-  <maintainer email="timo.hinzmann@gmail.com">Timo Hinzmann</maintainer>
+  <maintainer email="giuseppe.silano@unisannio.it">Giuseppe Silano</maintainer>
+  <maintainer email="luigi.iannelli@unisannio.it">Luigi Iannelli</maintainer>
 
-  <author>Pavel Vechersky</author>
+  <author>Giuseppe Silano</author>
+  <author>Emanuele Aucone</author>
+  <author>Benjamin Rodriguez</author>
+  <author>Luigi Iannelli</author>
 
   <license>ASL 2.0</license>
 
-  <url type="website">https://github.com/ethz-asl/rotors_simulator</url>
-  <url type="bugtracker">https://github.com/ethz-asl/rotors_simulator/issues</url>
+  <url type="website">https://github.com/gsilano/CrazyS</url>
+  <url type="bugtracker">https://github.com/gsilano/CrazyS/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
