@@ -69,24 +69,6 @@
     </joint>
 
     <!-- Call rgb sensor macro-->
-    <!-- RGB sensor has "unlimited ranges"-->
-    <xacro:camera_macro
-            namespace="${namespace}"
-            parent_link="rgbd_camera/base_link_gazebo"
-            camera_suffix="rgb"
-            frame_rate="${frame_rate}"
-            horizontal_fov="${fov}"
-            image_width="${width}"
-            image_height="${height}"
-            image_format="L8"
-            min_distance="0.01"
-            max_distance="500"
-            noise_mean="0.0"
-            noise_stddev="0.007"
-            enable_visual="false">
-      <box size="0.01 0.01 0.1" />
-      <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-    </xacro:camera_macro>
 
     <gazebo reference="${namespace}/camera_${camera_suffix}_link">
       <sensor type="depth" name="${namespace}_camera_{camera_suffix}">
@@ -112,8 +94,8 @@
           <cameraName>camera_${camera_suffix}</cameraName>
           <horizontal_fov>${fov}</horizontal_fov>
  	  <depthNoiseModelName>PMD</depthNoiseModelName>
- 	  <depthNoiseMinDist>0.02</depthNoiseMinDist>
- 	  <depthNoiseMaxDist>7.0</depthNoiseMaxDist>
+ 	  <depthNoiseMinDist>0.1</depthNoiseMinDist>
+ 	  <depthNoiseMaxDist>6.0</depthNoiseMaxDist>
 	 
           <imageTopicName>camera/image_raw</imageTopicName>
           <cameraInfoTopicName>camera/camera_info</cameraInfoTopicName>
@@ -128,7 +110,47 @@
           <distortionT2>0.0</distortionT2>
         </plugin>
       </sensor>
-    </gazebo>
+
+  <sensor type="camera" name="${namespace}_camera_${camera_suffix}">
+        <update_rate>${frame_rate}</update_rate>
+        <camera name="intensity">
+          <horizontal_fov>${fov}</horizontal_fov>
+          <image>
+            <width>${width}</width>
+            <height>${height}</height>
+            <format>L8</format>
+          </image>
+          <clip>
+            <near>0.01</near>
+            <far>100.0</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <!-- Noise is sampled independently per pixel on each frame.
+                 That pixel's noise value is added to each of its color
+                 channels, which at that point lie in the range [0,1]. -->
+            <mean>0.07</mean>
+            <stddev>0.0</stddev>
+          </noise>
+        </camera>
+        <plugin name="${namespace}_camera_${camera_suffix}_controller" filename="libgazebo_ros_camera.so">
+          <robotNamespace>${namespace}</robotNamespace>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>${frame_rate}</updateRate>
+          <cameraName>camera_${camera_suffix}</cameraName>
+          <imageTopicName>intensity/image_raw</imageTopicName>
+          <cameraInfoTopicName>intensity/camera_info</cameraInfoTopicName>
+          <frameName>camera_${camera_suffix}_optical_center_link</frameName>
+          <hackBaseline>0.0</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+</sensor>
+    </gazebo>	
+
   </xacro:macro>
 
   <!-- Call depth sensor macro
@@ -146,7 +168,7 @@
     baseline = "0.05"
     width = "352"
     height = "287"
-    max_range="6.0"
+    max_range="7.0"
     min_range="0.05">
     <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
   </xacro:rgbd_sensor_depth_macro>
