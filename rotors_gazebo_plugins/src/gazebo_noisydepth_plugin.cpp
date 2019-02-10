@@ -94,7 +94,13 @@ void GazeboNoisyDepth::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
     this->noise_model.reset(new KinectDepthNoiseModel());
 
     /* no other properties for Kinect */
-  } else if (boost::iequals(noise_model, "D435")) {
+  } else if(boost::iequals(noise_model, "PMD")) {
+    this->noise_model.reset(new PMDDepthNoiseModel());
+
+    /* no other properties for PMD */
+  }
+
+   else if (boost::iequals(noise_model, "D435")) {
     D435DepthNoiseModel *model = new D435DepthNoiseModel();
     this->noise_model.reset(model);
 
