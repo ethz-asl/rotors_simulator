@@ -64,7 +64,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   }
 
   node_handle_ = transport::NodePtr(new transport::Node());
-  node_handle_->Init(namespace_);
+  node_handle_->Init();
 
   getSdfParam<std::string>(_sdf, "motorSpeedCommandPubTopic", motor_velocity_reference_pub_topic_,
       motor_velocity_reference_pub_topic_);
@@ -688,10 +688,8 @@ void GazeboMavlinkInterface::pollForMAVLinkMessages(double _dt, uint32_t _timeou
       mavlink_status_t status;
       for (unsigned i = 0; i < len; ++i)
       {
-        gzwarn << __FUNCTION__ << "got a message (not handled)! " << std::endl;
         if (mavlink_parse_char(MAVLINK_COMM_0, _buf[i], &msg, &status))
         {
-          gzwarn << __FUNCTION__ << "handling! " << std::endl;
           if (serial_enabled_) {
             // forward message from qgc to serial
             send_mavlink_message(&msg);
@@ -729,6 +727,8 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
 
     // Set rotor speeds and controller targets for flagged messages.
     if (controls.flags == kMotorSpeedFlag) {
+
+        gzwarn << "got a motor speed message!!" << std::endl;
       input_reference_.resize(n_out_max);
       for (unsigned i = 0; i < n_motors; ++i) {
         if (armed) {
@@ -743,6 +743,8 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
       received_first_referenc_ = true;
     }
     else if (controls.flags == kServoPositionFlag) {
+
+        gzwarn << "got a motor servo message!!" << std::endl;
       for (unsigned i = n_motors; i < (n_motors + n_servos); ++i) {
         if (armed) {
           input_reference_[i] =
@@ -756,6 +758,8 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
     }
     // Set rotor speeds, controller targets for unflagged messages.
     else {
+
+      gzwarn << "got a generic motor message!!" << std::endl;
       input_reference_.resize(n_out_max);
       for (unsigned i = 0; i < n_out_max; ++i) {
         if (armed) {
