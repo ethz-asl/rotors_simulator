@@ -704,7 +704,6 @@ void GazeboMavlinkInterface::pollForMAVLinkMessages(double _dt, uint32_t _timeou
 
 void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
 {
-  gzwarn << "got a motor message!!" << std::endl;
   switch (msg->msgid) {
   case MAVLINK_MSG_ID_HIL_ACTUATOR_CONTROLS:
     mavlink_hil_actuator_controls_t controls;
@@ -727,8 +726,6 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
 
     // Set rotor speeds and controller targets for flagged messages.
     if (controls.flags == kMotorSpeedFlag) {
-
-        gzwarn << "got a motor speed message!!" << std::endl;
       input_reference_.resize(n_out_max);
       for (unsigned i = 0; i < n_motors; ++i) {
         if (armed) {
@@ -743,8 +740,6 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
       received_first_referenc_ = true;
     }
     else if (controls.flags == kServoPositionFlag) {
-
-        gzwarn << "got a motor servo message!!" << std::endl;
       for (unsigned i = n_motors; i < (n_motors + n_servos); ++i) {
         if (armed) {
           input_reference_[i] =
@@ -758,8 +753,6 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
     }
     // Set rotor speeds, controller targets for unflagged messages.
     else {
-
-      gzwarn << "got a generic motor message!!" << std::endl;
       input_reference_.resize(n_out_max);
       for (unsigned i = 0; i < n_out_max; ++i) {
         if (armed) {
