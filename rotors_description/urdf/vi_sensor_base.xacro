@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
-<robot name="vi_sensor" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="vi_sensor" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:property name="namespace" value="vi_sensor" />
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
 
   <link name="base_link">
+
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
