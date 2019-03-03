@@ -52,6 +52,9 @@ GazeboLidarPlugin::GazeboLidarPlugin()
 
 GazeboLidarPlugin::~GazeboLidarPlugin()
 {
+#if GAZEBO_MAJOR_VERSION == 9
+  this->newLaserScansConnection.reset();
+#else
 #if GAZEBO_MAJOR_VERSION >= 7
   this->parentSensor->LaserShape()->DisconnectNewLaserScans(
 #else
@@ -59,7 +62,7 @@ GazeboLidarPlugin::~GazeboLidarPlugin()
 #endif
       this->newLaserScansConnection);
   this->newLaserScansConnection.reset();
-
+#endif
   this->parentSensor.reset();
   this->world.reset();
 }

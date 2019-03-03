@@ -30,6 +30,7 @@
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/fw_parameters.h"
 
+#include <ignition/math/Vector3.hh>
 namespace gazebo {
 
 typedef const boost::shared_ptr<const gz_sensor_msgs::Actuators>
@@ -118,7 +119,7 @@ class GazeboFwDynamicsPlugin : public ModelPlugin {
   event::ConnectionPtr updateConnection_;
 
   /// \brief    Most current wind speed reading [m/s].
-  math::Vector3 W_wind_speed_W_B_;
+  ignition::math::Vector3d W_wind_speed_W_B_;
 
   /// \brief    The aerodynamic properties of the aircraft.
   FWAerodynamicParameters aero_params_;

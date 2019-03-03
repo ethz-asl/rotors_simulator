@@ -36,6 +36,7 @@
 #include <opencv2/core/core.hpp>
 
 #include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
+#include <boost/array.hpp>
 
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/sdf_api_wrapper.hpp"

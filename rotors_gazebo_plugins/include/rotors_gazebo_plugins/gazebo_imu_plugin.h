@@ -34,6 +34,8 @@
 
 #include "rotors_gazebo_plugins/common.h"
 
+#include <ignition/math/Vector3.hh>
+
 namespace gazebo {
 
 // Default values for use with ADIS16448 IMU
@@ -163,8 +165,8 @@ class GazeboImuPlugin : public ModelPlugin {
   //            and then published onto a topic
   gz_sensor_msgs::Imu imu_message_;
 
-  math::Vector3 gravity_W_;
-  math::Vector3 velocity_prev_W_;
+  ignition::math::Vector3d gravity_W_;
+  ignition::math::Vector3d velocity_prev_W_;
 
   Eigen::Vector3d gyroscope_bias_;
   Eigen::Vector3d accelerometer_bias_;

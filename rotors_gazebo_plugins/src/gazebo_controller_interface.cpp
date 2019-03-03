@@ -27,7 +27,7 @@
 namespace gazebo {
 
 GazeboControllerInterface::~GazeboControllerInterface() {
-  event::Events::DisconnectWorldUpdateBegin(updateConnection_);
+  updateConnection_.reset();
 }
 
 void GazeboControllerInterface::Load(physics::ModelPtr _model,
@@ -85,7 +85,7 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
     return;
   }
 
-  common::Time now = world_->GetSimTime();
+  common::Time now = world_->SimTime();
 
   gz_sensor_msgs::Actuators turning_velocities_msg;
 

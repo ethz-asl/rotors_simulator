@@ -112,7 +112,7 @@ endif()
 
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(gazebo REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Glog REQUIRED)

@@ -24,6 +24,8 @@
 // USER
 #include "ConnectGazeboToRosTopic.pb.h"
 
+#include <ignition/math/Vector3.hh>
+
 namespace gazebo {
 
 GazeboGpsPlugin::GazeboGpsPlugin()
@@ -33,7 +35,7 @@ GazeboGpsPlugin::GazeboGpsPlugin()
       pubs_and_subs_created_(false) {}
 
 GazeboGpsPlugin::~GazeboGpsPlugin() {
-  this->parent_sensor_->DisconnectUpdated(this->updateConnection_);
+  this->updateConnection_.reset();
 }
 
 void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
@@ -75,7 +77,7 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
 
   // Get the pointer to the link that holds the sensor.
   link_ =
-      boost::dynamic_pointer_cast<physics::Link>(world_->GetByName(link_name));
+      boost::dynamic_pointer_cast<physics::Link>(world_->BaseByName(link_name));
   if (link_ == NULL)
     gzerr << "[gazebo_gps_plugin] Couldn't find specified link \"" << link_name
           << "\"\n";
@@ -172,10 +174,10 @@ void GazeboGpsPlugin::OnUpdate() {
   common::Time current_time;
 
   // Get the linear velocity in the world frame.
-  math::Vector3 W_ground_speed_W_L = link_->GetWorldLinearVel();
+  ignition::math::Vector3d W_ground_speed_W_L = link_->WorldLinearVel();
 
   // Apply noise to ground speed.
-  W_ground_speed_W_L += math::Vector3(ground_speed_n_[0](random_generator_),
+  W_ground_speed_W_L += ignition::math::Vector3d(ground_speed_n_[0](random_generator_),
                                       ground_speed_n_[1](random_generator_),
                                       ground_speed_n_[2](random_generator_));
 
@@ -202,11 +204,11 @@ void GazeboGpsPlugin::OnUpdate() {
 
   // Fill the ground speed message.
   gz_ground_speed_message_.mutable_twist()->mutable_linear()->set_x(
-      W_ground_speed_W_L.x);
+      W_ground_speed_W_L.X());
   gz_ground_speed_message_.mutable_twist()->mutable_linear()->set_y(
-      W_ground_speed_W_L.y);
+      W_ground_speed_W_L.Y());
   gz_ground_speed_message_.mutable_twist()->mutable_linear()->set_z(
-      W_ground_speed_W_L.z);
+      W_ground_speed_W_L.Z());
   gz_ground_speed_message_.mutable_header()->mutable_stamp()->set_sec(
       current_time.sec);
   gz_ground_speed_message_.mutable_header()->mutable_stamp()->set_nsec(
