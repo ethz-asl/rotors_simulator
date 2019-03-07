@@ -40,10 +40,13 @@ Joy::Joy() {
   pnh.param("axis_roll_", axes_.roll, 0);
   pnh.param("axis_pitch_", axes_.pitch, 1);
   pnh.param("axis_thrust_", axes_.thrust, 2);
+  // Will be ignored if -1 is not overridden:
+  pnh.param("axis_yaw_rate_", axes_.yaw_rate, -1);
 
   pnh.param("axis_direction_roll", axes_.roll_direction, -1);
   pnh.param("axis_direction_pitch", axes_.pitch_direction, 1);
   pnh.param("axis_direction_thrust", axes_.thrust_direction, 1);
+  pnh.param("axis_direction_yaw", axes_.yaw_rate_direction, 1);
 
   pnh.param("max_v_xy", max_.v_xy, 1.0);  // [m/s]
   pnh.param("max_roll", max_.roll, 10.0 * M_PI / 180.0);  // [rad]
@@ -78,25 +81,31 @@ void Joy::StopMav() {
 void Joy::JoyCallback(const sensor_msgs::JoyConstPtr& msg) {
   current_joy_ = *msg;
   control_msg_.roll = msg->axes[axes_.roll] * max_.roll * axes_.roll_direction;
-  control_msg_.pitch = msg->axes[axes_.pitch] * max_.pitch * axes_.pitch_direction;
+  control_msg_.pitch =
+      msg->axes[axes_.pitch] * max_.pitch * axes_.pitch_direction;
 
-  if (msg->buttons[buttons_.yaw_left]) {
-    current_yaw_vel_ = max_.rate_yaw;
+  if (axes_.yaw_rate == -1) {
+    // Control yaw_rate with buttons [Default]
+    if (msg->buttons[buttons_.yaw_left]) {
+      current_yaw_vel_ = max_.rate_yaw;
+    } else if (msg->buttons[buttons_.yaw_right]) {
+      current_yaw_vel_ = -max_.rate_yaw;
+    } else {
+      current_yaw_vel_ = 0;
+    }
+    control_msg_.yaw_rate = current_yaw_vel_;
+  } else {
+    // Control yaw_rate with a joystick axis
+    control_msg_.yaw_rate =
+        (msg->axes[axes_.yaw_rate]) * max_.rate_yaw * axes_.yaw_rate_direction;
   }
-  else if (msg->buttons[buttons_.yaw_right]) {
-    current_yaw_vel_ = -max_.rate_yaw;
-  }
-  else {
-    current_yaw_vel_ = 0;
-  }
-  control_msg_.yaw_rate = current_yaw_vel_;
 
   if (is_fixed_wing_) {
     double thrust = msg->axes[axes_.thrust] * axes_.thrust_direction;
     control_msg_.thrust.x = (thrust >= 0.0) ? thrust : 0.0;
-  }
-  else {
-    control_msg_.thrust.z = (msg->axes[axes_.thrust] + 1) * max_.thrust / 2.0 * axes_.thrust_direction;
+  } else {
+    control_msg_.thrust.z = (msg->axes[axes_.thrust] + 1) * max_.thrust / 2.0 *
+                            axes_.thrust_direction;
   }
 
   ros::Time update_time = ros::Time::now();
