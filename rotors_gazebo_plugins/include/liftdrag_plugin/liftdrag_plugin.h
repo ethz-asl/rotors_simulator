@@ -107,19 +107,19 @@ namespace gazebo
     protected: double alpha;
 
     /// \brief center of pressure in link local coordinates
-    protected: math::Vector3 cp;
+    protected: ignition::math::Vector3d cp;
 
     /// \brief Normally, this is taken as a direction parallel to the chord
     /// of the airfoil in zero angle of attack forward flight.
-    protected: math::Vector3 forward;
+    protected: ignition::math::Vector3d forward;
 
     /// \brief A vector in the lift/drag plane, perpendicular to the forward
     /// vector. Inflow velocity orthogonal to forward and upward vectors
     /// is considered flow in the wing sweep direction.
-    protected: math::Vector3 upward;
+    protected: ignition::math::Vector3d upward;
 
     /// \brief Smoothed velocity
-    protected: math::Vector3 velSmooth;
+    protected: ignition::math::Vector3d velSmooth;
 
     /// \brief Pointer to link currently targeted by mud joint.
     protected: physics::LinkPtr link;

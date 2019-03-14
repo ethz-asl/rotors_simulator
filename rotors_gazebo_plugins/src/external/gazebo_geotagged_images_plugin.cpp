@@ -54,22 +54,14 @@ void GeotaggedImagesPlugin::Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf)
     gzerr << "Invalid sensor pointer.\n";
 
   this->parentSensor_ =
-#if GAZEBO_MAJOR_VERSION >= 7
     std::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
-#else
-    boost::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
-#endif
 
   if (!this->parentSensor_)
   {
     gzerr << "GeotaggedImagesPlugin requires a CameraSensor.\n";
   }
 
-#if GAZEBO_MAJOR_VERSION >= 7
   this->camera_ = this->parentSensor_->Camera();
-#else
-  this->camera_ = this->parentSensor_->GetCamera();
-#endif
 
   if (!this->parentSensor_)
   {
@@ -77,23 +69,12 @@ void GeotaggedImagesPlugin::Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf)
     return;
   }
   scene_ = camera_->GetScene();
-#if GAZEBO_MAJOR_VERSION >= 8
   lastImageTime_ = scene_->SimTime();
-#else
-  lastImageTime_ = scene_->GetSimTime();
-#endif
 
-#if GAZEBO_MAJOR_VERSION >= 7
   this->width_ = this->camera_->ImageWidth();
   this->height_ = this->camera_->ImageHeight();
   this->depth_ = this->camera_->ImageDepth();
   this->format_ = this->camera_->ImageFormat();
-#else
-  this->width_ = this->camera_->GetImageWidth();
-  this->height_ = this->camera_->GetImageHeight();
-  this->depth_ = this->camera_->GetImageDepth();
-  this->format_ = this->camera_->GetImageFormat();
-#endif
 
   if (sdf->HasElement("robotNamespace")) {
     namespace_ = sdf->GetElement("robotNamespace")->Get<std::string>();
@@ -149,17 +130,9 @@ void GeotaggedImagesPlugin::OnNewGpsPosition(ConstVector3dPtr& v)
 void GeotaggedImagesPlugin::OnNewFrame(const unsigned char * image)
 {
 
-#if GAZEBO_MAJOR_VERSION >= 7
   image = this->camera_->ImageData(0);
-#else
-  image = this->camera_->GetImageData(0);
-#endif
 
-#if GAZEBO_MAJOR_VERSION >= 8
   common::Time currentTime = scene_->SimTime();
-#else
-  common::Time currentTime = scene_->GetSimTime();
-#endif
   if (currentTime.Double() - lastImageTime_.Double() < storeIntervalSec_) {
     return;
   }

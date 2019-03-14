@@ -1,9 +1,10 @@
-<package>
+<package format="2">
   <name>rotors_gazebo_plugins</name>
-  <version>2.1.1</version>
+  <version>2.2.3</version>
   <description>The rotors_gazebo_plugins package</description>
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
+  <maintainer email="michael.pantic@mavt.ethz.ch">Michael Pantic</maintainer>
   <maintainer email="mina.kamel@mavt.ethz.ch">Mina Kamel</maintainer>
 
   <author>Fadri Furrer</author>
@@ -20,40 +21,25 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <!-- Dependencies needed to compile this package. -->
-  <build_depend>cmake_modules</build_depend>
-  <build_depend>cv_bridge</build_depend>
-  <build_depend>gazebo</build_depend>
-  <build_depend>geometry_msgs</build_depend>
-  <build_depend>libgoogle-glog-dev</build_depend>
-  <build_depend>mav_msgs</build_depend>
-  <build_depend>octomap</build_depend>
-  <build_depend>octomap_msgs</build_depend>
-  <build_depend>octomap_ros</build_depend>
-  <build_depend>rosbag</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>rotors_comm</build_depend>
-  <build_depend>rotors_control</build_depend>
-  <build_depend>std_srvs</build_depend>
-  <build_depend>tf</build_depend>
-  <build_depend>yaml-cpp</build_depend>
-  <build_depend>protobuf-dev</build_depend>
-
-
-  <!-- Dependencies needed after this package is compiled. -->
-  <run_depend>cv_bridge</run_depend>
-  <run_depend>gazebo_ros</run_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <run_depend>libgoogle-glog-dev</run_depend>
-  <run_depend>mav_msgs</run_depend>
-  <run_depend>octomap</run_depend>
-  <run_depend>octomap_msgs</run_depend>
-  <run_depend>octomap_ros</run_depend>
-  <run_depend>rosbag</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>rotors_comm</run_depend>
-  <run_depend>rotors_control</run_depend>
-  <run_depend>std_srvs</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>yaml-cpp</run_depend>
+  <depend>cmake_modules</depend>
+  <depend>cv_bridge</depend>
+  <depend>gazebo</depend>
+  <depend>gazebo_plugins</depend>
+  <depend>gazebo_ros</depend>
+  <depend>geometry_msgs</depend>
+  <depend>libgoogle-glog-dev</depend>
+  <depend>protobuf-dev</depend>
+  <depend>mavros</depend>
+  <depend>mav_msgs</depend>
+  <depend>octomap_msgs</depend>
+  <depend>octomap_ros</depend>
+  <depend>octomap</depend>
+  <depend>rosbag</depend>
+  <depend>roscpp</depend>
+  <depend>rotors_comm</depend>
+  <depend>rotors_control</depend>
+  <depend>std_srvs</depend>
+  <depend>tf</depend>
+  <depend>yaml-cpp</depend>
 
 </package>

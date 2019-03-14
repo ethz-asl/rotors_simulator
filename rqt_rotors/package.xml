@@ -1,6 +1,6 @@
-<package>
+<package format="2">
   <name>rqt_rotors</name>
-  <version>2.1.1</version>
+  <version>2.2.3</version>
   <description>The rqt_rotors package</description>
 
   <maintainer email="pavelv@student.ethz.ch">Pavel Vechersky</maintainer>
@@ -15,17 +15,10 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <!-- Dependencies needed to compile this package. -->
-  <build_depend>mavros_msgs</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>rqt_gui</build_depend>
-  <build_depend>rqt_gui_py</build_depend>
-
-  <!-- Dependencies needed after this package is compiled. -->
-  <run_depend>mavros_msgs</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>rqt_gui</run_depend>
-  <run_depend>rqt_gui_py</run_depend>
+  <depend>mavros_msgs</depend>
+  <depend>rospy</depend>
+  <depend>rqt_gui_py</depend>
+  <depend>rqt_gui</depend>
 
   <export>
     <rqt_gui plugin="${prefix}/plugin.xml"/>

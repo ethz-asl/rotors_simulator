@@ -16,7 +16,7 @@
 
   <!-- send the robot XML to param server -->
   <param name="robot_description" command="
-    $(find xacro)/xacro.py '$(arg model)'
+    $(find xacro)/xacro '$(arg model)'
     enable_logging:=$(arg enable_logging)
     enable_ground_truth:=$(arg enable_ground_truth)
     enable_mavlink_interface:=$(arg enable_mavlink_interface)
