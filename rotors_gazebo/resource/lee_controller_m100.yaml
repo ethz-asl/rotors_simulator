@@ -1,0 +1,5 @@
+# Lee position controller parameters
+position_gain: {x: 20, y: 20, z: 20}
+velocity_gain: {x: 10, y: 10, z: 10}
+attitude_gain: {x: 2, y: 2.3, z: 0.15}
+angular_rate_gain: {x: 0.4, y: 0.52, z: 0.18}
