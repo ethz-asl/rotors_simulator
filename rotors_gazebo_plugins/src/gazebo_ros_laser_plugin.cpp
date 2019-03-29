@@ -63,7 +63,7 @@ void ROSLaserPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
   getSdfParam<double>(_sdf, "max_range", max_range_, INFINITY);
 
   getSdfParam<std::string>(_sdf, "joint_name", joint_name_, "joint");
-  joint_ = world->GetJoint(joint_name_);
+  joint_ = world->ModelByName(robot_namespace_)->GetJoint(joint_name_);
 
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized()) {
@@ -143,7 +143,7 @@ double ROSLaserPlugin::ConstrainAngle(double angle_rad) {
 }
 
 void ROSLaserPlugin::OnScan(const ConstLaserScanStampedPtr& _msg) {
-  const double rotational_angle = ConstrainAngle(joint_->GetAngle(0).Radian());
+  const double rotational_angle = ConstrainAngle(joint_->Position(0));
 
 #if GAZEBO_MAJOR_VERSION >= 7
   const ignition::math::Angle maxAngle = parent_ray_sensor_->AngleMax();
