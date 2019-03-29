@@ -275,7 +275,7 @@ message(STATUS "${GAZEBO_VERSION_MAJOR}")
 
 if(${gazebo_VERSION_MAJOR} GREATER 4)
   add_library(gazebo_geotagged_images_plugin SHARED src/external/gazebo_geotagged_images_plugin.cpp)
-  target_link_libraries(gazebo_geotagged_images_plugin ${target_linking_LIBRARIES} )
+  target_link_libraries(gazebo_geotagged_images_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   if (NOT NO_ROS)
     add_dependencies(gazebo_geotagged_images_plugin ${catkin_EXPORTED_TARGETS})
   endif()
@@ -307,6 +307,18 @@ if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 list(APPEND targets_to_install rotors_gazebo_imu_plugin)
+
+#======================================== LASER ROS PLUGIN ==========================================//
+if(${gazebo_VERSION_MAJOR} GREATER 4)
+  add_library(gazebo_ros_laser_plugin SHARED src/gazebo_ros_laser_plugin.cpp)
+  target_link_libraries(gazebo_ros_laser_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} RayPlugin)
+  if (NOT NO_ROS)
+    add_dependencies(gazebo_ros_laser_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install gazebo_ros_laser_plugin)
+else()
+  message(STATUS "Gazebo version is less than 5, not building gazebo_ros_laser_plugin.cpp.")
+endif()
 
 #========================================= NoisyDepth PLUGIN ======================================//
 if(${gazebo_dev_FOUND})
@@ -371,6 +383,7 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
     message(WARN "MAVLINK_HEADER_DIR provided as '${MAVLINK_HEADER_DIR}'.")
     include_directories(${MAVLINK_HEADER_DIR})
     set(MAVLINK_HEADERS_FOUND TRUE)
+
   else()
     message(WARN "MAVLINK_HEADER_DIR not provided, falling back to looking at default paths...")
     # fist check if there's a mavlink dir in the current workspace
@@ -464,6 +477,18 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
     add_dependencies(rotors_gazebo_optical_flow_plugin ${catkin_EXPORTED_TARGETS})
   endif()
   list(APPEND targets_to_install rotors_gazebo_optical_flow_plugin)
+endif()
+
+#======================================== OS1 ROS PLUGIN ==========================================//
+if(${gazebo_VERSION_MAJOR} GREATER 4)
+  add_library(rotors_gazebo_os1_plugin SHARED src/gazebo_os1_plugin.cpp)
+  target_link_libraries(rotors_gazebo_os1_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} RayPlugin)
+  if (NOT NO_ROS)
+    add_dependencies(rotors_gazebo_os1_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install rotors_gazebo_os1_plugin)
+else()
+  message(STATUS "Gazebo version is less than 5, not building gazebo_os1_plugin.cpp.")
 endif()
 
 #======================================= PRESSURE PLUGIN ========================================//

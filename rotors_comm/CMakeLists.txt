@@ -8,6 +8,7 @@ add_service_files(
   FILES
   Octomap.srv
   RecordRosbag.srv
+  SetFrequency.srv
 )
 
 add_message_files(
