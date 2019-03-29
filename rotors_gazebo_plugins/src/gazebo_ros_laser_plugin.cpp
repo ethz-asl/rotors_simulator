@@ -63,7 +63,7 @@ void ROSLaserPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
   getSdfParam<double>(_sdf, "max_range", max_range_, INFINITY);
 
   getSdfParam<std::string>(_sdf, "joint_name", joint_name_, "joint");
-  joint_ = world->GetModel(robot_namespace_)->GetJoint(joint_name_);
+  joint_ = world->GetJoint(joint_name_);
 
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized()) {
