@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="terrain2">
+    <pose>-30 30 -2 1.57 0 0</pose>
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://terrain2/meshes/terrain2.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <cast_shadows>false</cast_shadows>
+        <geometry>
+          <mesh>
+            <uri>model://terrain2/meshes/terrain2.stl</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://terrain2/materials/scripts</uri>
+            <uri>model://terrain2/materials/textures</uri>
+            <name>vrc/forest</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
