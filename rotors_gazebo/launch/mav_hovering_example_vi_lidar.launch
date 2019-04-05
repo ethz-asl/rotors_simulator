@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="mav_name" default="neo11"/>
+  <arg name="mav_name" default="firefly"/>
   <arg name="world_name" default="unitbox"/>
   <arg name="enable_logging" default="false" />
   <arg name="enable_ground_truth" default="true" />
@@ -13,7 +13,7 @@
     <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world" />
     <!-- <arg name="debug" value="true"/> -->
     <arg name="paused" value="true"/>
-    <arg name="gui" value="false"/>
+    <arg name="gui" value="true"/>
   </include>
 
   <group ns="$(arg mav_name)">

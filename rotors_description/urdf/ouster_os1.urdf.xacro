@@ -61,7 +61,7 @@
             <!-- Use gaussian noise -->
             <type>gaussian</type>
             <mean>0.0</mean>
-            <stddev>0.02</stddev>
+            <stddev>0.0</stddev> <!--TODO 0.02 -->
           </noise>
           <scan>
             <horizontal>
@@ -94,7 +94,7 @@
           <frame_name>${lidar_points_frame}</frame_name>
           <min_range>${min_range}</min_range>
           <max_range>120</max_range>
-          <gaussian_noise>0.02</gaussian_noise>
+          <gaussian_noise>0.0</gaussian_noise><!--TODO 0.02 -->
         </plugin>
       </sensor>
     </gazebo>
