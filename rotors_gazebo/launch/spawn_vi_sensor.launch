@@ -5,7 +5,7 @@
   <arg name="enable_depth" default="false"/>
   <arg name="enable_ground_truth" default="false"/>
   <param name="robot_description"
-    command="$(find xacro)/xacro.py '$(find rotors_description)/urdf/vi_sensor_base.xacro'
+    command="$(find xacro)/xacro '$(find rotors_description)/urdf/vi_sensor_base.xacro'
     enable_cameras:=$(arg enable_cameras)
     enable_depth:=$(arg enable_depth)
     enable_ground_truth:=$(arg enable_ground_truth)"

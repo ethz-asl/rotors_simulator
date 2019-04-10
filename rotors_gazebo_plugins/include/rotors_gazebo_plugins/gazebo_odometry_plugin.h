@@ -28,6 +28,7 @@
 #include <random>
 #include <stdio.h>
 
+#include <boost/array.hpp>
 #include <boost/bind.hpp>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>

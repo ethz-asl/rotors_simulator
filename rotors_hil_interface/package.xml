@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>rotors_hil_interface</name>
-  <version>2.1.1</version>
+  <version>2.2.3</version>
   <description>RotorS Hardware-in-the-loop interface package</description>
 
   <maintainer email="pvechersky@gmail.com">Pavel Vechersky</maintainer>

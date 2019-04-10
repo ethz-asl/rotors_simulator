@@ -27,8 +27,8 @@
 namespace gazebo {
 
 GazeboMotorModel::~GazeboMotorModel() {
-  event::Events::DisconnectWorldUpdateBegin(updateConnection_);
 }
+
 void GazeboMotorModel::InitializeParams() {}
 
 void GazeboMotorModel::Publish() {
@@ -37,7 +37,7 @@ void GazeboMotorModel::Publish() {
     motor_velocity_pub_->Publish(turning_velocity_msg_);
   }
   if (publish_position_) {
-    position_msg_.set_data(joint_->GetAngle(0).Radian());
+    position_msg_.set_data(joint_->Position(0));
     motor_position_pub_->Publish(position_msg_);
   }
   if (publish_force_) {
@@ -196,12 +196,6 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
       _sdf, "timeConstantDown", time_constant_down_, time_constant_down_);
   getSdfParam<double>(
       _sdf, "rotorVelocitySlowdownSim", rotor_velocity_slowdown_sim_, 10);
-
-// Set the maximumForce on the joint. This is deprecated from V5 on, and the
-// joint won't move.
-#if GAZEBO_MAJOR_VERSION < 5
-  joint_->SetMaxForce(0, max_force_);
-#endif
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -369,15 +363,15 @@ void GazeboMotorModel::WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg) {
 
   // TODO(burrimi): Transform velocity to world frame if frame_id is set to
   // something else.
-  wind_speed_W_.x = wind_speed_msg->velocity().x();
-  wind_speed_W_.y = wind_speed_msg->velocity().y();
-  wind_speed_W_.z = wind_speed_msg->velocity().z();
+  wind_speed_W_.X() = wind_speed_msg->velocity().x();
+  wind_speed_W_.Y() = wind_speed_msg->velocity().y();
+  wind_speed_W_.Z() = wind_speed_msg->velocity().z();
 }
 
 void GazeboMotorModel::UpdateForcesAndMoments() {
   switch (motor_type_) {
     case (MotorType::kPosition): {
-      double err = joint_->GetAngle(0).Radian() - ref_motor_input_;
+      double err = joint_->Position(0) - ref_motor_input_;
       double force = pids_.Update(err, sampling_time_);
       joint_->SetForce(0, force);
       break;
@@ -405,19 +399,19 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
                       motor_constant_;
 
       // Apply a force to the link.
-      link_->AddRelativeForce(math::Vector3(0, 0, thrust));
+      link_->AddRelativeForce(ignition::math::Vector3d (0, 0, thrust));
 
       // Forces from Philppe Martin's and Erwan Salaün's
       // 2010 IEEE Conference on Robotics and Automation paper
       // The True Role of Accelerometer Feedback in Quadrotor Control
       // - \omega * \lambda_1 * V_A^{\perp}
-      math::Vector3 joint_axis = joint_->GetGlobalAxis(0);
-      math::Vector3 body_velocity_W = link_->GetWorldLinearVel();
-      math::Vector3 relative_wind_velocity_W = body_velocity_W - wind_speed_W_;
-      math::Vector3 body_velocity_perpendicular =
+      ignition::math::Vector3d joint_axis = joint_->GlobalAxis(0);
+      ignition::math::Vector3d body_velocity_W = link_->WorldLinearVel();
+      ignition::math::Vector3d relative_wind_velocity_W = body_velocity_W - wind_speed_W_;
+      ignition::math::Vector3d body_velocity_perpendicular =
           relative_wind_velocity_W -
           (relative_wind_velocity_W.Dot(joint_axis) * joint_axis);
-      math::Vector3 air_drag = -std::abs(real_motor_velocity) *
+      ignition::math::Vector3d air_drag = -std::abs(real_motor_velocity) *
                                rotor_drag_coefficient_ *
                                body_velocity_perpendicular;
 
@@ -427,17 +421,17 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
       // applied.
       physics::Link_V parent_links = link_->GetParentJointsLinks();
       // The tansformation from the parent_link to the link_.
-      math::Pose pose_difference =
-          link_->GetWorldCoGPose() - parent_links.at(0)->GetWorldCoGPose();
-      math::Vector3 drag_torque(
+      ignition::math::Pose3d pose_difference =
+          link_->WorldCoGPose() - parent_links.at(0)->WorldCoGPose();
+      ignition::math::Vector3d drag_torque(
           0, 0, -turning_direction_ * thrust * moment_constant_);
       // Transforming the drag torque into the parent frame to handle
       // arbitrary rotor orientations.
-      math::Vector3 drag_torque_parent_frame =
-          pose_difference.rot.RotateVector(drag_torque);
+      ignition::math::Vector3d drag_torque_parent_frame =
+          pose_difference.Rot().RotateVector(drag_torque);
       parent_links.at(0)->AddRelativeTorque(drag_torque_parent_frame);
 
-      math::Vector3 rolling_moment;
+      ignition::math::Vector3d rolling_moment;
       // - \omega * \mu_1 * V_A^{\perp}
       rolling_moment = -std::abs(real_motor_velocity) *
                        rolling_moment_coefficient_ *
@@ -451,12 +445,9 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
       // Make sure max force is set, as it may be reset to 0 by a world reset any
       // time. (This cannot be done during Reset() because the change will be undone
       // by the Joint's reset function afterwards.)
-      #if GAZEBO_MAJOR_VERSION < 5
-            joint_->SetMaxForce(0, max_force_);
-      #endif
-            joint_->SetVelocity(
-                0, turning_direction_ * ref_motor_rot_vel /
-                       rotor_velocity_slowdown_sim_);
+      joint_->SetVelocity(
+          0, turning_direction_ * ref_motor_rot_vel /
+                 rotor_velocity_slowdown_sim_);
     }
   }
 }

@@ -2,6 +2,25 @@
 Changelog for package rotors_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.3 (2018-12-13)
+------------------
+
+2.2.2 (2018-12-12)
+------------------
+
+2.2.0 (2018-12-10)
+------------------
+* switch to package format 2
+* switch to Eigen3 from Eigen
+* Merge pull request `#466 <https://github.com/ethz-asl/rotors_simulator/issues/466>`_ from ethz-asl/fix/lee_position_controller_nodehandle
+  make node handles member variables
+* make nh member variable
+  The NodeHandle (and the subscribers/publishers) are deleted if they go
+  out of scope. I am not sure how it was working all this time.
+* Merge pull request `#397 <https://github.com/ethz-asl/rotors_simulator/issues/397>`_ from ethz-asl/v2.1.1
+  update to 2.1.1
+* Contributors: Fadri Furrer, Mina Kamel
+
 2.1.1 (2017-04-27)
 -----------
 * update maintainers

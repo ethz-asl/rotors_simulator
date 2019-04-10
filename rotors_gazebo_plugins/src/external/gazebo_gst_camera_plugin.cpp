@@ -190,28 +190,17 @@ void GstCameraPlugin::Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf)
     gzerr << "Invalid sensor pointer.\n";
 
   this->parentSensor =
-#if GAZEBO_MAJOR_VERSION >= 7
     std::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
-#else
-    boost::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
-#endif
 
   if (!this->parentSensor)
   {
     gzerr << "GstCameraPlugin requires a CameraSensor.\n";
-#if GAZEBO_MAJOR_VERSION >= 7
+
     if (std::dynamic_pointer_cast<sensors::DepthCameraSensor>(sensor))
-#else
-    if (boost::dynamic_pointer_cast<sensors::DepthCameraSensor>(sensor))
-#endif
       gzmsg << "It is a depth camera sensor\n";
   }
 
-#if GAZEBO_MAJOR_VERSION >= 7
   this->camera = this->parentSensor->Camera();
-#else
-  this->camera = this->parentSensor->GetCamera();
-#endif
 
   if (!this->parentSensor)
   {
@@ -219,19 +208,11 @@ void GstCameraPlugin::Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf)
     return;
   }
 
-#if GAZEBO_MAJOR_VERSION >= 7
   this->width = this->camera->ImageWidth();
   this->height = this->camera->ImageHeight();
   this->depth = this->camera->ImageDepth();
   this->format = this->camera->ImageFormat();
   this->rate = this->camera->RenderRate();
-#else
-  this->width = this->camera->GetImageWidth();
-  this->height = this->camera->GetImageHeight();
-  this->depth = this->camera->GetImageDepth();
-  this->format = this->camera->GetImageFormat();
-  this->rate = this->camera->GetRenderRate();
-#endif
 
  if (!isfinite(this->rate)) {
    this->rate =  60.0;
@@ -269,11 +250,7 @@ void GstCameraPlugin::OnNewFrame(const unsigned char * image,
                               const std::string &format)
 {
 
-#if GAZEBO_MAJOR_VERSION >= 7
   image = this->camera->ImageData(0);
-#else
-  image = this->camera->GetImageData(0);
-#endif
 
   std::lock_guard<std::mutex> guard(frameBufferMutex);
 

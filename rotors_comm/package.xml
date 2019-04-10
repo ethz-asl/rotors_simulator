@@ -1,6 +1,6 @@
-<package>
+<package format="2">
   <name>rotors_comm</name>
-  <version>2.1.1</version>
+  <version>2.2.3</version>
   <description>RotorS specific messages and services.</description>
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
@@ -20,12 +20,9 @@
   <!-- Dependencies which this package needs to build itself. -->
   <buildtool_depend>catkin</buildtool_depend>
 
-  <!-- Dependencies needed to compile this package. -->
-  <build_depend>message_generation</build_depend>
-  <build_depend>geometry_msgs</build_depend>
-  <build_depend>octomap_msgs</build_depend>
-  <build_depend>cmake_modules</build_depend>
-
-  <!-- Dependencies needed after this package is compiled. -->
-  <run_depend>message_runtime</run_depend>
+  <depend>cmake_modules</depend>
+  <depend>geometry_msgs</depend>
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend>
+  <depend>octomap_msgs</depend>
 </package>

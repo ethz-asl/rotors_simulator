@@ -1,6 +1,6 @@
-<package>
+<package format="2">
   <name>rotors_gazebo</name>
-  <version>2.1.1</version>
+  <version>2.2.3</version>
   <description>The rotors_gazebo package</description>
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
@@ -19,24 +19,14 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <!-- Dependencies needed to compile this package. -->
-  <build_depend>gazebo_msgs</build_depend>
-  <build_depend>gazebo_plugins</build_depend>
-  <build_depend>geometry_msgs</build_depend>
-  <build_depend>mav_msgs</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>rotors_gazebo_plugins</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-
-  <!-- Dependencies needed after this package is compiled. -->
-  <run_depend>gazebo_msgs</run_depend>
-  <run_depend>gazebo_plugins</run_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <run_depend>joy</run_depend>
-  <run_depend>mav_msgs</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>rotors_gazebo_plugins</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>xacro</run_depend>
+  <depend>gazebo_msgs</depend>
+  <depend>gazebo_plugins</depend>
+  <depend>geometry_msgs</depend>
+  <depend>joy</depend>
+  <depend>mav_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>rotors_gazebo_plugins</depend>
+  <depend>sensor_msgs</depend>
+  <depend>xacro</depend>
 
 </package>

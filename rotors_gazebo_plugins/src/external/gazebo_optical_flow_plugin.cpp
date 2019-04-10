@@ -63,28 +63,16 @@ void OpticalFlowPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
     gzerr << "Invalid sensor pointer.\n";
 
   this->parentSensor =
-#if GAZEBO_MAJOR_VERSION >= 7
     std::dynamic_pointer_cast<sensors::CameraSensor>(_sensor);
-#else
-    boost::dynamic_pointer_cast<sensors::CameraSensor>(_sensor);
-#endif
 
   if (!this->parentSensor)
   {
     gzerr << "OpticalFlowPlugin requires a CameraSensor.\n";
-#if GAZEBO_MAJOR_VERSION >= 7
     if (std::dynamic_pointer_cast<sensors::DepthCameraSensor>(_sensor))
-#else
-    if (boost::dynamic_pointer_cast<sensors::DepthCameraSensor>(_sensor))
-#endif
       gzmsg << "It is a depth camera sensor\n";
   }
 
-#if GAZEBO_MAJOR_VERSION >= 7
   this->camera = this->parentSensor->Camera();
-#else
-  this->camera = this->parentSensor->GetCamera();
-#endif
 
   if (!this->parentSensor)
   {
@@ -92,17 +80,10 @@ void OpticalFlowPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
     return;
   }
 
-#if GAZEBO_MAJOR_VERSION >= 7
   this->width = this->camera->ImageWidth();
   this->height = this->camera->ImageHeight();
   this->depth = this->camera->ImageDepth();
   this->format = this->camera->ImageFormat();
-#else
-  this->width = this->camera->GetImageWidth();
-  this->height = this->camera->GetImageHeight();
-  this->depth = this->camera->GetImageDepth();
-  this->format = this->camera->GetImageFormat();
-#endif
 
   if (this->width != 64 || this->height != 64) {
     gzerr << "[gazebo_optical_flow_plugin] Incorrect image size, must by 64 x 64.\n";
@@ -116,24 +97,15 @@ void OpticalFlowPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
   node_handle_ = transport::NodePtr(new transport::Node());
   node_handle_->Init(namespace_);
 
-#if GAZEBO_MAJOR_VERSION >= 7
   const string scopedName = _sensor->ParentName();
-#else
-  const string scopedName = _sensor->GetParentName();
-#endif
 
   string topicName = "~/" + scopedName + "/opticalFlow";
   boost::replace_all(topicName, "::", "/");
 
   opticalFlow_pub_ = node_handle_->Advertise<opticalFlow_msgs::msgs::opticalFlow>(topicName, 10);
 
-  #if GAZEBO_MAJOR_VERSION >= 7
-    hfov = float(this->camera->HFOV().Radian());
-    first_frame_time = this->camera->LastRenderWallTime().Double();
-  #else
-    hfov = float(this->camera->GetHFOV().Radian());
-    first_frame_time = this->camera->GetLastRenderWallTime().Double();
-  #endif
+  hfov = float(this->camera->HFOV().Radian());
+  first_frame_time = this->camera->LastRenderWallTime().Double();
 
   old_frame_time = first_frame_time;
   focal_length = (this->width/2)/tan(hfov/2);
@@ -158,16 +130,9 @@ void OpticalFlowPlugin::OnNewFrame(const unsigned char * _image,
                               const std::string &_format)
 {
 
-  //get data depending on gazebo version
-  #if GAZEBO_MAJOR_VERSION >= 7
-    rate = this->camera->AvgFPS();
-    _image = this->camera->ImageData(0);
-    frame_time = this->camera->LastRenderWallTime().Double();
-  #else
-    rate = this->camera->GetAvgFPS();
-    _image = this->camera->GetImageData(0);
-    frame_time = this->camera->GetLastRenderWallTime().Double();
-  #endif
+  rate = this->camera->AvgFPS();
+  _image = this->camera->ImageData(0);
+  frame_time = this->camera->LastRenderWallTime().Double();
 
   frame_time_us = (frame_time - first_frame_time) * 1e6; //since start
 

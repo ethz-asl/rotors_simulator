@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>rotors_evaluation</name>
-  <version>2.1.1</version>
+  <version>2.2.3</version>
   <description>The dataset evaluation package for the RotorS simulator.</description>
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
   <maintainer email="mina.kamel@mavt.ethz.ch">Mina Kamel</maintainer>
-  
+
   <author>Fadri Furrer</author>
   <author>Michael Burri</author>
   <author>Mina Kamel</author>
@@ -20,7 +20,5 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>rospy</build_depend>
-
-  <run_depend>rospy</run_depend>
+  <depend>rospy</depend>
 </package>

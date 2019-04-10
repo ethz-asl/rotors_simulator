@@ -1,6 +1,6 @@
-<package>
+<package format="2">
   <name>rotors_description</name>
-  <version>2.1.1</version>
+  <version>2.2.3</version>
   <description>The rotors_description package provides URDF models of the AscTec multicopters.</description>
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
