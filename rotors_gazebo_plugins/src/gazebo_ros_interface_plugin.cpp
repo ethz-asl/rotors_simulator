@@ -273,7 +273,9 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
               << " is not supported by GazeboRosInterfacePlugin.");
   }
 
-  gzdbg << __FUNCTION__ << "() finished." << std::endl;
+  if (kPrintOnMsgCallback) {
+    gzdbg << __FUNCTION__ << "() finished." << std::endl;
+  }
 }
 
 void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
@@ -284,8 +286,17 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
 
   static std::vector<ros::Subscriber> ros_subscribers;
 
+  const std::string gazeboTopicName =
+      gz_connect_ros_to_gazebo_topic_msg->gazebo_topic();
+  const std::string rosTopicName =
+      gz_connect_ros_to_gazebo_topic_msg->ros_topic();
+
+  gzdbg << "Connecting ROS topic \"" <<rosTopicName
+        << "\" to Gazebo topic \"" << gazeboTopicName << "\"." << std::endl;
+
   switch (gz_connect_ros_to_gazebo_topic_msg->msgtype()) {
     case gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS: {
+      gzdbg << "ACTUATORS msgtype: "<<gz_connect_ros_to_gazebo_topic_msg->msgtype()<<std::endl;
       gazebo::transport::PublisherPtr gz_publisher_ptr =
           gz_node_handle_->Advertise<gz_sensor_msgs::Actuators>(
               gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
@@ -304,6 +315,7 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       break;
     }
     case gz_std_msgs::ConnectRosToGazeboTopic::COMMAND_MOTOR_SPEED: {
+      gzdbg << "COMMAND_MOTOR_SPEED msgtype: "<<gz_connect_ros_to_gazebo_topic_msg->msgtype()<<std::endl;
       gazebo::transport::PublisherPtr gz_publisher_ptr =
           gz_node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>(
               gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
@@ -323,6 +335,7 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       break;
     }
     case gz_std_msgs::ConnectRosToGazeboTopic::ROLL_PITCH_YAWRATE_THRUST: {
+      gzdbg << "ROLL_PITCH_YAWRATE_THRUST msgtype: "<<gz_connect_ros_to_gazebo_topic_msg->msgtype()<<std::endl;
       gazebo::transport::PublisherPtr gz_publisher_ptr =
           gz_node_handle_->Advertise<gz_mav_msgs::RollPitchYawrateThrust>(
               gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
@@ -343,6 +356,7 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       break;
     }
     case gz_std_msgs::ConnectRosToGazeboTopic::WIND_SPEED: {
+      gzdbg << "WIND_SPEED msgtype: "<<gz_connect_ros_to_gazebo_topic_msg->msgtype()<<std::endl;
       gazebo::transport::PublisherPtr gz_publisher_ptr =
           gz_node_handle_->Advertise<gz_mav_msgs::WindSpeed>(
               gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
