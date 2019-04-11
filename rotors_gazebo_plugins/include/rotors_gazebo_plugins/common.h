@@ -24,6 +24,7 @@
 
 #include <Eigen/Dense>
 #include <gazebo/gazebo.hh>
+#include <tinyxml.h>
 
 namespace gazebo {
 
@@ -79,6 +80,56 @@ bool getSdfParam(sdf::ElementPtr sdf, const std::string& name, T& param, const T
       gzerr << "[rotors_gazebo_plugins] Please specify a value for parameter \"" << name << "\".\n";
   }
   return false;
+}
+
+template <typename T>
+void model_param(const std::string& world_name, const std::string& model_name, const std::string& param, T& param_value)
+{
+  TiXmlElement* e_param = nullptr;
+  TiXmlElement* e_param_tmp = nullptr;
+  std::string dbg_param;
+
+  TiXmlDocument doc(world_name + ".xml");
+  if (doc.LoadFile())
+  {
+    TiXmlHandle h_root(doc.RootElement());
+
+    TiXmlElement* e_model = h_root.FirstChild("model").Element();
+
+    for( e_model; e_model; e_model=e_model->NextSiblingElement("model") )
+    {
+      const char* attr_name = e_model->Attribute("name");
+      if (attr_name)
+      {
+        //specific
+        if (model_name.compare(attr_name) == 0)
+        {
+          e_param_tmp = e_model->FirstChildElement(param);
+          if (e_param_tmp)
+          {
+            e_param = e_param_tmp;
+            dbg_param = "";
+          }
+          break;
+        }
+      }
+      else
+      {
+        //common
+        e_param = e_model->FirstChildElement(param);
+        dbg_param = "common ";
+      }
+    }
+
+    if (e_param)
+    {
+      std::istringstream iss(e_param->GetText());
+      iss >> param_value;
+
+      gzdbg << model_name << " model: " << dbg_param << "parameter " << param << " = " << param_value << " from " << doc.Value() << "\n";
+    }
+  }
+
 }
 
 }
