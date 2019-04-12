@@ -197,7 +197,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   // Subscriber to IMU sensor_msgs::Imu Message and SITL message
   imu_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + imu_sub_topic_, &GazeboMavlinkInterface::ImuCallback, this);
   lidar_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + lidar_sub_topic_, &GazeboMavlinkInterface::LidarCallback, this);
-  opticalFlow_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
+  opticalFlow_sub_ = node_handle_->Subscribe("~/" + namespace_+ "/" + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
 
   // Publish gazebo's motor_speed message
   motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + model_->GetName() + motor_velocity_reference_pub_topic_, 1);
@@ -367,20 +367,24 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
   handle_control(dt);
 
   if (received_first_referenc_) {
+    gzdbg<<"rfr_a"<<std::endl;
     gz_mav_msgs::CommandMotorSpeed turning_velocities_msg;
-
-    for (int i = 0; i < input_reference_.size(); i++) {
+    gzdbg<<"rfr_b"<<std::endl;
+    for (int i = 0; i < 16; i++) {
       if (last_actuator_time_ == 0 || (current_time - last_actuator_time_).Double() > 0.2) {
         turning_velocities_msg.add_motor_speed(0);
       } else {
         turning_velocities_msg.add_motor_speed(input_reference_[i]);
       }
     }
+
+    gzdbg<<"rfr_c"<<std::endl;
     // TODO Add timestamp and Header
     // turning_velocities_msg->header.stamp.sec = current_time.sec;
     // turning_velocities_msg->header.stamp.nsec = current_time.nsec;
 
-    motor_velocity_reference_pub_->Publish(turning_velocities_msg);
+    //motor_velocity_reference_pub_->Publish(turning_velocities_msg);
+    gzdbg<<"rfr_d"<<std::endl;
   }
 
   last_time_ = current_time;
@@ -696,6 +700,7 @@ void GazeboMavlinkInterface::pollForMAVLinkMessages(double _dt, uint32_t _timeou
           }
           // have a message, handle it
           handle_message(&msg);
+          gzdbg<<"pollingMavlink: handling message "<<i<<" of "<<len<<std::endl;
         }
       }
     }
@@ -706,6 +711,7 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
 {
   switch (msg->msgid) {
   case MAVLINK_MSG_ID_HIL_ACTUATOR_CONTROLS:
+    gzdbg<<"got a hil_actuator_controls message"<<std::endl;
     mavlink_hil_actuator_controls_t controls;
     mavlink_msg_hil_actuator_controls_decode(msg, &controls);
     bool armed = false;
@@ -713,17 +719,14 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
     if ((controls.mode & MAV_MODE_FLAG_SAFETY_ARMED) > 0) {
       armed = true;
     }
-
 #if GAZEBO_MAJOR_VERSION >= 9
     last_actuator_time_ = world_->SimTime();
 #else
     last_actuator_time_ = world_->GetSimTime();
 #endif
-
     for (unsigned i = 0; i < n_out_max; i++) {
       input_index_[i] = i;
     }
-
     // Set rotor speeds and controller targets for flagged messages.
     if (controls.flags == kMotorSpeedFlag) {
       input_reference_.resize(n_out_max);
@@ -753,28 +756,36 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
     }
     // Set rotor speeds, controller targets for unflagged messages.
     else {
+      //gzdbg<<"dbg: 1a"<<std::endl;
       input_reference_.resize(n_out_max);
+      //gzdbg<<"dbg: 1b"<<std::endl;
       for (unsigned i = 0; i < n_out_max; ++i) {
         if (armed) {
           input_reference_[i] =
               (controls.controls[input_index_[i]] + input_offset_[i]) *
                   input_scaling_[i] +
               zero_position_armed_[i];
+              //gzdbg<<"dbg: 1c "<<controls.controls[input_index_[i]]<<std::endl;
         } else {
           input_reference_[i] = zero_position_disarmed_[i];
+          //gzdbg<<"dbg: 1d"<<std::endl;
         }
       }
+      //gzdbg<<"dbg: 1e"<<std::endl;
       received_first_referenc_ = true;
     }
     break;
   }
+
 }
 
 void GazeboMavlinkInterface::handle_control(double _dt)
 {
+  //gzdbg<<"dbg: 2a"<<std::endl;
   // set joint positions
   for (int i = 0; i < input_reference_.size(); i++) {
     if (joints_[i]) {
+      gzdbg<<"dbg: 2b"<<i<<std::endl;
       double target = input_reference_[i];
       if (joint_control_type_[i] == "velocity")
       {
@@ -828,6 +839,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
       }
     }
   }
+  //gzdbg<<"dbg: 2c"<<std::endl;
 }
 
 void GazeboMavlinkInterface::open() {
@@ -893,6 +905,7 @@ void GazeboMavlinkInterface::parse_buffer(const boost::system::error_code& err, 
     if(msg_received != Framing::incomplete){
       // send to gcs
       send_mavlink_message(&message, qgc_udp_port_);
+      gzdbg<<"parse_buffer calls handle message"<<std::endl;
       handle_message(&message);
     }
   }

@@ -351,8 +351,7 @@ void GazeboFwDynamicsPlugin::CreatePubsAndSubs() {
         gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
   }
 
-  gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg,
-                                              true);
+  //gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
 }
 
 void GazeboFwDynamicsPlugin::ActuatorsCallback(

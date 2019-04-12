@@ -16,7 +16,9 @@
 -->
 
 <robot name="techpod" xmlns:xacro="http://ros.org/wiki/xacro">
+
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
+
   <!-- Instantiate fixed wing "mechanics" -->
   <xacro:include filename="$(find rotors_description)/urdf/techpod.xacro" />
 

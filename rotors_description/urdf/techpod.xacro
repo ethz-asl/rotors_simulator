@@ -129,7 +129,8 @@
     mesh_file="${body_mesh_file}"
     aero_params_yaml="$(arg aero_params_yaml_file)"
     vehicle_params_yaml="$(arg vehicle_params_yaml_file)"
-    is_input_joystick="$(arg is_input_joystick)">
+    is_input_joystick="$(arg is_input_joystick)"
+    enable_mavlink_interface="$(arg enable_mavlink_interface)">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <xacro:insert_block name="body_inertia" />
   </xacro:fixed_wing_base_macro>
