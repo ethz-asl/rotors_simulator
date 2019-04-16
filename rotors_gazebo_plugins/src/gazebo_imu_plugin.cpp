@@ -333,8 +333,7 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // Publish the IMU message
   imu_pub_->Publish(imu_message_);
-
-  // std::cout << "Published IMU message.\n";
+  // gzdbg<<"imu publishing"<<std::endl;
 }
 
 void GazeboImuPlugin::CreatePubsAndSubs() {
@@ -349,6 +348,8 @@ void GazeboImuPlugin::CreatePubsAndSubs() {
 
   imu_pub_ = node_handle_->Advertise<gz_sensor_msgs::Imu>(
       "~/" + namespace_ + "/" + imu_topic_, 1);
+
+  gzdbg<<"advertised  ~/" + namespace_ + "/" + imu_topic_ + " gazebo message."<<std::endl;
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
   // connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);

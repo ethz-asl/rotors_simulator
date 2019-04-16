@@ -188,6 +188,8 @@ void GazeboMagnetometerPlugin::CreatePubsAndSubs() {
   magnetometer_pub_ = node_handle_->Advertise<gz_sensor_msgs::MagneticField>(
       "~/" + namespace_ + "/" + magnetometer_topic_, 1);
 
+  gzdbg<<"advertised  ~/" + namespace_ + "/" + magnetometer_topic_ + " gazebo message."<<std::endl;
+
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
   // connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +

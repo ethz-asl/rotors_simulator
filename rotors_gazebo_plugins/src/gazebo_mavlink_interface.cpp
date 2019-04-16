@@ -124,6 +124,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
             joint_control_pub_[index] = node_handle_->Advertise<gazebo::msgs::GzString>(
                 gztopic_[index]);
       #endif
+            gzdbg<<"publishing to "<<gztopic_[index]<<std::endl;
           }
 
           if (channel->HasElement("joint_name"))
@@ -195,12 +196,18 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
       boost::bind(&GazeboMavlinkInterface::OnUpdate, this, _1));
 
   // Subscriber to IMU sensor_msgs::Imu Message and SITL message
-  imu_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + imu_sub_topic_, &GazeboMavlinkInterface::ImuCallback, this);
-  lidar_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + lidar_sub_topic_, &GazeboMavlinkInterface::LidarCallback, this);
-  opticalFlow_sub_ = node_handle_->Subscribe("~/" + namespace_+ "/" + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
+  imu_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + imu_sub_topic_, &GazeboMavlinkInterface::ImuCallback, this);
+  gzdbg<<"subscribing to ~/" + namespace_ + "/" + imu_sub_topic_<<std::endl;
+
+  lidar_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + lidar_sub_topic_, &GazeboMavlinkInterface::LidarCallback, this);
+  gzdbg<<"subscribing to ~/" + namespace_ + "/" + lidar_sub_topic_<<std::endl;
+
+  opticalFlow_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
+  gzdbg<<"subscribing to ~/" + namespace_ + "/" + opticalFlow_sub_topic_<<std::endl;
 
   // Publish gazebo's motor_speed message
-  motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + model_->GetName() + motor_velocity_reference_pub_topic_, 1);
+  motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + namespace_ + "/" + motor_velocity_reference_pub_topic_, 1);
+  gzdbg<<"subscribing to ~/" + namespace_ + "/" + motor_velocity_reference_pub_topic_<<std::endl;
 
   _rotor_count = 5;
 #if GAZEBO_MAJOR_VERSION >= 9
@@ -214,7 +221,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 #endif
 
   if (_sdf->HasElement("imu_rate")) {
-    imu_update_interval_ = 1 / _sdf->GetElement("imu_rate")->Get<int>();
+    imu_update_interval_ = 1.0 / _sdf->GetElement("imu_rate")->Get<int>();
   }
 
   // Magnetic field data for Zurich from WMM2015 (10^5xnanoTesla (N, E D) n-frame )
@@ -388,6 +395,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
   }
 
   last_time_ = current_time;
+  ++dbgCounter;
 }
 
 void GazeboMavlinkInterface::send_mavlink_message(const mavlink_message_t *message, const int destination_port)
@@ -424,8 +432,9 @@ void GazeboMavlinkInterface::send_mavlink_message(const mavlink_message_t *messa
 
     ssize_t len = sendto(_fd, buffer, packetlen, 0, (struct sockaddr *)&_srcaddr, sizeof(_srcaddr));
 
-    if (len <= 0) {
-      printf("Failed sending mavlink message\n");
+    if (len <= 0)
+    {
+      gzerr << "Failed sending mavlink message: " << strerror(errno) << "\n";
     }
   }
 
@@ -438,6 +447,10 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
   common::Time current_time = world_->GetSimTime();
 #endif
   double dt = (current_time - last_imu_time_).Double();
+
+  if(dbgCounter%50==0)
+    gzdbg<<"ImuCallback"<<std::endl;
+
 
   ignition::math::Quaterniond q_br(0, 1, 0, 0);
   ignition::math::Quaterniond q_ng(0, 0.70711, 0.70711, 0);
@@ -562,11 +575,15 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
     if (hil_mode_) {
       if (!hil_state_level_){
         send_mavlink_message(&msg);
+        if(dbgCounter%50==0)
+            gzdbg<<"send hil sensor message"<<std::endl;
       }
     }
 
     else {
       send_mavlink_message(&msg);
+      if(dbgCounter%50==0)
+        gzdbg<<"send hil sensor message"<<std::endl;
     }
     last_imu_time_ = current_time;
   }
@@ -579,7 +596,6 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
 #endif
 
     // send ground truth
-
     mavlink_hil_state_quaternion_t hil_state_quat;
 #if GAZEBO_MAJOR_VERSION >= 9
     hil_state_quat.time_usec = world_->SimTime().Double() * 1e6;
@@ -621,15 +637,21 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
     if (hil_mode_) {
       if (hil_state_level_){
         send_mavlink_message(&msg);
+        if(dbgCounter%50==0)
+            gzdbg<<"send hil state quaternion message"<<std::endl;
       }
     }
 
     else {
       send_mavlink_message(&msg);
+      if(dbgCounter%50==0)
+          gzdbg<<"send hil state quaternion message"<<std::endl;
     }
 }
 
 void GazeboMavlinkInterface::LidarCallback(LidarPtr& lidar_message) {
+  //gzdbg<<"LidarCallback"<<std::endl;
+
   mavlink_distance_sensor_t sensor_msg;
   sensor_msg.time_boot_ms = lidar_message->time_msec();
   sensor_msg.min_distance = lidar_message->min_distance() * 100.0;
@@ -649,6 +671,9 @@ void GazeboMavlinkInterface::LidarCallback(LidarPtr& lidar_message) {
 }
 
 void GazeboMavlinkInterface::OpticalFlowCallback(OpticalFlowPtr& opticalFlow_message) {
+
+  //gzdbg<<"OfCallback"<<std::endl;
+
   mavlink_hil_optical_flow_t sensor_msg;
 #if GAZEBO_MAJOR_VERSION >= 9
   sensor_msg.time_usec = world_->SimTime().Double() * 1e6;
@@ -781,6 +806,9 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
 
 void GazeboMavlinkInterface::handle_control(double _dt)
 {
+    if(dbgCounter%50==0)
+      gzdbg<<"handle_control"<<std::endl;
+
   //gzdbg<<"dbg: 2a"<<std::endl;
   // set joint positions
   for (int i = 0; i < input_reference_.size(); i++) {
@@ -905,7 +933,7 @@ void GazeboMavlinkInterface::parse_buffer(const boost::system::error_code& err, 
     if(msg_received != Framing::incomplete){
       // send to gcs
       send_mavlink_message(&message, qgc_udp_port_);
-      gzdbg<<"parse_buffer calls handle message"<<std::endl;
+      //gzdbg<<"parse_buffer calls handle message"<<std::endl;
       handle_message(&message);
     }
   }

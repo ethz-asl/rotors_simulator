@@ -217,6 +217,8 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   gz_gps_pub_ = node_handle_->Advertise<gz_sensor_msgs::NavSatFix>(
       "~/" + namespace_ + "/" + gps_topic_, 1);
 
+  gzdbg<<"advertised  ~/" + namespace_ + "/" + gps_topic_ + " gazebo message."<<std::endl;
+
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
                                                    gps_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + gps_topic_);
@@ -231,6 +233,8 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   gz_ground_speed_pub_ =
       node_handle_->Advertise<gz_geometry_msgs::TwistStamped>(
           "~/" + namespace_ + "/" + ground_speed_topic_, 1);
+
+  gzdbg<<"advertised  ~/" + namespace_ + "/" + ground_speed_topic_ + " gazebo message."<<std::endl;
 
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
                                                    ground_speed_topic_);

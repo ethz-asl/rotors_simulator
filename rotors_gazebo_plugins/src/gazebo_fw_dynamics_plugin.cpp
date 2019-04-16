@@ -101,18 +101,20 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
   }
 
   // Get the rest of the sdf parameters.
+  getSdfParam<bool>(_sdf, "useGzMavlinkInterface", use_gazebo_mavlink_interface_,
+                    true);
   getSdfParam<bool>(_sdf, "isInputJoystick", is_input_joystick_,
                     kDefaultIsInputJoystick);
   getSdfParam<std::string>(_sdf, "actuatorsSubTopic",
                            actuators_sub_topic_,
-                           mav_msgs::default_topics::COMMAND_ACTUATORS);
+                           mav_msgs::default_topics::COMMAND_ACTUATORS); // "command/motor_speeds"
   getSdfParam<std::string>(_sdf, "rollPitchYawrateThrustSubTopic",
                            roll_pitch_yawrate_thrust_sub_topic_,
                            mav_msgs::default_topics::
-                               COMMAND_ROLL_PITCH_YAWRATE_THRUST);
+                               COMMAND_ROLL_PITCH_YAWRATE_THRUST);  // "command/roll_pitch_yawrate_thrust"
   getSdfParam<std::string>(_sdf, "windSpeedSubTopic",
                            wind_speed_sub_topic_,
-                           mav_msgs::default_topics::WIND_SPEED);
+                           mav_msgs::default_topics::WIND_SPEED);   // "wind_speed"
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -327,12 +329,16 @@ void GazeboFwDynamicsPlugin::CreatePubsAndSubs() {
             roll_pitch_yawrate_thrust_sub_topic_,
             &GazeboFwDynamicsPlugin::RollPitchYawrateThrustCallback, this);
 
-    connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
-        roll_pitch_yawrate_thrust_sub_topic_);
-    connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
-        roll_pitch_yawrate_thrust_sub_topic_);
-    connect_ros_to_gazebo_topic_msg.set_msgtype(
-        gz_std_msgs::ConnectRosToGazeboTopic::ROLL_PITCH_YAWRATE_THRUST);
+        gzdbg<<"Aircraft actuation signal from ~/" << namespace_ << "/" <<
+           roll_pitch_yawrate_thrust_sub_topic_<<" gazebo topic"<<std::endl;
+
+        connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
+            roll_pitch_yawrate_thrust_sub_topic_);
+        connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
+            roll_pitch_yawrate_thrust_sub_topic_);
+        connect_ros_to_gazebo_topic_msg.set_msgtype(
+            gz_std_msgs::ConnectRosToGazeboTopic::ROLL_PITCH_YAWRATE_THRUST);
+
   } else {
     // ============================================ //
     // ===== ACTUATORS MSG SETUP (ROS->GAZEBO) ==== //
@@ -342,16 +348,21 @@ void GazeboFwDynamicsPlugin::CreatePubsAndSubs() {
         node_handle_->Subscribe("~/" + namespace_ + "/" + actuators_sub_topic_,
                                 &GazeboFwDynamicsPlugin::ActuatorsCallback,
                                 this);
+        gzdbg<<"Aircraft actuation signal from ~/" << namespace_ << "/" <<
+           roll_pitch_yawrate_thrust_sub_topic_<<" gazebo topic"<<std::endl;
 
-    connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
+        connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
                                                   actuators_sub_topic_);
-    connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
+        connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
                                                      actuators_sub_topic_);
-    connect_ros_to_gazebo_topic_msg.set_msgtype(
-        gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
+        connect_ros_to_gazebo_topic_msg.set_msgtype(
+            gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
   }
 
-  //gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
+  if(!use_gazebo_mavlink_interface_){
+      // prevent gazebo_ros_interface_plugin from publishing actuator data if mavlink_interface is used for doing so
+       gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
+  }
 }
 
 void GazeboFwDynamicsPlugin::ActuatorsCallback(
