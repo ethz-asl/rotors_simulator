@@ -182,6 +182,14 @@ class FirstOrderFilter {
   T previousState_;
 };
 
+/// Returns scalar value constrained by (min_val, max_val)		
+/// \brief    Computes a quaternion from the 3-element small angle approximation theta.
+template<typename Scalar>		
+static inline constexpr const Scalar &constrain(const Scalar &val, const Scalar &min_val, const Scalar &max_val) {		
+  return (val < min_val) ? min_val : ((val > max_val) ? max_val : val);		
+}		
+	
+
 /// \brief    Computes a quaternion from the 3-element small angle approximation theta.
 template<class Derived>
 Eigen::Quaternion<typename Derived::Scalar> QuaternionFromSmallAngle(const Eigen::MatrixBase<Derived> & theta) {

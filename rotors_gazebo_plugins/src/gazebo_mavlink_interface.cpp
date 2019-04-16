@@ -196,18 +196,18 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
       boost::bind(&GazeboMavlinkInterface::OnUpdate, this, _1));
 
   // Subscriber to IMU sensor_msgs::Imu Message and SITL message
-  imu_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + imu_sub_topic_, &GazeboMavlinkInterface::ImuCallback, this);
-  gzdbg<<"subscribing to ~/" + namespace_ + "/" + imu_sub_topic_<<std::endl;
+  imu_sub_ = node_handle_->Subscribe("~/" + namespace_ + imu_sub_topic_, &GazeboMavlinkInterface::ImuCallback, this);
+  gzdbg<<"subscribing to ~/" + namespace_ + imu_sub_topic_<<std::endl;
 
-  lidar_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + lidar_sub_topic_, &GazeboMavlinkInterface::LidarCallback, this);
-  gzdbg<<"subscribing to ~/" + namespace_ + "/" + lidar_sub_topic_<<std::endl;
+  lidar_sub_ = node_handle_->Subscribe("~/" + namespace_  + lidar_sub_topic_, &GazeboMavlinkInterface::LidarCallback, this);
+  gzdbg<<"subscribing to ~/" + namespace_ + lidar_sub_topic_<<std::endl;
 
-  opticalFlow_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
-  gzdbg<<"subscribing to ~/" + namespace_ + "/" + opticalFlow_sub_topic_<<std::endl;
+  opticalFlow_sub_ = node_handle_->Subscribe("~/" + namespace_  + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
+  gzdbg<<"subscribing to ~/" + namespace_ + opticalFlow_sub_topic_<<std::endl;
 
   // Publish gazebo's motor_speed message
-  motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + namespace_ + "/" + motor_velocity_reference_pub_topic_, 1);
-  gzdbg<<"subscribing to ~/" + namespace_ + "/" + motor_velocity_reference_pub_topic_<<std::endl;
+  motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + namespace_ + motor_velocity_reference_pub_topic_, 1);
+  gzdbg<<"advertising ~/" + namespace_ + motor_velocity_reference_pub_topic_<<std::endl;
 
   _rotor_count = 5;
 #if GAZEBO_MAJOR_VERSION >= 9
@@ -235,7 +235,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   mag_d_.Y() = 0;
   mag_d_.Z() = -0.42741;
 
-  if(_sdf->HasElement("hil_state_level"))
+  if(_sdf->HasElement("hil_mode"))
   {
     hil_mode_ = _sdf->GetElement("hil_mode")->Get<bool>();
   }

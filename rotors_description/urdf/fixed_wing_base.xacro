@@ -89,20 +89,23 @@
       <plugin filename="librotors_gazebo_mavlink_interface.so" name="gazebo_mavlink_interface">
         <robotNamespace>${robot_namespace}</robotNamespace>
         <protocol_version>2.0</protocol_version>
-        <motorSpeedCommandPubTopic>command/motor_speed</motorSpeedCommandPubTopic>
-        <imuSubTopic>imu</imuSubTopic>
+        <imuSubTopic>/imu</imuSubTopic>
+        <imu_rate>250</imu_rate>
+        <gpsSubTopic>/gps</gpsSubTopic>
         <lidarSubTopic></lidarSubTopic>
         <opticalFlowSubTopic></opticalFlowSubTopic>
-        <imu_rate>250</imu_rate>
-        <hil_state_level>true</hil_state_level>
-        <hil_mode>true</hil_mode>
+        <mavlink_addr>INADDR_ANY</mavlink_addr>
+        <mavlink_udp_port>14560</mavlink_udp_port>
         <serialEnabled>true</serialEnabled>
         <serialDevice>/dev/ttyACM0</serialDevice>
         <baudRate>921600</baudRate>
-        <mavlink_addr>INADDR_ANY</mavlink_addr>
-        <mavlink_udp_port>14560</mavlink_udp_port>
         <qgc_addr>INADDR_ANY</qgc_addr>
         <qgc_udp_port>14550</qgc_udp_port>
+        <hil_mode>true</hil_mode>
+        <hil_state_level>false</hil_state_level>
+        <enable_lockstep>false</enable_lockstep>
+        <use_tcp>false</use_tcp>
+        <motorSpeedCommandPubTopic>/command/motor_speed</motorSpeedCommandPubTopic>
         <control_channels>
           <channel name="propeller">
             <input_index>3</input_index>

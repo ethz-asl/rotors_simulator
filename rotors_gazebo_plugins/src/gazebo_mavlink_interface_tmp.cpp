@@ -51,19 +51,20 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   }
 
   node_handle_ = transport::NodePtr(new transport::Node());
-  node_handle_->Init(namespace_);
+  //node_handle_->Init(namespace_);
+  node_handle_->Init();
 
   getSdfParam<std::string>(_sdf, "motorSpeedCommandPubTopic", motor_velocity_reference_pub_topic_,
       motor_velocity_reference_pub_topic_);
   getSdfParam<std::string>(_sdf, "imuSubTopic", imu_sub_topic_, imu_sub_topic_);
-  getSdfParam<std::string>(_sdf, "gpsSubTopic", gps_sub_topic_, gps_sub_topic_);
-  getSdfParam<std::string>(_sdf, "visionSubTopic", vision_sub_topic_, vision_sub_topic_);
-  getSdfParam<std::string>(_sdf, "lidarSubTopic", lidar_sub_topic_, lidar_sub_topic_);
+  //getSdfParam<std::string>(_sdf, "gpsSubTopic", gps_sub_topic_, gps_sub_topic_);
+  //getSdfParam<std::string>(_sdf, "visionSubTopic", vision_sub_topic_, vision_sub_topic_);
+  //getSdfParam<std::string>(_sdf, "lidarSubTopic", lidar_sub_topic_, lidar_sub_topic_);
   getSdfParam<std::string>(_sdf, "opticalFlowSubTopic",
       opticalFlow_sub_topic_, opticalFlow_sub_topic_);
-  getSdfParam<std::string>(_sdf, "sonarSubTopic", sonar_sub_topic_, sonar_sub_topic_);
-  getSdfParam<std::string>(_sdf, "irlockSubTopic", irlock_sub_topic_, irlock_sub_topic_);
-  groundtruth_sub_topic_ = "/groundtruth";
+  //getSdfParam<std::string>(_sdf, "sonarSubTopic", sonar_sub_topic_, sonar_sub_topic_);
+  //getSdfParam<std::string>(_sdf, "irlockSubTopic", irlock_sub_topic_, irlock_sub_topic_);
+  //groundtruth_sub_topic_ = "/groundtruth";
 
   // set input_reference_ from inputs.control
   input_reference_.resize(n_out_max);
@@ -115,6 +116,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
             joint_control_pub_[index] = node_handle_->Advertise<gazebo::msgs::GzString>(
                 gztopic_[index]);
 #endif
+            gzdbg<<"publishing to "<<gztopic_[index]<<std::endl;
           }
 
           if (channel->HasElement("joint_name"))
@@ -178,6 +180,47 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
       }
       channel = channel->GetNextElement("channel");
     }
+  }
+
+  // Listen to the update event. This event is broadcast every
+  // simulation iteration.
+  updateConnection_ = event::Events::ConnectWorldUpdateBegin(
+      boost::bind(&GazeboMavlinkInterface::OnUpdate, this, _1));
+
+  // Subscribe to messages of other plugins.
+  imu_sub_ = node_handle_->Subscribe("~/" + namespace_ + imu_sub_topic_, &GazeboMavlinkInterface::ImuCallback, this);
+  gzdbg<<"subscribing to ~/" + namespace_ + imu_sub_topic_<<std::endl;
+
+  //lidar_sub_ = node_handle_->Subscribe("~/" + namespace_ + lidar_sub_topic_, &GazeboMavlinkInterface::LidarCallback, this);
+  //gzdbg<<"subscribing to ~/" + namespace_ + lidar_sub_topic_<<std::endl;
+
+  opticalFlow_sub_ = node_handle_->Subscribe("~/" + namespace_ + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
+  gzdbg<<"subscribing to ~/" + namespace_ + opticalFlow_sub_topic_<<std::endl;
+
+  //sonar_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + sonar_sub_topic_, &GazeboMavlinkInterface::SonarCallback, this);
+  //irlock_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + irlock_sub_topic_, &GazeboMavlinkInterface::IRLockCallback, this);
+  //gps_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + gps_sub_topic_, &GazeboMavlinkInterface::GpsCallback, this);
+  //groundtruth_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + groundtruth_sub_topic_, &GazeboMavlinkInterface::GroundtruthCallback, this);
+  //vision_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + vision_sub_topic_, &GazeboMavlinkInterface::VisionCallback, this);
+
+  // Publish gazebo's motor_speed message
+  motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + namespace_ + motor_velocity_reference_pub_topic_, 1);
+  gzdbg<<"advertising ~/" + namespace_ + motor_velocity_reference_pub_topic_<<std::endl;
+
+#if GAZEBO_MAJOR_VERSION >= 9
+  last_time_ = world_->SimTime();
+  last_imu_time_ = world_->SimTime();
+  gravity_W_ = world_->Gravity();
+#else
+  last_time_ = world_->GetSimTime();
+  last_imu_time_ = world_->GetSimTime();
+  gravity_W_ = ignitionFromGazeboMath(world_->GetPhysicsEngine()->GetGravity());
+#endif
+
+  // This doesn't seem to be used anywhere but we leave it here
+  // for potential compatibility
+  if (_sdf->HasElement("imu_rate")) {
+    imu_update_interval_ = 1.0 / _sdf->GetElement("imu_rate")->Get<int>();
   }
 
   if(_sdf->HasElement("hil_mode"))
@@ -256,40 +299,6 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     presetManager->SetCurrentProfileParam("real_time_update_rate", real_time_update_rate);
   }
 
-  // Listen to the update event. This event is broadcast every
-  // simulation iteration.
-  updateConnection_ = event::Events::ConnectWorldUpdateBegin(
-      boost::bind(&GazeboMavlinkInterface::OnUpdate, this, _1));
-
-  // Subscribe to messages of other plugins.
-  imu_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + imu_sub_topic_, &GazeboMavlinkInterface::ImuCallback, this);
-  lidar_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + lidar_sub_topic_, &GazeboMavlinkInterface::LidarCallback, this);
-  opticalFlow_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
-  sonar_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + sonar_sub_topic_, &GazeboMavlinkInterface::SonarCallback, this);
-  irlock_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + irlock_sub_topic_, &GazeboMavlinkInterface::IRLockCallback, this);
-  gps_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + gps_sub_topic_, &GazeboMavlinkInterface::GpsCallback, this);
-  groundtruth_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + groundtruth_sub_topic_, &GazeboMavlinkInterface::GroundtruthCallback, this);
-  vision_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + vision_sub_topic_, &GazeboMavlinkInterface::VisionCallback, this);
-
-  // Publish gazebo's motor_speed message
-  motor_velocity_reference_pub_ = node_handle_->Advertise<mav_msgs::msgs::CommandMotorSpeed>("~/" + model_->GetName() + motor_velocity_reference_pub_topic_, 1);
-
-#if GAZEBO_MAJOR_VERSION >= 9
-  last_time_ = world_->SimTime();
-  last_imu_time_ = world_->SimTime();
-  gravity_W_ = world_->Gravity();
-#else
-  last_time_ = world_->GetSimTime();
-  last_imu_time_ = world_->GetSimTime();
-  gravity_W_ = ignitionFromGazeboMath(world_->GetPhysicsEngine()->GetGravity());
-#endif
-
-  // This doesn't seem to be used anywhere but we leave it here
-  // for potential compatibility
-  if (_sdf->HasElement("imu_rate")) {
-    imu_update_interval_ = 1 / _sdf->GetElement("imu_rate")->Get<int>();
-  }
-
   // Get serial params
   if(_sdf->HasElement("serialEnabled"))
   {
@@ -336,6 +345,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   if (_sdf->HasElement("mavlink_udp_port")) {
     mavlink_udp_port_ = _sdf->GetElement("mavlink_udp_port")->Get<int>();
   }
+
   model_param(worldName, model_->GetName(), "mavlink_udp_port", mavlink_udp_port_);
 
   if (_sdf->HasElement("mavlink_tcp_port")) {
@@ -426,21 +436,24 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     }
   }
 
+  /*
   if(_sdf->HasElement("vehicle_is_tailsitter"))
   {
     vehicle_is_tailsitter_ = _sdf->GetElement("vehicle_is_tailsitter")->Get<bool>();
   }
-
+  */
+  /*
   if(_sdf->HasElement("send_vision_estimation"))
   {
     send_vision_estimation_ = _sdf->GetElement("send_vision_estimation")->Get<bool>();
   }
-
+  */
+  /*
   if(_sdf->HasElement("send_odometry"))
   {
     send_odometry_ = _sdf->GetElement("send_odometry")->Get<bool>();
   }
-
+  */
 
   if (use_tcp_) {
     fds_[0].fd = tcp_client_fd_;
@@ -468,6 +481,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 // This gets called by the world update start event.
 void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
 
+  /*
   std::unique_lock<std::mutex> lock(last_imu_message_mutex_);
 
   if (previous_imu_seq_ > 0) {
@@ -477,6 +491,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
   }
 
   previous_imu_seq_ = last_imu_message_.seq();
+  */
 
 #if GAZEBO_MAJOR_VERSION >= 9
   common::Time current_time = world_->SimTime();
@@ -492,7 +507,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
   handle_control(dt);
 
   if (received_first_actuator_) {
-    mav_msgs::msgs::CommandMotorSpeed turning_velocities_msg;
+    gz_mav_msgs::CommandMotorSpeed turning_velocities_msg;
 
     for (int i = 0; i < input_reference_.size(); i++) {
       if (last_actuator_time_ == 0 || (current_time - last_actuator_time_).Double() > 0.2) {
@@ -509,6 +524,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
   }
 
   last_time_ = current_time;
+  ++dbgCounter;
 }
 
 void GazeboMavlinkInterface::send_mavlink_message(const mavlink_message_t *message, const int destination_port)
@@ -528,7 +544,11 @@ void GazeboMavlinkInterface::send_mavlink_message(const mavlink_message_t *messa
       }
       tx_q.emplace_back(message);
     }
-    io_service.post(std::bind(&GazeboMavlinkInterface::do_write, this, true));
+    try {
+        io_service.post(std::bind(&GazeboMavlinkInterface::do_write, this, true));
+    } catch (const std::exception& e) {
+        gzdbg<<e.what()<<std::endl;
+    }
   }
 
   else {
@@ -553,11 +573,13 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message)
 {
   std::unique_lock<std::mutex> lock(last_imu_message_mutex_);
 
+  /*
   const int64_t diff = imu_message->seq() - last_imu_message_.seq();
   if (diff != 1 && imu_message->seq() != 0)
   {
     gzerr << "Skipped " << (diff - 1) << " IMU samples (presumably CPU usage is too high)\n";
   }
+  */
 
   last_imu_message_ = *imu_message;
   lock.unlock();
@@ -566,6 +588,9 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message)
 
 void GazeboMavlinkInterface::SendSensorMessages()
 {
+  ignition::math::Quaterniond q_br(0, 1, 0, 0);
+  ignition::math::Quaterniond q_ng(0, 0.70711, 0.70711, 0);
+
   ignition::math::Quaterniond q_gr = ignition::math::Quaterniond(
     last_imu_message_.orientation().w(),
     last_imu_message_.orientation().x(),
@@ -701,11 +726,13 @@ void GazeboMavlinkInterface::SendSensorMessages()
 
     // calculate differential pressure in hPa
     // if vehicle is a tailsitter the airspeed axis is different (z points from nose to tail)
-    if (vehicle_is_tailsitter_) {
+    /*if (vehicle_is_tailsitter_) {
       sensor_msg.diff_pressure = 0.005f*rho*vel_b.Z()*vel_b.Z();
     } else {
       sensor_msg.diff_pressure = 0.005f*rho*vel_b.X()*vel_b.X();
-    }
+    }*/
+
+    sensor_msg.diff_pressure = 0.005f*rho*vel_b.X()*vel_b.X();
 
     // calculate temperature in Celsius
     sensor_msg.temperature = temperature_local - 273.0f;
@@ -716,6 +743,8 @@ void GazeboMavlinkInterface::SendSensorMessages()
       mavlink_message_t msg;
       mavlink_msg_hil_sensor_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &sensor_msg);
       send_mavlink_message(&msg);
+      if(dbgCounter%50==0)
+          gzdbg<<"sending hil sensor message"<<std::endl;
     }
   }
 
@@ -768,9 +797,12 @@ void GazeboMavlinkInterface::SendSensorMessages()
     mavlink_message_t msg;
     mavlink_msg_hil_state_quaternion_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &hil_state_quat);
     send_mavlink_message(&msg);
+    if(dbgCounter%50==0)
+        gzdbg<<"sending hil state quaternion message"<<std::endl;
   }
 }
 
+/*
 void GazeboMavlinkInterface::GpsCallback(GpsPtr& gps_msg) {
   // fill HIL GPS Mavlink msg
   mavlink_hil_gps_t hil_gps_msg;
@@ -798,7 +830,8 @@ void GazeboMavlinkInterface::GpsCallback(GpsPtr& gps_msg) {
     send_mavlink_message(&msg);
   }
 }
-
+*/
+/*
 void GazeboMavlinkInterface::GroundtruthCallback(GtPtr& groundtruth_msg) {
   // update groundtruth lat_rad, lon_rad and altitude
   groundtruth_lat_rad = groundtruth_msg->latitude_rad();
@@ -807,10 +840,11 @@ void GazeboMavlinkInterface::GroundtruthCallback(GtPtr& groundtruth_msg) {
   // the rest of the data is obtained directly on this interface and sent to
   // the FCU
 }
-
+*/
+/*
 void GazeboMavlinkInterface::LidarCallback(LidarPtr& lidar_message) {
   mavlink_distance_sensor_t sensor_msg;
-  sensor_msg.time_boot_ms = lidar_message->time_usec() / 1e3;
+  sensor_msg.time_boot_ms = lidar_message->time_msec();
   sensor_msg.min_distance = lidar_message->min_distance() * 100.0;
   sensor_msg.max_distance = lidar_message->max_distance() * 100.0;
   sensor_msg.current_distance = lidar_message->current_distance() * 100.0;
@@ -826,10 +860,17 @@ void GazeboMavlinkInterface::LidarCallback(LidarPtr& lidar_message) {
   mavlink_msg_distance_sensor_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &sensor_msg);
   send_mavlink_message(&msg);
 }
+*/
 
 void GazeboMavlinkInterface::OpticalFlowCallback(OpticalFlowPtr& opticalFlow_message) {
+
+  /*
   mavlink_hil_optical_flow_t sensor_msg;
-  sensor_msg.time_usec = opticalFlow_message->time_usec();
+#if GAZEBO_MAJOR_VERSION >= 9
+  sensor_msg.time_usec = world_->SimTime().Double() * 1e6;
+#else
+  sensor_msg.time_usec = world_->GetSimTime().Double() * 1e6;
+#endif
   sensor_msg.sensor_id = opticalFlow_message->sensor_id();
   sensor_msg.integration_time_us = opticalFlow_message->integration_time_us();
   sensor_msg.integrated_x = opticalFlow_message->integrated_x();
@@ -855,8 +896,10 @@ void GazeboMavlinkInterface::OpticalFlowCallback(OpticalFlowPtr& opticalFlow_mes
   mavlink_message_t msg;
   mavlink_msg_hil_optical_flow_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &sensor_msg);
   send_mavlink_message(&msg);
+  */
 }
 
+/*
 void GazeboMavlinkInterface::SonarCallback(SonarPtr& sonar_message) {
   mavlink_distance_sensor_t sensor_msg;
   sensor_msg.time_boot_ms = sonar_message->time_usec() / 1e3;
@@ -872,7 +915,8 @@ void GazeboMavlinkInterface::SonarCallback(SonarPtr& sonar_message) {
   mavlink_msg_distance_sensor_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &sensor_msg);
   send_mavlink_message(&msg);
 }
-
+*/
+/*
 void GazeboMavlinkInterface::IRLockCallback(IRLockPtr& irlock_message) {
   mavlink_landing_target_t sensor_msg;
   sensor_msg.time_usec = irlock_message->time_usec() / 1e3;
@@ -888,7 +932,8 @@ void GazeboMavlinkInterface::IRLockCallback(IRLockPtr& irlock_message) {
   mavlink_msg_landing_target_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &sensor_msg);
   send_mavlink_message(&msg);
 }
-
+*/
+/*
 void GazeboMavlinkInterface::VisionCallback(OdomPtr& odom_message) {
   mavlink_message_t msg;
 
@@ -1006,6 +1051,7 @@ void GazeboMavlinkInterface::VisionCallback(OdomPtr& odom_message) {
     send_mavlink_message(&msg);
   }
 }
+*/
 
 void GazeboMavlinkInterface::pollForMAVLinkMessages()
 {
@@ -1214,6 +1260,7 @@ void GazeboMavlinkInterface::parse_buffer(const boost::system::error_code& err, 
 
     if(msg_received != Framing::incomplete){
       // send to gcs
+      //gzdbg<<"forwarding to qgc"<<std::endl;
       send_mavlink_message(&message, qgc_udp_port_);
       bool not_used;
       handle_message(&message, not_used);
