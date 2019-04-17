@@ -111,7 +111,6 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   virtual void OnUpdate(const common::UpdateInfo & /*_info*/);
 
  private:
-
   /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
   ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
   bool pubs_and_subs_created_;
@@ -121,6 +120,9 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
   ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
   void CreatePubsAndSubs();
+
+  /// \brief    Ensures any input angle is element of [0..2pi)
+  double NormalizeAngle(double input);
 
   std::string command_sub_topic_;
   std::string wind_speed_sub_topic_;
