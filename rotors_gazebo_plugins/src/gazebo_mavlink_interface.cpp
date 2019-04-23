@@ -68,7 +68,12 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
   getSdfParam<std::string>(_sdf, "motorSpeedCommandPubTopic", motor_velocity_reference_pub_topic_,
       motor_velocity_reference_pub_topic_);
+  getSdfParam<std::string>(_sdf, "actuatorsPubTopic", actuators_reference_pub_topic_,
+      actuators_reference_pub_topic_);
+
   gzdbg << "motorSpeedCommandPubTopic = \"" << motor_velocity_reference_pub_topic_ << "\"." << std::endl;
+  gzdbg << "actuatorsPubTopic = \"" << actuators_reference_pub_topic_ << "\"." << std::endl;
+
   getSdfParam<std::string>(_sdf, "imuSubTopic", imu_sub_topic_, imu_sub_topic_);
   getSdfParam<std::string>(_sdf, "lidarSubTopic", lidar_sub_topic_, lidar_sub_topic_);
   getSdfParam<std::string>(_sdf, "opticalFlowSubTopic",
@@ -208,6 +213,10 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   // Publish gazebo's motor_speed message
   motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + namespace_ + motor_velocity_reference_pub_topic_, 1);
   gzdbg<<"advertising ~/" + namespace_ + motor_velocity_reference_pub_topic_<<std::endl;
+
+  // Publish gazebo's actuators message
+  actuators_reference_pub_ = node_handle_->Advertise<gz_sensor_msgs::Actuators>("~/" + namespace_ + actuators_reference_pub_topic_, 1);
+  gzdbg<<"advertising ~/" + namespace_ + actuators_reference_pub_topic_<<std::endl;
 
   _rotor_count = 5;
 #if GAZEBO_MAJOR_VERSION >= 9
@@ -374,24 +383,25 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
   handle_control(dt);
 
   if (received_first_referenc_) {
-    gzdbg<<"rfr_a"<<std::endl;
     gz_mav_msgs::CommandMotorSpeed turning_velocities_msg;
-    gzdbg<<"rfr_b"<<std::endl;
+    gz_sensor_msgs::Actuators actuators_msg;
+
     for (int i = 0; i < 16; i++) {
       if (last_actuator_time_ == 0 || (current_time - last_actuator_time_).Double() > 0.2) {
         turning_velocities_msg.add_motor_speed(0);
+        actuators_msg.add_normalized(0);
       } else {
         turning_velocities_msg.add_motor_speed(input_reference_[i]);
+        actuators_msg.add_normalized(input_reference_[i]);
       }
     }
 
-    gzdbg<<"rfr_c"<<std::endl;
-    // TODO Add timestamp and Header
-    // turning_velocities_msg->header.stamp.sec = current_time.sec;
-    // turning_velocities_msg->header.stamp.nsec = current_time.nsec;
+    actuators_msg.mutable_header()->mutable_stamp()->set_sec(current_time.sec);
+    actuators_msg.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
+    actuators_msg.mutable_header()->set_frame_id("blabla");
 
-    //motor_velocity_reference_pub_->Publish(turning_velocities_msg);
-    gzdbg<<"rfr_d"<<std::endl;
+    motor_velocity_reference_pub_->Publish(turning_velocities_msg);
+    actuators_reference_pub_->Publish(actuators_msg);
   }
 
   last_time_ = current_time;
@@ -399,9 +409,6 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
 
 void GazeboMavlinkInterface::send_mavlink_message(const mavlink_message_t *message, const int destination_port)
 {
-    //std::thread::id this_id = std::this_thread::get_id();
-    //gzdbg<<"send_mavlink_message thread ID: "<<this_id<<std::endl;
-
     if(serial_enabled_ && destination_port == 0) {
         assert(message != nullptr);
         if (!is_open()) {
@@ -409,8 +416,8 @@ void GazeboMavlinkInterface::send_mavlink_message(const mavlink_message_t *messa
             return;
         }
 
-        // make sure that emplace_back is executed sequentially
-        // send_mavlink_messages probably called from different threads via callback
+        // lock makes sure that emplace_back is executed sequentially
+        // send_mavlink_messages probably called from different threads via callback: confirmed
         {
             lock_guard lock(mutex);
 
@@ -419,9 +426,8 @@ void GazeboMavlinkInterface::send_mavlink_message(const mavlink_message_t *messa
             }
             tx_q.emplace_back(message);
         }
-        //gzdbg<<"tx queue size: "<<tx_q.size()<<std::endl;
+
         io_service.post(std::bind(&GazeboMavlinkInterface::do_write, this, true)); // returns immediately
-        //gzdbg<<"io_service.post called"<<std::endl;
     }
 
     else {
@@ -452,9 +458,6 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
   common::Time current_time = world_->GetSimTime();
 #endif
   double dt = (current_time - last_imu_time_).Double();
-
-  //std::thread::id this_id = std::this_thread::get_id();
-  //gzdbg<<"ImuCallback thread ID: "<<this_id<<std::endl;
 
   ignition::math::Quaterniond q_br(0, 1, 0, 0);
   ignition::math::Quaterniond q_ng(0, 0.70711, 0.70711, 0);
@@ -564,12 +567,6 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
     // calculate temperature in Celsius
     sensor_msg.temperature = temperature_local - 273.0f;
 
-    /*
-    sensor_msg.temperature = dbgCounter;
-    if(dbgCounter%100==0)
-        gzmsg<<"imu temperature: "<<dbgCounter<<std::endl;
-    */
-
     sensor_msg.fields_updated = 4095;
 
     //accumulate gyro measurements that are needed for the optical flow message
@@ -649,7 +646,6 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
 }
 
 void GazeboMavlinkInterface::LidarCallback(LidarPtr& lidar_message) {
-  //gzdbg<<"LidarCallback"<<std::endl;
 
   mavlink_distance_sensor_t sensor_msg;
   sensor_msg.time_boot_ms = lidar_message->time_msec();
@@ -670,8 +666,6 @@ void GazeboMavlinkInterface::LidarCallback(LidarPtr& lidar_message) {
 }
 
 void GazeboMavlinkInterface::OpticalFlowCallback(OpticalFlowPtr& opticalFlow_message) {
-
-  //gzdbg<<"OfCallback"<<std::endl;
 
   mavlink_hil_optical_flow_t sensor_msg;
 #if GAZEBO_MAJOR_VERSION >= 9
@@ -724,7 +718,6 @@ void GazeboMavlinkInterface::pollForMAVLinkMessages(double _dt, uint32_t _timeou
           }
           // have a message, handle it
           handle_message(&msg);
-          //gzdbg<<"pollingMavlink: handling message "<<i<<" of "<<len<<std::endl;
         }
       }
     }
@@ -783,7 +776,7 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
       //gzdbg<<"dbg: 1a"<<std::endl;
       input_reference_.resize(n_out_max);
       //gzdbg<<"dbg: 1b"<<std::endl;
-      for (unsigned i = 0; i < n_out_max; ++i) {
+      for (unsigned i = 0; i < 16; ++i) {
         if (armed) {
           input_reference_[i] =
               (controls.controls[input_index_[i]] + input_offset_[i]) *
@@ -795,6 +788,16 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
           //gzdbg<<"dbg: 1d"<<std::endl;
         }
       }
+      gzdbg<<"a0: "<<input_reference_[0]<<" | a1: "<<input_reference_[1]<<" | a2: "<<input_reference_[2]
+           <<" | a3: "<<input_reference_[3]<<" | a4: "<<input_reference_[4]<<" | a5: "<<input_reference_[5]
+           <<" | a6: "<<input_reference_[6]<<" | a7: "<<input_reference_[7]<<std::endl;
+
+           /*" | a8: "<<input_reference_[8]
+           <<" | a9: "<<input_reference_[9]<<" | a10: "<<input_reference_[10]<<" | a11: "<<input_reference_[11]
+           <<" | a12: "<<input_reference_[12]<<" | a13: "<<input_reference_[13]<<" | a14: "<<input_reference_[14]
+           <<" | a15: "<<input_reference_[15]<<std::endl;
+           */
+
       //gzdbg<<"dbg: 1e"<<std::endl;
       received_first_referenc_ = true;
     }

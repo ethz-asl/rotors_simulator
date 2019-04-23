@@ -55,6 +55,7 @@
 #include <sdf/sdf.hh>
 #include "common.h"
 #include <CommandMotorSpeed.pb.h>
+#include <Actuators.pb.h>
 #include <Imu.pb.h>
 #include <OpticalFlow.pb.h>
 #include <Lidar.pb.h>
@@ -78,6 +79,7 @@ static constexpr size_t MAX_TXQ_SIZE = 1000;
 namespace gazebo {
 
 typedef const boost::shared_ptr<const gz_mav_msgs::CommandMotorSpeed> CommandMotorSpeedPtr;
+typedef const boost::shared_ptr<const gz_sensor_msgs::Actuators> ActuatorsPtr;
 typedef const boost::shared_ptr<const gz_sensor_msgs::Imu> ImuPtr;
 typedef const boost::shared_ptr<const lidar_msgs::msgs::lidar> LidarPtr;
 typedef const boost::shared_ptr<const opticalFlow_msgs::msgs::opticalFlow> OpticalFlowPtr;
@@ -87,8 +89,8 @@ typedef const boost::shared_ptr<const opticalFlow_msgs::msgs::opticalFlow> Optic
 
 // This just proxies the motor commands from command/motor_speed to the single motors via internal
 // ConsPtr passing, such that the original commands don't have to go n_motors-times over the wire.
-static const std::string kDefaultMotorVelocityReferencePubTopic = "/gazebo/command/motor_speed";
-
+static const std::string kDefaultMotorVelocityReferencePubTopic = "/gazebo/command/motor_speed_old";
+static const std::string kDefaultActuatorsReferencePubTopic = "/gazebo/command/motor_speed";
 static const std::string kDefaultImuTopic = "/imu";
 static const std::string kDefaultLidarTopic = "/link/lidar";
 static const std::string kDefaultOpticalFlowTopic = "/px4flow/link/opticalFlow";
@@ -109,6 +111,7 @@ public:
     namespace_(kDefaultNamespace),
     protocol_version_(2.0),
     motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferencePubTopic),
+    actuators_reference_pub_topic_(kDefaultActuatorsReferencePubTopic),
     use_propeller_pid_(false),
     use_elevator_pid_(false),
     use_left_elevon_pid_(false),
@@ -165,11 +168,13 @@ private:
 
   std::string namespace_;
   std::string motor_velocity_reference_pub_topic_;
+  std::string actuators_reference_pub_topic_;
   std::string mavlink_control_sub_topic_;
   std::string link_name_;
 
   transport::NodePtr node_handle_;
   transport::PublisherPtr motor_velocity_reference_pub_;
+  transport::PublisherPtr actuators_reference_pub_;
   transport::SubscriberPtr mav_control_sub_;
 
   physics::ModelPtr model_;

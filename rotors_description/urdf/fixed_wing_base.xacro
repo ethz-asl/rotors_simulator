@@ -86,7 +86,7 @@
 
   <xacro:if value="${enable_mavlink_interface}">
     <gazebo>
-      <plugin filename="librotors_gazebo_mavlink_interface_tmp.so" name="gazebo_mavlink_interface_tmp">
+      <plugin filename="librotors_gazebo_mavlink_interface.so" name="gazebo_mavlink_interface">
         <robotNamespace>${robot_namespace}</robotNamespace>
         <protocol_version>2.0</protocol_version>
         <imuSubTopic>/imu</imuSubTopic>
@@ -105,7 +105,8 @@
         <hil_state_level>true</hil_state_level>
         <enable_lockstep>false</enable_lockstep>
         <use_tcp>false</use_tcp>
-        <motorSpeedCommandPubTopic>/command/motor_speed</motorSpeedCommandPubTopic>
+        <motorSpeedCommandPubTopic>/command/motor_speed_old</motorSpeedCommandPubTopic>
+        <actuatorsPubTopic>/command/motor_speed</actuatorsPubTopic>
         <control_channels>
           <channel name="propeller">
             <input_index>3</input_index>
@@ -128,7 +129,7 @@
           <channel name="aileron_right">
             <input_index>0</input_index>
             <input_offset>0</input_offset>
-            <input_scaling>-1</input_scaling>
+            <input_scaling>1</input_scaling>
             <zero_position_disarmed>0</zero_position_disarmed>
             <zero_position_armed>0</zero_position_armed>
             <joint_control_type>position_gztopic</joint_control_type>

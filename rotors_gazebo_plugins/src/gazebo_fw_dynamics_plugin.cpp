@@ -348,8 +348,8 @@ void GazeboFwDynamicsPlugin::CreatePubsAndSubs() {
         node_handle_->Subscribe("~/" + namespace_ + "/" + actuators_sub_topic_,
                                 &GazeboFwDynamicsPlugin::ActuatorsCallback,
                                 this);
-        gzdbg<<"Aircraft actuation signal from ~/" << namespace_ << "/" <<
-           roll_pitch_yawrate_thrust_sub_topic_<<" gazebo topic"<<std::endl;
+        gzdbg<<"Aircraft actuation signal from " << "~/" + namespace_ + "/" + actuators_sub_topic_
+             <<" gazebo topic"<<std::endl;
 
         connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
                                                   actuators_sub_topic_);
@@ -373,7 +373,7 @@ void GazeboFwDynamicsPlugin::ActuatorsCallback(
 
   delta_aileron_left_ = NormalizedInputToAngle(vehicle_params_.aileron_left,
       actuators_msg->normalized(vehicle_params_.aileron_left.channel));
-  delta_aileron_right_ = NormalizedInputToAngle(vehicle_params_.aileron_right,
+  delta_aileron_right_ = -NormalizedInputToAngle(vehicle_params_.aileron_right,
       actuators_msg->normalized(vehicle_params_.aileron_right.channel));
   delta_elevator_ = NormalizedInputToAngle(vehicle_params_.elevator,
       actuators_msg->normalized(vehicle_params_.elevator.channel));
