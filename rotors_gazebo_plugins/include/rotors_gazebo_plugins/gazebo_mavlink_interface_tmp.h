@@ -171,6 +171,7 @@ public:
     serial_dev(io_service),
     device_(kDefaultDevice),
     baudrate_(kDefaultBaudRate),
+    tx_in_progress(false),
     hil_mode_(false),
     hil_state_level_(false),
     baro_rnd_y2_(0.0),

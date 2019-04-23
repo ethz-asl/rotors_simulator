@@ -104,7 +104,7 @@ enum class Framing : uint8_t {
 class GazeboMavlinkInterface : public ModelPlugin {
 public:
   GazeboMavlinkInterface() : ModelPlugin(),
-    dbgCounter(1),
+    dbgCounter(0),
     received_first_referenc_(false),
     namespace_(kDefaultNamespace),
     protocol_version_(2.0),
@@ -143,6 +143,7 @@ public:
     serial_dev(io_service),
     device_(kDefaultDevice),
     baudrate_(kDefaultBaudRate),
+    tx_in_progress(false),
     hil_mode_(false),
     hil_state_level_(false)
     {}

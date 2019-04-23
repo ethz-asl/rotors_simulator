@@ -305,6 +305,11 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     serial_enabled_ = _sdf->GetElement("serialEnabled")->Get<bool>();
   }
 
+  /*
+  tx_in_progress = false;
+  gzdbg<<" tx_in_progress 1: "<<tx_in_progress<<std::endl;
+  */
+
   if(serial_enabled_) {
     // Set up serial interface
     if(_sdf->HasElement("serialDevice"))
@@ -315,14 +320,14 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     if (_sdf->HasElement("baudRate")) {
       baudrate_ = _sdf->GetElement("baudRate")->Get<int>();
     }
-    io_service.post(std::bind(&GazeboMavlinkInterface::do_read, this));
+    io_service.post(std::bind(&GazeboMavlinkInterface::do_read, this)); // submitting the do_read function to the io_service
 
     // run io_service for async io
-    io_thread = std::thread([this] () {
-    io_service.run();
-  });
+    io_thread = std::thread([this] () { io_service.run();} );   // standard thread, runs io_service, argument is lambda object
     open();
   }
+
+  //gzdbg<<" tx_in_progress 2: "<<tx_in_progress<<std::endl;
 
   mavlink_addr_ = htonl(INADDR_ANY);
   if (_sdf->HasElement("mavlink_addr")) {
@@ -540,18 +545,22 @@ void GazeboMavlinkInterface::send_mavlink_message(const mavlink_message_t *messa
       std::lock_guard<std::recursive_mutex> lock(mutex);
 
       if (tx_q.size() >= MAX_TXQ_SIZE) {
-//         gzwarn << "TX queue overflow. \n";
+         gzwarn << "TX queue overflow. \n";
       }
-      tx_q.emplace_back(message);
+      tx_q.emplace_back(message); // constructing MsgBuffer struct at back of deque, using mavlink message
     }
     try {
-        io_service.post(std::bind(&GazeboMavlinkInterface::do_write, this, true));
-    } catch (const std::exception& e) {
-        gzdbg<<e.what()<<std::endl;
+        gzdbg<<"tx queue size: "<<tx_q.size()<<std::endl;
+        io_service.post(std::bind(&GazeboMavlinkInterface::do_write, this, true));  //Deprecated: Use boost::asio::post(), returns immediately?
+
+    } catch (...) {
+        gzdbg<<"some exception"<<std::endl;
+        //gzdbg<<e.what()<<std::endl;
     }
   }
 
   else {
+
     uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
     int packetlen = mavlink_msg_to_send_buffer(buffer, message);
 
@@ -743,8 +752,8 @@ void GazeboMavlinkInterface::SendSensorMessages()
       mavlink_message_t msg;
       mavlink_msg_hil_sensor_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &sensor_msg);
       send_mavlink_message(&msg);
-      if(dbgCounter%50==0)
-          gzdbg<<"sending hil sensor message"<<std::endl;
+      //if(dbgCounter%50==0)
+          //gzdbg<<"sending hil sensor message"<<std::endl;
     }
   }
 
@@ -797,8 +806,8 @@ void GazeboMavlinkInterface::SendSensorMessages()
     mavlink_message_t msg;
     mavlink_msg_hil_state_quaternion_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &hil_state_quat);
     send_mavlink_message(&msg);
-    if(dbgCounter%50==0)
-        gzdbg<<"sending hil state quaternion message"<<std::endl;
+    //if(dbgCounter%50==0)
+        //gzdbg<<"sending hil state quaternion message"<<std::endl;
   }
 }
 
@@ -1211,6 +1220,9 @@ void GazeboMavlinkInterface::open() {
   catch (boost::system::system_error &err) {
     gzerr <<"Error opening serial device: " << err.what() << "\n";
   }
+  catch (...) {
+        gzdbg<<"some other error"<<std::endl;
+  }
 }
 
 void GazeboMavlinkInterface::close()
@@ -1270,20 +1282,30 @@ void GazeboMavlinkInterface::parse_buffer(const boost::system::error_code& err, 
 }
 
 void GazeboMavlinkInterface::do_write(bool check_tx_state){
+  gzdbg<<"pre-check, tx_in_progress: "<<tx_in_progress<<" | check_tx_state: "<<check_tx_state<<std::endl;
+
   if (check_tx_state && tx_in_progress)
-    return;
+     return;
+
+  gzdbg<<"post-check"<<std::endl;
 
   std::lock_guard<std::recursive_mutex> lock(mutex);
   if (tx_q.empty())
     return;
 
   tx_in_progress = true;
-  auto &buf_ref = tx_q.front();
+  auto &buf_ref = tx_q.front(); //ref to first element (MsgBuffer)
+
+  // Usage: void async_write_some(const ConstBufferSequence & buffers, WriteHandler handler); // handler is called if write operation completed
+  //        void handler(const boost::system::error_code& error,    // Result of operation.
+  //                        std::size_t bytes_transferred           // Number of bytes written.
+  //        );
+  // Usage: boost::asio::buffer(void * data, std::size_t size_in_bytes)
 
   serial_dev.async_write_some(
     boost::asio::buffer(buf_ref.dpos(), buf_ref.nbytes()), [this, &buf_ref] (boost::system::error_code error,   size_t bytes_transferred)
     {
-      assert(bytes_transferred <= buf_ref.len);
+      assert(bytes_transferred <= buf_ref.len);// async_write_some not guaranteed to write all data...
       if(error) {
         gzerr << "Serial error: " << error.message() << "\n";
       return;
@@ -1297,8 +1319,12 @@ void GazeboMavlinkInterface::do_write(bool check_tx_state){
     }
 
     buf_ref.pos += bytes_transferred;
+    gzdbg << "transferred bytes: " << bytes_transferred <<std::endl;
+    gzdbg << "buf_ref.pos: " << buf_ref.pos <<std::endl;
+
     if (buf_ref.nbytes() == 0) {
       tx_q.pop_front();
+      gzdbg << "pop" <<std::endl;
     }
 
     if (!tx_q.empty()) {

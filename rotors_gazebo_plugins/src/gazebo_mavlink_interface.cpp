@@ -270,7 +270,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     open();
   }
 
-  //Create socket
+  // Create socket
   // udp socket data
   mavlink_addr_ = htonl(INADDR_ANY);
   if (_sdf->HasElement("mavlink_addr")) {
@@ -395,48 +395,53 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
   }
 
   last_time_ = current_time;
-  ++dbgCounter;
 }
 
 void GazeboMavlinkInterface::send_mavlink_message(const mavlink_message_t *message, const int destination_port)
 {
+    //std::thread::id this_id = std::this_thread::get_id();
+    //gzdbg<<"send_mavlink_message thread ID: "<<this_id<<std::endl;
 
-  if(serial_enabled_ && destination_port == 0) {
-    assert(message != nullptr);
-    if (!is_open()) {
-      gzerr << "Serial port closed! \n";
-      return;
+    if(serial_enabled_ && destination_port == 0) {
+        assert(message != nullptr);
+        if (!is_open()) {
+            gzerr << "Serial port closed! \n";
+            return;
+        }
+
+        // make sure that emplace_back is executed sequentially
+        // send_mavlink_messages probably called from different threads via callback
+        {
+            lock_guard lock(mutex);
+
+            if (tx_q.size() >= MAX_TXQ_SIZE) {
+               gzwarn << "TX queue overflow. \n";
+            }
+            tx_q.emplace_back(message);
+        }
+        //gzdbg<<"tx queue size: "<<tx_q.size()<<std::endl;
+        io_service.post(std::bind(&GazeboMavlinkInterface::do_write, this, true)); // returns immediately
+        //gzdbg<<"io_service.post called"<<std::endl;
     }
 
-    {
-      lock_guard lock(mutex);
+    else {
+        uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
+        int packetlen = mavlink_msg_to_send_buffer(buffer, message);
 
-      if (tx_q.size() >= MAX_TXQ_SIZE) {
-//         gzwarn << "TX queue overflow. \n";
-      }
-      tx_q.emplace_back(message);
+        struct sockaddr_in dest_addr;
+        memcpy(&dest_addr, &_srcaddr, sizeof(_srcaddr));
+
+        if (destination_port != 0) {
+            dest_addr.sin_port = htons(destination_port);
+        }
+
+        ssize_t len = sendto(_fd, buffer, packetlen, 0, (struct sockaddr *)&_srcaddr, sizeof(_srcaddr));
+
+        if (len <= 0)
+        {
+            gzerr << "Failed sending mavlink message: " << strerror(errno) << "\n";
+        }
     }
-    io_service.post(std::bind(&GazeboMavlinkInterface::do_write, this, true));
-  }
-
-  else {
-    uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
-    int packetlen = mavlink_msg_to_send_buffer(buffer, message);
-
-    struct sockaddr_in dest_addr;
-    memcpy(&dest_addr, &_srcaddr, sizeof(_srcaddr));
-
-    if (destination_port != 0) {
-      dest_addr.sin_port = htons(destination_port);
-    }
-
-    ssize_t len = sendto(_fd, buffer, packetlen, 0, (struct sockaddr *)&_srcaddr, sizeof(_srcaddr));
-
-    if (len <= 0)
-    {
-      gzerr << "Failed sending mavlink message: " << strerror(errno) << "\n";
-    }
-  }
 
 }
 
@@ -448,9 +453,8 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
 #endif
   double dt = (current_time - last_imu_time_).Double();
 
-  if(dbgCounter%50==0)
-    gzdbg<<"ImuCallback"<<std::endl;
-
+  //std::thread::id this_id = std::this_thread::get_id();
+  //gzdbg<<"ImuCallback thread ID: "<<this_id<<std::endl;
 
   ignition::math::Quaterniond q_br(0, 1, 0, 0);
   ignition::math::Quaterniond q_ng(0, 0.70711, 0.70711, 0);
@@ -560,6 +564,12 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
     // calculate temperature in Celsius
     sensor_msg.temperature = temperature_local - 273.0f;
 
+    /*
+    sensor_msg.temperature = dbgCounter;
+    if(dbgCounter%100==0)
+        gzmsg<<"imu temperature: "<<dbgCounter<<std::endl;
+    */
+
     sensor_msg.fields_updated = 4095;
 
     //accumulate gyro measurements that are needed for the optical flow message
@@ -575,15 +585,10 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
     if (hil_mode_) {
       if (!hil_state_level_){
         send_mavlink_message(&msg);
-        if(dbgCounter%50==0)
-            gzdbg<<"send hil sensor message"<<std::endl;
+        ++dbgCounter;
       }
-    }
-
-    else {
+    } else {
       send_mavlink_message(&msg);
-      if(dbgCounter%50==0)
-        gzdbg<<"send hil sensor message"<<std::endl;
     }
     last_imu_time_ = current_time;
   }
@@ -637,15 +642,9 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
     if (hil_mode_) {
       if (hil_state_level_){
         send_mavlink_message(&msg);
-        if(dbgCounter%50==0)
-            gzdbg<<"send hil state quaternion message"<<std::endl;
       }
-    }
-
-    else {
+    } else {
       send_mavlink_message(&msg);
-      if(dbgCounter%50==0)
-          gzdbg<<"send hil state quaternion message"<<std::endl;
     }
 }
 
@@ -725,7 +724,7 @@ void GazeboMavlinkInterface::pollForMAVLinkMessages(double _dt, uint32_t _timeou
           }
           // have a message, handle it
           handle_message(&msg);
-          gzdbg<<"pollingMavlink: handling message "<<i<<" of "<<len<<std::endl;
+          //gzdbg<<"pollingMavlink: handling message "<<i<<" of "<<len<<std::endl;
         }
       }
     }
@@ -806,9 +805,6 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
 
 void GazeboMavlinkInterface::handle_control(double _dt)
 {
-    if(dbgCounter%50==0)
-      gzdbg<<"handle_control"<<std::endl;
-
   //gzdbg<<"dbg: 2a"<<std::endl;
   // set joint positions
   for (int i = 0; i < input_reference_.size(); i++) {
@@ -932,6 +928,8 @@ void GazeboMavlinkInterface::parse_buffer(const boost::system::error_code& err, 
 
     if(msg_received != Framing::incomplete){
       // send to gcs
+      //std::thread::id this_id = std::this_thread::get_id();
+      //gzdbg<<"parse_buffer thread ID: "<<this_id<<std::endl;
       send_mavlink_message(&message, qgc_udp_port_);
       //gzdbg<<"parse_buffer calls handle message"<<std::endl;
       handle_message(&message);
@@ -941,10 +939,19 @@ void GazeboMavlinkInterface::parse_buffer(const boost::system::error_code& err, 
 }
 
 void GazeboMavlinkInterface::do_write(bool check_tx_state){
+
+  //std::thread::id this_id = std::this_thread::get_id();
+  //gzdbg<<"do_write thread ID: "<<this_id<<std::endl;
+
+  //gzdbg<<"pre-check, tx_in_progress: "<<tx_in_progress<<" | check_tx_state: "<<check_tx_state<<std::endl;
+
   if (check_tx_state && tx_in_progress)
     return;
 
   lock_guard lock(mutex);
+
+  //gzdbg<<"do_write locking"<<std::endl;
+
   if (tx_q.empty())
     return;
 
@@ -954,6 +961,9 @@ void GazeboMavlinkInterface::do_write(bool check_tx_state){
   serial_dev.async_write_some(
     boost::asio::buffer(buf_ref.dpos(), buf_ref.nbytes()), [this, &buf_ref] (boost::system::error_code error,   size_t bytes_transferred)
     {
+      //std::thread::id this_id = std::this_thread::get_id();
+      //gzdbg<<"async_write_some thread ID: "<<this_id<<std::endl;
+
       assert(bytes_transferred <= buf_ref.len);
       if(error) {
         gzerr << "Serial error: " << error.message() << "\n";
@@ -961,15 +971,19 @@ void GazeboMavlinkInterface::do_write(bool check_tx_state){
       }
 
     lock_guard lock(mutex);
+    //gzdbg<<"write handler locking"<<std::endl;
 
     if (tx_q.empty()) {
       tx_in_progress = false;
       return;
     }
+    //gzdbg << "transferred bytes: " << bytes_transferred <<std::endl;
+    //gzdbg << "buf_ref.pos: " << buf_ref.pos <<std::endl;
 
     buf_ref.pos += bytes_transferred;
     if (buf_ref.nbytes() == 0) {
       tx_q.pop_front();
+      //gzdbg << "pop" <<std::endl;
     }
 
     if (!tx_q.empty()) {
@@ -979,6 +993,14 @@ void GazeboMavlinkInterface::do_write(bool check_tx_state){
       tx_in_progress = false;
     }
   });
+  // async_write_some returns immediately
+  //gzdbg<<"async_write_some called"<<std::endl;
+
+  /*
+  if (!tx_q.empty()) {
+    tx_q.pop_front();
+  }
+  */
 }
 
 }
