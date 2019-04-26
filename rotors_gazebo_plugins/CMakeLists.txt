@@ -251,6 +251,14 @@ include_directories(${Eigen_INCLUDE_DIRS})
 
 # SORTED IN ALPHABETICAL ORDER (by "plugin" name, keep it this way!)
 
+#==================================== AERODYNAMICS PLUGIN ========================================//
+add_library(rotors_gazebo_aerodynamics_plugin SHARED src/gazebo_aerodynamics_plugin.cpp)
+target_link_libraries(rotors_gazebo_aerodynamics_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_aerodynamics_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_aerodynamics_plugin)
+
 #========================================= BAG PLUGIN ===========================================//
 # Entire GazeboBagPlugin is a heavy ROS dependency, and so rather than passing messages to
 # GazeboRosInterfacePlugin, this entire library is only included if ROS is present.
@@ -493,6 +501,14 @@ if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_pressure_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 list(APPEND targets_to_install rotors_gazebo_pressure_plugin)
+
+#==================================== PROPULSION PLUGIN ========================================//
+add_library(rotors_gazebo_propulsion_plugin SHARED src/gazebo_propulsion_plugin.cpp)
+target_link_libraries(rotors_gazebo_propulsion_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_propulsion_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_propulsion_plugin)
 
 #===================================== ROS INTERFACE PLUGIN =====================================//
 # This entire plugin is only built if ROS is a dependency
