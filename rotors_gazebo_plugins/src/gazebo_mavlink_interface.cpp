@@ -195,6 +195,8 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     }
   }
 
+  last_imu_message_.set_seq(0); // initialize this before registring/start OnUpdate which uses this
+
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   updateConnection_ = event::Events::ConnectWorldUpdateBegin(
@@ -209,6 +211,9 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
   opticalFlow_sub_ = node_handle_->Subscribe("~/" + namespace_  + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
   gzdbg<<"subscribing to ~/" + namespace_ + opticalFlow_sub_topic_<<std::endl;
+
+  gps_sub_ = node_handle_->Subscribe("~/" + namespace_  + gps_sub_topic_, &GazeboMavlinkInterface::GpsCallback, this);
+  gzdbg<<"subscribing to ~/" + namespace_ + gps_sub_topic_<<std::endl;
 
   // Publish gazebo's motor_speed message
   motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + namespace_ + motor_velocity_reference_pub_topic_, 1);
@@ -371,12 +376,30 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
 // This gets called by the world update start event.
 void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
+
+    std::unique_lock<std::mutex> lock(last_imu_message_mutex_); // blocks in imu callback
+    //gzdbg<<"previous_imu_seq_: "<<previous_imu_seq_<<std::endl;
+    if (previous_imu_seq_ > 0) {
+        while (previous_imu_seq_ == last_imu_message_.seq() && IsRunning()) {
+            // free lock if we want new imu data -> imu callback un-blocked for 10ms or
+            // until new message arrived. During this time go to sleep
+            last_imu_message_cond_.wait_for(lock, std::chrono::milliseconds(10));
+            // does lock.unlock() upon call and lock.lock() upon notification or if timer expires
+            // (might stay blocked if mutex is held by other lock at this time...
+            // loop again if no new message arrived in this interval, otherwise proceed (locked)
+        }
+    }
+
+    previous_imu_seq_ = last_imu_message_.seq();
+
 #if GAZEBO_MAJOR_VERSION >= 9
   common::Time current_time = world_->SimTime();
 #else
   common::Time current_time = world_->GetSimTime();
 #endif
   double dt = (current_time - last_time_).Double();
+
+  SendSensorMessages();
 
   pollForMAVLinkMessages(dt, 1000);
 
@@ -451,7 +474,25 @@ void GazeboMavlinkInterface::send_mavlink_message(const mavlink_message_t *messa
 
 }
 
-void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
+void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message)
+{
+  std::unique_lock<std::mutex> lock(last_imu_message_mutex_);
+
+  const int64_t diff = imu_message->seq() - last_imu_message_.seq();
+  if (diff != 1 && imu_message->seq() != 0)
+  {
+    gzerr << "Skipped " << (diff - 1) << " IMU samples (presumably CPU usage is too high)\n";
+  }
+
+  last_imu_message_ = *imu_message;
+
+  // Manual unlocking is done before notifying, to avoid waking up
+  // the waiting thread only to block again (see notify_one for details)
+  lock.unlock();
+  last_imu_message_cond_.notify_one();
+}
+
+void GazeboMavlinkInterface::SendSensorMessages() {
 #if GAZEBO_MAJOR_VERSION >= 9
   common::Time current_time = world_->SimTime();
 #else
@@ -459,14 +500,21 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
 #endif
   double dt = (current_time - last_imu_time_).Double();
 
+  //thread safe copying
+  std::unique_lock<std::mutex> lock(gps_gt_message_mutex_);
+  double gt_lat_loc = gt_lat;
+  double gt_lon_loc = gt_lon;
+  double gt_alt_loc = gt_alt;
+  lock.unlock();
+
   ignition::math::Quaterniond q_br(0, 1, 0, 0);
   ignition::math::Quaterniond q_ng(0, 0.70711, 0.70711, 0);
 
     ignition::math::Quaterniond q_gr = ignition::math::Quaterniond(
-      imu_message->orientation().w(),
-      imu_message->orientation().x(),
-      imu_message->orientation().y(),
-      imu_message->orientation().z());
+      last_imu_message_.orientation().w(),
+      last_imu_message_.orientation().x(),
+      last_imu_message_.orientation().y(),
+      last_imu_message_.orientation().z());
 
     ignition::math::Quaterniond q_gb = q_gr*q_br.Inverse();
     ignition::math::Quaterniond q_nb = q_ng*q_gb;
@@ -480,8 +528,23 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
 
     float declination = get_mag_declination(lat_rad_, lon_rad_);
 
-    ignition::math::Quaterniond q_dn(0.0, 0.0, declination);
-    ignition::math::Vector3d mag_n = q_dn.RotateVector(mag_d_);
+    // Magnetic declination and inclination (radians)
+    float declination_rad = get_mag_declination(gt_lat_loc/1e7, gt_lon_loc/1e7) * M_PI / 180;
+    float inclination_rad = get_mag_inclination(gt_lat_loc/1e7, gt_lon_loc/1e7) * M_PI / 180;
+
+    // Magnetic strength (10^5xnanoTesla)
+    float strength_ga = 0.01f * get_mag_strength(gt_lat_loc/1e7, gt_lon_loc/1e7);
+
+    // Magnetic filed components are calculated by http://geomag.nrcan.gc.ca/mag_fld/comp-en.php
+    float H = strength_ga * cosf(inclination_rad);
+    float Z = tanf(inclination_rad) * H;
+    float X = H * cosf(declination_rad);
+    float Y = H * sinf(declination_rad);
+
+    // Magnetic field data from WMM2018 (10^5xnanoTesla (N, E D) n-frame )
+    mag_d_.X() = X;
+    mag_d_.Y() = Y;
+    mag_d_.Z() = Z;
 
 #if GAZEBO_MAJOR_VERSION >= 9
     ignition::math::Vector3d vel_b = q_br.RotateVector(model_->RelativeLinearVel());
@@ -499,14 +562,14 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
       0.01 * randn_(rand_));
 
     ignition::math::Vector3d accel_b = q_br.RotateVector(ignition::math::Vector3d(
-      imu_message->linear_acceleration().x(),
-      imu_message->linear_acceleration().y(),
-      imu_message->linear_acceleration().z()));
+      last_imu_message_.linear_acceleration().x(),
+      last_imu_message_.linear_acceleration().y(),
+      last_imu_message_.linear_acceleration().z()));
     ignition::math::Vector3d gyro_b = q_br.RotateVector(ignition::math::Vector3d(
-      imu_message->angular_velocity().x(),
-      imu_message->angular_velocity().y(),
-      imu_message->angular_velocity().z()));
-    ignition::math::Vector3d mag_b = q_nb.RotateVectorReverse(mag_n) + mag_noise_b;
+      last_imu_message_.angular_velocity().x(),
+      last_imu_message_.angular_velocity().y(),
+      last_imu_message_.angular_velocity().z()));
+    ignition::math::Vector3d mag_b = q_nb.RotateVectorReverse(mag_d_) + mag_noise_b;
 
   if (imu_update_interval_!=0 && dt >= imu_update_interval_)
   {
@@ -613,9 +676,9 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
     hil_state_quat.pitchspeed = omega_nb_b.Y();
     hil_state_quat.yawspeed = omega_nb_b.Z();
 
-    hil_state_quat.lat = lat_rad_ * 180 / M_PI * 1e7;
-    hil_state_quat.lon = lon_rad_ * 180 / M_PI * 1e7;
-    hil_state_quat.alt = (-pos_n.Z() + kAltZurich_m) * 1000;
+    hil_state_quat.lat = gt_lat_loc;
+    hil_state_quat.lon = gt_lon_loc;
+    hil_state_quat.alt = gt_alt_loc;
 
     hil_state_quat.vx = vel_n.X() * 100;
     hil_state_quat.vy = vel_n.Y() * 100;
@@ -693,6 +756,48 @@ void GazeboMavlinkInterface::OpticalFlowCallback(OpticalFlowPtr& opticalFlow_mes
   send_mavlink_message(&msg);
 }
 
+void GazeboMavlinkInterface::GpsCallback(GpsPtr& gps_msg) {
+  // fill HIL GPS Mavlink msg
+  mavlink_hil_gps_t hil_gps_msg;
+  hil_gps_msg.time_usec = gps_msg->time_usec();
+  hil_gps_msg.fix_type = 3;
+  hil_gps_msg.lat = gps_msg->latitude_deg() * 1e7;
+  hil_gps_msg.lon = gps_msg->longitude_deg() * 1e7;
+  hil_gps_msg.alt = gps_msg->altitude() * 1000.0;
+  hil_gps_msg.eph = gps_msg->eph() * 100.0;
+  hil_gps_msg.epv = gps_msg->epv() * 100.0;
+  hil_gps_msg.vel = gps_msg->velocity() * 100.0;
+  hil_gps_msg.vn = gps_msg->velocity_north() * 100.0;
+  hil_gps_msg.ve = gps_msg->velocity_east() * 100.0;
+  hil_gps_msg.vd = -gps_msg->velocity_up() * 100.0;
+  // MAVLINK_HIL_GPS_T CoG is [0, 360]. math::Angle::Normalize() is [-pi, pi].
+  //ignition::math::Angle cog(atan2(gps_msg->velocity_east(), gps_msg->velocity_north()));
+  //cog.Normalize();
+  double cog = atan2(gps_msg->velocity_east(), gps_msg->velocity_north());
+  hil_gps_msg.cog = static_cast<uint16_t>(180*(cog+3.14159)/3.14159);
+  hil_gps_msg.satellites_visible = 10;
+
+  //gzdbg<<"dlat: "<<lat_last-hil_gps_msg.lat<<" dlon: "<<lon_last-hil_gps_msg.lon<<std::endl;
+  lon_last = hil_gps_msg.lon;
+  lat_last = hil_gps_msg.lat;
+
+  // send HIL_GPS Mavlink msg
+  if (hil_mode_ || (hil_mode_ && !hil_state_level_)) {
+    mavlink_message_t msg;
+    mavlink_msg_hil_gps_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &hil_gps_msg);
+    send_mavlink_message(&msg);
+  }
+}
+
+void GazeboMavlinkInterface::GpsGtCallback(GpsPtr& gps_gt_msg){
+
+    std::unique_lock<std::mutex> lock(gps_gt_message_mutex_);
+    gt_lat = gps_gt_msg->latitude_deg() * 1e7;
+    gt_lon = gps_gt_msg->longitude_deg() * 1e7;
+    gt_alt = gps_gt_msg->altitude() * 1000.0;
+    //lock.unlock();
+}
+
 void GazeboMavlinkInterface::pollForMAVLinkMessages(double _dt, uint32_t _timeoutMs)
 {
   // convert timeout in ms to timeval
@@ -728,7 +833,7 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
 {
   switch (msg->msgid) {
   case MAVLINK_MSG_ID_HIL_ACTUATOR_CONTROLS:
-    gzdbg<<"got a hil_actuator_controls message"<<std::endl;
+    //gzdbg<<"got a hil_actuator_controls message"<<std::endl;
     mavlink_hil_actuator_controls_t controls;
     mavlink_msg_hil_actuator_controls_decode(msg, &controls);
     bool armed = false;
@@ -773,32 +878,27 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
     }
     // Set rotor speeds, controller targets for unflagged messages.
     else {
-      //gzdbg<<"dbg: 1a"<<std::endl;
+
       input_reference_.resize(n_out_max);
-      //gzdbg<<"dbg: 1b"<<std::endl;
+
       for (unsigned i = 0; i < 16; ++i) {
         if (armed) {
           input_reference_[i] =
               (controls.controls[input_index_[i]] + input_offset_[i]) *
                   input_scaling_[i] +
               zero_position_armed_[i];
-              //gzdbg<<"dbg: 1c "<<controls.controls[input_index_[i]]<<std::endl;
+
         } else {
           input_reference_[i] = zero_position_disarmed_[i];
-          //gzdbg<<"dbg: 1d"<<std::endl;
+
         }
       }
+
+      /*
       gzdbg<<"a0: "<<input_reference_[0]<<" | a1: "<<input_reference_[1]<<" | a2: "<<input_reference_[2]
            <<" | a3: "<<input_reference_[3]<<" | a4: "<<input_reference_[4]<<" | a5: "<<input_reference_[5]
            <<" | a6: "<<input_reference_[6]<<" | a7: "<<input_reference_[7]<<std::endl;
-
-           /*" | a8: "<<input_reference_[8]
-           <<" | a9: "<<input_reference_[9]<<" | a10: "<<input_reference_[10]<<" | a11: "<<input_reference_[11]
-           <<" | a12: "<<input_reference_[12]<<" | a13: "<<input_reference_[13]<<" | a14: "<<input_reference_[14]
-           <<" | a15: "<<input_reference_[15]<<std::endl;
-           */
-
-      //gzdbg<<"dbg: 1e"<<std::endl;
+*/
       received_first_referenc_ = true;
     }
     break;
@@ -867,6 +967,15 @@ void GazeboMavlinkInterface::handle_control(double _dt)
     }
   }
   //gzdbg<<"dbg: 2c"<<std::endl;
+}
+
+bool GazeboMavlinkInterface::IsRunning()
+{
+#if GAZEBO_MAJOR_VERSION >= 8
+    return world_->Running();
+#else
+    return world_->GetRunning();
+#endif
 }
 
 void GazeboMavlinkInterface::open() {

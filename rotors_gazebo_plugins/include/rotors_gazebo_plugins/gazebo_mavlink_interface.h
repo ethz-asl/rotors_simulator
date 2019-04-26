@@ -21,6 +21,7 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 #include <deque>
 #include <atomic>
 #include <chrono>
@@ -59,11 +60,12 @@
 #include <Imu.pb.h>
 #include <OpticalFlow.pb.h>
 #include <Lidar.pb.h>
+#include <SITLGps.pb.h>
 
 #include <mavlink/v2.0/common/mavlink.h>
 #include "msgbuffer.h"
 
-#include <rotors_gazebo_plugins/geo_mag_declination.h>
+#include <rotors_gazebo_plugins/geo_mag_declination_tmp.h>
 
 static const uint32_t kDefaultMavlinkUdpPort = 14560;
 static const uint32_t kDefaultQGCUdpPort = 14550;
@@ -83,6 +85,8 @@ typedef const boost::shared_ptr<const gz_sensor_msgs::Actuators> ActuatorsPtr;
 typedef const boost::shared_ptr<const gz_sensor_msgs::Imu> ImuPtr;
 typedef const boost::shared_ptr<const lidar_msgs::msgs::lidar> LidarPtr;
 typedef const boost::shared_ptr<const opticalFlow_msgs::msgs::opticalFlow> OpticalFlowPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::SITLGps> GpsPtr;
+//typedef const boost::shared_ptr<const sensor_msgs::msgs::Groundtruth> GpsGtPtr;
 
 // Default values
 // static const std::string kDefaultNamespace = "";
@@ -94,6 +98,7 @@ static const std::string kDefaultActuatorsReferencePubTopic = "/gazebo/command/m
 static const std::string kDefaultImuTopic = "/imu";
 static const std::string kDefaultLidarTopic = "/link/lidar";
 static const std::string kDefaultOpticalFlowTopic = "/px4flow/link/opticalFlow";
+static const std::string kDefaultGpsTopic = "/gps_hil";
 
 //! Rx packer framing status. (same as @p mavlink::mavlink_framing_t)
 enum class Framing : uint8_t {
@@ -118,6 +123,7 @@ public:
     use_right_elevon_pid_(false),
     imu_sub_topic_(kDefaultImuTopic),
     opticalFlow_sub_topic_(kDefaultOpticalFlowTopic),
+    gps_sub_topic_(kDefaultGpsTopic),
     lidar_sub_topic_(kDefaultLidarTopic),
     model_ {},
     world_(nullptr),
@@ -133,8 +139,11 @@ public:
     zero_position_disarmed_ {},
     zero_position_armed_ {},
     input_index_ {},
-		lat_rad_(0.0),
-		lon_rad_(0.0),
+    lat_rad_(0.0),
+    lon_rad_(0.0),
+    gt_lat(0.0),
+    gt_lon(0.0),
+    gt_alt(0.0),
     mavlink_udp_port_(kDefaultMavlinkUdpPort),
     qgc_udp_port_(kDefaultMavlinkUdpPort),
     serial_enabled_(false),
@@ -206,10 +215,14 @@ private:
   void ImuCallback(ImuPtr& imu_msg);
   void LidarCallback(LidarPtr& lidar_msg);
   void OpticalFlowCallback(OpticalFlowPtr& opticalFlow_msg);
+  void GpsCallback(GpsPtr& gps_msg);
+  void GpsGtCallback(GpsPtr& gps_gt_msg);
+  void SendSensorMessages();
   void send_mavlink_message(const mavlink_message_t *message, const int destination_port = 0);
   void handle_message(mavlink_message_t *msg);
   void pollForMAVLinkMessages(double _dt, uint32_t _timeoutMs);
   void handle_control(double _dt);
+  bool IsRunning();
 
   // Serial interface
   void open();
@@ -244,19 +257,30 @@ private:
   transport::SubscriberPtr lidar_sub_;
   transport::SubscriberPtr sonar_sub_;
   transport::SubscriberPtr opticalFlow_sub_;
+  transport::SubscriberPtr gps_sub_;
 
   std::string imu_sub_topic_;
   std::string lidar_sub_topic_;
   std::string opticalFlow_sub_topic_;
+  std::string gps_sub_topic_;
 
   common::Time last_time_;
   common::Time last_imu_time_;
   common::Time last_actuator_time_;
   double imu_update_interval_ = 0.004;
-	double lat_rad_;
-	double lon_rad_;
+  double lat_rad_;
+  double lon_rad_;
 
+  double gt_lat;
+  double gt_lon;
+  double gt_alt;
 
+  std::mutex gps_gt_message_mutex_ {};
+
+  std::mutex last_imu_message_mutex_ {};
+  std::condition_variable last_imu_message_cond_ {};
+  gz_sensor_msgs::Imu last_imu_message_;
+  int64_t previous_imu_seq_ = 0;
 
   ignition::math::Vector3d gravity_W_;
   ignition::math::Vector3d velocity_prev_W_;
@@ -301,6 +325,9 @@ private:
 
   bool hil_mode_;
   bool hil_state_level_;
+
+  double lon_last = 0;
+  double lat_last = 0;
 
   };
 }
