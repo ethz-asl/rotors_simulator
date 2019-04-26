@@ -29,6 +29,7 @@
 #include <ignition/math.hh>
 
 #include "common.h"
+#include "uav_parameters.h"
 
 #include <math.h>
 #include <Eigen/Eigen>
@@ -133,6 +134,9 @@ namespace gazebo
       double controlJointRadToCD;   // dC_D/dCS slope, [1/rad]
       double controlJointRadToCM;   // dC_M/dCS slope, [1/rad]
       
+    /// \brief Quantities for full +/-180° AoA range
+    AerodynamicParameters aero_params_;
+
     /// \brief Multi-segment airfoil
     protected:
       bool segUse [4] = {0,0,0,0};          // Indicate which segments to use (0: dont use, 1: use), [-]

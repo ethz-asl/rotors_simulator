@@ -97,8 +97,8 @@ GazeboAerodynamics::GazeboAerodynamics()
     this->propulsion_slipstream_sub_topic_ = kDefaultPropulsionSlipstreamSubTopic;
     //this->do_log_sub_topic_ = kDefaultDoLogSubTopic;
     
-    std::cout<<"liftdrag constructed"<<std::endl;
-    
+    //std::cout<<"liftdrag constructed"<<std::endl;
+    gzdbg<<"gazebo_aerodynamics constructed"<<std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -112,6 +112,9 @@ GazeboAerodynamics::~GazeboAerodynamics()
 void GazeboAerodynamics::Load(physics::ModelPtr _model,
                           sdf::ElementPtr _sdf)
 {
+
+   gzdbg<<"gazebo_aerodynamics load called"<<std::endl;
+
     GZ_ASSERT(_model, "GazeboAerodynamics _model pointer is NULL");
     GZ_ASSERT(_sdf, "GazeboAerodynamics _sdf pointer is NULL");
     this->model = _model;
@@ -194,6 +197,21 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
     if (_sdf->HasElement("cp"))
         this->cp = _sdf->Get<ignition::math::Vector3d>("cp");
     
+    if (_sdf->HasElement("aeroParamsYAML")) {
+
+      std::string aero_params_yaml =
+          _sdf->GetElement("aeroParamsYAML")->Get<std::string>();
+      aero_params_.LoadAeroParamsYAML(aero_params_yaml);
+
+      gzdbg<<"yaml-parse test: alpha_blend="<<aero_params_.alpha_blend<<std::endl;
+      gzdbg<<"yaml-parse test: alpha_max_ns="<<aero_params_.alpha_max_ns<<std::endl;
+
+    } else {
+      gzwarn << "[gazebo_fw_dynamics_plugin] No aerodynamic paramaters YAML file"
+          << " specified, using default Techpod parameters.\n";
+    }
+
+
     if (this->bodyType.compare("airfoil")==0) {
         
         std::cout<<"Airfoil body type found"<<std::endl;
@@ -422,6 +440,7 @@ void GazeboAerodynamics::DoLogCallback(Int32Ptr& do_log){
 
 void GazeboAerodynamics::OnUpdate()
 {
+#if false
     //ignition::math::Vector3d pos_ref = ignition::math::Vector3d(0, 0, 0); // used as reference position (relative to and expressed in fuselage frame) to calculate moments exerted by airfoils for comparison with PX4 aerodynamic model (debugging).
     
     if (this->bodyType.compare("airfoil") == 0) {
@@ -809,7 +828,8 @@ void GazeboAerodynamics::OnUpdate()
     }
     
     this->updateCounter++;  // counter to time logging/debug printing
-    
+
+#endif
 }
 
 

@@ -84,6 +84,14 @@
       </plugin>
     </gazebo>
 
+   <gazebo>
+     <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+      <robotNamespace>${robot_namespace}</robotNamespace>
+      <linkName>${robot_namespace}/base_link</linkName>
+      <aeroParamsYAML>/home/david/catkin_ws_hil/src/rotors_simulator/rotors_gazebo/resource/fixed_wing/test.yaml</aeroParamsYAML>
+    </plugin>
+  </gazebo>
+
   <xacro:if value="${enable_mavlink_interface}">
     <gazebo>
       <plugin filename="librotors_gazebo_mavlink_interface.so" name="gazebo_mavlink_interface">

@@ -42,6 +42,7 @@
 
 #include "common.h"
 
+
 namespace turning_direction {
 const static int CCW = 1;
 const static int CW = -1;
