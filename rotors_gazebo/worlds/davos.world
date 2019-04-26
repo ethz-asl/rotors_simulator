@@ -22,6 +22,7 @@
          topic to a ROS topic (or vise versa). -->
     <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so"/>
 
+    <!-- used for gazebo gps sensor -->
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
       <latitude_deg>46.784369</latitude_deg>
@@ -29,6 +30,7 @@
       <elevation>500.0</elevation>
       <heading_deg>180</heading_deg>
     </spherical_coordinates>
+
     <physics type='ode'>
       <ode>
         <solver>

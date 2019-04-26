@@ -117,6 +117,82 @@
     </gazebo>
   </xacro:macro>
 
+  <!-- Macro to add a camera. 2 -->
+  <xacro:macro name="camera_macro_2"
+    params="namespace parent_link camera_suffix frame_rate
+      horizontal_fov image_width image_height image_format min_distance
+      max_distance noise_mean noise_stddev enable_visual *geometry *origin">
+
+    <link name="${namespace}/camera_${camera_suffix}_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <xacro:insert_block name="geometry" />
+      </geometry>
+    </collision>
+    <xacro:if value="${enable_visual}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
+        <geometry>
+          <xacro:insert_block name="geometry" />
+        </geometry>
+        <material name="red" />
+      </visual>
+    </xacro:if>
+      <inertial>
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
+
+    <joint name="${namespace}/camera_${camera_suffix}_joint" type="revolute">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/camera_${camera_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+
+    <gazebo reference="${namespace}/camera_${camera_suffix}_link">
+      <sensor type="camera" name="${namespace}_camera_${camera_suffix}">
+        <update_rate>${frame_rate}</update_rate>
+        <camera name="head">
+          <horizontal_fov>${horizontal_fov}</horizontal_fov>
+          <image>
+            <width>${image_width}</width>
+            <height>${image_height}</height>
+            <format>${image_format}</format>
+          </image>
+          <clip>
+            <near>${min_distance}</near>
+            <far>${max_distance}</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>${noise_mean}</mean>
+            <stddev>${noise_stddev}</stddev>
+          </noise>
+        </camera>
+        <plugin name="${namespace}_camera_${camera_suffix}_controller" filename="libgazebo_ros_camera.so">
+          <robotNamespace>${namespace}</robotNamespace>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>${frame_rate}</updateRate>
+          <cameraName>camera_${camera_suffix}</cameraName>
+          <imageTopicName>image_raw</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+          <frameName>camera_${camera_suffix}_link</frameName>
+          <hackBaseline>0.7</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+      </sensor>
+    </gazebo>
+
+  </xacro:macro>
+
   <!-- Camera joint macro - just the joints, links, and collisions for a single
        camera. -->
   <xacro:macro name="camera_joint_macro"
@@ -407,7 +483,7 @@
   <xacro:macro name="gps_plugin_macro"
     params="namespace gps_suffix parent_link gps_topic ground_speed_topic
       mass_gps_sensor horizontal_pos_std_dev vertical_pos_std_dev
-      horizontal_vel_std_dev vertical_vel_std_dev *inertia *origin">
+      horizontal_vel_std_dev vertical_vel_std_dev enable_delay *inertia *origin">
     <!-- GPS link -->
     <link name="${namespace}/gps${gps_suffix}_link">
       <inertial>
@@ -476,6 +552,8 @@
           <verPosStdDev>${vertical_pos_std_dev}</verPosStdDev> <!-- standard deviation for vertical position noise [m] -->
           <horVelStdDev>${horizontal_vel_std_dev}</horVelStdDev> <!-- standard deviation for horizontal speed noise [m/s] -->
           <verVelStdDev>${vertical_vel_std_dev}</verVelStdDev> <!-- standard deviation for vertical speed noise [m/s] -->
+          <enableDelay>${enable_delay}</enableDelay>
+          <!--<rqstFwdToRos>${rqst_fwd_to_ros}</rqstFwdToRos>-->
         </plugin>
       </sensor>
     </gazebo>
@@ -867,8 +945,28 @@
     </xacro:imu_plugin_macro>
   </xacro:macro>
 
-  <xacro:macro name="default_gps" params="namespace parent_link">
-    <!-- Default GPS. -->
+  <xacro:macro name="default_camera" params="namespace parent_link camera_suffix *origin">
+    <xacro:camera_macro_2
+      namespace="${namespace}"
+      parent_link="${parent_link}"
+      camera_suffix="${camera_suffix}"
+      frame_rate="30"
+      horizontal_fov="1.3962634"
+      image_width="752"
+      image_height="480"
+      image_format="L8"
+      min_distance="0.02"
+      max_distance="8000"
+      noise_mean="0.0"
+      noise_stddev="0.007"
+      enable_visual="true">
+      <mesh filename="package://rotors_description/meshes/vi_camera.dae" scale="1 1 1" />
+      <xacro:insert_block name="origin" />
+    </xacro:camera_macro_2>
+  </xacro:macro>
+
+  <xacro:macro name="default_gps" params="namespace parent_link *origin">
+    <!-- Default GPS including ground truth GPS -->
     <xacro:gps_plugin_macro
       namespace="${namespace}"
       gps_suffix=""
@@ -879,9 +977,25 @@
       horizontal_pos_std_dev="3.0"
       vertical_pos_std_dev="6.0"
       horizontal_vel_std_dev="0.1"
-      vertical_vel_std_dev="0.1">
+      vertical_vel_std_dev="0.1"
+      enable_delay = "true">
       <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <xacro:insert_block name="origin" />
+    </xacro:gps_plugin_macro>
+    <xacro:gps_plugin_macro
+      namespace="${namespace}"
+      gps_suffix="_gt"
+      parent_link="${parent_link}"
+      gps_topic="gps_gt"
+      ground_speed_topic="ground_speed_gt"
+      mass_gps_sensor="0.001"
+      horizontal_pos_std_dev="0.0"
+      vertical_pos_std_dev="0.0"
+      horizontal_vel_std_dev="0.0"
+      vertical_vel_std_dev="0.0"
+      enable_delay = "false">
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <xacro:insert_block name="origin" />
     </xacro:gps_plugin_macro>
   </xacro:macro>
 

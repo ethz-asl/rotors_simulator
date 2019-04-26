@@ -1,0 +1,16 @@
+syntax = "proto2";
+package sensor_msgs.msgs;
+
+message SITLGps
+{
+  required int64  time_usec             = 1;
+  required double latitude_deg          = 2;
+  required double longitude_deg         = 3;
+  required double altitude              = 4;
+  optional double eph                   = 5;
+  optional double epv                   = 6;
+  optional double velocity              = 7;
+  optional double velocity_east         = 8;
+  optional double velocity_north        = 9;
+  optional double velocity_up           = 10;
+}
