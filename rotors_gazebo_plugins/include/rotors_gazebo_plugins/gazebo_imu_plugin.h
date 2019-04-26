@@ -173,6 +173,8 @@ class GazeboImuPlugin : public ModelPlugin {
   Eigen::Vector3d accelerometer_turn_on_bias_;
 
   ImuParameters imu_parameters_;
+
+  uint64_t seq_ = 0;
 };
 
 }  // namespace gazebo

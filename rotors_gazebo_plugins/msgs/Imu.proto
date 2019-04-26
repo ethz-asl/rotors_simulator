@@ -19,4 +19,6 @@ message Imu
   
   required gazebo.msgs.Vector3d linear_acceleration = 6;
   repeated float   linear_acceleration_covariance = 7 [packed=true];
+
+  required int64 seq = 8;
 }
