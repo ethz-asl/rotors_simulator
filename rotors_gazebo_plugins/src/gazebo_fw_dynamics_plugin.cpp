@@ -51,6 +51,8 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
 
   namespace_.clear();
 
+  gzdbg << "dbg1" << std::endl;
+
   // Get the robot namespace.
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
@@ -62,6 +64,8 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
 
   // Initialise with default namespace (typically /gazebo/default/).
   node_handle_->Init();
+
+  gzdbg << "dbg2" << std::endl;
 
   // Get the link name.
   std::string link_name;
@@ -76,9 +80,12 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
             << link_name << "\".");
   }
 
+  gzdbg << "dbg3" << std::endl;
+
   // Get the path to fixed-wing aerodynamics parameters YAML file. If not
   // provided, default Techpod parameters are used.
   if (_sdf->HasElement("aeroParamsYAML")) {
+    gzdbg << "dbg3.0" << std::endl;
     std::string aero_params_yaml =
         _sdf->GetElement("aeroParamsYAML")->Get<std::string>();
 
@@ -100,6 +107,8 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
         << " specified, using default Techpod parameters.\n";
   }
 
+  gzdbg << "dbg4" << std::endl;
+
   // Get the rest of the sdf parameters.
   getSdfParam<bool>(_sdf, "useGzMavlinkInterface", use_gazebo_mavlink_interface_,
                     true);
@@ -115,6 +124,8 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
   getSdfParam<std::string>(_sdf, "windSpeedSubTopic",
                            wind_speed_sub_topic_,
                            mav_msgs::default_topics::WIND_SPEED);   // "wind_speed"
+
+  gzdbg << "dbg5" << std::endl;
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -281,6 +292,10 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
   // Apply the calculated forced and moments to the main body link.
   link_->AddRelativeForce(forces);
   link_->AddRelativeTorque(moments);
+
+  //gzdbg<<"force: x="<<forces[0]<<" y="<<forces[1]<<" z="<<forces[2]<<std::endl;
+  //gzdbg<<"moment: x="<<moments[0]<<" y="<<moments[1]<<" z="<<moments[2]<<std::endl;
+
 }
 
 double GazeboFwDynamicsPlugin::NormalizedInputToAngle(
