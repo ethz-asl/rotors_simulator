@@ -88,7 +88,18 @@
      <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
       <robotNamespace>${robot_namespace}</robotNamespace>
       <linkName>${robot_namespace}/base_link</linkName>
-      <aeroParamsYAML>/home/david/catkin_ws_hil/src/rotors_simulator/rotors_gazebo/resource/fixed_wing/test.yaml</aeroParamsYAML>
+      <airfoil>
+          <segment name="1">
+              <forward>1 0 0</forward>
+              <upward>0 0 1</upward>
+              <cp>0.21 0.0 0.185</cp>
+              <seg_area>0.0040</seg_area>
+              <seg_chord>0.16</seg_chord>
+              <ctrl_ch></ctrl_ch>
+              <slpstr></slpstr>
+              <aeroParamsYAML>/home/david/catkin_ws_hil/src/rotors_simulator/rotors_gazebo/resource/fixed_wing/test.yaml</aeroParamsYAML>
+          </segment>
+      </airfoil>
     </plugin>
   </gazebo>
 
@@ -186,7 +197,6 @@
 
 
   </xacro:macro>
-
   <!-- Control surface joint and link -->
   <xacro:macro name="control_surface"
     params="robot_namespace surface_name parent mass_surface min_angle

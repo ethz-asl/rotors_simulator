@@ -105,7 +105,9 @@ GazeboAerodynamics::GazeboAerodynamics()
 GazeboAerodynamics::~GazeboAerodynamics()
 {
     this->logfile.close();
-    std::cout<<"liftdrag destructed"<<std::endl;
+    delete[] segments;
+    
+    gzdbg<<"liftdrag destructed"<<std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -160,6 +162,81 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
         }
     }
     
+    if (_sdf->HasElement("airfoil")) {
+        int n_seg = 0;
+        sdf::ElementPtr _sdf_airfoil = _sdf->GetElement("airfoil");
+        sdf::ElementPtr _sdf_segment = _sdf_airfoil->GetElement("segment");
+        
+        while (_sdf_segment)
+        {
+            _sdf_segment = _sdf_segment->GetNextElement("segment");
+            ++n_seg;
+        }
+        
+        segments = new segment [n_seg];
+        
+        _sdf_segment = _sdf_airfoil->GetElement("segment");
+        
+        for(int i=0; i<n_seg; i++){
+            
+            if (_sdf_segment->HasElement("forward"))
+                segments[i]->fwd = _sdf_segment->Get<ignition::math::Vector3d>("forward");
+            segments[i]->fwd.Normalize();
+            
+            if (_sdf_segment->HasElement("upward"))
+                segments[i]->upwd = _sdf_segment->Get<ignition::math::Vector3d>("upward");
+            segments[i]->upwd.Normalize();
+            
+            if (_sdf_segment->HasElement("cp"))
+                segments[i]->cp = _sdf_segment->Get<ignition::math::Vector3d>("cp");
+            
+            if (_sdf_segment->HasElement("seg_area")) {
+                segments[i]->segArea = _sdf_segment->Get<double>("seg_area");
+
+            if (_sdf_segment->HasElement("seg_chord")) {
+                segments[i]->segChord = _sdf_segment->Get<double>("seg_chord");
+                
+            segments[i]->ctrl_Ch = -1:
+            if (_sdf_segment->HasElement("ctrl_ch")) {
+                segments[i]->ctrlCh = _sdf_segment->Get<int>("ctrl_ch");
+                
+            if (_sdf_segment->HasElement("slpstr")) {
+                segments[i]->slpstr = _sdf_segment->Get<double>("slpstr");
+                segments[i]->propulsion_slipstream_sub_topic_ = _sdf->Get<std::string>("propulsionSlipstreamSubTopic");
+                segments[i]->propulsion_slipstream_sub_ = node_handle_->Subscribe("~/" + model->GetName() + propulsion_slipstream_sub_topic_, &GazeboAerodynamics::PropulsionSlipstreamCallback, this);
+
+            }
+                
+            if (_sdf_segment->HasElement("aeroParamsYAML")) {
+                
+                AerodynamicParameters aero_params_;
+                std::string aero_params_yaml =
+                _sdf_segment->GetElement("aeroParamsYAML")->Get<std::string>();
+                aero_params_.LoadAeroParamsYAML(aero_params_yaml);
+                
+                segments[i]->alpha_max_ns = aero_params_.alpha_max_ns;
+                segments[i]->alpha_min_ns = aero_params_.alpha_min_ns;
+                
+                segments[i]->c_lift_alpha = aero_params_.c_lift_alpha;
+                segments[i]->c_drag_alpha = aero_params_.c_drag_alpha;
+                segments[i]->c_pitch_moment_alpha = aero_params_.c_pitch_moment_alpha;
+                
+                segments[i]->alpha_blend = aero_params_.alpha_blend;
+                segments[i]->fp_c_lift_max = aero_params_.fp_c_lift_max;
+                segments[i]->fp_c_drag_max = aero_params_.fp_c_drag_max;
+                segments[i]->fp_c_pitch_moment_max = aero_params_.fp_c_pitch_moment_max;
+                    
+            } else {
+                gzwarn << "[gazebo_fw_dynamics_plugin] No aerodynamic paramaters YAML file"
+                << " specified for segment, using default parameters.\n";
+            }
+                
+            _sdf_segment = _sdf_segment->GetNextElement("segment");
+        }
+        
+    }
+    
+    /**
     if (_sdf->HasElement("air_density"))
         this->rho = _sdf->Get<double>("air_density");
     
@@ -197,21 +274,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
     if (_sdf->HasElement("cp"))
         this->cp = _sdf->Get<ignition::math::Vector3d>("cp");
     
-    if (_sdf->HasElement("aeroParamsYAML")) {
-
-      std::string aero_params_yaml =
-          _sdf->GetElement("aeroParamsYAML")->Get<std::string>();
-      aero_params_.LoadAeroParamsYAML(aero_params_yaml);
-
-      gzdbg<<"yaml-parse test: alpha_blend="<<aero_params_.alpha_blend<<std::endl;
-      gzdbg<<"yaml-parse test: alpha_max_ns="<<aero_params_.alpha_max_ns<<std::endl;
-
-    } else {
-      gzwarn << "[gazebo_fw_dynamics_plugin] No aerodynamic paramaters YAML file"
-          << " specified, using default Techpod parameters.\n";
-    }
-
-
+    */
     if (this->bodyType.compare("airfoil")==0) {
         
         std::cout<<"Airfoil body type found"<<std::endl;
@@ -400,6 +463,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
 }
 
 /////////////////////////////////////////////////
+/*
 void GazeboAerodynamics::PropulsionSlipstreamCallback(PropulsionSlipstreamPtr& propulsion_slipstream){
     
     // world-position of rotor hub
@@ -426,7 +490,8 @@ void GazeboAerodynamics::PropulsionSlipstreamCallback(PropulsionSlipstreamPtr& p
     d_rot = propulsion_slipstream->prop_diam();
     
 }
-
+*/
+                
 /*
 void GazeboAerodynamics::DoLogCallback(Int32Ptr& do_log){
     if (do_log->data() == 1 && logEnable) {
