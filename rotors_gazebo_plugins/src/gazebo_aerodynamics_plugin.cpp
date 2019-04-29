@@ -43,30 +43,30 @@ GazeboAerodynamics::GazeboAerodynamics()
     
     this->rho = 1.2041;
     this->bodyType = "airfoil";
-    this->cp = ignition::math::Vector3d(0, 0, 0);
-    this->forward = ignition::math::Vector3d(1, 0, 0);
-    this->upward = ignition::math::Vector3d(0, 0, 1);
-    this->alpha = 0.0;
+    //this->cp = ignition::math::Vector3d(0, 0, 0);
+    //this->forward = ignition::math::Vector3d(1, 0, 0);
+    //this->upward = ignition::math::Vector3d(0, 0, 1);
+    //this->alpha = 0.0;
     
     /// Quantities for full 360° AoA range
-    this->alpha_zlift = 0.0;
-    this->cla = 2.0*M_PI;
-    this->alpha_dmin = 0;
-    this->cd_af_min = 0.01;
-    this->cd_af_stall = 0.04;
-    this->cm_af_0 = -0.1;
-    this->alphaStall = 0.5*M_PI;
-    this->cl_fp_max = 0.65;
-    this->cd_fp_max = 1.2;
-    this->cm_fp_max = 0.4;
-    this->cla_lin[0] = -0.0873;
-    this->cla_lin[1] = 0.2269;
-    this->d_a = 0.1;
+    //this->alpha_zlift = 0.0;
+    //this->cla = 2.0*M_PI;
+    //this->alpha_dmin = 0;
+    //this->cd_af_min = 0.01;
+    //this->cd_af_stall = 0.04;
+    //this->cm_af_0 = -0.1;
+    //this->alphaStall = 0.5*M_PI;
+    //this->cl_fp_max = 0.65;
+    //this->cd_fp_max = 1.2;
+    //this->cm_fp_max = 0.4;
+    //this->cla_lin[0] = -0.0873;
+    //this->cla_lin[1] = 0.2269;
+    //this->d_a = 0.1;
     
     /// How much to change coefficents per every radian of the control joint value
-    this->controlJointRadToCL = 0.0;
-    this->controlJointRadToCM = 0.0;
-    this->controlJointRadToCD = 0.0;
+    //this->controlJointRadToCL = 0.0;
+    //this->controlJointRadToCM = 0.0;
+    //this->controlJointRadToCD = 0.0;
     
     /// Fuselage lift/drag
     this->A_fus_xx = 0.0;
@@ -76,11 +76,11 @@ GazeboAerodynamics::GazeboAerodynamics()
     this->cd_cyl_lat = 1.17;
 
     /// Propeller slipstream modeling
-    this->p_rot = ignition::math::Vector3d(0,0,0);
-    this->d_wake = ignition::math::Vector3d(0,0,0);
-    this->v_ind_d = ignition::math::Vector3d(0,0,0);
-    this->v_ind_e = ignition::math::Vector3d(0,0,0);
-    this->d_rot = 0.0;
+    //this->p_rot = ignition::math::Vector3d(0,0,0);
+    //this->d_wake = ignition::math::Vector3d(0,0,0);
+    //this->v_ind_d = ignition::math::Vector3d(0,0,0);
+    //this->v_ind_e = ignition::math::Vector3d(0,0,0);
+    //this->d_rot = 0.0;
     
     /// Debugging/Logging
     this->dbgOut = false;
@@ -94,7 +94,7 @@ GazeboAerodynamics::GazeboAerodynamics()
     this->headerFlag = true;
     
     /// Topics to subscribe to
-    this->propulsion_slipstream_sub_topic_ = kDefaultPropulsionSlipstreamSubTopic;
+    //this->propulsion_slipstream_sub_topic_ = kDefaultPropulsionSlipstreamSubTopic;
     //this->do_log_sub_topic_ = kDefaultDoLogSubTopic;
     
     //std::cout<<"liftdrag constructed"<<std::endl;
@@ -105,6 +105,12 @@ GazeboAerodynamics::GazeboAerodynamics()
 GazeboAerodynamics::~GazeboAerodynamics()
 {
     this->logfile.close();
+
+    for(int i=0; i<n_seg; i++){
+        delete[] segments[i].slpstr;
+        delete[] segments[i].cs;
+        //delete[] segments[i].v_ind_cp_;
+    }
     delete[] segments;
     
     gzdbg<<"liftdrag destructed"<<std::endl;
@@ -114,8 +120,7 @@ GazeboAerodynamics::~GazeboAerodynamics()
 void GazeboAerodynamics::Load(physics::ModelPtr _model,
                           sdf::ElementPtr _sdf)
 {
-
-   gzdbg<<"gazebo_aerodynamics load called"<<std::endl;
+    gzdbg<<"gazebo_aerodynamics load called"<<std::endl;
 
     GZ_ASSERT(_model, "GazeboAerodynamics _model pointer is NULL");
     GZ_ASSERT(_sdf, "GazeboAerodynamics _sdf pointer is NULL");
@@ -163,16 +168,16 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
     }
     
     if (_sdf->HasElement("airfoil")) {
-        int n_seg = 0;
+
         sdf::ElementPtr _sdf_airfoil = _sdf->GetElement("airfoil");
         sdf::ElementPtr _sdf_segment = _sdf_airfoil->GetElement("segment");
         
-        while (_sdf_segment)
-        {
+        while (_sdf_segment) {
             _sdf_segment = _sdf_segment->GetNextElement("segment");
             ++n_seg;
         }
         
+        gzdbg<<"found "<<n_seg<<"airfoil segments for this link. \n";
         segments = new segment [n_seg];
         
         _sdf_segment = _sdf_airfoil->GetElement("segment");
@@ -180,63 +185,155 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
         for(int i=0; i<n_seg; i++){
             
             if (_sdf_segment->HasElement("forward"))
-                segments[i]->fwd = _sdf_segment->Get<ignition::math::Vector3d>("forward");
-            segments[i]->fwd.Normalize();
+                segments[i].fwd = _sdf_segment->Get<ignition::math::Vector3d>("forward");
+            else
+                gzwarn<<"segment ["<<i<<"] is missing 'forward' element \n";
+
+            segments[i].fwd = segments[i].fwd.Normalize();
             
             if (_sdf_segment->HasElement("upward"))
-                segments[i]->upwd = _sdf_segment->Get<ignition::math::Vector3d>("upward");
-            segments[i]->upwd.Normalize();
+                segments[i].upwd = _sdf_segment->Get<ignition::math::Vector3d>("upward");
+            else
+                gzwarn<<"segment ["<<i<<"] is missing 'upward' element \n";
+
+            segments[i].upwd = segments[i].upwd.Normalize();
             
             if (_sdf_segment->HasElement("cp"))
-                segments[i]->cp = _sdf_segment->Get<ignition::math::Vector3d>("cp");
-            
-            if (_sdf_segment->HasElement("seg_area")) {
-                segments[i]->segArea = _sdf_segment->Get<double>("seg_area");
+                segments[i].cp = _sdf_segment->Get<ignition::math::Vector3d>("cp");
+            else
+                gzwarn<<"segment ["<<i<<"] is missing 'cp' element \n";
 
-            if (_sdf_segment->HasElement("seg_chord")) {
-                segments[i]->segChord = _sdf_segment->Get<double>("seg_chord");
-                
-            segments[i]->ctrl_Ch = -1:
-            if (_sdf_segment->HasElement("ctrl_ch")) {
-                segments[i]->ctrlCh = _sdf_segment->Get<int>("ctrl_ch");
-                
-            if (_sdf_segment->HasElement("slpstr")) {
-                segments[i]->slpstr = _sdf_segment->Get<double>("slpstr");
-                segments[i]->propulsion_slipstream_sub_topic_ = _sdf->Get<std::string>("propulsionSlipstreamSubTopic");
-                segments[i]->propulsion_slipstream_sub_ = node_handle_->Subscribe("~/" + model->GetName() + propulsion_slipstream_sub_topic_, &GazeboAerodynamics::PropulsionSlipstreamCallback, this);
+            if (_sdf_segment->HasElement("seg_area"))
+                segments[i].segArea = _sdf_segment->Get<double>("seg_area");
+            else
+                gzwarn<<"segment ["<<i<<"] is missing 'seg_area' element \n";
 
-            }
-                
+            if (_sdf_segment->HasElement("seg_chord"))
+                segments[i].segChord = _sdf_segment->Get<double>("seg_chord");
+            else
+                gzwarn<<"segment ["<<i<<"] is missing 'seg_chord' element \n";
+
+            AerodynamicParameters aero_params_;
+
             if (_sdf_segment->HasElement("aeroParamsYAML")) {
-                
-                AerodynamicParameters aero_params_;
                 std::string aero_params_yaml =
                 _sdf_segment->GetElement("aeroParamsYAML")->Get<std::string>();
                 aero_params_.LoadAeroParamsYAML(aero_params_yaml);
-                
-                segments[i]->alpha_max_ns = aero_params_.alpha_max_ns;
-                segments[i]->alpha_min_ns = aero_params_.alpha_min_ns;
-                
-                segments[i]->c_lift_alpha = aero_params_.c_lift_alpha;
-                segments[i]->c_drag_alpha = aero_params_.c_drag_alpha;
-                segments[i]->c_pitch_moment_alpha = aero_params_.c_pitch_moment_alpha;
-                
-                segments[i]->alpha_blend = aero_params_.alpha_blend;
-                segments[i]->fp_c_lift_max = aero_params_.fp_c_lift_max;
-                segments[i]->fp_c_drag_max = aero_params_.fp_c_drag_max;
-                segments[i]->fp_c_pitch_moment_max = aero_params_.fp_c_pitch_moment_max;
-                    
+
             } else {
-                gzwarn << "[gazebo_fw_dynamics_plugin] No aerodynamic paramaters YAML file"
-                << " specified for segment, using default parameters.\n";
+                gzwarn<<"segment ["<<i<<"] is missing aerodynamic paramaters YAML file, "
+                      <<"using default parameters.\n";
             }
-                
+
+            segments[i].alpha_max_ns = aero_params_.alpha_max_ns;
+            segments[i].alpha_min_ns = aero_params_.alpha_min_ns;
+
+            segments[i].c_lift_alpha = aero_params_.c_lift_alpha;
+            segments[i].c_drag_alpha = aero_params_.c_drag_alpha;
+            segments[i].c_pitch_moment_alpha = aero_params_.c_pitch_moment_alpha;
+
+            segments[i].alpha_blend = aero_params_.alpha_blend;
+            segments[i].fp_c_lift_max = aero_params_.fp_c_lift_max;
+            segments[i].fp_c_drag_max = aero_params_.fp_c_drag_max;
+            segments[i].fp_c_pitch_moment_max = aero_params_.fp_c_pitch_moment_max;
+
+            // get control joints
+            if (_sdf_segment->HasElement("control")) {
+                 sdf::ElementPtr _sdf_control = _sdf_segment->GetElement("control");
+                 sdf::ElementPtr _sdf_cs = _sdf_control->GetElement("cs");
+
+                 // get number of control inputs on this particular segment
+                 while (_sdf_cs) {
+                     _sdf_cs = _sdf_cs->GetNextElement("cs");
+                     ++segments[i].n_cs;
+                 }
+
+                 gzdbg<<"found "<<segments[i].n_cs<<" control surface segments for segment ["<<i<<"]. \n";
+                 _sdf_cs = _sdf_control->GetElement("cs");
+                 segments[i].cs = new control_surface [segments[i].n_cs];
+
+                 for(int j=0; j<segments[i].n_cs; j++){
+
+                   if (_sdf_cs->HasElement("controlJoint")){
+                       std::string joint_name = _sdf_cs->Get<std::string>("controlJoint");
+                       segments[i].cs[j].controlJoint = model->GetJoint(joint_name);
+
+                       if (model->GetJoint(joint_name) == nullptr)
+                           gzwarn << "joint [" << joint_name << "] not found \n";
+
+                   } else {
+                       gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'controlJoint' element \n";
+                   }
+
+                   if (_sdf_cs->HasElement("radToCLift"))
+                        segments[i].cs[j].controlJointRadToCL = _sdf_cs->Get<double>("radToCLift");
+                   else
+                        gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'radToCLift' element \n";
+
+                   if (_sdf_cs->HasElement("radToCDrag"))
+                        segments[i].cs[j].controlJointRadToCD = _sdf_cs->Get<double>("radToCDrag");
+                   else
+                        gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'radToCDrag' element \n";
+
+                   if (_sdf_cs->HasElement("radToCPitch"))
+                        segments[i].cs[j].controlJointRadToCM = _sdf_cs->Get<double>("radToCPitch");
+                   else
+                        gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'radToCPitch' element \n";
+
+                   _sdf_cs = _sdf_cs->GetNextElement("cs");
+                 }
+            }
+
+            // get slipstreams
+            if (_sdf_segment->HasElement("indVel")) {
+                 sdf::ElementPtr _sdf_ind_vel= _sdf_segment->GetElement("indVel");
+                 sdf::ElementPtr _sdf_slpstr = _sdf_ind_vel->GetElement("slpstr");
+
+                 // get number of slipstreams for this particular segment
+                 while (_sdf_slpstr) {
+                     _sdf_slpstr = _sdf_slpstr->GetNextElement("slpstr");
+                     ++segments[i].n_slpstr;
+                 }
+
+                 gzdbg<<"found "<<segments[i].n_slpstr<<" slipstreams for segment ["<<i<<"]. \n";
+                 _sdf_slpstr = _sdf_ind_vel->GetElement("slpstr");
+
+                 segments[i].slpstr = new slipstream [segments[i].n_slpstr];
+                 //segments[i].propulsion_slipstream_sub_ = new transport::SubscriberPtr [segments[i].n_slpstr];
+                 //segments[i].v_ind_cp_ = new ignition::math::Vector3d [segments[i].n_slpstr];
+                 //segments[i].f = new boost::function<void(PropulsionSlipstreamPtr& msg_ptr)> [segments[i].n_slpstr];
+
+                 for(int j=0; j<segments[i].n_slpstr; j++){
+
+                    if(_sdf_slpstr->HasElement("topic")){
+                        std::string slpstr_topic = _sdf_slpstr->Get<std::string>("topic");
+
+                        segments[i].slpstr[j].propulsion_slipstream_sub_ = node_handle_->Subscribe("~/" + model->GetName() + slpstr_topic, &GazeboAerodynamics::slipstream::GetIndVel, &segments[i].slpstr[j]);
+
+                        //boost::function<void(PropulsionSlipstreamPtr& msg_ptr)> f = boost::bind(PropulsionSlipstreamCallback,_1,i,j,this);
+
+                        //segments[i].f[j] = boost::bind(PropulsionSlipstreamCallback,_1,i,j,this);
+
+                        //segments[i].propulsion_slipstream_sub_[j] = node_handle_->Subscribe("~/" + model->GetName() + slpstr_topic, segments[i].f[j]);
+
+
+                        //segments[i].propulsion_slipstream_sub_[j] = node_handle_->Subscribe("~/" + model->GetName() + slpstr_topic, &boost::bind(PropulsionSlipstreamCallback,_1,i,j,this));
+
+/*
+                        segments[i].propulsion_slipstream_sub_[j] = node_handle_->Subscribe("~/" + model->GetName() + slpstr_topic,
+                                                                                         &GazeboAerodynamics::PropulsionSlipstreamCallback,this);
+*/
+                    } else {
+                        gzwarn<<"slipstream ["<<j<<"] of segment ["<<i<<"] is missing 'radToCPitch' element \n";
+                    }
+                 }
+            }
+
             _sdf_segment = _sdf_segment->GetNextElement("segment");
         }
-        
     }
-    
-    /**
+
+    /*
     if (_sdf->HasElement("air_density"))
         this->rho = _sdf->Get<double>("air_density");
     
@@ -275,6 +372,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
         this->cp = _sdf->Get<ignition::math::Vector3d>("cp");
     
     */
+    /*
     if (this->bodyType.compare("airfoil")==0) {
         
         std::cout<<"Airfoil body type found"<<std::endl;
@@ -428,7 +526,8 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
         } else {
             gzerr << "missing <seg_log> element\n";}
     }
-    
+    */
+    /*
     if (this->bodyType.compare("fuselage")==0) {
         
         if (_sdf->HasElement("A_fus_xx"))
@@ -440,7 +539,8 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
         if (_sdf->HasElement("A_fus_zz"))
             this->A_fus_zz = _sdf->Get<double>("A_fus_zz")/10000.0;
     }
-    
+    */
+
     if (_sdf->HasElement("dbg_out"))
         this->dbgOut = _sdf->Get<int>("dbg_out");
     
@@ -459,7 +559,6 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
     }
 
     //do_log_sub_ = node_handle_->Subscribe("~/" + model->GetName() + do_log_sub_topic_, &GazeboAerodynamics::DoLogCallback, this);   // triggers log
-    
 }
 
 /////////////////////////////////////////////////
@@ -502,6 +601,7 @@ void GazeboAerodynamics::DoLogCallback(Int32Ptr& do_log){
     }
 }
 */
+
 
 void GazeboAerodynamics::OnUpdate()
 {
@@ -893,7 +993,6 @@ void GazeboAerodynamics::OnUpdate()
     }
     
     this->updateCounter++;  // counter to time logging/debug printing
-
 #endif
 }
 

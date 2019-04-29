@@ -95,9 +95,35 @@
               <cp>0.21 0.0 0.185</cp>
               <seg_area>0.0040</seg_area>
               <seg_chord>0.16</seg_chord>
-              <ctrl_ch></ctrl_ch>
-              <slpstr></slpstr>
               <aeroParamsYAML>/home/david/catkin_ws_hil/src/rotors_simulator/rotors_gazebo/resource/fixed_wing/test.yaml</aeroParamsYAML>
+              <indVel>
+                <slpstr name="prop1">
+                    <topic>propeller1</topic>
+                </slpstr>
+                <slpstr name="prop2">
+                    <topic>propeller2</topic>
+                </slpstr>
+              </indVel>
+              <control>
+                <cs name="aileron">
+                    <controlJoint></controlJoint>
+                    <radToCLift></radToCLift>
+                    <radToCDrag></radToCDrag>
+                    <radToCPitch></radToCPitch>
+                </cs>
+                <cs name="spoiler">
+                    <controlJoint></controlJoint>
+                    <radToCLift></radToCLift>
+                    <radToCDrag></radToCDrag>
+                    <radToCPitch></radToCPitch>
+                </cs>
+                <cs name="krueger">
+                    <controlJoint></controlJoint>
+                    <radToCLift></radToCLift>
+                    <radToCDrag></radToCDrag>
+                    <radToCPitch></radToCPitch>
+                </cs>
+              </control>
           </segment>
       </airfoil>
     </plugin>
