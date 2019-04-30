@@ -101,7 +101,7 @@ namespace gazebo
 
     /// \brief Lifting body type
     /// "airfoil" or "fuselage"
-    std::string bodyType;
+    //std::string bodyType;
       
     /// \brief Center of pressure wrt link frame, expressed in link frame
     //protected: ignition::math::Vector3d cp;
@@ -136,36 +136,50 @@ namespace gazebo
           v_ind_cp_(ignition::math::Vector3d(0,0,0)),
           propulsion_slipstream_sub_(nullptr){}
 
+        transport::SubscriberPtr propulsion_slipstream_sub_;
+        std::mutex writingVelInd;
+
         ignition::math::Vector3d cp_wrld;   // current world position of center of pressure
         ignition::math::Vector3d v_ind_cp_; // induced velocity at cp (e.g. due to slipstream)
-        transport::SubscriberPtr propulsion_slipstream_sub_;
 
-        void GetIndVel(PropulsionSlipstreamPtr& propulsion_slipstream){
+        ignition::math::Vector3d p_rot;
+        ignition::math::Vector3d d_wake;
+        ignition::math::Vector3d d_wake_e;
+        ignition::math::Vector3d v_ind_d;
+        ignition::math::Vector3d v_ind_e;
 
-              // position of rotordisk center wrt world, expressed in world frame [m]
-              ignition::math::Vector3d p_rot(propulsion_slipstream->rotor_pos().x(),
+        double d_rot;
+
+        void Callback(PropulsionSlipstreamPtr& propulsion_slipstream){
+            std::unique_lock<std::mutex> lock(writingVelInd);
+            // position of rotordisk center wrt world, expressed in world frame [m]
+            p_rot = ignition::math::Vector3d(propulsion_slipstream->rotor_pos().x(),
                                              propulsion_slipstream->rotor_pos().y(),
                                              propulsion_slipstream->rotor_pos().z());
 
-              // wake direction expressed in world frame [-]
-              ignition::math::Vector3d d_wake(propulsion_slipstream->wake_dir().x(),
+            // wake direction expressed in world frame [-]
+            d_wake = ignition::math::Vector3d(propulsion_slipstream->wake_dir().x(),
                                               propulsion_slipstream->wake_dir().y(),
                                               propulsion_slipstream->wake_dir().z());
-              ignition::math::Vector3d d_wake_e = d_wake.Normalize();
+            d_wake_e = d_wake.Normalized();
 
-              // induced velocity at rotordisk, expressed in world frame [m/s]
-              ignition::math::Vector3d v_ind_d(propulsion_slipstream->ind_vel_disk().x(),
+            // induced velocity at rotordisk, expressed in world frame [m/s]
+            v_ind_d = ignition::math::Vector3d(propulsion_slipstream->ind_vel_disk().x(),
                                                propulsion_slipstream->ind_vel_disk().y(),
                                                propulsion_slipstream->ind_vel_disk().z());
 
-              // induced velocity at end of wake (Note: not necessarily 0!)
-              ignition::math::Vector3d v_ind_e(propulsion_slipstream->ind_vel_end().x(),
+            // induced velocity at end of wake (Note: not necessarily 0!)
+            v_ind_e = ignition::math::Vector3d(propulsion_slipstream->ind_vel_end().x(),
                                                propulsion_slipstream->ind_vel_end().y(),
                                                propulsion_slipstream->ind_vel_end().z());
 
-              // propeller/wake diameter
-              double d_rot = propulsion_slipstream->prop_diam();
+            // propeller/wake diameter
+            d_rot = propulsion_slipstream->prop_diam();
+            lock.unlock();
+        }
 
+        void GetIndVel(){
+              std::unique_lock<std::mutex> lock(writingVelInd);
               ignition::math::Vector3d p_r2cp_ = cp_wrld - p_rot;
               double off_a_ = d_wake_e.Dot(p_r2cp_);                 // axial distance in wake (d1 in report)
               double off_p_ = (off_a_*d_wake_e-p_r2cp_).Length();    // radial distance to wake centerline (d2 in report)
@@ -177,6 +191,7 @@ namespace gazebo
                   k_p_ = ignition::math::clamp(k_p_,0.0,1.0);                // radial distance downscaling
                   v_ind_cp_ = k_p_*(k_a_*v_ind_d+(1-k_a_)*v_ind_e);   // induced velocity at airfoil segment cp
               }
+              lock.unlock();
          }
     };
 
@@ -198,6 +213,10 @@ namespace gazebo
       double fp_c_lift_max;
       double fp_c_drag_max;
       double fp_c_pitch_moment_max;
+
+      double cs_c_lift;
+      double cs_c_drag;
+      double cs_c_pitch_moment;
 
       /*
       // double alpha_zlift;           // zero-lift AoA, [rad]
@@ -245,13 +264,31 @@ namespace gazebo
       int n_seg = 0;
 
     /// \brief Fuselage lift/drag modeling
-    protected:
-      double A_fus_xx;                      // forward-projected area of fuselage, [m^2]
-      double A_fus_yy;                      // side-projected area of fuselage, [m^2]
-      double A_fus_zz;                      // down-projected area of fuselage, [m^2]
-      double cd_cyl_ax;                     // drag coefficient of long cylinder in axial flow, [-]
-      double cd_cyl_lat;                    // drag coefficient of cylinder in lateral flow, [-]
-      
+
+      struct body {
+
+          body():
+            A_fus_xx(0),
+            A_fus_yy(0),
+            A_fus_zz(0),
+            cd_cyl_ax(0),
+            cd_cyl_lat(0){}
+
+          double A_fus_xx;                      // forward-projected area of fuselage, [m^2]
+          double A_fus_yy;                      // side-projected area of fuselage, [m^2]
+          double A_fus_zz;                      // down-projected area of fuselage, [m^2]
+          double cd_cyl_ax;                     // drag coefficient of long cylinder in axial flow, [-]
+          double cd_cyl_lat;                    // drag coefficient of cylinder in lateral flow, [-]
+
+          ignition::math::Vector3d cp;
+          ignition::math::Vector3d fwd;
+          ignition::math::Vector3d upwd;
+
+      };
+
+      body * bodies;
+      int n_bdy = 0;
+
     /// \brief Debugging/Logging
     protected:
       bool dbgOut;
