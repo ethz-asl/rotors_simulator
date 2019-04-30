@@ -47,62 +47,62 @@
 
 namespace gazebo
 {
- 
-  /// \brief Stuff for propeller slipstream message subscription
-  typedef const boost::shared_ptr<const gz_mav_msgs::PropulsionSlipstream> PropulsionSlipstreamPtr;
-  static const std::string kDefaultPropulsionSlipstreamSubTopic = "/propulsion_slipstream";
 
-  /// \brief Stuff for log request message subscription
-  //typedef const boost::shared_ptr<const std_msgs::msgs::Int32> Int32Ptr;
-  //static const std::string kDefaultDoLogSubTopic = "/do_log";
-    
-  //void PropulsionSlipstreamCallback(PropulsionSlipstreamPtr& propulsion_slipstream, int seg_index, int slpstr_index, GazeboAerodynamics obj);
+/// \brief Stuff for propeller slipstream message subscription
+typedef const boost::shared_ptr<const gz_mav_msgs::PropulsionSlipstream> PropulsionSlipstreamPtr;
+static const std::string kDefaultPropulsionSlipstreamSubTopic = "/propulsion_slipstream";
 
-  /// \brief A plugin that simulates lift and drag.
-  class GAZEBO_VISIBLE GazeboAerodynamics : public ModelPlugin
-  {
+/// \brief Stuff for log request message subscription
+//typedef const boost::shared_ptr<const std_msgs::msgs::Int32> Int32Ptr;
+//static const std::string kDefaultDoLogSubTopic = "/do_log";
+
+//void PropulsionSlipstreamCallback(PropulsionSlipstreamPtr& propulsion_slipstream, int seg_index, int slpstr_index, GazeboAerodynamics obj);
+
+/// \brief A plugin that simulates lift and drag.
+class GAZEBO_VISIBLE GazeboAerodynamics : public ModelPlugin
+{
     /// \brief Constructor.
-    public: GazeboAerodynamics();
+public: GazeboAerodynamics();
 
     /// \brief Destructor.
-    public: ~GazeboAerodynamics();
+public: ~GazeboAerodynamics();
 
     // Documentation Inherited.
-    public: virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+public: virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
     /// \brief Callback for World Update events.
-    protected: virtual void OnUpdate();
+protected: virtual void OnUpdate();
 
     /// \brief Connection to World Update events.
-    protected: event::ConnectionPtr updateConnection;
+protected: event::ConnectionPtr updateConnection;
 
     /// \brief Pointer to world.
-    protected: physics::WorldPtr world;
+protected: physics::WorldPtr world;
 
     /// \brief Pointer to physics engine.
-    protected: physics::PhysicsEnginePtr physics;
+protected: physics::PhysicsEnginePtr physics;
 
     /// \brief Pointer to model containing plugin.
-    protected: physics::ModelPtr model;
-      
-    /// \brief Pointer to link currently targeted by mud joint.
-    protected: physics::LinkPtr link;
-      
-    /// \brief SDF for this plugin;
-    protected: sdf::ElementPtr sdf;
+protected: physics::ModelPtr model;
 
-    private: std::string namespace_;
-    private: transport::NodePtr node_handle_;
-      
+    /// \brief Pointer to link currently targeted by mud joint.
+protected: physics::LinkPtr link;
+
+    /// \brief SDF for this plugin;
+protected: sdf::ElementPtr sdf;
+
+private: std::string namespace_;
+private: transport::NodePtr node_handle_;
+
     /// \brief air density
     /// at 25 deg C it's about 1.1839 kg/m^3
     /// At 20 °C and 101.325 kPa, dry air has a density of 1.2041 kg/m3.
-    protected: double rho;
+protected: double rho;
 
     /// \brief Lifting body type
     /// "airfoil" or "fuselage"
     //std::string bodyType;
-      
+
     /// \brief Center of pressure wrt link frame, expressed in link frame
     //protected: ignition::math::Vector3d cp;
 
@@ -114,15 +114,15 @@ namespace gazebo
     /// vector. Inflow velocity orthogonal to forward and upward vectors
     /// is considered flow in the wing sweep direction.
     //protected: ignition::math::Vector3d upward;
-      
+
     /// \brief Quantities for full +/-180° AoA range, per segment
     struct control_surface {
 
         control_surface():
-          controlJoint(nullptr),
-          controlJointRadToCL(0.0),
-          controlJointRadToCD(0.0),
-          controlJointRadToCM(0.0){}
+            controlJoint(nullptr),
+            controlJointRadToCL(0.0),
+            controlJointRadToCD(0.0),
+            controlJointRadToCM(0.0){}
 
         physics::JointPtr controlJoint;
         double controlJointRadToCL;   // dC_L/dCS slope, [1/rad]
@@ -133,8 +133,8 @@ namespace gazebo
     struct slipstream {
 
         slipstream():
-          v_ind_cp_(ignition::math::Vector3d(0,0,0)),
-          propulsion_slipstream_sub_(nullptr){}
+            v_ind_cp_(ignition::math::Vector3d(0,0,0)),
+            propulsion_slipstream_sub_(nullptr){}
 
         transport::SubscriberPtr propulsion_slipstream_sub_;
         std::mutex writingVelInd;
@@ -179,46 +179,46 @@ namespace gazebo
         }
 
         void GetIndVel(){
-              std::unique_lock<std::mutex> lock(writingVelInd);
-              ignition::math::Vector3d p_r2cp_ = cp_wrld - p_rot;
-              double off_a_ = d_wake_e.Dot(p_r2cp_);                 // axial distance in wake (d1 in report)
-              double off_p_ = (off_a_*d_wake_e-p_r2cp_).Length();    // radial distance to wake centerline (d2 in report)
+            std::unique_lock<std::mutex> lock(writingVelInd);
+            ignition::math::Vector3d p_r2cp_ = cp_wrld - p_rot;
+            double off_a_ = d_wake_e.Dot(p_r2cp_);                 // axial distance in wake (d1 in report)
+            double off_p_ = (off_a_*d_wake_e-p_r2cp_).Length();    // radial distance to wake centerline (d2 in report)
 
-              if(off_a_>0 && d_wake.Length()>off_a_){
-                  // if in zone of slipstream influence
-                  double k_a_ = (d_wake.Length()-off_a_)/d_wake.Length();    // axial direction interpolation weight
-                  double k_p_ = 1-pow((off_p_/d_rot),4);
-                  k_p_ = ignition::math::clamp(k_p_,0.0,1.0);                // radial distance downscaling
-                  v_ind_cp_ = k_p_*(k_a_*v_ind_d+(1-k_a_)*v_ind_e);   // induced velocity at airfoil segment cp
-              }
-              lock.unlock();
-         }
+            if(off_a_>0 && d_wake.Length()>off_a_){
+                // if in zone of slipstream influence
+                double k_a_ = (d_wake.Length()-off_a_)/d_wake.Length();    // axial direction interpolation weight
+                double k_p_ = 1-pow((off_p_/d_rot),4);
+                k_p_ = ignition::math::clamp(k_p_,0.0,1.0);                // radial distance downscaling
+                v_ind_cp_ = k_p_*(k_a_*v_ind_d+(1-k_a_)*v_ind_e);   // induced velocity at airfoil segment cp
+            }
+            lock.unlock();
+        }
     };
 
     struct segment {
-      
-      segment():
-        alpha_prev(0){}
 
-      double alpha;
-      double alpha_prev;
-      double alpha_max_ns;
-      double alpha_min_ns;
-      
-      Eigen::Vector3d c_lift_alpha;
-      Eigen::Vector3d c_drag_alpha;
-      Eigen::Vector2d c_pitch_moment_alpha;
-      
-      double alpha_blend;
-      double fp_c_lift_max;
-      double fp_c_drag_max;
-      double fp_c_pitch_moment_max;
+        segment():
+            alpha_prev(0){}
 
-      double cs_c_lift;
-      double cs_c_drag;
-      double cs_c_pitch_moment;
+        double alpha;
+        double alpha_prev;
+        double alpha_max_ns;
+        double alpha_min_ns;
 
-      /*
+        Eigen::Vector3d c_lift_alpha;
+        Eigen::Vector3d c_drag_alpha;
+        Eigen::Vector2d c_pitch_moment_alpha;
+
+        double alpha_blend;
+        double fp_c_lift_max;
+        double fp_c_drag_max;
+        double fp_c_pitch_moment_max;
+
+        double cs_c_lift;
+        double cs_c_drag;
+        double cs_c_pitch_moment;
+
+        /*
       // double alpha_zlift;           // zero-lift AoA, [rad]
       // double cla;                   // dC_L/DAoA, [1/rad]
       // double alpha_dmin;            // AoA where drag minimal,  [rad]
@@ -242,87 +242,87 @@ namespace gazebo
       // double segArea [4] = {0,0,0,0};       // Effective planeform surface areas of the 4 wing segments, [m^2]
       */
 
-      ignition::math::Vector3d cp;
-      ignition::math::Vector3d fwd;
-      ignition::math::Vector3d upwd;
-      double segArea;
-      double segChord;
+        ignition::math::Vector3d cp;
+        ignition::math::Vector3d fwd;
+        ignition::math::Vector3d upwd;
+        double segArea;
+        double segChord;
         
-      control_surface * cs;
-      int n_cs = 0;
+        control_surface * cs;
+        int n_cs = 0;
 
-      /// \brief Quantities to model propeller/rotor wake/slipstream
+        /// \brief Quantities to model propeller/rotor wake/slipstream
 
-      slipstream * slpstr;
-      //ignition::math::Vector3d cp_wrld; // current world position of center of pressure
-      ignition::math::Vector3d v_ind_cp_; // induced velocity at cp (e.g. due to slipstream)
-      int n_slpstr = 0;
+        slipstream * slpstr;
+        //ignition::math::Vector3d cp_wrld; // current world position of center of pressure
+        ignition::math::Vector3d v_ind_cp_; // induced velocity at cp (e.g. due to slipstream)
+        int n_slpstr = 0;
 
     };
-     
-      segment * segments;
-      int n_seg = 0;
+
+    segment * segments;
+    int n_seg = 0;
 
     /// \brief Fuselage lift/drag modeling
 
-      struct body {
+    struct body {
 
-          body():
+        body():
             A_fus_xx(0),
             A_fus_yy(0),
             A_fus_zz(0),
             cd_cyl_ax(0),
             cd_cyl_lat(0){}
 
-          double A_fus_xx;                      // forward-projected area of fuselage, [m^2]
-          double A_fus_yy;                      // side-projected area of fuselage, [m^2]
-          double A_fus_zz;                      // down-projected area of fuselage, [m^2]
-          double cd_cyl_ax;                     // drag coefficient of long cylinder in axial flow, [-]
-          double cd_cyl_lat;                    // drag coefficient of cylinder in lateral flow, [-]
+        double A_fus_xx;                      // forward-projected area of fuselage, [m^2]
+        double A_fus_yy;                      // side-projected area of fuselage, [m^2]
+        double A_fus_zz;                      // down-projected area of fuselage, [m^2]
+        double cd_cyl_ax;                     // drag coefficient of long cylinder in axial flow, [-]
+        double cd_cyl_lat;                    // drag coefficient of cylinder in lateral flow, [-]
 
-          ignition::math::Vector3d cp;
-          ignition::math::Vector3d fwd;
-          ignition::math::Vector3d upwd;
+        ignition::math::Vector3d cp;
+        ignition::math::Vector3d fwd;
+        ignition::math::Vector3d upwd;
 
-      };
+    };
 
-      body * bodies;
-      int n_bdy = 0;
+    body * bodies;
+    int n_bdy = 0;
 
     /// \brief Debugging/Logging
-    protected:
-      bool dbgOut;
-      int printItv;
-      int logItv;
-      int updateCounter;
-      std::ofstream logfile;
-      std::string logName;
-      bool logFlag;
-      bool logStarted;
-      bool logEnable;
-      bool headerFlag;
-      bool segLog [4] = {0,0,0,0};
-      
+protected:
+    bool dbgOut;
+    int printItv;
+    int logItv;
+    int updateCounter;
+    std::ofstream logfile;
+    std::string logName;
+    bool logFlag;
+    bool logStarted;
+    bool logEnable;
+    bool headerFlag;
+    bool segLog [4] = {0,0,0,0};
+
     /// \brief Stuff for propeller slipstream and log request message subscription
 
-      
-      //std::string propulsion_slipstream_sub_topic_;
-      //transport::SubscriberPtr propulsion_slipstream_sub_;
-      //void PropulsionSlipstreamCallback(PropulsionSlipstreamPtr& propulsion_slipstream);
-      
-      std::string do_log_sub_topic_;
-      transport::SubscriberPtr do_log_sub_;
-      //void DoLogCallback(Int32Ptr& do_log);
-      
+
+    //std::string propulsion_slipstream_sub_topic_;
+    //transport::SubscriberPtr propulsion_slipstream_sub_;
+    //void PropulsionSlipstreamCallback(PropulsionSlipstreamPtr& propulsion_slipstream);
+
+    std::string do_log_sub_topic_;
+    transport::SubscriberPtr do_log_sub_;
+    //void DoLogCallback(Int32Ptr& do_log);
+
     /// \brief Utilities
     int sgn(double val) {
         return (int)(0.0 < val) - (int)(val < 0.0);
     }
-  };
+};
 
-  // callback wrapper
+// callback wrapper
 
-  /*
+/*
   struct cb_wrapper
   {
       cb_wrapper() {}

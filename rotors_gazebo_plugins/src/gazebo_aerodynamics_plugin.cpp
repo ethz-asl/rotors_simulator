@@ -117,7 +117,7 @@ GazeboAerodynamics::~GazeboAerodynamics()
 
 /////////////////////////////////////////////////
 void GazeboAerodynamics::Load(physics::ModelPtr _model,
-                          sdf::ElementPtr _sdf)
+                              sdf::ElementPtr _sdf)
 {
     gzdbg<<"gazebo_aerodynamics load called"<<std::endl;
 
@@ -157,9 +157,9 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
         
         if (!this->link) {
             gzerr << "Link with name[" << linkName << "] not found. "
-            << "The GazeboAerodynamics will not generate forces\n";
+                  << "The GazeboAerodynamics will not generate forces\n";
             std::cout<<"updateConnection not called"<<std::endl;
-        
+
         } else {
             this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboAerodynamics::OnUpdate, this));
             std::cout<<"updateConnection called"<<std::endl;
@@ -242,12 +242,12 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
 
             if (_sdf_segment->HasElement("aeroParamsYAML")) {
                 std::string aero_params_yaml =
-                _sdf_segment->GetElement("aeroParamsYAML")->Get<std::string>();
+                        _sdf_segment->GetElement("aeroParamsYAML")->Get<std::string>();
                 aero_params_.LoadAeroParamsYAML(aero_params_yaml);
 
             } else {
                 gzwarn<<"segment ["<<i<<"] is missing aerodynamic paramaters YAML file, "
-                      <<"using default parameters.\n";
+                     <<"using default parameters.\n";
             }
 
             segments[i].alpha_max_ns = aero_params_.alpha_max_ns;
@@ -264,68 +264,68 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
 
             // get control joints
             if (_sdf_segment->HasElement("control")) {
-                 sdf::ElementPtr _sdf_control = _sdf_segment->GetElement("control");
-                 sdf::ElementPtr _sdf_cs = _sdf_control->GetElement("cs");
+                sdf::ElementPtr _sdf_control = _sdf_segment->GetElement("control");
+                sdf::ElementPtr _sdf_cs = _sdf_control->GetElement("cs");
 
-                 // get number of control inputs on this particular segment
-                 while (_sdf_cs) {
-                     _sdf_cs = _sdf_cs->GetNextElement("cs");
-                     ++segments[i].n_cs;
-                 }
+                // get number of control inputs on this particular segment
+                while (_sdf_cs) {
+                    _sdf_cs = _sdf_cs->GetNextElement("cs");
+                    ++segments[i].n_cs;
+                }
 
-                 gzdbg<<"found "<<segments[i].n_cs<<" control surface segments for segment ["<<i<<"]. \n";
-                 _sdf_cs = _sdf_control->GetElement("cs");
-                 segments[i].cs = new control_surface [segments[i].n_cs];
+                gzdbg<<"found "<<segments[i].n_cs<<" control surface segments for segment ["<<i<<"]. \n";
+                _sdf_cs = _sdf_control->GetElement("cs");
+                segments[i].cs = new control_surface [segments[i].n_cs];
 
-                 for(int j=0; j<segments[i].n_cs; j++){
+                for(int j=0; j<segments[i].n_cs; j++){
 
-                   if (_sdf_cs->HasElement("controlJoint")){
-                       std::string joint_name = _sdf_cs->Get<std::string>("controlJoint");
-                       segments[i].cs[j].controlJoint = model->GetJoint(joint_name);
+                    if (_sdf_cs->HasElement("controlJoint")){
+                        std::string joint_name = _sdf_cs->Get<std::string>("controlJoint");
+                        segments[i].cs[j].controlJoint = model->GetJoint(joint_name);
 
-                       if (model->GetJoint(joint_name) == nullptr)
-                           gzwarn << "joint [" << joint_name << "] not found \n";
+                        if (model->GetJoint(joint_name) == nullptr)
+                            gzwarn << "joint [" << joint_name << "] not found \n";
 
-                   } else {
-                       gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'controlJoint' element \n";
-                   }
+                    } else {
+                        gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'controlJoint' element \n";
+                    }
 
-                   if (_sdf_cs->HasElement("radToCLift"))
+                    if (_sdf_cs->HasElement("radToCLift"))
                         segments[i].cs[j].controlJointRadToCL = _sdf_cs->Get<double>("radToCLift");
-                   else
+                    else
                         gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'radToCLift' element \n";
 
-                   if (_sdf_cs->HasElement("radToCDrag"))
+                    if (_sdf_cs->HasElement("radToCDrag"))
                         segments[i].cs[j].controlJointRadToCD = _sdf_cs->Get<double>("radToCDrag");
-                   else
+                    else
                         gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'radToCDrag' element \n";
 
-                   if (_sdf_cs->HasElement("radToCPitch"))
+                    if (_sdf_cs->HasElement("radToCPitch"))
                         segments[i].cs[j].controlJointRadToCM = _sdf_cs->Get<double>("radToCPitch");
-                   else
+                    else
                         gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'radToCPitch' element \n";
 
-                   _sdf_cs = _sdf_cs->GetNextElement("cs");
-                 }
+                    _sdf_cs = _sdf_cs->GetNextElement("cs");
+                }
             }
 
             // get slipstreams
             if (_sdf_segment->HasElement("indVel")) {
-                 sdf::ElementPtr _sdf_ind_vel= _sdf_segment->GetElement("indVel");
-                 sdf::ElementPtr _sdf_slpstr = _sdf_ind_vel->GetElement("slpstr");
+                sdf::ElementPtr _sdf_ind_vel= _sdf_segment->GetElement("indVel");
+                sdf::ElementPtr _sdf_slpstr = _sdf_ind_vel->GetElement("slpstr");
 
-                 // get number of slipstreams for this particular segment
-                 while (_sdf_slpstr) {
-                     _sdf_slpstr = _sdf_slpstr->GetNextElement("slpstr");
-                     ++segments[i].n_slpstr;
-                 }
+                // get number of slipstreams for this particular segment
+                while (_sdf_slpstr) {
+                    _sdf_slpstr = _sdf_slpstr->GetNextElement("slpstr");
+                    ++segments[i].n_slpstr;
+                }
 
-                 gzdbg<<"found "<<segments[i].n_slpstr<<" slipstreams for segment ["<<i<<"]. \n";
-                 _sdf_slpstr = _sdf_ind_vel->GetElement("slpstr");
+                gzdbg<<"found "<<segments[i].n_slpstr<<" slipstreams for segment ["<<i<<"]. \n";
+                _sdf_slpstr = _sdf_ind_vel->GetElement("slpstr");
 
-                 segments[i].slpstr = new slipstream [segments[i].n_slpstr];
+                segments[i].slpstr = new slipstream [segments[i].n_slpstr];
 
-                 for(int j=0; j<segments[i].n_slpstr; j++){
+                for(int j=0; j<segments[i].n_slpstr; j++){
 
                     if(_sdf_slpstr->HasElement("topic")){
                         std::string slpstr_topic = _sdf_slpstr->Get<std::string>("topic");
@@ -336,7 +336,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
                     } else {
                         gzwarn<<"slipstream ["<<j<<"] of segment ["<<i<<"] is missing 'radToCPitch' element \n";
                     }
-                 }
+                }
             }
 
             _sdf_segment = _sdf_segment->GetNextElement("segment");
@@ -346,7 +346,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
     /*
     if (_sdf->HasElement("air_density"))
         this->rho = _sdf->Get<double>("air_density");
-    
+
     if (_sdf->HasElement("forward"))
         this->forward = _sdf->Get<ignition::math::Vector3d>("forward");
     this->forward.Normalize();
@@ -365,58 +365,58 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
         
         if(cmp1.compare(this->bodyType)==0)
             std::cout<<"bodyType is airfoil"<<std::endl;
-        
+
         if(cmp2.compare(this->bodyType)==0)
             std::cout<<"bodyType is fuselage"<<std::endl;
-        
+
         if(cmp1.compare(this->bodyType)!=0 && cmp2.compare(this->bodyType)!=0){
             gzerr << "body type needs to be either 'airfoil' or 'fuselage', setting it to 'airfoil'";
             this->bodyType = "airfoil";
         }
-    
+
     } else {
         gzerr << "missing <body_type> element\n";
     }
     
     if (_sdf->HasElement("cp"))
         this->cp = _sdf->Get<ignition::math::Vector3d>("cp");
-    
+
     */
     /*
     if (this->bodyType.compare("airfoil")==0) {
-        
+
         std::cout<<"Airfoil body type found"<<std::endl;
         
         if (_sdf->HasElement("a0"))
             this->alpha_zlift = _sdf->Get<double>("a0")/180.0*M_PI;
-        
+
         if (_sdf->HasElement("cla"))
             this->cla = _sdf->Get<double>("cla");
-        
+
         if (_sdf->HasElement("a_min_drag"))
             this->alpha_dmin = _sdf->Get<double>("a_min_drag")/180.0*M_PI;
-        
+
         if (_sdf->HasElement("cd_af_min"))
             this->cd_af_min = _sdf->Get<double>("cd_af_min");
-        
+
         if (_sdf->HasElement("cd_af_stall"))
             this->cd_af_stall = _sdf->Get<double>("cd_af_stall");
-        
+
         if (_sdf->HasElement("alpha_stall"))
             this->alphaStall = _sdf->Get<double>("alpha_stall")/180.0*M_PI;
-        
+
         if (_sdf->HasElement("cm_af_0"))
             this->cm_af_0 = _sdf->Get<double>("cm_af_0");
-        
+
         if (_sdf->HasElement("cl_fp_max"))
             this->cl_fp_max = _sdf->Get<double>("cl_fp_max");
-        
+
         if (_sdf->HasElement("cd_fp_max"))
             this->cd_fp_max = _sdf->Get<double>("cd_fp_max");
-        
+
         if (_sdf->HasElement("cm_fp_max"))
             this->cm_fp_max = _sdf->Get<double>("cm_fp_max");
-        
+
         if (_sdf->HasElement("cla_lin_intrvl")) {
             ignition::math::Vector2d claLinIntrv = _sdf->Get<ignition::math::Vector2d>("cla_lin_intrvl");
             this->cla_lin[0] = claLinIntrv.X()/180.0*M_PI;
@@ -428,7 +428,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
         
         if (_sdf->HasElement("blend_range"))
             this->d_a = _sdf->Get<double>("blend_range")/180.0*M_PI;
-        
+
         if (_sdf->HasElement("control_joint_name"))
         {
             std::string controlJointName = _sdf->Get<std::string>("control_joint_name");
@@ -441,13 +441,13 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
         
         if (_sdf->HasElement("control_joint_deg_to_cl"))
             this->controlJointRadToCL = _sdf->Get<double>("control_joint_deg_to_cl")*180.0/M_PI;
-        
+
         if (_sdf->HasElement("control_joint_deg_to_cd"))
             this->controlJointRadToCD = _sdf->Get<double>("control_joint_deg_to_cd")*180.0/M_PI;
-        
+
         if (_sdf->HasElement("control_joint_deg_to_cm"))
             this->controlJointRadToCM  = _sdf->Get<double>("control_joint_deg_to_cm")*180.0/M_PI;
-        
+
         if (_sdf->HasElement("seg_use")) {
             ignition::math::Vector4i segUseTemp = _sdf->Get<ignition::math::Vector4i>("seg_use");
             this->segUse[0] = (bool)segUseTemp.X();
@@ -455,7 +455,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
             this->segUse[2] = (bool)segUseTemp.Z();
             this->segUse[3] = (bool)segUseTemp.W();
             //std::cout<<"segUse: "<<this->segUse[0]<<this->segUse[1]<<this->segUse[2]<<this->segUse[3]<<std::endl;
-        
+
         } else {
             gzerr << "missing <seg_use> element\n";
         }
@@ -498,7 +498,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
             this->segYOffset[1] = segYOffsetTemp.Y();
             this->segYOffset[2] = segYOffsetTemp.Z();
             this->segYOffset[3] = segYOffsetTemp.W();
-        
+
         } else {
             gzerr << "missing <seg_y_off> element\n";
         }
@@ -509,7 +509,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
             this->segChord[1] = segChordTemp.Y();
             this->segChord[2] = segChordTemp.Z();
             this->segChord[3] = segChordTemp.W();
-        
+
         } else {
             gzerr << "missing <seg_chord> element\n";
         }
@@ -532,20 +532,20 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
             this->segLog[1] = (bool)segLogTemp.Y();
             this->segLog[2] = (bool)segLogTemp.Z();
             this->segLog[3] = (bool)segLogTemp.W();
-        
+
         } else {
             gzerr << "missing <seg_log> element\n";}
     }
     */
     /*
     if (this->bodyType.compare("fuselage")==0) {
-        
+
         if (_sdf->HasElement("A_fus_xx"))
             this->A_fus_xx = _sdf->Get<double>("A_fus_xx")/10000.0;
-        
+
         if (_sdf->HasElement("A_fus_yy"))
             this->A_fus_yy = _sdf->Get<double>("A_fus_yy")/10000.0;
-        
+
         if (_sdf->HasElement("A_fus_zz"))
             this->A_fus_zz = _sdf->Get<double>("A_fus_zz")/10000.0;
     }
@@ -574,38 +574,38 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
 /////////////////////////////////////////////////
 /*
 void GazeboAerodynamics::PropulsionSlipstreamCallback(PropulsionSlipstreamPtr& propulsion_slipstream){
-    
+
     // world-position of rotor hub
     p_rot = ignition::math::Vector3d(propulsion_slipstream->rotor_pos().x(),
                                      propulsion_slipstream->rotor_pos().y(),
                                      propulsion_slipstream->rotor_pos().z());
-    
+
     // propeller wake vector (hub to end of wake)
     d_wake = ignition::math::Vector3d(propulsion_slipstream->wake_dir().x(),
                                       propulsion_slipstream->wake_dir().y(),
                                       propulsion_slipstream->wake_dir().z());
-    
+
     // induced velocity at propeller disk
     v_ind_d = ignition::math::Vector3d(propulsion_slipstream->ind_vel_disk().x(),
                                        propulsion_slipstream->ind_vel_disk().y(),
                                        propulsion_slipstream->ind_vel_disk().z());
-    
+
     // induced velocity at end of wake (i.e. at p_rot+d_wake)
     v_ind_e = ignition::math::Vector3d(propulsion_slipstream->ind_vel_end().x(),
                                        propulsion_slipstream->ind_vel_end().y(),
                                        propulsion_slipstream->ind_vel_end().z());
-    
+
     // propeller/wake diameter
     d_rot = propulsion_slipstream->prop_diam();
     
 }
 */
-                
+
 /*
 void GazeboAerodynamics::DoLogCallback(Int32Ptr& do_log){
     if (do_log->data() == 1 && logEnable) {
         logFlag = true; // starts log
-    
+
     } else {
         logFlag = false; // stops log
     }
@@ -617,7 +617,7 @@ void GazeboAerodynamics::OnUpdate()
 {
 
     //ignition::math::Vector3d pos_ref = ignition::math::Vector3d(0, 0, 0); // used as reference position (relative to and expressed in fuselage frame) to calculate moments exerted by airfoils for comparison with PX4 aerodynamic model (debugging).
-    
+
     if (n_seg>0) {
         
         /*
@@ -684,26 +684,26 @@ void GazeboAerodynamics::OnUpdate()
         // iterate over employed wing segments
         for (int i = 0; i<n_seg; i++) {
 
-                ignition::math::Vector3d cp_ = pose.Pos() + pose.Rot().RotateVector(segments[i].cp);  // segments cp-reference position expressed in world-frame
+            ignition::math::Vector3d cp_ = pose.Pos() + pose.Rot().RotateVector(segments[i].cp);  // segments cp-reference position expressed in world-frame
 
-                segments[i].v_ind_cp_ = ignition::math::Vector3d(0,0,0);
+            segments[i].v_ind_cp_ = ignition::math::Vector3d(0,0,0);
 
-                for(int j=0; j<segments[i].n_slpstr; j++){
-                    segments[i].slpstr[j].cp_wrld = cp_;
-                    segments[i].slpstr[j].GetIndVel();
-                    segments[i].v_ind_cp_ += segments[i].slpstr[j].v_ind_cp_;
-                }
+            for(int j=0; j<segments[i].n_slpstr; j++){
+                segments[i].slpstr[j].cp_wrld = cp_;
+                segments[i].slpstr[j].GetIndVel();
+                segments[i].v_ind_cp_ += segments[i].slpstr[j].v_ind_cp_;
+            }
 
-                // geometry...
-                //ignition::math::Vector3d cp_;
-                //cp_ = this->cp + ignition::math::Vector3d(0.0,this->segYOffset[i],0.0); // cp position of segment i wrt link-frame
-                //cp_wrld = pose.Pos() + pose.Rot().RotateVector(cp_);                    // cp position of segment i wrt to world-frame
-                
-                //ignition::math::Vector3d ref_wrld = parent_pose.Pos() + parent_pose.Rot().RotateVector(pos_ref);    // debugging: a body-fixed reference point, expressed in world frame
-                //ignition::math::Vector3d cp_loc = parent_pose.Rot().RotateVectorReverse(cp_wrld - ref_wrld);        // debugging: reference point -> cp, expressed in body frame
-                
-                // calculate induced flow velocity at c/4 (i.e. cp_)
-                /*
+            // geometry...
+            //ignition::math::Vector3d cp_;
+            //cp_ = this->cp + ignition::math::Vector3d(0.0,this->segYOffset[i],0.0); // cp position of segment i wrt link-frame
+            //cp_wrld = pose.Pos() + pose.Rot().RotateVector(cp_);                    // cp position of segment i wrt to world-frame
+
+            //ignition::math::Vector3d ref_wrld = parent_pose.Pos() + parent_pose.Rot().RotateVector(pos_ref);    // debugging: a body-fixed reference point, expressed in world frame
+            //ignition::math::Vector3d cp_loc = parent_pose.Rot().RotateVectorReverse(cp_wrld - ref_wrld);        // debugging: reference point -> cp, expressed in body frame
+
+            // calculate induced flow velocity at c/4 (i.e. cp_)
+            /*
                 ignition::math::Vector3d p_r2cp_;                       // vector: propeller->cp_
                 ignition::math::Vector3d v_ind_cp_(0,0,0);              // zero induced (slipstream) velocity by default
                 ignition::math::Vector3d d_wakeI = d_wake.Normalized();  // propeller wake direction
@@ -729,71 +729,71 @@ void GazeboAerodynamics::OnUpdate()
                 
                 */
 
-                // get local airspeed at cp_, expressed in world frame
-                GZ_ASSERT(this->link, "Link was NULL");
+            // get local airspeed at cp_, expressed in world frame
+            GZ_ASSERT(this->link, "Link was NULL");
 #if GAZEBO_MAJOR_VERSION >= 9
-                ignition::math::Vector3d vel = this->link->WorldLinearVel(cp_);
+            ignition::math::Vector3d vel = this->link->WorldLinearVel(cp_);
 #else
-                ignition::math::Vector3d vel = ignitionFromGazeboMath(this->link->GetWorldLinearVel(cp_));
+            ignition::math::Vector3d vel = ignitionFromGazeboMath(this->link->GetWorldLinearVel(cp_));
 #endif
-                
-                // account for induced velocity, expressed in world frame
-                vel = vel - segments[i].v_ind_cp_;
-                
-                // inflow direction at cp_, expressed in world frame
-                ignition::math::Vector3d velI = vel.Normalized();
 
-                // forward, upward, spanwise direction, expressed in world frame
-                ignition::math::Vector3d forwardI = pose.Rot().RotateVector(segments[i].fwd);
-                ignition::math::Vector3d upwardI = pose.Rot().RotateVector(segments[i].upwd);
-                ignition::math::Vector3d spanwiseI = forwardI.Cross(upwardI).Normalized();
-                
-                // velocity in lift-drag plane
-                ignition::math::Vector3d velInLDPlane = vel - vel.Dot(spanwiseI)*spanwiseI;
-                
-                // get direction of drag
-                ignition::math::Vector3d dragDirection = -velInLDPlane;
-                dragDirection.Normalize();
-                
-                // get direction of lift
-                ignition::math::Vector3d liftDirection = spanwiseI.Cross(velInLDPlane);
-                liftDirection.Normalize();
-                
-                // get direction of moment
-                ignition::math::Vector3d momentDirection = spanwiseI;
+            // account for induced velocity, expressed in world frame
+            vel = vel - segments[i].v_ind_cp_;
 
-                // get sweep (angle between velI and lift-drag-plane) (aka sideslip)
-                double cosSweepAngle = ignition::math::clamp(velI.Dot(-dragDirection), -1.0, 1.0);
-                
-                // compute angle of attack
-                double alpha_ = acos(-dragDirection.Dot(forwardI)); // [0,pi]
-                if (dragDirection.Dot(upwardI)<=0) {
-                    alpha_*=-1;
-                }
-                
-                // compute dynamic pressure
-                double speedInLDPlane = velInLDPlane.Length();
-                double q = 0.5 * rho * speedInLDPlane * speedInLDPlane;
-                
-                // aerodynamic coefficient correction terms due to control surface deflection (only effective if not stalled)
+            // inflow direction at cp_, expressed in world frame
+            ignition::math::Vector3d velI = vel.Normalized();
 
-                double d_cl = 0.0;
-                double d_cd = 0.0;
-                double d_cm = 0.0;
+            // forward, upward, spanwise direction, expressed in world frame
+            ignition::math::Vector3d forwardI = pose.Rot().RotateVector(segments[i].fwd);
+            ignition::math::Vector3d upwardI = pose.Rot().RotateVector(segments[i].upwd);
+            ignition::math::Vector3d spanwiseI = forwardI.Cross(upwardI).Normalized();
 
-                for(int j=0; j<segments[i].n_cs; j++){
+            // velocity in lift-drag plane
+            ignition::math::Vector3d velInLDPlane = vel - vel.Dot(spanwiseI)*spanwiseI;
+
+            // get direction of drag
+            ignition::math::Vector3d dragDirection = -velInLDPlane;
+            dragDirection.Normalize();
+
+            // get direction of lift
+            ignition::math::Vector3d liftDirection = spanwiseI.Cross(velInLDPlane);
+            liftDirection.Normalize();
+
+            // get direction of moment
+            ignition::math::Vector3d momentDirection = spanwiseI;
+
+            // get sweep (angle between velI and lift-drag-plane) (aka sideslip)
+            double cosSweepAngle = ignition::math::clamp(velI.Dot(-dragDirection), -1.0, 1.0);
+
+            // compute angle of attack
+            double alpha_ = acos(-dragDirection.Dot(forwardI)); // [0,pi]
+            if (dragDirection.Dot(upwardI)<=0) {
+                alpha_*=-1;
+            }
+
+            // compute dynamic pressure
+            double speedInLDPlane = velInLDPlane.Length();
+            double q = 0.5 * rho * speedInLDPlane * speedInLDPlane;
+
+            // aerodynamic coefficient correction terms due to control surface deflection (only effective if not stalled)
+
+            double d_cl = 0.0;
+            double d_cd = 0.0;
+            double d_cm = 0.0;
+
+            for(int j=0; j<segments[i].n_cs; j++){
 #if GAZEBO_MAJOR_VERSION >= 9
-                    double controlAngle = segments[i].cs[j].controlJoint->Position(0);
+                double controlAngle = segments[i].cs[j].controlJoint->Position(0);
 #else
-                    double controlAngle = segments[i].cs[j].controlJoint->GetAngle(0).Radian();
+                double controlAngle = segments[i].cs[j].controlJoint->GetAngle(0).Radian();
 #endif
-                    d_cl += segments[i].cs[j].controlJointRadToCL*controlAngle;
-                    d_cd += segments[i].cs[j].controlJointRadToCD*controlAngle;
-                    d_cm += segments[i].cs[j].controlJointRadToCM*controlAngle;
-                }
-                
-                // assembling aerodynamic coefficients for pre-stall (af) and post-stall (fp)
-                /*
+                d_cl += segments[i].cs[j].controlJointRadToCL*controlAngle;
+                d_cd += segments[i].cs[j].controlJointRadToCD*controlAngle;
+                d_cm += segments[i].cs[j].controlJointRadToCM*controlAngle;
+            }
+
+            // assembling aerodynamic coefficients for pre-stall (af) and post-stall (fp)
+            /*
                 double cl_af = (alpha_-alpha_zlift)*cla + d_cl;
                 double cd_af = pow((alpha_-alpha_dmin)/(alphaStall-alpha_dmin),2)*(cd_af_stall-cd_af_min) + cd_af_min  + d_cd;
                 double cm_af = cm_af_0 + d_cm;
@@ -803,18 +803,18 @@ void GazeboAerodynamics::OnUpdate()
                 double cm_fp = -cm_fp_max*sin(pow(alpha_,3)/(M_PI*M_PI));
                 */
 
-                Eigen::Vector3d alpha_poly_3(1.0,alpha_,alpha_*alpha_);
-                Eigen::Vector2d alpha_poly_2(1.0,alpha_);
+            Eigen::Vector3d alpha_poly_3(1.0,alpha_,alpha_*alpha_);
+            Eigen::Vector2d alpha_poly_2(1.0,alpha_);
 
-                double cl_af = segments[i].c_lift_alpha.dot(alpha_poly_3) + d_cl;
-                double cd_af = segments[i].c_drag_alpha.dot(alpha_poly_3) + d_cd;
-                double cm_af = segments[i].c_pitch_moment_alpha.dot(alpha_poly_2) + d_cm;
+            double cl_af = segments[i].c_lift_alpha.dot(alpha_poly_3) + d_cl;
+            double cd_af = segments[i].c_drag_alpha.dot(alpha_poly_3) + d_cd;
+            double cm_af = segments[i].c_pitch_moment_alpha.dot(alpha_poly_2) + d_cm;
 
-                double cl_fp = segments[i].fp_c_lift_max*sin(2*alpha_);
-                double cd_fp = segments[i].fp_c_drag_max*pow(sin(alpha_),2);
-                double cm_fp = -segments[i].fp_c_pitch_moment_max*sin(pow(alpha_,3)/(M_PI*M_PI));
-                
-                /* where:
+            double cl_fp = segments[i].fp_c_lift_max*sin(2*alpha_);
+            double cd_fp = segments[i].fp_c_drag_max*pow(sin(alpha_),2);
+            double cm_fp = -segments[i].fp_c_pitch_moment_max*sin(pow(alpha_,3)/(M_PI*M_PI));
+
+            /* where:
                  *
                  * alpha_           Angle of attack (AoA)
                  * alpha_zlift           Zero-lift AoA
@@ -829,44 +829,44 @@ void GazeboAerodynamics::OnUpdate()
                  * cm_fp_max        Flat-plate maximum moment coefficient
                  *
                  */
-                
-                // form mixing weight to combine pre- and post-stall models
-                double w_af;
-                if(alpha_>segments[i].alpha_max_ns + segments[i].alpha_blend)
-                    w_af = 0.0;
-                else if(alpha_>segments[i].alpha_max_ns)
-                    w_af = 0.5+0.5*cos(M_PI*(alpha_ - segments[i].alpha_max_ns)/segments[i].alpha_blend);
-                else if(alpha_>segments[i].alpha_min_ns)
-                    w_af = 1.0;
-                else if(alpha_>segments[i].alpha_min_ns - segments[i].alpha_blend)
-                    w_af = 0.5+0.5*cos(M_PI*(segments[i].alpha_min_ns-alpha_)/segments[i].alpha_blend);
-                else
-                    w_af = 0.0;
-                
-                // form weighted sum of pre-stall and post_stall (flat-plate) contributions to aerodynamic coefficients
-                double cl = w_af*cl_af+(1-w_af)*cl_fp;
-                double cd = w_af*cd_af+(1-w_af)*cd_fp;
-                double cm = w_af*cm_af+(1-w_af)*cm_fp;
-                
-                // original plugin incorporates sweep (sideslip)
-                //cl = cl*cosSweepAngle;
-                //cd = cd*cosSweepAngle;
-                //cm = cm*cosSweepAngle;
-                
-                // set to zero if desired...
-                cm = 0.0;
-                //cd = 0.0;
-                //cl = 0.0;
-                
-                // assemble final forces and moments
-                ignition::math::Vector3d lift   = cl * q * segments[i].segArea * liftDirection;
-                ignition::math::Vector3d drag   = cd * q * segments[i].segArea * dragDirection;
-                ignition::math::Vector3d moment = cm * q * segments[i].segArea * momentDirection * segments[i].segChord;
-                
-                ignition::math::Vector3d force  = lift + drag;
-                ignition::math::Vector3d torque = moment;
-                
-                /*
+
+            // form mixing weight to combine pre- and post-stall models
+            double w_af;
+            if(alpha_>segments[i].alpha_max_ns + segments[i].alpha_blend)
+                w_af = 0.0;
+            else if(alpha_>segments[i].alpha_max_ns)
+                w_af = 0.5+0.5*cos(M_PI*(alpha_ - segments[i].alpha_max_ns)/segments[i].alpha_blend);
+            else if(alpha_>segments[i].alpha_min_ns)
+                w_af = 1.0;
+            else if(alpha_>segments[i].alpha_min_ns - segments[i].alpha_blend)
+                w_af = 0.5+0.5*cos(M_PI*(segments[i].alpha_min_ns-alpha_)/segments[i].alpha_blend);
+            else
+                w_af = 0.0;
+
+            // form weighted sum of pre-stall and post_stall (flat-plate) contributions to aerodynamic coefficients
+            double cl = w_af*cl_af+(1-w_af)*cl_fp;
+            double cd = w_af*cd_af+(1-w_af)*cd_fp;
+            double cm = w_af*cm_af+(1-w_af)*cm_fp;
+
+            // original plugin incorporates sweep (sideslip)
+            //cl = cl*cosSweepAngle;
+            //cd = cd*cosSweepAngle;
+            //cm = cm*cosSweepAngle;
+
+            // set to zero if desired...
+            cm = 0.0;
+            //cd = 0.0;
+            //cl = 0.0;
+
+            // assemble final forces and moments
+            ignition::math::Vector3d lift   = cl * q * segments[i].segArea * liftDirection;
+            ignition::math::Vector3d drag   = cd * q * segments[i].segArea * dragDirection;
+            ignition::math::Vector3d moment = cm * q * segments[i].segArea * momentDirection * segments[i].segChord;
+
+            ignition::math::Vector3d force  = lift + drag;
+            ignition::math::Vector3d torque = moment;
+
+            /*
                 // debugging quantities (moments wrt reference point in body frame)
                 ignition::math::Vector3d lift_m = cp_loc.Cross(parent_pose.Rot().RotateVectorReverse(lift));
                 ignition::math::Vector3d drag_m = cp_loc.Cross(parent_pose.Rot().RotateVectorReverse(drag));
@@ -878,10 +878,10 @@ void GazeboAerodynamics::OnUpdate()
                     gzdbg << "plugin name: " << this->sdf->Get<std::string>("name") <<" [" << i << "] | cp_pos: (" <<cp_loc.X()<<","<<cp_loc.Y()<<","<<cp_loc.Z()<<")"<<" | tot_m: ("<<tot_m.X()<<","<<tot_m.Y()<<","<<tot_m.Z()<<")"<<"\n" ;
                 }
                 */
-                /*
+            /*
                 // debug printing
                 if (this->updateCounter%this->printItv==0 && this->dbgOut) {
-                    
+
                     gzdbg << "=============================\n";
                     gzdbg << "link: [" << this->link->GetName() << "] segment: [" << i << "]\n";
                     //gzdbg << "dynamic pressure: [" << q << "]\n";
@@ -924,9 +924,9 @@ void GazeboAerodynamics::OnUpdate()
                     //gzdbg << "LogFlag" << logFlag << "\n";
                     //std::cout<< this->propulsion_slipstream_sub_topic_ <<std::endl;
                 } */
-                
-                // log segment specific data
-                /*
+
+            // log segment specific data
+            /*
                 if (logNow && segLog[i]==1) {
                     this->logfile<<", "<<cp_wrld.X()<<", "<<cp_wrld.Y()<<", "<<cp_wrld.Z();
                     this->logfile<<", "<<vel.X()<<", "<<vel.Y()<<", "<<vel.Z();
@@ -936,15 +936,15 @@ void GazeboAerodynamics::OnUpdate()
                     this->logfile<<", "<<alpha_<<", "<<q<<", "<<w_af;
                 }
                 */
-                
-                // correct for nan or inf
-                force.Correct();
-                cp_.Correct();
-                torque.Correct();
-                
-                // apply forces cp
-                this->link->AddForceAtWorldPosition(force, cp_);
-                this->link->AddTorque(torque);
+
+            // correct for nan or inf
+            force.Correct();
+            cp_.Correct();
+            torque.Correct();
+
+            // apply forces cp
+            this->link->AddForceAtWorldPosition(force, cp_);
+            this->link->AddTorque(torque);
         }
         
         /*
@@ -981,18 +981,18 @@ void GazeboAerodynamics::OnUpdate()
 
 
         for(int i=0; i<n_bdy; i++){
-        // get pose of body
-        GZ_ASSERT(this->link, "Link was NULL");
+            // get pose of body
+            GZ_ASSERT(this->link, "Link was NULL");
 #if GAZEBO_MAJOR_VERSION >= 9
-        ignition::math::Pose3d pose = this->link->WorldPose();
+            ignition::math::Pose3d pose = this->link->WorldPose();
 #else
-        ignition::math::Pose3d pose = ignitionFromGazeboMath(this->link->GetWorldPose());
+            ignition::math::Pose3d pose = ignitionFromGazeboMath(this->link->GetWorldPose());
 #endif
-        ignition::math::Vector3d cp_ = pose.Pos() + pose.Rot().RotateVector(bodies[i].cp);  // position of cp in world frame
-        
-        // Logging
+            ignition::math::Vector3d cp_ = pose.Pos() + pose.Rot().RotateVector(bodies[i].cp);  // position of cp in world frame
 
-        /*
+            // Logging
+
+            /*
         if(logNow){
             //this->logfile<<this->world->SimTime().Double()<<", "<<pose.Pos().X()<<", "<<pose.Pos().Y()<<", "<<pose.Pos().Z();
             this->logfile<<this->world->SimTime().Double()<<", "<<cp_wrld.X()<<", "<<cp_wrld.Y()<<", "<<cp_wrld.Z();
@@ -1000,37 +1000,37 @@ void GazeboAerodynamics::OnUpdate()
         }
         */
 
-        // get velocity of cp, expressed in world frame
+            // get velocity of cp, expressed in world frame
 #if GAZEBO_MAJOR_VERSION >= 9
-        ignition::math::Vector3d vel = this->link->WorldLinearVel(bodies[i].cp);
+            ignition::math::Vector3d vel = this->link->WorldLinearVel(bodies[i].cp);
 #else
-        ignition::math::Vector3d vel = ignitionFromGazeboMath(this->link->GetWorldLinearVel(bodies[i].cp));
+            ignition::math::Vector3d vel = ignitionFromGazeboMath(this->link->GetWorldLinearVel(bodies[i].cp));
 #endif
-        // express forward, upward and spanwise vectors in world frame
-        ignition::math::Vector3d forwardI = pose.Rot().RotateVector(bodies[i].fwd);
-        ignition::math::Vector3d upwardI = pose.Rot().RotateVector(bodies[i].upwd);
-        ignition::math::Vector3d spanwiseI = forwardI.Cross(upwardI);
-        forwardI.Normalize();
-        upwardI.Normalize();
-        spanwiseI.Normalize();
-        
-        // 'signed-quadratic' flow components in forward, upward and spanwise direction
-        double uu = vel.Dot(forwardI)*fabs(vel.Dot(forwardI));
-        double vv = vel.Dot(upwardI)*fabs(vel.Dot(upwardI));
-        double ww = vel.Dot(spanwiseI)*fabs(vel.Dot(spanwiseI));
-        
-        // 'directional' drag coefficiens
-        double cd_x = bodies[i].A_fus_xx * bodies[i].cd_cyl_ax;
-        double cd_y = bodies[i].A_fus_yy * bodies[i].cd_cyl_lat;
-        double cd_z = bodies[i].A_fus_zz * bodies[i].cd_cyl_lat;
-        
-        // calculate and apply drag fuselage drag force
-        ignition::math::Vector3d drag = -this->rho/2.0*(forwardI*uu*cd_x + upwardI*vv*cd_y + spanwiseI*ww*cd_z);
-        this->link->AddForceAtWorldPosition(drag, cp_);
-        
-        // logging
+            // express forward, upward and spanwise vectors in world frame
+            ignition::math::Vector3d forwardI = pose.Rot().RotateVector(bodies[i].fwd);
+            ignition::math::Vector3d upwardI = pose.Rot().RotateVector(bodies[i].upwd);
+            ignition::math::Vector3d spanwiseI = forwardI.Cross(upwardI);
+            forwardI.Normalize();
+            upwardI.Normalize();
+            spanwiseI.Normalize();
 
-        /*
+            // 'signed-quadratic' flow components in forward, upward and spanwise direction
+            double uu = vel.Dot(forwardI)*fabs(vel.Dot(forwardI));
+            double vv = vel.Dot(upwardI)*fabs(vel.Dot(upwardI));
+            double ww = vel.Dot(spanwiseI)*fabs(vel.Dot(spanwiseI));
+
+            // 'directional' drag coefficiens
+            double cd_x = bodies[i].A_fus_xx * bodies[i].cd_cyl_ax;
+            double cd_y = bodies[i].A_fus_yy * bodies[i].cd_cyl_lat;
+            double cd_z = bodies[i].A_fus_zz * bodies[i].cd_cyl_lat;
+
+            // calculate and apply drag fuselage drag force
+            ignition::math::Vector3d drag = -this->rho/2.0*(forwardI*uu*cd_x + upwardI*vv*cd_y + spanwiseI*ww*cd_z);
+            this->link->AddForceAtWorldPosition(drag, cp_);
+
+            // logging
+
+            /*
         if (logNow) {
             this->logfile<<", "<<vel.X()<<", "<<vel.Y()<<", "<<vel.Z();
             this->logfile<<", "<<drag.X()<<", "<<drag.Y()<<", "<<drag.Z();
