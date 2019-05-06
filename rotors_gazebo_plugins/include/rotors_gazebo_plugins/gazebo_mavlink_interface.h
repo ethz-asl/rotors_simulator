@@ -134,11 +134,11 @@ public:
     gimbal_yaw_joint_(nullptr),
     gimbal_pitch_joint_(nullptr),
     gimbal_roll_joint_(nullptr),
-    input_offset_ {},
-    input_scaling_ {},
-    zero_position_disarmed_ {},
-    zero_position_armed_ {},
-    input_index_ {},
+    //input_offset_ {},
+    //input_scaling_ {},
+    //zero_position_disarmed_ {},
+    //zero_position_armed_ {},
+    //input_index_ {},
     lat_rad_(0.0),
     lon_rad_(0.0),
     gt_lat(0.0),
@@ -204,9 +204,6 @@ private:
   bool use_left_elevon_pid_;
   bool use_right_elevon_pid_;
 
-  std::vector<physics::JointPtr> joints_;
-  std::vector<common::PID> pids_;
-
   /// \brief Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
@@ -244,6 +241,67 @@ private:
 
   unsigned _rotor_count;
 
+  struct servo {
+
+      servo():
+      ref(0),
+      slew(1.0/0.3),
+      torque(0.85),
+      init(false),
+      P_vel(0.002),
+      P_pos(0.04){}  //slew/max_err
+
+      double ref;       // rad
+      double slew;      // rad/s
+      double torque;    // Nm
+      common::Time last_srv_time;
+      bool init;
+
+      double P_vel;
+      double P_pos;
+  };
+
+  struct ctrl_chan {
+
+      ctrl_chan():
+          input_index_(0),
+          input_offset_(0),
+          input_scaling_(0),
+          zero_position_disarmed_(0),
+          zero_position_armed_(0),
+          input_reference_(0),
+          joint_(nullptr),
+          joint_control_pub_(nullptr),
+          gztopic_("default"){
+          pid_.Init(0, 0, 0, 0, 0, 0, 0);
+      }
+
+      physics::JointPtr joint_;
+      std::string joint_name;
+
+      int input_index_;
+      double input_offset_;
+      double input_scaling_;
+      double zero_position_disarmed_;
+      double zero_position_armed_;
+      double input_reference_;
+      double control;
+
+      std::string joint_control_type_;
+      common::PID pid_;
+      servo srv;
+      std::string gztopic_;
+      transport::PublisherPtr joint_control_pub_;
+  };
+
+
+
+  int n_chan;
+  ctrl_chan* channels;
+
+  /*
+  std::vector<physics::JointPtr> joints_;
+  std::vector<common::PID> pids_;
   double input_offset_[n_out_max];
   double input_scaling_[n_out_max];
   std::string joint_control_type_[n_out_max];
@@ -252,6 +310,7 @@ private:
   double zero_position_armed_[n_out_max];
   int input_index_[n_out_max];
   transport::PublisherPtr joint_control_pub_[n_out_max];
+  */
 
   transport::SubscriberPtr imu_sub_;
   transport::SubscriberPtr lidar_sub_;

@@ -37,6 +37,7 @@ namespace gazebo {
 GZ_REGISTER_MODEL_PLUGIN(GazeboMavlinkInterface);
 
 GazeboMavlinkInterface::~GazeboMavlinkInterface() {
+    delete[] channels;
     updateConnection_->~Connection();
 }
 
@@ -80,6 +81,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
       opticalFlow_sub_topic_, opticalFlow_sub_topic_);
 
   // set input_reference_ from inputs.control
+  /*
   input_reference_.resize(n_out_max);
   joints_.resize(n_out_max);
   pids_.resize(n_out_max);
@@ -88,68 +90,83 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     pids_[i].Init(0, 0, 0, 0, 0, 0, 0);
     input_reference_[i] = 0;
   }
+  */
 
+  n_chan = 0;
   if (_sdf->HasElement("control_channels")) {
     sdf::ElementPtr control_channels = _sdf->GetElement("control_channels");
     sdf::ElementPtr channel = control_channels->GetElement("channel");
+
     while (channel)
+    {
+        ++n_chan;
+        channel = channel->GetNextElement("channel");
+    }
+
+    channels = new ctrl_chan[n_chan];
+    channel = control_channels->GetElement("channel");
+
+    for(int i=0; i<n_chan; i++)
     {
       if (channel->HasElement("input_index"))
       {
-        int index = channel->Get<int>("input_index");
-        if (index < n_out_max)
+
+        channels[i].input_index_ = channel->Get<int>("input_index");
+        //int index = channel->Get<int>("input_index");
+        if (channels[i].input_index_ < n_out_max)
         {
-          input_offset_[index] = channel->Get<double>("input_offset");
-          input_scaling_[index] = channel->Get<double>("input_scaling");
-          zero_position_disarmed_[index] = channel->Get<double>("zero_position_disarmed");
-          zero_position_armed_[index] = channel->Get<double>("zero_position_armed");
+          channels[i].input_offset_ = channel->Get<double>("input_offset");
+          channels[i].input_scaling_ = channel->Get<double>("input_scaling");
+          channels[i].zero_position_disarmed_ = channel->Get<double>("zero_position_disarmed");
+          channels[i].zero_position_armed_ = channel->Get<double>("zero_position_armed");
           if (channel->HasElement("joint_control_type"))
           {
-            joint_control_type_[index] = channel->Get<std::string>("joint_control_type");
+            channels[i].joint_control_type_ = channel->Get<std::string>("joint_control_type");
           }
           else
           {
-            gzwarn << "joint_control_type[" << index << "] not specified, using velocity.\n";
-            joint_control_type_[index] = "velocity";
+            gzwarn << "joint_control_type of" << channel->GetName() << " channel not specified, using velocity.\n";
+            channels[i].joint_control_type_ = "velocity";
           }
 
           // start gz transport node handle
-          if (joint_control_type_[index] == "position_gztopic")
+          if (channels[i].joint_control_type_ == "position_gztopic")
           {
             // setup publisher handle to topic
             if (channel->HasElement("gztopic"))
-              gztopic_[index] = "~/" + model_->GetName() + channel->Get<std::string>("gztopic");
+              channels[i].gztopic_ = "~/" + model_->GetName() + channel->Get<std::string>("gztopic");
             else
-              gztopic_[index] = "control_position_gztopic_" + std::to_string(index);
+              channels[i].gztopic_ = "control_position_gztopic_" + std::to_string(i);
       #if GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4
             /// only gazebo 7.4 and above support Any
-            joint_control_pub_[index] = node_handle_->Advertise<gazebo::msgs::Any>(
-                gztopic_[index]);
+            channels[i].joint_control_pub_ = node_handle_->Advertise<gazebo::msgs::Any>(
+                channels[i].gztopic_);
       #else
-            joint_control_pub_[index] = node_handle_->Advertise<gazebo::msgs::GzString>(
-                gztopic_[index]);
+            channels[i].joint_control_pub_ = node_handle_->Advertise<gazebo::msgs::GzString>(
+                channels[i].gztopic_);
       #endif
-            gzdbg<<"publishing to "<<gztopic_[index]<<std::endl;
+            gzdbg<<"publishing to "<<channels[i].gztopic_<<"\n";
           }
 
           if (channel->HasElement("joint_name"))
           {
-            std::string joint_name = channel->Get<std::string>("joint_name");
-            joints_[index] = model_->GetJoint(joint_name);
-            if (joints_[index] == nullptr)
+            channels[i].joint_name = channel->Get<std::string>("joint_name");
+            channels[i].joint_ = model_->GetJoint(channels[i].joint_name);
+
+            if (channels[i].joint_ == nullptr)
             {
-              gzwarn << "joint [" << joint_name << "] not found for channel["
-                     << index << "] no joint control for this channel.\n";
+              gzwarn << "joint [" << channels[i].joint_name << "] not found for channel["
+                     << channels[i].input_index_ << "] no joint control for this channel.\n";
             }
             else
             {
-              gzdbg << "joint [" << joint_name << "] found for channel["
-                    << index << "] joint control active for this channel.\n";
+              gzdbg << "joint [" << channels[i].joint_name << "] found for channel["
+                    << channels[i].input_index_ << "] joint control active for this channel.\n";
             }
           }
           else
           {
-            gzdbg << "<joint_name> not found for channel[" << index
+            gzdbg << "<joint_name> not found for channel[" << channels[i].input_index_
                   << "] no joint control will be performed for this channel.\n";
           }
 
@@ -157,15 +174,15 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
           if (channel->HasElement("joint_control_pid"))
           {
             sdf::ElementPtr pid = channel->GetElement("joint_control_pid");
-            double p = 0;
+            double p_gain = 0;
             if (pid->HasElement("p"))
-              p = pid->Get<double>("p");
-            double i = 0;
+              p_gain = pid->Get<double>("p");
+            double i_gain = 0;
             if (pid->HasElement("i"))
-              i = pid->Get<double>("i");
-            double d = 0;
+              i_gain = pid->Get<double>("i");
+            double d_gain = 0;
             if (pid->HasElement("d"))
-              d = pid->Get<double>("d");
+              d_gain = pid->Get<double>("d");
             double iMax = 0;
             if (pid->HasElement("iMax"))
               iMax = pid->Get<double>("iMax");
@@ -178,12 +195,13 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
             double cmdMin = 0;
             if (pid->HasElement("cmdMin"))
               cmdMin = pid->Get<double>("cmdMin");
-            pids_[index].Init(p, i, d, iMax, iMin, cmdMax, cmdMin);
+
+            channels[i].pid_.Init(p_gain, i_gain, d_gain, iMax, iMin, cmdMax, cmdMin);
           }
         }
         else
         {
-          gzerr << "input_index[" << index << "] out of range, not parsing.\n";
+          gzerr << "input_index[" << channels[i].input_index_ << "] out of range, not parsing.\n";
         }
       }
       else
@@ -414,8 +432,8 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
         turning_velocities_msg.add_motor_speed(0);
         actuators_msg.add_normalized(0);
       } else {
-        turning_velocities_msg.add_motor_speed(input_reference_[i]);
-        actuators_msg.add_normalized(input_reference_[i]);
+        turning_velocities_msg.add_motor_speed(channels[i].input_reference_);
+        actuators_msg.add_normalized(channels[i].input_reference_);
       }
     }
 
@@ -645,7 +663,6 @@ void GazeboMavlinkInterface::SendSensorMessages() {
     if (hil_mode_) {
       if (!hil_state_level_){
         send_mavlink_message(&msg);
-        ++dbgCounter;
       }
     } else {
       send_mavlink_message(&msg);
@@ -846,51 +863,68 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg)
 #else
     last_actuator_time_ = world_->GetSimTime();
 #endif
+    /*
     for (unsigned i = 0; i < n_out_max; i++) {
       input_index_[i] = i;
     }
+    */
+
     // Set rotor speeds and controller targets for flagged messages.
     if (controls.flags == kMotorSpeedFlag) {
-      input_reference_.resize(n_out_max);
+      //input_reference_.resize(n_out_max);
       for (unsigned i = 0; i < n_motors; ++i) {
+        if (i>=n_chan) {
+            gzerr<<"index out of bounds, break \n";
+            break;
+        }
+
         if (armed) {
-          input_reference_[i] =
-              (controls.controls[input_index_[i]] + input_offset_[i]) *
-                  input_scaling_[i] +
-              zero_position_armed_[i];
+          channels[i].control = controls.controls[channels[i].input_index_];
+          channels[i].input_reference_ =
+              (controls.controls[channels[i].input_index_] + channels[i].input_offset_) *
+                  channels[i].input_scaling_ +
+              channels[i].zero_position_armed_;
         } else {
-          input_reference_[i] = zero_position_disarmed_[i];
+          channels[i].input_reference_ = channels[i].zero_position_disarmed_;
+          channels[i].control = 0.0;
         }
       }
       received_first_referenc_ = true;
     }
     else if (controls.flags == kServoPositionFlag) {
       for (unsigned i = n_motors; i < (n_motors + n_servos); ++i) {
+        if (i>=n_chan) {
+              gzerr<<"index out of bounds, break \n";
+              break;
+        }
+
         if (armed) {
-          input_reference_[i] =
-              (controls.controls[input_index_[i - n_motors]] + input_offset_[i]) *
-                  input_scaling_[i] +
-              zero_position_armed_[i];
+          channels[i].control = controls.controls[channels[i].input_index_];
+          channels[i].input_reference_ =
+              (controls.controls[channels[i].input_index_] + channels[i].input_offset_) *
+                  channels[i].input_scaling_ +
+              channels[i].zero_position_armed_;
         } else {
-          input_reference_[i] = zero_position_disarmed_[i];
+          channels[i].input_reference_ = channels[i].zero_position_disarmed_;
+          channels[i].control = 0.0;
         }
       }
     }
     // Set rotor speeds, controller targets for unflagged messages.
     else {
+      //input_reference_.resize(n_out_max);
 
-      input_reference_.resize(n_out_max);
-
-      for (unsigned i = 0; i < 16; ++i) {
+      for (unsigned i = 0; i < n_chan; ++i) {
         if (armed) {
-          input_reference_[i] =
-              (controls.controls[input_index_[i]] + input_offset_[i]) *
-                  input_scaling_[i] +
-              zero_position_armed_[i];
+          channels[i].control = controls.controls[channels[i].input_index_];
+          channels[i].input_reference_ =
+              (controls.controls[channels[i].input_index_] + channels[i].input_offset_) *
+                  channels[i].input_scaling_ +
+              channels[i].zero_position_armed_;
 
         } else {
-          input_reference_[i] = zero_position_disarmed_[i];
-
+          channels[i].input_reference_ = channels[i].zero_position_disarmed_;
+          channels[i].control = 0.0;
         }
       }
 
@@ -910,32 +944,80 @@ void GazeboMavlinkInterface::handle_control(double _dt)
 {
   //gzdbg<<"dbg: 2a"<<std::endl;
   // set joint positions
-  for (int i = 0; i < input_reference_.size(); i++) {
-    if (joints_[i]) {
-      gzdbg<<"dbg: 2b"<<i<<std::endl;
-      double target = input_reference_[i];
-      if (joint_control_type_[i] == "velocity")
-      {
-        double current = joints_[i]->GetVelocity(0);
-        double err = current - target;
-        double force = pids_[i].Update(err, _dt);
-        joints_[i]->SetForce(0, force);
-      }
-      else if (joint_control_type_[i] == "position")
-      {
+  for (int i = 0; i < n_chan; i++) {
+    if (channels[i].joint_) {
+      //gzdbg<<"dbg: 2b"<<i<<std::endl;
+      double target = channels[i].input_reference_;
 
+      if (channels[i].joint_control_type_ == "velocity")
+      {
+        double current = channels[i].joint_->GetVelocity(0);
+        double err = current - target;
+        double force = channels[i].pid_.Update(err, _dt);
+        channels[i].joint_->SetForce(0, force);
+
+      } else if (channels[i].joint_control_type_ == "position") {
 #if GAZEBO_MAJOR_VERSION >= 9
-        double current = joints_[i]->Position(0);
+        double current = channels[i].joint_->Position(0);
 #else
-        double current = joints_[i]->GetAngle(0).Radian();
+        double current = channels[i].joint_->GetAngle(0).Radian();
 #endif
 
         double err = current - target;
-        double force = pids_[i].Update(err, _dt);
-        joints_[i]->SetForce(0, force);
-      }
-      else if (joint_control_type_[i] == "position_gztopic")
-      {
+        double force = channels[i].pid_.Update(err, _dt);
+        channels[i].joint_->SetForce(0, force);
+
+      } else if (channels[i].joint_control_type_ == "servo") {
+
+        common::Time now;
+        double pos;
+        double pos_ref;
+        double rate;
+        double rate_ref;
+
+#if GAZEBO_MAJOR_VERSION >= 9
+        now = world_->SimTime();
+        pos = channels[i].joint_->Position(0);
+        rate = channels[i].joint_->GetVelocity(0);
+#else
+        now = world_->GetSimTime();
+        pos = channels[i].joint_->GetAngle(0).Radian();
+#endif
+
+        if (!channels[i].srv.init) {
+            channels[i].srv.last_srv_time = now;
+            channels[i].srv.init = true;
+        }
+
+        double dt = (now - channels[i].srv.last_srv_time).Double();
+        double d_ref = channels[i].srv.slew * dt;
+        channels[i].srv.last_srv_time = now;
+
+        // implementation of slew-rate constraint
+        if (channels[i].input_reference_>channels[i].srv.ref+d_ref) {
+            rate_ref = channels[i].srv.slew;
+            channels[i].srv.ref+=d_ref;
+
+        } else if (channels[i].srv.ref+d_ref>channels[i].input_reference_>channels[i].srv.ref-d_ref) {
+            rate_ref = (channels[i].input_reference_-channels[i].srv.ref)/dt;
+            channels[i].srv.ref = channels[i].input_reference_;
+
+        } else {
+            rate_ref = -channels[i].srv.slew;
+            channels[i].srv.ref -= d_ref;
+        }
+
+        double err_pos = channels[i].srv.ref-pos;
+        double err_vel = -rate;
+        /*
+        double torque = ignition::math::clamp(channels[i].srv.P_vel*(err_vel+channels[i].srv.P_pos*err_pos),
+                                              -channels[i].srv.torque,
+                                              channels[i].srv.torque);
+        */
+        double torque = channels[i].srv.P_vel*err_vel+channels[i].srv.P_pos*err_pos;
+        channels[i].joint_->SetForce(0, torque);
+
+      } else if (channels[i].joint_control_type_ == "position_gztopic") {
      #if GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4
         /// only gazebo 7.4 and above support Any
         gazebo::msgs::Any m;
@@ -947,26 +1029,30 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         ss << target;
         m.set_data(ss.str());
      #endif
-        joint_control_pub_[i]->Publish(m);
-      }
-      else if (joint_control_type_[i] == "position_kinematic")
-      {
+        channels[i].joint_control_pub_->Publish(m);
+
+      } else if (channels[i].joint_control_type_ == "position_kinematic") {
         /// really not ideal if your drone is moving at all,
         /// mixing kinematic updates with dynamics calculation is
         /// non-physical.
      #if GAZEBO_MAJOR_VERSION >= 6
-        joints_[i]->SetPosition(0, input_reference_[i]);
+        channels[i].joint_->SetPosition(0, channels[i].input_reference_);
      #else
-        joints_[i]->SetAngle(0, input_reference_[i]);
+        channels[i].joint_->SetAngle(0, channels[i].input_reference_);
      #endif
-      }
-      else
-      {
-        gzerr << "joint_control_type[" << joint_control_type_[i] << "] undefined.\n";
+      } else {
+        gzerr << "joint_control_type[" << channels[i].joint_control_type_ << "] undefined.\n";
       }
     }
   }
-  //gzdbg<<"dbg: 2c"<<std::endl;
+
+  ++dbgCounter;
+  if (dbgCounter%50==0) {
+      gzdbg<<channels[4].joint_name<<": "<<channels[4].joint_->Position(0)<<" | ref: "<<channels[4].input_reference_<<" | srv_ref: "<<channels[4].srv.ref<<"\n";
+
+      dbgCounter = 1;
+  }
+
 }
 
 bool GazeboMavlinkInterface::IsRunning()
