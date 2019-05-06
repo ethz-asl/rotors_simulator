@@ -166,6 +166,9 @@ void GazeboRosInterfacePlugin::ConnectHelper(
   // Save a reference to the subscriber pointer so subscriber
   // won't be deleted.
   subscriberPtrs_.push_back(subscriberPtr);
+
+  gzdbg << "Connecting Gazebo topic \"" << gazeboTopicName
+        << "\" to ROS topic \"" << rosTopicName << "\"." << std::endl;
 }
 
 void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
@@ -180,9 +183,6 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       gz_connect_gazebo_to_ros_topic_msg->gazebo_topic();
   const std::string rosTopicName =
       gz_connect_gazebo_to_ros_topic_msg->ros_topic();
-
-  gzdbg << "Connecting Gazebo topic \"" << gazeboTopicName
-        << "\" to ROS topic \"" << rosTopicName << "\"." << std::endl;
 
   switch (gz_connect_gazebo_to_ros_topic_msg->msgtype()) {
     case gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS:
@@ -265,6 +265,19 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       ConnectHelper<gz_geometry_msgs::WrenchStamped,
                     geometry_msgs::WrenchStamped>(
           &GazeboRosInterfacePlugin::GzWrenchStampedMsgCallback, this,
+          gazeboNamespace, gazeboTopicName, rosTopicName, gz_node_handle_);
+      break;
+    case gz_std_msgs::ConnectGazeboToRosTopic::VIS_VECTOR:
+      ConnectHelper<gz_visualization_msgs::VisVector,
+                    visualization_msgs::Marker>(
+          &GazeboRosInterfacePlugin::GzVisVectorMsgCallback, this,
+          gazeboNamespace, gazeboTopicName, rosTopicName, gz_node_handle_);
+      break;
+
+    case gz_std_msgs::ConnectGazeboToRosTopic::VIS_VECTOR_ARRAY:
+      ConnectHelper<gz_visualization_msgs::VisVectorArray,
+                    visualization_msgs::MarkerArray>(
+          &GazeboRosInterfacePlugin::GzVisVectorArrayMsgCallback, this,
           gazeboNamespace, gazeboTopicName, rosTopicName, gz_node_handle_);
       break;
     default:
@@ -942,6 +955,107 @@ void GazeboRosInterfacePlugin::GzWrenchStampedMsgCallback(
       gz_wrench_stamped_msg->wrench().torque().z();
 
   ros_publisher.publish(ros_wrench_stamped_msg_);
+}
+
+void GazeboRosInterfacePlugin::GzVisVectorMsgCallback(
+        GzVisVectorMsgPtr& gz_vis_vector_msg,
+        ros::Publisher ros_publisher){
+
+    visualization_msgs::Marker ros_marker_msg_;
+    geometry_msgs::Point ros_point_msg_;
+
+    ConvertHeaderGzToRos(gz_vis_vector_msg->header(),
+                         &ros_marker_msg_.header);
+
+    ros_marker_msg_.header.stamp = ros::Time();
+    ros_marker_msg_.ns = gz_vis_vector_msg->ns();
+    ros_marker_msg_.id = gz_vis_vector_msg->id();
+    ros_marker_msg_.type = visualization_msgs::Marker::ARROW;
+    ros_marker_msg_.action = visualization_msgs::Marker::ADD;
+
+    // add vector starting point
+    ros_point_msg_.x = gz_vis_vector_msg->startpoint().x();
+    ros_point_msg_.y = gz_vis_vector_msg->startpoint().y();
+    ros_point_msg_.z = gz_vis_vector_msg->startpoint().z();
+    ros_marker_msg_.points.push_back(ros_point_msg_);
+
+    // add vector end point
+    ros_point_msg_.x = gz_vis_vector_msg->startpoint().x() + gz_vis_vector_msg->vector().x();
+    ros_point_msg_.y = gz_vis_vector_msg->startpoint().y() + gz_vis_vector_msg->vector().y();
+    ros_point_msg_.z = gz_vis_vector_msg->startpoint().z() + gz_vis_vector_msg->vector().z();
+    ros_marker_msg_.points.push_back(ros_point_msg_);
+
+    // scale of arraw (shaft dia./head dia./head length)
+    ros_marker_msg_.scale.x = gz_vis_vector_msg->scale().x();
+    ros_marker_msg_.scale.y = gz_vis_vector_msg->scale().y();
+    ros_marker_msg_.scale.z = gz_vis_vector_msg->scale().z();
+
+    ros_marker_msg_.color.a = 1.0;
+    ros_marker_msg_.color.r = gz_vis_vector_msg->color().x();
+    ros_marker_msg_.color.g = gz_vis_vector_msg->color().y();
+    ros_marker_msg_.color.b = gz_vis_vector_msg->color().z();
+
+    ros_publisher.publish(ros_marker_msg_);
+}
+
+// MARKER ARRAY (Multiple Vector Visualization)
+void GazeboRosInterfacePlugin::GzVisVectorArrayMsgCallback(GzVisVectorArrayMsgPtr& gz_vis_vector_array_msg,
+                                 ros::Publisher ros_publisher){
+
+    // involved message types
+    visualization_msgs::MarkerArray ros_marker_array_msg_;
+    visualization_msgs::Marker ros_marker_msg_;
+    geometry_msgs::Point ros_point_msg_;
+
+    // get number of markers
+    size_t n_vect = gz_vis_vector_array_msg->vector_size();
+
+    ConvertHeaderGzToRos(gz_vis_vector_array_msg->header(),
+                         &ros_marker_msg_.header);
+
+    ros_marker_msg_.header.stamp = ros::Time();
+    ros_marker_msg_.type = visualization_msgs::Marker::ARROW;
+    ros_marker_msg_.action = visualization_msgs::Marker::ADD;
+
+    // gz_vis_vector_array_msg->vector(0).scale().x();
+
+    // scale of arraw (shaft dia./head dia./head length)
+    ros_marker_msg_.scale.x = gz_vis_vector_array_msg->vector(0).scale().x();
+    ros_marker_msg_.scale.y = gz_vis_vector_array_msg->vector(0).scale().y();
+    ros_marker_msg_.scale.z = gz_vis_vector_array_msg->vector(0).scale().z();
+
+    ros_marker_msg_.color.a = 1.0;
+
+    //gzdbg<<"VVACb vector_size: "<<gz_vis_vector_array_msg->vector_size()<<" capacity: "<<ros_marker_array_msg_.markers.capacity()<<"\n";
+
+    for(int n=0; n<n_vect; n++){
+
+        ros_marker_msg_.ns = gz_vis_vector_array_msg->vector(n).ns();
+        ros_marker_msg_.id = gz_vis_vector_array_msg->vector(n).id();
+
+        ros_marker_msg_.color.r = gz_vis_vector_array_msg->vector(n).color().x();
+        ros_marker_msg_.color.g = gz_vis_vector_array_msg->vector(n).color().y();
+        ros_marker_msg_.color.b = gz_vis_vector_array_msg->vector(n).color().z();
+
+        // add vector starting point
+        ros_point_msg_.x = gz_vis_vector_array_msg->vector(n).startpoint().x();
+        ros_point_msg_.y = gz_vis_vector_array_msg->vector(n).startpoint().y();
+        ros_point_msg_.z = gz_vis_vector_array_msg->vector(n).startpoint().z();
+        ros_marker_msg_.points.push_back(ros_point_msg_);
+
+        // add vector end point
+        ros_point_msg_.x = gz_vis_vector_array_msg->vector(n).startpoint().x() + gz_vis_vector_array_msg->vector(n).vector().x();
+        ros_point_msg_.y = gz_vis_vector_array_msg->vector(n).startpoint().y() + gz_vis_vector_array_msg->vector(n).vector().y();
+        ros_point_msg_.z = gz_vis_vector_array_msg->vector(n).startpoint().z() + gz_vis_vector_array_msg->vector(n).vector().z();
+        ros_marker_msg_.points.push_back(ros_point_msg_);
+
+        // add marker to array
+        ros_marker_array_msg_.markers.push_back(ros_marker_msg_);
+        ros_marker_msg_.points.clear();
+
+    }
+
+    ros_publisher.publish(ros_marker_array_msg_);
 }
 
 //===========================================================================//
