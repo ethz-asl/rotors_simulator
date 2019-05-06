@@ -84,51 +84,6 @@
       </plugin>
     </gazebo>
 
-   <gazebo>
-     <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
-      <robotNamespace>${robot_namespace}</robotNamespace>
-      <linkName>${robot_namespace}/base_link</linkName>
-      <airfoil>
-          <segment name="1">
-              <forward>1 0 0</forward>
-              <upward>0 0 1</upward>
-              <cp>0.21 0.0 0.185</cp>
-              <seg_area>0.0040</seg_area>
-              <seg_chord>0.16</seg_chord>
-              <aeroParamsYAML>/home/david/catkin_ws_hil/src/rotors_simulator/rotors_gazebo/resource/fixed_wing/test.yaml</aeroParamsYAML>
-              <indVel>
-                <slpstr name="prop1">
-                    <topic>propeller1</topic>
-                </slpstr>
-                <slpstr name="prop2">
-                    <topic>propeller2</topic>
-                </slpstr>
-              </indVel>
-              <control>
-                <cs name="aileron">
-                    <controlJoint></controlJoint>
-                    <radToCLift></radToCLift>
-                    <radToCDrag></radToCDrag>
-                    <radToCPitch></radToCPitch>
-                </cs>
-                <cs name="spoiler">
-                    <controlJoint></controlJoint>
-                    <radToCLift></radToCLift>
-                    <radToCDrag></radToCDrag>
-                    <radToCPitch></radToCPitch>
-                </cs>
-                <cs name="krueger">
-                    <controlJoint></controlJoint>
-                    <radToCLift></radToCLift>
-                    <radToCDrag></radToCDrag>
-                    <radToCPitch></radToCPitch>
-                </cs>
-              </control>
-          </segment>
-      </airfoil>
-    </plugin>
-  </gazebo>
-
   <xacro:if value="${enable_mavlink_interface}">
     <gazebo>
       <plugin filename="librotors_gazebo_mavlink_interface.so" name="gazebo_mavlink_interface">
