@@ -1,0 +1,38 @@
+# Fixed wing aerodynamic parameters
+
+# Angle of attack bounds
+alpha_max: 0.27    # [rad]
+alpha_min: -0.27   # [rad]
+
+# The vector values correspond to the Taylor expansion coefficients, where the
+#   first value is the zero-degree term coefficient, second value is the first-
+#   degree term coefficent, and so on.
+#
+# For example, 'c_drag_alpha: [n_0, n_1, n_2]' would result in the following
+#   calculation: 'drag = n_0 + n_1 * alpha + n_2 * alpha^2'.
+c_drag_alpha: [0.136, -0.6737, 5.4546]
+c_drag_beta: [0.0195, 0.0, -0.3842]
+c_drag_delta_ail: [0.0195, 1.4205e-4, 7.5037e-6]
+c_drag_delta_flp: [0.0195, 2.7395e-4, 1.23e-5]
+
+c_side_force_beta: [0.0, -0.3073]
+
+c_lift_alpha: [0.2127, 10.806, -46.8324, 60.6017]
+c_lift_delta_ail: [0.3304, 0.0048]
+c_lift_delta_flp: [0.3304, 0.0073]
+
+c_roll_moment_beta: [0.0, -0.0154]
+c_roll_moment_p: [0.0, -0.1647]
+c_roll_moment_r: [0.0, 0.0117]
+c_roll_moment_delta_ail: [0.0, 0.0117]
+c_roll_moment_delta_flp: [0.0, 0.001]
+
+c_pitch_moment_alpha: [0.0435, -2.969]
+c_pitch_moment_q: [-0.1173, -106.1541]
+c_pitch_moment_delta_elv: [-0.1173, -6.1308]
+
+c_yaw_moment_beta: [0.0, 0.043]
+c_yaw_moment_r: [0.0, -0.0827]
+c_yaw_moment_delta_rud: [0.0, 0.06]
+
+c_thrust: [0.0, 14.7217, 0.0]

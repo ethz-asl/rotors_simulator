@@ -5,6 +5,7 @@
   <arg name="namespace" default="$(arg uav_name)"/>
   <arg name="aero_params_yaml_file" default="$(find rotors_gazebo)/resource/fixed_wing/aero_params_$(arg uav_name).yaml"/>
   <arg name="vehicle_params_yaml_file" default="$(find rotors_gazebo)/resource/fixed_wing/$(arg uav_name).yaml"/>
+  <arg name="airfoil_yaml_file" default="$(find rotors_gazebo)/resource/fixed_wing/test.yaml"/>
   <arg name="is_input_joystick" default="false"/>
   <arg name="model" default="$(find rotors_description)/urdf/$(arg uav_name)_base.xacro"/>
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
@@ -32,6 +33,7 @@
     namespace:=$(arg namespace)
     aero_params_yaml_file:=$(arg aero_params_yaml_file)
     vehicle_params_yaml_file:=$(arg vehicle_params_yaml_file)
+    airfoil_yaml_file:=$(arg airfoil_yaml_file)
     is_input_joystick:=$(arg is_input_joystick)"
   />
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />

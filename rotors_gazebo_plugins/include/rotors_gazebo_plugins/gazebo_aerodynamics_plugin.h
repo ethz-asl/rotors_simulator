@@ -40,7 +40,10 @@
 #include <boost/bind.hpp>
 #include <gazebo/gazebo.hh>
 #include <gazebo/common/common.hh>
-#include <PropulsionSlipstream.pb.h>
+#include "PropulsionSlipstream.pb.h"
+//#include "VisVector.pb.h"
+#include "VisVectorArray.pb.h"
+#include "ConnectGazeboToRosTopic.pb.h"
 //#include <Int32.pb.h>
 #include <iostream>
 #include <fstream>
@@ -51,6 +54,9 @@ namespace gazebo
 /// \brief Stuff for propeller slipstream message subscription
 typedef const boost::shared_ptr<const gz_mav_msgs::PropulsionSlipstream> PropulsionSlipstreamPtr;
 static const std::string kDefaultPropulsionSlipstreamSubTopic = "/propulsion_slipstream";
+
+//typedef const boost::shared_ptr<const gz_visualization_msgs::VisVector> GzVisVectorMsgPtr;
+typedef const boost::shared_ptr<const gz_visualization_msgs::VisVectorArray> GzVisVectorArrayMsgPtr;
 
 /// \brief Stuff for log request message subscription
 //typedef const boost::shared_ptr<const std_msgs::msgs::Int32> Int32Ptr;
@@ -198,13 +204,29 @@ protected: double rho;
     struct segment {
 
         segment():
-            alpha_prev(0){}
+            alpha_prev(0),
+            alpha_dot(0),
+            cp(0,0,0),
+            fwd(1,0,0),
+            upwd(0,0,1),
+            ellpRed(1){}
 
+        int index;
         double alpha;
-        double alpha_prev;
+
+        /*
         double alpha_max_ns;
         double alpha_min_ns;
+        */
 
+        // To include hyteresis in future implementation, currently not used
+        double alpha_prev;
+        double alpha_dot;
+        bool cl_hist_up;
+
+        AerodynamicParameters aero_params_;
+
+        /*
         Eigen::Vector3d c_lift_alpha;
         Eigen::Vector3d c_drag_alpha;
         Eigen::Vector2d c_pitch_moment_alpha;
@@ -213,6 +235,7 @@ protected: double rho;
         double fp_c_lift_max;
         double fp_c_drag_max;
         double fp_c_pitch_moment_max;
+        */
 
         double cs_c_lift;
         double cs_c_drag;
@@ -247,6 +270,7 @@ protected: double rho;
         ignition::math::Vector3d upwd;
         double segArea;
         double segChord;
+        double ellpRed;
         
         control_surface * cs;
         int n_cs = 0;
@@ -258,21 +282,48 @@ protected: double rho;
         ignition::math::Vector3d v_ind_cp_; // induced velocity at cp (e.g. due to slipstream)
         int n_slpstr = 0;
 
+        /// \brief Force and torque visualization in rviz
+        /*
+        std::string lift_f_vis_topic;
+        gz_visualization_msgs::VisVector lift_f_vis;
+        gazebo::transport::PublisherPtr lift_f_vis_pub;
+
+        std::string drag_f_vis_topic;
+        gz_visualization_msgs::VisVector drag_f_vis;
+        gazebo::transport::PublisherPtr drag_f_vis_pub;
+
+        std::string pitch_m_vis_topic;
+        gz_visualization_msgs::VisVector pitch_m_vis;
+        gazebo::transport::PublisherPtr pitch_m_vis_pub;
+        */
+        gz_visualization_msgs::ArrowMarker* lift_vis;
     };
 
     segment * segments;
     int n_seg = 0;
+
+    std::string vector_vis_array_topic;
+    gz_visualization_msgs::VisVectorArray vector_vis_array;
+    gazebo::transport::PublisherPtr vector_vis_array_pub;
+
+    //gz_visualization_msgs::ArrowMarker * vector = vector_vis_array.add_vector();
 
     /// \brief Fuselage lift/drag modeling
 
     struct body {
 
         body():
+            index(0),
             A_fus_xx(0),
             A_fus_yy(0),
             A_fus_zz(0),
-            cd_cyl_ax(0),
-            cd_cyl_lat(0){}
+            cd_cyl_ax(0.82),
+            cd_cyl_lat(1.17),
+            cp(0,0,0),
+            fwd(1,0,0),
+            upwd(0,0,1){}
+
+        int index;
 
         double A_fus_xx;                      // forward-projected area of fuselage, [m^2]
         double A_fus_yy;                      // side-projected area of fuselage, [m^2]
@@ -284,13 +335,18 @@ protected: double rho;
         ignition::math::Vector3d fwd;
         ignition::math::Vector3d upwd;
 
+        gz_visualization_msgs::ArrowMarker* force_vis;
+
     };
 
     body * bodies;
     int n_bdy = 0;
 
+     common::Time last_time;
+
     /// \brief Debugging/Logging
 protected:
+    bool pubs_and_subs_created_;
     bool dbgOut;
     int printItv;
     int logItv;

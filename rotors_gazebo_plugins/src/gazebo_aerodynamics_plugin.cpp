@@ -83,6 +83,7 @@ GazeboAerodynamics::GazeboAerodynamics()
     //this->d_rot = 0.0;
     
     /// Debugging/Logging
+    this->pubs_and_subs_created_ = false;
     this->dbgOut = false;
     this->printItv = 300;
     this->logItv = 100;
@@ -140,16 +141,21 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
     
     namespace_.clear();
     
+    gzdbg<<"model name: "<<model->GetName()<<"\n";
+    model->Print("");
+    gzdbg<<"model child count: "<<model->GetChildCount()<<"\n";
+
     if (_sdf->HasElement("robotNamespace"))
         namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
     else
         gzerr << "[gazebo_motor_model] Please specify a robotNamespace.\n";
     
     node_handle_ = transport::NodePtr(new transport::Node());
-    node_handle_->Init(namespace_);
+    //node_handle_->Init(namespace_);
+    node_handle_->Init();
     
-    if (_sdf->HasElement("link_name")) {
-        sdf::ElementPtr elem = _sdf->GetElement("link_name");
+    if (_sdf->HasElement("linkName")) {
+        sdf::ElementPtr elem = _sdf->GetElement("linkName");
         // GZ_ASSERT(elem, "Element link_name doesn't exist!");
         std::string linkName = elem->Get<std::string>();
         this->link = this->model->GetLink(linkName);
@@ -166,10 +172,12 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
         }
     }
 
-    ignition::math::Vector3d test_1(2,2,2);
-    ignition::math::Vector3d test_2 = test_1.Normalized();
-    gzdbg<<"test_1: "<<test_1<<"\n";
-    gzdbg<<"test_2: "<<test_2<<"\n";
+    last_time = world->SimTime(); // ini last time
+
+    vector_vis_array_topic = namespace_ + "_vis_forces";
+    vector_vis_array.mutable_header()->mutable_stamp()->set_sec(0.0);
+    vector_vis_array.mutable_header()->mutable_stamp()->set_nsec(0.0);
+    vector_vis_array.mutable_header()->set_frame_id(this->link->GetName());
 
     if (_sdf->HasElement("body")) {
 
@@ -181,16 +189,62 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
             ++n_bdy;
         }
 
-        gzdbg<<"found "<<n_bdy<<"body elements for this link. \n";
+        gzdbg<<"found "<<n_bdy<<" body element(s) for this link. \n";
         bodies = new body [n_bdy];
 
         _sdf_element = _sdf_body->GetElement("element");
 
         for(int i=0; i<n_bdy; i++){
+            gzdbg<<"processing body-element nr: "<<i<<" \n";
 
+            bodies[i].index = i;
+
+            if (_sdf_element->HasElement("forward"))
+                    bodies[i].fwd = _sdf_element->Get<ignition::math::Vector3d>("forward");
+            else
+            gzwarn<<"segment ["<<i<<"] is missing 'forward' element \n";
+
+            bodies[i].fwd.Normalize();
+
+            if (_sdf_element->HasElement("upward"))
+                bodies[i].upwd = _sdf_element->Get<ignition::math::Vector3d>("upward");
+            else
+                gzwarn<<"segment ["<<i<<"] is missing 'upward' elemenbodiest \n";
+
+            bodies[i].upwd.Normalize();
+
+            if (_sdf_element->HasElement("cp"))
+                bodies[i].cp = _sdf_element->Get<ignition::math::Vector3d>("cp");
+            else
+                gzwarn<<"segment ["<<i<<"] is missing 'cp' element \n";
+
+            if (_sdf_element->HasElement("aBdyXX"))
+                bodies[i].A_fus_xx = _sdf_element->Get<double>("aBdyXX");
+            else
+                gzwarn<<"segment ["<<i<<"] is missing 'aBdyXX' element \n";
+
+            if (_sdf_element->HasElement("aBdyYY"))
+                bodies[i].A_fus_yy = _sdf_element->Get<double>("aBdyYY");
+            else
+                gzwarn<<"segment ["<<i<<"] is missing 'aBdyYY' element \n";
+
+            if (_sdf_element->HasElement("aBdyZZ"))
+                bodies[i].A_fus_zz = _sdf_element->Get<double>("aBdyZZ");
+            else
+                gzwarn<<"segment ["<<i<<"] is missing 'aBdyZZ' element \n";
+
+            bodies[i].force_vis = vector_vis_array.add_vector();
+
+            bodies[i].force_vis->set_ns(namespace_);
+            bodies[i].force_vis->set_id(bodies[i].index);
+            bodies[i].force_vis->mutable_scale()->set_x(0.025);
+            bodies[i].force_vis->mutable_scale()->set_y(0.05);
+            bodies[i].force_vis->mutable_scale()->set_z(0.05);
+            bodies[i].force_vis->mutable_color()->set_x(1.0);
+            bodies[i].force_vis->mutable_color()->set_y(0.0);
+            bodies[i].force_vis->mutable_color()->set_z(0.0);
         }
     }
-
 
     if (_sdf->HasElement("airfoil")) {
 
@@ -202,13 +256,16 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
             ++n_seg;
         }
         
-        gzdbg<<"found "<<n_seg<<"airfoil segments for this link. \n";
+        gzdbg<<"found "<<n_seg<<" airfoil segment(s) for this link. \n";
         segments = new segment [n_seg];
         
         _sdf_segment = _sdf_airfoil->GetElement("segment");
         
         for(int i=0; i<n_seg; i++){
-            
+            gzdbg<<"processing airfoil-segment nr: "<<i<<" \n";
+
+            segments[i].index = i;
+
             if (_sdf_segment->HasElement("forward"))
                 segments[i].fwd = _sdf_segment->Get<ignition::math::Vector3d>("forward");
             else
@@ -238,18 +295,17 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
             else
                 gzwarn<<"segment ["<<i<<"] is missing 'seg_chord' element \n";
 
-            AerodynamicParameters aero_params_;
-
             if (_sdf_segment->HasElement("aeroParamsYAML")) {
                 std::string aero_params_yaml =
                         _sdf_segment->GetElement("aeroParamsYAML")->Get<std::string>();
-                aero_params_.LoadAeroParamsYAML(aero_params_yaml);
+                segments[i].aero_params_.LoadAeroParamsYAML(aero_params_yaml);
 
             } else {
                 gzwarn<<"segment ["<<i<<"] is missing aerodynamic paramaters YAML file, "
                      <<"using default parameters.\n";
             }
 
+            /*
             segments[i].alpha_max_ns = aero_params_.alpha_max_ns;
             segments[i].alpha_min_ns = aero_params_.alpha_min_ns;
 
@@ -261,6 +317,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
             segments[i].fp_c_lift_max = aero_params_.fp_c_lift_max;
             segments[i].fp_c_drag_max = aero_params_.fp_c_drag_max;
             segments[i].fp_c_pitch_moment_max = aero_params_.fp_c_pitch_moment_max;
+            */
 
             // get control joints
             if (_sdf_segment->HasElement("control")) {
@@ -273,12 +330,11 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
                     ++segments[i].n_cs;
                 }
 
-                gzdbg<<"found "<<segments[i].n_cs<<" control surface segments for segment ["<<i<<"]. \n";
+                gzdbg<<"found "<<segments[i].n_cs<<" control surface segment(s) for segment ["<<i<<"]. \n";
                 _sdf_cs = _sdf_control->GetElement("cs");
                 segments[i].cs = new control_surface [segments[i].n_cs];
 
                 for(int j=0; j<segments[i].n_cs; j++){
-
                     if (_sdf_cs->HasElement("controlJoint")){
                         std::string joint_name = _sdf_cs->Get<std::string>("controlJoint");
                         segments[i].cs[j].controlJoint = model->GetJoint(joint_name);
@@ -320,7 +376,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
                     ++segments[i].n_slpstr;
                 }
 
-                gzdbg<<"found "<<segments[i].n_slpstr<<" slipstreams for segment ["<<i<<"]. \n";
+                gzdbg<<"found "<<segments[i].n_slpstr<<" slipstream(s) for segment ["<<i<<"]. \n";
                 _sdf_slpstr = _sdf_ind_vel->GetElement("slpstr");
 
                 segments[i].slpstr = new slipstream [segments[i].n_slpstr];
@@ -338,6 +394,34 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
                     }
                 }
             }
+
+            segments[i].lift_vis = vector_vis_array.add_vector();
+
+            segments[i].lift_vis->set_ns(namespace_);
+            segments[i].lift_vis->set_id(segments[i].index+n_bdy);
+            segments[i].lift_vis->mutable_scale()->set_x(0.025);
+            segments[i].lift_vis->mutable_scale()->set_y(0.05);
+            segments[i].lift_vis->mutable_scale()->set_z(0.05);
+            segments[i].lift_vis->mutable_color()->set_x(1.0);
+            segments[i].lift_vis->mutable_color()->set_y(1.0);
+            segments[i].lift_vis->mutable_color()->set_z(1.0);
+
+            // message setup for visualization
+            /*
+            const std::string frame_id = this->link->GetName();
+            segments[i].lift_f_vis.mutable_header()->mutable_stamp()->set_sec(0.0);
+            segments[i].lift_f_vis.mutable_header()->mutable_stamp()->set_nsec(0.0);
+            segments[i].lift_f_vis.mutable_header()->set_frame_id(frame_id);
+            segments[i].lift_f_vis.set_ns(namespace_);
+            segments[i].lift_f_vis.set_id(segments[i].index);
+            segments[i].lift_f_vis.mutable_scale()->set_x(0.025);
+            segments[i].lift_f_vis.mutable_scale()->set_y(0.05);
+            segments[i].lift_f_vis.mutable_scale()->set_z(0.05);
+            segments[i].lift_f_vis.mutable_color()->set_x(1.0);
+            segments[i].lift_f_vis.mutable_color()->set_y(0.0);
+            segments[i].lift_f_vis.mutable_color()->set_z(0.0);
+            segments[i].lift_f_vis_topic = namespace_ + "_lift_" + std::to_string(i);
+            */
 
             _sdf_segment = _sdf_segment->GetNextElement("segment");
         }
@@ -612,9 +696,44 @@ void GazeboAerodynamics::DoLogCallback(Int32Ptr& do_log){
 }
 */
 
-
 void GazeboAerodynamics::OnUpdate()
 {
+
+    if (!pubs_and_subs_created_) {
+
+        gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+                node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>(
+                "~/" + kConnectGazeboToRosSubtopic, 1);
+        gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
+        gzdbg<<"advertised ~/" + kConnectGazeboToRosSubtopic + "\n";
+
+        /*
+        for (int i = 0; i<n_seg; i++){
+            segments[i].lift_f_vis_pub = node_handle_->Advertise<gz_visualization_msgs::VisVector>("~/" + segments[i].lift_f_vis_topic, 1);
+
+            connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + segments[i].lift_f_vis_topic);
+            connect_gazebo_to_ros_topic_msg.set_ros_topic(segments[i].lift_f_vis_topic);
+            connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::VIS_VECTOR);
+            connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+        }
+
+        for (int i = 0; i<n_bdy; i++){
+
+        }
+        */
+
+        vector_vis_array_pub = node_handle_->Advertise<gz_visualization_msgs::VisVectorArray>("~/" + vector_vis_array_topic, 1);
+        connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + vector_vis_array_topic);
+        connect_gazebo_to_ros_topic_msg.set_ros_topic(vector_vis_array_topic);
+        connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::VIS_VECTOR_ARRAY);
+        connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+        pubs_and_subs_created_ = true;
+    }
+
+    common::Time current_time = world->SimTime();
+    double dt = (current_time - last_time).Double();
+    last_time = current_time;
 
     //ignition::math::Vector3d pos_ref = ignition::math::Vector3d(0, 0, 0); // used as reference position (relative to and expressed in fuselage frame) to calculate moments exerted by airfoils for comparison with PX4 aerodynamic model (debugging).
 
@@ -726,15 +845,14 @@ void GazeboAerodynamics::OnUpdate()
                         v_ind_cp_ = k_p_*(k_a_*v_ind_d+(1-k_a_)*v_ind_e);   // induced velocity at airfoil segment cp
                     }
                 }
-                
-                */
+            */
 
             // get local airspeed at cp_, expressed in world frame
             GZ_ASSERT(this->link, "Link was NULL");
 #if GAZEBO_MAJOR_VERSION >= 9
-            ignition::math::Vector3d vel = this->link->WorldLinearVel(cp_);
+            ignition::math::Vector3d vel = this->link->WorldLinearVel(segments[i].cp);
 #else
-            ignition::math::Vector3d vel = ignitionFromGazeboMath(this->link->GetWorldLinearVel(cp_));
+            ignition::math::Vector3d vel = ignitionFromGazeboMath(this->link->GetWorldLinearVel(segments[i].cp));
 #endif
 
             // account for induced velocity, expressed in world frame
@@ -771,6 +889,9 @@ void GazeboAerodynamics::OnUpdate()
                 alpha_*=-1;
             }
 
+            //segments[i].alpha_dot = (alpha_-segments[i].alpha_prev)/ignition::math::clamp(dt,0.001,0.1);
+            //segments[i].alpha_prev = alpha_;
+
             // compute dynamic pressure
             double speedInLDPlane = velInLDPlane.Length();
             double q = 0.5 * rho * speedInLDPlane * speedInLDPlane;
@@ -801,18 +922,18 @@ void GazeboAerodynamics::OnUpdate()
                 double cl_fp = cl_fp_max*sin(2*alpha_);
                 double cd_fp = cd_af_min + (cd_fp_max-cd_af_min)*pow(sin(alpha_),2);
                 double cm_fp = -cm_fp_max*sin(pow(alpha_,3)/(M_PI*M_PI));
-                */
+            */
 
             Eigen::Vector3d alpha_poly_3(1.0,alpha_,alpha_*alpha_);
             Eigen::Vector2d alpha_poly_2(1.0,alpha_);
 
-            double cl_af = segments[i].c_lift_alpha.dot(alpha_poly_3) + d_cl;
-            double cd_af = segments[i].c_drag_alpha.dot(alpha_poly_3) + d_cd;
-            double cm_af = segments[i].c_pitch_moment_alpha.dot(alpha_poly_2) + d_cm;
+            double cl_af = segments[i].aero_params_.c_lift_alpha.dot(alpha_poly_3) + d_cl;
+            double cd_af = segments[i].aero_params_.c_drag_alpha.dot(alpha_poly_3) + d_cd;
+            double cm_af = segments[i].aero_params_.c_pitch_moment_alpha.dot(alpha_poly_2) + d_cm;
 
-            double cl_fp = segments[i].fp_c_lift_max*sin(2*alpha_);
-            double cd_fp = segments[i].fp_c_drag_max*pow(sin(alpha_),2);
-            double cm_fp = -segments[i].fp_c_pitch_moment_max*sin(pow(alpha_,3)/(M_PI*M_PI));
+            double cl_fp = segments[i].aero_params_.fp_c_lift_max*sin(2*alpha_);
+            double cd_fp = segments[i].aero_params_.fp_c_drag_max*pow(sin(alpha_),2);
+            double cm_fp = -segments[i].aero_params_.fp_c_pitch_moment_max*sin(pow(alpha_,3)/(M_PI*M_PI));
 
             /* where:
                  *
@@ -832,14 +953,14 @@ void GazeboAerodynamics::OnUpdate()
 
             // form mixing weight to combine pre- and post-stall models
             double w_af;
-            if(alpha_>segments[i].alpha_max_ns + segments[i].alpha_blend)
+            if(alpha_>segments[i].aero_params_.alpha_max_ns + segments[i].aero_params_.alpha_blend)
                 w_af = 0.0;
-            else if(alpha_>segments[i].alpha_max_ns)
-                w_af = 0.5+0.5*cos(M_PI*(alpha_ - segments[i].alpha_max_ns)/segments[i].alpha_blend);
-            else if(alpha_>segments[i].alpha_min_ns)
+            else if(alpha_>segments[i].aero_params_.alpha_max_ns)
+                w_af = 0.5+0.5*cos(M_PI*(alpha_ - segments[i].aero_params_.alpha_max_ns)/segments[i].aero_params_.alpha_blend);
+            else if(alpha_>segments[i].aero_params_.alpha_min_ns)
                 w_af = 1.0;
-            else if(alpha_>segments[i].alpha_min_ns - segments[i].alpha_blend)
-                w_af = 0.5+0.5*cos(M_PI*(segments[i].alpha_min_ns-alpha_)/segments[i].alpha_blend);
+            else if(alpha_>segments[i].aero_params_.alpha_min_ns - segments[i].aero_params_.alpha_blend)
+                w_af = 0.5+0.5*cos(M_PI*(segments[i].aero_params_.alpha_min_ns-alpha_)/segments[i].aero_params_.alpha_blend);
             else
                 w_af = 0.0;
 
@@ -945,6 +1066,61 @@ void GazeboAerodynamics::OnUpdate()
             // apply forces cp
             this->link->AddForceAtWorldPosition(force, cp_);
             this->link->AddTorque(torque);
+
+            // visualization
+
+            // world to local frame
+            ignition::math::Vector3d _B_force = pose.Rot().RotateVectorReverse(force);
+            ignition::math::Vector3d _B_torque = pose.Rot().RotateVectorReverse(torque);
+
+            /*
+            switch(i){
+                case 0:
+                    _B_force = pose.Rot().RotateVectorReverse(vel);
+                    break;
+                case 1:
+                    _B_force = pose.Rot().RotateVectorReverse(velInLDPlane);
+                    break;
+                case 2:
+                    _B_force = pose.Rot().RotateVectorReverse(dragDirection);
+                    break;
+                case 3:
+                    _B_force = pose.Rot().RotateVectorReverse(liftDirection);
+                    break;
+                case 4:
+                    _B_force = pose.Rot().RotateVectorReverse(momentDirection);
+                    break;
+                case 5:
+                    _B_force = pose.Rot().RotateVectorReverse(spanwiseI);
+                    break;
+                default:
+                   _B_force = ignition::math::Vector3d(0,0,0);
+            }
+            */
+            /*
+            segments[i].lift_f_vis.mutable_startpoint()->set_x(segments[i].cp.X());
+            segments[i].lift_f_vis.mutable_startpoint()->set_y(segments[i].cp.Y());
+            segments[i].lift_f_vis.mutable_startpoint()->set_z(segments[i].cp.Z());
+            segments[i].lift_f_vis.mutable_vector()->set_x(_B_force.X()/10.0);
+            segments[i].lift_f_vis.mutable_vector()->set_y(_B_force.Y()/10.0);
+            segments[i].lift_f_vis.mutable_vector()->set_z(_B_force.Z()/10.0);
+            segments[i].lift_f_vis_pub->Publish(segments[i].lift_f_vis);
+            */
+
+            segments[i].lift_vis->mutable_color()->set_x(1-w_af);
+            segments[i].lift_vis->mutable_color()->set_y(w_af);
+            segments[i].lift_vis->mutable_color()->set_z(0.0);
+            segments[i].lift_vis->mutable_startpoint()->set_x(segments[i].cp.X());
+            segments[i].lift_vis->mutable_startpoint()->set_y(segments[i].cp.Y());
+            segments[i].lift_vis->mutable_startpoint()->set_z(segments[i].cp.Z());
+            segments[i].lift_vis->mutable_vector()->set_x(_B_force.X()/300.0/segments[i].segArea);
+            segments[i].lift_vis->mutable_vector()->set_y(_B_force.Y()/300.0/segments[i].segArea);
+            segments[i].lift_vis->mutable_vector()->set_z(_B_force.Z()/300.0/segments[i].segArea);
+
+            if(updateCounter%100==0){
+                gzdbg<<"w_af_"<<i<<": "<<w_af<<" | alpha:"<<alpha_<<"\n";
+            }
+
         }
         
         /*
@@ -1028,6 +1204,17 @@ void GazeboAerodynamics::OnUpdate()
             ignition::math::Vector3d drag = -this->rho/2.0*(forwardI*uu*cd_x + upwardI*vv*cd_y + spanwiseI*ww*cd_z);
             this->link->AddForceAtWorldPosition(drag, cp_);
 
+            // world to local frame
+            ignition::math::Vector3d _B_drag = pose.Rot().RotateVectorReverse(drag);
+            //ignition::math::Vector3d _B_torque = pose.Rot().RotateVectorReverse(torque);
+
+            bodies[i].force_vis->mutable_startpoint()->set_x(bodies[i].cp.X());
+            bodies[i].force_vis->mutable_startpoint()->set_y(bodies[i].cp.Y());
+            bodies[i].force_vis->mutable_startpoint()->set_z(bodies[i].cp.Z());
+            bodies[i].force_vis->mutable_vector()->set_x(_B_drag.X()/10);
+            bodies[i].force_vis->mutable_vector()->set_y(_B_drag.Y()/10);
+            bodies[i].force_vis->mutable_vector()->set_z(_B_drag.Z()/10);
+
             // logging
 
             /*
@@ -1041,6 +1228,7 @@ void GazeboAerodynamics::OnUpdate()
 
     }
     
+    vector_vis_array_pub->Publish(vector_vis_array);
     this->updateCounter++;  // counter to time logging/debug printing
 
 }

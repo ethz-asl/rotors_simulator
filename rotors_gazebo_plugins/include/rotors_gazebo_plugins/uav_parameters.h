@@ -41,19 +41,19 @@ static constexpr double kDefaultAlphaMaxNs = 0.27;
 static constexpr double kDefaultAlphaMinNs = -0.27;
 
 static const Eigen::Vector3d kDefaultCLiftAlpha =
-    Eigen::Vector3d(0.2127, 10.8060, -46.8324);
+    Eigen::Vector3d(0.4, 6.3, 0.0);
 
 static const Eigen::Vector3d kDefaultCDragAlpha =
-    Eigen::Vector3d(0.1360, -0.6737, 5.4546);
+    Eigen::Vector3d(0.0, 0.0, 0.9);
 
 static const Eigen::Vector2d kDefaultCPitchMomentAlpha =
-    Eigen::Vector2d(0.0435, -2.9690);
+    Eigen::Vector2d(-0.1, 0.0);
 
 // Stalled regime
-static constexpr double kDefaultAlphaBlend = -0.05;
-static constexpr double kDefaultFpCLiftMax = 0.0;
-static constexpr double kDefaultFpCDragMax = 0.0;
-static constexpr double kDefaultFpCPitchMomentMax = 0.0;
+static constexpr double kDefaultAlphaBlend = 0.2;
+static constexpr double kDefaultFpCLiftMax = 0.65;
+static constexpr double kDefaultFpCDragMax = 1.20;
+static constexpr double kDefaultFpCPitchMomentMax = 0.40;
 
 /// \brief  This function reads a vector from a YAML node and converts it into
 ///         a vector of type Eigen.
@@ -85,7 +85,10 @@ struct AerodynamicParameters {
           alpha_blend(kDefaultAlphaBlend),
           fp_c_lift_max(kDefaultFpCLiftMax),
           fp_c_drag_max(kDefaultFpCDragMax),
-          fp_c_pitch_moment_max(kDefaultFpCPitchMomentMax) {}
+          fp_c_pitch_moment_max(kDefaultFpCPitchMomentMax) {
+
+        //gzdbg<<"aerodynamic struct created... \n";
+    }
 
     double alpha_max_ns;
     double alpha_min_ns;
@@ -101,28 +104,39 @@ struct AerodynamicParameters {
 
     void LoadAeroParamsYAML(const std::string& yaml_path) {
 
-        const YAML::Node node = YAML::LoadFile(yaml_path);
-
-        gzdbg << yaml_path <<std::endl;
-        gzdbg<<"IsDefined"<<node.IsDefined()<<std::endl;
-        gzdbg<<"IsMap"<<node.IsMap()<<std::endl;
-        gzdbg<<"IsNull"<<node.IsNull()<<std::endl;
-        gzdbg<<"IsScalar"<<node.IsScalar()<<std::endl;
-        gzdbg<<"IsSequence"<<node.IsSequence()<<std::endl;
+        gzdbg <<"loading "<< yaml_path <<std::endl;
 
         try{
 
-            READ_PARAM(node, alpha_max_ns);
-            READ_PARAM(node, alpha_min_ns);
+            const YAML::Node node = YAML::LoadFile(yaml_path);
 
-            READ_EIGEN_VECTOR(node, c_lift_alpha);
-            READ_EIGEN_VECTOR(node, c_drag_alpha);
-            READ_EIGEN_VECTOR(node, c_pitch_moment_alpha);
+            gzdbg<<"IsDefined"<<node.IsDefined()<<std::endl;
+            gzdbg<<"IsMap"<<node.IsMap()<<std::endl;
+            gzdbg<<"IsNull"<<node.IsNull()<<std::endl;
+            gzdbg<<"IsScalar"<<node.IsScalar()<<std::endl;
+            gzdbg<<"IsSequence"<<node.IsSequence()<<std::endl;
 
-            READ_PARAM(node, alpha_blend);
-            READ_PARAM(node, fp_c_lift_max);
-            READ_PARAM(node, fp_c_drag_max);
-            READ_PARAM(node, fp_c_pitch_moment_max);
+            try{
+
+                READ_PARAM(node, alpha_max_ns);
+                READ_PARAM(node, alpha_min_ns);
+
+                READ_EIGEN_VECTOR(node, c_lift_alpha);
+                READ_EIGEN_VECTOR(node, c_drag_alpha);
+                READ_EIGEN_VECTOR(node, c_pitch_moment_alpha);
+
+                READ_PARAM(node, alpha_blend);
+                READ_PARAM(node, fp_c_lift_max);
+                READ_PARAM(node, fp_c_drag_max);
+                READ_PARAM(node, fp_c_pitch_moment_max);
+
+            } catch (const std::exception& ex) {
+                gzerr<<ex.what()<<std::endl;
+            } catch (const std::string& ex) {
+                gzerr<<ex<<std::endl;
+            } catch (...) {
+                gzerr<<"meeep"<<std::endl;
+            }
 
         } catch (const std::exception& ex) {
             gzerr<<ex.what()<<std::endl;
@@ -131,8 +145,6 @@ struct AerodynamicParameters {
         } catch (...) {
             gzerr<<"meeep"<<std::endl;
         }
-
-        gzdbg << "dbg3.4" << std::endl;
     }
 };
 
