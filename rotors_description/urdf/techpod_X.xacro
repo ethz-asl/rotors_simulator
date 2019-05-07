@@ -253,7 +253,7 @@
   <!-- Instantiate the propeller -->
   <xacro:propeller
     robot_namespace="${namespace}"
-    suffix=""
+    suffix="main"
     parent="${namespace}/base_link"
     mass_propeller="${mass_propeller}"
     propeller_radius="${propeller_radius}"
@@ -267,13 +267,14 @@
   <gazebo>
     <plugin filename="librotors_gazebo_propulsion_plugin.so" name="propulsion_plugin">
       <robotNamespace>${namespace}</robotNamespace>
-      <propeller name = "main">
-        <jointName>${namespace}/propeller_joint</jointName>
+      <linkName>${namespace}/base_link</linkName>
+      <prop name="P1">
+        <jointName>${namespace}/propeller_main_joint</jointName>
         <turnDir>ccw</turnDir>
         <cp>0 0 0</cp>
         <propParamsYAML>${yaml_path}/propeller_test.yaml</propParamsYAML>
-        <propSlpStrPubTopic></propSlpStrPubTopic>
-      </propeller>
+        <propSlpStrPubTopic>slipstr</propSlpStrPubTopic>
+      </prop>
     </plugin>
   </gazebo>
 

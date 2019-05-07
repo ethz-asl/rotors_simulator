@@ -49,6 +49,7 @@ class GazeboPropulsion : public ModelPlugin{
 public:
     GazeboPropulsion():
           ModelPlugin(),
+          n_props(0),
           max_rot_velocity_(kDefaulMaxRotVelocity),
           rho_air(kDefaultRhoAir),
           updateCounter(0){}

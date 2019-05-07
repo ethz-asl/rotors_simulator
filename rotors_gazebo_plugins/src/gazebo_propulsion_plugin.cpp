@@ -51,18 +51,18 @@ void GazeboPropulsion::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     node_handle_ = transport::NodePtr(new transport::Node());
     node_handle_->Init(namespace_);
 
-    if (_sdf->HasElement("propeller")){
-        sdf::ElementPtr _sdf_propeller = _sdf->GetElement("propeller");
+    if (_sdf->HasElement("prop")){
+        sdf::ElementPtr _sdf_propeller = _sdf->GetElement("prop");
 
         while (_sdf_propeller) {
-            _sdf_propeller = _sdf->GetNextElement("propeller");
+            _sdf_propeller = _sdf_propeller->GetNextElement("prop");
             ++n_props;
         }
 
         gzdbg<<"found "<<n_props<<" propellers for this plugin. \n";
         propellers = new propeller [n_props];
 
-        _sdf_propeller = _sdf->GetElement("propeller");
+        _sdf_propeller = _sdf->GetElement("prop");
 
         for(int idx=0; idx<n_props; idx++){
             gzdbg<<"processing propeller nr: "<<idx<<" \n";
@@ -71,7 +71,7 @@ void GazeboPropulsion::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
                 propellers[idx].propJoint =  model_->GetJoint(_sdf_propeller->GetElement("jointName")->Get<std::string>());
 
                 if (propellers[idx].propJoint == NULL)
-                    gzthrow("[gazebo_motor_model] Couldn't find specified joint \"" << _sdf_propeller->GetElement("jointName")->Get<std::string>() << "\".");
+                    gzthrow("[gazebo_motor_model] Couldn't find specified joint " << _sdf_propeller->GetElement("jointName")->Get<std::string>() << "\".");
 
             } else {
                 gzerr << "[gazebo_motor_model] Please specify propeller joinName.\n";
