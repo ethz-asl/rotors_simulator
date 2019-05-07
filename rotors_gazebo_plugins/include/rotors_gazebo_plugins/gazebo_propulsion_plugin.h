@@ -34,6 +34,8 @@
 #include "gazebo/transport/transport.hh"
 #include "gazebo/msgs/msgs.hh"
 #include "PropulsionSlipstream.pb.h"
+#include "VisVectorArray.pb.h"
+#include "ConnectGazeboToRosTopic.pb.h"
 #include <iostream>
 #include <fstream>
 
@@ -41,6 +43,8 @@
 #include "uav_parameters.h"
 
 namespace gazebo {
+
+typedef const boost::shared_ptr<const gz_visualization_msgs::VisVectorArray> GzVisVectorArrayMsgPtr;
 // Default values
 static constexpr double kDefaulMaxRotVelocity = 838.0;
 static constexpr double kDefaultRhoAir = 1.255;
@@ -52,7 +56,8 @@ public:
           n_props(0),
           max_rot_velocity_(kDefaulMaxRotVelocity),
           rho_air(kDefaultRhoAir),
-          updateCounter(0){}
+          updateCounter(0),
+          pubs_and_subs_created(false){}
     virtual ~GazeboPropulsion();
 
 protected:
@@ -77,7 +82,9 @@ private:
             turning_direction_(1),
             cp(ignition::math::Vector3d(0,0,0)),
             prop_slpstr_pub_(nullptr),
-            prop_slpstr_pub_topic_("slipstream"){}
+            prop_slpstr_pub_topic_("slipstream"),
+            vector_vis_array_topic("prop_vis"),
+            vector_vis_array_pub(nullptr){}
 
         PropellerParameters prop_params_;
 
@@ -88,6 +95,11 @@ private:
         ignition::math::Vector3d cp;
         transport::PublisherPtr prop_slpstr_pub_;
         std::string prop_slpstr_pub_topic_;
+
+        std::array<gz_visualization_msgs::ArrowMarker*,4> vec_vis;
+        std::string vector_vis_array_topic;
+        gz_visualization_msgs::VisVectorArray vector_vis_array_msg;
+        gazebo::transport::PublisherPtr vector_vis_array_pub;
     };
 
     propeller* propellers;
@@ -97,6 +109,8 @@ private:
     double rho_air;   // air density, [kg/m^3]
 
     gz_mav_msgs::PropulsionSlipstream propulsion_slipstream_msg_;
+
+    bool pubs_and_subs_created;
 
     int sgn(double val) {
         return (int)(0.0 < val) - (int)(val < 0.0);
