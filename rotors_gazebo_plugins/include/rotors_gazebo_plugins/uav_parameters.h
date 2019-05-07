@@ -34,8 +34,9 @@ inline void YAMLReadAirfoil(const YAML::Node& node,
                                    ControlSurface& surface);
 */
 
-// Default aerodynamic parameter values (NACAXXXX airfoil and low-Re flat-plate)
-
+//++++++++++++++++++++++++++++++++++++++++++
+// Default airfoil parameter values (NACAXXXX airfoil and low-Re flat-plate)
+//++++++++++++++++++++++++++++++++++++++++++
 // Non-stalled regime
 static constexpr double kDefaultAlphaMaxNs = 0.27;
 static constexpr double kDefaultAlphaMinNs = -0.27;
@@ -55,6 +56,18 @@ static constexpr double kDefaultFpCLiftMax = 0.65;
 static constexpr double kDefaultFpCDragMax = 1.20;
 static constexpr double kDefaultFpCPitchMomentMax = 0.40;
 
+//++++++++++++++++++++++++++++++++++++++++++
+// Default propeller parameter values (similar 11x7E apc)
+//++++++++++++++++++++++++++++++++++++++++++
+static constexpr double kDefaultDiameter = 0.28;
+static constexpr double kDefaultKT = -0.13;
+static constexpr double kDefaultKT0 = 0.11;
+static constexpr double kDefaultKQ = -0.011;
+static constexpr double kDefaultKQ0 = 0.01;
+static constexpr double kDefaultRollMomCoeff = 1e-06;
+static constexpr double kDefaultDragMomCoeff = 5.3849e-04;
+static constexpr double kDefaultDFlow = 5.0;
+
 /// \brief  This function reads a vector from a YAML node and converts it into
 ///         a vector of type Eigen.
 template <typename Derived>
@@ -73,11 +86,75 @@ inline void YAMLReadParam(const YAML::Node& node,
 #define READ_EIGEN_VECTOR(node, item) YAMLReadEigenVector(node, #item, item);
 #define READ_PARAM(node, item) YAMLReadParam(node, #item, item);
 
+struct PropellerParameters {
+
+    PropellerParameters():
+        diameter(kDefaultDiameter),
+        k_T(kDefaultKT),
+        k_T0(kDefaultKT0),
+        k_Q(kDefaultKQ),
+        k_Q0(kDefaultKQ0),
+        rolling_moment_coefficient_(kDefaultRollMomCoeff),
+        rotor_drag_coefficient_(kDefaultDragMomCoeff),
+        d_flow(kDefaultDFlow){}
+
+    double diameter;
+    double k_T;
+    double k_T0;
+    double k_Q;
+    double k_Q0;
+    double rolling_moment_coefficient_;
+    double rotor_drag_coefficient_;
+    double d_flow;
+
+    void LoadPropParamsYAML(const std::string& yaml_path) {
+
+        gzdbg <<"loading propeller"<< yaml_path <<std::endl;
+
+        try{
+
+            const YAML::Node node = YAML::LoadFile(yaml_path);
+
+            gzdbg<<"IsDefined"<<node.IsDefined()<<std::endl;
+            gzdbg<<"IsMap"<<node.IsMap()<<std::endl;
+            gzdbg<<"IsNull"<<node.IsNull()<<std::endl;
+            gzdbg<<"IsScalar"<<node.IsScalar()<<std::endl;
+            gzdbg<<"IsSequence"<<node.IsSequence()<<std::endl;
+
+            try{
+
+                READ_PARAM(node, diameter);
+                READ_PARAM(node, k_T);
+                READ_PARAM(node, k_T0);
+                READ_PARAM(node, k_Q);
+                READ_PARAM(node, k_Q0);
+                READ_PARAM(node, rolling_moment_coefficient_);
+                READ_PARAM(node, rotor_drag_coefficient_);
+                READ_PARAM(node, d_flow);
+
+            } catch (const std::exception& ex) {
+                gzerr<<ex.what()<<std::endl;
+            } catch (const std::string& ex) {
+                gzerr<<ex<<std::endl;
+            } catch (...) {
+                gzerr<<"meeep"<<std::endl;
+            }
+
+        } catch (const std::exception& ex) {
+            gzerr<<ex.what()<<std::endl;
+        } catch (const std::string& ex) {
+            gzerr<<ex<<std::endl;
+        } catch (...) {
+            gzerr<<"meeep"<<std::endl;
+        }
+    }
+};
+
 struct AerodynamicParameters {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    AerodynamicParameters()
-        : alpha_max_ns(kDefaultAlphaMaxNs),
+    AerodynamicParameters():
+          alpha_max_ns(kDefaultAlphaMaxNs),
           alpha_min_ns(kDefaultAlphaMinNs),
           c_lift_alpha(kDefaultCLiftAlpha),
           c_drag_alpha(kDefaultCDragAlpha),
@@ -87,7 +164,7 @@ struct AerodynamicParameters {
           fp_c_drag_max(kDefaultFpCDragMax),
           fp_c_pitch_moment_max(kDefaultFpCPitchMomentMax) {
 
-        //gzdbg<<"aerodynamic struct created... \n";
+          //gzdbg<<"aerodynamic struct created... \n";
     }
 
     double alpha_max_ns;
@@ -104,7 +181,7 @@ struct AerodynamicParameters {
 
     void LoadAeroParamsYAML(const std::string& yaml_path) {
 
-        gzdbg <<"loading "<< yaml_path <<std::endl;
+        gzdbg <<"loading airfoil"<< yaml_path <<std::endl;
 
         try{
 
