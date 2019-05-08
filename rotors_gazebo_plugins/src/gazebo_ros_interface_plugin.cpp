@@ -102,8 +102,82 @@ void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world,
 }
 
 void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
-  // Do nothing
-  // This plugins actions are all executed through message callbacks.
+    // Do nothing
+    // This plugins actions are all executed through message callbacks.
+
+    //gzdbg<<"onUpdate\n";
+    gz_sensor_msgs::JointState every_joint_state;
+
+    /*
+    every_joint_state.mutable_header()->set_frame_id("");
+    every_joint_state.mutable_header()->mutable_stamp()->set_sec(0);
+    every_joint_state.mutable_header()->mutable_stamp()->set_nsec(0);
+   */
+    ros_all_joint_state_msg_.header.stamp.sec = 0;
+    ros_all_joint_state_msg_.header.stamp.nsec = 0;
+    ros_all_joint_state_msg_.header.frame_id = "";
+
+    int n_joints = 0;
+    for (physics::ModelPtr model : world_->Models()) {
+        for (physics::JointPtr joint : model->GetJoints()) {
+            ++n_joints;
+        }
+    }
+
+    ros_all_joint_state_msg_.name.resize(n_joints);
+    ros_all_joint_state_msg_.position.resize(n_joints);
+
+    int idx=0;
+    for (physics::ModelPtr model : world_->Models()) {
+        for (physics::JointPtr joint : model->GetJoints()) {
+            if(idx<n_joints){
+                ros_all_joint_state_msg_.name[idx] = joint->GetName();
+                ros_all_joint_state_msg_.position[idx] = joint->Position();
+            }
+            ++idx;
+            /*
+            std::string* name = every_joint_state.add_name();
+            every_joint_state.add_position(joint->Position());
+            *name = joint->GetName();
+            */
+        }
+    }
+
+    if(n_joints>0){
+        if(!joint_states_advertised){
+            joint_states_advertised = true;
+            ros_joint_state_publisher = ros_node_handle_->advertise<sensor_msgs::JointState>("/all_joint_states", 1);
+        }
+
+        //GazeboRosInterfacePlugin::GzJointStateMsgCallback(boost::shared_ptr<gz_sensor_msgs::JointState>(&every_joint_state), ros_joint_state_publisher);
+        ros_joint_state_publisher.publish(ros_all_joint_state_msg_);
+    }
+    /*
+    gzdbg<<"segfault dbg1\n";
+    ConvertHeaderGzToRos(gz_joint_state_msg->header(),
+                         &ros_joint_state_msg_.header);
+
+    gzdbg<<"segfault dbg2\n";
+    ros_joint_state_msg_.name.resize(gz_joint_state_msg->name_size());
+    for (int i = 0; i < gz_joint_state_msg->name_size(); i++) {
+      ros_joint_state_msg_.name[i] = gz_joint_state_msg->name(i);
+    }
+
+    gzdbg<<"segfault dbg3\n";
+    ros_joint_state_msg_.position.resize(gz_joint_state_msg->position_size());
+    for (int i = 0; i < gz_joint_state_msg->position_size(); i++) {
+      ros_joint_state_msg_.position[i] = gz_joint_state_msg->position(i);
+    }
+
+    gzdbg<<"n_name: "<<gz_joint_state_msg->name_size()<<"n_pos: "<<gz_joint_state_msg->position_size()<<"\n";
+    gzdbg<<"publisher: "<<ros_publisher<<"\n";
+
+    gzdbg<<"segfault dbg4\n";
+
+    // Publish to ROS.
+    ros_publisher.publish(ros_joint_state_msg_);
+    gzdbg<<"segfault dbg5\n";
+    */
 }
 
 /// \brief      A helper class that provides storage for additional parameters
@@ -1172,10 +1246,12 @@ void GazeboRosInterfacePlugin::GzBroadcastTransformMsgCallback(
                    broadcast_transform_msg->transform().translation().y(),
                    broadcast_transform_msg->transform().translation().z());
 
+
   tf_ = tf::Transform(tf_q_W_L, tf_p);
   transform_broadcaster_.sendTransform(tf::StampedTransform(
       tf_, stamp, broadcast_transform_msg->parent_frame_id(),
       broadcast_transform_msg->child_frame_id()));
+
 }
 
 GZ_REGISTER_WORLD_PLUGIN(GazeboRosInterfacePlugin);

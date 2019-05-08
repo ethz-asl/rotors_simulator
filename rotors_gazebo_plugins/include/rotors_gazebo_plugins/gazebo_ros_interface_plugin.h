@@ -345,6 +345,12 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
 
   tf::Transform tf_;
   tf::TransformBroadcaster transform_broadcaster_;
+
+  // publishing joint states of all robots in world
+  bool joint_states_advertised = false;
+  ros::Publisher ros_joint_state_publisher;
+  sensor_msgs::JointState ros_all_joint_state_msg_;
+
 };
 
 }  // namespace gazebo
