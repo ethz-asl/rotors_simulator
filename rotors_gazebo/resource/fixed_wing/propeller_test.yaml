@@ -1,6 +1,7 @@
 # default propeller parameters (~APC11x7E)
 
 diameter: 0.28
+mass: 0.023
 
 k_T: -0.13
 k_T0: 0.11

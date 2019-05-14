@@ -60,6 +60,7 @@ static constexpr double kDefaultFpCPitchMomentMax = 0.40;
 // Default propeller parameter values (similar 11x7E apc)
 //++++++++++++++++++++++++++++++++++++++++++
 static constexpr double kDefaultDiameter = 0.28;
+static constexpr double kDefaultMass = 0.023;
 static constexpr double kDefaultKT = -0.13;
 static constexpr double kDefaultKT0 = 0.11;
 static constexpr double kDefaultKQ = -0.011;
@@ -90,6 +91,7 @@ struct PropellerParameters {
 
     PropellerParameters():
         diameter(kDefaultDiameter),
+        mass(kDefaultMass),
         k_T(kDefaultKT),
         k_T0(kDefaultKT0),
         k_Q(kDefaultKQ),
@@ -99,6 +101,7 @@ struct PropellerParameters {
         d_flow(kDefaultDFlow){}
 
     double diameter;
+    double mass;
     double k_T;
     double k_T0;
     double k_Q;
@@ -109,21 +112,23 @@ struct PropellerParameters {
 
     void LoadPropParamsYAML(const std::string& yaml_path) {
 
-        gzdbg <<"loading propeller"<< yaml_path <<std::endl;
+        gzdbg <<"loading propeller: "<< yaml_path <<std::endl;
 
         try{
 
             const YAML::Node node = YAML::LoadFile(yaml_path);
 
-            gzdbg<<"IsDefined"<<node.IsDefined()<<std::endl;
-            gzdbg<<"IsMap"<<node.IsMap()<<std::endl;
-            gzdbg<<"IsNull"<<node.IsNull()<<std::endl;
-            gzdbg<<"IsScalar"<<node.IsScalar()<<std::endl;
-            gzdbg<<"IsSequence"<<node.IsSequence()<<std::endl;
+            gzdbg<<"IsDefined: "<<node.IsDefined()<<std::endl;
+            gzdbg<<"IsMap: "<<node.IsMap()<<std::endl;
+            gzdbg<<"IsNull: "<<node.IsNull()<<std::endl;
+            gzdbg<<"IsScalar: "<<node.IsScalar()<<std::endl;
+            gzdbg<<"IsSequence: "<<node.IsSequence()<<std::endl;
+            gzdbg<<node.size()<<"\n";
 
             try{
 
                 READ_PARAM(node, diameter);
+                READ_PARAM(node, mass);
                 READ_PARAM(node, k_T);
                 READ_PARAM(node, k_T0);
                 READ_PARAM(node, k_Q);
@@ -132,6 +137,8 @@ struct PropellerParameters {
                 READ_PARAM(node, rotor_drag_coefficient_);
                 READ_PARAM(node, d_flow);
 
+            } catch(const YAML::Exception& ex) {
+                gzerr << ex.what();
             } catch (const std::exception& ex) {
                 gzerr<<ex.what()<<std::endl;
             } catch (const std::string& ex) {
@@ -140,6 +147,8 @@ struct PropellerParameters {
                 gzerr<<"meeep"<<std::endl;
             }
 
+        } catch(const YAML::Exception& ex) {
+            gzerr << ex.what();
         } catch (const std::exception& ex) {
             gzerr<<ex.what()<<std::endl;
         } catch (const std::string& ex) {
@@ -181,7 +190,7 @@ struct AerodynamicParameters {
 
     void LoadAeroParamsYAML(const std::string& yaml_path) {
 
-        gzdbg <<"loading airfoil"<< yaml_path <<std::endl;
+        gzdbg <<"loading airfoil: "<< yaml_path <<std::endl;
 
         try{
 
@@ -207,6 +216,8 @@ struct AerodynamicParameters {
                 READ_PARAM(node, fp_c_drag_max);
                 READ_PARAM(node, fp_c_pitch_moment_max);
 
+            } catch(const YAML::Exception& ex) {
+                gzerr << ex.what();
             } catch (const std::exception& ex) {
                 gzerr<<ex.what()<<std::endl;
             } catch (const std::string& ex) {
@@ -215,6 +226,8 @@ struct AerodynamicParameters {
                 gzerr<<"meeep"<<std::endl;
             }
 
+        } catch(const YAML::Exception& ex) {
+            gzerr << ex.what();
         } catch (const std::exception& ex) {
             gzerr<<ex.what()<<std::endl;
         } catch (const std::string& ex) {
@@ -333,6 +346,29 @@ inline void YAMLReadParam(const YAML::Node& node,
     value = node[name].as<T>();
 }
 
+}
+
+template<typename ValueType>
+bool safeGet(const YAML::Node& node, const std::string& key, ValueType* value) {
+  //CHECK_NOTNULL(value);
+  bool success = false;
+  if(!node.IsMap()) {
+    gzerr << "Unable to get Node[\"" << key << "\"] because the node is not a map";
+  } else {
+    const YAML::Node sub_node = node[key];
+    if(sub_node) {
+      try {
+        *value = sub_node.as<ValueType>();
+        success = true;
+      } catch(const YAML::Exception& e) {
+        gzerr << "Error getting key \"" << key << "\" as type "
+            << typeid(ValueType).name() << ": " << e.what();
+      }
+    } else {
+      gzerr << "Key \"" << key << "\" does not exist";
+    }
+  }
+  return success;
 }
 
 #endif /* ROTORS_GAZEBO_PLUGINS_UAV_PARAMETERS_H_ */

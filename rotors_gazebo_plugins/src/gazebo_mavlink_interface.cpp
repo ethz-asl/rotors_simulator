@@ -122,6 +122,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
           if (channel->HasElement("joint_control_type"))
           {
             channels[i].joint_control_type_ = channel->Get<std::string>("joint_control_type");
+            gzdbg<<"joint_control_type: "<<channels[i].joint_control_type_<<"\n";
           }
           else
           {
@@ -132,11 +133,15 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
           // start gz transport node handle
           if (channels[i].joint_control_type_ == "position_gztopic")
           {
-            // setup publisher handle to topic
-            if (channel->HasElement("gztopic"))
-              channels[i].gztopic_ = "~/" + model_->GetName() + channel->Get<std::string>("gztopic");
-            else
-              channels[i].gztopic_ = "control_position_gztopic_" + std::to_string(i);
+              // setup publisher handle to topic
+              if (channel->HasElement("gztopic"))
+                  channels[i].gztopic_ = "~/" + model_->GetName() + channel->Get<std::string>("gztopic");
+              else
+                  channels[i].gztopic_ = "control_position_gztopic_" + std::to_string(i);
+
+              channels[i].joint_control_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>(
+                          channels[i].gztopic_);
+              /*
       #if GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4
             /// only gazebo 7.4 and above support Any
             channels[i].joint_control_pub_ = node_handle_->Advertise<gazebo::msgs::Any>(
@@ -145,7 +150,8 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
             channels[i].joint_control_pub_ = node_handle_->Advertise<gazebo::msgs::GzString>(
                 channels[i].gztopic_);
       #endif
-            gzdbg<<"publishing to "<<channels[i].gztopic_<<"\n";
+      */
+              gzdbg<<"publishing to "<<channels[i].gztopic_<<"\n";
           }
 
           if (channel->HasElement("joint_name"))
@@ -164,7 +170,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
                     << channels[i].input_index_ << "] joint control active for this channel.\n";
             }
           }
-          else
+          else if(channels[i].joint_control_type_ != "position_gztopic")
           {
             gzdbg << "<joint_name> not found for channel[" << channels[i].input_index_
                   << "] no joint control will be performed for this channel.\n";
@@ -945,17 +951,24 @@ void GazeboMavlinkInterface::handle_control(double _dt)
   //gzdbg<<"dbg: 2a"<<std::endl;
   // set joint positions
   for (int i = 0; i < n_chan; i++) {
-    if (channels[i].joint_) {
+    if (channels[i].joint_||channels[i].joint_control_type_ == "position_gztopic") {
       //gzdbg<<"dbg: 2b"<<i<<std::endl;
       double target = channels[i].input_reference_;
 
       if (channels[i].joint_control_type_ == "velocity")
       {
         double current = channels[i].joint_->GetVelocity(0);
-        double err = current - target;
+        double err =  current - target;
         double force = channels[i].pid_.Update(err, _dt);
-        channels[i].joint_->SetForce(0, force);
 
+        force = ignition::math::clamp(-3*err,-1.0,1.0);
+
+        if(!isnan(force)){
+            channels[i].joint_->SetVelocity(0,target);
+            //gzdbg<<"prop speed: "<<current<<" prop moment: "<<force<<"err: "<<err<<"\n";
+        }else{
+            gzdbg<<"nan force\n";
+         }
       } else if (channels[i].joint_control_type_ == "position") {
 #if GAZEBO_MAJOR_VERSION >= 9
         double current = channels[i].joint_->Position(0);
@@ -1018,6 +1031,10 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         channels[i].joint_->SetForce(0, torque);
 
       } else if (channels[i].joint_control_type_ == "position_gztopic") {
+          gz_std_msgs::Float32 m;
+          m.set_data((float)target);
+          //gzdbg<<"target: "<<target<<"\n";
+     /*
      #if GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4
         /// only gazebo 7.4 and above support Any
         gazebo::msgs::Any m;
@@ -1029,6 +1046,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         ss << target;
         m.set_data(ss.str());
      #endif
+     */
         channels[i].joint_control_pub_->Publish(m);
 
       } else if (channels[i].joint_control_type_ == "position_kinematic") {
@@ -1047,12 +1065,16 @@ void GazeboMavlinkInterface::handle_control(double _dt)
   }
 
   ++dbgCounter;
-  if (dbgCounter%50==0) {
-      gzdbg<<channels[4].joint_name<<": "<<channels[4].joint_->Position(0)<<" | ref: "<<channels[4].input_reference_<<" | srv_ref: "<<channels[4].srv.ref<<"\n";
-
+  if (dbgCounter%100==0) {
+      for(int i=0; i<n_chan; i++){
+          if (channels[i].joint_)
+              gzdbg<<channels[i].joint_name <<": "<<channels[i].joint_->Position(0)
+                  <<" | ref: "<<channels[i].input_reference_
+                 <<" | srv_ref: "<<channels[i].srv.ref<<"\n";
+      }
+      gzdbg<<"\n";
       dbgCounter = 1;
   }
-
 }
 
 bool GazeboMavlinkInterface::IsRunning()

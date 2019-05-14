@@ -154,7 +154,7 @@ protected: double rho;
         ignition::math::Vector3d v_ind_d;
         ignition::math::Vector3d v_ind_e;
 
-        double d_rot;
+        double r_rot;
 
         void Callback(PropulsionSlipstreamPtr& propulsion_slipstream){
             std::unique_lock<std::mutex> lock(writingVelInd);
@@ -180,7 +180,7 @@ protected: double rho;
                                                propulsion_slipstream->ind_vel_end().z());
 
             // propeller/wake diameter
-            d_rot = propulsion_slipstream->prop_diam();
+            r_rot = propulsion_slipstream->prop_diam()/2;
             lock.unlock();
         }
 
@@ -190,10 +190,12 @@ protected: double rho;
             double off_a_ = d_wake_e.Dot(p_r2cp_);                 // axial distance in wake (d1 in report)
             double off_p_ = (off_a_*d_wake_e-p_r2cp_).Length();    // radial distance to wake centerline (d2 in report)
 
+
             if(off_a_>0 && d_wake.Length()>off_a_){
                 // if in zone of slipstream influence
                 double k_a_ = (d_wake.Length()-off_a_)/d_wake.Length();    // axial direction interpolation weight
-                double k_p_ = 1-pow((off_p_/d_rot),4);
+                double r_rot_exp = (2-1*k_a_)*r_rot;
+                double k_p_ = 1-pow((off_p_/r_rot_exp),4);
                 k_p_ = ignition::math::clamp(k_p_,0.0,1.0);                // radial distance downscaling
                 v_ind_cp_ = k_p_*(k_a_*v_ind_d+(1-k_a_)*v_ind_e);   // induced velocity at airfoil segment cp
             }
@@ -297,6 +299,7 @@ protected: double rho;
         gazebo::transport::PublisherPtr pitch_m_vis_pub;
         */
         gz_visualization_msgs::ArrowMarker* lift_vis;
+        gz_visualization_msgs::ArrowMarker* slpstr_vis;
     };
 
     segment * segments;

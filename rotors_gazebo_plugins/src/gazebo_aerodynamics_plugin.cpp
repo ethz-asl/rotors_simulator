@@ -235,7 +235,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
 
             bodies[i].force_vis = vector_vis_array.add_vector();
 
-            bodies[i].force_vis->set_ns(namespace_);
+            bodies[i].force_vis->set_ns(namespace_+"/bdy");
             bodies[i].force_vis->set_id(bodies[i].index);
             bodies[i].force_vis->mutable_scale()->set_x(0.025);
             bodies[i].force_vis->mutable_scale()->set_y(0.05);
@@ -368,43 +368,56 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
             // get slipstreams
             if (_sdf_segment->HasElement("indVel")) {
                 sdf::ElementPtr _sdf_ind_vel= _sdf_segment->GetElement("indVel");
-                sdf::ElementPtr _sdf_slpstr = _sdf_ind_vel->GetElement("slpstr");
+                //sdf::ElementPtr _sdf_slpstr = _sdf_ind_vel->GetElement("slpstr");
 
                 // get number of slipstreams for this particular segment
-                while (_sdf_slpstr) {
-                    _sdf_slpstr = _sdf_slpstr->GetNextElement("slpstr");
+                while (_sdf_ind_vel) {
+                    _sdf_ind_vel = _sdf_ind_vel->GetNextElement("indVel");
                     ++segments[i].n_slpstr;
                 }
 
                 gzdbg<<"found "<<segments[i].n_slpstr<<" slipstream(s) for segment ["<<i<<"]. \n";
-                _sdf_slpstr = _sdf_ind_vel->GetElement("slpstr");
-
+                _sdf_ind_vel = _sdf_segment->GetElement("indVel");
                 segments[i].slpstr = new slipstream [segments[i].n_slpstr];
 
                 for(int j=0; j<segments[i].n_slpstr; j++){
 
-                    if(_sdf_slpstr->HasElement("topic")){
-                        std::string slpstr_topic = _sdf_slpstr->Get<std::string>("topic");
+                    if(_sdf_ind_vel->HasElement("topic")){
+                        std::string slpstr_topic = _sdf_ind_vel->Get<std::string>("topic");
 
-                        segments[i].slpstr[j].propulsion_slipstream_sub_ = node_handle_->Subscribe("~/" + model->GetName() + slpstr_topic,
+                        segments[i].slpstr[j].propulsion_slipstream_sub_ = node_handle_->Subscribe("~/" + model->GetName() + "/" + slpstr_topic,
                                                                                                    &GazeboAerodynamics::slipstream::Callback,
                                                                                                    &segments[i].slpstr[j]);
                     } else {
                         gzwarn<<"slipstream ["<<j<<"] of segment ["<<i<<"] is missing 'radToCPitch' element \n";
                     }
+
+                    _sdf_ind_vel = _sdf_ind_vel->GetNextElement("indVel");
+                }
+
+                if(segments[i].n_slpstr>0){
+                    segments[i].slpstr_vis = vector_vis_array.add_vector();
+                    segments[i].slpstr_vis->set_ns(namespace_+"/slpstr");
+                    segments[i].slpstr_vis->set_id(segments[i].index);
+                    segments[i].slpstr_vis->mutable_scale()->set_x(0.025);
+                    segments[i].slpstr_vis->mutable_scale()->set_y(0.05);
+                    segments[i].slpstr_vis->mutable_scale()->set_z(0.05);
+                    segments[i].slpstr_vis->mutable_color()->set_x(1.0);
+                    segments[i].slpstr_vis->mutable_color()->set_y(1.0);
+                    segments[i].slpstr_vis->mutable_color()->set_z(1.0);
                 }
             }
 
             segments[i].lift_vis = vector_vis_array.add_vector();
-
-            segments[i].lift_vis->set_ns(namespace_);
-            segments[i].lift_vis->set_id(segments[i].index+n_bdy);
+            segments[i].lift_vis->set_ns(namespace_+"/lift");
+            segments[i].lift_vis->set_id(segments[i].index);
             segments[i].lift_vis->mutable_scale()->set_x(0.025);
             segments[i].lift_vis->mutable_scale()->set_y(0.05);
             segments[i].lift_vis->mutable_scale()->set_z(0.05);
             segments[i].lift_vis->mutable_color()->set_x(1.0);
             segments[i].lift_vis->mutable_color()->set_y(1.0);
             segments[i].lift_vis->mutable_color()->set_z(1.0);
+
 
             // message setup for visualization
             /*
@@ -1072,6 +1085,7 @@ void GazeboAerodynamics::OnUpdate()
             // world to local frame
             ignition::math::Vector3d _B_force = pose.Rot().RotateVectorReverse(force);
             ignition::math::Vector3d _B_torque = pose.Rot().RotateVectorReverse(torque);
+            ignition::math::Vector3d _B_indvel = pose.Rot().RotateVectorReverse(segments[i].v_ind_cp_);
 
             /*
             switch(i){
@@ -1117,8 +1131,20 @@ void GazeboAerodynamics::OnUpdate()
             segments[i].lift_vis->mutable_vector()->set_y(_B_force.Y()/300.0/segments[i].segArea);
             segments[i].lift_vis->mutable_vector()->set_z(_B_force.Z()/300.0/segments[i].segArea);
 
+            if(segments[i].n_slpstr>0){
+                segments[i].slpstr_vis->mutable_color()->set_x(0.0);
+                segments[i].slpstr_vis->mutable_color()->set_y(1.0);
+                segments[i].slpstr_vis->mutable_color()->set_z(1.0);
+                segments[i].slpstr_vis->mutable_startpoint()->set_x(segments[i].cp.X());
+                segments[i].slpstr_vis->mutable_startpoint()->set_y(segments[i].cp.Y());
+                segments[i].slpstr_vis->mutable_startpoint()->set_z(segments[i].cp.Z());
+                segments[i].slpstr_vis->mutable_vector()->set_x(_B_indvel.X());
+                segments[i].slpstr_vis->mutable_vector()->set_y(_B_indvel.Y());
+                segments[i].slpstr_vis->mutable_vector()->set_z(_B_indvel.Z());
+            }
+
             if(updateCounter%100==0){
-                gzdbg<<"w_af_"<<i<<": "<<w_af<<" | alpha:"<<alpha_<<"\n";
+                //gzdbg<<"w_af_"<<i<<": "<<w_af<<" | alpha:"<<alpha_<<"\n";
             }
 
         }

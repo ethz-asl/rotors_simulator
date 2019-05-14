@@ -31,13 +31,13 @@
   <xacro:property name="mass_flap" value="0.1" /> <!-- [kg] -->
   <xacro:property name="mass_elevator" value="0.1" /> <!-- [kg] -->
   <xacro:property name="mass_rudder" value="0.1" /> <!-- [kg] -->
-  <xacro:property name="mass_propeller" value="0.1" /> <!-- [kg] -->
+  <xacro:property name="mass_propeller" value="0.01" /> <!-- [kg] -->
 
   <!-- Main body properties -->
   <xacro:property name="body_length" value="1.088" /> <!-- [m] -->
   <xacro:property name="body_width" value="2.591" /> <!-- [m] -->
   <xacro:property name="body_height" value="0.303" /> <!-- [m] -->
-  <xacro:property name="body_color" value="Gray" />
+  <xacro:property name="body_color" value="White" />
   <xacro:property name="body_mesh_file" value="package://rotors_description/meshes/techpod/techpod_body.dae" />
 
   <!-- Aileron properties -->
@@ -267,11 +267,13 @@
   <gazebo>
     <plugin filename="librotors_gazebo_propulsion_plugin.so" name="propulsion_plugin">
       <robotNamespace>${namespace}</robotNamespace>
-      <linkName>${namespace}/base_link</linkName>
       <prop name="P0">
         <jointName>${namespace}/propeller_P0_joint</jointName>
-        <turnDir>ccw</turnDir>
-        <cp>0 0 0</cp>
+        <linkNameParent>${namespace}/base_link</linkNameParent>
+        <cp>-0.025 0 0.15</cp>
+        <axisPosRot>-1 0 0</axisPosRot>
+        <turnDir>cw</turnDir>
+        <speedRefTopic>prop_P0_ref</speedRefTopic>
         <propParamsYAML>${yaml_path}/propeller_test.yaml</propParamsYAML>
         <slpstrTopic>prop0_slpstr</slpstrTopic>
         <visTopic>prop0_vis</visTopic>
@@ -424,6 +426,9 @@
           <seg_area>0.03</seg_area>
           <seg_chord>0.12</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <indVel name="prop0">
+            <topic>prop0_slpstr</topic>
+          </indVel>
           <control>
             <cs name="elevator_left">
                 <controlJoint>${namespace}/elevator_joint</controlJoint>
@@ -441,6 +446,9 @@
           <seg_area>0.03</seg_area>
           <seg_chord>0.12</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <indVel name="prop0">
+            <topic>prop0_slpstr</topic>
+          </indVel>
           <control>
             <cs name="elevator_right">
                 <controlJoint>${namespace}/elevator_joint</controlJoint>
@@ -458,10 +466,13 @@
           <seg_area>0.03</seg_area>
           <seg_chord>0.12</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <indVel name="prop0">
+            <topic>prop0_slpstr</topic>
+          </indVel>
           <control>
             <cs name="rudder">
                 <controlJoint>${namespace}/rudder_joint</controlJoint>
-                <radToCLift>2</radToCLift>
+                <radToCLift>3</radToCLift>
                 <radToCDrag>0.0</radToCDrag>
                 <radToCPitch>0.0</radToCPitch>
             </cs>
@@ -497,12 +508,21 @@
       <control_channels>
       <channel name="propeller">
         <input_index>4</input_index>
-        <input_offset>0</input_offset>
-        <input_scaling>0</input_scaling>
+        <input_offset>1</input_offset>
+        <input_scaling>366</input_scaling><!-- max rad/s/2 -->
         <zero_position_disarmed>0</zero_position_disarmed>
         <zero_position_armed>0</zero_position_armed>
-        <joint_control_type>servo</joint_control_type>
-        <joint_name></joint_name>
+        <joint_control_type>position_gztopic</joint_control_type>
+        <gztopic>prop_P0_ref</gztopic>
+        <!--
+        <joint_name>${namespace}/propeller_P0_joint</joint_name>
+        <joint_control_pid>
+          <p>1</p>
+          <d>0.1</d>
+          <cmdMin>10</cmdMin>
+          <cmdMax>-10</cmdMax>
+        </joint_control_pid>
+        -->
       </channel>
       <channel name="aileron_left">
         <input_index>0</input_index>

@@ -61,6 +61,7 @@
 #include <OpticalFlow.pb.h>
 #include <Lidar.pb.h>
 #include <SITLGps.pb.h>
+#include <Float32.pb.h>
 
 #include <mavlink/v2.0/common/mavlink.h>
 #include "msgbuffer.h"

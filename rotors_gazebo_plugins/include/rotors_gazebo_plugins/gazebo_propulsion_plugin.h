@@ -36,6 +36,7 @@
 #include "PropulsionSlipstream.pb.h"
 #include "VisVectorArray.pb.h"
 #include "ConnectGazeboToRosTopic.pb.h"
+#include "Float32.pb.h"
 #include <iostream>
 #include <fstream>
 
@@ -45,6 +46,9 @@
 namespace gazebo {
 
 typedef const boost::shared_ptr<const gz_visualization_msgs::VisVectorArray> GzVisVectorArrayMsgPtr;
+typedef const boost::shared_ptr<const gz_std_msgs::Float32> GzFloat32MsgPtr;
+typedef ignition::math::Vector3d v3d;
+typedef ignition::math::Matrix3<double> m3d;
 // Default values
 static constexpr double kDefaulMaxRotVelocity = 838.0;
 static constexpr double kDefaultRhoAir = 1.255;
@@ -57,7 +61,9 @@ public:
           max_rot_velocity_(kDefaulMaxRotVelocity),
           rho_air(kDefaultRhoAir),
           updateCounter(0),
-          pubs_and_subs_created(false){}
+          pubs_and_subs_created(false),
+          prev_sim_time_(0),
+          sampling_time_(0){}
     virtual ~GazeboPropulsion();
 
 protected:
@@ -74,32 +80,63 @@ private:
     /// \brief Pointer to the update event connection.
     event::ConnectionPtr updateConnection_;
     int updateCounter;
+    double sampling_time_;
+    double prev_sim_time_;
 
     struct propeller {
-        propeller():
-            propJoint(nullptr),
-            propLink(nullptr),
-            turning_direction_(1),
-            cp(ignition::math::Vector3d(0,0,0)),
-            prop_slpstr_pub_(nullptr),
-            prop_slpstr_pub_topic_("slipstream"),
-            vector_vis_array_topic("prop_vis"),
-            vector_vis_array_pub(nullptr){}
+        propeller(){}
 
         PropellerParameters prop_params_;
 
-        physics::JointPtr propJoint;
-        physics::LinkPtr propLink;
-        int turning_direction_;
+        physics::LinkPtr parentLink = nullptr;
+        ignition::math::Vector3d P_joint{1,0,0};
+        ignition::math::Vector3d P_cp{0,0,0};
+        int turning_direction_ = 1;
 
-        ignition::math::Vector3d cp;
-        transport::PublisherPtr prop_slpstr_pub_;
+        m3d inertia;
+        double omega = 0;
+        double omega_dot = 0;
+        double omega_ref = 0;
+        double tau = 0.1;
+        double dt = 0.0;
+        transport::SubscriberPtr omega_ref_sub_ = nullptr;
+        std::string omega_ref_sub_topic;
+
+        physics::JointPtr propJoint = nullptr;
+        physics::LinkPtr propLink = nullptr;
+        ignition::math::Vector3d cp{0,0,0};
+
+        transport::PublisherPtr prop_slpstr_pub_ = nullptr;
         std::string prop_slpstr_pub_topic_;
 
-        std::array<gz_visualization_msgs::ArrowMarker*,4> vec_vis;
+        std::array<gz_visualization_msgs::ArrowMarker*,7> vec_vis;
         std::string vector_vis_array_topic;
         gz_visualization_msgs::VisVectorArray vector_vis_array_msg;
         gazebo::transport::PublisherPtr vector_vis_array_pub;
+
+        void PropSpeedCallback(GzFloat32MsgPtr& ref){
+            omega_ref = (double)ref->data();
+            MotorDyn();
+        }
+
+        void MotorDyn(){
+            // To Do: implement proper motor dynamics
+            //omega = omega_ref;
+
+            if (tau>0.0 && dt>0.0) {
+                omega = omega + std::min(dt, tau)/tau*(omega_ref-omega);
+                omega_dot = (omega_ref-omega)*std::min(dt, tau)/(dt*tau);
+
+            } else {
+                gzerr<<"simulation time-step and/or motor time-constant equals zero, division by zero\n";
+            }
+
+            if(isnan(omega)||isinf(omega)){
+                omega = 0.0;
+                gzerr<<"bad omega detected, setting to zero!!\n";
+            }
+
+        }
     };
 
     propeller* propellers;

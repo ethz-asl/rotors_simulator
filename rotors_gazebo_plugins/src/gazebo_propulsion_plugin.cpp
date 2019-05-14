@@ -40,7 +40,7 @@ void GazeboPropulsion::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     gzdbg << "GazeboPropulsion::Load started\n";
     model_ = _model;
     this->world_ = this->model_->GetWorld();
-    
+
     namespace_.clear();
 
     if (_sdf->HasElement("robotNamespace"))
@@ -52,6 +52,21 @@ void GazeboPropulsion::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     //node_handle_->Init(namespace_);
     node_handle_->Init();
 
+
+    const YAML::Node nodeTest = YAML::Load("{name: Brewers, city: Milwaukee}");
+    std::string id_string;
+    gzdbg<<"yaml safe get: "<<safeGet<std::string>(nodeTest, "name", &id_string)<<"\n";
+
+
+    /*
+    YAML::Node primes = YAML::Load("1");
+    gzdbg<<"IsDefined: "<<primes.IsDefined()<<std::endl;
+    gzdbg<<"IsMap: "<<primes.IsMap()<<std::endl;
+    gzdbg<<"IsNull: "<<primes.IsNull()<<std::endl;
+    gzdbg<<"IsScalar: "<<primes.IsScalar()<<std::endl;
+    gzdbg<<"IsSequence: "<<primes.IsSequence()<<std::endl;
+    */
+
     if (_sdf->HasElement("prop")){
         sdf::ElementPtr _sdf_propeller = _sdf->GetElement("prop");
 
@@ -62,7 +77,6 @@ void GazeboPropulsion::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
         gzdbg<<"found "<<n_props<<" propellers for this plugin. \n";
         propellers = new propeller [n_props];
-
         _sdf_propeller = _sdf->GetElement("prop");
 
         for(int idx=0; idx<n_props; idx++){
@@ -78,7 +92,42 @@ void GazeboPropulsion::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
                 gzerr << "[gazebo_motor_model] Please specify propeller joinName.\n";
             }
 
+            if (_sdf_propeller->HasElement("linkNameParent")) {
+                propellers[idx].parentLink =  model_->GetLink(_sdf_propeller->GetElement("linkNameParent")->Get<std::string>());
+
+                if (propellers[idx].propJoint == NULL)
+                    gzthrow("[gazebo_motor_model] Couldn't find specified parent link " << _sdf_propeller->GetElement("jointName")->Get<std::string>() << "\".");
+
+            } else {
+                gzerr << "[gazebo_motor_model] Please specify propeller joinName.\n";
+            }
+
+            if (_sdf_propeller->HasElement("cp"))
+                propellers[idx].P_cp = _sdf_propeller->Get<v3d>("cp");
+            else
+                gzwarn<<"_sdf_propeller ["<<idx<<"] is missing 'cp' element \n";
+
+            if (_sdf_propeller->HasElement("axisPosRot"))
+                propellers[idx].P_joint = _sdf_propeller->Get<v3d>("axisPosRot");
+            else
+                gzwarn<<"_sdf_propeller ["<<idx<<"] is missing 'axisPosRot' element \n";
+
+/*
             propellers[idx].propLink = propellers[idx].propJoint->GetChild();   // propeller link
+            //propellers[idx].parentLink = propellers[idx].propJoint->GetParent();   // propeller link
+
+#if GAZEBO_MAJOR_VERSION >= 9
+            ignition::math::Pose3d pose = propellers[idx].propLink->WorldPose();
+            ignition::math::Pose3d pose_parent = propellers[idx].parentLink->WorldPose();
+#else
+            ignition::math::Pose3d pose = ignitionFromGazeboMath(propellers[idx].propLink->GetWorldPose());
+            ignition::math::Pose3d pose_parent = ignitionFromGazeboMath(propellers[idx].parentLink->GetWorldPose());
+#endif
+
+            // parent frame relative position of propeller cp
+            propellers[idx].P_joint = pose_parent.Rot().RotateVectorReverse(propellers[idx].propJoint->GlobalAxis(0));
+            propellers[idx].P_cp = pose_parent.Rot().RotateVectorReverse(pose.Pos() + pose.Rot().RotateVector(propellers[idx].cp)-pose_parent.Pos());
+*/
 
             if (_sdf_propeller->HasElement("turnDir")) {
                 std::string turning_direction = _sdf_propeller->GetElement("turnDir")->Get<std::string>();
@@ -93,6 +142,13 @@ void GazeboPropulsion::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
                 gzerr << "[gazebo_motor_model] Please specify a turning direction ('cw' or 'ccw').\n";
             }
 
+            if (_sdf_propeller->HasElement("speedRefTopic")) {
+                propellers[idx].omega_ref_sub_topic = "~/" + model_->GetName() + _sdf_propeller->GetElement("speedRefTopic")->Get<std::string>();
+                gzdbg<<"speedRefTopic "<<propellers[idx].omega_ref_sub_topic<<"\n";
+            } else {
+                gzwarn<<"no speedRefTopic specified.\n";
+            }
+
             if (_sdf_propeller->HasElement("propParamsYAML")) {
                 std::string prop_params_yaml = _sdf_propeller->GetElement("propParamsYAML")->Get<std::string>();
                 propellers[idx].prop_params_.LoadPropParamsYAML(prop_params_yaml);
@@ -101,6 +157,11 @@ void GazeboPropulsion::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
                 gzwarn<<"propeller ["<<idx<<"] is missing propeller parameters YAML file, "
                      <<"using default parameters.\n";
             }
+
+            // calculate inertia tensor (assuming flat disk)
+            propellers[idx].inertia = propellers[idx].prop_params_.mass *
+                                      pow(propellers[idx].prop_params_.diameter/2,2) *
+                                      m3d(0.25,0,0,0,0.25,0,0,0,0.5);
 
             if (_sdf_propeller->HasElement("slpstrTopic")) {
                 propellers[idx].prop_slpstr_pub_topic_ = _sdf_propeller->GetElement("slpstrTopic")->Get<std::string>();
@@ -116,7 +177,7 @@ void GazeboPropulsion::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
             propellers[idx].vector_vis_array_msg.mutable_header()->mutable_stamp()->set_sec(0.0);
             propellers[idx].vector_vis_array_msg.mutable_header()->mutable_stamp()->set_nsec(0.0);
-            propellers[idx].vector_vis_array_msg.mutable_header()->set_frame_id(propellers[idx].propLink->GetName());
+            propellers[idx].vector_vis_array_msg.mutable_header()->set_frame_id(propellers[idx].parentLink->GetName());
 
             for(int idx_vis=0; idx_vis<propellers[idx].vec_vis.size(); idx_vis++){
                 propellers[idx].vec_vis[idx_vis] = propellers[idx].vector_vis_array_msg.add_vector();
@@ -129,6 +190,8 @@ void GazeboPropulsion::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
                 propellers[idx].vec_vis[idx_vis]->mutable_color()->set_y(0.0);
                 propellers[idx].vec_vis[idx_vis]->mutable_color()->set_z(0.0);
             }
+
+            _sdf_propeller = _sdf_propeller->GetNextElement("prop");
         }
 
     } else {
@@ -147,7 +210,10 @@ void GazeboPropulsion::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
 // This gets called by the world update start event.
 void GazeboPropulsion::OnUpdate(const common::UpdateInfo& _info) {
-    
+
+    sampling_time_ = world_->SimTime().Double() - prev_sim_time_;
+    prev_sim_time_ = world_->SimTime().Double();
+
     if (!pubs_and_subs_created) {
 
         gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
@@ -158,7 +224,7 @@ void GazeboPropulsion::OnUpdate(const common::UpdateInfo& _info) {
 
         for (int idx = 0; idx<n_props; idx++) {
             propellers[idx].prop_slpstr_pub_ = node_handle_->Advertise<gz_mav_msgs::PropulsionSlipstream>
-                    ("~/" + propellers[idx].prop_slpstr_pub_topic_, 1);
+                    ("~/" + model_->GetName() + "/" + propellers[idx].prop_slpstr_pub_topic_, 1);
             propellers[idx].vector_vis_array_pub = node_handle_->Advertise<gz_visualization_msgs::VisVectorArray>
                     ("~/" + propellers[idx].vector_vis_array_topic, 1);
 
@@ -166,61 +232,103 @@ void GazeboPropulsion::OnUpdate(const common::UpdateInfo& _info) {
             connect_gazebo_to_ros_topic_msg.set_ros_topic(propellers[idx].vector_vis_array_topic);
             connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::VIS_VECTOR_ARRAY);
             connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+
+            propellers[idx].omega_ref_sub_ = node_handle_->Subscribe(propellers[idx].omega_ref_sub_topic,
+                                                                     &GazeboPropulsion::propeller::PropSpeedCallback,
+                                                                     &propellers[idx]);
         }
+
         pubs_and_subs_created = true;
     }
 
-
     for (int idx = 0; idx<n_props; idx++) {
+
+        propellers[idx].dt = sampling_time_;
 
         // pose of propeller frame
 #if GAZEBO_MAJOR_VERSION >= 9
-        ignition::math::Pose3d pose = propellers[idx].propLink->WorldPose();
+        //ignition::math::Pose3d pose = propellers[idx].propLink->WorldPose();
+        ignition::math::Pose3d pose_parent = propellers[idx].parentLink->WorldPose();
 #else
-        ignition::math::Pose3d pose = ignitionFromGazeboMath(propellers[idx].propLink->GetWorldPose());
+        //ignition::math::Pose3d pose = ignitionFromGazeboMath(propellers[idx].propLink->GetWorldPose());
+        ignition::math::Pose3d pose_parent = ignitionFromGazeboMath(propellers[idx].parentLink->GetWorldPose());
 #endif
+
+        // Moments due to change in angular momentum of propeller, expressed in Hub-frame (parent-link frame)
+        // Fast spinning link is problematic due to aliasing effects in the physics engine
+
+        v3d H_Omega = propellers[idx].parentLink->RelativeAngularVel();
+        v3d H_Omega_dot = propellers[idx].parentLink->RelativeAngularAccel();
+        v3d H_moment_inertial = propellers[idx].inertia*H_Omega_dot + H_Omega.Cross(propellers[idx].inertia*H_Omega) +
+                                propellers[idx].inertia*propellers[idx].P_joint*propellers[idx].omega_dot +
+                                H_Omega.Cross(propellers[idx].inertia*propellers[idx].P_joint*propellers[idx].omega);
+
+        H_moment_inertial.Correct();
+        propellers[idx].parentLink->AddRelativeTorque(-H_moment_inertial);
+
 
         // velocity of propeller hub
 #if GAZEBO_MAJOR_VERSION >= 9
-        ignition::math::Vector3d body_velocity = propellers[idx].propLink->WorldLinearVel(propellers[idx].cp);
+        v3d body_velocity = propellers[idx].parentLink->WorldLinearVel(propellers[idx].P_cp);
 #else
-        ignition::math::Vector3d body_velocity = ignitionFromGazeboMath(propellers[idx].propLink->GetWorldLinearVel(propellers[idx].cp));
+        v3d body_velocity = ignitionFromGazeboMath(propellers[idx].parentLink->GetWorldLinearVel(propellers[idx].P_cp));
 #endif
 
-        // propeller axis expressed in world frame, in positive thrust (forward) direction
+        // propeller cp position in world frame
+        //v3d W_cp = pose.Pos() + pose.Rot().RotateVector(propellers[idx].cp);
+        /*
 #if GAZEBO_MAJOR_VERSION >= 9
-        ignition::math::Vector3d joint_axis = propellers[idx].propJoint->GlobalAxis(0);
+        v3d joint_axis = propellers[idx].propJoint->GlobalAxis(0);
 #else
-        ignition::math::Vector3d joint_axis = ignitionFromGazeboMath(propellers[idx].propJoint->GetGlobalAxis(0));
+        v3d joint_axis = ignitionFromGazeboMath(propellers[idx].propJoint->GetGlobalAxis(0));
 #endif
+*/
+
+        // propeller axis expressed in world frame, in positive rot direction
+        v3d joint_axis = pose_parent.Rot().RotateVector(propellers[idx].P_joint);
         joint_axis.Normalize();
 
-        //double rps = propellers[idx].propJoint->GetVelocity(0);
-        double rps = joint_axis.Dot(propellers[idx].propLink->WorldAngularVel())/(2*M_PI);   //includes body rotation along prop axis - just to be precise ;)
+        double rps = propellers[idx].omega/(2*M_PI);
+        //gzdbg<<"rps: "<<rps<<"\n";
 
-        ignition::math::Vector3d forward = joint_axis*propellers[idx].turning_direction_*(rps>=0 ? 1.0 : -1.0);   // for symmetric propellers, we want enable two-way operation
+        //double rps = (propellers[idx].omega + joint_axis.Dot(propellers[idx].parentLink->WorldAngularVel()))/(2*M_PI);
+        //includes body rotation along prop axis - just to be unnecessarily precise ;)
+
+        /*
+        if (rps / (2 * M_PI) > 1 / (2 * sampling_time_)) {
+           gzerr << "Aliasing on motor might occur. Consider making smaller simulation time steps or raising the rotor_velocity_slowdown_sim_ param.\n";
+        }
+        */
+
+        v3d forward = joint_axis*propellers[idx].turning_direction_*(rps>=0 ? 1.0 : -1.0);   // positive thrust direction for symmetric propellers, we want enable two-way operation
 
         // resolve local airspeed into axial (V_inf_a) and radial (V_inf_r) component
-        ignition::math::Vector3d body_velocity_radial = body_velocity - body_velocity.Dot(forward) * forward;
-        ignition::math::Vector3d body_velocity_axial = body_velocity.Dot(forward) * forward;
-        ignition::math::Vector3d rotor_pos = propellers[idx].propLink->WorldPose().Pos();  // link position expressed in world frame
+        v3d body_velocity_radial = body_velocity - body_velocity.Dot(forward) * forward;
+        v3d body_velocity_axial = body_velocity.Dot(forward) * forward;
+        v3d rotor_pos = propellers[idx].parentLink->WorldPose().Pos()+
+                                             pose_parent.Rot().RotateVector(propellers[idx].P_cp);  // link position expressed in world frame
 
         double V_inf_a = body_velocity.Dot(forward);    // axial component of relative flow wrt propeller disk (no wind assumed)
         double V_inf_a_clmpd = std::max(V_inf_a,0.0);   // treat reverse flow as static case
         double V_inf_r = body_velocity_radial.Length(); // radial component of relative flow wrt propeller disk (no wind assumed)
 
-        double J   = V_inf_a_clmpd/(std::max(std::abs(rps),1.0) * propellers[idx].prop_params_.diameter);    // Advance ratio (set minimum rps to prevent division by zero...)
+        double J   = V_inf_a_clmpd/(std::max(std::abs(rps),0.1) * propellers[idx].prop_params_.diameter);    // Advance ratio (set minimum rps to prevent division by zero...)
 
         // ---- Thrust ----
 
-        double C_T = propellers[idx].prop_params_.k_T*J + propellers[idx].prop_params_.k_T0;
-        double thrust = rho_air*pow(rps,2)*pow(propellers[idx].prop_params_.diameter,4)*C_T;
-        propellers[idx].propLink->AddForceAtRelativePosition(thrust*forward, propellers[idx].cp);
+        //double C_T = propellers[idx].prop_params_.k_T*J + propellers[idx].prop_params_.k_T0;
+        //double thrust = rho_air*pow(rps,2)*pow(propellers[idx].prop_params_.diameter,4)*C_T;
+        double thrust = rho_air*std::abs(rps)*pow(propellers[idx].prop_params_.diameter,3)*
+                        (propellers[idx].prop_params_.k_T*V_inf_a_clmpd +
+                         std::abs(rps)*propellers[idx].prop_params_.diameter*propellers[idx].prop_params_.k_T0);
+
+        //propellers[idx].propLink->AddForceAtRelativePosition(thrust*forward, propellers[idx].cp);
+        propellers[idx].parentLink->AddForceAtRelativePosition(thrust*forward, propellers[idx].P_cp);
 
         // ---- Normal force ----
 
-        ignition::math::Vector3d hub_force_ = -std::abs(rps*2*M_PI) * propellers[idx].prop_params_.rotor_drag_coefficient_ * body_velocity_radial;
-        propellers[idx].propLink->AddForceAtRelativePosition(hub_force_, propellers[idx].cp);
+        v3d hub_force_ = -std::abs(rps*2*M_PI) * propellers[idx].prop_params_.rotor_drag_coefficient_ * body_velocity_radial;
+        propellers[idx].parentLink->AddForceAtRelativePosition(hub_force_, propellers[idx].P_cp);
 
         // ---- Propeller slipstream ----
 
@@ -229,11 +337,11 @@ void GazeboPropulsion::OnUpdate(const common::UpdateInfo& _info) {
         double w = 0.5*(-V_inf_a_clmpd + sqrt(pow(V_inf_a_clmpd,2)+2*thrust/(rho_air*disk_area)));  // induced velocity at disk, w>=0
         double V_disk_a = V_inf_a+w;    //airflow velocity at propeller disk, w>=0
 
-        ignition::math::Vector3d w_ds_a_;   // axial induced velocity
-        ignition::math::Vector3d w_ds_r_;   // radial induced velocity
-        ignition::math::Vector3d w_dir(0.0,0.0,0.0);    // propeller hub -> wake end
-        ignition::math::Vector3d w_end(0.0,0.0,0.0);    // induced velocity at end of wake
-        ignition::math::Vector3d w_disk(0.0,0.0,0.0);   // induced velocity at disk
+        v3d w_ds_a_;   // axial induced velocity
+        v3d w_ds_r_;   // radial induced velocity
+        v3d w_dir(0.0,0.0,0.0);    // propeller hub -> wake end
+        v3d w_end(0.0,0.0,0.0);    // induced velocity at end of wake
+        v3d w_disk(0.0,0.0,0.0);   // induced velocity at disk
 
         double k_w;
         double m_dot_clmpd = disk_area*(V_inf_a_clmpd + w)*rho_air; //>=0
@@ -255,7 +363,7 @@ void GazeboPropulsion::OnUpdate(const common::UpdateInfo& _info) {
 
             // induced velocity at disk in radial direction
             //w_ds_r_ = -hub_force_/hub_force_.Length() * ignition::math::clamp(hub_force_.Length()/m_dot_clmpd*pow(std::abs(rps*2*M_PI)/max_rot_velocity_,0.25), 0.0, 0.8*body_velocity_radial.Length());
-            w_ds_r_ = ignition::math::Vector3d(0,0,0);
+            w_ds_r_ = v3d(0,0,0);
             //double hub_vel_rel = w_ds_r_.Length()/V_inf_r; // debug: so far no check if hub_vel_rel < 1 ... should it be <1?
 
             w_disk = w_ds_a_+w_ds_r_; // downstream values already at disk for simplification
@@ -276,100 +384,111 @@ void GazeboPropulsion::OnUpdate(const common::UpdateInfo& _info) {
 
         } else {
             // case III: wake does not extend beyond prop, reverse flow through prop disk, no wake modelled
-            w_dir = ignition::math::Vector3d(0.0,0.0,0.0);
-            w_end = ignition::math::Vector3d(0.0,0.0,0.0);
+            w_dir = v3d(0.0,0.0,0.0);
+            w_end = v3d(0.0,0.0,0.0);
         }
 
         // ---- Drag torque ----
-        ignition::math::Vector3d drag_torque = -joint_axis * rho_air * pow(rps,2) * pow(propellers[idx].prop_params_.diameter,5)*
-                                                (propellers[idx].prop_params_.k_Q0 + J*propellers[idx].prop_params_.k_Q) *
-                                                (rps>=0 ? 1.0 : -1.0);
-        propellers[idx].propLink->AddTorque(drag_torque);
+        double drag_torque = -rho_air*std::abs(rps)*pow(propellers[idx].prop_params_.diameter,4)*
+                             (V_inf_a_clmpd*propellers[idx].prop_params_.k_Q +
+                              std::abs(rps)*propellers[idx].prop_params_.diameter*propellers[idx].prop_params_.k_Q0)*
+                             (rps>=0 ? 1.0 : -1.0);
+        v3d drag_torque_ = joint_axis * drag_torque;
+        propellers[idx].parentLink->AddTorque(drag_torque_);
 
         //Want to apply torques to parent link, not to propeller link (otherwise possibly problems when using _joint->SetVelocity)
         //physics::Link_V parent_links = link_->GetParentJointsLinks();
-        //parent_links.at(0)->AddTorque(drag_torque);
+        //parent_links.at(0)->AddTorque(drag_torque_);
 
         // ---- Rolling moment ----
-        ignition::math::Vector3d rolling_moment = -propellers[idx].turning_direction_*std::abs(rps*2*M_PI) *
+        v3d rolling_moment = -propellers[idx].turning_direction_*std::abs(rps*2*M_PI) *
                                                    propellers[idx].prop_params_.rolling_moment_coefficient_ *
                                                    body_velocity_radial;
-        propellers[idx].propLink->AddTorque(rolling_moment);
+        propellers[idx].parentLink->AddTorque(rolling_moment);
 
         // ---- Fill propeller slipstream message ----
-        propulsion_slipstream_msg_.mutable_rotor_pos()->set_x(rotor_pos.X());
-        propulsion_slipstream_msg_.mutable_rotor_pos()->set_y(rotor_pos.Y());
-        propulsion_slipstream_msg_.mutable_rotor_pos()->set_z(rotor_pos.Z());
+        {
+            propulsion_slipstream_msg_.mutable_rotor_pos()->set_x(rotor_pos.X());
+            propulsion_slipstream_msg_.mutable_rotor_pos()->set_y(rotor_pos.Y());
+            propulsion_slipstream_msg_.mutable_rotor_pos()->set_z(rotor_pos.Z());
 
-        propulsion_slipstream_msg_.mutable_ind_vel_disk()->set_x(w_disk.X());
-        propulsion_slipstream_msg_.mutable_ind_vel_disk()->set_y(w_disk.Y());
-        propulsion_slipstream_msg_.mutable_ind_vel_disk()->set_z(w_disk.Z());
+            propulsion_slipstream_msg_.mutable_ind_vel_disk()->set_x(w_disk.X());
+            propulsion_slipstream_msg_.mutable_ind_vel_disk()->set_y(w_disk.Y());
+            propulsion_slipstream_msg_.mutable_ind_vel_disk()->set_z(w_disk.Z());
 
-        propulsion_slipstream_msg_.mutable_ind_vel_end()->set_x(w_end.X());
-        propulsion_slipstream_msg_.mutable_ind_vel_end()->set_y(w_end.Y());
-        propulsion_slipstream_msg_.mutable_ind_vel_end()->set_z(w_end.Z());
+            propulsion_slipstream_msg_.mutable_ind_vel_end()->set_x(w_end.X());
+            propulsion_slipstream_msg_.mutable_ind_vel_end()->set_y(w_end.Y());
+            propulsion_slipstream_msg_.mutable_ind_vel_end()->set_z(w_end.Z());
 
-        propulsion_slipstream_msg_.mutable_wake_dir()->set_x(w_dir.X());
-        propulsion_slipstream_msg_.mutable_wake_dir()->set_y(w_dir.Y());
-        propulsion_slipstream_msg_.mutable_wake_dir()->set_z(w_dir.Z());
+            propulsion_slipstream_msg_.mutable_wake_dir()->set_x(w_dir.X());
+            propulsion_slipstream_msg_.mutable_wake_dir()->set_y(w_dir.Y());
+            propulsion_slipstream_msg_.mutable_wake_dir()->set_z(w_dir.Z());
 
-        propulsion_slipstream_msg_.mutable_timestamp()->set_sec((int)0);
-        propulsion_slipstream_msg_.mutable_timestamp()->set_nsec((int)0);
+            propulsion_slipstream_msg_.mutable_timestamp()->set_sec((int)0);
+            propulsion_slipstream_msg_.mutable_timestamp()->set_nsec((int)0);
 
-        propulsion_slipstream_msg_.set_k_w(k_w);
-        propulsion_slipstream_msg_.set_l_a(0.0);
-        propulsion_slipstream_msg_.set_l_p(0.0);
-        propulsion_slipstream_msg_.set_prop_diam(propellers[idx].prop_params_.diameter);
+            propulsion_slipstream_msg_.set_k_w(k_w);
+            propulsion_slipstream_msg_.set_l_a(0.0);
+            propulsion_slipstream_msg_.set_l_p(0.0);
+            propulsion_slipstream_msg_.set_prop_diam(propellers[idx].prop_params_.diameter);
 
-        propellers[idx].prop_slpstr_pub_->Publish(propulsion_slipstream_msg_);
+            propellers[idx].prop_slpstr_pub_->Publish(propulsion_slipstream_msg_);
+        }
 
         float r,g,b;
-        ignition::math::Vector3d B_start;
-        ignition::math::Vector3d B_end;
+        v3d P_start = propellers[idx].P_cp;//v3d(-0.025,0,0.15); //
+        v3d P_vec;
+
+        // Test joint issues
+        ignition::math::Pose3d err_joint = propellers[idx].propJoint->AnchorErrorPose();
+        //v3d err_axis;
+        //double err_angle;
+        //err_joint.Rot().ToAxis(err_axis,err_angle);
+        //if(err_angle*err_axis.Dot>0.03)
+            //gzdbg<<"err_angle: "<<err_angle<<"\n";
 
         for(int idx_vis=0; idx_vis<propellers[idx].vec_vis.size(); idx_vis++){
 
             switch (idx_vis) {
             case 0:
                 r=1;g=0;b=0;
-                B_start = propellers[idx].cp;
-                //B_end = pose.Rot().RotateVectorReverse(thrust*forward)+propellers[idx].cp;
-                B_end = ignition::math::Vector3d(1,1,1)+propellers[idx].cp;
+                P_vec = pose_parent.Rot().RotateVectorReverse(thrust*forward/10);
                 break;
             case 1:
                 r=0;g=1;b=0;
-                B_start = propellers[idx].cp;
-                //B_end = pose.Rot().RotateVectorReverse(hub_force_)+propellers[idx].cp;
-                B_end = pose.Rot().RotateVectorReverse(ignition::math::Vector3d(1,0,0))+propellers[idx].cp;
+                P_vec = pose_parent.Rot().RotateVectorReverse(hub_force_/10);
                 break;
             case 2:
                 r=0;g=0;b=1;
-                B_start = propellers[idx].cp;
-                //B_end = pose.Rot().RotateVectorReverse(drag_torque)+propellers[idx].cp;
-                B_end = pose.Rot().RotateVectorReverse(ignition::math::Vector3d(0,1,0))+propellers[idx].cp;
+                P_vec = pose_parent.Rot().RotateVectorReverse(drag_torque_);
                 break;
             case 3:
                 r=1;g=1;b=0;
-                B_start = propellers[idx].cp;
-                //B_end = pose.Rot().RotateVectorReverse(rolling_moment)+propellers[idx].cp;
-                B_end = pose.Rot().RotateVectorReverse(ignition::math::Vector3d(0,0,1))+propellers[idx].cp;
+                P_vec = pose_parent.Rot().RotateVectorReverse(rolling_moment);
                 break;
-            default:
-                r=0;g=0;b=0;
-                B_start = ignition::math::Vector3d(0,0,0);
-                B_end = ignition::math::Vector3d(0,0,0);
+            case 4:
+                r=1;g=0;b=1;
+                P_vec = pose_parent.Rot().RotateVectorReverse(w_dir);
+                break;
+            case 5:
+                r=0;g=1;b=1;
+                P_vec = pose_parent.Rot().RotateVectorReverse(w_disk);
+                break;
+            case 6:
+                r=1;g=1;b=1;
+                P_vec = H_moment_inertial;
                 break;
             }
 
             propellers[idx].vec_vis[idx_vis]->mutable_color()->set_x(r);
             propellers[idx].vec_vis[idx_vis]->mutable_color()->set_y(g);
             propellers[idx].vec_vis[idx_vis]->mutable_color()->set_z(b);
-            propellers[idx].vec_vis[idx_vis]->mutable_startpoint()->set_x(B_start.X());
-            propellers[idx].vec_vis[idx_vis]->mutable_startpoint()->set_y(B_start.Y());
-            propellers[idx].vec_vis[idx_vis]->mutable_startpoint()->set_z(B_start.Z());
-            propellers[idx].vec_vis[idx_vis]->mutable_vector()->set_x(B_end.X());
-            propellers[idx].vec_vis[idx_vis]->mutable_vector()->set_y(B_end.Y());
-            propellers[idx].vec_vis[idx_vis]->mutable_vector()->set_z(B_end.Z());
+            propellers[idx].vec_vis[idx_vis]->mutable_startpoint()->set_x(P_start.X());
+            propellers[idx].vec_vis[idx_vis]->mutable_startpoint()->set_y(P_start.Y());
+            propellers[idx].vec_vis[idx_vis]->mutable_startpoint()->set_z(P_start.Z());
+            propellers[idx].vec_vis[idx_vis]->mutable_vector()->set_x(P_vec.X());
+            propellers[idx].vec_vis[idx_vis]->mutable_vector()->set_y(P_vec.Y());
+            propellers[idx].vec_vis[idx_vis]->mutable_vector()->set_z(P_vec.Z());
         }
         propellers[idx].vector_vis_array_pub->Publish(propellers[idx].vector_vis_array_msg);
 
