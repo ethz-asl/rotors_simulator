@@ -174,7 +174,11 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
 
     last_time = world->SimTime(); // ini last time
 
-    vector_vis_array_topic = namespace_ + "_vis_forces";
+    if (_sdf->HasElement("aeroForcesVis"))
+        vector_vis_array_topic = _sdf->Get<std::string>("aeroForcesVis");
+    else
+        vector_vis_array_topic = "aero_forces_vis";
+
     vector_vis_array.mutable_header()->mutable_stamp()->set_sec(0.0);
     vector_vis_array.mutable_header()->mutable_stamp()->set_nsec(0.0);
     vector_vis_array.mutable_header()->set_frame_id(this->link->GetName());
@@ -383,11 +387,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
                 for(int j=0; j<segments[i].n_slpstr; j++){
 
                     if(_sdf_ind_vel->HasElement("topic")){
-                        std::string slpstr_topic = _sdf_ind_vel->Get<std::string>("topic");
-
-                        segments[i].slpstr[j].propulsion_slipstream_sub_ = node_handle_->Subscribe("~/" + model->GetName() + "/" + slpstr_topic,
-                                                                                                   &GazeboAerodynamics::slipstream::Callback,
-                                                                                                   &segments[i].slpstr[j]);
+                        segments[i].slpstr[j].slpstr_topic = _sdf_ind_vel->Get<std::string>("topic");
                     } else {
                         gzwarn<<"slipstream ["<<j<<"] of segment ["<<i<<"] is missing 'radToCPitch' element \n";
                     }
@@ -720,8 +720,15 @@ void GazeboAerodynamics::OnUpdate()
         gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
         gzdbg<<"advertised ~/" + kConnectGazeboToRosSubtopic + "\n";
 
-        /*
         for (int i = 0; i<n_seg; i++){
+            for (int j=0; j<segments[i].n_slpstr; j++){
+                segments[i].slpstr[j].propulsion_slipstream_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + segments[i].slpstr[j].slpstr_topic,
+                                                                                           &GazeboAerodynamics::slipstream::Callback,
+                                                                                           &segments[i].slpstr[j]);
+                gzdbg<<"subscribing to: "<<"~/" + namespace_ + "/" + segments[i].slpstr[j].slpstr_topic<<"\n";
+            }
+        }
+        /*
             segments[i].lift_f_vis_pub = node_handle_->Advertise<gz_visualization_msgs::VisVector>("~/" + segments[i].lift_f_vis_topic, 1);
 
             connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + segments[i].lift_f_vis_topic);
@@ -735,9 +742,9 @@ void GazeboAerodynamics::OnUpdate()
         }
         */
 
-        vector_vis_array_pub = node_handle_->Advertise<gz_visualization_msgs::VisVectorArray>("~/" + vector_vis_array_topic, 1);
-        connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + vector_vis_array_topic);
-        connect_gazebo_to_ros_topic_msg.set_ros_topic(vector_vis_array_topic);
+        vector_vis_array_pub = node_handle_->Advertise<gz_visualization_msgs::VisVectorArray>("~/" + namespace_ + "/" + vector_vis_array_topic, 1);
+        connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" + vector_vis_array_topic);
+        connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + vector_vis_array_topic);
         connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::VIS_VECTOR_ARRAY);
         connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 

@@ -92,22 +92,22 @@ struct PropellerParameters {
     PropellerParameters():
         diameter(kDefaultDiameter),
         mass(kDefaultMass),
-        k_T(kDefaultKT),
-        k_T0(kDefaultKT0),
-        k_Q(kDefaultKQ),
-        k_Q0(kDefaultKQ0),
-        rolling_moment_coefficient_(kDefaultRollMomCoeff),
-        rotor_drag_coefficient_(kDefaultDragMomCoeff),
+        k_t(kDefaultKT),
+        k_t0(kDefaultKT0),
+        k_q(kDefaultKQ),
+        k_q0(kDefaultKQ0),
+        rolling_moment_coefficient(kDefaultRollMomCoeff),
+        rotor_drag_coefficient(kDefaultDragMomCoeff),
         d_flow(kDefaultDFlow){}
 
     double diameter;
     double mass;
-    double k_T;
-    double k_T0;
-    double k_Q;
-    double k_Q0;
-    double rolling_moment_coefficient_;
-    double rotor_drag_coefficient_;
+    double k_t;
+    double k_t0;
+    double k_q;
+    double k_q0;
+    double rolling_moment_coefficient;
+    double rotor_drag_coefficient;
     double d_flow;
 
     void LoadPropParamsYAML(const std::string& yaml_path) {
@@ -129,12 +129,12 @@ struct PropellerParameters {
 
                 READ_PARAM(node, diameter);
                 READ_PARAM(node, mass);
-                READ_PARAM(node, k_T);
-                READ_PARAM(node, k_T0);
-                READ_PARAM(node, k_Q);
-                READ_PARAM(node, k_Q0);
-                READ_PARAM(node, rolling_moment_coefficient_);
-                READ_PARAM(node, rotor_drag_coefficient_);
+                READ_PARAM(node, k_t);
+                READ_PARAM(node, k_t0);
+                READ_PARAM(node, k_q);
+                READ_PARAM(node, k_q0);
+                READ_PARAM(node, rolling_moment_coefficient);
+                READ_PARAM(node, rotor_drag_coefficient);
                 READ_PARAM(node, d_flow);
 
             } catch(const YAML::Exception& ex) {
@@ -349,7 +349,7 @@ inline void YAMLReadParam(const YAML::Node& node,
 }
 
 template<typename ValueType>
-bool safeGet(const YAML::Node& node, const std::string& key, ValueType* value) {
+bool SafeGet(const YAML::Node& node, const std::string& key, ValueType* value) {
   //CHECK_NOTNULL(value);
   bool success = false;
   if(!node.IsMap()) {

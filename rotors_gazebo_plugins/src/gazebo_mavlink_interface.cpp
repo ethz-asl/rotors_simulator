@@ -131,13 +131,13 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
           }
 
           // start gz transport node handle
-          if (channels[i].joint_control_type_ == "position_gztopic")
+          if (channels[i].joint_control_type_ == "gz_msg")
           {
               // setup publisher handle to topic
               if (channel->HasElement("gztopic"))
-                  channels[i].gztopic_ = "~/" + model_->GetName() + channel->Get<std::string>("gztopic");
+                  channels[i].gztopic_ = "~/" + namespace_ + "/" + channel->Get<std::string>("gztopic");
               else
-                  channels[i].gztopic_ = "control_position_gztopic_" + std::to_string(i);
+                  channels[i].gztopic_ = "control_gz_msg_" + std::to_string(i);
 
               channels[i].joint_control_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>(
                           channels[i].gztopic_);
@@ -170,7 +170,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
                     << channels[i].input_index_ << "] joint control active for this channel.\n";
             }
           }
-          else if(channels[i].joint_control_type_ != "position_gztopic")
+          else if(channels[i].joint_control_type_ != "gz_msg")
           {
             gzdbg << "<joint_name> not found for channel[" << channels[i].input_index_
                   << "] no joint control will be performed for this channel.\n";
@@ -951,7 +951,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
   //gzdbg<<"dbg: 2a"<<std::endl;
   // set joint positions
   for (int i = 0; i < n_chan; i++) {
-    if (channels[i].joint_||channels[i].joint_control_type_ == "position_gztopic") {
+    if (channels[i].joint_||channels[i].joint_control_type_ == "gz_msg") {
       //gzdbg<<"dbg: 2b"<<i<<std::endl;
       double target = channels[i].input_reference_;
 
@@ -1030,7 +1030,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         double torque = channels[i].srv.P_vel*err_vel+channels[i].srv.P_pos*err_pos;
         channels[i].joint_->SetForce(0, torque);
 
-      } else if (channels[i].joint_control_type_ == "position_gztopic") {
+      } else if (channels[i].joint_control_type_ == "gz_msg") {
           gz_std_msgs::Float32 m;
           m.set_data((float)target);
           //gzdbg<<"target: "<<target<<"\n";

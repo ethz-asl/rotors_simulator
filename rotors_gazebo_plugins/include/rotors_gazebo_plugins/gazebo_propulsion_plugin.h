@@ -22,14 +22,19 @@
  */
 
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
 
+#include <ignition/math.hh>
+#include <math.h>
 #include <boost/bind.hpp>
 #include <Eigen/Eigen>
+
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
-#include <rotors_gazebo_plugins/motor_model.hpp>
+
 #include "CommandMotorSpeed.pb.h"
 #include "gazebo/transport/transport.hh"
 #include "gazebo/msgs/msgs.hh"
@@ -37,8 +42,6 @@
 #include "VisVectorArray.pb.h"
 #include "ConnectGazeboToRosTopic.pb.h"
 #include "Float32.pb.h"
-#include <iostream>
-#include <fstream>
 
 #include "common.h"
 #include "uav_parameters.h"
@@ -47,8 +50,9 @@ namespace gazebo {
 
 typedef const boost::shared_ptr<const gz_visualization_msgs::VisVectorArray> GzVisVectorArrayMsgPtr;
 typedef const boost::shared_ptr<const gz_std_msgs::Float32> GzFloat32MsgPtr;
-typedef ignition::math::Vector3d v3d;
-typedef ignition::math::Matrix3<double> m3d;
+typedef ignition::math::Vector3d V3D;
+typedef ignition::math::Matrix3<double> M3D;
+
 // Default values
 static constexpr double kDefaulMaxRotVelocity = 838.0;
 static constexpr double kDefaultRhoAir = 1.255;
@@ -56,58 +60,50 @@ static constexpr double kDefaultRhoAir = 1.255;
 class GazeboPropulsion : public ModelPlugin{
 public:
     GazeboPropulsion():
-          ModelPlugin(),
-          n_props(0),
-          max_rot_velocity_(kDefaulMaxRotVelocity),
-          rho_air(kDefaultRhoAir),
-          updateCounter(0),
-          pubs_and_subs_created(false),
-          prev_sim_time_(0),
-          sampling_time_(0){}
+        ModelPlugin(){}
+
     virtual ~GazeboPropulsion();
 
 protected:
     virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
-    virtual void OnUpdate(const common::UpdateInfo & /*_info*/);
+    //virtual void OnUpdate(const common::UpdateInfo & _info);
+    virtual void OnUpdate();
 
 private:
-
-    std::string namespace_;                   //from sdf, required
+    std::string namespace_;
     transport::NodePtr node_handle_;
     physics::WorldPtr world_;
     physics::ModelPtr model_;
+    event::ConnectionPtr update_connection_;
 
-    /// \brief Pointer to the update event connection.
-    event::ConnectionPtr updateConnection_;
-    int updateCounter;
-    double sampling_time_;
-    double prev_sim_time_;
+    int update_counter_ = 0;
+    double sampling_time_ = 0.0;    // simulation time-step [s]
+    double prev_sim_time_ = 0.0;    // simulation time [s]
 
-    struct propeller {
-        propeller(){}
+    struct Propeller {
+        Propeller(){}
 
-        PropellerParameters prop_params_;
+        PropellerParameters prop_params;
 
-        physics::LinkPtr parentLink = nullptr;
-        ignition::math::Vector3d P_joint{1,0,0};
-        ignition::math::Vector3d P_cp{0,0,0};
-        int turning_direction_ = 1;
+        physics::LinkPtr parent_link = nullptr;
+        ignition::math::Vector3d p_joint{1,0,0};    // propeller joint, pos. rot. dir., expr. in parent link
+        ignition::math::Vector3d p_cp{0,0,0};       // propeller hub position w.r.t parent link, expr. in parent link
+        int turning_direction = 1;                  // 1: if thrust and rot. vect in same dir, otherwise -1
 
-        m3d inertia;
-        double omega = 0;
-        double omega_dot = 0;
-        double omega_ref = 0;
-        double tau = 0.1;
-        double dt = 0.0;
-        transport::SubscriberPtr omega_ref_sub_ = nullptr;
-        std::string omega_ref_sub_topic;
+        M3D inertia;           // propeller (disk) inertia tensor, expressed in parent frame
+        double omega = 0;      // propeller angular speed (wrt parent link) [rad/s]
+        double omega_dot = 0;  // propeller angular acc (wrt parent link) [rad/s²]
+        double omega_ref = 0;  // propeller angular ref speed (wrt parent link) [rad/s]
+        double tau = 0.1;      // prop/motor time constant [s]
+        double dt = 0.0;       // discrete time step for motor simulation [s]
 
-        physics::JointPtr propJoint = nullptr;
-        physics::LinkPtr propLink = nullptr;
+        transport::SubscriberPtr omega_ref_sub = nullptr;
+        std::string omega_ref_subtopic;
+
         ignition::math::Vector3d cp{0,0,0};
 
-        transport::PublisherPtr prop_slpstr_pub_ = nullptr;
-        std::string prop_slpstr_pub_topic_;
+        transport::PublisherPtr prop_slpstr_pub = nullptr;
+        std::string prop_slpstr_pubtopic;
 
         std::array<gz_visualization_msgs::ArrowMarker*,7> vec_vis;
         std::string vector_vis_array_topic;
@@ -120,36 +116,32 @@ private:
         }
 
         void MotorDyn(){
-            // To Do: implement proper motor dynamics
-            //omega = omega_ref;
 
             if (tau>0.0 && dt>0.0) {
                 omega = omega + std::min(dt, tau)/tau*(omega_ref-omega);
                 omega_dot = (omega_ref-omega)*std::min(dt, tau)/(dt*tau);
 
             } else {
-                gzerr<<"simulation time-step and/or motor time-constant equals zero, division by zero\n";
+                gzerr<<"simulation time-step and/or motor time-constant equals zero\n";
             }
 
             if(isnan(omega)||isinf(omega)){
                 omega = 0.0;
                 gzerr<<"bad omega detected, setting to zero!!\n";
             }
-
         }
     };
 
-    propeller* propellers;
-    int n_props;
+    Propeller* propellers_;
+    int num_props_ = 0;
 
-    double max_rot_velocity_;    // maximum rotor speed [rad/s]
-    double rho_air;   // air density, [kg/m^3]
+    double max_rot_velocity_ = kDefaulMaxRotVelocity;   // [rad/s]
+    double rho_air_ = kDefaultRhoAir;                   // [kg/m^3]
 
     gz_mav_msgs::PropulsionSlipstream propulsion_slipstream_msg_;
+    bool pubs_and_subs_created_ = false;
 
-    bool pubs_and_subs_created;
-
-    int sgn(double val) {
+    int Sgn(double val) {
         return (int)(0.0 < val) - (int)(val < 0.0);
     }
 

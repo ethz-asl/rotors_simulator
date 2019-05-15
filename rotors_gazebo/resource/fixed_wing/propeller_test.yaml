@@ -3,12 +3,12 @@
 diameter: 0.28
 mass: 0.023
 
-k_T: -0.13
-k_T0: 0.11
-k_Q: -0.011
-k_Q0: -0.01
-rolling_moment_coefficient_: 1e-06
-rotor_drag_coefficient_: 5.3849e-04
+k_t: -0.13
+k_t0: 0.11
+k_q: -0.011
+k_q0: -0.01
+rolling_moment_coefficient: 1e-06
+rotor_drag_coefficient: 5.3849e-04
 d_flow: 5
 
 #To Do: approx calculation based on standard propeller characteristics (dia, pitch, profile?, No of blades)

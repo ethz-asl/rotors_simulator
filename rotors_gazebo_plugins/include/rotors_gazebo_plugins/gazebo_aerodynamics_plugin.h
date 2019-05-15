@@ -144,6 +144,7 @@ protected: double rho;
 
         transport::SubscriberPtr propulsion_slipstream_sub_;
         std::mutex writingVelInd;
+        std::string slpstr_topic;
 
         ignition::math::Vector3d cp_wrld;   // current world position of center of pressure
         ignition::math::Vector3d v_ind_cp_; // induced velocity at cp (e.g. due to slipstream)

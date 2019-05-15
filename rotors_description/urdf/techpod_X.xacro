@@ -271,12 +271,12 @@
         <jointName>${namespace}/propeller_P0_joint</jointName>
         <linkNameParent>${namespace}/base_link</linkNameParent>
         <cp>-0.025 0 0.15</cp>
-        <axisPosRot>-1 0 0</axisPosRot>
+        <axisPosRot>-1 0.0 0.1</axisPosRot>
         <turnDir>cw</turnDir>
-        <speedRefTopic>prop_P0_ref</speedRefTopic>
+        <speedRefTopic>prop_ref_0</speedRefTopic>
         <propParamsYAML>${yaml_path}/propeller_test.yaml</propParamsYAML>
-        <slpstrTopic>prop0_slpstr</slpstrTopic>
-        <visTopic>prop0_vis</visTopic>
+        <slpstrTopic>prop_slpstr_0</slpstrTopic>
+        <visTopic>prop_vis_0</visTopic>
       </prop>
     </plugin>
   </gazebo>
@@ -285,6 +285,7 @@
     <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
       <robotNamespace>${namespace}</robotNamespace>
       <linkName>${namespace}/base_link</linkName>
+      <aeroForcesVis>aero_force_vis_0</aeroForcesVis>
       <body>
         <element>
           <aBdyXX>0.02</aBdyXX>
@@ -427,7 +428,7 @@
           <seg_chord>0.12</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
           <indVel name="prop0">
-            <topic>prop0_slpstr</topic>
+            <topic>prop_slpstr_0</topic>
           </indVel>
           <control>
             <cs name="elevator_left">
@@ -447,7 +448,7 @@
           <seg_chord>0.12</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
           <indVel name="prop0">
-            <topic>prop0_slpstr</topic>
+            <topic>prop_slpstr_0</topic>
           </indVel>
           <control>
             <cs name="elevator_right">
@@ -467,7 +468,7 @@
           <seg_chord>0.12</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
           <indVel name="prop0">
-            <topic>prop0_slpstr</topic>
+            <topic>prop_slpstr_0</topic>
           </indVel>
           <control>
             <cs name="rudder">
@@ -512,8 +513,8 @@
         <input_scaling>366</input_scaling><!-- max rad/s/2 -->
         <zero_position_disarmed>0</zero_position_disarmed>
         <zero_position_armed>0</zero_position_armed>
-        <joint_control_type>position_gztopic</joint_control_type>
-        <gztopic>prop_P0_ref</gztopic>
+        <joint_control_type>gz_msg</joint_control_type>
+        <gztopic>prop_ref_0</gztopic>
         <!--
         <joint_name>${namespace}/propeller_P0_joint</joint_name>
         <joint_control_pid>
