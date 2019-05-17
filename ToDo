@@ -1,0 +1,3 @@
+- Prevent seg-faults when joints missing, wrong joint names etc. Instead output message and don't start plugins
+- Make yaml load
+- zero-mass/inertia links and setPosition ok?

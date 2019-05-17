@@ -17,7 +17,8 @@
  * Modifications by David Rohr, drohr@student.ethz.ch
  *
 */
-#ifndef _GAZEBO_LIFT_DRAG_PLUGIN_HH_    //header guard
+
+#ifndef _GAZEBO_LIFT_DRAG_PLUGIN_HH_
 #define _GAZEBO_LIFT_DRAG_PLUGIN_HH_
 
 #include <mutex>
@@ -48,8 +49,20 @@
 #include <iostream>
 #include <fstream>
 
+
+#include <algorithm>
+
+#include "gazebo/common/Assert.hh"
+#include "gazebo/sensors/SensorManager.hh"
+#include "gazebo/transport/transport.hh"
+#include <iomanip>
+
+
 namespace gazebo
 {
+
+typedef ignition::math::Vector3d V3D;
+typedef ignition::math::Matrix3<double> M3D;
 
 /// \brief Stuff for propeller slipstream message subscription
 typedef const boost::shared_ptr<const gz_mav_msgs::PropulsionSlipstream> PropulsionSlipstreamPtr;
@@ -105,23 +118,6 @@ private: transport::NodePtr node_handle_;
     /// At 20 °C and 101.325 kPa, dry air has a density of 1.2041 kg/m3.
 protected: double rho;
 
-    /// \brief Lifting body type
-    /// "airfoil" or "fuselage"
-    //std::string bodyType;
-
-    /// \brief Center of pressure wrt link frame, expressed in link frame
-    //protected: ignition::math::Vector3d cp;
-
-    /// \brief Normally, this is taken as a direction parallel to the chord
-    /// of the airfoil in zero angle of attack forward flight (trailing to leading edge).
-    //protected: ignition::math::Vector3d forward;
-
-    /// \brief A vector in the lift/drag plane, perpendicular to the forward
-    /// vector. Inflow velocity orthogonal to forward and upward vectors
-    /// is considered flow in the wing sweep direction.
-    //protected: ignition::math::Vector3d upward;
-
-    /// \brief Quantities for full +/-180° AoA range, per segment
     struct control_surface {
 
         control_surface():
@@ -139,44 +135,40 @@ protected: double rho;
     struct slipstream {
 
         slipstream():
-            v_ind_cp_(ignition::math::Vector3d(0,0,0)),
             propulsion_slipstream_sub_(nullptr){}
 
         transport::SubscriberPtr propulsion_slipstream_sub_;
-        std::mutex writingVelInd;
+        std::mutex slipstream_lock;
         std::string slpstr_topic;
 
-        ignition::math::Vector3d cp_wrld;   // current world position of center of pressure
-        ignition::math::Vector3d v_ind_cp_; // induced velocity at cp (e.g. due to slipstream)
-
-        ignition::math::Vector3d p_rot;
-        ignition::math::Vector3d d_wake;
-        ignition::math::Vector3d d_wake_e;
-        ignition::math::Vector3d v_ind_d;
-        ignition::math::Vector3d v_ind_e;
+        V3D p_rot;
+        V3D d_wake;
+        V3D d_wake_e;
+        V3D v_ind_d;
+        V3D v_ind_e;
 
         double r_rot;
 
         void Callback(PropulsionSlipstreamPtr& propulsion_slipstream){
-            std::unique_lock<std::mutex> lock(writingVelInd);
+            std::unique_lock<std::mutex> lock(slipstream_lock);
             // position of rotordisk center wrt world, expressed in world frame [m]
-            p_rot = ignition::math::Vector3d(propulsion_slipstream->rotor_pos().x(),
+            p_rot = V3D(propulsion_slipstream->rotor_pos().x(),
                                              propulsion_slipstream->rotor_pos().y(),
                                              propulsion_slipstream->rotor_pos().z());
 
             // wake direction expressed in world frame [-]
-            d_wake = ignition::math::Vector3d(propulsion_slipstream->wake_dir().x(),
+            d_wake = V3D(propulsion_slipstream->wake_dir().x(),
                                               propulsion_slipstream->wake_dir().y(),
                                               propulsion_slipstream->wake_dir().z());
             d_wake_e = d_wake.Normalized();
 
             // induced velocity at rotordisk, expressed in world frame [m/s]
-            v_ind_d = ignition::math::Vector3d(propulsion_slipstream->ind_vel_disk().x(),
+            v_ind_d = V3D(propulsion_slipstream->ind_vel_disk().x(),
                                                propulsion_slipstream->ind_vel_disk().y(),
                                                propulsion_slipstream->ind_vel_disk().z());
 
             // induced velocity at end of wake (Note: not necessarily 0!)
-            v_ind_e = ignition::math::Vector3d(propulsion_slipstream->ind_vel_end().x(),
+            v_ind_e = V3D(propulsion_slipstream->ind_vel_end().x(),
                                                propulsion_slipstream->ind_vel_end().y(),
                                                propulsion_slipstream->ind_vel_end().z());
 
@@ -185,9 +177,11 @@ protected: double rho;
             lock.unlock();
         }
 
-        void GetIndVel(){
-            std::unique_lock<std::mutex> lock(writingVelInd);
-            ignition::math::Vector3d p_r2cp_ = cp_wrld - p_rot;
+        V3D GetIndVel(V3D p_cp){
+
+            V3D v_ind; // induced velocity at cp (e.g. due to slipstream)
+            std::unique_lock<std::mutex> lock(slipstream_lock);
+            V3D p_r2cp_ = p_cp - p_rot;
             double off_a_ = d_wake_e.Dot(p_r2cp_);                 // axial distance in wake (d1 in report)
             double off_p_ = (off_a_*d_wake_e-p_r2cp_).Length();    // radial distance to wake centerline (d2 in report)
 
@@ -198,9 +192,11 @@ protected: double rho;
                 double r_rot_exp = (2-1*k_a_)*r_rot;
                 double k_p_ = 1-pow((off_p_/r_rot_exp),4);
                 k_p_ = ignition::math::clamp(k_p_,0.0,1.0);                // radial distance downscaling
-                v_ind_cp_ = k_p_*(k_a_*v_ind_d+(1-k_a_)*v_ind_e);   // induced velocity at airfoil segment cp
+                v_ind = k_p_*(k_a_*v_ind_d+(1-k_a_)*v_ind_e);   // induced velocity at airfoil segment cp
             }
+
             lock.unlock();
+            return v_ind;
         }
     };
 
@@ -217,11 +213,6 @@ protected: double rho;
         int index;
         double alpha;
 
-        /*
-        double alpha_max_ns;
-        double alpha_min_ns;
-        */
-
         // To include hyteresis in future implementation, currently not used
         double alpha_prev;
         double alpha_dot;
@@ -229,48 +220,13 @@ protected: double rho;
 
         AerodynamicParameters aero_params_;
 
-        /*
-        Eigen::Vector3d c_lift_alpha;
-        Eigen::Vector3d c_drag_alpha;
-        Eigen::Vector2d c_pitch_moment_alpha;
-
-        double alpha_blend;
-        double fp_c_lift_max;
-        double fp_c_drag_max;
-        double fp_c_pitch_moment_max;
-        */
-
         double cs_c_lift;
         double cs_c_drag;
         double cs_c_pitch_moment;
 
-        /*
-      // double alpha_zlift;           // zero-lift AoA, [rad]
-      // double cla;                   // dC_L/DAoA, [1/rad]
-      // double alpha_dmin;            // AoA where drag minimal,  [rad]
-      // double cd_af_min;             // Minimum drag coefficient if not stalled, [-]
-      // double cd_af_stall;           // Drag coefficient when stalled, [-]
-      // double alphaStall;            // AoA where C_d = cd_af_stall, [rad]
-      // double cm_af_0;               // Moment coefficient at zero AoA, [-]
-      // double cl_fp_max;             // Flat-plate maximum lift coefficient, [-]
-      // double cd_fp_max;             // Flat-plate maximum drag coefficient, [-]
-      // double cm_fp_max;             // Flat-plate maximum moment coefficient, [-]
-      // double cla_lin [2];           // AoA range where lift ~linear in AoA, [rad]
-      // double d_a;                   // Blending range around stall AoA Airfoil vs Flat-plate model, [rad]
-
-      //AerodynamicParameters aero_params_;
-
-      // bool segUse [4] = {0,0,0,0};          // Indicate which segments to use (0: dont use, 1: use), [-]
-      // bool segSlps [4] = {0,0,0,0};         // Airflow type (0: free stream, 1: slipstream), [-]
-      // bool segCS [4] = {0,0,0,0};           // Control surface presence (0: without control surface, 1: with control surface), [-]
-      // double segYOffset [4] = {0,0,0,0};    // Offset in y-axis of the 4 wing segments, [m]
-      // double segChord [4] = {0,0,0,0};      // Segment chord lengths, [m]
-      // double segArea [4] = {0,0,0,0};       // Effective planeform surface areas of the 4 wing segments, [m^2]
-      */
-
-        ignition::math::Vector3d cp;
-        ignition::math::Vector3d fwd;
-        ignition::math::Vector3d upwd;
+        V3D cp;    // Center of pressure wrt link frame, expressed in link frame
+        V3D fwd;
+        V3D upwd;
         double segArea;
         double segChord;
         double ellpRed;
@@ -281,26 +237,21 @@ protected: double rho;
         /// \brief Quantities to model propeller/rotor wake/slipstream
 
         slipstream * slpstr;
-        //ignition::math::Vector3d cp_wrld; // current world position of center of pressure
-        ignition::math::Vector3d v_ind_cp_; // induced velocity at cp (e.g. due to slipstream)
+        V3D v_ind_cp_; // induced velocity at cp (e.g. due to slipstream)
         int n_slpstr = 0;
 
         /// \brief Force and torque visualization in rviz
-        /*
-        std::string lift_f_vis_topic;
-        gz_visualization_msgs::VisVector lift_f_vis;
-        gazebo::transport::PublisherPtr lift_f_vis_pub;
 
-        std::string drag_f_vis_topic;
-        gz_visualization_msgs::VisVector drag_f_vis;
-        gazebo::transport::PublisherPtr drag_f_vis_pub;
-
-        std::string pitch_m_vis_topic;
-        gz_visualization_msgs::VisVector pitch_m_vis;
-        gazebo::transport::PublisherPtr pitch_m_vis_pub;
-        */
         gz_visualization_msgs::ArrowMarker* lift_vis;
         gz_visualization_msgs::ArrowMarker* slpstr_vis;
+
+        void UpdateIndVel(V3D w_cp){
+            v_ind_cp_ = V3D(0,0,0);
+            for(int j=0; j<n_slpstr; j++){
+                v_ind_cp_ += slpstr[j].GetIndVel(w_cp);;
+            }
+        }
+
     };
 
     segment * segments;
@@ -309,10 +260,6 @@ protected: double rho;
     std::string vector_vis_array_topic;
     gz_visualization_msgs::VisVectorArray vector_vis_array;
     gazebo::transport::PublisherPtr vector_vis_array_pub;
-
-    //gz_visualization_msgs::ArrowMarker * vector = vector_vis_array.add_vector();
-
-    /// \brief Fuselage lift/drag modeling
 
     struct body {
 
@@ -335,9 +282,9 @@ protected: double rho;
         double cd_cyl_ax;                     // drag coefficient of long cylinder in axial flow, [-]
         double cd_cyl_lat;                    // drag coefficient of cylinder in lateral flow, [-]
 
-        ignition::math::Vector3d cp;
-        ignition::math::Vector3d fwd;
-        ignition::math::Vector3d upwd;
+        V3D cp;
+        V3D fwd;
+        V3D upwd;
 
         gz_visualization_msgs::ArrowMarker* force_vis;
 
@@ -346,7 +293,7 @@ protected: double rho;
     body * bodies;
     int n_bdy = 0;
 
-     common::Time last_time;
+    common::Time last_time;
 
     /// \brief Debugging/Logging
 protected:
@@ -363,34 +310,11 @@ protected:
     bool headerFlag;
     bool segLog [4] = {0,0,0,0};
 
-    /// \brief Stuff for propeller slipstream and log request message subscription
-
-
-    //std::string propulsion_slipstream_sub_topic_;
-    //transport::SubscriberPtr propulsion_slipstream_sub_;
-    //void PropulsionSlipstreamCallback(PropulsionSlipstreamPtr& propulsion_slipstream);
-
-    std::string do_log_sub_topic_;
-    transport::SubscriberPtr do_log_sub_;
-    //void DoLogCallback(Int32Ptr& do_log);
-
     /// \brief Utilities
     int sgn(double val) {
         return (int)(0.0 < val) - (int)(val < 0.0);
     }
 };
 
-// callback wrapper
-
-/*
-  struct cb_wrapper
-  {
-      cb_wrapper() {}
-      void PropulsionSlipstreamCallback(PropulsionSlipstreamPtr& propulsion_slipstream, int seg_index, int slpstr_index, GazeboAerodynamics *obj){
-          obj->segments[seg_index].GetIndVel(propulsion_slipstream, slpstr_index);
-      }
-
-  };
-  */
 }
 #endif

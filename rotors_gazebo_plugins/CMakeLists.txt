@@ -519,6 +519,22 @@ if (NOT NO_ROS)
   list(APPEND targets_to_install rotors_gazebo_ros_interface_plugin)
 endif()
 
+#==================================== SPRING DAMPER PLUGIN ========================================//
+add_library(rotors_gazebo_springdamper_plugin SHARED src/gazebo_springdamper_plugin.cpp)
+target_link_libraries(rotors_gazebo_springdamper_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_springdamper_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_springdamper_plugin)
+
+#==================================== TEMPLATE PLUGIN ========================================//
+add_library(rotors_gazebo_template_plugin SHARED src/gazebo_template_plugin.cpp)
+target_link_libraries(rotors_gazebo_template_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_template_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_template_plugin)
+
 #========================================= WIND PLUGIN ==========================================//
 add_library(rotors_gazebo_wind_plugin SHARED src/gazebo_wind_plugin.cpp)
 target_link_libraries(rotors_gazebo_wind_plugin ${target_linking_LIBRARIES} )
