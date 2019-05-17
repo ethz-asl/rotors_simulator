@@ -224,14 +224,22 @@ catkin build
 source ~/catkin_ws/devel/setup.bash
 
 ## Hook up Pixhawk to computer via USB (should appear as /dev/ttyACM0:921600 on linux/ubuntu)
-## It needs to be configured in HIL-mode (Airframe: HILStar(XPlane) or fw_uav_sim)
-## For first trial, flash provided px4_fmu-v3_default.px4 to Pixhawk using QGC
+## It needs to be configured in HIL-mode (Airframe: HILStar(XPlane)). Make sure that the gazebo_mavlink_interface is configured
+## to match the control channel
 
-## Start ROS/Gazebo using Davos world and spawn a Techpod. It should start to communicate with the Pixhawk using
+## Start ROS/Gazebo using Yosemite or Davos world and spawn a Techpod. The plane should start to communicate with the Pixhawk using
 ## the gazebo_mavlink_interface gazebo-plugin attached to the spawned Techpod. In workspace, invoke:
-roslaunch rotors_gazebo fixed_wing_hil.launch verbose:=true world_name:=davos
+roslaunch rotors_gazebo fixed_wing_hil.launch verbose:=true world_name:=yosemite uav_name:=techpod_X
 
-## If Mavros should be used to relay messages from Gazebo via ROS to FCU, start Mavros in addition to above
+## Or, for the avalmapper terrain:
+roslaunch rotors_gazebo fixed_wing_hil.launch verbose:=true world_name:=davos uav_name:=techpod_X
+## (Note: this currently spawns the techpod in mid-air which, subsequently, crashes into the ground -> use gazebos 'follow' function
+## to find the techpod again
+
+## You can now start QGC to introspect e.g. the telemetry from the sim. Make sure QGC connects to the Pixhawk only via UDP (not serial
+## as this interferes with gazebo)
+
+## Optional: If Mavros should be used to relay messages from Gazebo via ROS to FCU, start Mavros in addition to above
 ## command and make sure  gazebo_mavlink_interface gazebo-plugin is not running (otherwise "double" communication)
 ## To be tested, so far I was trying to keep Mavros out of the loop/using direct communiction between Gazebo and FCU#.
 # roslaunch mavros px4.launch fcu_url:=/dev/ttyACM0:921600 gcs_url:=udp://127.0.0.1:14555@127.0.0.1:14560
