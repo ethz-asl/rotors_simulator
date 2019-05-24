@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 
-<robot name="techpod_X" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="techpod_X_flex" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Global properties -->
   <xacro:property name="namespace" value="$(arg namespace)" />
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
@@ -26,7 +26,7 @@
   <xacro:property name="PI" value="3.1415926535897931" />
 
   <!-- Component masses -->
-  <xacro:property name="mass_fuselage" value="2.05" /> <!-- [kg] -->
+  <xacro:property name="mass_fuselage" value="1.8" /> <!-- [kg] -->
   <xacro:property name="mass_aileron" value="0.1" /> <!-- [kg] -->
   <xacro:property name="mass_flap" value="0.1" /> <!-- [kg] -->
   <xacro:property name="mass_elevator" value="0.1" /> <!-- [kg] -->
@@ -37,7 +37,7 @@
   <xacro:property name="body_length" value="1.088" /> <!-- [m] -->
   <xacro:property name="body_width" value="2.591" /> <!-- [m] -->
   <xacro:property name="body_height" value="0.303" /> <!-- [m] -->
-  <xacro:property name="body_color" value="Gray" />
+  <xacro:property name="body_color" value="White" />
   <xacro:property name="body_mesh_file" value="package://rotors_description/meshes/techpod/techpod_body.dae" />
 
   <!-- Aileron properties -->
@@ -46,7 +46,7 @@
   <xacro:property name="aileron_height" value="0.013" /> <!-- [m] -->
   <xacro:property name="aileron_min_angle" value="-0.349066" /> <!-- [rad] -->
   <xacro:property name="aileron_max_angle" value="0.349066" /> <!-- [rad] -->
-  <xacro:property name="aileron_color" value="Red" />
+  <xacro:property name="aileron_color" value="${body_color}" />
   <xacro:property name="aileron_left_mesh_file" value="package://rotors_description/meshes/techpod/techpod_aileron_left.dae" />
   <xacro:property name="aileron_right_mesh_file" value="package://rotors_description/meshes/techpod/techpod_aileron_right.dae" />
 
@@ -56,7 +56,7 @@
   <xacro:property name="elevator_height" value="0.012" /> <!-- [m] -->
   <xacro:property name="elevator_min_angle" value="-0.349066" /> <!-- [rad] -->
   <xacro:property name="elevator_max_angle" value="0.349066" /> <!-- [rad] -->
-  <xacro:property name="elevator_color" value="Blue" />
+  <xacro:property name="elevator_color" value="${body_color}" />
   <xacro:property name="elevator_mesh_file" value="package://rotors_description/meshes/techpod/techpod_elevator.dae" />
 
   <!-- Flap properties -->
@@ -65,7 +65,7 @@
   <xacro:property name="flap_height" value="0.016" /> <!-- [m] -->
   <xacro:property name="flap_min_angle" value="-0.349066" /> <!-- [rad] -->
   <xacro:property name="flap_max_angle" value="0.349066" /> <!-- [rad] -->
-  <xacro:property name="flap_color" value="Yellow" />
+  <xacro:property name="flap_color" value="${body_color}" />
   <xacro:property name="flap_left_mesh_file" value="package://rotors_description/meshes/techpod/techpod_flap_left.dae" />
   <xacro:property name="flap_right_mesh_file" value="package://rotors_description/meshes/techpod/techpod_flap_right.dae" />
 
@@ -75,7 +75,7 @@
   <xacro:property name="rudder_height" value="0.241" />
   <xacro:property name="rudder_min_angle" value="-0.349066" />
   <xacro:property name="rudder_max_angle" value="0.349066" />
-  <xacro:property name="rudder_color" value="Orange" />
+  <xacro:property name="rudder_color" value="Red" />
   <xacro:property name="rudder_mesh_file" value="package://rotors_description/meshes/techpod/techpod_rudder.dae" />
 
   <!-- Propeller properties -->
@@ -84,6 +84,26 @@
   <xacro:property name="propeller_height" value="0.003" />
   <xacro:property name="propeller_color" value="Gray" />
   <xacro:property name="propeller_mesh_file" value="package://rotors_description/meshes/propeller_${propeller_direction}.dae" />
+
+  <!-- Flexing properties -->
+<!--
+<xacro:property name="k1" value="450" />
+<xacro:property name="d1" value="3.5" />
+<xacro:property name="k2" value="140" />
+<xacro:property name="d2" value="1.9" />
+<xacro:property name="k3" value="60" />
+<xacro:property name="d3" value="1.0" />
+<xacro:property name="k4" value="80" />
+<xacro:property name="d4" value="1.2" />
+-->
+<xacro:property name="k1" value="250" />
+<xacro:property name="d1" value="2" />
+<xacro:property name="k2" value="120" />
+<xacro:property name="d2" value="1.0" />
+<xacro:property name="k3" value="30" />
+<xacro:property name="d3" value="0.7" />
+<xacro:property name="k4" value="80" />
+<xacro:property name="d4" value="1.2" />
 
   <!-- Inertia of the main body -->
   <xacro:property name="body_inertia">
@@ -127,10 +147,86 @@
     height="${body_height}"
     color="${body_color}"
     use_mesh_file="${use_mesh}"
-    mesh_file="package://rotors_description/meshes/techpod_X_flex/fuselage.stl">
-    <origin xyz="0.16 0 0.05" rpy="0 0 0" />
+    mesh_file="package://rotors_description/meshes/techpod_X_flex/fuselage_barless.stl">
+    <origin xyz="0.10 0 0.08" rpy="0 0 0" />
     <xacro:insert_block name="body_inertia" />
   </xacro:fixed_wing_base_macro>
+
+<joint name="${namespace}/dome_joint" type="fixed">
+  <parent link="${namespace}/base_link" />
+  <child link="${namespace}/dome" />
+</joint>
+<link name="${namespace}/dome">
+  <inertial>
+    <mass value="0.001" />
+    <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+  </inertial>
+  <visual>
+    <geometry>
+        <mesh filename="package://rotors_description/meshes/techpod_X_flex/dome.stl" scale="1 1 1" />
+    </geometry>
+  </visual>
+</link>
+<gazebo reference="${namespace}/dome">
+  <material>Gazebo/GreyTransparent</material>
+</gazebo>
+
+<joint name="${namespace}/bar_joint" type="fixed">
+  <parent link="${namespace}/base_link" />
+  <child link="${namespace}/bar" />
+</joint>
+<link name="${namespace}/bar">
+  <inertial>
+    <mass value="0.001" />
+    <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+  </inertial>
+  <visual>
+    <geometry>
+        <mesh filename="package://rotors_description/meshes/techpod_X_flex/bar.stl" scale="1 1 1" />
+    </geometry>
+  </visual>
+</link>
+<gazebo reference="${namespace}/bar">
+  <material>Gazebo/Grey</material>
+</gazebo>
+
+<joint name="${namespace}/cover" type="fixed">
+  <parent link="${namespace}/base_link" />
+  <child link="${namespace}/cover" />
+</joint>
+<link name="${namespace}/cover">
+  <inertial>
+    <mass value="0.001" />
+    <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+  </inertial>
+  <visual>
+    <geometry>
+        <mesh filename="package://rotors_description/meshes/techpod_X_flex/cover_hole.stl" scale="1 1 1" />
+    </geometry>
+  </visual>
+</link>
+<gazebo reference="${namespace}/cover">
+   <material>Gazebo/White</material>
+</gazebo>
+
+<joint name="${namespace}/motor_joint" type="fixed">
+  <parent link="${namespace}/base_link" />
+  <child link="${namespace}/motor" />
+</joint>
+<link name="${namespace}/motor">
+  <inertial>
+    <mass value="0.001" />
+    <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+  </inertial>
+  <visual>
+    <geometry>
+        <mesh filename="package://rotors_description/meshes/techpod_X_flex/motor.stl" scale="1 1 1" />
+    </geometry>
+  </visual>
+</link>
+<gazebo reference="${namespace}/motor">
+  <material>Gazebo/Black</material>
+</gazebo>
 
   <!-- Instantiate flexing wing segments -->
 
@@ -139,8 +235,8 @@
     segment_name="wl_1"
     parent="${namespace}/base_link"
     mass_segment="0.15"
-    k = "150"
-    c = "5"
+    k = "${k1}"
+    c = "${d1}"
     color="${body_color}"
     use_mesh_file="${use_mesh}"
     mesh_file="package://rotors_description/meshes/techpod_X_flex/wing_l_1.stl"
@@ -178,6 +274,8 @@
         <control>
           <cs name="flap_left">
               <controlJoint>${namespace}/flap_left_1_joint</controlJoint>
+              <fromTopic>true</fromTopic>
+              <csRefTopic>flap_l1_pos</csRefTopic>
               <radToCLift>2</radToCLift>
               <radToCDrag>0.0</radToCDrag>
               <radToCPitch>0.0</radToCPitch>
@@ -193,8 +291,8 @@
   segment_name="wr_1"
   parent="${namespace}/base_link"
   mass_segment="0.15"
-  k = "150"
-  c = "5"
+  k = "${k1}"
+  c = "${d1}"
   color="${body_color}"
   use_mesh_file="${use_mesh}"
   mesh_file="package://rotors_description/meshes/techpod_X_flex/wing_r_1.stl"
@@ -232,6 +330,8 @@
         <control>
           <cs name="flap_right">
               <controlJoint>${namespace}/flap_right_1_joint</controlJoint>
+              <fromTopic>true</fromTopic>
+              <csRefTopic>flap_r1_pos</csRefTopic>
               <radToCLift>2</radToCLift>
               <radToCDrag>0.0</radToCDrag>
               <radToCPitch>0.0</radToCPitch>
@@ -247,9 +347,9 @@
   segment_name="wl_2"
   parent="${namespace}/wl_1"
   mass_segment="0.1"
-  k = "50"
-  c = "1"
-  color="${body_color}"
+  k = "${k2}"
+  c = "${d2}"
+  color="Red"
   use_mesh_file="${use_mesh}"
   mesh_file="package://rotors_description/meshes/techpod_X_flex/wing_l_2.stl"
   segment_length="0.1"
@@ -278,6 +378,8 @@
         <control>
           <cs name="flap_left">
               <controlJoint>${namespace}/flap_left_2_joint</controlJoint>
+              <fromTopic>true</fromTopic>
+              <csRefTopic>flap_l2_pos</csRefTopic>
               <radToCLift>2</radToCLift>
               <radToCDrag>0.0</radToCDrag>
               <radToCPitch>0.0</radToCPitch>
@@ -301,9 +403,9 @@
   segment_name="wr_2"
   parent="${namespace}/wr_1"
   mass_segment="0.1"
-  k = "50"
-  c = "1"
-  color="${body_color}"
+  k = "${k2}"
+  c = "${d2}"
+  color="Red"
   use_mesh_file="${use_mesh}"
   mesh_file="package://rotors_description/meshes/techpod_X_flex/wing_r_2.stl"
   segment_length="0.1"
@@ -332,6 +434,8 @@
         <control>
           <cs name="flap_right">
               <controlJoint>${namespace}/flap_right_2_joint</controlJoint>
+              <fromTopic>true</fromTopic>
+              <csRefTopic>flap_r2_pos</csRefTopic>
               <radToCLift>2</radToCLift>
               <radToCDrag>0.0</radToCDrag>
               <radToCPitch>0.0</radToCPitch>
@@ -355,8 +459,8 @@
   segment_name="wl_3"
   parent="${namespace}/wl_2"
   mass_segment="0.1"
-  k = "35"
-  c = "0.015"
+  k = "${k3}"
+  c = "${d3}"
   color="${body_color}"
   use_mesh_file="${use_mesh}"
   mesh_file="package://rotors_description/meshes/techpod_X_flex/wing_l_3.stl"
@@ -386,6 +490,8 @@
         <control>
           <cs name="aileron_left">
               <controlJoint>${namespace}/aileron_left_joint</controlJoint>
+              <fromTopic>true</fromTopic>
+              <csRefTopic>ail_l_pos</csRefTopic>
               <radToCLift>2</radToCLift>
               <radToCDrag>0.0</radToCDrag>
               <radToCPitch>0.0</radToCPitch>
@@ -409,8 +515,8 @@
   segment_name="wr_3"
   parent="${namespace}/wr_2"
   mass_segment="0.1"
-  k = "35"
-  c = "0.015"
+  k = "${k3}"
+  c = "${d3}"
   color="${body_color}"
   use_mesh_file="${use_mesh}"
   mesh_file="package://rotors_description/meshes/techpod_X_flex/wing_r_3.stl"
@@ -440,6 +546,8 @@
         <control>
           <cs name="aileron_right">
               <controlJoint>${namespace}/aileron_right_joint</controlJoint>
+              <fromTopic>true</fromTopic>
+              <csRefTopic>ail_r_pos</csRefTopic>
               <radToCLift>2</radToCLift>
               <radToCDrag>0.0</radToCDrag>
               <radToCPitch>0.0</radToCPitch>
@@ -463,8 +571,8 @@
   segment_name="vs"
   parent="${namespace}/base_link"
   mass_segment="0.15"
-  k = "50"
-  c = "0.5"
+  k = "${k4}"
+  c = "${d4}"
   color="${body_color}"
   use_mesh_file="${use_mesh}"
   mesh_file="package://rotors_description/meshes/techpod_X_flex/v_stb.stl"
@@ -497,6 +605,8 @@
       <control>
         <cs name="rudder">
             <controlJoint>${namespace}/rudder_joint</controlJoint>
+            <fromTopic>true</fromTopic>
+            <csRefTopic>rudd_pos</csRefTopic>
             <radToCLift>3</radToCLift>
             <radToCDrag>0.0</radToCDrag>
             <radToCPitch>0.0</radToCPitch>
@@ -512,8 +622,8 @@
   segment_name="hs"
   parent="${namespace}/vs"
   mass_segment="0.15"
-  k = "35"
-  c = "0.35"
+  k = "${k4}"
+  c = "${d4}"
   color="${body_color}"
   use_mesh_file="${use_mesh}"
   mesh_file="package://rotors_description/meshes/techpod_X_flex/h_stb.stl"
@@ -546,6 +656,8 @@
       <control>
         <cs name="elevator_left">
             <controlJoint>${namespace}/elevator_joint</controlJoint>
+            <fromTopic>true</fromTopic>
+            <csRefTopic>elev_pos</csRefTopic>
             <radToCLift>2</radToCLift>
             <radToCDrag>0.0</radToCDrag>
             <radToCPitch>0.0</radToCPitch>
@@ -566,6 +678,8 @@
       <control>
         <cs name="elevator_right">
             <controlJoint>${namespace}/elevator_joint</controlJoint>
+            <fromTopic>true</fromTopic>
+            <csRefTopic>elev_pos</csRefTopic>
             <radToCLift>2</radToCLift>
             <radToCDrag>0.0</radToCDrag>
             <radToCPitch>0.0</radToCPitch>
@@ -575,7 +689,6 @@
     </airfoil>
   </plugin>
 </gazebo>
-
 
   <!-- Instantiate the ailerons -->
   <xacro:control_surface
@@ -667,7 +780,7 @@
   mass_surface="${mass_flap}"
   min_angle="${flap_min_angle}"
   max_angle="${flap_max_angle}"
-  color="${flap_color}"
+  color="Red"
   use_mesh_file="true"
   mesh_file="package://rotors_description/meshes/techpod_X_flex/flp_l_2.stl"
   surface_length="${flap_length}"
@@ -707,7 +820,7 @@ parent="${namespace}/wr_2"
 mass_surface="${mass_flap}"
 min_angle="${flap_min_angle}"
 max_angle="${flap_max_angle}"
-color="${flap_color}"
+color="Red"
 use_mesh_file="true"
 mesh_file="package://rotors_description/meshes/techpod_X_flex/flp_r_2.stl"
 surface_length="${flap_length}"
@@ -1004,7 +1117,7 @@ surface_height="${flap_height}">
       <channel name="propeller">
         <input_index>4</input_index>
         <input_offset>1</input_offset>
-        <input_scaling>366</input_scaling><!-- max rad/s/2 -->
+        <input_scaling>466</input_scaling><!-- max rad/s/2 -->
         <zero_position_disarmed>0</zero_position_disarmed>
         <zero_position_armed>0</zero_position_armed>
         <joint_control_type>gz_msg</joint_control_type>
@@ -1027,6 +1140,7 @@ surface_height="${flap_height}">
         <zero_position_armed>0</zero_position_armed>
         <joint_control_type>servo</joint_control_type>
         <joint_name>${namespace}/aileron_left_joint</joint_name>
+        <gztopic>ail_l_pos</gztopic>
       </channel>
       <channel name="aileron_right">
         <input_index>0</input_index>
@@ -1036,6 +1150,7 @@ surface_height="${flap_height}">
         <zero_position_armed>0</zero_position_armed>
         <joint_control_type>servo</joint_control_type>
         <joint_name>${namespace}/aileron_right_joint</joint_name>
+        <gztopic>ail_r_pos</gztopic>
       </channel>
       <channel name="elevator">
         <input_index>2</input_index>
@@ -1045,6 +1160,7 @@ surface_height="${flap_height}">
         <zero_position_armed>0</zero_position_armed>
         <joint_control_type>servo</joint_control_type>
         <joint_name>${namespace}/elevator_joint</joint_name>
+        <gztopic>elev_pos</gztopic>
       </channel>
       <channel name="rudder">
         <input_index>3</input_index>
@@ -1054,6 +1170,7 @@ surface_height="${flap_height}">
         <zero_position_armed>0</zero_position_armed>
         <joint_control_type>servo</joint_control_type>
         <joint_name>${namespace}/rudder_joint</joint_name>
+        <gztopic>rudd_pos</gztopic>
       </channel>
       <channel name="flap_left_1">
         <input_index>5</input_index>
@@ -1063,6 +1180,7 @@ surface_height="${flap_height}">
         <zero_position_armed>0</zero_position_armed>
         <joint_control_type>servo</joint_control_type>
         <joint_name>${namespace}/flap_left_1_joint</joint_name>
+        <gztopic>flap_l1_pos</gztopic>
       </channel>
       <channel name="flap_left_2">
         <input_index>5</input_index>
@@ -1072,6 +1190,7 @@ surface_height="${flap_height}">
         <zero_position_armed>0</zero_position_armed>
         <joint_control_type>servo</joint_control_type>
         <joint_name>${namespace}/flap_left_2_joint</joint_name>
+        <gztopic>flap_l2_pos</gztopic>
       </channel>
       <channel name="flap_right_1">
         <input_index>5</input_index>
@@ -1081,6 +1200,7 @@ surface_height="${flap_height}">
         <zero_position_armed>0</zero_position_armed>
         <joint_control_type>servo</joint_control_type>
         <joint_name>${namespace}/flap_right_1_joint</joint_name>
+        <gztopic>flap_r1_pos</gztopic>
       </channel>
       <channel name="flap_right_2">
         <input_index>5</input_index>
@@ -1090,6 +1210,7 @@ surface_height="${flap_height}">
         <zero_position_armed>0</zero_position_armed>
         <joint_control_type>servo</joint_control_type>
         <joint_name>${namespace}/flap_right_2_joint</joint_name>
+        <gztopic>flap_r2_pos</gztopic>
       </channel>
     </control_channels>
   </plugin>
