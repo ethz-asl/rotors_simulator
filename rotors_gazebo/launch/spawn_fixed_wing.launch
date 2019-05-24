@@ -21,6 +21,10 @@
   <arg name="wait_to_record_bag" default="false"/>
   <arg name="enable_mavlink_interface" default="true"/>
 
+  <arg name="tracking_cam" default="$(find rotors_description)/urdf/tracking_cam.xacro"/>
+  <arg name="target_name" default="$(arg namespace)"/>
+  <arg name="target_link" default="$(arg namespace)/base_link"/>
+
   <!-- send the robot XML to param server -->
   <param name="robot_description" command="
     $(find xacro)/xacro.py '$(arg model)'
@@ -38,6 +42,13 @@
   />
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
 
+  <!-- send the tracking camera XML to param server -->
+  <param name="tracking_cam_description" command="
+    $(find xacro)/xacro.py '$(arg tracking_cam)'
+    target_name:=$(arg target_name)
+    target_link:=$(arg target_link)"
+  />
+
   <!-- push robot_description to factory and spawn robot in gazebo -->
   <node name="spawn_$(arg namespace)" pkg="gazebo_ros" type="spawn_model"
    args="-param robot_description
@@ -51,4 +62,19 @@
          -model $(arg namespace)"
    respawn="false" output="screen">
   </node>
+
+  <!-- push tracking_cam_description to factory and spawn camera in gazebo -->
+  <node name="spawn_tracking_cam" pkg="gazebo_ros" type="spawn_model"
+   args="-param tracking_cam_description
+         -urdf
+         -x 20
+         -y 5
+         -z 0
+         -R 0
+         -P 0
+         -Y 0
+        -model tracking_cam"
+    respawn="false" output="screen">
+  </node>
+
 </launch>
