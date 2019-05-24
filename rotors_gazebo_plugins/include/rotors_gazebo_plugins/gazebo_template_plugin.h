@@ -36,10 +36,10 @@ namespace gazebo
     public: ~GazeboTemplate();
 
     // Documentation Inherited.
-    public: virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+    public: void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
     /// \brief Callback for World Update events.
-    protected: virtual void OnUpdate();
+    protected: void OnUpdate();
 
     /// \brief Connection to World Update events.
     protected: event::ConnectionPtr updateConnection;

@@ -55,19 +55,19 @@ typedef ignition::math::Matrix3<double> M3D;
 
 // Default values
 static constexpr double kDefaulMaxRotVelocity = 838.0;
-static constexpr double kDefaultRhoAir = 1.255;
+static constexpr double kDefaultRhoAir = 1.2041; // air density 1.2041 kg/m³ (dry, @20 °C, 101.325 kPa)
 
 class GazeboPropulsion : public ModelPlugin{
 public:
     GazeboPropulsion():
         ModelPlugin(){}
 
-    virtual ~GazeboPropulsion();
+    ~GazeboPropulsion();
 
 protected:
-    virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
-    //virtual void OnUpdate(const common::UpdateInfo & _info);
-    virtual void OnUpdate();
+    void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+    //void OnUpdate(const common::UpdateInfo & _info);
+    void OnUpdate();
 
 private:
     std::string namespace_;

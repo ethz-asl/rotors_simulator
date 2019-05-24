@@ -64,6 +64,7 @@
   </node>
 
   <!-- push tracking_cam_description to factory and spawn camera in gazebo -->
+  <!--
   <node name="spawn_tracking_cam" pkg="gazebo_ros" type="spawn_model"
    args="-param tracking_cam_description
          -urdf
@@ -73,8 +74,7 @@
          -R 0
          -P 0
          -Y 0
-        -model tracking_cam"
-    respawn="false" output="screen">
+        -model tracking_cam">
   </node>
-
+  -->
 </launch>

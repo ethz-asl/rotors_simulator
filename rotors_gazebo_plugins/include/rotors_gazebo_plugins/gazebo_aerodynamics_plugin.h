@@ -48,7 +48,6 @@
 #include <iostream>
 #include <fstream>
 
-
 #include <algorithm>
 
 #include "gazebo/common/Assert.hh"
@@ -67,112 +66,86 @@ typedef const boost::shared_ptr<const gz_visualization_msgs::VisVectorArray> GzV
 typedef const boost::shared_ptr<const gz_mav_msgs::PropulsionSlipstream> PropulsionSlipstreamPtr;
 typedef const boost::shared_ptr<const gz_std_msgs::Float32> Float32Ptr;
 static const std::string kDefaultPropulsionSlipstreamSubTopic = "/propulsion_slipstream";
+static constexpr double kDefaultRhoAir = 1.2041; // air density 1.2041 kg/m³ (dry, @20 °C, 101.325 kPa)
 
-/// \brief A plugin that simulates lift and drag.
-class GAZEBO_VISIBLE GazeboAerodynamics : public ModelPlugin
+
+class GazeboAerodynamics : public ModelPlugin
 {
     /// \brief Constructor.
-public: GazeboAerodynamics();
+public:
+    GazeboAerodynamics():
+        ModelPlugin(){gzdbg<<"gazebo_aerodynamics constructed"<<std::endl;}
+    ~GazeboAerodynamics();
 
-    /// \brief Destructor.
-public: ~GazeboAerodynamics();
+protected:
+    void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+    void OnUpdate();
 
-    // Documentation Inherited.
-public: virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+private:
+    std::string namespace_;
+    transport::NodePtr node_handle_;
+    physics::WorldPtr world;
+    physics::ModelPtr model;
+    physics::LinkPtr link;
+    event::ConnectionPtr updateConnection;
 
-    /// \brief Callback for World Update events.
-protected: virtual void OnUpdate();
+    double rho_ = kDefaultRhoAir; // air density 1.2041 kg/m³ (dry, @20 °C, 101.325 kPa)
 
-    /// \brief Connection to World Update events.
-protected: event::ConnectionPtr updateConnection;
+    struct ControlSurface {
+        ControlSurface():
+            cs_ref(0.0){}
 
-    /// \brief Pointer to world.
-protected: physics::WorldPtr world;
-
-    /// \brief Pointer to physics engine.
-protected: physics::PhysicsEnginePtr physics;
-
-    /// \brief Pointer to model containing plugin.
-protected: physics::ModelPtr model;
-
-    /// \brief Pointer to link currently targeted by mud joint.
-protected: physics::LinkPtr link;
-
-    /// \brief SDF for this plugin;
-protected: sdf::ElementPtr sdf;
-
-private: std::string namespace_;
-private: transport::NodePtr node_handle_;
-
-    /// \brief air density
-    /// at 25 deg C it's about 1.1839 kg/m^3
-    /// At 20 °C and 101.325 kPa, dry air has a density of 1.2041 kg/m3.
-protected: double rho;
-
-    struct control_surface {
-
-        control_surface():
-            controlJoint(nullptr),
-            control_ref_sub(nullptr),
-            fromTopic(false),
-            cs_ref(0.0),
-            controlJointRadToCL(0.0),
-            controlJointRadToCD(0.0),
-            controlJointRadToCM(0.0){}
-
-        physics::JointPtr controlJoint;
-        transport::SubscriberPtr control_ref_sub;
+        physics::JointPtr control_joint = nullptr;
+        transport::SubscriberPtr control_ref_sub = nullptr;
         std::string cs_ref_topic;
-        bool fromTopic;
+        bool from_topic = false;
         std::atomic<double> cs_ref;
-        double controlJointRadToCL;   // dC_L/dCS slope, [1/rad]
-        double controlJointRadToCD;   // dC_D/dCS slope, [1/rad]
-        double controlJointRadToCM;   // dC_M/dCS slope, [1/rad]
+        double control_joint_rad_to_cl = 0.0;   // dC_L/dCS slope, [1/rad]
+        double control_joint_rad_to_cd = 0.0;   // dC_D/dCS slope, [1/rad]
+        double control_joint_rad_to_cm = 0.0;   // dC_M/dCS slope, [1/rad]
 
         void Callback(Float32Ptr& reference){
             cs_ref = (double)reference->data();
         }
     };
 
-    struct slipstream {
+    struct Slipstream {
+        Slipstream(){}
 
-        slipstream():
-            propulsion_slipstream_sub_(nullptr){}
-
-        transport::SubscriberPtr propulsion_slipstream_sub_;
+        transport::SubscriberPtr propulsion_slipstream_sub_ = nullptr;
         std::mutex slipstream_lock;
         std::string slpstr_topic;
 
-        V3D p_rot;
-        V3D d_wake;
-        V3D d_wake_e;
-        V3D v_ind_d;
-        V3D v_ind_e;
+        V3D p_rot = V3D(0,0,0);
+        V3D d_wake = V3D(0,0,0);
+        V3D d_wake_e = V3D(0,0,0);
+        V3D v_ind_d = V3D(0,0,0);
+        V3D v_ind_e = V3D(0,0,0);
 
-        double r_rot;
+        double r_rot = 0;
 
         void Callback(PropulsionSlipstreamPtr& propulsion_slipstream){
             std::unique_lock<std::mutex> lock(slipstream_lock);
             // position of rotordisk center wrt world, expressed in world frame [m]
             p_rot = V3D(propulsion_slipstream->rotor_pos().x(),
-                                             propulsion_slipstream->rotor_pos().y(),
-                                             propulsion_slipstream->rotor_pos().z());
+                        propulsion_slipstream->rotor_pos().y(),
+                        propulsion_slipstream->rotor_pos().z());
 
             // wake direction expressed in world frame [-]
             d_wake = V3D(propulsion_slipstream->wake_dir().x(),
-                                              propulsion_slipstream->wake_dir().y(),
-                                              propulsion_slipstream->wake_dir().z());
+                         propulsion_slipstream->wake_dir().y(),
+                         propulsion_slipstream->wake_dir().z());
             d_wake_e = d_wake.Normalized();
 
             // induced velocity at rotordisk, expressed in world frame [m/s]
             v_ind_d = V3D(propulsion_slipstream->ind_vel_disk().x(),
-                                               propulsion_slipstream->ind_vel_disk().y(),
-                                               propulsion_slipstream->ind_vel_disk().z());
+                          propulsion_slipstream->ind_vel_disk().y(),
+                          propulsion_slipstream->ind_vel_disk().z());
 
             // induced velocity at end of wake (Note: not necessarily 0!)
             v_ind_e = V3D(propulsion_slipstream->ind_vel_end().x(),
-                                               propulsion_slipstream->ind_vel_end().y(),
-                                               propulsion_slipstream->ind_vel_end().z());
+                          propulsion_slipstream->ind_vel_end().y(),
+                          propulsion_slipstream->ind_vel_end().z());
 
             // propeller/wake diameter
             r_rot = propulsion_slipstream->prop_diam()/2;
@@ -202,44 +175,31 @@ protected: double rho;
         }
     };
 
-    struct segment {
-
-        segment():
-            alpha_prev(0),
-            alpha_dot(0),
-            cp(0,0,0),
-            fwd(1,0,0),
-            upwd(0,0,1),
-            ellpRed(1){}
-
-        int index;
-        double alpha;
+    struct Segment {
+        Segment(){}
 
         // To include hyteresis in future implementation, currently not used
-        double alpha_prev;
-        double alpha_dot;
-        bool cl_hist_up;
+        double alpha_prev = 0;
+        double alpha_dot = 0;
+        bool cl_hist_up = true;
 
-        AerodynamicParameters aero_params_;
+        AerodynamicParameters aero_params;
 
-        double cs_c_lift;
-        double cs_c_drag;
-        double cs_c_pitch_moment;
+        V3D cp = V3D(0,0,0);    // Center of pressure wrt link frame, expressed in link frame
+        V3D fwd = V3D(1,0,0);
+        V3D upwd = V3D(0,0,1);
+        double seg_area;
 
-        V3D cp;    // Center of pressure wrt link frame, expressed in link frame
-        V3D fwd;
-        V3D upwd;
-        double segArea;
-        double segChord;
-        double ellpRed;
+        double seg_chord;
+        double ellp_mult;
         
-        control_surface * cs;
+        ControlSurface * cs;
         int n_cs = 0;
 
         /// \brief Quantities to model propeller/rotor wake/slipstream
 
-        slipstream * slpstr;
-        V3D v_ind_cp_; // induced velocity at cp (e.g. due to slipstream)
+        Slipstream * slpstr;
+        V3D v_ind_cp; // induced velocity at cp (e.g. due to slipstream)
         int n_slpstr = 0;
 
         /// \brief Force and torque visualization in rviz
@@ -248,28 +208,24 @@ protected: double rho;
         gz_visualization_msgs::ArrowMarker* slpstr_vis;
 
         void UpdateIndVel(V3D w_cp){
-            v_ind_cp_ = V3D(0,0,0);
+            v_ind_cp = V3D(0,0,0);
             for(int j=0; j<n_slpstr; j++){
-                v_ind_cp_ += slpstr[j].GetIndVel(w_cp);;
+                v_ind_cp += slpstr[j].GetIndVel(w_cp);;
             }
         }
 
     };
 
-    segment * segments;
-    int n_seg = 0;
+    Segment * segments_;
+    int n_seg_ = 0;
 
-    std::string vector_vis_array_topic;
-    gz_visualization_msgs::VisVectorArray vector_vis_array;
-    gazebo::transport::PublisherPtr vector_vis_array_pub;
+    struct Body {
 
-    struct body {
-
-        body():
+        Body():
             index(0),
-            A_fus_xx(0),
-            A_fus_yy(0),
-            A_fus_zz(0),
+            a_fus_xx(0),
+            a_fus_yy(0),
+            a_fus_zz(0),
             cd_cyl_ax(0.82),
             cd_cyl_lat(1.17),
             cp(0,0,0),
@@ -278,9 +234,9 @@ protected: double rho;
 
         int index;
 
-        double A_fus_xx;                      // forward-projected area of fuselage, [m^2]
-        double A_fus_yy;                      // side-projected area of fuselage, [m^2]
-        double A_fus_zz;                      // down-projected area of fuselage, [m^2]
+        double a_fus_xx;                      // forward-projected area of fuselage, [m^2]
+        double a_fus_yy;                      // side-projected area of fuselage, [m^2]
+        double a_fus_zz;                      // down-projected area of fuselage, [m^2]
         double cd_cyl_ax;                     // drag coefficient of long cylinder in axial flow, [-]
         double cd_cyl_lat;                    // drag coefficient of cylinder in lateral flow, [-]
 
@@ -292,30 +248,18 @@ protected: double rho;
 
     };
 
-    body * bodies;
-    int n_bdy = 0;
+    Body * bodies_;
+    int n_bdy_ = 0;
 
-    common::Time last_time;
+    std::string vector_vis_array_topic_;
+    gz_visualization_msgs::VisVectorArray vector_vis_array_;
+    gazebo::transport::PublisherPtr vector_vis_array_pub_;
 
-    /// \brief Debugging/Logging
-protected:
-    bool pubs_and_subs_created_;
-    bool dbgOut;
-    int printItv;
-    int logItv;
-    int updateCounter;
-    std::ofstream logfile;
-    std::string logName;
-    bool logFlag;
-    bool logStarted;
-    bool logEnable;
-    bool headerFlag;
-    bool segLog [4] = {0,0,0,0};
+    common::Time last_time_;
 
-    /// \brief Utilities
-    int sgn(double val) {
-        return (int)(0.0 < val) - (int)(val < 0.0);
-    }
+    bool pubs_and_subs_created_ = false;
+    int update_counter_ = 0;
+
 };
 
 }
