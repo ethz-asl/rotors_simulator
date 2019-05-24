@@ -131,8 +131,8 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
           }
 
           // start gz transport node handle
-          if (channels[i].joint_control_type_ == "gz_msg")
-          {
+          //if (channels[i].joint_control_type_ == "gz_msg")
+          //{
               // setup publisher handle to topic
               if (channel->HasElement("gztopic"))
                   channels[i].gztopic_ = "~/" + namespace_ + "/" + channel->Get<std::string>("gztopic");
@@ -151,8 +151,8 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
                 channels[i].gztopic_);
       #endif
       */
-              gzdbg<<"publishing to "<<channels[i].gztopic_<<"\n";
-          }
+             // gzdbg<<"publishing to "<<channels[i].gztopic_<<"\n";
+          //}
 
           if (channel->HasElement("joint_name"))
           {
@@ -955,20 +955,25 @@ void GazeboMavlinkInterface::handle_control(double _dt)
       //gzdbg<<"dbg: 2b"<<i<<std::endl;
       double target = channels[i].input_reference_;
 
-      if (channels[i].joint_control_type_ == "velocity")
-      {
+      if (channels[i].joint_control_type_ == "velocity") {
         double current = channels[i].joint_->GetVelocity(0);
         double err =  current - target;
         double force = channels[i].pid_.Update(err, _dt);
 
         force = ignition::math::clamp(-3*err,-1.0,1.0);
 
-        if(!isnan(force)){
+        if (!isnan(force)) {
             channels[i].joint_->SetVelocity(0,target);
             //gzdbg<<"prop speed: "<<current<<" prop moment: "<<force<<"err: "<<err<<"\n";
-        }else{
+        } else {
             gzdbg<<"nan force\n";
-         }
+        }
+
+        //publish velocity
+        gz_std_msgs::Float32 m;
+        m.set_data((float)target);
+        channels[i].joint_control_pub_->Publish(m);
+
       } else if (channels[i].joint_control_type_ == "position") {
 #if GAZEBO_MAJOR_VERSION >= 9
         double current = channels[i].joint_->Position(0);
@@ -979,6 +984,11 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         double err = current - target;
         double force = channels[i].pid_.Update(err, _dt);
         channels[i].joint_->SetForce(0, force);
+
+        //publish velocity
+        gz_std_msgs::Float32 m;
+        m.set_data((float)target);
+        channels[i].joint_control_pub_->Publish(m);
 
       } else if (channels[i].joint_control_type_ == "servo") {
 
@@ -1030,6 +1040,11 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         double torque = channels[i].srv.P_vel*err_vel+channels[i].srv.P_pos*err_pos;
         channels[i].joint_->SetForce(0, torque);
 
+        //publish servo position (without link dynamics)
+        gz_std_msgs::Float32 m;
+        m.set_data((float)channels[i].srv.ref);
+        channels[i].joint_control_pub_->Publish(m);
+
       } else if (channels[i].joint_control_type_ == "gz_msg") {
           gz_std_msgs::Float32 m;
           m.set_data((float)target);
@@ -1058,6 +1073,10 @@ void GazeboMavlinkInterface::handle_control(double _dt)
      #else
         channels[i].joint_->SetAngle(0, channels[i].input_reference_);
      #endif
+        //publish position
+        gz_std_msgs::Float32 m;
+        m.set_data((float)target);
+        channels[i].joint_control_pub_->Publish(m);
       } else {
         gzerr << "joint_control_type[" << channels[i].joint_control_type_ << "] undefined.\n";
       }

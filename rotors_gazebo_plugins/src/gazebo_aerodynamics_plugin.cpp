@@ -285,6 +285,10 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
                 segments[i].cs = new control_surface [segments[i].n_cs];
 
                 for(int j=0; j<segments[i].n_cs; j++){
+
+                    if(_sdf_cs->HasElement("fromTopic"))
+                        segments[i].cs[j].fromTopic = _sdf_cs->Get<bool>("fromTopic");
+
                     if (_sdf_cs->HasElement("controlJoint")){
                         std::string joint_name = _sdf_cs->Get<std::string>("controlJoint");
                         segments[i].cs[j].controlJoint = model->GetJoint(joint_name);
@@ -292,8 +296,17 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
                         if (model->GetJoint(joint_name) == nullptr)
                             gzwarn << "joint [" << joint_name << "] not found \n";
 
-                    } else {
-                        gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'controlJoint' element \n";
+                    } else if(!segments[i].cs[j].fromTopic) {
+                        gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'controlJoint' element and won't be effective \n";
+                    }
+
+                    if(segments[i].cs[j].fromTopic){
+                        if (_sdf_cs->HasElement("csRefTopic")) {
+                            segments[i].cs[j].cs_ref_topic = _sdf_cs->Get<std::string>("csRefTopic");
+                        } else {
+                            gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'csRefTopic' element and won't be effective \n";
+                            segments[i].cs[j].fromTopic = false;
+                        }
                     }
 
                     if (_sdf_cs->HasElement("radToCLift"))
@@ -407,6 +420,14 @@ void GazeboAerodynamics::OnUpdate()
                                                                                            &segments[i].slpstr[j]);
                 gzdbg<<"subscribing to: "<<"~/" + namespace_ + "/" + segments[i].slpstr[j].slpstr_topic<<"\n";
             }
+            for (int j=0; j<segments[i].n_cs; j++){
+                if(segments[i].cs[j].fromTopic){
+                    segments[i].cs[j].control_ref_sub = node_handle_->Subscribe("~/" + namespace_ + "/" + segments[i].cs[j].cs_ref_topic,
+                                                                                &GazeboAerodynamics::control_surface::Callback,
+                                                                                &segments[i].cs[j]);
+                    gzdbg<<"sub to: ~/" + namespace_ + "/" + segments[i].cs[j].cs_ref_topic + "\n";
+                }
+            }
         }
         /*
             segments[i].lift_f_vis_pub = node_handle_->Advertise<gz_visualization_msgs::VisVector>("~/" + segments[i].lift_f_vis_topic, 1);
@@ -517,11 +538,23 @@ void GazeboAerodynamics::OnUpdate()
             double d_cm = 0.0;
 
             for(int j=0; j<segments[i].n_cs; j++){
+                double controlAngle;
+                if (segments[i].cs[j].fromTopic) {
+                    controlAngle = segments[i].cs[j].cs_ref;
+
+                } else if (segments[i].cs[j].controlJoint){
 #if GAZEBO_MAJOR_VERSION >= 9
-                double controlAngle = segments[i].cs[j].controlJoint->Position(0);
+                    controlAngle = segments[i].cs[j].controlJoint->Position(0);
 #else
-                double controlAngle = segments[i].cs[j].controlJoint->GetAngle(0).Radian();
+                    controlAngle = segments[i].cs[j].controlJoint->GetAngle(0).Radian();
 #endif
+                } else {
+                    controlAngle = 0.0;
+                }
+
+                if (!std::isfinite(controlAngle))
+                    controlAngle = 0.0;
+
                 d_cl += segments[i].cs[j].controlJointRadToCL*controlAngle;
                 d_cd += segments[i].cs[j].controlJointRadToCD*controlAngle;
                 d_cm += segments[i].cs[j].controlJointRadToCM*controlAngle;

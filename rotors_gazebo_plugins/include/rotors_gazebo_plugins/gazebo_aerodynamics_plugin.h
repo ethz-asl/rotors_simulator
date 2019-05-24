@@ -42,10 +42,9 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/common/common.hh>
 #include "PropulsionSlipstream.pb.h"
-//#include "VisVector.pb.h"
 #include "VisVectorArray.pb.h"
 #include "ConnectGazeboToRosTopic.pb.h"
-//#include <Int32.pb.h>
+#include <Float32.pb.h>
 #include <iostream>
 #include <fstream>
 
@@ -64,18 +63,10 @@ namespace gazebo
 typedef ignition::math::Vector3d V3D;
 typedef ignition::math::Matrix3<double> M3D;
 
-/// \brief Stuff for propeller slipstream message subscription
-typedef const boost::shared_ptr<const gz_mav_msgs::PropulsionSlipstream> PropulsionSlipstreamPtr;
-static const std::string kDefaultPropulsionSlipstreamSubTopic = "/propulsion_slipstream";
-
-//typedef const boost::shared_ptr<const gz_visualization_msgs::VisVector> GzVisVectorMsgPtr;
 typedef const boost::shared_ptr<const gz_visualization_msgs::VisVectorArray> GzVisVectorArrayMsgPtr;
-
-/// \brief Stuff for log request message subscription
-//typedef const boost::shared_ptr<const std_msgs::msgs::Int32> Int32Ptr;
-//static const std::string kDefaultDoLogSubTopic = "/do_log";
-
-//void PropulsionSlipstreamCallback(PropulsionSlipstreamPtr& propulsion_slipstream, int seg_index, int slpstr_index, GazeboAerodynamics obj);
+typedef const boost::shared_ptr<const gz_mav_msgs::PropulsionSlipstream> PropulsionSlipstreamPtr;
+typedef const boost::shared_ptr<const gz_std_msgs::Float32> Float32Ptr;
+static const std::string kDefaultPropulsionSlipstreamSubTopic = "/propulsion_slipstream";
 
 /// \brief A plugin that simulates lift and drag.
 class GAZEBO_VISIBLE GazeboAerodynamics : public ModelPlugin
@@ -122,14 +113,25 @@ protected: double rho;
 
         control_surface():
             controlJoint(nullptr),
+            control_ref_sub(nullptr),
+            fromTopic(false),
+            cs_ref(0.0),
             controlJointRadToCL(0.0),
             controlJointRadToCD(0.0),
             controlJointRadToCM(0.0){}
 
         physics::JointPtr controlJoint;
+        transport::SubscriberPtr control_ref_sub;
+        std::string cs_ref_topic;
+        bool fromTopic;
+        std::atomic<double> cs_ref;
         double controlJointRadToCL;   // dC_L/dCS slope, [1/rad]
         double controlJointRadToCD;   // dC_D/dCS slope, [1/rad]
         double controlJointRadToCM;   // dC_M/dCS slope, [1/rad]
+
+        void Callback(Float32Ptr& reference){
+            cs_ref = (double)reference->data();
+        }
     };
 
     struct slipstream {
