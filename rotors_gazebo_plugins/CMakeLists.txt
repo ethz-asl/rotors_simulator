@@ -351,6 +351,15 @@ else()
   message(STATUS "Gazebo version is less than 5, not building gazebo_lidar_plugin.cpp.")
 endif()
 
+#==================================== LIFTING LINE PLUGIN ========================================//
+add_library(rotors_gazebo_lifting_line_plugin SHARED src/gazebo_lifting_line_plugin.cpp)
+target_link_libraries(rotors_gazebo_lifting_line_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_lifting_line_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_lifting_line_plugin)
+
+
 #===================================== MAGNETOMETER PLUGIN ======================================//
 add_library(rotors_gazebo_magnetometer_plugin SHARED src/gazebo_magnetometer_plugin.cpp)
 target_link_libraries(rotors_gazebo_magnetometer_plugin ${target_linking_LIBRARIES} )

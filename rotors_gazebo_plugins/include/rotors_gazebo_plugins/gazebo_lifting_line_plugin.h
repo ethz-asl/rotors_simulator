@@ -14,8 +14,8 @@
  * limitations under the License.
  *
 */
-#ifndef _GAZEBO_TEMPLATE_PLUGIN_HH_
-#define _GAZEBO_TEMPLATE_PLUGIN_HH_
+#ifndef _GAZEBO_LIFTING_LINE_PLUGIN_HH_
+#define _GAZEBO_LIFTING_LINE_PLUGIN_HH_
 
 #include <string>
 #include <vector>
@@ -26,14 +26,14 @@
 
 namespace gazebo
 {
-  /// \brief A template model plugin
-  class GAZEBO_VISIBLE GazeboTemplate : public ModelPlugin
+  /// \brief A plugin that simulates lift and drag.
+  class GAZEBO_VISIBLE GazeboLiftingLine : public ModelPlugin
   {
     /// \brief Constructor.
-    public: GazeboTemplate();
+    public: GazeboLiftingLine();
 
     /// \brief Destructor.
-    public: ~GazeboTemplate();
+    public: ~GazeboLiftingLine();
 
     // Documentation Inherited.
     public: void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
