@@ -317,6 +317,14 @@ if (NOT NO_ROS)
 endif()
 list(APPEND targets_to_install rotors_gazebo_imu_plugin)
 
+#========================================= IMU S PLUGIN ===========================================//
+add_library(rotors_gazebo_imu_s_plugin SHARED src/gazebo_imu_s_plugin.cpp)
+target_link_libraries(rotors_gazebo_imu_s_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_imu_s_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_imu_s_plugin)
+
 #========================================= NoisyDepth PLUGIN ======================================//
 if(${gazebo_dev_FOUND})
   add_library(rotors_gazebo_noisydepth_plugin SHARED src/gazebo_noisydepth_plugin.cpp
@@ -543,6 +551,14 @@ if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_template_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 list(APPEND targets_to_install rotors_gazebo_template_plugin)
+
+#==================================== TEMPLATE SENSOR PLUGIN ========================================//
+add_library(rotors_gazebo_template_sensor_plugin SHARED src/gazebo_template_sensor_plugin.cpp)
+target_link_libraries(rotors_gazebo_template_sensor_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_template_sensor_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_template_sensor_plugin)
 
 #==================================== TRACKING CAM PLUGIN ========================================//
 add_library(rotors_gazebo_tracking_cam_plugin SHARED src/gazebo_tracking_cam_plugin.cpp)
