@@ -26,6 +26,7 @@
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/default_topics.h>
 #include <nav_msgs/Odometry.h>
+#include <sensor_msgs/Imu.h>
 
 #include "rotors_control/parameters.h"
 
@@ -74,6 +75,32 @@ inline void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
   odometry->orientation = mav_msgs::quaternionFromMsg(msg->pose.pose.orientation);
   odometry->velocity = mav_msgs::vector3FromMsg(msg->twist.twist.linear);
   odometry->angular_velocity = mav_msgs::vector3FromMsg(msg->twist.twist.angular);
+}
+
+struct EigenImu {
+  EigenImu()
+      : linear_acceleration(0.0, 0.0, 0.0),
+        orientation(Eigen::Quaterniond::Identity()),
+        angular_velocity(0.0, 0.0, 0.0) {};
+
+  EigenImu(const Eigen::Vector3d& _linear_acceleration,
+                const Eigen::Quaterniond& _orientation,
+                const Eigen::Vector3d& _angular_velocity) {
+    linear_acceleration = _linear_acceleration;
+    orientation         = _orientation;
+    angular_velocity    = _angular_velocity;
+  };
+
+  Eigen::Vector3d linear_acceleration; // Velocity is expressed in the Body frame!
+  Eigen::Quaterniond orientation;
+  Eigen::Vector3d angular_velocity;
+};
+
+inline void eigenImuFromMsg(const sensor_msgs::Imu& msg,
+                                 EigenImu* imu) {
+  imu->linear_acceleration  = mav_msgs::vector3FromMsg(msg.linear_acceleration);
+  imu->orientation          = mav_msgs::quaternionFromMsg(msg.orientation);
+  imu->angular_velocity     = mav_msgs::vector3FromMsg(msg.angular_velocity);
 }
 
 inline void calculateAllocationMatrix(const RotorConfiguration& rotor_configuration,
