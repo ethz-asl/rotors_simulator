@@ -44,7 +44,7 @@
       max_distance noise_mean noise_stddev enable_visual *geometry *origin">
     <link name="${namespace}/camera_${camera_suffix}_link">
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0" />
+        <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
         <geometry>
           <xacro:insert_block name="geometry" />
         </geometry>
@@ -124,12 +124,14 @@
       max_distance noise_mean noise_stddev enable_visual *geometry *origin">
 
     <link name="${namespace}/camera_${camera_suffix}_link">
+    <!--
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
       <geometry>
         <xacro:insert_block name="geometry" />
       </geometry>
     </collision>
+    -->
     <xacro:if value="${enable_visual}">
       <visual>
         <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
@@ -424,6 +426,54 @@
     </gazebo>
   </xacro:macro>
 
+  <!-- Macro to add an IMU (using Gazebo IMU) -->
+  <xacro:macro name="imu_s_plugin_macro"
+  params="namespace imu_suffix parent_link imu_topic
+    mass_imu_sensor *inertia *origin">
+  <!-- IMU link -->
+  <link name="${namespace}/imu${imu_suffix}_link">
+    <inertial>
+      <xacro:insert_block name="inertia" />
+      <mass value="${mass_imu_sensor}" />  <!-- [kg] -->
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </inertial>
+  </link>
+  <!-- IMU joint -->
+  <joint name="${namespace}/imu${imu_suffix}_joint" type="revolute">
+    <xacro:insert_block name="origin" />
+    <parent link="${parent_link}" />
+    <child link="${namespace}/imu${imu_suffix}_link" />
+    <limit upper="0" lower="0" effort="0" velocity="0" />
+  </joint>
+  <gazebo reference="${namespace}/imu${imu_suffix}_link">
+    <gravity>true</gravity>
+    <sensor name="imu_sensor" type="imu">
+      <pose>0 0 0 0 0 0</pose>
+      <always_on>true</always_on>
+      <visualize>true</visualize>
+      <topic>__default_topic__</topic>
+      <update_rate>100</update_rate>
+      <imu>
+        <angular_velocity>
+          <x></x>
+          <y></y>
+          <y></y>
+        </angular_velocity>
+        <linear_acceleration>
+          <x></x>
+          <y></y>
+          <y></y>
+        </linear_acceleration>
+      </imu>
+      <plugin filename="librotors_gazebo_imu_s_plugin.so" name="rotors_gazebo_imu_s_plugin">
+        <robotNamespace>${namespace}</robotNamespace> <!-- (string, required): ros namespace in which the messages are published -->
+        <linkName>${namespace}/imu${imu_suffix}_link</linkName> <!-- (string, required): name of the body which holds the IMU sensor -->
+        <imuTopic>${imu_topic}</imuTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to imu) -->
+      </plugin>
+    </sensor>
+  </gazebo>
+  </xacro:macro>
+
   <!-- Macro to add a generic odometry sensor. -->
   <xacro:macro name="odometry_plugin_macro"
     params="
@@ -504,7 +554,7 @@
         <pose>0 0 0 0 0 0</pose>
         <visualize>0</visualize>
         <always_on>1</always_on>
-        <update_rate>5</update_rate>
+        <update_rate>10</update_rate>
         <gps>
           <position_sensing>
             <horizontal>
