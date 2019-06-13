@@ -26,7 +26,7 @@
       <latitude_deg>47.3667</latitude_deg>
       <longitude_deg>8.5500</longitude_deg>
       <elevation>500.0</elevation>
-      <heading_deg>0</heading_deg>
+      <heading_deg>180</heading_deg>
     </spherical_coordinates>
 
     <physics type='ode'>
@@ -82,6 +82,12 @@
                   <mu2>.2</mu2>
                 </ode>
               </friction>
+              <contact>
+                <ode>
+                  <kp>1000000</kp>
+                  <kd>1</kd>
+                </ode>
+              </contact>
             </surface>
           </collision>
           <visual name='visual_1'>
