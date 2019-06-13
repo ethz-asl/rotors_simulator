@@ -318,11 +318,13 @@ private:
   transport::SubscriberPtr sonar_sub_;
   transport::SubscriberPtr opticalFlow_sub_;
   transport::SubscriberPtr gps_sub_;
+  transport::SubscriberPtr gps_gt_sub_; // for ground truth and custom magnetometer
 
   std::string imu_sub_topic_;
   std::string lidar_sub_topic_;
   std::string opticalFlow_sub_topic_;
   std::string gps_sub_topic_;
+  std::string gps_gt_sub_topic_;
 
   common::Time last_time_;
   common::Time last_imu_time_;
@@ -388,6 +390,10 @@ private:
 
   double lon_last = 0;
   double lat_last = 0;
+
+  uint16_t timing_stats_[11]{0,0,0,0,0,0,0,0,0,0,0};
+  common::Time last_wall_time_;
+  uint16_t send_counter_ = 0;
 
   };
 }

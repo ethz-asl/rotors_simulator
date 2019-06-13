@@ -51,7 +51,7 @@
           </geometry>
         </visual>
         <collision>
-          <origin xyz="0 0 0" rpy="0 0 0" />
+          <origin xyz="-0.2 0 0.15" rpy="0 0 0" />
           <geometry>
             <box size="${length} ${width} ${height}" />
           </geometry>
@@ -63,10 +63,10 @@
     </gazebo>
   </xacro:macro>
 
-<!-- Control surface joint and link -->
+<!-- Airfoil segment joint, link and plugin -->
 <xacro:macro name="airfoil_segment"
   params="robot_namespace segment_name parent mass_segment k c color use_mesh_file mesh_file segment_length segment_width
-    segment_height *axis *joint_origin *inertia_origin *mesh_origin *inertia ">
+    segment_height *axis *joint_origin *inertia_origin *vis_coll_origin *inertia ">
 
   <joint name="${robot_namespace}/${segment_name}_joint" type="revolute">
     <xacro:insert_block name="joint_origin" />
@@ -83,7 +83,7 @@
       <xacro:box_inertia x="${segment_length}" y="${segment_width}" z="${segment_height}" mass="${mass_segment}" />
     </inertial>
     <visual>
-      <xacro:insert_block name="mesh_origin" />
+      <xacro:insert_block name="vis_coll_origin" />
       <geometry>
         <xacro:if value="${use_mesh_file}">
           <mesh filename="${mesh_file}" scale="1 1 1" />
@@ -93,9 +93,9 @@
         </xacro:unless>
       </geometry>
     </visual>
-
+    <!--
     <collision>
-      <xacro:insert_block name="mesh_origin" />
+      <xacro:insert_block name="vis_coll_origin" />
       <geometry>
         <xacro:if value="${use_mesh_file}">
           <mesh filename="${mesh_file}" scale="1 1 1" />
@@ -105,7 +105,7 @@
         </xacro:unless>
       </geometry>
     </collision>
-
+    -->
   </link>
 
   <gazebo reference="${robot_namespace}/${segment_name}">
@@ -131,7 +131,7 @@
   <xacro:macro name="control_surface"
     params="robot_namespace surface_name parent mass_surface min_angle
       max_angle color use_mesh_file mesh_file surface_length surface_width
-      surface_height *axis *joint_origin *link_origin *mesh_origin *inertia">
+      surface_height *axis *joint_origin *link_origin *vis_coll_origin *inertia">
     <joint name="${robot_namespace}/${surface_name}_joint" type="revolute">
       <xacro:insert_block name="joint_origin" />
       <xacro:insert_block name="axis" />
@@ -147,7 +147,7 @@
         <xacro:insert_block name="inertia" />
       </inertial>
       <visual>
-        <xacro:insert_block name="mesh_origin" />
+        <xacro:insert_block name="vis_coll_origin" />
         <geometry>
           <xacro:if value="${use_mesh_file}">
             <mesh filename="${mesh_file}" scale="1 1 1" />
@@ -157,19 +157,19 @@
           </xacro:unless>
         </geometry>
       </visual>
+      <!--
       <collision>
-        <xacro:insert_block name="link_origin" />
+        <xacro:insert_block name="vis_coll_origin" />
         <geometry>
           <xacro:if value="${use_mesh_file}">
             <mesh filename="${mesh_file}" scale="1 1 1" />
           </xacro:if>
-          <!--
           <xacro:unless value="${use_mesh_file}">
             <box size="${surface_length} ${surface_width} ${surface_height}" />
           </xacro:unless>
-          -->
         </geometry>
       </collision>
+      -->
     </link>
 
     <gazebo reference="${robot_namespace}/${surface_name}">
@@ -180,7 +180,7 @@
   <!-- Propeller joint and link -->
   <xacro:macro name="propeller"
     params="robot_namespace suffix parent mass_propeller propeller_radius color
-      use_mesh_file mesh_file *origin *mesh_origin *inertia">
+      use_mesh_file mesh_file *origin *vis_coll_origin *inertia">
     <joint name="${robot_namespace}/propeller_${suffix}_joint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="0 0 1" />
@@ -194,30 +194,29 @@
         <xacro:insert_block name="inertia" />
       </inertial>
       <visual>
-        <xacro:insert_block name="mesh_origin" />
+        <xacro:insert_block name="vis_coll_origin" />
         <geometry>
           <xacro:if value="${use_mesh_file}">
             <mesh filename="${mesh_file}"/>
           </xacro:if>
-          <!--
           <xacro:unless value="${use_mesh_file}">
             <cylinder length="0.005" radius="${propeller_radius}"/>
           </xacro:unless>
-          -->
         </geometry>
       </visual>
+      <!--
       <collision>
+        <xacro:insert_block name="vis_coll_origin" />
         <geometry>
           <xacro:if value="${use_mesh_file}">
             <mesh filename="${mesh_file}"/>
           </xacro:if>
-          <!--
           <xacro:unless value="${use_mesh_file}">
             <cylinder length="0.005" radius="${propeller_radius}"/>
           </xacro:unless>
-          -->
         </geometry>
       </collision>
+      -->
     </link>
 
     <gazebo reference="${robot_namespace}/propeller_${suffix}">

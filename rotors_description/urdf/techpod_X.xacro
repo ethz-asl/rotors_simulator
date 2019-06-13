@@ -496,8 +496,9 @@
       <robotNamespace>${namespace}</robotNamespace>
       <protocol_version>2.0</protocol_version>
       <imuSubTopic>/imu</imuSubTopic>
-      <imu_rate>100</imu_rate>
+      <imu_rate>250</imu_rate>
       <gpsSubTopic>/gps</gpsSubTopic>
+      <gpsGtSubTopic>/gps_gt</gpsGtSubTopic>
       <lidarSubTopic></lidarSubTopic>
       <opticalFlowSubTopic></opticalFlowSubTopic>
       <mavlink_addr>INADDR_ANY</mavlink_addr>
@@ -508,7 +509,7 @@
       <qgc_addr>INADDR_ANY</qgc_addr>
       <qgc_udp_port>14550</qgc_udp_port>
       <hil_mode>true</hil_mode>
-      <hil_state_level>true</hil_state_level>
+      <hil_state_level>false</hil_state_level>
       <enable_lockstep>false</enable_lockstep>
       <use_tcp>false</use_tcp>
       <motorSpeedCommandPubTopic>/command/motor_speed_old</motorSpeedCommandPubTopic>

@@ -77,8 +77,9 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
   getSdfParam<std::string>(_sdf, "imuSubTopic", imu_sub_topic_, imu_sub_topic_);
   getSdfParam<std::string>(_sdf, "lidarSubTopic", lidar_sub_topic_, lidar_sub_topic_);
-  getSdfParam<std::string>(_sdf, "opticalFlowSubTopic",
-      opticalFlow_sub_topic_, opticalFlow_sub_topic_);
+  getSdfParam<std::string>(_sdf, "opticalFlowSubTopic", opticalFlow_sub_topic_, opticalFlow_sub_topic_);
+  getSdfParam<std::string>(_sdf, "gpsSubTopic", gps_sub_topic_, gps_sub_topic_);
+  getSdfParam<std::string>(_sdf, "gpsGtSubTopic", gps_gt_sub_topic_, gps_gt_sub_topic_);
 
   // set input_reference_ from inputs.control
   /*
@@ -236,8 +237,11 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   opticalFlow_sub_ = node_handle_->Subscribe("~/" + namespace_  + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
   gzdbg<<"subscribing to ~/" + namespace_ + opticalFlow_sub_topic_<<std::endl;
 
-  gps_sub_ = node_handle_->Subscribe("~/" + namespace_  + gps_sub_topic_, &GazeboMavlinkInterface::GpsCallback, this);
-  gzdbg<<"subscribing to ~/" + namespace_ + gps_sub_topic_<<std::endl;
+  gps_sub_ = node_handle_->Subscribe("~/" + namespace_  + gps_sub_topic_ + "_hil", &GazeboMavlinkInterface::GpsCallback, this);
+  gzdbg<<"subscribing to ~/" + namespace_ + gps_sub_topic_ + "_hil"<<std::endl;
+
+  gps_gt_sub_ = node_handle_->Subscribe("~/" + namespace_  + gps_gt_sub_topic_ + "_hil", &GazeboMavlinkInterface::GpsGtCallback, this);
+  gzdbg<<"subscribing to ~/" + namespace_ + gps_gt_sub_topic_ + "_hil"<<std::endl;
 
   // Publish gazebo's motor_speed message
   motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + namespace_ + motor_velocity_reference_pub_topic_, 1);
@@ -262,7 +266,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     imu_update_interval_ = 1.0 / _sdf->GetElement("imu_rate")->Get<int>();
   }
 
-  // Magnetic field data for Zurich from WMM2015 (10^5xnanoTesla (N, E D) n-frame )
+  // Magnetic field data for Zurich from WMM2015 (10^5xnanoTesla (N E D) n-frame )
   // mag_n_ = {0.21523, 0.00771, -0.42741};
   // We set the world Y component to zero because we apply
   // the declination based on the global position,
@@ -452,6 +456,8 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
   }
 
   last_time_ = current_time;
+
+  ++dbgCounter;
 }
 
 void GazeboMavlinkInterface::send_mavlink_message(const mavlink_message_t *message, const int destination_port)
@@ -531,8 +537,8 @@ void GazeboMavlinkInterface::SendSensorMessages() {
   double gt_alt_loc = gt_alt;
   lock.unlock();
 
-  ignition::math::Quaterniond q_br(0, 1, 0, 0);
-  ignition::math::Quaterniond q_ng(0, 0.70711, 0.70711, 0);
+  ignition::math::Quaterniond q_br(0, 1, 0, 0);             //imu-frame to body-frame
+  ignition::math::Quaterniond q_ng(0, 0.70711, 0.70711, 0); //gazebo-frame to NED-frame
 
     ignition::math::Quaterniond q_gr = ignition::math::Quaterniond(
       last_imu_message_.orientation().w(),
@@ -540,8 +546,8 @@ void GazeboMavlinkInterface::SendSensorMessages() {
       last_imu_message_.orientation().y(),
       last_imu_message_.orientation().z());
 
-    ignition::math::Quaterniond q_gb = q_gr*q_br.Inverse();
-    ignition::math::Quaterniond q_nb = q_ng*q_gb;
+    ignition::math::Quaterniond q_gb = q_gr*q_br.Inverse(); //body to gazebo
+    ignition::math::Quaterniond q_nb = q_ng*q_gb; //body to ned
 
 #if GAZEBO_MAJOR_VERSION >= 9
     ignition::math::Vector3d pos_g = model_->WorldPose().Pos();
@@ -550,7 +556,7 @@ void GazeboMavlinkInterface::SendSensorMessages() {
 #endif
     ignition::math::Vector3d pos_n = q_ng.RotateVector(pos_g);
 
-    float declination = get_mag_declination(lat_rad_, lon_rad_);
+    //float declination = get_mag_declination(lat_rad_, lon_rad_);
 
     // Magnetic declination and inclination (radians)
     float declination_rad = get_mag_declination(gt_lat_loc/1e7, gt_lon_loc/1e7) * M_PI / 180;
@@ -565,7 +571,7 @@ void GazeboMavlinkInterface::SendSensorMessages() {
     float X = H * cosf(declination_rad);
     float Y = H * sinf(declination_rad);
 
-    // Magnetic field data from WMM2018 (10^5xnanoTesla (N, E D) n-frame )
+    // Magnetic field data from WMM2018 (10^5xnanoTesla (N E D) n-frame )
     mag_d_.X() = X;
     mag_d_.Y() = Y;
     mag_d_.Z() = Z;
@@ -593,7 +599,7 @@ void GazeboMavlinkInterface::SendSensorMessages() {
       last_imu_message_.angular_velocity().x(),
       last_imu_message_.angular_velocity().y(),
       last_imu_message_.angular_velocity().z()));
-    ignition::math::Vector3d mag_b = q_nb.RotateVectorReverse(mag_d_) + mag_noise_b;
+    ignition::math::Vector3d mag_b = q_nb.RotateVectorReverse(mag_d_) + mag_noise_b; //ned to body
 
   if (imu_update_interval_!=0 && dt >= imu_update_interval_)
   {
@@ -645,10 +651,10 @@ void GazeboMavlinkInterface::SendSensorMessages() {
     const float density_ratio = powf((temperature_msl/temperature_local) , 4.256f);
     float rho = 1.225f / density_ratio;
 
-    // calculate pressure altitude including effect of pressure noise
+    // calculate pressure altitude including effect of pressure noise (unused on PX4)
     sensor_msg.pressure_alt = alt_msl - abs_pressure_noise / (gravity_W_.Length() * rho);
 
-    // calculate differential pressure in hPa
+    // calculate differential pressure in hPa -> for airspeed
     sensor_msg.diff_pressure = 0.005f*rho*vel_b.X()*vel_b.X();
 
     // calculate temperature in Celsius
@@ -728,6 +734,15 @@ void GazeboMavlinkInterface::SendSensorMessages() {
       }
     } else {
       send_mavlink_message(&msg);
+    }
+
+    if (dbgCounter%100==0) {
+        gzdbg<<"lat: "  <<gt_lat_loc <<" | lon: "<<gt_lon_loc   <<" | alt: "<<gt_alt_loc<<"\n";
+        gzdbg<<"pos_x: "<<pos_g.X()  <<" | pos_y: "<<pos_g.Y()  <<" | pos_z: "<<pos_g.Z()<<"\n";
+        gzdbg<<"b_acc_x: "<<accel_b.X()<<" | b_acc_y: "<<accel_b.Y()<<" | b_acc_z: "<<accel_b.Z()<<"\n";
+        gzdbg<<"acc_x: "<<last_imu_message_.linear_acceleration().x()<<" | acc_y: "<<last_imu_message_.linear_acceleration().y()<<" | acc_z: "<<last_imu_message_.linear_acceleration().z()<<"\n";
+        gzdbg<<"gyr_x: "<<gyro_b.X() <<" | gyr_y: "<<gyro_b.Y() <<" | gyr_z: "<<gyro_b.Z()<<"\n";
+        gzdbg<<"mag_x: "<<mag_b.X() <<" | mag_y: "<<mag_b.Y() <<" | mag_z: "<<mag_b.Z()<<"\n";
     }
 }
 
@@ -1083,8 +1098,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
     }
   }
 
-  ++dbgCounter;
-  if (dbgCounter%100==0) {
+  if (dbgCounter%100==0&&false) {
       for(int i=0; i<n_chan; i++){
           if (channels[i].joint_)
               gzdbg<<channels[i].joint_name <<": "<<channels[i].joint_->Position(0)
@@ -1092,7 +1106,6 @@ void GazeboMavlinkInterface::handle_control(double _dt)
                  <<" | srv_ref: "<<channels[i].srv.ref<<"\n";
       }
       gzdbg<<"\n";
-      dbgCounter = 1;
   }
 }
 
@@ -1183,6 +1196,65 @@ void GazeboMavlinkInterface::do_write(bool check_tx_state){
   //gzdbg<<"do_write thread ID: "<<this_id<<std::endl;
 
   //gzdbg<<"pre-check, tx_in_progress: "<<tx_in_progress<<" | check_tx_state: "<<check_tx_state<<std::endl;
+
+
+    // Get timing statistics
+    {
+        common::Time now = world_->RealTime();
+        double_t dt_wall = (now-last_wall_time_).Double();
+        last_wall_time_ = now;
+        ++send_counter_;
+
+        if (dt_wall<0.005f) {
+            timing_stats_[0]++;
+
+        } else if (dt_wall>=0.005f&&dt_wall<0.01f){
+            timing_stats_[1]++;
+
+        } else if (dt_wall>=0.01f&&dt_wall<0.02f){
+            timing_stats_[2]++;
+
+        } else if (dt_wall>=0.02f&&dt_wall<0.04f){
+            timing_stats_[3]++;
+
+        } else if (dt_wall>=0.04f&&dt_wall<0.10f){
+            timing_stats_[4]++;
+
+        } else if (dt_wall>=0.10f&&dt_wall<0.20f){
+            timing_stats_[5]++;
+
+        } else if (dt_wall>=0.20f&&dt_wall<0.30f){
+            timing_stats_[6]++;
+
+        } else if (dt_wall>=0.30f&&dt_wall<0.40f){
+            timing_stats_[7]++;
+
+        } else if (dt_wall>=0.40f&&dt_wall<0.50f){
+            timing_stats_[8]++;
+
+        } else if (dt_wall>=0.50f&&dt_wall<1.00f){
+            timing_stats_[9]++;
+
+        } else if (dt_wall>=1.0f){
+            timing_stats_[10]++;
+        }
+
+        if(send_counter_%100==0){
+            gzdbg<<" <.005  |.005-.01| .01-.02| .02-.04| .04-.1 | .1-.2  | .2-.3  | .3-.4  | .4-.5  | .5-1.0 |  >1.0  | tot \n";
+            gzdbg<<std::setw(8)<<std::right<<timing_stats_[0]<<"|"
+                <<std::setw(8)<<std::right<<timing_stats_[1]<<"|"
+               <<std::setw(8)<<std::right<<timing_stats_[2]<<"|"
+              <<std::setw(8)<<std::right<<timing_stats_[3]<<"|"
+             <<std::setw(8)<<std::right<<timing_stats_[4]<<"|"
+            <<std::setw(8)<<std::right<<timing_stats_[5]<<"|"
+            <<std::setw(8)<<std::right<<timing_stats_[6]<<"|"
+            <<std::setw(8)<<std::right<<timing_stats_[7]<<"|"
+            <<std::setw(8)<<std::right<<timing_stats_[8]<<"|"
+            <<std::setw(8)<<std::right<<timing_stats_[9]<<"|"
+            <<std::setw(8)<<std::right<<timing_stats_[10]<<"|"
+            <<std::setw(8)<<std::right<<send_counter_<<"\n";
+        }
+    }
 
   if (check_tx_state && tx_in_progress)
     return;
