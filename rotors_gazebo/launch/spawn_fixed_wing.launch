@@ -74,7 +74,8 @@
          -R 0
          -P 0
          -Y 0
-        -model tracking_cam">
+        -model tracking_cam"
+        respawn="false" output="screen">
   </node>
   <!---->
 </launch>
