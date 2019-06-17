@@ -39,6 +39,8 @@ static constexpr double kDefaultHorPosStdDev = 3.0;
 static constexpr double kDefaultVerPosStdDev = 6.0;
 static constexpr double kDefaultHorVelStdDev = 0.1;
 static constexpr double kDefaultVerVelStdDev = 0.1;
+static constexpr double kDefaultUpdateItv = 0.2;
+static constexpr double kDefaultDelay = 0.12;
 static constexpr bool kDefaultEnableDelay = false;
 //static constexpr bool kDefaultRqstFwdToRos = false;
 
@@ -110,8 +112,8 @@ class GazeboGpsPlugin : public SensorPlugin {
   double std_z;     // meters
 
   /// \brief    GPS delay related
-  static constexpr double gps_update_interval_ = 0.2; // 5hz
-  static constexpr double gps_delay = 0.12;           // 120 ms
+  double gps_update_interval_ = 0.2; // 5hz
+  double gps_delay = 0.12;           // 120 ms
   static constexpr int gps_buffer_size_max = 1000;
   std::queue<sensor_msgs::msgs::SITLGps> gps_delay_buffer;
   common::Time last_gps_time_;

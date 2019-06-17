@@ -103,6 +103,10 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
                       kDefaultVerVelStdDev);
   getSdfParam<bool>(_sdf, "enableDelay", enable_delay,
                       kDefaultEnableDelay);
+  getSdfParam<double>(_sdf, "updateInterval", gps_update_interval_,
+                      kDefaultUpdateItv);
+  getSdfParam<double>(_sdf, "delay", gps_delay,
+                      kDefaultDelay);
   /*getSdfParam<bool>(_sdf, "rqstFwdToRos", rqst_fwd_to_ros,
                       kDefaultRqstFwdToRos);*/
 
@@ -255,8 +259,9 @@ void GazeboGpsPlugin::OnUpdate() {
       // publish SITLGps msg at 5hz
       gz_gps_hil_pub_->Publish(gz_gps_hil_message_);
 
-  } else if(!enable_delay) {
-      gz_gps_hil_pub_->Publish(gz_gps_hil_message_); //full rate and no delay
+  } else if(!enable_delay && ((current_time - last_gps_time_).Double() > gps_update_interval_)) {
+      last_gps_time_ = current_time;
+      gz_gps_hil_pub_->Publish(gz_gps_hil_message_);
   }
 
   // Publish the GPS message.
