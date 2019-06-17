@@ -35,7 +35,7 @@
       <ode>
         <solver>
           <type>quick</type>
-          <iters>1000</iters>
+          <iters>75</iters>
           <sor>1.3</sor>
         </solver>
         <constraints>
@@ -45,9 +45,9 @@
           <contact_surface_layer>0.001</contact_surface_layer>
         </constraints>
       </ode>
-      <max_step_size>0.01</max_step_size>
+      <max_step_size>0.004</max_step_size>
       <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>100</real_time_update_rate>
+      <real_time_update_rate>250</real_time_update_rate>
       <gravity>0 0 -9.8</gravity>
     </physics>
     <!-- Light Source -->
