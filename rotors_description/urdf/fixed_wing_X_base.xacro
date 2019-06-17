@@ -74,6 +74,7 @@
     <parent link="${parent}" />
     <child link="${robot_namespace}/${segment_name}"/>
     <limit upper="0.17" lower="-0.17" effort="5000" velocity="50"/>
+    <dynamics damping="${c}"/>
   </joint>
 
   <link name="${robot_namespace}/${segment_name}">
@@ -114,8 +115,10 @@
 
   <gazebo reference="${robot_namespace}/${segment_name}_joint">
     <implicitSpringDamper>true</implicitSpringDamper>
+    <springStiffness>${k}</springStiffness>
   </gazebo>
 
+  <!--
   <gazebo>
     <plugin filename="librotors_gazebo_springdamper_plugin.so" name="gazebo_springdamper_plugin">
       <robotNamespace>${robot_namespace}</robotNamespace>
@@ -124,7 +127,7 @@
       <stiffness>${k}</stiffness>
     </plugin>
   </gazebo>
-
+  -->
 </xacro:macro>
 
   <!-- Control surface joint and link -->
