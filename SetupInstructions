@@ -201,7 +201,6 @@ catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release
 cd ~/catkin_ws/src
 git clone -b feature/fw_hil_rotors git@github.com:ethz-asl/rotors_simulator.git
 git clone git@github.com:ethz-asl/mav_comm.git
-git clone git@github.com:ethz-asl/yaml_cpp_catkin.git
 git clone https://github.com/catkin/catkin_simple.git
 
 ## For HIL we also need MAVLINK and (optionally) MAVROS
@@ -215,8 +214,7 @@ rosdep install --from-paths src --ignore-src -y
 
 ################################ Build and Run #########################################
 
-## Build workspace, takes some time. Start with yaml_cpp_catkin
-catkin build yaml_cpp_catkin
+## Build workspace, takes some time
 catkin build
 
 ## Don't forget to overlay workspace on top of environment (only for current shell)

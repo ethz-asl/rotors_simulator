@@ -598,7 +598,7 @@
       <cp>-0.02 0.0 0.13</cp>
       <seg_area>0.03</seg_area>
       <seg_chord>0.12</seg_chord>
-      <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+      <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
       <indVel name="prop0">
         <topic>prop_slpstr_0</topic>
       </indVel>
@@ -649,7 +649,7 @@
       <cp>0 0.125 0</cp>
       <seg_area>0.03</seg_area>
       <seg_chord>0.12</seg_chord>
-      <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+      <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
       <indVel name="prop0">
         <topic>prop_slpstr_0</topic>
       </indVel>
@@ -671,7 +671,7 @@
       <cp>0 -0.125 0</cp>
       <seg_area>0.03</seg_area>
       <seg_chord>0.12</seg_chord>
-      <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+      <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
       <indVel name="prop0">
         <topic>prop_slpstr_0</topic>
       </indVel>

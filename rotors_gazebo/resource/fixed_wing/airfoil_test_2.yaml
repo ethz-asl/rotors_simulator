@@ -3,7 +3,7 @@
 alpha_max_ns: 0.27    # [rad]
 alpha_min_ns: -0.27   # [rad]
 
-c_lift_alpha: [0.4, 6.3, 0.0]
+c_lift_alpha: [0.0, 6.3, 0.0]
 c_drag_alpha: [0.0, 0.0, 0.9]
 c_pitch_moment_alpha: [-0.1, 0.0]
 

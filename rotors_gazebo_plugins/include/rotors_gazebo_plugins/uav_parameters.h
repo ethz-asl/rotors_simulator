@@ -139,13 +139,6 @@ struct PropellerParameters {
 
             const YAML::Node node = YAML::LoadFile(yaml_path);
 
-            gzdbg<<"IsDefined: "<<node.IsDefined()<<std::endl;
-            gzdbg<<"IsMap: "<<node.IsMap()<<std::endl;
-            gzdbg<<"IsNull: "<<node.IsNull()<<std::endl;
-            gzdbg<<"IsScalar: "<<node.IsScalar()<<std::endl;
-            gzdbg<<"IsSequence: "<<node.IsSequence()<<std::endl;
-            gzdbg<<node.size()<<"\n";
-
             try{
 
                 READ_PARAM(node, diameter);
@@ -216,12 +209,6 @@ struct AerodynamicParameters {
         try{
 
             const YAML::Node node = YAML::LoadFile(yaml_path);
-
-            gzdbg<<"IsDefined"<<node.IsDefined()<<std::endl;
-            gzdbg<<"IsMap"<<node.IsMap()<<std::endl;
-            gzdbg<<"IsNull"<<node.IsNull()<<std::endl;
-            gzdbg<<"IsScalar"<<node.IsScalar()<<std::endl;
-            gzdbg<<"IsSequence"<<node.IsSequence()<<std::endl;
 
             try{
 
@@ -309,13 +296,6 @@ struct FWVehicleParameters {
 
   void LoadVehicleParamsYAML(const std::string& yaml_path) {
     const YAML::Node node = YAML::LoadFile(yaml_path);
-
-    gzdbg << yaml_path <<std::endl;
-    gzdbg<<"IsDefined"<<node.IsDefined()<<std::endl;
-    gzdbg<<"IsMap"<<node.IsMap()<<std::endl;
-    gzdbg<<"IsNull"<<node.IsNull()<<std::endl;
-    gzdbg<<"IsScalar"<<node.IsScalar()<<std::endl;
-    gzdbg<<"IsSequence"<<node.IsSequence()<<std::endl;
 
     try{
     READ_PARAM(node, wing_span);
