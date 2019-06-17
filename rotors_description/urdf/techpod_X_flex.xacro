@@ -286,6 +286,21 @@
   </plugin>
 </gazebo>
 
+  <xacro:angle_vane
+    robot_namespace="${namespace}"
+    vane_name="alpha_1"
+    type="alpha"
+    chord="0.02"
+    arm_cp="0.05"
+    mass_vane="0.02"
+    parent="${namespace}/wl_1"
+    color="Grey"
+    mesh_file="package://rotors_description/meshes/techpod_X_flex/flp_l_1.stl">
+    <origin xyz="0.15 0.35 0.05" rpy="0 0 0" />   <!-- Joint origin -->
+    <origin xyz="0 0 0" rpy="0 0 0" />       <!-- vis_coll origin -->
+    <xacro:box_inertia x="0.1" y="0.02" z="0.02" mass="0.02" />
+  </xacro:angle_vane>
+
 <xacro:airfoil_segment
   robot_namespace="${namespace}"
   segment_name="wr_1"
@@ -341,6 +356,21 @@
     </airfoil>
   </plugin>
 </gazebo>
+
+<xacro:angle_vane
+  robot_namespace="${namespace}"
+  vane_name="beta_1"
+  type="beta"
+  chord="0.02"
+  arm_cp="0.05"
+  mass_vane="0.02"
+  parent="${namespace}/wr_1"
+  color="Grey"
+  mesh_file="package://rotors_description/meshes/techpod_X_flex/flp_l_1.stl">
+  <origin xyz="0.15 -0.35 0.05" rpy="0 0 0" />   <!-- Joint origin -->
+  <origin xyz="0 0 0" rpy="0 0 0" />       <!-- vis_coll origin -->
+  <xacro:box_inertia x="0.1" y="0.02" z="0.02" mass="0.02" />
+</xacro:angle_vane>
 
 <xacro:airfoil_segment
   robot_namespace="${namespace}"

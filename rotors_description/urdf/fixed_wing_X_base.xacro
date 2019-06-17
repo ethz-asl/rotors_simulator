@@ -227,4 +227,95 @@
     </gazebo>
   </xacro:macro>
 
+<!-- Aerodyn. angle vane -->
+<xacro:macro name="angle_vane"
+  params="robot_namespace vane_name type chord arm_cp parent mass_vane
+          color mesh_file *joint_origin *vis_coll_origin *inertia">
+
+  <joint name="${robot_namespace}/${vane_name}_joint" type="continuous">
+    <xacro:insert_block name="joint_origin" />
+    <xacro:if value="${type=='alpha'}">
+       <axis xyz="0 1 0" />
+     </xacro:if>
+     <xacro:if value="${type=='beta'}">
+       <axis xyz="0 0 -1" />
+     </xacro:if>
+     <parent link="${parent}" />
+     <child link="${robot_namespace}/${vane_name}" />
+     <dynamics friction="0" damping="0.001"/>
+  </joint>
+
+  <link name="${robot_namespace}/${vane_name}">
+    <inertial>
+      <mass value="${mass_vane}" />
+      <xacro:insert_block name="inertia" />
+    </inertial>
+    <visual>
+      <xacro:insert_block name="vis_coll_origin" />
+      <geometry>
+        <box size="0.1 0.003 0.003" />
+      </geometry>
+    </visual>
+    <visual>
+      <xacro:if value="${type=='alpha'}">
+        <origin xyz="-0.04 0.02 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.02 0.04 0.002" />
+        </geometry>
+      </xacro:if>
+      <xacro:if value="${type=='beta'}">
+        <origin xyz="-0.04 0 0.02" rpy="0 0 0" />
+        <geometry>
+          <box size="0.02 0.002 0.04" />
+        </geometry>
+      </xacro:if>
+    </visual>
+  </link>
+
+  <gazebo reference="${robot_namespace}/${vane_name}">
+    <material>Gazebo/${color}</material>
+  </gazebo>
+
+  <xacro:if value="${type=='alpha'}">
+   <gazebo>
+     <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+       <robotNamespace>${namespace}</robotNamespace>
+       <linkName>${robot_namespace}/${vane_name}</linkName>
+        <aeroForcesVis>aero_force_vis_${vane_name}</aeroForcesVis>
+        <airfoil>
+          <segment name="alpha_vane">
+            <forward>1 0 0</forward>
+            <upward>0 0 1</upward>
+            <cp>${-arm_cp} 0 0</cp>
+            <seg_area>${2*chord*chord}</seg_area>
+            <seg_chord>${chord}</seg_chord>
+            <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
+          </segment>
+        </airfoil>
+      </plugin>
+    </gazebo>
+  </xacro:if>
+
+  <xacro:if value="${type=='beta'}">
+   <gazebo>
+     <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+       <robotNamespace>${namespace}</robotNamespace>
+       <linkName>${robot_namespace}/${vane_name}</linkName>
+        <aeroForcesVis>aero_force_vis_${vane_name}</aeroForcesVis>
+        <airfoil>
+          <segment name="beta_vane">
+            <forward>1 0 0</forward>
+            <upward>0 -1 0</upward>
+            <cp>${-arm_cp} 0 0</cp>
+            <seg_area>${2*chord*chord}</seg_area>
+            <seg_chord>${chord}</seg_chord>
+            <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
+          </segment>
+        </airfoil>
+      </plugin>
+    </gazebo>
+  </xacro:if>
+
+</xacro:macro>
+
 </robot>
