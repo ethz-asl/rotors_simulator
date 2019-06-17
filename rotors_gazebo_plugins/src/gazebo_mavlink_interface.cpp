@@ -457,7 +457,40 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
 
   last_time_ = current_time;
 
-  ++dbgCounter;
+  // Display timing statistics
+  if(dbg_counter_%100==0){
+      gzdbg<<"Itv: <.005  |.005-.01| .01-.02| .02-.04| .04-.1 | .1-.2  | .2-.3  | .3-.4  | .4-.5  | .5-1.0 |  >1.0  | tot \n";
+
+      gzdbg<<"GPS:"
+           <<std::setw(8)<<std::right<<timing_stats_gps_[0]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_gps_[1]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_gps_[2]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_gps_[3]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_gps_[4]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_gps_[5]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_gps_[6]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_gps_[7]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_gps_[8]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_gps_[9]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_gps_[10]<<"|"
+           <<std::setw(8)<<std::right<<send_counter_gps_<<"\n";
+
+      gzdbg<<"IMU:"
+           <<std::setw(8)<<std::right<<timing_stats_imu_[0]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_imu_[1]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_imu_[2]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_imu_[3]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_imu_[4]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_imu_[5]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_imu_[6]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_imu_[7]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_imu_[8]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_imu_[9]<<"|"
+           <<std::setw(8)<<std::right<<timing_stats_imu_[10]<<"|"
+           <<std::setw(8)<<std::right<<send_counter_imu_<<"\n\n";
+  }
+
+  ++dbg_counter_;
 }
 
 void GazeboMavlinkInterface::send_mavlink_message(const mavlink_message_t *message, const int destination_port)
@@ -674,6 +707,49 @@ void GazeboMavlinkInterface::SendSensorMessages() {
     mavlink_msg_hil_sensor_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &sensor_msg);
     if (hil_mode_) {
       if (!hil_state_level_){
+
+          // Get timing statistics
+          {
+              common::Time now = world_->RealTime();
+              double_t dt_wall = (now-last_wall_time_imu_).Double();
+              last_wall_time_imu_ = now;
+              ++send_counter_imu_;
+
+              if (dt_wall<0.005f) {
+                  timing_stats_imu_[0]++;
+
+              } else if (dt_wall>=0.005f&&dt_wall<0.01f){
+                  timing_stats_imu_[1]++;
+
+              } else if (dt_wall>=0.01f&&dt_wall<0.02f){
+                  timing_stats_imu_[2]++;
+
+              } else if (dt_wall>=0.02f&&dt_wall<0.04f){
+                  timing_stats_imu_[3]++;
+
+              } else if (dt_wall>=0.04f&&dt_wall<0.10f){
+                  timing_stats_imu_[4]++;
+
+              } else if (dt_wall>=0.10f&&dt_wall<0.20f){
+                  timing_stats_imu_[5]++;
+
+              } else if (dt_wall>=0.20f&&dt_wall<0.30f){
+                  timing_stats_imu_[6]++;
+
+              } else if (dt_wall>=0.30f&&dt_wall<0.40f){
+                  timing_stats_imu_[7]++;
+
+              } else if (dt_wall>=0.40f&&dt_wall<0.50f){
+                  timing_stats_imu_[8]++;
+
+              } else if (dt_wall>=0.50f&&dt_wall<1.00f){
+                  timing_stats_imu_[9]++;
+
+              } else if (dt_wall>=1.0f){
+                  timing_stats_imu_[10]++;
+              }
+          }
+
         send_mavlink_message(&msg);
       }
     } else {
@@ -736,7 +812,7 @@ void GazeboMavlinkInterface::SendSensorMessages() {
       send_mavlink_message(&msg);
     }
 
-    if (dbgCounter%100==0) {
+    if (dbg_counter_%100==0&&false) {
         gzdbg<<"lat: "  <<gt_lat_loc <<" | lon: "<<gt_lon_loc   <<" | alt: "<<gt_alt_loc<<"\n";
         gzdbg<<"pos_x: "<<pos_g.X()  <<" | pos_y: "<<pos_g.Y()  <<" | pos_z: "<<pos_g.Z()<<"\n";
         gzdbg<<"b_acc_x: "<<accel_b.X()<<" | b_acc_y: "<<accel_b.Y()<<" | b_acc_z: "<<accel_b.Z()<<"\n";
@@ -820,7 +896,51 @@ void GazeboMavlinkInterface::GpsCallback(GpsPtr& gps_msg) {
   lat_last = hil_gps_msg.lat;
 
   // send HIL_GPS Mavlink msg
+
   if (hil_mode_ || (hil_mode_ && !hil_state_level_)) {
+
+      // Get timing statistics
+      {
+          common::Time now = world_->RealTime();
+          double_t dt_wall = (now-last_wall_time_gps_).Double();
+          last_wall_time_gps_ = now;
+          ++send_counter_gps_;
+
+          if (dt_wall<0.005f) {
+              timing_stats_gps_[0]++;
+
+          } else if (dt_wall>=0.005f&&dt_wall<0.01f){
+              timing_stats_gps_[1]++;
+
+          } else if (dt_wall>=0.01f&&dt_wall<0.02f){
+              timing_stats_gps_[2]++;
+
+          } else if (dt_wall>=0.02f&&dt_wall<0.04f){
+              timing_stats_gps_[3]++;
+
+          } else if (dt_wall>=0.04f&&dt_wall<0.10f){
+              timing_stats_gps_[4]++;
+
+          } else if (dt_wall>=0.10f&&dt_wall<0.20f){
+              timing_stats_gps_[5]++;
+
+          } else if (dt_wall>=0.20f&&dt_wall<0.30f){
+              timing_stats_gps_[6]++;
+
+          } else if (dt_wall>=0.30f&&dt_wall<0.40f){
+              timing_stats_gps_[7]++;
+
+          } else if (dt_wall>=0.40f&&dt_wall<0.50f){
+              timing_stats_gps_[8]++;
+
+          } else if (dt_wall>=0.50f&&dt_wall<1.00f){
+              timing_stats_gps_[9]++;
+
+          } else if (dt_wall>=1.0f){
+              timing_stats_gps_[10]++;
+          }
+      }
+
     mavlink_message_t msg;
     mavlink_msg_hil_gps_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &hil_gps_msg);
     send_mavlink_message(&msg);
@@ -1098,7 +1218,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
     }
   }
 
-  if (dbgCounter%100==0&&false) {
+  if (dbg_counter_%100==0&&false) {
       for(int i=0; i<n_chan; i++){
           if (channels[i].joint_)
               gzdbg<<channels[i].joint_name <<": "<<channels[i].joint_->Position(0)
@@ -1196,65 +1316,6 @@ void GazeboMavlinkInterface::do_write(bool check_tx_state){
   //gzdbg<<"do_write thread ID: "<<this_id<<std::endl;
 
   //gzdbg<<"pre-check, tx_in_progress: "<<tx_in_progress<<" | check_tx_state: "<<check_tx_state<<std::endl;
-
-
-    // Get timing statistics
-    {
-        common::Time now = world_->RealTime();
-        double_t dt_wall = (now-last_wall_time_).Double();
-        last_wall_time_ = now;
-        ++send_counter_;
-
-        if (dt_wall<0.005f) {
-            timing_stats_[0]++;
-
-        } else if (dt_wall>=0.005f&&dt_wall<0.01f){
-            timing_stats_[1]++;
-
-        } else if (dt_wall>=0.01f&&dt_wall<0.02f){
-            timing_stats_[2]++;
-
-        } else if (dt_wall>=0.02f&&dt_wall<0.04f){
-            timing_stats_[3]++;
-
-        } else if (dt_wall>=0.04f&&dt_wall<0.10f){
-            timing_stats_[4]++;
-
-        } else if (dt_wall>=0.10f&&dt_wall<0.20f){
-            timing_stats_[5]++;
-
-        } else if (dt_wall>=0.20f&&dt_wall<0.30f){
-            timing_stats_[6]++;
-
-        } else if (dt_wall>=0.30f&&dt_wall<0.40f){
-            timing_stats_[7]++;
-
-        } else if (dt_wall>=0.40f&&dt_wall<0.50f){
-            timing_stats_[8]++;
-
-        } else if (dt_wall>=0.50f&&dt_wall<1.00f){
-            timing_stats_[9]++;
-
-        } else if (dt_wall>=1.0f){
-            timing_stats_[10]++;
-        }
-
-        if(send_counter_%100==0){
-            gzdbg<<" <.005  |.005-.01| .01-.02| .02-.04| .04-.1 | .1-.2  | .2-.3  | .3-.4  | .4-.5  | .5-1.0 |  >1.0  | tot \n";
-            gzdbg<<std::setw(8)<<std::right<<timing_stats_[0]<<"|"
-                <<std::setw(8)<<std::right<<timing_stats_[1]<<"|"
-               <<std::setw(8)<<std::right<<timing_stats_[2]<<"|"
-              <<std::setw(8)<<std::right<<timing_stats_[3]<<"|"
-             <<std::setw(8)<<std::right<<timing_stats_[4]<<"|"
-            <<std::setw(8)<<std::right<<timing_stats_[5]<<"|"
-            <<std::setw(8)<<std::right<<timing_stats_[6]<<"|"
-            <<std::setw(8)<<std::right<<timing_stats_[7]<<"|"
-            <<std::setw(8)<<std::right<<timing_stats_[8]<<"|"
-            <<std::setw(8)<<std::right<<timing_stats_[9]<<"|"
-            <<std::setw(8)<<std::right<<timing_stats_[10]<<"|"
-            <<std::setw(8)<<std::right<<send_counter_<<"\n";
-        }
-    }
 
   if (check_tx_state && tx_in_progress)
     return;

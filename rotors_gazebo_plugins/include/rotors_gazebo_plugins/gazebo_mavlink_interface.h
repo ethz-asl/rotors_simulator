@@ -112,7 +112,7 @@ enum class Framing : uint8_t {
 class GazeboMavlinkInterface : public ModelPlugin {
 public:
   GazeboMavlinkInterface() : ModelPlugin(),
-    dbgCounter(0),
+    dbg_counter_(0),
     received_first_referenc_(false),
     namespace_(kDefaultNamespace),
     protocol_version_(2.0),
@@ -170,7 +170,7 @@ protected:
   void OnUpdate(const common::UpdateInfo&  /*_info*/);
 
 private:
-  unsigned int dbgCounter;
+  unsigned int dbg_counter_;
   bool received_first_referenc_;
   Eigen::VectorXd input_reference_;
 
@@ -391,9 +391,12 @@ private:
   double lon_last = 0;
   double lat_last = 0;
 
-  uint16_t timing_stats_[11]{0,0,0,0,0,0,0,0,0,0,0};
-  common::Time last_wall_time_;
-  uint16_t send_counter_ = 0;
+  uint16_t timing_stats_imu_[11]{0,0,0,0,0,0,0,0,0,0,0};
+  uint16_t timing_stats_gps_[11]{0,0,0,0,0,0,0,0,0,0,0};
+  common::Time last_wall_time_imu_;
+  common::Time last_wall_time_gps_;
+  uint16_t send_counter_imu_ = 0;
+  uint16_t send_counter_gps_ = 0;
 
   };
 }
