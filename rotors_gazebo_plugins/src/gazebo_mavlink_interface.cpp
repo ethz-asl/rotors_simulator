@@ -278,8 +278,8 @@ void GazeboMavlinkInterface::Load(
 #else
   auto worldName = world_->GetName();
 #endif
-  // model_param(worldName, model_->GetName(), "mavlink_udp_port",
-  // mavlink_udp_port_);
+  model_param(worldName, model_->GetName(), "mavlink_udp_port",
+  mavlink_udp_port_);
 
   qgc_addr_ = htonl(INADDR_ANY);
   if (_sdf->HasElement("qgc_addr")) {
