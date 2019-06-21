@@ -143,7 +143,7 @@
     robot_namespace="${namespace}"
     mass="${mass_fuselage}"
     length="${body_length}"
-    width="${body_width}"
+    width="0.2"
     height="${body_height}"
     color="${body_color}"
     use_mesh_file="${use_mesh}"
@@ -250,6 +250,67 @@
     <xacro:insert_block name="aileron_inertia" />
   </xacro:airfoil_segment>
 
+
+<gazebo reference="${namespace}/base_link">
+  <visual>
+    <plugin name='visual_plugin_base_link' filename='librotors_gazebo_template_visual_plugin.so'/>
+  </visual>
+</gazebo>
+
+<link name="${namespace}/payload_1">
+  <inertial>
+    <mass value="0.5" />
+    <xacro:sphere_inertia r="0.05" mass="0.5" />
+  </inertial>
+  <visual>
+    <origin xyz="0 0 0" rpy="0 1.5708 0" />
+    <geometry>
+        <cylinder length="0.25" radius="0.03"/>
+    </geometry>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 1.5708 0" />
+    <geometry>
+        <cylinder length="0.25" radius="0.03"/>
+    </geometry>
+  </collision>
+</link>
+<!--
+<joint name="${namespace}/payload_1_joint" type="revolute">
+  <parent link="${namespace}/wl_2" />
+  <child link="${namespace}/payload_1" />
+  <origin xyz="0.05 0 -0.1" rpy="0 0 0" />
+  <limit upper="0" lower="0" effort="5000" velocity="50"/>
+</joint>
+-->
+<joint name="${namespace}/payload_1_joint" type="floating">
+  <parent link="${namespace}/wl_2" />
+  <child link="${namespace}/payload_1" />
+  <origin xyz="0.05 0 -0.1" rpy="0 0 0" />
+</joint>
+<gazebo reference="${namespace}/payload_1">
+  <visual>
+    <plugin name='visual_plugin_payload_1' filename='librotors_gazebo_template_visual_plugin.so'/>
+  </visual>
+  <material>Gazebo/Orange</material>
+  <mu1>0.2</mu1>
+  <mu2>0.2</mu2>
+  <kp>10000</kp>
+  <kd>1</kd>
+</gazebo>
+<gazebo>
+  <plugin filename="librotors_gazebo_payload_plugin.so" name="payload_plugin_1">
+    <robotNamespace>${namespace}</robotNamespace>
+    <joint>${namespace}/payload_1_joint</joint>
+    <payload>${namespace}/payload_1</payload>
+    <parent>${namespace}/wl_2</parent>
+    <hoistPosParent>0 -0.15 -0.07</hoistPosParent>
+    <hoistPosPayload>0 0 0</hoistPosPayload>
+    <dropTopic>drop_1</dropTopic>
+  </plugin>
+</gazebo>
+
+
 <gazebo>
   <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
     <robotNamespace>${namespace}</robotNamespace>
@@ -300,6 +361,14 @@
     <origin xyz="0 0 0" rpy="0 0 0" />       <!-- vis_coll origin -->
     <xacro:box_inertia x="0.1" y="0.02" z="0.02" mass="0.02" />
   </xacro:angle_vane>
+<gazebo>
+  <plugin filename="librotors_gazebo_vane_plugin.so" name="alpha_1_vane_plugin">
+    <robotNamespace>${namespace}</robotNamespace>
+    <vaneJoint>${namespace}/alpha_1_joint</vaneJoint>
+    <vaneTopic>alpha_1_vane_sensor</vaneTopic>
+  </plugin>
+</gazebo>
+
 
 <xacro:airfoil_segment
   robot_namespace="${namespace}"
@@ -371,6 +440,13 @@
   <origin xyz="0 0 0" rpy="0 0 0" />       <!-- vis_coll origin -->
   <xacro:box_inertia x="0.1" y="0.02" z="0.02" mass="0.02" />
 </xacro:angle_vane>
+<gazebo>
+  <plugin filename="librotors_gazebo_vane_plugin.so" name="beta_1_vane_plugin">
+    <robotNamespace>${namespace}</robotNamespace>
+    <vaneJoint>${namespace}/beta_1_joint</vaneJoint>
+    <vaneTopic>beta_1_vane_sensor</vaneTopic>
+  </plugin>
+</gazebo>
 
 <xacro:airfoil_segment
   robot_namespace="${namespace}"
@@ -1242,6 +1318,15 @@ surface_height="${flap_height}">
         <joint_control_type>servo</joint_control_type>
         <joint_name>${namespace}/flap_right_2_joint</joint_name>
         <gztopic>flap_r2_pos</gztopic>
+      </channel>
+      <channel name="payload">
+        <input_index>5</input_index>
+        <input_offset>0</input_offset>
+        <input_scaling>1</input_scaling>
+        <zero_position_disarmed>0</zero_position_disarmed>
+        <zero_position_armed>0</zero_position_armed>
+        <joint_control_type>gz_msg</joint_control_type>
+        <gztopic>drop_1</gztopic>
       </channel>
     </control_channels>
   </plugin>
