@@ -338,7 +338,6 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
 
 void GazeboAerodynamics::OnUpdate()
 {
-
     if (!pubs_and_subs_created_) {
 
         gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
