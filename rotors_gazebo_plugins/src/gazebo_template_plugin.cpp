@@ -27,50 +27,51 @@ GZ_REGISTER_MODEL_PLUGIN(GazeboTemplate)
 /////////////////////////////////////////////////
 GazeboTemplate::GazeboTemplate()
 {
-    gzdbg<<"template plugin constructed\n";
+    gzdbg<<"TemplatePlugin constructed\n";
 }
 
 /////////////////////////////////////////////////
 GazeboTemplate::~GazeboTemplate()
 {
-    gzdbg<<"template plugin destructed\n";
+    gzdbg<<"TemplatePlugin destructed\n";
 }
 
 /////////////////////////////////////////////////
 void GazeboTemplate::Load(physics::ModelPtr _model,
                               sdf::ElementPtr _sdf)
 {
-    gzdbg<<"load called"<<std::endl;
+    gzdbg<<"loading...\n";
 
     GZ_ASSERT(_model, "TemplatePlugin _model pointer is NULL");
     GZ_ASSERT(_sdf, "TemplatePlugin _sdf pointer is NULL");
-    this->model = _model;
-    this->sdf = _sdf;
+    this->model_ = _model;
+    this->sdf_ = _sdf;
     
-    this->world = this->model->GetWorld();
-    GZ_ASSERT(this->world, "TemplatePlugin world pointer is NULL");
+    this->world_ = this->model_->GetWorld();
+    GZ_ASSERT(this->world_, "TemplatePlugin world pointer is NULL");
     
 #if GAZEBO_MAJOR_VERSION >= 9
-    this->physics = this->world->Physics();
+    this->physics_ = this->world_->Physics();
 #else
-    this->physics = this->world->GetPhysicsEngine();
+    this->physics_ = this->world_->GetPhysicsEngine();
 #endif
-    GZ_ASSERT(this->physics, "TemplatePlugin physics pointer is NULL");
-    
-    GZ_ASSERT(_sdf, "TemplatePlugin _sdf pointer is NULL");
+    GZ_ASSERT(this->physics_, "TemplatePlugin physics pointer is NULL");
     
     namespace_.clear();
-    
-    this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboTemplate::OnUpdate, this));
 
-    gzdbg<<"model name: "<<model->GetName()<<"\n";
-    model->Print("");
-    gzdbg<<"model child count: "<<model->GetChildCount()<<"\n";
+    node_handle_ = transport::NodePtr(new transport::Node());
+    node_handle_->Init();
+    
+    this->update_connection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboTemplate::OnUpdate, this));
+
+    gzdbg<<"model name: "<<model_->GetName()<<"\n";
+    model_->Print("");
+    gzdbg<<"model child count: "<<model_->GetChildCount()<<"\n";
 
     if (_sdf->HasElement("robotNamespace"))
         namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
     else
-        gzerr << "[gazebo_motor_model] Please specify a robotNamespace.\n";
+        gzerr << "Please specify a robotNamespace.\n";
 }
 
 /////////////////////////////////////////////////

@@ -23,40 +23,45 @@
 #include "gazebo/common/Plugin.hh"
 #include "gazebo/physics/physics.hh"
 #include "gazebo/transport/TransportTypes.hh"
+#include "gazebo/transport/transport.hh"
 
 namespace gazebo
 {
-  /// \brief A template model plugin
-  class GAZEBO_VISIBLE GazeboTemplate : public ModelPlugin
-  {
+/// \brief A template model plugin
+class GAZEBO_VISIBLE GazeboTemplate : public ModelPlugin
+{
+public:
     /// \brief Constructor.
-    public: GazeboTemplate();
+    GazeboTemplate();
 
     /// \brief Destructor.
-    public: ~GazeboTemplate();
+    ~GazeboTemplate();
 
     // Documentation Inherited.
-    public: void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+    void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
+protected:
     /// \brief Callback for World Update events.
-    protected: void OnUpdate();
+    void OnUpdate();
 
     /// \brief Connection to World Update events.
-    protected: event::ConnectionPtr updateConnection;
+    event::ConnectionPtr update_connection_;
 
     /// \brief Pointer to world.
-    protected: physics::WorldPtr world;
+    physics::WorldPtr world_;
 
     /// \brief Pointer to physics engine.
-    protected: physics::PhysicsEnginePtr physics;
+    physics::PhysicsEnginePtr physics_;
 
     /// \brief Pointer to model containing plugin.
-    protected: physics::ModelPtr model;
+    physics::ModelPtr model_;
 
     /// \brief SDF for this plugin;
-    protected: sdf::ElementPtr sdf;
+    sdf::ElementPtr sdf_;
 
+private:
+    transport::NodePtr node_handle_;
     std::string namespace_;
-  };
+};
 }
 #endif
