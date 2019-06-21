@@ -511,6 +511,14 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   list(APPEND targets_to_install rotors_gazebo_optical_flow_plugin)
 endif()
 
+#==================================== PAYLOAD PLUGIN ========================================//
+add_library(rotors_gazebo_payload_plugin SHARED src/gazebo_payload_plugin.cpp)
+target_link_libraries(rotors_gazebo_payload_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_payload_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_payload_plugin)
+
 #======================================= PRESSURE PLUGIN ========================================//
 add_library(rotors_gazebo_pressure_plugin SHARED src/gazebo_pressure_plugin.cpp)
 target_link_libraries(rotors_gazebo_pressure_plugin ${target_linking_LIBRARIES}  ${GLOG_LIBRARIES})
@@ -560,6 +568,14 @@ if (NOT NO_ROS)
 endif()
 list(APPEND targets_to_install rotors_gazebo_template_sensor_plugin)
 
+#==================================== TEMPLATE VISUAL PLUGIN ========================================//
+add_library(rotors_gazebo_template_visual_plugin SHARED src/gazebo_template_visual_plugin.cpp)
+target_link_libraries(rotors_gazebo_template_visual_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_template_visual_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_template_visual_plugin)
+
 #==================================== TRACKING CAM PLUGIN ========================================//
 add_library(rotors_gazebo_tracking_cam_plugin SHARED src/gazebo_tracking_cam_plugin.cpp)
 target_link_libraries(rotors_gazebo_tracking_cam_plugin ${target_linking_LIBRARIES} )
@@ -567,6 +583,14 @@ if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_tracking_cam_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 list(APPEND targets_to_install rotors_gazebo_tracking_cam_plugin)
+
+#==================================== VANE PLUGIN ========================================//
+add_library(rotors_gazebo_vane_plugin SHARED src/gazebo_vane_plugin.cpp)
+target_link_libraries(rotors_gazebo_vane_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_vane_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_vane_plugin)
 
 #========================================= WIND PLUGIN ==========================================//
 add_library(rotors_gazebo_wind_plugin SHARED src/gazebo_wind_plugin.cpp)
