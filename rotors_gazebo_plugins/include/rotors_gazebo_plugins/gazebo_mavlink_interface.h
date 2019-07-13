@@ -393,8 +393,10 @@ private:
 
   uint16_t timing_stats_imu_[11]{0,0,0,0,0,0,0,0,0,0,0};
   uint16_t timing_stats_gps_[11]{0,0,0,0,0,0,0,0,0,0,0};
+  common::Time last_wall_time_;
   common::Time last_wall_time_imu_;
   common::Time last_wall_time_gps_;
+  double dt_wall_ = 0.004;
   uint16_t send_counter_imu_ = 0;
   uint16_t send_counter_gps_ = 0;
 

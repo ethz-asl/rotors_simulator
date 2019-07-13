@@ -55,9 +55,11 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
     
     namespace_.clear();
     
+    /*
     gzdbg<<"model name: "<<model->GetName()<<"\n";
     model->Print("");
     gzdbg<<"model child count: "<<model->GetChildCount()<<"\n";
+    */
 
     if (_sdf->HasElement("robotNamespace"))
         namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();

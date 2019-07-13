@@ -40,17 +40,28 @@
   <xacro:default_pressure_sensor namespace="${namespace}" parent_link="${namespace}/base_link" />
   -->
 
+  <!--
   <xacro:if value="$(arg enable_ground_truth)">
     <xacro:ground_truth_imu_and_odometry namespace="${namespace}" parent_link="${namespace}/base_link" />
   </xacro:if>
+  -->
 
   <xacro:if value="$(arg enable_logging)">
     <!-- Instantiate a logger -->
+    <!--
     <xacro:bag_plugin_macro
       namespace="${namespace}"
       bag_file="$(arg log_file)"
       rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}"
       wait_to_record_bag="$(arg wait_to_record_bag)" />
+    -->
   </xacro:if>
+
+  <xacro:default_camera
+    namespace="${namespace}"
+    parent_link="${namespace}/base_link"
+    camera_suffix="cam_front">
+    <origin xyz="0.465 0 0.05" rpy="0 0.2 0" />
+  </xacro:default_camera>
 
 </robot>

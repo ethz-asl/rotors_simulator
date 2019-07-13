@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   Copyright 2016 Pavel Vechersky, ASL, ETH Zurich, Switzerland
 
@@ -433,7 +433,7 @@
           <cp>-0.49 0.125 0.28</cp>
           <seg_area>0.03</seg_area>
           <seg_chord>0.12</seg_chord>
-          <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
           <indVel name="prop0">
             <topic>prop_slpstr_0</topic>
           </indVel>
@@ -453,7 +453,7 @@
           <cp>-0.49 -0.125 0.28</cp>
           <seg_area>0.03</seg_area>
           <seg_chord>0.12</seg_chord>
-          <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
           <indVel name="prop0">
             <topic>prop_slpstr_0</topic>
           </indVel>
@@ -473,7 +473,7 @@
           <cp>-0.44 0.0 0.125</cp>
           <seg_area>0.03</seg_area>
           <seg_chord>0.12</seg_chord>
-          <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
           <indVel name="prop0">
             <topic>prop_slpstr_0</topic>
           </indVel>

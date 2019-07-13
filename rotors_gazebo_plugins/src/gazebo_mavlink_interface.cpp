@@ -255,6 +255,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 #if GAZEBO_MAJOR_VERSION >= 9
   last_time_ = world_->SimTime();
   last_imu_time_ = world_->SimTime();
+  last_wall_time_ = world_->RealTime();
   gravity_W_ = world_->Gravity();
 #else
   last_time_ = world_->GetSimTime();
@@ -422,10 +423,14 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
 
 #if GAZEBO_MAJOR_VERSION >= 9
   common::Time current_time = world_->SimTime();
+  common::Time current_wall_time = world_->RealTime();
 #else
   common::Time current_time = world_->GetSimTime();
 #endif
   double dt = (current_time - last_time_).Double();
+  dt_wall_ += (current_wall_time - last_wall_time_).Double();
+  last_time_ = current_time;
+  last_wall_time_ = current_wall_time;
 
   SendSensorMessages();
 
@@ -455,11 +460,12 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
     actuators_reference_pub_->Publish(actuators_msg);
   }
 
-  last_time_ = current_time;
+
 
   // Display timing statistics
+
   if(dbg_counter_%100==0){
-      gzdbg<<"Itv: <.005  |.005-.01| .01-.02| .02-.04| .04-.1 | .1-.2  | .2-.3  | .3-.4  | .4-.5  | .5-1.0 |  >1.0  | tot \n";
+      gzdbg<<"Itv: <.005  |.005-.01| .01-.02| .02-.04| .04-.1 | .1-.2  | .2-.3  | .3-.4  | .4-.5  | .5-1.0 |  >1.0  |   tot  | f=: "<<100/dt_wall_<<"\n";
 
       gzdbg<<"GPS:"
            <<std::setw(8)<<std::right<<timing_stats_gps_[0]<<"|"
@@ -488,6 +494,7 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
            <<std::setw(8)<<std::right<<timing_stats_imu_[9]<<"|"
            <<std::setw(8)<<std::right<<timing_stats_imu_[10]<<"|"
            <<std::setw(8)<<std::right<<send_counter_imu_<<"\n\n";
+      dt_wall_ = 0;
   }
 
   ++dbg_counter_;
@@ -598,7 +605,7 @@ void GazeboMavlinkInterface::SendSensorMessages() {
     // Magnetic strength (10^5xnanoTesla)
     float strength_ga = 0.01f * get_mag_strength(gt_lat_loc/1e7, gt_lon_loc/1e7);
 
-    // Magnetic filed components are calculated by http://geomag.nrcan.gc.ca/mag_fld/comp-en.php
+    // Magnetic field components are calculated by http://geomag.nrcan.gc.ca/mag_fld/comp-en.php
     float H = strength_ga * cosf(inclination_rad);
     float Z = tanf(inclination_rad) * H;
     float X = H * cosf(declination_rad);
