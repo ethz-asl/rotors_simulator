@@ -363,13 +363,12 @@
             </material>
           </visual>
           <visual name='runway'>
-            <pose>74 0 0.05 0 0 0</pose>
+            <pose>85 0 0 0 0 0</pose>
             <cast_shadows>false</cast_shadows>
             <geometry>
-              <plane>
-                <normal>0 0 1</normal>
-                <size>150 10</size>
-              </plane>
+              <box>
+                <size>150 10 0.04</size>
+              </box>
             </geometry>
             <material>
               <script>
@@ -379,13 +378,12 @@
             </material>
           </visual>
           <visual name='runway_line'>
-            <pose>74 0 0.06 0 0 0</pose>
+            <pose>85 0 0 0 0 0</pose>
             <cast_shadows>false</cast_shadows>
             <geometry>
-              <plane>
-                <normal>0 0 1</normal>
-                <size>150 0.15</size>
-              </plane>
+              <box>
+                <size>150 0.15 0.05</size>
+              </box>
             </geometry>
             <material>
               <script>
@@ -394,14 +392,14 @@
               </script>
             </material>
           </visual>
+          <!--
           <visual name='runway_line_l'>
-            <pose>74 5 0.06 0 0 0</pose>
+            <pose>85 5 0 0 0 0</pose>
             <cast_shadows>false</cast_shadows>
             <geometry>
-              <plane>
-                <normal>0 0 1</normal>
-                <size>150 0.15</size>
-              </plane>
+              <box>
+                <size>150 0.15 0.05</size>
+              </box>
             </geometry>
             <material>
               <script>
@@ -411,13 +409,12 @@
             </material>
           </visual>
           <visual name='runway_line_r'>
-            <pose>74 -5 0.06 0 0 0</pose>
+            <pose>85 -5 0 0 0 0</pose>
             <cast_shadows>false</cast_shadows>
             <geometry>
-              <plane>
-                <normal>0 0 1</normal>
-                <size>150 0.15</size>
-              </plane>
+              <box>
+                <size>150 0.15 0.05</size>
+              </box>
             </geometry>
             <material>
               <script>
@@ -426,10 +423,125 @@
               </script>
             </material>
           </visual>
+          -->
+          <visual name='bulls_eye_r1'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>0.5</radius>
+                <length>0.12</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Black</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='bulls_eye_r2'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>1</radius>
+                <length>0.11</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/White</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='bulls_eye_r3'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>1.5</radius>
+                <length>0.1</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Black</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='bulls_eye_r4'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>2</radius>
+                <length>0.09</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/White</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='bulls_eye_r5'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>2.5</radius>
+                <length>0.08</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Black</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='bulls_eye_r6'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>3</radius>
+                <length>0.07</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/White</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='bulls_eye_r7'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>3.5</radius>
+                <length>0.06</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Black</name>
+              </script>
+            </material>
+          </visual>
         </link>
     </model>
 
     <!-- Pylons -->
+
+    <!--
     <model name="pylon1">
      <static>true</static>
      <link name="pylon">
@@ -564,7 +676,9 @@
        </collision>
      </link>
     </model>
+    -->
 
+    <!--
     <model name="pylon2">
      <static>true</static>
      <link name="pylon">
@@ -694,6 +808,7 @@
        </collision>
      </link>
     </model>
+    -->
 
     <model name="pylon3">
      <static>true</static>

@@ -9,7 +9,7 @@
   <arg name="is_input_joystick" default="false"/>
   <arg name="model" default="$(find rotors_description)/urdf/$(arg uav_name)_base.xacro"/>
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
-  <arg name="x" default="0.0"/>
+  <arg name="x" default="10.0"/>
   <arg name="y" default="0.0"/>
   <arg name="z" default="0.1"/>
   <arg name="R" default="0.0"/>
@@ -64,7 +64,7 @@
   </node>
 
   <!-- push tracking_cam_description to factory and spawn camera in gazebo -->
-<!--
+  <!--
   <node name="spawn_tracking_cam" pkg="gazebo_ros" type="spawn_model"
    args="-param tracking_cam_description
          -urdf

@@ -146,7 +146,7 @@
       parent_link="tracking/tiltLink"
       camera_suffix="1"
       frame_rate="30"
-      horizontal_fov="0.0962634"
+      horizontal_fov="0.1962634"
       image_width="1920"
       image_height="1080"
       image_format="R8G8B8"
