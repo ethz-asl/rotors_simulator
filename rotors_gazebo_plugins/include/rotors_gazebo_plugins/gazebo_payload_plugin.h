@@ -75,6 +75,7 @@ private:
     bool reload_ = false;
     bool trigg_ = false;
     bool ini_ = true;
+    bool reset_ = false;
     common::Timer reload_timer_;
 
     std::string drop_topic_;

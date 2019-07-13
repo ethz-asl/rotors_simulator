@@ -30,7 +30,7 @@
       izz="${0.5 * mass * r * r}" />
   </xacro:macro>
 
-  <!-- Macro for the inertia of a cylinder -->
+  <!-- Macro for the inertia of a sphere -->
   <xacro:macro name="sphere_inertia" params="r mass">
     <inertia ixx="${0.4 * mass * r*r}" ixy="0.0" ixz="0.0"
            iyy="${0.4 * mass * r*r}" iyz="0.0"
@@ -72,17 +72,32 @@
 
 <!-- Airfoil segment joint, link and plugin -->
 <xacro:macro name="airfoil_segment"
-  params="robot_namespace segment_name parent mass_segment k c color use_mesh_file mesh_file segment_length segment_width
+  params="robot_namespace segment_name parent mass_segment do_flex k c color use_mesh_file mesh_file segment_length segment_width
     segment_height *axis *joint_origin *inertia_origin *vis_coll_origin *inertia ">
 
-  <joint name="${robot_namespace}/${segment_name}_joint" type="revolute">
-    <xacro:insert_block name="joint_origin" />
-    <xacro:insert_block name="axis" />
-    <parent link="${parent}" />
-    <child link="${robot_namespace}/${segment_name}"/>
-    <limit upper="0.17" lower="-0.17" effort="5000" velocity="50"/>
-    <dynamics damping="${c}"/>
-  </joint>
+  <xacro:if value="${do_flex}">
+    <joint name="${robot_namespace}/${segment_name}_joint" type="revolute">
+      <xacro:insert_block name="joint_origin" />
+      <xacro:insert_block name="axis" />
+      <parent link="${parent}" />
+      <child link="${robot_namespace}/${segment_name}"/>
+      <limit upper="0.17" lower="-0.17" effort="5000" velocity="50"/>
+      <dynamics damping="${c}"/>
+    </joint>
+    <gazebo reference="${robot_namespace}/${segment_name}_joint">
+      <implicitSpringDamper>true</implicitSpringDamper>
+      <springStiffness>${k}</springStiffness>
+    </gazebo>
+  </xacro:if>
+  <xacro:unless value="${do_flex}">
+    <joint name="${robot_namespace}/${segment_name}_joint" type="revolute">
+      <xacro:insert_block name="joint_origin" />
+      <xacro:insert_block name="axis" />
+      <parent link="${parent}" />
+      <child link="${robot_namespace}/${segment_name}"/>
+      <limit upper="0" lower="-0" effort="5000" velocity="50"/>
+    </joint>
+  </xacro:unless>
 
   <link name="${robot_namespace}/${segment_name}">
     <inertial>
@@ -101,7 +116,6 @@
         </xacro:unless>
       </geometry>
     </visual>
-
     <collision>
       <xacro:insert_block name="vis_coll_origin" />
       <geometry>
@@ -113,35 +127,19 @@
         </xacro:unless>
       </geometry>
     </collision>
-
   </link>
 
   <gazebo reference="${robot_namespace}/${segment_name}">
     <material>Gazebo/${color}</material>
   </gazebo>
 
-  <gazebo reference="${robot_namespace}/${segment_name}_joint">
-    <implicitSpringDamper>true</implicitSpringDamper>
-    <springStiffness>${k}</springStiffness>
-  </gazebo>
-
-  <!--
-  <gazebo>
-    <plugin filename="librotors_gazebo_springdamper_plugin.so" name="gazebo_springdamper_plugin">
-      <robotNamespace>${robot_namespace}</robotNamespace>
-      <jointName>${robot_namespace}/${segment_name}_joint</jointName>
-      <damping>${c}</damping>
-      <stiffness>${k}</stiffness>
-    </plugin>
-  </gazebo>
-  -->
 </xacro:macro>
 
   <!-- Control surface joint and link -->
   <xacro:macro name="control_surface"
     params="robot_namespace surface_name parent mass_surface min_angle
       max_angle color use_mesh_file mesh_file surface_length surface_width
-      surface_height *axis *joint_origin *link_origin *vis_coll_origin *inertia">
+      surface_height *axis *joint_origin *inertia_origin *vis_coll_origin *inertia">
     <joint name="${robot_namespace}/${surface_name}_joint" type="revolute">
       <xacro:insert_block name="joint_origin" />
       <xacro:insert_block name="axis" />
@@ -152,7 +150,7 @@
 
     <link name="${robot_namespace}/${surface_name}">
       <inertial>
-        <xacro:insert_block name="link_origin" />
+        <xacro:insert_block name="inertia_origin" />
         <mass value="${mass_surface}" />
         <xacro:insert_block name="inertia" />
       </inertial>

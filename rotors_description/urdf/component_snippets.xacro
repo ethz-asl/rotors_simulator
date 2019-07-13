@@ -22,6 +22,18 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:property name="pi" value="3.14159265359" />
 
+  <!-- Macro for the inertia of a box -->
+  <xacro:macro name="box_inertia" params="x y z mass">
+    <inertia ixx="${0.0833333 * mass * (y*y + z*z)}" ixy="0.0" ixz="0.0"
+      iyy="${0.0833333 * mass * (x*x + z*z)}" iyz="0.0"
+      izz="${0.0833333 * mass * (x*x + y*y)}" />
+  </xacro:macro>
+
+  <!-- Macro for the inertia of a cube -->
+  <xacro:macro name="cube_inertia" params="l mass">
+    <xacro:box_inertia x="${l}" y="${l}" z="${l}" mass="${mass}" />
+  </xacro:macro>
+
   <!-- Macro to add logging to a bag file. -->
   <xacro:macro name="bag_plugin_macro"
     params="namespace bag_file rotor_velocity_slowdown_sim wait_to_record_bag">
@@ -121,7 +133,7 @@
   <xacro:macro name="camera_macro_2"
     params="namespace parent_link camera_suffix frame_rate
       horizontal_fov image_width image_height image_format min_distance
-      max_distance noise_mean noise_stddev enable_visual *geometry *origin">
+      max_distance noise_mean noise_stddev mass enable_visual *geometry *inertia *origin">
 
     <link name="${namespace}/camera_${camera_suffix}_link">
     <!--
@@ -142,9 +154,9 @@
       </visual>
     </xacro:if>
       <inertial>
-        <mass value="1e-5" />
+        <mass value="${mass}" />
         <origin xyz="0 0 0" rpy="0 0 0" />
-        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+        <xacro:insert_block name="inertia" />
       </inertial>
     </link>
 
@@ -227,7 +239,6 @@
       <child link="${namespace}/camera_${camera_suffix}_link" />
     </joint>
   </xacro:macro>
-
 
   <!-- Camera sensor macro - just image parameters. -->
   <xacro:macro name="camera_sensor_macro"
@@ -343,7 +354,8 @@
   <!-- =============================================================== -->
   <!-- ==================== ROS INTERFACE MACRO ====================== -->
   <!-- =============================================================== -->
-  <!-- <xacro:macro 
+  <!--
+  <xacro:macro
   		name="ros_interface_plugin_macro"
   		params="namespace">
     <gazebo>
@@ -351,7 +363,8 @@
         <robotNamespace>${namespace}</robotNamespace>
       </plugin>
     </gazebo>
-  </xacro:macro>-->
+  </xacro:macro>
+  -->
 
   <!-- =============================================================== -->
   <!-- ================== MAVLINK INTERFACE MACRO ==================== -->
@@ -970,7 +983,7 @@
       enable_odometry_map="false"
       odometry_map=""
       image_scale="">
-      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+      <xacro:cube_inertia l="0.001" mass="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
     </xacro:odometry_plugin_macro>
   </xacro:macro>
@@ -991,7 +1004,7 @@
       accelerometer_random_walk="0.006"
       accelerometer_bias_correlation_time="300.0"
       accelerometer_turn_on_bias_sigma="0.1960">
-      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <xacro:cube_inertia l="0.02" mass="0.015" />
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:imu_plugin_macro>
   </xacro:macro>
@@ -1010,8 +1023,10 @@
       max_distance="8000"
       noise_mean="0.0"
       noise_stddev="0.007"
+      mass = "0.01"
       enable_visual="true">
       <mesh filename="package://rotors_description/meshes/vi_camera.dae" scale="1 1 1" />
+      <xacro:cube_inertia l="0.02" mass="0.01" />
       <xacro:insert_block name="origin" />
     </xacro:camera_macro_2>
   </xacro:macro>
@@ -1030,7 +1045,7 @@
       horizontal_vel_std_dev="0.1"
       vertical_vel_std_dev="0.1"
       enable_delay = "true">
-      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <xacro:cube_inertia l="0.02" mass="0.015" />
       <xacro:insert_block name="origin" />
     </xacro:gps_plugin_macro>
     <xacro:gps_plugin_macro
@@ -1045,7 +1060,7 @@
       horizontal_vel_std_dev="0.0"
       vertical_vel_std_dev="0.0"
       enable_delay = "false">
-      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <xacro:cube_inertia l="0.02" mass="0.001" />
       <xacro:insert_block name="origin" />
     </xacro:gps_plugin_macro>
   </xacro:macro>
@@ -1063,7 +1078,7 @@
       ref_mag_down="0.000042795"
       noise_normal="0.000000080 0.000000080 0.000000080"
       noise_uniform_initial_bias="0.000000400 0.000000400 0.000000400">
-      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <xacro:cube_inertia l="0.02" mass="0.015" />
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:magnetometer_plugin_macro>
   </xacro:macro>
@@ -1077,7 +1092,7 @@
       mass_pressure_sensor="0.015"
       reference_altitude="500.0"
       pressure_variance="0.0">
-      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+      <xacro:cube_inertia l="0.002" mass="0.015" />
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:pressure_sensor_plugin_macro>
   </xacro:macro>

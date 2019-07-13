@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 
-<robot name="techpod_X" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="techpod_X_flex" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
 
@@ -23,16 +23,12 @@
   <xacro:include filename="$(find rotors_description)/urdf/techpod_X_flex.xacro" />
 
   <!-- Mount an ADIS16448 IMU. -->
-
   <xacro:default_imu namespace="${namespace}" parent_link="${namespace}/base_link" />
-  <!-- -->
 
   <!-- Mount a GPS. -->
-
   <xacro:default_gps namespace="${namespace}" parent_link="${namespace}/base_link" >
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:default_gps>
-  <!-- -->
 
   <!-- Mount a magnetometer. note: mavlink interface already does this based on position from gps-->
   <!--
@@ -81,5 +77,23 @@
     camera_suffix="cam_front">
     <origin xyz="0.35 0 0.11" rpy="0 0.2 0" />
   </xacro:default_camera>
+
+  <!--
+  <xacro:default_camera
+    namespace="${namespace}"
+    parent_link="${namespace}/base_link"
+    camera_suffix="cam_aft">
+    <origin xyz="-0.7 0 0.02" rpy="0 0.4 3.14" />
+  </xacro:default_camera>
+  -->
+
+  <!--
+  <xacro:default_camera
+    namespace="${namespace}"
+    parent_link="${namespace}/payload_1"
+    camera_suffix="cam_payload">
+    <origin xyz="0.125 0 0" rpy="0 0 0" />
+  </xacro:default_camera>
+  -->
 
 </robot>

@@ -120,13 +120,12 @@ void GazeboPayloadPlugin::CreatePubsAndSubs(){
 /////////////////////////////////////////////////
 void GazeboPayloadPlugin::DropCallback(Float32Ptr &drop_msg){
 
-    /*
-    if (drop_msg->data()>0) {
+    if (drop_msg->data()>0.0) {
         trigg_ = true;
+        gzdbg<<"trigg\n";
     } else {
         trigg_ = false;
     }
-    */
 }
 
 /////////////////////////////////////////////////
@@ -142,8 +141,12 @@ void GazeboPayloadPlugin::OnUpdate()
 
     ignition::math::Pose3d pose_parent = parent_->WorldPose();
     ignition::math::Pose3d pose_payload = payload_->WorldPose();
-    pose_parent.Pos() += pose_parent.Rot().RotateVector(hoist_pos_parent_);
-    pose_payload.Pos() += pose_payload.Rot().RotateVector(hoist_pos_payload_);
+    ignition::math::Pose3d pose_payload_reset;
+    pose_payload_reset.Pos() = pose_parent.Pos() + pose_parent.Rot().RotateVector(hoist_pos_parent_) - pose_payload.Rot().RotateVector(hoist_pos_payload_);
+    pose_payload_reset.Rot() = pose_parent.Rot();
+
+    //pose_parent.Pos() += pose_parent.Rot().RotateVector(hoist_pos_parent_);
+    //pose_payload.Pos() += pose_payload.Rot().RotateVector(hoist_pos_payload_);
 
     if(ini_){
         q_pr_pa_ = pose_parent.Rot().Inverse()*pose_payload.Rot();
@@ -152,7 +155,8 @@ void GazeboPayloadPlugin::OnUpdate()
 
     // Position error quantities (expressed in world frame)
     ignition::math::Vector3d lin_vel_err =  payload_->WorldLinearVel(hoist_pos_payload_) - parent_->WorldLinearVel(hoist_pos_parent_);
-    ignition::math::Vector3d pos_err = pose_parent.Pos()-pose_payload.Pos();
+    //ignition::math::Vector3d pos_err = pose_parent.Pos()-pose_payload.Pos();
+    ignition::math::Vector3d pos_err = pose_payload_reset.Pos()-pose_payload.Pos();
     lin_vel_err.Correct();
 
     // Orientation error quantities (expressed in payload frame)
@@ -165,26 +169,17 @@ void GazeboPayloadPlugin::OnUpdate()
 
     //state machine
     bool close;
-    if (pos_err.Length()<0.01 && lin_vel_err.Length()<0.1 && rot_err.Length()<0.01 && rot_vel_err.Length()<1.0)
+    if (pos_err.Length()<0.05 && lin_vel_err.Length()<0.1 && rot_err.Length()<0.17 && rot_vel_err.Length()<0.17)
         close = true;
     else
         close = false;
-
-    gzdbg<<"close: "<<close<<"\n";
-
-    /*
-    if(current_time.sec%10==1)
-        trigg_ = true;
-    else
-        trigg_ = false;
-    */
 
     if (trigg_ && !reload_ && !drop_) {
         drop_ = true;
         reload_ = false;
         reload_timer_.Start();
 
-    } else if (trigg_ && drop_ && reload_timer_.GetElapsed().Float()>2.0) {
+    } else if (drop_ && reload_timer_.GetElapsed().Float()>8.0) {
         drop_ = false;
         reload_ = true;
         reload_timer_.Stop();
@@ -197,9 +192,9 @@ void GazeboPayloadPlugin::OnUpdate()
 
     //ignition::math::Quaterniond rot_err = q_pr_pa_.Inverse()*pose_parent.Rot().Inverse()*pose_payload.Rot();
 
-    double omega = 33.3;    // natural frequency
+    double omega = 3*33.3;    // natural frequency
     double zeta = 1.0;      // damping ratio
-    double mass = 0.5;
+    double mass = 0.25;
     double inertia = 0.4*mass*0.0025; // inertia of solid sphere: 0.4*m*r²
     double k_p_lin = omega*omega*mass;
     double k_p_rot = omega*omega*inertia;
@@ -213,10 +208,25 @@ void GazeboPayloadPlugin::OnUpdate()
         k_p_rot = 0;
         k_d_rot = 0;
         reactio = 0;
+        reset_ = false;
+
     } else if(reload_) {
         reactio = 0;
+        if(!reset_){
+            //get it somewhat close...
+            payload_->SetWorldPose(pose_payload_reset);
+            payload_->SetAngularVel(pose_payload.Rot().RotateVectorReverse(parent_->WorldAngularVel()));
+            payload_->SetLinearVel(pose_payload.Rot().RotateVectorReverse(parent_->WorldLinearVel(hoist_pos_parent_)));
+            k_p_lin = 0;
+            k_d_lin = 0;
+            k_p_rot = 0;
+            k_d_rot = 0;
+            reset_ = true;
+        }
+
     } else {
         reactio = 1;
+        reset_ = false;
     }
 
     ignition::math::Vector3d force  = k_p_lin*pos_err-k_d_lin*lin_vel_err;
@@ -240,16 +250,6 @@ void GazeboPayloadPlugin::OnUpdate()
     payload_->AddForceAtRelativePosition(force, hoist_pos_payload_);
     payload_->AddRelativeTorque(torque);
 
-    /*
-    if(10.0 < current_time.Double() && joint_ && !detached_){
-        joint_force = ignition::math::Vector3d(0,0,0);
-        joint_->Reset();
-        joint_->Detach();
-        joint_->Fini();
-        detached_ = true;
-        gzdbg<<"detached\n";
-    }
-    */
 }
 
 
