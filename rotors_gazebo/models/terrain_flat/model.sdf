@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
   <model name="terrain_flat">
-    <pose>-18 18 -2 1.57 0 0</pose>
+    <pose>-37.5 -22.5 -2 1.57 0 0</pose>
     <static>true</static>
     <link name="link">
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://terrain_flat/meshes/terrain_flat.stl</uri>
+            <uri>model://terrain_flat/meshes/terrain_flat2_yconst.stl</uri>
           </mesh>
         </geometry>
       </collision>
@@ -15,7 +15,7 @@
         <cast_shadows>false</cast_shadows>
         <geometry>
           <mesh>
-            <uri>model://terrain_flat/meshes/terrain_flat.stl</uri>
+            <uri>model://terrain_flat/meshes/terrain_flat2_yconst.stl</uri>
           </mesh>
         </geometry>
         <material>

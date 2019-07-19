@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
   <model name="terrain2">
-    <pose>-22.5 22.5 0 1.57 0 0</pose> <-- -22 22 -2 1.57 0 0 -->
+    <pose>-22.5 22.5 -2 1.57 0 0</pose>
     <static>true</static>
     <link name="link">
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://terrain2/meshes/terrain2.stl</uri>
+            <uri>model://terrain2/meshes/terrain2_edges2.stl</uri>
           </mesh>
         </geometry>
       </collision>
@@ -15,7 +15,7 @@
         <cast_shadows>false</cast_shadows>
         <geometry>
           <mesh>
-            <uri>model://terrain2/meshes/terrain2.stl</uri>
+            <uri>model://terrain2/meshes/terrain2_edges2.stl</uri>
           </mesh>
         </geometry>
         <material>
