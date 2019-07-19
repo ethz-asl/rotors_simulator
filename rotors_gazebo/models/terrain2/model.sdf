@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
   <model name="terrain2">
-    <pose>-18 18 -2 1.57 0 0</pose>
+    <pose>-22.5 22.5 0 1.57 0 0</pose> <-- -22 22 -2 1.57 0 0 -->
     <static>true</static>
     <link name="link">
       <collision name="collision">
