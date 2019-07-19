@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="terrain_flat">
+    <pose>-18 18 -2 1.57 0 0</pose>
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://terrain_flat/meshes/terrain_flat.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <cast_shadows>false</cast_shadows>
+        <geometry>
+          <mesh>
+            <uri>model://terrain_flat/meshes/terrain_flat.stl</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://terrain_flat/materials/scripts</uri>
+            <uri>model://terrain_flat/materials/textures</uri>
+            <name>vrc/forest</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
