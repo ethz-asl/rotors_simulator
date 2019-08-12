@@ -100,10 +100,10 @@ private:
         std::string cs_ref_topic;
         bool from_topic = false;
         std::atomic<double> cs_ref;
-        double control_joint_rad_to_cl = 0.0;   // dC_L/dCS slope, [1/rad]
-        double control_joint_rad_to_cd = 0.0;   // dC_D/dCS slope, [1/rad]
-        double control_joint_rad_to_cm = 0.0;   // dC_M/dCS slope, [1/rad]
-
+        V3D control_joint_rad_to_cl = V3D(0,0,0);   // dC_L/dCS slope, [1/rad]
+        V3D control_joint_rad_to_cd = V3D(0,0,0);   // dC_D/dCS slope, [1/rad]
+        V3D control_joint_rad_to_cm = V3D(0,0,0);   // dC_M/dCS slope, [1/rad]
+        double d_aoa_b_d_delta_cs = 0;                // dAlpha_break/dCs slope [rad/rad]
         void Callback(Float32Ptr& reference){
             cs_ref = (double)reference->data();
         }

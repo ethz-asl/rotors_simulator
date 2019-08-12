@@ -262,20 +262,26 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
                         }
                     }
 
-                    if (_sdf_cs->HasElement("radToCLift"))
-                        segments_[i].cs[j].control_joint_rad_to_cl = _sdf_cs->Get<double>("radToCLift");
-                    else
+                    if (_sdf_cs->HasElement("radToCLift")) {
+                        segments_[i].cs[j].control_joint_rad_to_cl = _sdf_cs->Get<V3D>("radToCLift");
+                    } else {
                         gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'radToCLift' element \n";
+                    }
 
                     if (_sdf_cs->HasElement("radToCDrag"))
-                        segments_[i].cs[j].control_joint_rad_to_cd = _sdf_cs->Get<double>("radToCDrag");
+                        segments_[i].cs[j].control_joint_rad_to_cd = _sdf_cs->Get<V3D>("radToCDrag");
                     else
                         gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'radToCDrag' element \n";
 
                     if (_sdf_cs->HasElement("radToCPitch"))
-                        segments_[i].cs[j].control_joint_rad_to_cm = _sdf_cs->Get<double>("radToCPitch");
+                        segments_[i].cs[j].control_joint_rad_to_cm = _sdf_cs->Get<V3D>("radToCPitch");
                     else
                         gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'radToCPitch' element \n";
+
+                    if (_sdf_cs->HasElement("radToAoAB"))
+                        segments_[i].cs[j].d_aoa_b_d_delta_cs = _sdf_cs->Get<double>("radToAoAB");
+                    else
+                        gzwarn<<"control surface ["<<j<<"] of segment ["<<i<<"] is missing 'radToAoAB' element \n";
 
                     _sdf_cs = _sdf_cs->GetNextElement("cs");
                 }
@@ -447,6 +453,9 @@ void GazeboAerodynamics::OnUpdate()
             double d_cd = 0.0;
             double d_cm = 0.0;
 
+            // shift of stall angle due to control surface deflection
+            double d_alpha_max_ns = 0.0;
+
             for(int j=0; j<segments_[i].n_cs; j++){
                 double control_defl;
                 if (segments_[i].cs[j].from_topic) {
@@ -465,9 +474,19 @@ void GazeboAerodynamics::OnUpdate()
                 if (!std::isfinite(control_defl))
                     control_defl = 0.0;
 
-                d_cl += segments_[i].cs[j].control_joint_rad_to_cl*control_defl;
-                d_cd += segments_[i].cs[j].control_joint_rad_to_cd*control_defl;
-                d_cm += segments_[i].cs[j].control_joint_rad_to_cm*control_defl;
+                d_cl += segments_[i].cs[j].control_joint_rad_to_cl[2] +
+                        segments_[i].cs[j].control_joint_rad_to_cl[0]*control_defl +
+                        segments_[i].cs[j].control_joint_rad_to_cl[1]*control_defl*control_defl;
+
+                d_cd += segments_[i].cs[j].control_joint_rad_to_cd[2] +
+                        segments_[i].cs[j].control_joint_rad_to_cd[0]*control_defl +
+                        segments_[i].cs[j].control_joint_rad_to_cd[1]*control_defl*control_defl;
+
+                d_cm += segments_[i].cs[j].control_joint_rad_to_cm[2] +
+                        segments_[i].cs[j].control_joint_rad_to_cm[0]*control_defl +
+                        segments_[i].cs[j].control_joint_rad_to_cm[1]*control_defl*control_defl;
+
+                d_alpha_max_ns += segments_[i].cs[j].d_aoa_b_d_delta_cs*control_defl;
             }
 
             // assembling aerodynamic coefficients for pre-stall (af) and post-stall (fp)
@@ -484,13 +503,13 @@ void GazeboAerodynamics::OnUpdate()
 
             // form mixing weight to combine pre- and post-stall models
             double w_af;
-            if(alpha>segments_[i].aero_params.alpha_max_ns + segments_[i].aero_params.alpha_blend)
+            if(alpha>segments_[i].aero_params.alpha_max_ns + segments_[i].aero_params.alpha_blend + d_alpha_max_ns)
                 w_af = 0.0;
-            else if(alpha>segments_[i].aero_params.alpha_max_ns)
+            else if(alpha>segments_[i].aero_params.alpha_max_ns + d_alpha_max_ns)
                 w_af = 0.5+0.5*cos(M_PI*(alpha - segments_[i].aero_params.alpha_max_ns)/segments_[i].aero_params.alpha_blend);
-            else if(alpha>segments_[i].aero_params.alpha_min_ns)
+            else if(alpha>segments_[i].aero_params.alpha_min_ns + d_alpha_max_ns)
                 w_af = 1.0;
-            else if(alpha>segments_[i].aero_params.alpha_min_ns - segments_[i].aero_params.alpha_blend)
+            else if(alpha>segments_[i].aero_params.alpha_min_ns - segments_[i].aero_params.alpha_blend + d_alpha_max_ns)
                 w_af = 0.5+0.5*cos(M_PI*(segments_[i].aero_params.alpha_min_ns-alpha)/segments_[i].aero_params.alpha_blend);
             else
                 w_af = 0.0;
@@ -506,7 +525,7 @@ void GazeboAerodynamics::OnUpdate()
             //cm = cm*cos_sweep_angle;
 
             // set to zero if desired...
-            cm = 0.0;
+            //cm = 0.0;
             //cd = 0.0;
             //cl = 0.0;
 
@@ -540,9 +559,9 @@ void GazeboAerodynamics::OnUpdate()
             segments_[i].lift_vis->mutable_startpoint()->set_x(segments_[i].cp.X());
             segments_[i].lift_vis->mutable_startpoint()->set_y(segments_[i].cp.Y());
             segments_[i].lift_vis->mutable_startpoint()->set_z(segments_[i].cp.Z());
-            segments_[i].lift_vis->mutable_vector()->set_x(_B_force.X()/300.0/segments_[i].seg_area);
-            segments_[i].lift_vis->mutable_vector()->set_y(_B_force.Y()/300.0/segments_[i].seg_area);
-            segments_[i].lift_vis->mutable_vector()->set_z(_B_force.Z()/300.0/segments_[i].seg_area);
+            segments_[i].lift_vis->mutable_vector()->set_x(_B_force.X());
+            segments_[i].lift_vis->mutable_vector()->set_y(_B_force.Y());
+            segments_[i].lift_vis->mutable_vector()->set_z(_B_force.Z());
 
             if(segments_[i].n_slpstr>0){
                 segments_[i].slpstr_vis->mutable_color()->set_x(0.0);
