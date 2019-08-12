@@ -23,7 +23,7 @@ project(rotors_gazebo_plugins)
 # ========================== SET DEFAULTS FOR PASSED-IN VARIABLES =============================== #
 # =============================================================================================== #
 
-set(BUILD_MAVLINK_TOGGLE FALSE) # Set to TRUE to build MAVLINK plugin
+set(BUILD_MAVLINK_TOGGLE TRUE) # Set to TRUE to build MAVLINK plugin
 
 if(${BUILD_MAVLINK_TOGGLE})
   find_package(mavlink QUIET)
@@ -385,14 +385,14 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
   else()
     message(WARN "MAVLINK_HEADER_DIR not provided, falling back to looking at default paths...")
     # fist check if there's a mavlink dir in the current workspace
-    if(EXISTS ${mavlink_INCLUDE_DIRS}/mavlink/v1.0)
-      message(STATUS "Found MAVLink headers in workspace at ' ${mavlink_INCLUDE_DIRS}/mavlink/v1.0/'.")
-      include_directories("${mavlink_INCLUDE_DIRS}/mavlink/v1.0/")
+    if(EXISTS ${mavlink_INCLUDE_DIRS}/mavlink/v2.0)
+      message(STATUS "Found MAVLink headers in workspace at ' ${mavlink_INCLUDE_DIRS}/mavlink/v2.0/'.")
+      include_directories("${mavlink_INCLUDE_DIRS}/mavlink/v2.0/")
       set(MAVLINK_HEADERS_FOUND TRUE)
     # If ROS is installed, we should be able to find them at the path below
-    elseif(EXISTS /opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/)
-      message(STATUS "Found MAVLink headers at '/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/'.")
-      include_directories("/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/")
+    elseif(EXISTS /opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v2.0/)
+      message(STATUS "Found MAVLink headers at '/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v2.0/'.")
+      include_directories("/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v2.0/")
       set(MAVLINK_HEADERS_FOUND TRUE)
     endif()
 
