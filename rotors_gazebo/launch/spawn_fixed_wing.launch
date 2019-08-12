@@ -20,6 +20,7 @@
   <arg name="log_file" default="$(arg uav_name)"/>
   <arg name="wait_to_record_bag" default="false"/>
   <arg name="enable_mavlink_interface" default="true"/>
+  <arg name="serial_device" default="/dev/ttyACM0"/>
 
   <arg name="tracking_cam" default="$(find rotors_description)/urdf/tracking_cam.xacro"/>
   <arg name="target_name" default="$(arg namespace)"/>
@@ -38,16 +39,10 @@
     aero_params_yaml_file:=$(arg aero_params_yaml_file)
     vehicle_params_yaml_file:=$(arg vehicle_params_yaml_file)
     yaml_path:=$(arg yaml_path)
-    is_input_joystick:=$(arg is_input_joystick)"
+    is_input_joystick:=$(arg is_input_joystick)
+    serial_device:=$(arg serial_device)"
   />
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
-
-  <!-- send the tracking camera XML to param server -->
-  <param name="tracking_cam_description" command="
-    $(find xacro)/xacro.py '$(arg tracking_cam)'
-    target_name:=$(arg target_name)
-    target_link:=$(arg target_link)"
-  />
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
   <node name="spawn_$(arg namespace)" pkg="gazebo_ros" type="spawn_model"
@@ -63,19 +58,4 @@
    respawn="false" output="screen">
   </node>
 
-  <!-- push tracking_cam_description to factory and spawn camera in gazebo -->
-  <!--
-  <node name="spawn_tracking_cam" pkg="gazebo_ros" type="spawn_model"
-   args="-param tracking_cam_description
-         -urdf
-         -x 20
-         -y 5
-         -z 0
-         -R 0
-         -P 0
-         -Y 0
-        -model tracking_cam"
-        respawn="false" output="screen">
-  </node>
-  -->
 </launch>

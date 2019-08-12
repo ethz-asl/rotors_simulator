@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.4">
-  <world name="yosemite">
+  <world name="fw_playground">
     <!-- Place user camera -->
     <gui>
       <camera name="user_camera">

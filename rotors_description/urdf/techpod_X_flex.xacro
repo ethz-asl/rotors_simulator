@@ -22,6 +22,7 @@
    <xacro:property name="flexing" value="true" />
    <xacro:property name="meshes_path" value="package://rotors_description/meshes/techpod_X_flex"/>
    <xacro:property name="yaml_path" value="$(arg yaml_path)" />
+   <xacro:property name="serial_device" value="$(arg serial_device)" />
 
    <!-- Constants -->
    <xacro:property name="PI" value="3.1415926535897931" />
@@ -1044,7 +1045,7 @@
          <mavlink_addr>INADDR_ANY</mavlink_addr>
          <mavlink_udp_port>14560</mavlink_udp_port>
          <serialEnabled>true</serialEnabled>
-         <serialDevice>/dev/ttyACM0</serialDevice>
+         <serialDevice>${serial_device}</serialDevice>
          <baudRate>921600</baudRate>
          <qgc_addr>INADDR_ANY</qgc_addr>
          <qgc_udp_port>14550</qgc_udp_port>
@@ -1058,8 +1059,7 @@
             <channel name="propeller">
                <input_index>4</input_index>
                <input_offset>1</input_offset>
-               <input_scaling>466</input_scaling>
-               <!-- max rad/s/2 -->
+               <input_scaling>466</input_scaling><!-- max_vel/2  [rad/s]-->
                <zero_position_disarmed>0</zero_position_disarmed>
                <zero_position_armed>0</zero_position_armed>
                <joint_control_type>gz_msg</joint_control_type>
