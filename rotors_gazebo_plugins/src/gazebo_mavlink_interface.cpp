@@ -210,7 +210,7 @@ void GazeboMavlinkInterface::Load(
   gravity_W_ = world_->Gravity();
 
   if (_sdf->HasElement("imu_rate")) {
-    imu_update_interval_ = 1 / _sdf->GetElement("imu_rate")->Get<int>();
+    imu_update_interval_ = 1.0 / _sdf->GetElement("imu_rate")->Get<int>();
   }
 
   // Magnetic field data for Zurich from WMM2015 (10^5xnanoTesla (N, E D)
