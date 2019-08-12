@@ -120,66 +120,51 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
           channels[i].input_scaling_ = channel->Get<double>("input_scaling");
           channels[i].zero_position_disarmed_ = channel->Get<double>("zero_position_disarmed");
           channels[i].zero_position_armed_ = channel->Get<double>("zero_position_armed");
-          if (channel->HasElement("joint_control_type"))
-          {
+          if (channel->HasElement("joint_control_type")) {
             channels[i].joint_control_type_ = channel->Get<std::string>("joint_control_type");
             gzdbg<<"joint_control_type: "<<channels[i].joint_control_type_<<"\n";
-          }
-          else
-          {
+          } else {
             gzwarn << "joint_control_type of" << channel->GetName() << " channel not specified, using velocity.\n";
             channels[i].joint_control_type_ = "velocity";
           }
 
-          // start gz transport node handle
-          //if (channels[i].joint_control_type_ == "gz_msg")
-          //{
-              // setup publisher handle to topic
-              if (channel->HasElement("gztopic"))
-                  channels[i].gztopic_ = "~/" + namespace_ + "/" + channel->Get<std::string>("gztopic");
-              else
-                  channels[i].gztopic_ = "control_gz_msg_" + std::to_string(i);
+          if (channel->HasElement("servo_params")) {
+            sdf::ElementPtr servo_params = channel->GetElement("servo_params");
+            if (servo_params->HasElement("slew"))
+                channels[i].srv.slew = servo_params->Get<double>("slew");
+            if (servo_params->HasElement("p"))
+                channels[i].srv.slew = servo_params->Get<double>("p");
+            if (servo_params->HasElement("d"))
+                channels[i].srv.slew = servo_params->Get<double>("d");
+          }
 
-              channels[i].joint_control_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>(
-                          channels[i].gztopic_);
-              /*
-      #if GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4
-            /// only gazebo 7.4 and above support Any
-            channels[i].joint_control_pub_ = node_handle_->Advertise<gazebo::msgs::Any>(
-                channels[i].gztopic_);
-      #else
-            channels[i].joint_control_pub_ = node_handle_->Advertise<gazebo::msgs::GzString>(
-                channels[i].gztopic_);
-      #endif
-      */
-             // gzdbg<<"publishing to "<<channels[i].gztopic_<<"\n";
-          //}
+          // setup publisher handle to topic
+          if (channel->HasElement("gztopic"))
+              channels[i].gztopic_ = "~/" + namespace_ + "/" + channel->Get<std::string>("gztopic");
+          else
+              channels[i].gztopic_ = "control_gz_msg_" + std::to_string(i);
+
+          channels[i].joint_control_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>(channels[i].gztopic_);
 
           if (channel->HasElement("joint_name"))
           {
-            channels[i].joint_name = channel->Get<std::string>("joint_name");
-            channels[i].joint_ = model_->GetJoint(channels[i].joint_name);
+              channels[i].joint_name = channel->Get<std::string>("joint_name");
+              channels[i].joint_ = model_->GetJoint(channels[i].joint_name);
 
-            if (channels[i].joint_ == nullptr)
-            {
-              gzwarn << "joint [" << channels[i].joint_name << "] not found for channel["
-                     << channels[i].input_index_ << "] no joint control for this channel.\n";
-            }
-            else
-            {
-              gzdbg << "joint [" << channels[i].joint_name << "] found for channel["
-                    << channels[i].input_index_ << "] joint control active for this channel.\n";
-            }
-          }
-          else if(channels[i].joint_control_type_ != "gz_msg")
-          {
-            gzdbg << "<joint_name> not found for channel[" << channels[i].input_index_
-                  << "] no joint control will be performed for this channel.\n";
+              if (channels[i].joint_ == nullptr) {
+                  gzwarn << "joint [" << channels[i].joint_name << "] not found for channel["
+                         << channels[i].input_index_ << "] no joint control for this channel.\n";
+              } else {
+                  gzdbg << "joint [" << channels[i].joint_name << "] found for channel["
+                        << channels[i].input_index_ << "] joint control active for this channel.\n";
+              }
+          } else if(channels[i].joint_control_type_ != "gz_msg") {
+              gzdbg << "<joint_name> not found for channel[" << channels[i].input_index_
+                    << "] no joint control will be performed for this channel.\n";
           }
 
           // setup joint control pid to control joint
-          if (channel->HasElement("joint_control_pid"))
-          {
+          if (channel->HasElement("joint_control_pid")) {
             sdf::ElementPtr pid = channel->GetElement("joint_control_pid");
             double p_gain = 0;
             if (pid->HasElement("p"))
@@ -205,14 +190,11 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
             channels[i].pid_.Init(p_gain, i_gain, d_gain, iMax, iMin, cmdMax, cmdMin);
           }
-        }
-        else
-        {
+
+        } else {
           gzerr << "input_index[" << channels[i].input_index_ << "] out of range, not parsing.\n";
         }
-      }
-      else
-      {
+      } else {
         gzerr << "no input_index, not parsing.\n";
         break;
       }
@@ -250,6 +232,10 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   // Publish gazebo's actuators message
   actuators_reference_pub_ = node_handle_->Advertise<gz_sensor_msgs::Actuators>("~/" + namespace_ + actuators_reference_pub_topic_, 1);
   gzdbg<<"advertising ~/" + namespace_ + actuators_reference_pub_topic_<<std::endl;
+
+  //Publish robot world position message to be used by tracking camera
+  tracking_pos_pub_ = node_handle_->Advertise<gazebo::msgs::Vector3d>(namespace_ + tracking_pos_pub_topic_, 1);
+  gzdbg<<"advertising ~/" + namespace_ + tracking_pos_pub_topic_<<std::endl;
 
   _rotor_count = 5;
 #if GAZEBO_MAJOR_VERSION >= 9
@@ -460,7 +446,11 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
     actuators_reference_pub_->Publish(actuators_msg);
   }
 
-
+  gazebo::msgs::Vector3d tracking_pos;
+  tracking_pos.set_x(model_->WorldPose().Pos().X());
+  tracking_pos.set_y(model_->WorldPose().Pos().Y());
+  tracking_pos.set_z(model_->WorldPose().Pos().Z());
+  tracking_pos_pub_->Publish(tracking_pos);
 
   // Display timing statistics
 
@@ -1162,24 +1152,25 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         if (channels[i].input_reference_>channels[i].srv.ref+d_ref) {
             rate_ref = channels[i].srv.slew;
             channels[i].srv.ref+=d_ref;
-
-        } else if (channels[i].srv.ref+d_ref>channels[i].input_reference_>channels[i].srv.ref-d_ref) {
-            rate_ref = (channels[i].input_reference_-channels[i].srv.ref)/dt;
-            channels[i].srv.ref = channels[i].input_reference_;
-
-        } else {
+        } else if (channels[i].input_reference_<channels[i].srv.ref-d_ref) {
             rate_ref = -channels[i].srv.slew;
             channels[i].srv.ref -= d_ref;
+        } else {
+            rate_ref = (channels[i].input_reference_-channels[i].srv.ref)/dt;
+            channels[i].srv.ref = channels[i].input_reference_;
         }
+
+        // sanity
+        if (isnan(channels[i].srv.ref))
+            channels[i].srv.ref = 0.0;
+
+        channels[i].srv.ref = ignition::math::clamp(channels[i].srv.ref,
+                                                    -abs(channels[i].input_scaling_),
+                                                    +abs(channels[i].input_scaling_));
 
         double err_pos = channels[i].srv.ref-pos;
         double err_vel = -rate;
-        /*
-        double torque = ignition::math::clamp(channels[i].srv.P_vel*(err_vel+channels[i].srv.P_pos*err_pos),
-                                              -channels[i].srv.torque,
-                                              channels[i].srv.torque);
-        */
-        double torque = channels[i].srv.P_vel*err_vel+channels[i].srv.P_pos*err_pos;
+        double torque = channels[i].srv.P_pos*err_pos + channels[i].srv.P_vel*err_vel;
         channels[i].joint_->SetForce(0, torque);
 
         //publish servo position (without link dynamics)
@@ -1225,7 +1216,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
     }
   }
 
-  if (dbg_counter_%100==0&&false) {
+  if (dbg_counter_%100==0&&true) {
       for(int i=0; i<n_chan; i++){
           if (channels[i].joint_)
               gzdbg<<channels[i].joint_name <<": "<<channels[i].joint_->Position(0)

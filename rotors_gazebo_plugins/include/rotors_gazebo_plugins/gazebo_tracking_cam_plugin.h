@@ -22,13 +22,18 @@
 #include <ignition/math.hh>
 #include "gazebo/common/Plugin.hh"
 #include "gazebo/physics/physics.hh"
+
 #include "gazebo/transport/TransportTypes.hh"
+#include "gazebo/transport/transport.hh"
+#include "gazebo/msgs/msgs.hh"
+#include "vector3d.pb.h"
 
 namespace gazebo
 {
 
 typedef ignition::math::Vector3d V3D;
 typedef ignition::math::Matrix3<double> M3D;
+typedef const boost::shared_ptr<const gazebo::msgs::Vector3d> GzV3dPtr;
 
   /// \brief A plugin that simulates lift and drag.
   class GAZEBO_VISIBLE GazeboTrackingCam : public ModelPlugin
@@ -46,21 +51,24 @@ typedef ignition::math::Matrix3<double> M3D;
     protected: virtual void OnUpdate();
 
     /// \brief Connection to World Update events.
-    protected: event::ConnectionPtr updateConnection;
+    protected: event::ConnectionPtr updateConnection_;
 
     /// \brief Pointer to world.
-    protected: physics::WorldPtr world;
+    protected: physics::WorldPtr world_;
 
     /// \brief Pointer to physics engine.
-    protected: physics::PhysicsEnginePtr physics;
+    protected: physics::PhysicsEnginePtr physics_;
 
     /// \brief Pointer to model containing plugin.
-    protected: physics::ModelPtr model;
+    protected: physics::ModelPtr model_;
 
     /// \brief SDF for this plugin;
-    protected: sdf::ElementPtr sdf;
+    protected: sdf::ElementPtr sdf_;
+
+    private:
 
     std::string namespace_;
+    transport::NodePtr node_handle_;
 
     physics::JointPtr pan_joint_;
     physics::JointPtr tilt_joint_;
@@ -70,6 +78,18 @@ typedef ignition::math::Matrix3<double> M3D;
     physics::LinkPtr target_link_;
 
     physics::ModelPtr target_;
+
+    bool init_ = false;
+    bool pubs_and_subs_created_ = false;
+
+    V3D target_pos_ = V3D(0,0,0);
+    transport::SubscriberPtr target_pos_sub_ = nullptr;
+    std::string target_pos_subtopic_;
+
+    void TargetPosCallback(GzV3dPtr& ref){
+        target_pos_.Set(ref->x(),ref->y(),ref->z());
+        //gzerr<<"posx: "<<target_pos_[0]<<" posy: "<<target_pos_[1]<<"posz: "<<target_pos_[2]<<"\n";
+    }
 
   };
 }

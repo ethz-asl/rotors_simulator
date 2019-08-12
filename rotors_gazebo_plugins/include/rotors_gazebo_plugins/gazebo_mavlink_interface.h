@@ -62,6 +62,7 @@
 #include <Lidar.pb.h>
 #include <SITLGps.pb.h>
 #include <Float32.pb.h>
+#include "vector3d.pb.h"
 
 #include <mavlink/v2.0/common/mavlink.h>
 #include "msgbuffer.h"
@@ -100,6 +101,7 @@ static const std::string kDefaultImuTopic = "/imu";
 static const std::string kDefaultLidarTopic = "/link/lidar";
 static const std::string kDefaultOpticalFlowTopic = "/px4flow/link/opticalFlow";
 static const std::string kDefaultGpsTopic = "/gps_hil";
+static const std::string kDefaultTrackingPos = "/tracking_pos";
 
 //! Rx packer framing status. (same as @p mavlink::mavlink_framing_t)
 enum class Framing : uint8_t {
@@ -118,6 +120,7 @@ public:
     protocol_version_(2.0),
     motor_velocity_reference_pub_topic_(kDefaultMotorVelocityReferencePubTopic),
     actuators_reference_pub_topic_(kDefaultActuatorsReferencePubTopic),
+    tracking_pos_pub_topic_(kDefaultTrackingPos),
     use_propeller_pid_(false),
     use_elevator_pid_(false),
     use_left_elevon_pid_(false),
@@ -179,12 +182,14 @@ private:
   std::string namespace_;
   std::string motor_velocity_reference_pub_topic_;
   std::string actuators_reference_pub_topic_;
+  std::string tracking_pos_pub_topic_;
   std::string mavlink_control_sub_topic_;
   std::string link_name_;
 
   transport::NodePtr node_handle_;
   transport::PublisherPtr motor_velocity_reference_pub_;
   transport::PublisherPtr actuators_reference_pub_;
+  transport::PublisherPtr tracking_pos_pub_;
   transport::SubscriberPtr mav_control_sub_;
 
   physics::ModelPtr model_;
@@ -294,7 +299,6 @@ private:
       std::string gztopic_;
       transport::PublisherPtr joint_control_pub_;
   };
-
 
 
   int n_chan;
