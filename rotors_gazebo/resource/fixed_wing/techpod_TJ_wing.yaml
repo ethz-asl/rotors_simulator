@@ -1,0 +1,19 @@
+# Fixed wing aerodynamic parameters
+
+alpha_max_ns: 0.14    # [rad]
+alpha_min_ns: -0.14   # [rad]
+
+# derived from from ID
+#c_lift_alpha: [0.6, 2.8568, 0]
+#c_drag_alpha: [0.04, 0.2, 0.33]
+#c_pitch_moment_alpha: [-0.4091, 2.5523]
+
+# modified
+c_lift_alpha: [0.6, 2.8568, 0]
+c_drag_alpha: [0.014, 0.239, 0.378]
+c_pitch_moment_alpha: [-0.1, 0.80]
+
+alpha_blend: 0.2 # [rad]
+fp_c_lift_max: 0.75
+fp_c_drag_max: 1.6
+fp_c_pitch_moment_max: 0.41
