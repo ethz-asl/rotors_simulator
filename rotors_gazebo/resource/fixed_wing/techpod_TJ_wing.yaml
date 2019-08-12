@@ -11,7 +11,7 @@ alpha_min_ns: -0.14   # [rad]
 # modified
 c_lift_alpha: [0.6, 2.8568, 0]
 c_drag_alpha: [0.014, 0.239, 0.378]
-c_pitch_moment_alpha: [-0.1, 0.80]
+c_pitch_moment_alpha: [-0.0418, 2.01]
 
 alpha_blend: 0.2 # [rad]
 fp_c_lift_max: 0.75

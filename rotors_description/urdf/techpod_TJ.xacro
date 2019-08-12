@@ -88,7 +88,7 @@
 
   <!-- Inertia of the main body -->
   <xacro:property name="body_inertia">
-    <inertia ixx="0.6688" ixy="0.0" ixz="-0.32112" iyy="0.16235" iyz="0.0" izz="0.69364" />
+    <inertia ixx="0.6688" ixy="0.0" ixz="0.0" iyy="0.16235" iyz="0.0" izz="0.69364" />
   </xacro:property>
 
   <!-- Inertia of the aileron, assuming it is a cuboid -->
@@ -278,8 +278,8 @@
       <prop name="P0">
         <jointName>${namespace}/propeller_P0_joint</jointName>
         <linkNameParent>${namespace}/base_link</linkNameParent>
-        <cp>0 0 0.15</cp>
-        <axisPosRot>-1 0 0.035</axisPosRot>
+        <cp>0 0 0.05</cp>
+        <axisPosRot>-1 0 0</axisPosRot>
         <turnDir>cw</turnDir>
         <speedRefTopic>prop_ref_0</speedRefTopic>
         <propParamsYAML>${yaml_path}/techpod_TJ_prop.yaml</propParamsYAML>
@@ -517,7 +517,7 @@
           <control>
             <cs name="elevator_left">
                 <controlJoint>${namespace}/elevator_joint</controlJoint>
-                <radToCLift>1.2322 0</radToCLift>
+                <radToCLift>1.15 0</radToCLift>
                 <radToCDrag>0 0</radToCDrag>
                 <radToCPitch>0 0</radToCPitch>
                 <radToAoAB>0</radToAoAB>
@@ -538,7 +538,7 @@
           <control>
             <cs name="elevator_right">
                 <controlJoint>${namespace}/elevator_joint</controlJoint>
-                <radToCLift>1.2322 0</radToCLift>
+                <radToCLift>1.15 0</radToCLift>
                 <radToCDrag>0 0</radToCDrag>
                 <radToCPitch>0 0</radToCPitch>
                 <radToAoAB>0</radToAoAB>
