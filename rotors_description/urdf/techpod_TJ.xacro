@@ -22,7 +22,7 @@
   <xacro:property name="use_mesh" value="true" />
   <xacro:property name="yaml_path" value="$(arg yaml_path)"/>
   <xacro:property name="serial_device" value="$(arg serial_device)" />
-  <xacro:property name="main_color" value="Orange"/>
+  <xacro:property name="main_color" value="White"/>
 
   <!-- Constants -->
   <xacro:property name="PI" value="3.1415926535897931" />
@@ -273,14 +273,13 @@
     <xacro:insert_block name="propeller_inertia" />
   </xacro:propeller>
 
-<!-- Tracing ribbon/Visual plugin -->
-
-<gazebo reference="${namespace}/base_link">
-   <visual>
-      <plugin name="visual_plugin_base_link" filename="librotors_gazebo_template_visual_plugin.so" />
-   </visual>
-</gazebo>
-
+  <!-- Tracing ribbon/Visual plugin
+  <gazebo reference="${namespace}/base_link">
+     <visual>
+        <plugin name="visual_plugin_base_link" filename="librotors_gazebo_template_visual_plugin.so" />
+     </visual>
+  </gazebo>
+  -->
 
   <gazebo>
     <plugin filename="librotors_gazebo_propulsion_plugin.so" name="propulsion_plugin">
@@ -315,7 +314,6 @@
         </element>
       </body>
       <airfoil>
-
         <segment name="WL1">
           <forward>1 0 0</forward>
           <upward>0 0 1</upward>
@@ -324,7 +322,6 @@
           <seg_chord>0.194</seg_chord>
           <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
         </segment>
-
         <segment name="WL2">
           <forward>1 0 0</forward>
           <upward>0 0 1</upward>
@@ -342,7 +339,6 @@
             </cs>
           </control>
         </segment>
-
         <segment name="WL3">
           <forward>1 0 0</forward>
           <upward>0 0 1</upward>
@@ -360,7 +356,6 @@
            </cs>
           </control>
         </segment>
-
         <segment name="WL4">
           <forward>1 0 0</forward>
           <upward>0 0 1</upward>
@@ -369,7 +364,6 @@
           <seg_chord>0.157</seg_chord>
           <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
         </segment>
-
         <segment name="WL5">
           <forward>1 0 0</forward>
           <upward>0 0 1</upward>
@@ -387,7 +381,6 @@
             </cs>
           </control>
         </segment>
-
         <segment name="WL6">
           <forward>1 0 0</forward>
           <upward>0 0 1</upward>
@@ -405,7 +398,6 @@
             </cs>
           </control>
         </segment>
-
         <segment name="WL7">
           <forward>1 0 0</forward>
           <upward>0 0 1</upward>
@@ -414,106 +406,98 @@
           <seg_chord>0.127</seg_chord>
           <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
         </segment>
-
-  <segment name="WR1">
-    <forward>1 0 0</forward>
-    <upward>0 0 1</upward>
-    <cp>0.175 -0.075 0.115</cp>
-    <seg_area>0.029</seg_area>
-    <seg_chord>0.194</seg_chord>
-    <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
-  </segment>
-
-  <segment name="WR2">
-    <forward>1 0 0</forward>
-    <upward>0 0 1</upward>
-    <cp>0.172 -0.265 0.115</cp>
-    <seg_area>0.042</seg_area>
-    <seg_chord>0.183</seg_chord>
-    <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
-    <control>
-      <cs name="flap_right">
-          <controlJoint>${namespace}/flap_right_joint</controlJoint>
-          <radToCLift>1.6067 0</radToCLift>
-          <radToCDrag>0.1438 0.8227</radToCDrag>
-          <radToCPitch>0.0898 0</radToCPitch>
-          <radToAoAB>-0.08</radToAoAB>
-      </cs>
-    </control>
-  </segment>
-
-  <segment name="WR3">
-    <forward>1 0 0</forward>
-    <upward>0 0 1</upward>
-    <cp>0.169 -0.495 0.115</cp>
-    <seg_area>0.039</seg_area>
-    <seg_chord>0.170</seg_chord>
-    <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
-    <control>
-      <cs name="flap_right">
-         <controlJoint>${namespace}/flap_right_joint</controlJoint>
-         <radToCLift>1.6067 0</radToCLift>
-         <radToCDrag>0.1438 0.8227</radToCDrag>
-         <radToCPitch>0.0898 0</radToCPitch>
-         <radToAoAB>-0.08</radToAoAB>
-     </cs>
-    </control>
-  </segment>
-
-  <segment name="WR4">
-    <forward>1 0 0</forward>
-    <upward>0 0 1</upward>
-    <cp>0.165 -0.715 0.115</cp>
-    <seg_area>0.033</seg_area>
-    <seg_chord>0.157</seg_chord>
-    <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
-  </segment>
-
-  <segment name="WR5">
-    <forward>1 0 0</forward>
-    <upward>0 0 1</upward>
-    <cp>0.162 -0.907 0.115</cp>
-    <seg_area>0.026</seg_area>
-    <seg_chord>0.146</seg_chord>
-    <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
-    <control>
-      <cs name="aileron_right">
-          <controlJoint>${namespace}/aileron_right_joint</controlJoint>
-          <radToCLift>1.7541 0</radToCLift>
-          <radToCDrag>0.1053 0.6267</radToCDrag>
-          <radToCPitch>-0.1789 0</radToCPitch>
-          <radToAoAB>0.0</radToAoAB>
-      </cs>
-    </control>
-  </segment>
-
-  <segment name="WR6">
-    <forward>1 0 0</forward>
-    <upward>0 0 1</upward>
-    <cp>0.160 -1.083 0.115</cp>
-    <seg_area>0.024</seg_area>
-    <seg_chord>0.136</seg_chord>
-    <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
-    <control>
-      <cs name="aileron_right">
-         <controlJoint>${namespace}/aileron_right_joint</controlJoint>
-         <radToCLift>1.7541 0</radToCLift>
-         <radToCDrag>0.1053 0.6267</radToCDrag>
-         <radToCPitch>-0.1789 0</radToCPitch>
-         <radToAoAB>0.0</radToAoAB>
-      </cs>
-    </control>
-  </segment>
-
-  <segment name="WR7">
-    <forward>1 0 0</forward>
-    <upward>0 0 1</upward>
-    <cp>0.157 -1.234 0.115</cp>
-    <seg_area>0.016</seg_area>
-    <seg_chord>0.127</seg_chord>
-    <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
-  </segment>
-
+        <segment name="WR1">
+          <forward>1 0 0</forward>
+          <upward>0 0 1</upward>
+          <cp>0.175 -0.075 0.115</cp>
+          <seg_area>0.029</seg_area>
+          <seg_chord>0.194</seg_chord>
+          <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+        </segment>
+        <segment name="WR2">
+          <forward>1 0 0</forward>
+          <upward>0 0 1</upward>
+          <cp>0.172 -0.265 0.115</cp>
+          <seg_area>0.042</seg_area>
+          <seg_chord>0.183</seg_chord>
+          <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+          <control>
+            <cs name="flap_right">
+                <controlJoint>${namespace}/flap_right_joint</controlJoint>
+                <radToCLift>1.6067 0</radToCLift>
+                <radToCDrag>0.1438 0.8227</radToCDrag>
+                <radToCPitch>0.0898 0</radToCPitch>
+                <radToAoAB>-0.08</radToAoAB>
+            </cs>
+          </control>
+        </segment>
+        <segment name="WR3">
+          <forward>1 0 0</forward>
+          <upward>0 0 1</upward>
+          <cp>0.169 -0.495 0.115</cp>
+          <seg_area>0.039</seg_area>
+          <seg_chord>0.170</seg_chord>
+          <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+          <control>
+            <cs name="flap_right">
+               <controlJoint>${namespace}/flap_right_joint</controlJoint>
+               <radToCLift>1.6067 0</radToCLift>
+               <radToCDrag>0.1438 0.8227</radToCDrag>
+               <radToCPitch>0.0898 0</radToCPitch>
+               <radToAoAB>-0.08</radToAoAB>
+           </cs>
+          </control>
+        </segment>
+        <segment name="WR4">
+          <forward>1 0 0</forward>
+          <upward>0 0 1</upward>
+          <cp>0.165 -0.715 0.115</cp>
+          <seg_area>0.033</seg_area>
+          <seg_chord>0.157</seg_chord>
+          <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+        </segment>
+        <segment name="WR5">
+          <forward>1 0 0</forward>
+          <upward>0 0 1</upward>
+          <cp>0.162 -0.907 0.115</cp>
+          <seg_area>0.026</seg_area>
+          <seg_chord>0.146</seg_chord>
+          <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+          <control>
+            <cs name="aileron_right">
+                <controlJoint>${namespace}/aileron_right_joint</controlJoint>
+                <radToCLift>1.7541 0</radToCLift>
+                <radToCDrag>0.1053 0.6267</radToCDrag>
+                <radToCPitch>-0.1789 0</radToCPitch>
+                <radToAoAB>0.0</radToAoAB>
+            </cs>
+          </control>
+        </segment>
+        <segment name="WR6">
+          <forward>1 0 0</forward>
+          <upward>0 0 1</upward>
+          <cp>0.160 -1.083 0.115</cp>
+          <seg_area>0.024</seg_area>
+          <seg_chord>0.136</seg_chord>
+          <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+          <control>
+            <cs name="aileron_right">
+               <controlJoint>${namespace}/aileron_right_joint</controlJoint>
+               <radToCLift>1.7541 0</radToCLift>
+               <radToCDrag>0.1053 0.6267</radToCDrag>
+               <radToCPitch>-0.1789 0</radToCPitch>
+               <radToAoAB>0.0</radToAoAB>
+            </cs>
+          </control>
+        </segment>
+        <segment name="WR7">
+          <forward>1 0 0</forward>
+          <upward>0 0 1</upward>
+          <cp>0.157 -1.234 0.115</cp>
+          <seg_area>0.016</seg_area>
+          <seg_chord>0.127</seg_chord>
+          <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+        </segment>
         <segment name="EL1">
           <forward>1 0 0</forward>
           <upward>0 0 1</upward>
@@ -534,7 +518,6 @@
             </cs>
           </control>
         </segment>
-
         <segment name="ER1">
           <forward>1 0 0</forward>
           <upward>0 0 1</upward>
@@ -555,7 +538,6 @@
             </cs>
           </control>
         </segment>
-
         <segment name="RU1">
           <forward>1 0 0</forward>
           <upward>0 -1 0</upward>
