@@ -22,6 +22,7 @@
   <xacro:property name="use_mesh" value="true" />
   <xacro:property name="yaml_path" value="$(arg yaml_path)"/>
   <xacro:property name="serial_device" value="$(arg serial_device)" />
+  <xacro:property name="main_color" value="Orange"/>
 
   <!-- Constants -->
   <xacro:property name="PI" value="3.1415926535897931" />
@@ -38,7 +39,7 @@
   <xacro:property name="body_length" value="1.088" /> <!-- [m] -->
   <xacro:property name="body_width" value="2.591" /> <!-- [m] -->
   <xacro:property name="body_height" value="0.303" /> <!-- [m] -->
-  <xacro:property name="body_color" value="White" />
+  <xacro:property name="body_color" value="${main_color}" />
   <xacro:property name="body_mesh_file" value="package://rotors_description/meshes/techpod/techpod_body.dae" />
 
   <!-- Aileron properties -->
@@ -47,7 +48,7 @@
   <xacro:property name="aileron_height" value="0.013" /> <!-- [m] -->
   <xacro:property name="aileron_min_angle" value="-0.349066" /> <!-- [rad] -->
   <xacro:property name="aileron_max_angle" value="0.349066" /> <!-- [rad] -->
-  <xacro:property name="aileron_color" value="White" />
+  <xacro:property name="aileron_color" value="${main_color}" />
   <xacro:property name="aileron_left_mesh_file" value="package://rotors_description/meshes/techpod/techpod_aileron_left.dae" />
   <xacro:property name="aileron_right_mesh_file" value="package://rotors_description/meshes/techpod/techpod_aileron_right.dae" />
 
@@ -57,7 +58,7 @@
   <xacro:property name="elevator_height" value="0.012" /> <!-- [m] -->
   <xacro:property name="elevator_min_angle" value="-0.349066" /> <!-- [rad] -->
   <xacro:property name="elevator_max_angle" value="0.349066" /> <!-- [rad] -->
-  <xacro:property name="elevator_color" value="White" />
+  <xacro:property name="elevator_color" value="${main_color}" />
   <xacro:property name="elevator_mesh_file" value="package://rotors_description/meshes/techpod/techpod_elevator.dae" />
 
   <!-- Flap properties -->
@@ -66,7 +67,7 @@
   <xacro:property name="flap_height" value="0.016" /> <!-- [m] -->
   <xacro:property name="flap_min_angle" value="-0.349066" /> <!-- [rad] -->
   <xacro:property name="flap_max_angle" value="0.349066" /> <!-- [rad] -->
-  <xacro:property name="flap_color" value="White" />
+  <xacro:property name="flap_color" value="${main_color}" />
   <xacro:property name="flap_left_mesh_file" value="package://rotors_description/meshes/techpod/techpod_flap_left.dae" />
   <xacro:property name="flap_right_mesh_file" value="package://rotors_description/meshes/techpod/techpod_flap_right.dae" />
 
@@ -76,7 +77,7 @@
   <xacro:property name="rudder_height" value="0.241" />
   <xacro:property name="rudder_min_angle" value="-0.349066" />
   <xacro:property name="rudder_max_angle" value="0.349066" />
-  <xacro:property name="rudder_color" value="White" />
+  <xacro:property name="rudder_color" value="${main_color}" />
   <xacro:property name="rudder_mesh_file" value="package://rotors_description/meshes/techpod/techpod_rudder.dae" />
 
   <!-- Propeller properties -->
@@ -129,7 +130,7 @@
     color="${body_color}"
     use_mesh_file="${use_mesh}"
     mesh_file="${body_mesh_file}">
-    <origin xyz="0.16 0 0.05" rpy="0 0 0" />
+    <origin xyz="0.16 0 0.10" rpy="0 0 0" />
     <xacro:insert_block name="body_inertia" />
   </xacro:fixed_wing_base_macro>
 
@@ -272,13 +273,22 @@
     <xacro:insert_block name="propeller_inertia" />
   </xacro:propeller>
 
+<!-- Tracing ribbon/Visual plugin -->
+
+<gazebo reference="${namespace}/base_link">
+   <visual>
+      <plugin name="visual_plugin_base_link" filename="librotors_gazebo_template_visual_plugin.so" />
+   </visual>
+</gazebo>
+
+
   <gazebo>
     <plugin filename="librotors_gazebo_propulsion_plugin.so" name="propulsion_plugin">
       <robotNamespace>${namespace}</robotNamespace>
       <prop name="P0">
         <jointName>${namespace}/propeller_P0_joint</jointName>
         <linkNameParent>${namespace}/base_link</linkNameParent>
-        <cp>0 0 0.05</cp>
+        <cp>0 0 0.15</cp>
         <axisPosRot>-1 0 0</axisPosRot>
         <turnDir>cw</turnDir>
         <speedRefTopic>prop_ref_0</speedRefTopic>

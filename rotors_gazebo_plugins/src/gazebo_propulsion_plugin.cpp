@@ -295,12 +295,12 @@ void GazeboPropulsion::OnUpdate() {
                 (propellers_[idx].prop_params.k_t*V_inf_a_clmpd +
                  std::abs(rps)*propellers_[idx].prop_params.diameter*propellers_[idx].prop_params.k_t0);
 
-        propellers_[idx].parent_link->AddForceAtRelativePosition(thrust*forward, propellers_[idx].p_cp);
+        propellers_[idx].parent_link->AddLinkForce(thrust*pose_parent.Rot().RotateVectorReverse(forward), propellers_[idx].p_cp);
 
         // ---- Normal force ----
 
         V3D hub_force_ = -std::abs(rps*2*M_PI) * propellers_[idx].prop_params.rotor_drag_coefficient * body_velocity_radial;
-        propellers_[idx].parent_link->AddForceAtRelativePosition(hub_force_, propellers_[idx].p_cp);
+        propellers_[idx].parent_link->AddLinkForce(pose_parent.Rot().RotateVectorReverse(hub_force_), propellers_[idx].p_cp);
 
         // ---- Drag torque ----
 
