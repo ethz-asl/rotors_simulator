@@ -61,18 +61,20 @@
   <group ns="uav_1_tc">
     <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
       <arg name="target_uav" value="uav_1" />
-      <arg name="namespace" default="uav_1_tc" />
-      <arg name="target_pos_topic" default="uav_1/tracking_pos" />
-      <arg name="x" default="25.0"/>
+      <arg name="namespace" value="uav_1_tc" />
+      <arg name="target_pos_topic" value="uav_1/tracking_pos" />
+      <arg name="x" value="25.0"/>
+      <arg name="horizontal_fov" value="4.0"/>
     </include>
   </group>
 
   <group ns="uav_2_tc">
     <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
       <arg name="target_uav" value="uav_2" />
-      <arg name="namespace" default="uav_2_tc"/>
-      <arg name="target_pos_topic" default="uav_2/tracking_pos" />
-      <arg name="x" default="23.0"/>
+      <arg name="namespace" value="uav_2_tc"/>
+      <arg name="target_pos_topic" value="uav_2/tracking_pos" />
+      <arg name="x" value="23.0"/>
+      <arg name="horizontal_fov" value="4.0"/>
     </include>
   </group>
 

@@ -12,12 +12,14 @@
   <arg name="R" default="0.0"/>
   <arg name="P" default="0.0"/>
   <arg name="Y" default="0.0"/>
+  <arg name="horizontal_fov" default="0.3"/>
 
   <!-- send the tracking camera XML to param server -->
   <param name="tracking_cam_description" command="
     $(find xacro)/xacro.py '$(arg tracking_cam)'
     namespace:=$(arg namespace)
-    target_pos_topic:=$(arg target_pos_topic)"
+    target_pos_topic:=$(arg target_pos_topic)
+    h_fov:=$(arg horizontal_fov)"
   />
   <!--<param name="tf_prefix" type="string" value="$(arg tf_prefix)" />-->
 

@@ -21,9 +21,10 @@
     <arg name="verbose" value="$(arg verbose)"/>
   </include>
 
-  <group ns="$(arg uav_name)">
+  <group ns="uav_1">
     <include file="$(find rotors_gazebo)/launch/spawn_fixed_wing.launch">
       <arg name="uav_name" value="$(arg uav_name)" />
+      <arg name="namespace" value="uav_1" />
       <arg name="model" value="$(find rotors_description)/urdf/$(arg uav_name)_base.xacro" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
@@ -51,6 +52,26 @@
       <!--<param name = "use_gui" value = "true"/>-->
     </node>
 
+  </group>
+
+  <group ns="uav_1_tc">
+    <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
+      <arg name="target_uav" value="uav_1" />
+      <arg name="namespace" value="uav_1_tc_1" />
+      <arg name="target_pos_topic" value="uav_1/tracking_pos" />
+      <arg name="x" value="25.0"/>
+      <arg name="horizontal_fov" value="2"/>
+    </include>
+  </group>
+
+  <group ns="uav_1_tc_2">
+    <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
+      <arg name="target_uav" value="uav_1" />
+      <arg name="namespace" value="uav_1_tc_2" />
+      <arg name="target_pos_topic" value="uav_1/tracking_pos" />
+      <arg name="x" value="30.0"/>
+      <arg name="horizontal_fov" value="0.2"/>
+    </include>
   </group>
 
   <!--
