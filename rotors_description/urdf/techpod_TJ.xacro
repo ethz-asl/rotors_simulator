@@ -89,7 +89,7 @@
 
   <!-- Inertia of the main body -->
   <xacro:property name="body_inertia">
-    <inertia ixx="0.6688" ixy="0.0" ixz="0.0" iyy="0.16235" iyz="0.0" izz="0.69364" />
+    <inertia ixx="0.6688" ixy="0.0" ixz="0.0281" iyy="0.16235" iyz="0.0" izz="0.69364" />
   </xacro:property>
 
   <!-- Inertia of the aileron, assuming it is a cuboid -->
@@ -332,9 +332,9 @@
           <control>
             <cs name="flap_left">
                 <controlJoint>${namespace}/flap_left_joint</controlJoint>
-                <radToCLift>1.6067 0</radToCLift>
-                <radToCDrag>0.1438 0.8227</radToCDrag>
-                <radToCPitch>0.0898 0</radToCPitch>
+                <radToCLift>1.6228 0</radToCLift>
+                <radToCDrag>0.1431 0.8085</radToCDrag>
+                <radToCPitch>0.0880 0</radToCPitch>
                 <radToAoAB>-0.08</radToAoAB>
             </cs>
           </control>
@@ -349,9 +349,9 @@
           <control>
             <cs name="flap_left">
                <controlJoint>${namespace}/flap_left_joint</controlJoint>
-               <radToCLift>1.6067 0</radToCLift>
-               <radToCDrag>0.1438 0.8227</radToCDrag>
-               <radToCPitch>0.0898 0</radToCPitch>
+               <radToCLift>1.6228 0</radToCLift>
+               <radToCDrag>0.1431 0.8085</radToCDrag>
+               <radToCPitch>0.0880 0</radToCPitch>
                <radToAoAB>-0.08</radToAoAB>
            </cs>
           </control>
@@ -374,9 +374,9 @@
           <control>
             <cs name="aileron_left">
                 <controlJoint>${namespace}/aileron_left_joint</controlJoint>
-                <radToCLift>1.7541 0</radToCLift>
-                <radToCDrag>0.1053 0.6267</radToCDrag>
-                <radToCPitch>-0.1789 0</radToCPitch>
+                <radToCLift>1.8386 0</radToCLift>
+                <radToCDrag>0.1053 0.5616</radToCDrag>
+                <radToCPitch>-0.0518 0</radToCPitch>
                 <radToAoAB>0.0</radToAoAB>
             </cs>
           </control>
@@ -391,9 +391,9 @@
           <control>
             <cs name="aileron_left">
                <controlJoint>${namespace}/aileron_left_joint</controlJoint>
-               <radToCLift>1.7541 0</radToCLift>
-               <radToCDrag>0.1053 0.6267</radToCDrag>
-               <radToCPitch>-0.1789 0</radToCPitch>
+               <radToCLift>1.8386 0</radToCLift>
+               <radToCDrag>0.1053 0.5616</radToCDrag>
+               <radToCPitch>-0.0518 0</radToCPitch>
                <radToAoAB>0.0</radToAoAB>
             </cs>
           </control>
@@ -424,9 +424,9 @@
           <control>
             <cs name="flap_right">
                 <controlJoint>${namespace}/flap_right_joint</controlJoint>
-                <radToCLift>1.6067 0</radToCLift>
-                <radToCDrag>0.1438 0.8227</radToCDrag>
-                <radToCPitch>0.0898 0</radToCPitch>
+                <radToCLift>1.6228 0</radToCLift>
+                <radToCDrag>0.1431 0.8085</radToCDrag>
+                <radToCPitch>0.0880 0</radToCPitch>
                 <radToAoAB>-0.08</radToAoAB>
             </cs>
           </control>
@@ -441,9 +441,9 @@
           <control>
             <cs name="flap_right">
                <controlJoint>${namespace}/flap_right_joint</controlJoint>
-               <radToCLift>1.6067 0</radToCLift>
-               <radToCDrag>0.1438 0.8227</radToCDrag>
-               <radToCPitch>0.0898 0</radToCPitch>
+               <radToCLift>1.6228 0</radToCLift>
+               <radToCDrag>0.1431 0.8085</radToCDrag>
+               <radToCPitch>0.0880 0</radToCPitch>
                <radToAoAB>-0.08</radToAoAB>
            </cs>
           </control>
@@ -466,9 +466,9 @@
           <control>
             <cs name="aileron_right">
                 <controlJoint>${namespace}/aileron_right_joint</controlJoint>
-                <radToCLift>1.7541 0</radToCLift>
-                <radToCDrag>0.1053 0.6267</radToCDrag>
-                <radToCPitch>-0.1789 0</radToCPitch>
+                <radToCLift>1.8386 0</radToCLift>
+                <radToCDrag>0.1053 0.5616</radToCDrag>
+                <radToCPitch>-0.0518 0</radToCPitch>
                 <radToAoAB>0.0</radToAoAB>
             </cs>
           </control>
@@ -483,9 +483,9 @@
           <control>
             <cs name="aileron_right">
                <controlJoint>${namespace}/aileron_right_joint</controlJoint>
-               <radToCLift>1.7541 0</radToCLift>
-               <radToCDrag>0.1053 0.6267</radToCDrag>
-               <radToCPitch>-0.1789 0</radToCPitch>
+               <radToCLift>1.8386 0</radToCLift>
+               <radToCDrag>0.1053 0.5616</radToCDrag>
+               <radToCPitch>-0.0518 0</radToCPitch>
                <radToAoAB>0.0</radToAoAB>
             </cs>
           </control>
@@ -511,7 +511,7 @@
           <control>
             <cs name="elevator_left">
                 <controlJoint>${namespace}/elevator_joint</controlJoint>
-                <radToCLift>1.15 0</radToCLift>
+                <radToCLift>1.5676 0</radToCLift>
                 <radToCDrag>0 0</radToCDrag>
                 <radToCPitch>0 0</radToCPitch>
                 <radToAoAB>0</radToAoAB>
@@ -531,7 +531,7 @@
           <control>
             <cs name="elevator_right">
                 <controlJoint>${namespace}/elevator_joint</controlJoint>
-                <radToCLift>1.15 0</radToCLift>
+                <radToCLift>1.5676 0</radToCLift>
                 <radToCDrag>0 0</radToCDrag>
                 <radToCPitch>0 0</radToCPitch>
                 <radToAoAB>0</radToAoAB>
@@ -551,7 +551,7 @@
           <control>
             <cs name="rudder">
                 <controlJoint>${namespace}/rudder_joint</controlJoint>
-                <radToCLift>2.2459 0</radToCLift>
+                <radToCLift>2.2801 0</radToCLift>
                 <radToCDrag>0 0</radToCDrag>
                 <radToCPitch>0 0</radToCPitch>
                 <radToAoAB>0</radToAoAB>

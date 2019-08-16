@@ -9,7 +9,7 @@
       </camera>
     </gui>
     <scene>
-      <ambient>0.2 0.2 0.2 1.0</ambient>
+      <ambient>0.7 0.7 0.7 1.0</ambient>
       <grid>false</grid>
       <sky>
         <clouds>
@@ -52,7 +52,7 @@
     </physics>
     <!-- Light Source -->
     <light type="directional" name="sun">
-      <cast_shadows>false</cast_shadows>
+      <cast_shadows>true</cast_shadows>
       <pose>0 0 300 0 0 0</pose>
       <diffuse>0.8 0.8 0.8 1</diffuse>
       <specular>0.0 0.0 0.0 1</specular>
