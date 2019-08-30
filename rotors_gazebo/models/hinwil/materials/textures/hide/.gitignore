@@ -1,0 +1,8 @@
+.DS_Store
+.cproject
+.project
+.settings
+*.png
+*.jpg
+*.tif
+*.xcf
