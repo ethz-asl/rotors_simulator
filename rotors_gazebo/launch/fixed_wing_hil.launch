@@ -10,6 +10,7 @@
   <!-- The following line causes gzmsg and gzerr messages to be printed to the console
       (even when Gazebo is started through roslaunch) -->
   <arg name="verbose" default="false"/>
+  <arg name="spawn_tc" default="true"/>
 
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
@@ -54,24 +55,25 @@
 
   </group>
 
-  <group ns="uav_1_tc">
-    <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
-      <arg name="target_uav" value="uav_1" />
-      <arg name="namespace" value="uav_1_tc_1" />
-      <arg name="target_pos_topic" value="uav_1/tracking_pos" />
-      <arg name="x" value="25.0"/>
-      <arg name="horizontal_fov" value="2"/>
-    </include>
-  </group>
-
-  <group ns="uav_1_tc_2">
-    <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
-      <arg name="target_uav" value="uav_1" />
-      <arg name="namespace" value="uav_1_tc_2" />
-      <arg name="target_pos_topic" value="uav_1/tracking_pos" />
-      <arg name="x" value="30.0"/>
-      <arg name="horizontal_fov" value="0.2"/>
-    </include>
+  <group if="$(arg spawn_tc)">
+    <group ns="uav_1_tc">
+      <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
+        <arg name="target_uav" value="uav_1" />
+        <arg name="namespace" value="uav_1_tc_1" />
+        <arg name="target_pos_topic" value="uav_1/tracking_pos" />
+        <arg name="x" value="25.0"/>
+        <arg name="horizontal_fov" value="2"/>
+      </include>
+    </group>
+    <group ns="uav_1_tc_2">
+      <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
+        <arg name="target_uav" value="uav_1" />
+        <arg name="namespace" value="uav_1_tc_2" />
+        <arg name="target_pos_topic" value="uav_1/tracking_pos" />
+        <arg name="x" value="30.0"/>
+        <arg name="horizontal_fov" value="0.2"/>
+      </include>
+    </group>
   </group>
 
   <!--
