@@ -234,7 +234,7 @@
 
 <!-- Aerodyn. angle vane -->
 <xacro:macro name="angle_vane"
-  params="robot_namespace vane_name type chord arm_cp parent mass_vane
+  params="robot_namespace vane_name type chord arm_cp parent wind_topic mass_vane
           color mesh_file *joint_origin *vis_coll_origin *inertia">
 
   <joint name="${robot_namespace}/${vane_name}_joint" type="continuous">
@@ -295,6 +295,9 @@
             <seg_area>${2*chord*chord}</seg_area>
             <seg_chord>${chord}</seg_chord>
             <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
+            <wind name="wind">
+              <topic>${wind_topic}</topic>
+            </wind>
           </segment>
         </airfoil>
       </plugin>
@@ -315,6 +318,9 @@
             <seg_area>${2*chord*chord}</seg_area>
             <seg_chord>${chord}</seg_chord>
             <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
+            <wind name="wind">
+              <topic>${wind_topic}</topic>
+            </wind>
           </segment>
         </airfoil>
       </plugin>

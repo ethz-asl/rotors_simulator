@@ -273,6 +273,44 @@
   </xacro:propeller>
 
   <gazebo>
+    <plugin filename="librotors_gazebo_wind_beta_plugin.so" name="wind_beta_plugin">
+      <robotNamespace>${namespace}</robotNamespace>
+      <windLayer>
+        <layer name="layer1">
+          <altitude>10</altitude>
+          <windMeanNED>-5 0 0</windMeanNED>
+        </layer>
+        <layer name="layer2">
+          <altitude>25</altitude>
+          <windMeanNED>-6 0 0</windMeanNED>
+        </layer>
+        <layer name="layer3">
+          <altitude>35</altitude>
+          <windMeanNED>-10 0 0</windMeanNED>
+        </layer>
+      </windLayer>
+      <!---->
+      <findWind>
+        <query name="q1">
+          <linkName>${namespace}/base_link</linkName>
+          <windTopic>wind_base_link</windTopic>
+        </query>
+      </findWind>
+      <!--
+      <customWindFieldPath>${yaml_path}/../test_wind_field.csv</customWindFieldPath>
+      <windFieldXOffset>100</windFieldXOffset>
+      <windFieldYOffset>100</windFieldYOffset>
+      <windFieldZOffset>0</windFieldZOffset>
+      -->
+      <lambdaMin>10</lambdaMin>
+      <lengthScale>725</lengthScale>
+      <fourierNNN>7 7 7</fourierNNN>
+      <sigma>2</sigma>
+      <trnspVelTurbNED>5 0 0</trnspVelTurbNED>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
     <plugin filename="librotors_gazebo_propulsion_plugin.so" name="propulsion_plugin">
       <robotNamespace>${namespace}</robotNamespace>
       <prop name="P0">
@@ -285,6 +323,9 @@
         <propParamsYAML>${yaml_path}/propeller_test.yaml</propParamsYAML>
         <slpstrTopic>prop_slpstr_0</slpstrTopic>
         <visTopic>prop_vis_0</visTopic>
+        <wind name="wind">
+          <topic>wind_base_link</topic>
+        </wind>
       </prop>
     </plugin>
   </gazebo>
@@ -302,6 +343,9 @@
           <forward>1 0 0</forward>
           <upward>0 0 1</upward>
           <cp>0.2 0.0 0.05</cp>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
         </element>
       </body>
       <airfoil>
@@ -313,6 +357,9 @@
           <seg_area>0.028</seg_area>
           <seg_chord>0.16</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
         </segment>
 
         <segment name="WL2">
@@ -322,6 +369,9 @@
           <seg_area>0.072</seg_area>
           <seg_chord>0.16</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
           <control>
             <cs name="flap_left">
                 <controlJoint>${namespace}/flap_left_joint</controlJoint>
@@ -339,6 +389,9 @@
           <seg_area>0.032</seg_area>
           <seg_chord>0.16</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
         </segment>
 
         <segment name="WL4">
@@ -348,6 +401,9 @@
           <seg_area>0.056</seg_area>
           <seg_chord>0.16</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
           <control>
             <cs name="aileron_left">
                 <controlJoint>${namespace}/aileron_left_joint</controlJoint>
@@ -365,6 +421,9 @@
           <seg_area>0.0192</seg_area>
           <seg_chord>0.16</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
         </segment>
 
         <segment name="WR1">
@@ -374,6 +433,9 @@
           <seg_area>0.028</seg_area>
           <seg_chord>0.16</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
         </segment>
 
         <segment name="WR2">
@@ -383,6 +445,9 @@
           <seg_area>0.072</seg_area>
           <seg_chord>0.16</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
           <control>
             <cs name="flap_right">
                 <controlJoint>${namespace}/flap_right_joint</controlJoint>
@@ -400,6 +465,9 @@
           <seg_area>0.032</seg_area>
           <seg_chord>0.16</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
         </segment>
 
         <segment name="WR4">
@@ -409,6 +477,9 @@
           <seg_area>0.056</seg_area>
           <seg_chord>0.16</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
           <control>
             <cs name="aileron_right">
                 <controlJoint>${namespace}/aileron_right_joint</controlJoint>
@@ -426,6 +497,9 @@
           <seg_area>0.0192</seg_area>
           <seg_chord>0.16</seg_chord>
           <aeroParamsYAML>${yaml_path}/airfoil_test.yaml</aeroParamsYAML>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
         </segment>
 
         <segment name="EL1">
@@ -438,6 +512,9 @@
           <indVel name="prop0">
             <topic>prop_slpstr_0</topic>
           </indVel>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
           <control>
             <cs name="elevator_left">
                 <controlJoint>${namespace}/elevator_joint</controlJoint>
@@ -458,6 +535,9 @@
           <indVel name="prop0">
             <topic>prop_slpstr_0</topic>
           </indVel>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
           <control>
             <cs name="elevator_right">
                 <controlJoint>${namespace}/elevator_joint</controlJoint>
@@ -478,6 +558,9 @@
           <indVel name="prop0">
             <topic>prop_slpstr_0</topic>
           </indVel>
+          <wind name="wind">
+            <topic>wind_base_link</topic>
+          </wind>
           <control>
             <cs name="rudder">
                 <controlJoint>${namespace}/rudder_joint</controlJoint>
@@ -490,6 +573,12 @@
 
       </airfoil>
     </plugin>
+  </gazebo>
+
+  <gazebo reference="${namespace}/base_link">
+     <visual>
+        <plugin name="visual_plugin_base_link" filename="librotors_gazebo_template_visual_plugin.so" />
+     </visual>
   </gazebo>
 
   <gazebo>
