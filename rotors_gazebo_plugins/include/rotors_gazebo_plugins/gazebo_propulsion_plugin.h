@@ -40,6 +40,7 @@
 #include "gazebo/msgs/msgs.hh"
 #include "PropulsionSlipstream.pb.h"
 #include "VisVectorArray.pb.h"
+#include "WindSpeedBeta.pb.h"
 #include "ConnectGazeboToRosTopic.pb.h"
 #include "Float32.pb.h"
 
@@ -50,6 +51,7 @@ namespace gazebo {
 
 typedef const boost::shared_ptr<const gz_visualization_msgs::VisVectorArray> GzVisVectorArrayMsgPtr;
 typedef const boost::shared_ptr<const gz_std_msgs::Float32> GzFloat32MsgPtr;
+typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeedBeta> WindPtr;
 typedef ignition::math::Vector3d V3D;
 typedef ignition::math::Matrix3<double> M3D;
 
@@ -80,6 +82,49 @@ private:
     double sampling_time_ = 0.0;    // simulation time-step [s]
     double prev_sim_time_ = 0.0;    // simulation time [s]
 
+    struct Wind {
+        Wind(){}
+
+        transport::SubscriberPtr wind_sub_ = nullptr;
+        std::mutex wind_lock;
+        std::string wind_topic;
+
+        V3D pos_ned = V3D(0,0,0);
+        V3D wind_ned = V3D(0,0,0);
+        M3D wind_grad_ned = M3D(0,0,0,0,0,0,0,0,0);
+
+        void Callback(WindPtr& wind){
+            std::unique_lock<std::mutex> lock(wind_lock);
+
+            pos_ned = V3D(wind->pos_ned().x(),
+                          wind->pos_ned().y(),
+                          wind->pos_ned().z());
+
+            wind_ned = V3D(wind->wind_ned().x(),
+                           wind->wind_ned().y(),
+                           wind->wind_ned().z());
+
+            wind_grad_ned = M3D(wind->wind_grad_ned().xx(),
+                                wind->wind_grad_ned().xy(),
+                                wind->wind_grad_ned().xz(),
+                                wind->wind_grad_ned().yx(),
+                                wind->wind_grad_ned().yy(),
+                                wind->wind_grad_ned().yz(),
+                                wind->wind_grad_ned().zx(),
+                                wind->wind_grad_ned().zy(),
+                                wind->wind_grad_ned().zz());
+            lock.unlock();
+        }
+
+        V3D GetWind(V3D p_cp){
+            std::unique_lock<std::mutex> lock(wind_lock);   //necessary? atomic V3D?
+            V3D wind_local = wind_ned + wind_grad_ned*(p_cp-pos_ned);
+            //V3D wind_local = wind_grad_ned*(p_cp-pos_ned);
+            lock.unlock();
+            return wind_local;
+        }
+    };
+
     struct Propeller {
         Propeller(){}
 
@@ -100,15 +145,20 @@ private:
         transport::SubscriberPtr omega_ref_sub = nullptr;
         std::string omega_ref_subtopic;
 
-        ignition::math::Vector3d cp{0,0,0};
+        //ignition::math::Vector3d cp{0,0,0};
 
         transport::PublisherPtr prop_slpstr_pub = nullptr;
         std::string prop_slpstr_pubtopic;
 
         std::array<gz_visualization_msgs::ArrowMarker*,7> vec_vis;
+        gz_visualization_msgs::ArrowMarker* wind_vis;
         std::string vector_vis_array_topic;
         gz_visualization_msgs::VisVectorArray vector_vis_array_msg;
         gazebo::transport::PublisherPtr vector_vis_array_pub;
+
+        Wind * wind;
+        V3D wind_cp;
+        int n_wind = 0;
 
         void PropSpeedCallback(GzFloat32MsgPtr& ref){
             omega_ref = (double)ref->data();
@@ -128,6 +178,13 @@ private:
             if(isnan(omega)||isinf(omega)){
                 omega = 0.0;
                 gzerr<<"bad omega detected, setting to zero!!\n";
+            }
+        }
+
+        void UpdateWind(V3D w_cp){
+            wind_cp = V3D(0,0,0);
+            for(int j=0; j<n_wind; j++){
+                wind_cp += wind[j].GetWind(w_cp);
             }
         }
     };

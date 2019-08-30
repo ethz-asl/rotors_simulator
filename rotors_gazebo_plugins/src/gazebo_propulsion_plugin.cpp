@@ -27,6 +27,11 @@ namespace gazebo {
 
 GazeboPropulsion::~GazeboPropulsion() {
     update_connection_->~Connection();
+
+    for(int i=0; i<num_props_; i++){
+        delete[] propellers_[i].wind;
+    }
+
     delete[] propellers_;
     gzdbg<<"GazeboPropulsion plugin destructed\n";
 }
@@ -159,10 +164,49 @@ void GazeboPropulsion::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
             propellers_[idx].vector_vis_array_msg.mutable_header()->mutable_stamp()->set_nsec(0.0);
             propellers_[idx].vector_vis_array_msg.mutable_header()->set_frame_id(propellers_[idx].parent_link->GetName());
 
+            // get winds
+            if (_sdf_propeller->HasElement("wind")) {
+                sdf::ElementPtr _sdf_wind= _sdf_propeller->GetElement("wind");
+
+                // get number of winds for this particular segment
+                while (_sdf_wind) {
+                    _sdf_wind = _sdf_wind->GetNextElement("wind");
+                    ++propellers_[idx].n_wind;
+                }
+
+                gzdbg<<"found "<<propellers_[idx].n_wind<<" wind(s) for propeller ["<<idx<<"]. \n";
+                _sdf_wind = _sdf_propeller->GetElement("wind");
+                propellers_[idx].wind = new Wind [propellers_[idx].n_wind];
+
+                for(int j=0; j<propellers_[idx].n_wind; j++){
+
+                    if(_sdf_wind->HasElement("topic")){
+                        propellers_[idx].wind[j].wind_topic = _sdf_wind->Get<std::string>("topic");
+                    } else {
+                        gzwarn<<"wind ["<<j<<"] of segment ["<<idx<<"] is missing 'topic' element \n";
+                    }
+
+                    _sdf_wind = _sdf_wind->GetNextElement("wind");
+                }
+
+
+                if(propellers_[idx].n_wind>0){
+                    propellers_[idx].wind_vis = propellers_[idx].vector_vis_array_msg.add_vector();
+                    propellers_[idx].wind_vis->set_ns(namespace_+"/prp_"+std::to_string(idx)+"/wind");
+                    propellers_[idx].wind_vis->set_id(0);
+                    propellers_[idx].wind_vis->mutable_scale()->set_x(0.025);
+                    propellers_[idx].wind_vis->mutable_scale()->set_y(0.05);
+                    propellers_[idx].wind_vis->mutable_scale()->set_z(0.05);
+                    propellers_[idx].wind_vis->mutable_color()->set_x(1.0);
+                    propellers_[idx].wind_vis->mutable_color()->set_y(1.0);
+                    propellers_[idx].wind_vis->mutable_color()->set_z(1.0);
+                }
+            }
+
             // setup visualization message
             for(int idx_vis=0; idx_vis<propellers_[idx].vec_vis.size(); idx_vis++){
                 propellers_[idx].vec_vis[idx_vis] = propellers_[idx].vector_vis_array_msg.add_vector();
-                propellers_[idx].vec_vis[idx_vis]->set_ns(namespace_+std::to_string(idx));
+                propellers_[idx].vec_vis[idx_vis]->set_ns(namespace_+"/prp_"+std::to_string(idx));
                 propellers_[idx].vec_vis[idx_vis]->set_id(idx_vis);
                 propellers_[idx].vec_vis[idx_vis]->mutable_scale()->set_x(0.025);
                 propellers_[idx].vec_vis[idx_vis]->mutable_scale()->set_y(0.05);
@@ -227,6 +271,13 @@ void GazeboPropulsion::OnUpdate() {
                                                                          &GazeboPropulsion::Propeller::PropSpeedCallback,
                                                                          &propellers_[idx]);
             }
+
+            for (int j=0; j<propellers_[idx].n_wind; j++){
+                propellers_[idx].wind[j].wind_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + propellers_[idx].wind[j].wind_topic,
+                                                                         &GazeboPropulsion::Wind::Callback,
+                                                                         &propellers_[idx].wind[j]);
+                gzdbg<<"subscribing to: "<<"~/" + namespace_ + "/" + propellers_[idx].wind[j].wind_topic<<"\n";
+            }
         }
 
         pubs_and_subs_created_ = true;
@@ -260,12 +311,18 @@ void GazeboPropulsion::OnUpdate() {
         H_moment_inertial.Correct();
         propellers_[idx].parent_link->AddRelativeTorque(-H_moment_inertial);
 
+        V3D rotor_pos = pose_parent.Pos() + pose_parent.Rot().RotateVector(propellers_[idx].p_cp);
+        propellers_[idx].UpdateWind(rotor_pos);
+
         // velocity of propeller hub
 #if GAZEBO_MAJOR_VERSION >= 9
         V3D body_velocity = propellers_[idx].parent_link->WorldLinearVel(propellers_[idx].p_cp);
 #else
         V3D body_velocity = ignitionFromGazeboMath(propellers_[idx].parent_link->GetWorldLinearVel(propellers_[idx].p_cp));
 #endif
+
+        // account for wind
+        body_velocity = body_velocity - propellers_[idx].wind_cp;
 
         // propeller axis expressed in world frame, in positive rot direction
         V3D joint_axis = pose_parent.Rot().RotateVector(propellers_[idx].p_joint);
@@ -278,8 +335,7 @@ void GazeboPropulsion::OnUpdate() {
         // resolve local airspeed into axial (V_inf_a) and radial (V_inf_r) component
         V3D body_velocity_radial = body_velocity - body_velocity.Dot(forward) * forward;
         V3D body_velocity_axial = body_velocity.Dot(forward) * forward;
-        V3D rotor_pos = propellers_[idx].parent_link->WorldPose().Pos()
-                        + pose_parent.Rot().RotateVector(propellers_[idx].p_cp);  // link position expressed in world frame
+        //V3D rotor_pos = propellers_[idx].parent_link->WorldPose().Pos() + pose_parent.Rot().RotateVector(propellers_[idx].p_cp);  // link position expressed in world frame
 
         double V_inf_a = body_velocity.Dot(forward);    // axial component of relative flow wrt propeller disk (no wind assumed)
         double V_inf_a_clmpd = std::max(V_inf_a,0.0);   // treat reverse flow as static case
@@ -467,6 +523,19 @@ void GazeboPropulsion::OnUpdate() {
                 propellers_[idx].vec_vis[idx_vis]->mutable_vector()->set_x(P_vec.X());
                 propellers_[idx].vec_vis[idx_vis]->mutable_vector()->set_y(P_vec.Y());
                 propellers_[idx].vec_vis[idx_vis]->mutable_vector()->set_z(P_vec.Z());
+            }
+
+            if(propellers_[idx].n_wind>0){
+                V3D _B_wind = pose_parent.Rot().RotateVectorReverse(propellers_[idx].wind_cp);
+                propellers_[idx].wind_vis->mutable_color()->set_x(0.0);
+                propellers_[idx].wind_vis->mutable_color()->set_y(1.0);
+                propellers_[idx].wind_vis->mutable_color()->set_z(1.0);
+                propellers_[idx].wind_vis->mutable_startpoint()->set_x(P_start.X());
+                propellers_[idx].wind_vis->mutable_startpoint()->set_y(P_start.Y());
+                propellers_[idx].wind_vis->mutable_startpoint()->set_z(P_start.Z());
+                propellers_[idx].wind_vis->mutable_vector()->set_x(_B_wind.X());
+                propellers_[idx].wind_vis->mutable_vector()->set_y(_B_wind.Y());
+                propellers_[idx].wind_vis->mutable_vector()->set_z(_B_wind.Z());
             }
 
             propellers_[idx].vector_vis_array_pub->Publish(propellers_[idx].vector_vis_array_msg);

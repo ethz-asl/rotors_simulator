@@ -43,6 +43,7 @@
 #include <gazebo/common/common.hh>
 #include "PropulsionSlipstream.pb.h"
 #include "VisVectorArray.pb.h"
+#include "WindSpeedBeta.pb.h"
 #include "ConnectGazeboToRosTopic.pb.h"
 #include <Float32.pb.h>
 #include <iostream>
@@ -64,6 +65,7 @@ typedef ignition::math::Matrix3<double> M3D;
 
 typedef const boost::shared_ptr<const gz_visualization_msgs::VisVectorArray> GzVisVectorArrayMsgPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::PropulsionSlipstream> PropulsionSlipstreamPtr;
+typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeedBeta> WindPtr;
 typedef const boost::shared_ptr<const gz_std_msgs::Float32> Float32Ptr;
 static const std::string kDefaultPropulsionSlipstreamSubTopic = "/propulsion_slipstream";
 static constexpr double kDefaultRhoAir = 1.2041; // air density 1.2041 kg/m³ (dry, @20 °C, 101.325 kPa)
@@ -106,6 +108,49 @@ private:
         double d_aoa_b_d_delta_cs = 0;                // dAlpha_break/dCs slope [rad/rad]
         void Callback(Float32Ptr& reference){
             cs_ref = (double)reference->data();
+        }
+    };
+
+    struct Wind {
+        Wind(){}
+
+        transport::SubscriberPtr wind_sub_ = nullptr;
+        std::mutex wind_lock;
+        std::string wind_topic;
+
+        V3D pos_ned = V3D(0,0,0);
+        V3D wind_ned = V3D(0,0,0);
+        M3D wind_grad_ned = M3D(0,0,0,0,0,0,0,0,0);
+
+        void Callback(WindPtr& wind){
+            std::unique_lock<std::mutex> lock(wind_lock);
+
+            pos_ned = V3D(wind->pos_ned().x(),
+                          wind->pos_ned().y(),
+                          wind->pos_ned().z());
+
+            wind_ned = V3D(wind->wind_ned().x(),
+                           wind->wind_ned().y(),
+                           wind->wind_ned().z());
+
+            wind_grad_ned = M3D(wind->wind_grad_ned().xx(),
+                                wind->wind_grad_ned().xy(),
+                                wind->wind_grad_ned().xz(),
+                                wind->wind_grad_ned().yx(),
+                                wind->wind_grad_ned().yy(),
+                                wind->wind_grad_ned().yz(),
+                                wind->wind_grad_ned().zx(),
+                                wind->wind_grad_ned().zy(),
+                                wind->wind_grad_ned().zz());
+            lock.unlock();
+        }
+
+        V3D GetWind(V3D p_cp){
+            std::unique_lock<std::mutex> lock(wind_lock);   //necessary? atomic V3D?
+            V3D wind_local = wind_ned + wind_grad_ned*(p_cp-pos_ned);
+            //V3D wind_local = wind_grad_ned*(p_cp-pos_ned);
+            lock.unlock();
+            return wind_local;
         }
     };
 
@@ -202,15 +247,27 @@ private:
         V3D v_ind_cp; // induced velocity at cp (e.g. due to slipstream)
         int n_slpstr = 0;
 
+        Wind * wind;
+        V3D wind_cp;
+        int n_wind = 0;
+
         /// \brief Force and torque visualization in rviz
 
         gz_visualization_msgs::ArrowMarker* lift_vis;
         gz_visualization_msgs::ArrowMarker* slpstr_vis;
+        gz_visualization_msgs::ArrowMarker* wind_vis;
 
         void UpdateIndVel(V3D w_cp){
             v_ind_cp = V3D(0,0,0);
             for(int j=0; j<n_slpstr; j++){
-                v_ind_cp += slpstr[j].GetIndVel(w_cp);;
+                v_ind_cp += slpstr[j].GetIndVel(w_cp);
+            }
+        }
+
+        void UpdateWind(V3D w_cp){
+            wind_cp = V3D(0,0,0);
+            for(int j=0; j<n_wind; j++){
+                wind_cp += wind[j].GetWind(w_cp);
             }
         }
 
@@ -244,7 +301,19 @@ private:
         V3D fwd;
         V3D upwd;
 
+        Wind * wind;
+        V3D wind_cp;
+        int n_wind = 0;
+
         gz_visualization_msgs::ArrowMarker* force_vis;
+        gz_visualization_msgs::ArrowMarker* wind_vis;
+
+        void UpdateWind(V3D w_cp){
+            wind_cp = V3D(0,0,0);
+            for(int j=0; j<n_wind; j++){
+                wind_cp += wind[j].GetWind(w_cp);
+            }
+        }
 
     };
 

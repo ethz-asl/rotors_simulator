@@ -31,6 +31,7 @@ GazeboAerodynamics::~GazeboAerodynamics()
     for(int i=0; i<n_seg_; i++){
         delete[] segments_[i].slpstr;
         delete[] segments_[i].cs;
+        delete[] segments_[i].wind;
     }
     delete[] segments_;
     delete[] bodies_;
@@ -151,6 +152,45 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
                 bodies_[i].a_fus_zz = _sdf_element->Get<double>("aBdyZZ");
             else
                 gzwarn<<"segment ["<<i<<"] is missing 'aBdyZZ' element \n";
+
+            // get winds
+            if (_sdf_element->HasElement("wind")) {
+                sdf::ElementPtr _sdf_wind= _sdf_element->GetElement("wind");
+
+                // get number of winds for this particular segment
+                while (_sdf_wind) {
+                    _sdf_wind = _sdf_wind->GetNextElement("wind");
+                    ++bodies_[i].n_wind;
+                }
+
+                gzdbg<<"found "<<bodies_[i].n_wind<<" wind(s) for body ["<<i<<"]. \n";
+                _sdf_wind = _sdf_element->GetElement("wind");
+                bodies_[i].wind = new Wind [bodies_[i].n_wind];
+
+                for(int j=0; j<bodies_[i].n_wind; j++){
+
+                    if(_sdf_wind->HasElement("topic")){
+                        bodies_[i].wind[j].wind_topic = _sdf_wind->Get<std::string>("topic");
+                    } else {
+                        gzwarn<<"wind ["<<j<<"] of body ["<<i<<"] is missing 'topic' element \n";
+                    }
+
+                    _sdf_wind = _sdf_wind->GetNextElement("wind");
+                }
+
+                if(bodies_[i].n_wind>0){
+                    bodies_[i].wind_vis = vector_vis_array_.add_vector();
+                    bodies_[i].wind_vis->set_ns(namespace_+"/bdy/wind");
+                    bodies_[i].wind_vis->set_id(i);
+                    bodies_[i].wind_vis->mutable_scale()->set_x(0.025);
+                    bodies_[i].wind_vis->mutable_scale()->set_y(0.05);
+                    bodies_[i].wind_vis->mutable_scale()->set_z(0.05);
+                    bodies_[i].wind_vis->mutable_color()->set_x(1.0);
+                    bodies_[i].wind_vis->mutable_color()->set_y(1.0);
+                    bodies_[i].wind_vis->mutable_color()->set_z(1.0);
+                }
+            }
+
 
             bodies_[i].force_vis = vector_vis_array_.add_vector();
 
@@ -307,7 +347,7 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
                     if(_sdf_ind_vel->HasElement("topic")){
                         segments_[i].slpstr[j].slpstr_topic = _sdf_ind_vel->Get<std::string>("topic");
                     } else {
-                        gzwarn<<"slipstream ["<<j<<"] of segment ["<<i<<"] is missing 'radToCPitch' element \n";
+                        gzwarn<<"slipstream ["<<j<<"] of segment ["<<i<<"] is missing 'topic' element \n";
                     }
 
                     _sdf_ind_vel = _sdf_ind_vel->GetNextElement("indVel");
@@ -323,6 +363,44 @@ void GazeboAerodynamics::Load(physics::ModelPtr _model,
                     segments_[i].slpstr_vis->mutable_color()->set_x(1.0);
                     segments_[i].slpstr_vis->mutable_color()->set_y(1.0);
                     segments_[i].slpstr_vis->mutable_color()->set_z(1.0);
+                }
+            }
+
+            // get winds
+            if (_sdf_segment->HasElement("wind")) {
+                sdf::ElementPtr _sdf_wind= _sdf_segment->GetElement("wind");
+
+                // get number of winds for this particular segment
+                while (_sdf_wind) {
+                    _sdf_wind = _sdf_wind->GetNextElement("wind");
+                    ++segments_[i].n_wind;
+                }
+
+                gzdbg<<"found "<<segments_[i].n_wind<<" wind(s) for segment ["<<i<<"]. \n";
+                _sdf_wind = _sdf_segment->GetElement("wind");
+                segments_[i].wind = new Wind [segments_[i].n_wind];
+
+                for(int j=0; j<segments_[i].n_wind; j++){
+
+                    if(_sdf_wind->HasElement("topic")){
+                        segments_[i].wind[j].wind_topic = _sdf_wind->Get<std::string>("topic");
+                    } else {
+                        gzwarn<<"wind ["<<j<<"] of segment ["<<i<<"] is missing 'topic' element \n";
+                    }
+
+                    _sdf_wind = _sdf_wind->GetNextElement("wind");
+                }
+
+                if(segments_[i].n_wind>0){
+                    segments_[i].wind_vis = vector_vis_array_.add_vector();
+                    segments_[i].wind_vis->set_ns(namespace_+"/wind");
+                    segments_[i].wind_vis->set_id(i);
+                    segments_[i].wind_vis->mutable_scale()->set_x(0.025);
+                    segments_[i].wind_vis->mutable_scale()->set_y(0.05);
+                    segments_[i].wind_vis->mutable_scale()->set_z(0.05);
+                    segments_[i].wind_vis->mutable_color()->set_x(1.0);
+                    segments_[i].wind_vis->mutable_color()->set_y(1.0);
+                    segments_[i].wind_vis->mutable_color()->set_z(1.0);
                 }
             }
 
@@ -361,6 +439,12 @@ void GazeboAerodynamics::OnUpdate()
                                                                                             &segments_[i].slpstr[j]);
                 gzdbg<<"subscribing to: "<<"~/" + namespace_ + "/" + segments_[i].slpstr[j].slpstr_topic<<"\n";
             }
+            for (int j=0; j<segments_[i].n_wind; j++){
+                segments_[i].wind[j].wind_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + segments_[i].wind[j].wind_topic,
+                                                                                            &GazeboAerodynamics::Wind::Callback,
+                                                                                            &segments_[i].wind[j]);
+                gzdbg<<"subscribing to: "<<"~/" + namespace_ + "/" + segments_[i].wind[j].wind_topic<<"\n";
+            }
             for (int j=0; j<segments_[i].n_cs; j++){
                 if(segments_[i].cs[j].from_topic){
                     segments_[i].cs[j].control_ref_sub = node_handle_->Subscribe("~/" + namespace_ + "/" + segments_[i].cs[j].cs_ref_topic,
@@ -368,6 +452,15 @@ void GazeboAerodynamics::OnUpdate()
                                                                                  &segments_[i].cs[j]);
                     gzdbg<<"sub to: ~/" + namespace_ + "/" + segments_[i].cs[j].cs_ref_topic + "\n";
                 }
+            }
+        }
+
+        for (int i = 0; i<n_bdy_; i++){
+            for (int j=0; j<bodies_[i].n_wind; j++){
+                bodies_[i].wind[j].wind_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + bodies_[i].wind[j].wind_topic,
+                                                                         &GazeboAerodynamics::Wind::Callback,
+                                                                         &bodies_[i].wind[j]);
+                gzdbg<<"subscribing to: "<<"~/" + namespace_ + "/" + bodies_[i].wind[j].wind_topic<<"\n";
             }
         }
 
@@ -386,7 +479,8 @@ void GazeboAerodynamics::OnUpdate()
 
     if (n_seg_>0) {
         
-        // pose of body and parent
+        // pose of reference link
+        GZ_ASSERT(this->link, "Link was NULL");
 #if GAZEBO_MAJOR_VERSION >= 9
         ignition::math::Pose3d pose = this->link->WorldPose();
 #else
@@ -399,6 +493,7 @@ void GazeboAerodynamics::OnUpdate()
             V3D cp = pose.Pos() + pose.Rot().RotateVector(segments_[i].cp);  // segments cp-reference position expressed in world-frame
 
             segments_[i].UpdateIndVel(cp);
+            segments_[i].UpdateWind(cp);
 
             // get local airspeed at cp, expressed in world frame
             GZ_ASSERT(this->link, "Link was NULL");
@@ -408,8 +503,8 @@ void GazeboAerodynamics::OnUpdate()
             V3D vel = ignitionFromGazeboMath(this->link->GetWorldLinearVel(segments_[i].cp));
 #endif
 
-            // account for induced velocity, expressed in world frame
-            vel = vel - segments_[i].v_ind_cp;
+            // account for induced velocity and wind, expressed in world frame
+            vel = vel - segments_[i].v_ind_cp - segments_[i].wind_cp;
 
             // inflow direction at cp, expressed in world frame
             V3D velI = vel.Normalized();
@@ -551,7 +646,6 @@ void GazeboAerodynamics::OnUpdate()
             // world to local frame
             V3D _B_force = pose.Rot().RotateVectorReverse(force);
             V3D _B_torque = pose.Rot().RotateVectorReverse(torque);
-            V3D _B_indvel = pose.Rot().RotateVectorReverse(segments_[i].v_ind_cp);
 
             segments_[i].lift_vis->mutable_color()->set_x(1-w_af);
             segments_[i].lift_vis->mutable_color()->set_y(w_af);
@@ -564,8 +658,9 @@ void GazeboAerodynamics::OnUpdate()
             segments_[i].lift_vis->mutable_vector()->set_z(_B_force.Z());
 
             if(segments_[i].n_slpstr>0){
+                V3D _B_indvel = pose.Rot().RotateVectorReverse(segments_[i].v_ind_cp);
                 segments_[i].slpstr_vis->mutable_color()->set_x(0.0);
-                segments_[i].slpstr_vis->mutable_color()->set_y(1.0);
+                segments_[i].slpstr_vis->mutable_color()->set_y(0.0);
                 segments_[i].slpstr_vis->mutable_color()->set_z(1.0);
                 segments_[i].slpstr_vis->mutable_startpoint()->set_x(segments_[i].cp.X());
                 segments_[i].slpstr_vis->mutable_startpoint()->set_y(segments_[i].cp.Y());
@@ -573,6 +668,19 @@ void GazeboAerodynamics::OnUpdate()
                 segments_[i].slpstr_vis->mutable_vector()->set_x(_B_indvel.X());
                 segments_[i].slpstr_vis->mutable_vector()->set_y(_B_indvel.Y());
                 segments_[i].slpstr_vis->mutable_vector()->set_z(_B_indvel.Z());
+            }
+
+            if(segments_[i].n_wind>0){
+                V3D _B_wind = pose.Rot().RotateVectorReverse(segments_[i].wind_cp);
+                segments_[i].wind_vis->mutable_color()->set_x(0.0);
+                segments_[i].wind_vis->mutable_color()->set_y(1.0);
+                segments_[i].wind_vis->mutable_color()->set_z(1.0);
+                segments_[i].wind_vis->mutable_startpoint()->set_x(segments_[i].cp.X());
+                segments_[i].wind_vis->mutable_startpoint()->set_y(segments_[i].cp.Y());
+                segments_[i].wind_vis->mutable_startpoint()->set_z(segments_[i].cp.Z());
+                segments_[i].wind_vis->mutable_vector()->set_x(_B_wind.X());
+                segments_[i].wind_vis->mutable_vector()->set_y(_B_wind.Y());
+                segments_[i].wind_vis->mutable_vector()->set_z(_B_wind.Z());
             }
 
             if(update_counter_%100==0){
@@ -583,15 +691,20 @@ void GazeboAerodynamics::OnUpdate()
     
     if (n_bdy_>0) {
 
-        for(int i=0; i<n_bdy_; i++){
-            // get pose of body
-            GZ_ASSERT(this->link, "Link was NULL");
+        // pose of reference link
+        GZ_ASSERT(this->link, "Link was NULL");
 #if GAZEBO_MAJOR_VERSION >= 9
-            ignition::math::Pose3d pose = this->link->WorldPose();
+        ignition::math::Pose3d pose = this->link->WorldPose();
 #else
-            ignition::math::Pose3d pose = ignitionFromGazeboMath(this->link->GetWorldPose());
+        ignition::math::Pose3d pose = ignitionFromGazeboMath(this->link->GetWorldPose());
 #endif
+
+        // iterate over body elements
+        for(int i=0; i<n_bdy_; i++){
+
             V3D cp = pose.Pos() + pose.Rot().RotateVector(bodies_[i].cp);  // position of cp in world frame
+
+            bodies_[i].UpdateWind(cp);
 
             // get velocity of cp, expressed in world frame
 #if GAZEBO_MAJOR_VERSION >= 9
@@ -599,6 +712,11 @@ void GazeboAerodynamics::OnUpdate()
 #else
             V3D vel = ignitionFromGazeboMath(this->link->GetWorldLinearVel(bodies_[i].cp));
 #endif
+
+            vel = vel - bodies_[i].wind_cp;
+
+            //gzdbg<<"bodies wind: "<<bodies_[i].wind_cp.X()<<" "<<bodies_[i].wind_cp.Y()<<" "<<bodies_[i].wind_cp.Z()<<"\n";
+
             // express forward, upward and spanwise vectors in world frame
             V3D forward_i = pose.Rot().RotateVector(bodies_[i].fwd);
             V3D upward_i = pose.Rot().RotateVector(bodies_[i].upwd);
@@ -623,6 +741,7 @@ void GazeboAerodynamics::OnUpdate()
 
             // world to local frame
             V3D _B_drag = pose.Rot().RotateVectorReverse(drag);
+            V3D _B_wind = pose.Rot().RotateVectorReverse(bodies_[i].wind_cp);
             //V3D _B_torque = pose.Rot().RotateVectorReverse(torque);
 
             bodies_[i].force_vis->mutable_startpoint()->set_x(bodies_[i].cp.X());
@@ -631,6 +750,18 @@ void GazeboAerodynamics::OnUpdate()
             bodies_[i].force_vis->mutable_vector()->set_x(_B_drag.X()/10);
             bodies_[i].force_vis->mutable_vector()->set_y(_B_drag.Y()/10);
             bodies_[i].force_vis->mutable_vector()->set_z(_B_drag.Z()/10);
+
+            if(bodies_[i].n_wind>0){
+                bodies_[i].wind_vis->mutable_color()->set_x(0.0);
+                bodies_[i].wind_vis->mutable_color()->set_y(1.0);
+                bodies_[i].wind_vis->mutable_color()->set_z(1.0);
+                bodies_[i].wind_vis->mutable_startpoint()->set_x(bodies_[i].cp.X());
+                bodies_[i].wind_vis->mutable_startpoint()->set_y(bodies_[i].cp.Y());
+                bodies_[i].wind_vis->mutable_startpoint()->set_z(bodies_[i].cp.Z());
+                bodies_[i].wind_vis->mutable_vector()->set_x(_B_wind.X());
+                bodies_[i].wind_vis->mutable_vector()->set_y(_B_wind.Y());
+                bodies_[i].wind_vis->mutable_vector()->set_z(_B_wind.Z());
+            }
         }
     }
     
