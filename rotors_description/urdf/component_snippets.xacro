@@ -129,21 +129,13 @@
     </gazebo>
   </xacro:macro>
 
-  <!-- Macro to add a camera. 2 -->
+  <!-- Macro to add a camera. 2 (configurable mass, no massless links) -->
   <xacro:macro name="camera_macro_2"
     params="namespace parent_link camera_suffix frame_rate
       horizontal_fov image_width image_height image_format min_distance
       max_distance noise_mean noise_stddev mass enable_visual *geometry *inertia *origin">
 
     <link name="${namespace}/camera_${camera_suffix}_link">
-    <!--
-    <collision>
-      <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
-      <geometry>
-        <xacro:insert_block name="geometry" />
-      </geometry>
-    </collision>
-    -->
     <xacro:if value="${enable_visual}">
       <visual>
         <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
@@ -154,17 +146,30 @@
       </visual>
     </xacro:if>
       <inertial>
-        <mass value="${mass}" />
+        <mass value="${mass-0.001}" />
         <origin xyz="0 0 0" rpy="0 0 0" />
         <xacro:insert_block name="inertia" />
       </inertial>
     </link>
 
-    <joint name="${namespace}/camera_${camera_suffix}_joint" type="revolute">
+    <joint name="${namespace}/camera_${camera_suffix}_joint" type="fixed">
       <xacro:insert_block name="origin" />
       <parent link="${parent_link}" />
       <child link="${namespace}/camera_${camera_suffix}_link" />
-      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+
+    <link name="${namespace}/camera_${camera_suffix}_optical_link">
+    <inertial>
+      <mass value="0.001" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <xacro:cube_inertia l="0.02" mass="0.001" />
+    </inertial>
+    </link>
+
+    <joint name="${namespace}/camera_${camera_suffix}_optical_joint" type="fixed" >
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+      <parent link="${namespace}/camera_${camera_suffix}_link" />
+      <child link="${namespace}/camera_${camera_suffix}_optical_link" />
     </joint>
 
     <gazebo reference="${namespace}/camera_${camera_suffix}_link">
@@ -191,7 +196,7 @@
           <robotNamespace>${namespace}</robotNamespace>
           <alwaysOn>true</alwaysOn>
           <updateRate>${frame_rate}</updateRate>
-          <cameraName>camera_${camera_suffix}</cameraName>
+          <cameraName>cam_${camera_suffix}</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>camera_${camera_suffix}_link</frameName>
@@ -934,6 +939,76 @@
       <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
       <origin xyz="0.015 0 0.0113" rpy="0 0 0" />
     </xacro:imu_plugin_macro>
+  </xacro:macro>
+
+  <!-- Techpod Mono-VI Sensor Macro -->
+  <xacro:macro name="asl_mono_vi_1" params="namespace parent_link suffix fps h_fov imu_topic acc_nd acc_rw gyr_nd gyr_rw *T_base_cam *T_cam_imu *T_cam_odom">
+    <xacro:camera_macro_2
+      namespace="${namespace}"
+      parent_link="${parent_link}"
+      camera_suffix="${suffix}"
+      frame_rate="${fps}"
+      horizontal_fov="${h_fov}"
+      image_width="752"
+      image_height="480"
+      image_format="L8"
+      min_distance="0.02"
+      max_distance="8000"
+      noise_mean="0.0"
+      noise_stddev="0.007"
+      mass="0.02"
+      enable_visual="true">
+      <mesh filename="package://rotors_description/meshes/vi_camera.dae" scale="1 1 1" />
+      <xacro:cube_inertia l="0.02" mass="0.01" />
+      <xacro:insert_block name="T_base_cam" />
+    </xacro:camera_macro_2>
+    <xacro:imu_plugin_macro
+      namespace="${namespace}"
+      imu_suffix="_camera_${suffix}"
+      parent_link="${namespace}/camera_${suffix}_optical_link"
+      imu_topic="${imu_topic}"
+      mass_imu_sensor="0.01"
+      gyroscope_noise_density="${gyr_nd}"
+      gyroscope_random_walk="${gyr_rw}"
+      gyroscope_bias_correlation_time="1000.0"
+      gyroscope_turn_on_bias_sigma="0.0087"
+      accelerometer_noise_density="${acc_nd}"
+      accelerometer_random_walk="${acc_rw}"
+      accelerometer_bias_correlation_time="300.0"
+      accelerometer_turn_on_bias_sigma="0.1960">
+      <xacro:cube_inertia l="0.02" mass="0.01" />
+      <xacro:insert_block name="T_cam_imu"/>
+    </xacro:imu_plugin_macro>
+    <xacro:odometry_plugin_macro
+      namespace="${namespace}"
+      odometry_sensor_suffix="_camera_${suffix}"
+      parent_link="${namespace}/camera_${suffix}_optical_link"
+      pose_topic="cam_${suffix}/pose"
+      pose_with_covariance_topic="t1"
+      position_topic="t2"
+      transform_topic="t3"
+      odometry_topic="t4"
+      parent_frame_id="world"
+      child_frame_id="odometry_sensor_camera_${suffix}"
+      mass_odometry_sensor="0.001"
+      measurement_divisor="1"
+      measurement_delay="0"
+      unknown_delay="0.0"
+      noise_normal_position="0 0 0"
+      noise_normal_quaternion="0 0 0"
+      noise_normal_linear_velocity="0 0 0"
+      noise_normal_angular_velocity="0 0 0"
+      noise_uniform_position="0 0 0"
+      noise_uniform_quaternion="0 0 0"
+      noise_uniform_linear_velocity="0 0 0"
+      noise_uniform_angular_velocity="0 0 0"
+      enable_odometry_map="false"
+      odometry_map=""
+      image_scale="">
+      <xacro:cube_inertia l="0.02" mass="0.001" />
+      <xacro:insert_block name="T_cam_odom"/>
+    </xacro:odometry_plugin_macro>
+    <!---->
   </xacro:macro>
 
   <xacro:macro name="ground_truth_imu_and_odometry" params="namespace parent_link">
