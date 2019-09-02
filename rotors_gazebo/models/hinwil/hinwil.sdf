@@ -6,8 +6,8 @@
       <collision name="collision">
         <geometry>
           <heightmap>
-            <uri>model://hinwil/materials/textures/hinwil_heightmap_large_1025_trees.png</uri>
-            <size>925 925 20</size>
+            <uri>model://hinwil/materials/textures/heightmap_996m_513_8bit.png</uri>
+            <size>996 996 45</size>
             <pos>0 0 -5</pos>
           </heightmap>
         </geometry>
@@ -29,12 +29,12 @@
       <visual name="visual">
         <geometry>
           <heightmap>
-            <uri>model://hinwil/materials/textures/hinwil_heightmap_large_1025_trees.png</uri>
-            <size>925 925 20</size>
+            <uri>model://hinwil/materials/textures/heightmap_996m_1025_8bit.png</uri>
+            <size>996 996 45</size>
             <pos>0 0 -5</pos>
             <texture>
-              <size>925</size>
-              <diffuse>model://hinwil/materials/textures/hinwil_texture_large_3700.png</diffuse>
+              <size>996</size>
+              <diffuse>model://hinwil/materials/textures/texture_996m_4000.png</diffuse>
               <normal>file://media/materials/textures/flat_normal.png</normal>
             </texture>
           </heightmap>
