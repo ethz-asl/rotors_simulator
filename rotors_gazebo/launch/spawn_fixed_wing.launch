@@ -21,6 +21,7 @@
   <arg name="wait_to_record_bag" default="false"/>
   <arg name="enable_mavlink_interface" default="true"/>
   <arg name="serial_device" default="/dev/ttyACM0"/>
+  <arg name="enable_wind" default="true"/>
 
   <arg name="tracking_cam" default="$(find rotors_description)/urdf/tracking_cam.xacro"/>
   <arg name="target_name" default="$(arg namespace)"/>
@@ -40,7 +41,8 @@
     vehicle_params_yaml_file:=$(arg vehicle_params_yaml_file)
     yaml_path:=$(arg yaml_path)
     is_input_joystick:=$(arg is_input_joystick)
-    serial_device:=$(arg serial_device)"
+    serial_device:=$(arg serial_device)
+    enable_wind:=$(arg enable_wind)"
   />
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
 

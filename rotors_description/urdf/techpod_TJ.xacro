@@ -23,6 +23,7 @@
   <xacro:property name="yaml_path" value="$(arg yaml_path)"/>
   <xacro:property name="serial_device" value="$(arg serial_device)" />
   <xacro:property name="main_color" value="White"/>
+  <xacro:property name="enable_wind" value="$(arg enable_wind)"/>
 
   <!-- Constants -->
   <xacro:property name="PI" value="3.1415926535897931" />
@@ -281,36 +282,38 @@
   </gazebo>
   -->
 
-  <gazebo>
-    <plugin filename="librotors_gazebo_wind_beta_plugin.so" name="wind_beta_plugin">
-      <robotNamespace>${namespace}</robotNamespace>
-      <windLayer>
-        <layer name="layer1">
-          <altitude>10</altitude>
-          <windMeanNED>-5 0 0</windMeanNED>
-        </layer>
-        <layer name="layer2">
-          <altitude>25</altitude>
-          <windMeanNED>-6 0 0</windMeanNED>
-        </layer>
-        <layer name="layer3">
-          <altitude>35</altitude>
-          <windMeanNED>-10 0 0</windMeanNED>
-        </layer>
-      </windLayer>
-      <findWind>
-        <query name="q1">
-          <linkName>${namespace}/base_link</linkName>
-          <windTopic>wind_base_link</windTopic>
-        </query>
-      </findWind>
-      <lambdaMin>10</lambdaMin>
-      <lengthScale>725</lengthScale>
-      <fourierNNN>10 10 10</fourierNNN>
-      <sigma>5</sigma>
-      <trnspVelTurbNED>5 0 0</trnspVelTurbNED>
-    </plugin>
-  </gazebo>
+  <xacro:if value="${enable_wind}">
+    <gazebo>
+      <plugin filename="librotors_gazebo_wind_beta_plugin.so" name="wind_beta_plugin">
+        <robotNamespace>${namespace}</robotNamespace>
+        <windLayer>
+          <layer name="layer1">
+            <altitude>10</altitude>
+            <windMeanNED>-5 0 0</windMeanNED>
+          </layer>
+          <layer name="layer2">
+            <altitude>25</altitude>
+            <windMeanNED>-6 0 0</windMeanNED>
+          </layer>
+          <layer name="layer3">
+            <altitude>35</altitude>
+            <windMeanNED>-10 0 0</windMeanNED>
+          </layer>
+        </windLayer>
+        <findWind>
+          <query name="q1">
+            <linkName>${namespace}/base_link</linkName>
+            <windTopic>wind_base_link</windTopic>
+          </query>
+        </findWind>
+        <lambdaMin>10</lambdaMin>
+        <lengthScale>725</lengthScale>
+        <fourierNNN>10 10 10</fourierNNN>
+        <sigma>5</sigma>
+        <trnspVelTurbNED>5 0 0</trnspVelTurbNED>
+      </plugin>
+    </gazebo>
+  </xacro:if>
 
   <gazebo>
     <plugin filename="librotors_gazebo_propulsion_plugin.so" name="propulsion_plugin">

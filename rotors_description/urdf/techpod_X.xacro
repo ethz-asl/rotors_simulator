@@ -22,6 +22,7 @@
   <xacro:property name="use_mesh" value="true" />
   <xacro:property name="yaml_path" value="$(arg yaml_path)"/>
   <xacro:property name="serial_device" value="$(arg serial_device)" />
+  <xacro:property name="enable_wind" value="$(arg enable_wind)"/>
 
   <!-- Constants -->
   <xacro:property name="PI" value="3.1415926535897931" />
@@ -272,43 +273,45 @@
     <xacro:insert_block name="propeller_inertia" />
   </xacro:propeller>
 
-  <gazebo>
-    <plugin filename="librotors_gazebo_wind_beta_plugin.so" name="wind_beta_plugin">
-      <robotNamespace>${namespace}</robotNamespace>
-      <windLayer>
-        <layer name="layer1">
-          <altitude>10</altitude>
-          <windMeanNED>-5 0 0</windMeanNED>
-        </layer>
-        <layer name="layer2">
-          <altitude>25</altitude>
-          <windMeanNED>-6 0 0</windMeanNED>
-        </layer>
-        <layer name="layer3">
-          <altitude>35</altitude>
-          <windMeanNED>-10 0 0</windMeanNED>
-        </layer>
-      </windLayer>
-      <!---->
-      <findWind>
-        <query name="q1">
-          <linkName>${namespace}/base_link</linkName>
-          <windTopic>wind_base_link</windTopic>
-        </query>
-      </findWind>
-      <!--
-      <customWindFieldPath>${yaml_path}/../test_wind_field.csv</customWindFieldPath>
-      <windFieldXOffset>100</windFieldXOffset>
-      <windFieldYOffset>100</windFieldYOffset>
-      <windFieldZOffset>0</windFieldZOffset>
-      -->
-      <lambdaMin>10</lambdaMin>
-      <lengthScale>725</lengthScale>
-      <fourierNNN>7 7 7</fourierNNN>
-      <sigma>2</sigma>
-      <trnspVelTurbNED>5 0 0</trnspVelTurbNED>
-    </plugin>
-  </gazebo>
+  <xacro:if value="${enable_wind}">
+    <gazebo>
+      <plugin filename="librotors_gazebo_wind_beta_plugin.so" name="wind_beta_plugin">
+        <robotNamespace>${namespace}</robotNamespace>
+        <windLayer>
+          <layer name="layer1">
+            <altitude>10</altitude>
+            <windMeanNED>-5 0 0</windMeanNED>
+          </layer>
+          <layer name="layer2">
+            <altitude>25</altitude>
+            <windMeanNED>-6 0 0</windMeanNED>
+          </layer>
+          <layer name="layer3">
+            <altitude>35</altitude>
+            <windMeanNED>-10 0 0</windMeanNED>
+          </layer>
+        </windLayer>
+        <!---->
+        <findWind>
+          <query name="q1">
+            <linkName>${namespace}/base_link</linkName>
+            <windTopic>wind_base_link</windTopic>
+          </query>
+        </findWind>
+        <!--
+        <customWindFieldPath>${yaml_path}/../test_wind_field.csv</customWindFieldPath>
+        <windFieldXOffset>100</windFieldXOffset>
+        <windFieldYOffset>100</windFieldYOffset>
+        <windFieldZOffset>0</windFieldZOffset>
+        -->
+        <lambdaMin>10</lambdaMin>
+        <lengthScale>725</lengthScale>
+        <fourierNNN>7 7 7</fourierNNN>
+        <sigma>2</sigma>
+        <trnspVelTurbNED>5 0 0</trnspVelTurbNED>
+      </plugin>
+    </gazebo>
+  </xacro:if>
 
   <gazebo>
     <plugin filename="librotors_gazebo_propulsion_plugin.so" name="propulsion_plugin">
