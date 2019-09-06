@@ -43,6 +43,7 @@
 #include "WindSpeedBeta.pb.h"
 #include "ConnectGazeboToRosTopic.pb.h"
 #include "Float32.pb.h"
+#include "vector2d.pb.h"
 
 #include "common.h"
 #include "uav_parameters.h"
@@ -139,7 +140,11 @@ private:
         double omega = 0;      // propeller angular speed (wrt parent link) [rad/s]
         double omega_dot = 0;  // propeller angular acc (wrt parent link) [rad/s²]
         double omega_ref = 0;  // propeller angular ref speed (wrt parent link) [rad/s]
-        double tau = 0.1;      // prop/motor time constant [s]
+        double omega_dead = 0; // ESC dead-zone. If omega_ref below this value prop wont spin [rad/s]
+        double omega_max = 1e5;//
+        double tau_p = 0.1;    // prop/motor time constant rising [s]
+        double tau_n = 0.3;    // prop/motor time constant falling [s]
+        double tau_su = 0.1;     // prop/motor time constant spool up [s]
         double dt = 0.0;       // discrete time step for motor simulation [s]
 
         transport::SubscriberPtr omega_ref_sub = nullptr;
@@ -149,6 +154,8 @@ private:
 
         transport::PublisherPtr prop_slpstr_pub = nullptr;
         std::string prop_slpstr_pubtopic;
+
+        transport::PublisherPtr speed_pub = nullptr;
 
         std::array<gz_visualization_msgs::ArrowMarker*,7> vec_vis;
         gz_visualization_msgs::ArrowMarker* wind_vis;
@@ -167,9 +174,44 @@ private:
 
         void MotorDyn(){
 
-            if (tau>0.0 && dt>0.0) {
-                omega = omega + std::min(dt, tau)/tau*(omega_ref-omega);
-                omega_dot = (omega_ref-omega)*std::min(dt, tau)/(dt*tau);
+            // constrain speed reference with dead-zone
+            if (omega_ref<omega_dead)
+                omega_ref = 0.0;
+
+            if (omega_ref>omega_max)
+                omega_ref=omega_max;
+
+            if (tau_p>0.0 && tau_n>0.0 && tau_su>0.0 && dt>0.0) {
+
+                if (omega<omega_dead && omega_ref>=omega_dead) {
+                    // throttle up from within deadzone
+
+                    // Model 1: 1st order
+                    omega = omega + std::min(dt, tau_su)/tau_su*(omega_ref-omega);
+                    omega_dot = (omega_ref-omega)*std::min(dt, tau_su)/(dt*tau_su);
+
+                    // Model 2: slew-rate:
+                    /* double slew_dead = omega_dead/0.15/tau_su; // approx. fastest rise
+                    omega = ignition::math::clamp(omega + slew_dead*dt, 0.0, omega_ref);
+                    omega_dot = slew_dead; */
+
+                } else {
+                    if (omega_ref>=omega){
+                        omega = omega + std::min(dt, tau_p)/tau_p*(omega_ref-omega);
+                        omega_dot = (omega_ref-omega)*std::min(dt, tau_p)/(dt*tau_p);
+
+                    } else {
+                        omega = omega + std::min(dt, tau_n)/tau_n*(omega_ref-omega);
+                        omega_dot = (omega_ref-omega)*std::min(dt, tau_n)/(dt*tau_n);
+                    }
+                }
+
+                gazebo::msgs::Vector2d speed_msg;
+                speed_msg.set_x(omega);
+                speed_msg.set_y(omega_dot);
+
+                if (speed_pub)
+                    speed_pub->Publish(speed_msg);
 
             } else {
                 gzerr<<"simulation time-step and/or motor time-constant equals zero\n";

@@ -276,7 +276,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     gzdbg<<"subscribing to ~/" + namespace_ + vane_sub_topic_<<std::endl;
   }
 
-  for (int j=0; j<n_wind; j++){
+  for (int j=0; j<n_wind; j++) {
       wind[j].wind_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + wind[j].wind_topic, &GazeboMavlinkInterface::Wind::Callback, &wind[j]);
       gzdbg<<"subscribing to ~/" + namespace_ + "/" + wind[j].wind_topic + "\n";
   }

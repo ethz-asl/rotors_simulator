@@ -1080,6 +1080,11 @@
             <turnDir>cw</turnDir>
             <speedRefTopic>prop_ref_0</speedRefTopic>
             <propParamsYAML>${yaml_path}/techpod_TJ_prop.yaml</propParamsYAML>
+            <tauUp>0.1963</tauUp>
+            <tauDown>0.3777</tauDown>
+            <tauSpoolUp>2.0422</tauSpoolUp>
+            <rdpsDead>200</rdpsDead>
+            <rdpsMax>1028</rdpsMax>
             <slpstrTopic>prop_slpstr_0</slpstrTopic>
             <visTopic>prop_vis_0</visTopic>
             <wind name="wind">
@@ -1375,9 +1380,9 @@
             <channel name="propeller">
                <input_index>4</input_index>
                <input_offset>1</input_offset>
-               <input_scaling>514</input_scaling><!-- max_vel/2  [rad/s]-->
+               <input_scaling>578.7</input_scaling><!-- rdps_slope/2  [rad/s]-->
                <zero_position_disarmed>0</zero_position_disarmed>
-               <zero_position_armed>0</zero_position_armed>
+               <zero_position_armed>15.03</zero_position_armed>
                <joint_control_type>gz_msg</joint_control_type>
                <gztopic>prop_ref_0</gztopic>
             </channel>

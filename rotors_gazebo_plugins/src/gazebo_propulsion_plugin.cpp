@@ -130,6 +130,31 @@ void GazeboPropulsion::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
                      <<"using default parameters.\n";
             }
 
+            if (_sdf_propeller->HasElement("tauUp"))
+                propellers_[idx].tau_p = _sdf_propeller->GetElement("tauUp")->Get<double>();
+            else
+                gzwarn<<"No time-constant for increasing throttle specified, using default \n";
+
+            if (_sdf_propeller->HasElement("tauDown"))
+                propellers_[idx].tau_n = _sdf_propeller->GetElement("tauDown")->Get<double>();
+            else
+                gzwarn<<"No time-constant for decreasing throttle specified, using default \n";
+
+            if (_sdf_propeller->HasElement("tauSpoolUp"))
+                propellers_[idx].tau_su = _sdf_propeller->GetElement("tauSpoolUp")->Get<double>();
+            else
+                gzwarn<<"No time-constant for spool-up specified, using default \n";
+
+            if (_sdf_propeller->HasElement("rdpsDead"))
+                propellers_[idx].omega_dead = _sdf_propeller->GetElement("rdpsDead")->Get<double>();
+            else
+                gzwarn<<"No prop speed dead-zone defined, using default \n";
+
+            if (_sdf_propeller->HasElement("rdpsMax"))
+                propellers_[idx].omega_max = _sdf_propeller->GetElement("rdpsMax")->Get<double>();
+            else
+                gzwarn<<"No max prop speed defined, using default \n";
+
             // inertia tensor (assuming flat disk) expressed in propeller* frame
             // propeller* frame: parent-fixed and x-axis aligned with prop axis
             M3D inertia_prop = propellers_[idx].prop_params.mass *
@@ -278,6 +303,9 @@ void GazeboPropulsion::OnUpdate() {
                                                                          &propellers_[idx].wind[j]);
                 gzdbg<<"subscribing to: "<<"~/" + namespace_ + "/" + propellers_[idx].wind[j].wind_topic<<"\n";
             }
+
+            propellers_[idx].speed_pub = node_handle_->Advertise<gazebo::msgs::Vector2d>(
+                        "~/" + namespace_ + "/speed_p" + std::to_string(idx), 1);
         }
 
         pubs_and_subs_created_ = true;
