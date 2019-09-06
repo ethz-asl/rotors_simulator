@@ -70,70 +70,71 @@
     </gazebo>
   </xacro:macro>
 
-<!-- Airfoil segment joint, link and plugin -->
-<xacro:macro name="airfoil_segment"
-  params="robot_namespace segment_name parent mass_segment do_flex k c color use_mesh_file mesh_file segment_length segment_width
-    segment_height *axis *joint_origin *inertia_origin *vis_coll_origin *inertia ">
+  <!-- Airfoil segment joint, link and plugin -->
+  <xacro:macro name="airfoil_segment"
+    params="robot_namespace segment_name parent mass_segment do_flex k c color use_mesh_file mesh_file segment_length segment_width
+      segment_height *axis *joint_origin *inertia_origin *vis_coll_origin *inertia ">
 
-  <xacro:if value="${do_flex}">
-    <joint name="${robot_namespace}/${segment_name}_joint" type="revolute">
-      <xacro:insert_block name="joint_origin" />
-      <xacro:insert_block name="axis" />
-      <parent link="${parent}" />
-      <child link="${robot_namespace}/${segment_name}"/>
-      <limit upper="0.17" lower="-0.17" effort="5000" velocity="50"/>
-      <dynamics damping="${c}"/>
-    </joint>
-    <gazebo reference="${robot_namespace}/${segment_name}_joint">
-      <implicitSpringDamper>true</implicitSpringDamper>
-      <springStiffness>${k}</springStiffness>
+    <xacro:if value="${do_flex}">
+      <joint name="${robot_namespace}/${segment_name}_joint" type="revolute">
+        <xacro:insert_block name="joint_origin" />
+        <xacro:insert_block name="axis" />
+        <parent link="${parent}" />
+        <child link="${robot_namespace}/${segment_name}"/>
+        <limit upper="0.17" lower="-0.17" effort="5000" velocity="50"/>
+        <dynamics damping="${c}"/>
+      </joint>
+      <gazebo reference="${robot_namespace}/${segment_name}_joint">
+        <implicitSpringDamper>true</implicitSpringDamper>
+        <springStiffness>${k}</springStiffness>
+      </gazebo>
+    </xacro:if>
+    <xacro:unless value="${do_flex}">
+      <joint name="${robot_namespace}/${segment_name}_joint" type="revolute">
+        <xacro:insert_block name="joint_origin" />
+        <xacro:insert_block name="axis" />
+        <parent link="${parent}" />
+        <child link="${robot_namespace}/${segment_name}"/>
+        <limit upper="0" lower="-0" effort="5000" velocity="50"/>
+      </joint>
+    </xacro:unless>
+
+    <link name="${robot_namespace}/${segment_name}">
+      <inertial>
+        <xacro:insert_block name="inertia_origin" />
+        <mass value="${mass_segment}" />
+        <xacro:box_inertia x="${segment_length}" y="${segment_width}" z="${segment_height}" mass="${mass_segment}" />
+      </inertial>
+      <visual>
+        <xacro:insert_block name="vis_coll_origin" />
+        <geometry>
+          <xacro:if value="${use_mesh_file}">
+            <mesh filename="${mesh_file}" scale="1 1 1" />
+          </xacro:if>
+          <xacro:unless value="${use_mesh_file}">
+            <box size="${segment_length} ${segment_width} ${segment_height}" />
+          </xacro:unless>
+        </geometry>
+      </visual>
+      <collision>
+        <xacro:insert_block name="vis_coll_origin" />
+        <geometry>
+          <xacro:if value="${use_mesh_file}">
+            <mesh filename="${mesh_file}" scale="1 1 1" />
+          </xacro:if>
+          <xacro:unless value="${use_mesh_file}">
+            <box size="${segment_length} ${segment_width} ${segment_height}" />
+          </xacro:unless>
+        </geometry>
+      </collision>
+    </link>
+
+    <gazebo reference="${robot_namespace}/${segment_name}">
+      <material>Gazebo/${color}</material>
     </gazebo>
-  </xacro:if>
-  <xacro:unless value="${do_flex}">
-    <joint name="${robot_namespace}/${segment_name}_joint" type="revolute">
-      <xacro:insert_block name="joint_origin" />
-      <xacro:insert_block name="axis" />
-      <parent link="${parent}" />
-      <child link="${robot_namespace}/${segment_name}"/>
-      <limit upper="0" lower="-0" effort="5000" velocity="50"/>
-    </joint>
-  </xacro:unless>
 
-  <link name="${robot_namespace}/${segment_name}">
-    <inertial>
-      <xacro:insert_block name="inertia_origin" />
-      <mass value="${mass_segment}" />
-      <xacro:box_inertia x="${segment_length}" y="${segment_width}" z="${segment_height}" mass="${mass_segment}" />
-    </inertial>
-    <visual>
-      <xacro:insert_block name="vis_coll_origin" />
-      <geometry>
-        <xacro:if value="${use_mesh_file}">
-          <mesh filename="${mesh_file}" scale="1 1 1" />
-        </xacro:if>
-        <xacro:unless value="${use_mesh_file}">
-          <box size="${segment_length} ${segment_width} ${segment_height}" />
-        </xacro:unless>
-      </geometry>
-    </visual>
-    <collision>
-      <xacro:insert_block name="vis_coll_origin" />
-      <geometry>
-        <xacro:if value="${use_mesh_file}">
-          <mesh filename="${mesh_file}" scale="1 1 1" />
-        </xacro:if>
-        <xacro:unless value="${use_mesh_file}">
-          <box size="${segment_length} ${segment_width} ${segment_height}" />
-        </xacro:unless>
-      </geometry>
-    </collision>
-  </link>
+  </xacro:macro>
 
-  <gazebo reference="${robot_namespace}/${segment_name}">
-    <material>Gazebo/${color}</material>
-  </gazebo>
-
-</xacro:macro>
 
   <!-- Control surface joint and link -->
   <xacro:macro name="control_surface"
@@ -232,101 +233,101 @@
     </gazebo>
   </xacro:macro>
 
-<!-- Aerodyn. angle vane -->
-<xacro:macro name="angle_vane"
-  params="robot_namespace vane_name type chord arm_cp parent wind_topic mass_vane
-          color mesh_file *joint_origin *vis_coll_origin *inertia">
+  <!-- Aerodyn. angle vane -->
+  <xacro:macro name="angle_vane"
+    params="robot_namespace vane_name type chord arm_cp parent wind_topic mass_vane
+            color mesh_file *joint_origin *vis_coll_origin *inertia">
 
-  <joint name="${robot_namespace}/${vane_name}_joint" type="continuous">
-    <xacro:insert_block name="joint_origin" />
-    <xacro:if value="${type=='alpha'}">
-       <axis xyz="0 1 0" />
-     </xacro:if>
-     <xacro:if value="${type=='beta'}">
-       <axis xyz="0 0 -1" />
-     </xacro:if>
-     <parent link="${parent}" />
-     <child link="${robot_namespace}/${vane_name}" />
-     <dynamics friction="0" damping="0.001"/>
-  </joint>
-
-  <link name="${robot_namespace}/${vane_name}">
-    <inertial>
-      <mass value="${mass_vane}" />
-      <xacro:insert_block name="inertia" />
-    </inertial>
-    <visual>
-      <xacro:insert_block name="vis_coll_origin" />
-      <geometry>
-        <box size="0.1 0.003 0.003" />
-      </geometry>
-    </visual>
-    <visual>
+    <joint name="${robot_namespace}/${vane_name}_joint" type="continuous">
+      <xacro:insert_block name="joint_origin" />
       <xacro:if value="${type=='alpha'}">
-        <origin xyz="-0.04 0.02 0" rpy="0 0 0" />
+         <axis xyz="0 1 0" />
+       </xacro:if>
+       <xacro:if value="${type=='beta'}">
+         <axis xyz="0 0 -1" />
+       </xacro:if>
+       <parent link="${parent}" />
+       <child link="${robot_namespace}/${vane_name}" />
+       <dynamics friction="0" damping="0.001"/>
+    </joint>
+
+    <link name="${robot_namespace}/${vane_name}">
+      <inertial>
+        <mass value="${mass_vane}" />
+        <xacro:insert_block name="inertia" />
+      </inertial>
+      <visual>
+        <xacro:insert_block name="vis_coll_origin" />
         <geometry>
-          <box size="0.02 0.04 0.002" />
+          <box size="0.1 0.003 0.003" />
         </geometry>
-      </xacro:if>
-      <xacro:if value="${type=='beta'}">
-        <origin xyz="-0.04 0 0.02" rpy="0 0 0" />
-        <geometry>
-          <box size="0.02 0.002 0.04" />
-        </geometry>
-      </xacro:if>
-    </visual>
-  </link>
+      </visual>
+      <visual>
+        <xacro:if value="${type=='alpha'}">
+          <origin xyz="-0.04 0.02 0" rpy="0 0 0" />
+          <geometry>
+            <box size="0.02 0.04 0.002" />
+          </geometry>
+        </xacro:if>
+        <xacro:if value="${type=='beta'}">
+          <origin xyz="-0.04 0 0.02" rpy="0 0 0" />
+          <geometry>
+            <box size="0.02 0.002 0.04" />
+          </geometry>
+        </xacro:if>
+      </visual>
+    </link>
 
-  <gazebo reference="${robot_namespace}/${vane_name}">
-    <material>Gazebo/${color}</material>
-  </gazebo>
-
-  <xacro:if value="${type=='alpha'}">
-   <gazebo>
-     <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
-       <robotNamespace>${namespace}</robotNamespace>
-       <linkName>${robot_namespace}/${vane_name}</linkName>
-        <aeroForcesVis>aero_force_vis_${vane_name}</aeroForcesVis>
-        <airfoil>
-          <segment name="alpha_vane">
-            <forward>1 0 0</forward>
-            <upward>0 0 1</upward>
-            <cp>${-arm_cp} 0 0</cp>
-            <seg_area>${2*chord*chord}</seg_area>
-            <seg_chord>${chord}</seg_chord>
-            <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
-            <wind name="wind">
-              <topic>${wind_topic}</topic>
-            </wind>
-          </segment>
-        </airfoil>
-      </plugin>
+    <gazebo reference="${robot_namespace}/${vane_name}">
+      <material>Gazebo/${color}</material>
     </gazebo>
-  </xacro:if>
 
-  <xacro:if value="${type=='beta'}">
-   <gazebo>
-     <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
-       <robotNamespace>${namespace}</robotNamespace>
-       <linkName>${robot_namespace}/${vane_name}</linkName>
-        <aeroForcesVis>aero_force_vis_${vane_name}</aeroForcesVis>
-        <airfoil>
-          <segment name="beta_vane">
-            <forward>1 0 0</forward>
-            <upward>0 -1 0</upward>
-            <cp>${-arm_cp} 0 0</cp>
-            <seg_area>${2*chord*chord}</seg_area>
-            <seg_chord>${chord}</seg_chord>
-            <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
-            <wind name="wind">
-              <topic>${wind_topic}</topic>
-            </wind>
-          </segment>
-        </airfoil>
-      </plugin>
-    </gazebo>
-  </xacro:if>
+    <xacro:if value="${type=='alpha'}">
+     <gazebo>
+       <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <linkName>${robot_namespace}/${vane_name}</linkName>
+          <aeroForcesVis>aero_force_vis_${vane_name}</aeroForcesVis>
+          <airfoil>
+            <segment name="alpha_vane">
+              <forward>1 0 0</forward>
+              <upward>0 0 1</upward>
+              <cp>${-arm_cp} 0 0</cp>
+              <seg_area>${2*chord*chord}</seg_area>
+              <seg_chord>${chord}</seg_chord>
+              <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
+              <wind name="wind">
+                <topic>${wind_topic}</topic>
+              </wind>
+            </segment>
+          </airfoil>
+        </plugin>
+      </gazebo>
+    </xacro:if>
 
-</xacro:macro>
+    <xacro:if value="${type=='beta'}">
+     <gazebo>
+       <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <linkName>${robot_namespace}/${vane_name}</linkName>
+          <aeroForcesVis>aero_force_vis_${vane_name}</aeroForcesVis>
+          <airfoil>
+            <segment name="beta_vane">
+              <forward>1 0 0</forward>
+              <upward>0 -1 0</upward>
+              <cp>${-arm_cp} 0 0</cp>
+              <seg_area>${2*chord*chord}</seg_area>
+              <seg_chord>${chord}</seg_chord>
+              <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
+              <wind name="wind">
+                <topic>${wind_topic}</topic>
+              </wind>
+            </segment>
+          </airfoil>
+        </plugin>
+      </gazebo>
+    </xacro:if>
+
+  </xacro:macro>
 
 </robot>

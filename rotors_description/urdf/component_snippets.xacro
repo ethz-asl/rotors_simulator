@@ -1063,7 +1063,7 @@
     </xacro:odometry_plugin_macro>
   </xacro:macro>
 
-  <xacro:macro name="default_imu" params="namespace parent_link">
+  <xacro:macro name="default_imu" params="namespace parent_link *origin">
     <!-- ADIS16448 IMU. -->
     <xacro:imu_plugin_macro
       namespace="${namespace}"
@@ -1080,7 +1080,7 @@
       accelerometer_bias_correlation_time="300.0"
       accelerometer_turn_on_bias_sigma="0.1960">
       <xacro:cube_inertia l="0.02" mass="0.015" />
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <xacro:insert_block name="origin" />
     </xacro:imu_plugin_macro>
   </xacro:macro>
 
