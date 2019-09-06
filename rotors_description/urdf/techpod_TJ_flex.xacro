@@ -1097,12 +1097,12 @@
          <aeroForcesVis>aero_force_vis_0</aeroForcesVis>
          <body>
             <element>
-               <aBdyXX>0.02</aBdyXX>
-               <aBdyYY>0.07</aBdyYY>
-               <aBdyZZ>0.04</aBdyZZ>
+               <aBdyXX>0.0176</aBdyXX>
+               <aBdyYY>0.0640</aBdyYY>
+               <aBdyZZ>0.0560</aBdyZZ>
                <forward>1 0 0</forward>
                <upward>0 0 1</upward>
-               <cp>0.2 0.0 0.05</cp>
+               <cp>0 0.0 0.097</cp>     <!-- ... in (uncorrected) cg -->
                <wind name="wind">
                  <topic>wind_base_link</topic>
                </wind>

@@ -3,12 +3,12 @@
 alpha_max_ns: 0.14    # [rad]
 alpha_min_ns: -0.14   # [rad]
 
-# derived from from ID
+# derived from old ID
 #c_lift_alpha: [0.0, 1.0042, 0]
 #c_drag_alpha: [0.04, 0.2, 0.33]
 #c_pitch_moment_alpha: [0, 0]
 
-# modifed
+# derived from latest ID
 c_lift_alpha: [0, 1.5955, 0]
 c_drag_alpha: [0.0135, 0.2633, 0.2042]
 c_pitch_moment_alpha: [0, 0]
