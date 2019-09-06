@@ -172,10 +172,10 @@ sudo apt install python-rosinstall python-rosinstall-generator python-wstool bui
 sudo apt install python-catkin-tools
 mkdir -p ~/catkin_ws/src
 cd ~/catkin_ws/
-catkin_make
+#catkin_make
 
 ## Overlay workspace on top of environment (only for current shell)
-source devel/setup.bash
+#source devel/setup.bash
 
 ################################ RotorS simulator #########################################
 ##
