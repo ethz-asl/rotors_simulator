@@ -1,6 +1,6 @@
 <launch>
-  <arg name="uav_name" default="techpod"/>
-  <arg name="world_name" default="yosemite"/>
+  <arg name="uav_name" default="techpod_TJ_flex"/>
+  <arg name="world_name" default="fw_playground"/>
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
   <arg name="log_file" default="$(arg uav_name)"/>
@@ -10,7 +10,7 @@
   <!-- The following line causes gzmsg and gzerr messages to be printed to the console
       (even when Gazebo is started through roslaunch) -->
   <arg name="verbose" default="false"/>
-  <arg name="spawn_tc" default="true"/>
+  <arg name="spawn_tc" default="false"/>
   <arg name="enable_wind" default="true"/>
 
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>

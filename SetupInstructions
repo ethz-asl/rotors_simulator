@@ -241,20 +241,25 @@ source ~/catkin_ws/devel/setup.bash
 ## or "hil_state_quaternion" (state-level hil) and "hil_gps" mavlink messages are sent back to the Pixhawk to provide feedback.
 
 ## To launch a fw-simulation, go to your catkin workspace and invoke (choosing one of the param values at a time...):
-## "roslaunch rotors_gazebo fixed_wing_hil.launch verbose:=(true|false) world_name:=(davos|yosemite|fw_playground) uav_name:=(techpod_X|techpod_X_flex)"
+##
+## "roslaunch rotors_gazebo fixed_wing_hil.launch verbose:={false|true} world_name:={fw_playground|yosemite|davos|hinwil}
+## uav_name:={techpod_TJ_flex|techpod_TJ|techpod_X_flex|techpod_X} spawn_tc:={false|true} enable_wind:={true|false}"
+##
 ## where "verbose" can be used to enable debug output (e.g. sim-rate, message statistics etc), "world_name" sets the world in which 
-## the UAV spawns and "uav_name" is used to select the UAV. E.g.:
+## the UAV spawns and "uav_name" is used to select the UAV. "spawn_tc" further controls if tracking cameras are placed (ground view) and
+## "enable_wind" indicates if the wind specified in the uav's *.xacro is enabled. Defaults are the first options in each brace. E.g.:
 
-roslaunch rotors_gazebo fixed_wing_hil.launch verbose:=true world_name:=fw_playground uav_name:=techpod_X
+roslaunch rotors_gazebo fixed_wing_hil.launch verbose:=true world_name:=fw_playground uav_name:=techpod_X spawn_tc:=true enable_wind:=true
 
 ## The listed sets of parameters include tested and working UAV/world combinations. More UAVs/worlds will be tested or added in the future. 
 ## Note:
 ## - In the "davos" world  (avalmapper terrain), the UAV currently spawns in mid-air and, subsequently, crashes into the ground -> use 
 ##   gazebos 'follow' function to find the UAV again.
-## - Both "techpod_X" versions require an AAERTFF mixer on the Pixhawk to work properly.
+## - All "techpod" versions require an AAERTFF mixer on the Pixhawk to work properly.
 
 ## Once the simulation is running, you can start QGC to introspect e.g. the telemetry from the sim. Make sure QGC connects to the Pixhawk 
 ## only via UDP (and not serial as this interferes with gazebo). To this end, only select "UDP" in QGC under General->AutoConnect.
+## Streams of installed cameras and other signals published as ROS messages can be displayed with rqt.
 
 ## Optional: If Mavros should be used to relay messages from Gazebo via ROS to FCU, start Mavros in addition to above
 ## commands and make sure no gazebo_mavlink_interface plugin is running (otherwise "double" communication). To be tested. 

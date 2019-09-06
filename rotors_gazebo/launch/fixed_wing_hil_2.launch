@@ -11,7 +11,7 @@
   <!-- The following line causes gzmsg and gzerr messages to be printed to the console
       (even when Gazebo is started through roslaunch) -->
   <arg name="verbose" default="false"/>
-  <arg name="spawn_tc" default="true"/>
+  <arg name="spawn_tc" default="false"/>
   <arg name="enable_wind" default="true"/>
 
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
