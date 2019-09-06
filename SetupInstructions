@@ -215,6 +215,12 @@ wstool update -t src -j4
 rosdep install --from-paths src --ignore-src -y
 #./src/mavros/mavros/scripts/install_geographiclib_datasets.sh 	# might not be required
 
+# Note: HIL simulation newly requires ASLUAV mavlink dialect as of ethz-asl/fw_mavlink/ 
+# feature/hil_extended branch (commit: 55397e5). After the above installation steps, replace 
+# the ASLUAV.xml in /catkin_ws/src/mavlink-gbp-release/message_definitions/v1.0 with the the 
+# ASLUAV.xml found on ethz-asl/fw_mavlink/ in feature/hil_extended branch (commit: 55397e5). 
+# You can then proceed to build the catkin workspace, see below.
+
 ################################ Build and Run #########################################
 
 ## Build workspace, takes some minutes

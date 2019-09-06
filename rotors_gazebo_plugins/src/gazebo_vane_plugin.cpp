@@ -55,27 +55,32 @@ void GazeboVanePlugin::Load(physics::ModelPtr _model,
     node_handle_ = gazebo::transport::NodePtr(new transport::Node());
     node_handle_->Init();
     
-    this->update_connection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboVanePlugin::OnUpdate, this));
-
     if (_sdf->HasElement("robotNamespace"))
         namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
     else
         gzerr << "Please specify a robotNamespace.\n";
 
-    joint_name_;
-    if (_sdf->HasElement("vaneJoint")) {
-        joint_name_ = _sdf->Get<std::string>("vaneJoint");
-        gzdbg<<"jointName "<<joint_name_<<"\n";
-        this->vane_joint_ = this->model_->GetJoint(joint_name_);
-    }
-
-    if (!this->vane_joint_){
-        gzerr<<"Joint "<<joint_name_<<" not found \n";
-    }
-
     if (_sdf->HasElement("vaneTopic")) {
         vane_topic_ = _sdf->Get<std::string>("vaneTopic");
         gzdbg<<"vaneTopic "<<vane_topic_<<"\n";
+    }
+
+    if (_sdf->HasElement("alphaJoint")) {
+        alpha_joint_name_ = _sdf->Get<std::string>("alphaJoint");
+        gzdbg<<"alphaJoint "<<alpha_joint_name_<<"\n";
+        this->alpha_joint_ = this->model_->GetJoint(alpha_joint_name_);
+    }
+
+    if (_sdf->HasElement("betaJoint")) {
+        beta_joint_name_ = _sdf->Get<std::string>("betaJoint");
+        gzdbg<<"betaJoint "<<beta_joint_name_<<"\n";
+        this->beta_joint_ = this->model_->GetJoint(beta_joint_name_);
+    }
+
+    if (this->alpha_joint_||this->beta_joint_) {
+         this->update_connection_ = event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboVanePlugin::OnUpdate, this));
+    } else {
+        gzerr<<"Joint(s) not found, plugin won't run. \n";
     }
 }
 
@@ -87,41 +92,37 @@ void GazeboVanePlugin::OnUpdate() {
       pubs_and_subs_created_ = true;
     }
 
-    common::Time current_time = world_->SimTime();
+    if (alpha_joint_)
+        vane_msg_.set_x(std::remainder(alpha_joint_->Position(),2*M_PI));
+    else
+        vane_msg_.set_x(0);
 
-    vane_msg_.mutable_header()->mutable_stamp()->set_sec(current_time.sec);
-    vane_msg_.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
-    vane_msg_.mutable_header()->set_frame_id("");
-    vane_msg_.clear_name();
-    vane_msg_.clear_position();
-
-    vane_msg_.add_name(joint_name_);
-    vane_msg_.add_position(vane_joint_->Position());
+    if (beta_joint_)
+        vane_msg_.set_y(std::remainder(beta_joint_->Position(),2*M_PI));
+    else
+        vane_msg_.set_y(0);
 
     vane_pub_->Publish(vane_msg_);
-
 }
 
 /////////////////////////////////////////////////
 void GazeboVanePlugin::CreatePubsAndSubs(){
-    // Create temporary "ConnectGazeboToRosTopic" publisher and message
 
+      gzdbg<<"advertised  ~/" + namespace_ + "/" + vane_topic_ + " gazebo message.\n";
+      vane_pub_ = node_handle_->Advertise<gazebo::msgs::Vector2d>(
+          "~/" + namespace_ + "/" + vane_topic_, 1);
+
+      /*
       gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
           node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>(
               "~/" + kConnectGazeboToRosSubtopic, 1);
-
-      // ============================================ //
-      // =============== Vane MSG SETUP ============= //
-      // ============================================ //
-      gzdbg<<"advertised  ~/" + namespace_ + "/" + vane_topic_ + " gazebo message.\n";
-      vane_pub_ = node_handle_->Advertise<gz_sensor_msgs::JointState>(
-          "~/" + namespace_ + "/" + vane_topic_, 1);
 
       gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
       connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
                                                        vane_topic_);
       connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + vane_topic_);
-      connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::JOINT_STATE);
+      connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::);
       connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
+      */
 
 }

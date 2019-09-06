@@ -81,6 +81,12 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   getSdfParam<std::string>(_sdf, "gpsSubTopic", gps_sub_topic_, gps_sub_topic_);
   getSdfParam<std::string>(_sdf, "gpsGtSubTopic", gps_gt_sub_topic_, gps_gt_sub_topic_);
 
+  bool use_vane = false;
+  if (_sdf->HasElement("vaneSubTopic")) {
+    vane_sub_topic_ = _sdf->GetElement("vaneSubTopic")->Get<std::string>();
+    use_vane = true;
+  }
+
   // set input_reference_ from inputs.control
   /*
   input_reference_.resize(n_out_max);
@@ -202,6 +208,46 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     }
   }
 
+  n_wind = 0;
+  if (_sdf->HasElement("wind")) {
+      sdf::ElementPtr _sdf_wind= _sdf->GetElement("wind");
+
+      // get number of winds for this particular segment
+      while (_sdf_wind) {
+          _sdf_wind = _sdf_wind->GetNextElement("wind");
+          ++n_wind;
+      }
+
+      gzdbg<<"found "<<n_wind<<" wind(s) affecting airspeed. \n";
+      _sdf_wind = _sdf->GetElement("wind");
+      wind = new Wind [n_wind];
+
+      for(int j=0; j<n_wind; j++){
+
+          if(_sdf_wind->HasElement("topic")){
+              wind[j].wind_topic = _sdf_wind->Get<std::string>("topic");
+          } else {
+              gzwarn<<"wind ["<<j<<"] is missing 'topic' element \n";
+          }
+
+          _sdf_wind = _sdf_wind->GetNextElement("wind");
+      }
+  }
+
+  if (_sdf->HasElement("linkName")) {
+    std::string link_name = _sdf->GetElement("linkName")->Get<std::string>();
+    link_ = model_->GetLink(link_name);
+
+    if (!link_)
+        gzerr << "Link with name[" << link_name << "] not found. ";
+
+    getSdfParam<V3D>(_sdf, "pitotPos", airspeed_pos_, airspeed_pos_);
+    getSdfParam<V3D>(_sdf, "baroPos", barometer_pos_, barometer_pos_);
+
+  } else {
+    gzwarn << "[gazebo_mavlink_interface] Please specify a linkName, sensing at model origin.\n";
+  }
+
   last_imu_message_.set_seq(0); // initialize this before registring/start OnUpdate which uses this
 
   // Listen to the update event. This event is broadcast every
@@ -224,6 +270,16 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
   gps_gt_sub_ = node_handle_->Subscribe("~/" + namespace_  + gps_gt_sub_topic_ + "_hil", &GazeboMavlinkInterface::GpsGtCallback, this);
   gzdbg<<"subscribing to ~/" + namespace_ + gps_gt_sub_topic_ + "_hil"<<std::endl;
+
+  if (use_vane) {
+    vane_sub_ = node_handle_->Subscribe("~/" + namespace_  + vane_sub_topic_, &GazeboMavlinkInterface::VaneCallback, this);
+    gzdbg<<"subscribing to ~/" + namespace_ + vane_sub_topic_<<std::endl;
+  }
+
+  for (int j=0; j<n_wind; j++){
+      wind[j].wind_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + wind[j].wind_topic, &GazeboMavlinkInterface::Wind::Callback, &wind[j]);
+      gzdbg<<"subscribing to ~/" + namespace_ + "/" + wind[j].wind_topic + "\n";
+  }
 
   // Publish gazebo's motor_speed message
   motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + namespace_ + motor_velocity_reference_pub_topic_, 1);
@@ -408,10 +464,10 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
     previous_imu_seq_ = last_imu_message_.seq();
 
 #if GAZEBO_MAJOR_VERSION >= 9
-  common::Time current_time = world_->SimTime();
-  common::Time current_wall_time = world_->RealTime();
+   common::Time current_time = world_->SimTime();
+   common::Time current_wall_time = world_->RealTime();
 #else
-  common::Time current_time = world_->GetSimTime();
+   common::Time current_time = world_->GetSimTime();
 #endif
   double dt = (current_time - last_time_).Double();
   dt_wall_ += (current_wall_time - last_wall_time_).Double();
@@ -560,6 +616,19 @@ void GazeboMavlinkInterface::SendSensorMessages() {
 #endif
   double dt = (current_time - last_imu_time_).Double();
 
+  V3D wind_sens_B = V3D(0,0,0);
+  if (n_wind>0 && link_) {
+#if GAZEBO_MAJOR_VERSION >= 9
+        ignition::math::Pose3d pose = link_->WorldPose();
+#else
+        ignition::math::Pose3d pose = ignitionFromGazeboMath(link_->GetWorldPose());
+#endif
+      V3D cp = pose.Pos() + pose.Rot().RotateVector(airspeed_pos_); // airspeed sensor position in world frame
+      UpdateWind(cp);   // get wind at airspeed sensor position (updates wind_sens)
+      wind_sens_B = pose.Rot().RotateVectorReverse(wind_sens);
+  }
+
+
   //thread safe copying
   std::unique_lock<std::mutex> lock(gps_gt_message_mutex_);
   double gt_lat_loc = gt_lat;
@@ -577,14 +646,7 @@ void GazeboMavlinkInterface::SendSensorMessages() {
       last_imu_message_.orientation().z());
 
     ignition::math::Quaterniond q_gb = q_gr*q_br.Inverse(); //body to gazebo
-    ignition::math::Quaterniond q_nb = q_ng*q_gb; //body to ned
-
-#if GAZEBO_MAJOR_VERSION >= 9
-    ignition::math::Vector3d pos_g = model_->WorldPose().Pos();
-#else
-    ignition::math::Vector3d pos_g = ignitionFromGazeboMath(model_->GetWorldPose().pos);
-#endif
-    ignition::math::Vector3d pos_n = q_ng.RotateVector(pos_g);
+    ignition::math::Quaterniond q_nb = q_ng*q_gb;           //body to ned
 
     //float declination = get_mag_declination(lat_rad_, lon_rad_);
 
@@ -606,15 +668,41 @@ void GazeboMavlinkInterface::SendSensorMessages() {
     mag_d_.Y() = Y;
     mag_d_.Z() = Z;
 
+    V3D pos_g;
+    V3D vel_b;
+    V3D vel_n;
+    V3D omega_nb_b;
+
+    if (link_){
 #if GAZEBO_MAJOR_VERSION >= 9
-    ignition::math::Vector3d vel_b = q_br.RotateVector(model_->RelativeLinearVel());
-    ignition::math::Vector3d vel_n = q_ng.RotateVector(model_->WorldLinearVel());
-    ignition::math::Vector3d omega_nb_b = q_br.RotateVector(model_->RelativeAngularVel());
+        ignition::math::Pose3d pose = link_->WorldPose();
+        pos_g = pose.Pos() + pose.Rot().RotateVector(barometer_pos_);
+        vel_b = q_br.RotateVector(pose.Rot().RotateVectorReverse(link_->WorldLinearVel(airspeed_pos_)));
+        vel_n = q_ng.RotateVector(link_->WorldLinearVel());
+        omega_nb_b = q_br.RotateVector(link_->RelativeAngularVel());
 #else
-    ignition::math::Vector3d vel_b = q_br.RotateVector(ignitionFromGazeboMath(model_->GetRelativeLinearVel()));
-    ignition::math::Vector3d vel_n = q_ng.RotateVector(ignitionFromGazeboMath(model_->GetWorldLinearVel()));
-    ignition::math::Vector3d omega_nb_b = q_br.RotateVector(ignitionFromGazeboMath(model_->GetRelativeAngularVel()));
+        ignition::math::Pose3d pose = ignitionFromGazeboMath(link_->GetWorldPose());
+        pos_g = pose.Pos() + pose.Rot().RotateVector(barometer_pos_);
+        vel_b = q_br.RotateVector(pose.Rot().RotateVectorReverse(link_->GetWorldLinearVel(airspeed_pos_)));
+        vel_n = q_ng.RotateVector(ignitionFromGazeboMath(link_->GetWorldLinearVel()));
+        omega_nb_b = q_br.RotateVector(ignitionFromGazeboMath(link_->GetRelativeAngularVel()));
 #endif
+
+    } else {
+#if GAZEBO_MAJOR_VERSION >= 9
+        pos_g = model_->WorldPose().Pos();
+        vel_b = q_br.RotateVector(model_->RelativeLinearVel());
+        vel_n = q_ng.RotateVector(model_->WorldLinearVel());
+        omega_nb_b = q_br.RotateVector(model_->RelativeAngularVel());
+#else
+        pos_g = ignitionFromGazeboMath(model_->GetWorldPose().pos);
+        vel_b = q_br.RotateVector(ignitionFromGazeboMath(model_->GetRelativeLinearVel()));
+        vel_n = q_ng.RotateVector(ignitionFromGazeboMath(model_->GetWorldLinearVel()));
+        omega_nb_b = q_br.RotateVector(ignitionFromGazeboMath(model_->GetRelativeAngularVel()));
+#endif
+    }
+
+    ignition::math::Vector3d pos_n = q_ng.RotateVector(pos_g);
 
     ignition::math::Vector3d mag_noise_b(
       0.01 * randn_(rand_),
@@ -649,7 +737,7 @@ void GazeboMavlinkInterface::SendSensorMessages() {
     sensor_msg.ymag = mag_b.Y();
     sensor_msg.zmag = mag_b.Z();
 
-    // calculate abs_pressure using an ISA model for the tropsphere (valid up to 11km above MSL)
+    // calculate abs_pressure using an ISA model for the troposphere (valid up to 11km above MSL)
     const float lapse_rate = 0.0065f; // reduction in temperature with altitude (Kelvin/m)
     const float temperature_msl = 288.0f; // temperature at MSL (Kelvin)
     float alt_msl = (float)alt_home - pos_n.Z();
@@ -685,7 +773,10 @@ void GazeboMavlinkInterface::SendSensorMessages() {
     sensor_msg.pressure_alt = alt_msl - abs_pressure_noise / (gravity_W_.Length() * rho);
 
     // calculate differential pressure in hPa -> for airspeed
-    sensor_msg.diff_pressure = 0.005f*rho*vel_b.X()*vel_b.X();
+    if (vel_b.X()-wind_sens_B.X()>0)
+        sensor_msg.diff_pressure = 0.005f*rho*(vel_b.X()-wind_sens_B.X())*(vel_b.X()-wind_sens_B.X());
+    else
+        sensor_msg.diff_pressure = 0;
 
     // calculate temperature in Celsius
     sensor_msg.temperature = temperature_local - 273.0f;
@@ -787,13 +878,27 @@ void GazeboMavlinkInterface::SendSensorMessages() {
     hil_state_quat.vz = vel_n.Z() * 100;
 
     // assumed indicated airspeed due to flow aligned with pitot (body x)
-    hil_state_quat.ind_airspeed = vel_b.X();
+    if (vel_b.X()-wind_sens_B.X()>0)
+        hil_state_quat.ind_airspeed = vel_b.X()-wind_sens_B.X();
+    else
+        hil_state_quat.ind_airspeed = 0;
 
+    V3D tgs = V3D(0,0,0);
+    if (link_) {
 #if GAZEBO_MAJOR_VERSION >= 9
-    hil_state_quat.true_airspeed = model_->WorldLinearVel().Length() * 100;  //no wind simulated
+        tgs = link_->WorldLinearVel(airspeed_pos_);
 #else
-    hil_state_quat.true_airspeed = model_->GetWorldLinearVel().GetLength() * 100;  //no wind simulated
+        tgs = link_->GetWorldLinearVel(airspeed_pos_);
 #endif
+    } else {
+#if GAZEBO_MAJOR_VERSION >= 9
+        tgs = model_->WorldLinearVel();
+#else
+        tgs = model_->GetWorldLinearVel();
+#endif
+    }
+
+    hil_state_quat.true_airspeed = (tgs - wind_sens_B).Length() * 100;
 
     hil_state_quat.xacc = accel_true_b.X() * 1000;
     hil_state_quat.yacc = accel_true_b.Y() * 1000;
@@ -865,6 +970,35 @@ void GazeboMavlinkInterface::OpticalFlowCallback(OpticalFlowPtr& opticalFlow_mes
   mavlink_message_t msg;
   mavlink_msg_hil_optical_flow_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &sensor_msg);
   send_mavlink_message(&msg);
+}
+
+void GazeboMavlinkInterface::VaneCallback(VanePtr& vane_message) {
+
+  mavlink_hil_extended_t hil_extended_msg;
+
+#if GAZEBO_MAJOR_VERSION >= 9
+  hil_extended_msg.timestamp = world_->SimTime().Double() * 1e6;
+#else
+  hil_extended_msg.timestamp = world_->GetSimTime().Double() * 1e6;
+#endif
+
+  hil_extended_msg.var1 = vane_message->x();    // angle of attack [rad]
+  hil_extended_msg.var2 = vane_message->y();    // sideslip angle [rad]
+  hil_extended_msg.var3 = 0;
+  hil_extended_msg.var4 = 0;
+  hil_extended_msg.var5 = 0;
+  hil_extended_msg.var6 = 0;
+  hil_extended_msg.var7 = 0;
+  hil_extended_msg.var8 = 0;
+
+  mavlink_message_t msg;
+  mavlink_msg_hil_extended_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &hil_extended_msg);
+  send_mavlink_message(&msg);
+
+  /*
+  gzdbg<<"alpha: "<<vane_message->x()<<"\n";
+  gzdbg<<"beta: "<<vane_message->y()<<"\n";
+  */
 }
 
 void GazeboMavlinkInterface::GpsCallback(GpsPtr& gps_msg) {

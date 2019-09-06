@@ -29,7 +29,8 @@
    <xacro:property name="PI" value="3.1415926535897931" />
 
    <!-- Component masses -->
-   <xacro:property name="mass_fuselage" value="2.124" /><!-- [kg] -->
+   <!--<xacro:property name="mass_fuselage" value="2.124" />--><!-- [kg] -->
+   <xacro:property name="mass_fuselage" value="1.984" />
    <xacro:property name="mass_aileron" value="0.01" /><!-- [kg] -->
    <xacro:property name="mass_flap" value="0.01" /><!-- [kg] -->
    <xacro:property name="mass_elevator" value="0.01" /><!-- [kg] -->
@@ -44,9 +45,9 @@
    <xacro:property name="body_mesh_file" value="package://rotors_description/meshes/techpod/techpod_body.dae" />
 
    <!-- Aileron properties -->
-   <xacro:property name="aileron_length" value="0.153" /><!-- [m] -->
-   <xacro:property name="aileron_width" value="0.349" /><!-- [m] -->
-   <xacro:property name="aileron_height" value="0.013" /><!-- [m] -->
+   <xacro:property name="aileron_length" value="0.15" /><!-- [m] -->
+   <xacro:property name="aileron_width"  value="0.35" /><!-- [m] -->
+   <xacro:property name="aileron_height" value="0.01" /><!-- [m] -->
    <xacro:property name="aileron_min_angle" value="-0.349066" /><!-- [rad] -->
    <xacro:property name="aileron_max_angle" value="0.349066" /><!-- [rad] -->
    <xacro:property name="aileron_color" value="${body_color}" />
@@ -54,18 +55,18 @@
    <xacro:property name="aileron_right_mesh_file" value="package://rotors_description/meshes/techpod/techpod_aileron_right.dae" />
 
    <!-- Elevator properties -->
-   <xacro:property name="elevator_length" value="0.151" /><!-- [m] -->
-   <xacro:property name="elevator_width" value="0.457" /><!-- [m] -->
-   <xacro:property name="elevator_height" value="0.012" /><!-- [m] -->
+   <xacro:property name="elevator_length" value="0.15" /><!-- [m] -->
+   <xacro:property name="elevator_width"  value="0.46" /><!-- [m] -->
+   <xacro:property name="elevator_height" value="0.01" /><!-- [m] -->
    <xacro:property name="elevator_min_angle" value="-0.349066" /><!-- [rad] -->
    <xacro:property name="elevator_max_angle" value="0.349066" /><!-- [rad] -->
    <xacro:property name="elevator_color" value="${body_color}" />
    <xacro:property name="elevator_mesh_file" value="package://rotors_description/meshes/techpod/techpod_elevator.dae" />
 
    <!-- Flap properties -->
-   <xacro:property name="flap_length" value="0.176" /><!-- [m] -->
-   <xacro:property name="flap_width" value="0.459" /><!-- [m] -->
-   <xacro:property name="flap_height" value="0.016" /><!-- [m] -->
+   <xacro:property name="flap_length" value="0.18" /><!-- [m] -->
+   <xacro:property name="flap_width"  value="0.23" /><!-- [m] -->
+   <xacro:property name="flap_height" value="0.01" /><!-- [m] -->
    <xacro:property name="flap_min_angle" value="-0.349066" /><!-- [rad] -->
    <xacro:property name="flap_max_angle" value="0.349066" /><!-- [rad] -->
    <xacro:property name="flap_color" value="${body_color}" />
@@ -73,9 +74,9 @@
    <xacro:property name="flap_right_mesh_file" value="package://rotors_description/meshes/techpod/techpod_flap_right.dae" />
 
    <!-- Rudder properties -->
-   <xacro:property name="rudder_length" value="0.129" />
-   <xacro:property name="rudder_width" value="0.018" />
-   <xacro:property name="rudder_height" value="0.241" />
+   <xacro:property name="rudder_length" value="0.13" />
+   <xacro:property name="rudder_width"  value="0.02" />
+   <xacro:property name="rudder_height" value="0.24" />
    <xacro:property name="rudder_min_angle" value="-0.349066" />
    <xacro:property name="rudder_max_angle" value="0.349066" />
    <xacro:property name="rudder_color" value="${body_color}" />
@@ -99,8 +100,14 @@
    <xacro:property name="d4" value="1.8" />
 
    <!-- Inertia of the main body -->
+   <!--
    <xacro:property name="body_inertia">
       <inertia ixx="0.16632" ixy="0.0" ixz="0.0755" iyy="0.3899" iyz="0.0" izz="0.5243" />
+   </xacro:property>
+   -->
+
+   <xacro:property name="body_inertia">
+     <inertia ixx="0.1686" ixy="0.0" ixz="0.0013" iyy="0.0498" iyz="0.0" izz="0.1100" />
    </xacro:property>
 
    <!-- Inertia of the aileron, assuming it is a cuboid -->
@@ -141,7 +148,8 @@
       color="${body_color}"
       use_mesh_file="true"
       mesh_file="package://rotors_description/meshes/techpod_X_flex/fuselage_barless.stl">
-      <origin xyz="0.09 0 0.147" rpy="0 0 0" />
+      <!--<origin xyz="0.09 0 0.147" rpy="0 0 0" />-->
+      <origin xyz="0.068 0 ${0.051+0.05}" rpy="0 0 0" />
       <xacro:insert_block name="body_inertia" />
    </xacro:fixed_wing_base_macro>
    <joint name="${namespace}/dome_joint" type="fixed">
@@ -239,6 +247,21 @@
    <gazebo reference="${namespace}/pitot">
       <material>Gazebo/Grey</material>
    </gazebo>
+
+   <!--
+   <link name="${namespace}/check_coordinates">
+      <inertial>
+         <mass value="0.1" />
+         <xacro:box_inertia x="0.1" y="0.1" z="0.1" mass="0.1" />
+      </inertial>
+   </link>
+   <joint name="${namespace}/check_coordinates_joint" type="revolute">
+     <origin xyz="0.54 0 0.184" rpy="0 0 0" />
+     <parent link="${namespace}/base_link" />
+     <child link="${namespace}/check_coordinates" />
+     <limit upper="0" lower="0" effort="0" velocity="0" />
+   </joint>
+   -->
 
    <!-- Instantiate (flexing) wing segments -->
    <xacro:airfoil_segment robot_namespace="${namespace}"
@@ -1104,14 +1127,6 @@
       <xacro:box_inertia x="0.1" y="0.02" z="0.02" mass="0.02" />
    </xacro:angle_vane>
 
-   <gazebo>
-      <plugin filename="librotors_gazebo_vane_plugin.so" name="alpha_1_vane_plugin">
-         <robotNamespace>${namespace}</robotNamespace>
-         <vaneJoint>${namespace}/alpha_1_joint</vaneJoint>
-         <vaneTopic>alpha_1_vane_sensor</vaneTopic>
-      </plugin>
-   </gazebo>
-
    <joint name="${namespace}/vane_mount_l" type="fixed">
       <parent link="${namespace}/wl_1" />
       <child link="${namespace}/vane_mount_l" />
@@ -1147,14 +1162,6 @@
       <xacro:box_inertia x="0.1" y="0.02" z="0.02" mass="0.02" />
    </xacro:angle_vane>
 
-   <gazebo>
-      <plugin filename="librotors_gazebo_vane_plugin.so" name="beta_1_vane_plugin">
-         <robotNamespace>${namespace}</robotNamespace>
-         <vaneJoint>${namespace}/beta_1_joint</vaneJoint>
-         <vaneTopic>beta_1_vane_sensor</vaneTopic>
-      </plugin>
-   </gazebo>
-
    <joint name="${namespace}/vane_mount_r" type="fixed">
       <parent link="${namespace}/wr_1" />
       <child link="${namespace}/vane_mount_r" />
@@ -1175,6 +1182,15 @@
       <material>Gazebo/Grey</material>
    </gazebo>
 
+   <gazebo>
+      <plugin filename="librotors_gazebo_vane_plugin.so" name="alpha_1_vane_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <alphaJoint>${namespace}/alpha_1_joint</alphaJoint>
+         <betaJoint>${namespace}/beta_1_joint</betaJoint>
+         <vaneTopic>vanes</vaneTopic>
+      </plugin>
+   </gazebo>
+
    <!-- Wind -->
    <xacro:if value="${enable_wind}">
      <gazebo>
@@ -1191,7 +1207,7 @@
            </layer>
            <layer name="layer3">
              <altitude>35</altitude>
-             <windMeanNED>-5 0 0</windMeanNED>
+             <windMeanNED>-9 0 0</windMeanNED>
            </layer>
          </windLayer>
          <findWind>
@@ -1203,7 +1219,7 @@
          <lambdaMin>2</lambdaMin>
          <lengthScale>725</lengthScale>
          <fourierNNN>10 10 10</fourierNNN>
-         <sigma>3</sigma>
+         <sigma>2</sigma>
          <trnspVelTurbNED>-3 0 0</trnspVelTurbNED>
        </plugin>
      </gazebo>
@@ -1329,12 +1345,13 @@
       <plugin filename="librotors_gazebo_mavlink_interface.so" name="gazebo_mavlink_interface">
          <robotNamespace>${namespace}</robotNamespace>
          <protocol_version>2.0</protocol_version>
-         <imuSubTopic>/imu</imuSubTopic>
+         <imuSubTopic>/imu</imuSubTopic>            <!-- subscription of imu topic to relay acc/gyro to autopilot -->
          <imu_rate>250</imu_rate>
-         <gpsSubTopic>/gps</gpsSubTopic>
+         <gpsSubTopic>/gps</gpsSubTopic>            <!-- subscription of gnss topic to relay pos to autopilot -->
          <gpsGtSubTopic>/gps_gt</gpsGtSubTopic>
          <lidarSubTopic />
          <opticalFlowSubTopic />
+         <vaneSubTopic>/vanes</vaneSubTopic>        <!-- subscription of vane topic to relay aoa/slip to autopilot -->
          <mavlink_addr>INADDR_ANY</mavlink_addr>
          <mavlink_udp_port>14560</mavlink_udp_port>
          <serialEnabled>true</serialEnabled>
@@ -1348,6 +1365,12 @@
          <use_tcp>false</use_tcp>
          <motorSpeedCommandPubTopic>/command/motor_speed_old</motorSpeedCommandPubTopic>
          <actuatorsPubTopic>/command/motor_speed</actuatorsPubTopic>
+         <linkName>${namespace}/base_link</linkName> <!-- reference link frame for airspeed and baro alt-->
+         <pitotPos>0.54 0 0.184</pitotPos>           <!-- pitot position wrt reference link -->
+         <baroPos>0.14 0.0 0.07</baroPos>            <!-- baro position wrt reference link -->
+         <wind name="wind">                          <!-- include wind in airspeed measurement -->
+           <topic>wind_base_link</topic>
+         </wind>
          <control_channels>
             <channel name="propeller">
                <input_index>4</input_index>

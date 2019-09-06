@@ -27,7 +27,7 @@
 
 #include "rotors_gazebo_plugins/common.h"
 #include "ConnectGazeboToRosTopic.pb.h"
-#include "JointState.pb.h"
+#include "vector2d.pb.h"
 
 namespace gazebo
 {
@@ -75,13 +75,14 @@ namespace gazebo
 
       transport::NodePtr node_handle_;
       std::string namespace_;
-      physics::JointPtr vane_joint_;
-      std::string frame_id_;
-      std::string joint_name_;
+      physics::JointPtr alpha_joint_;
+      physics::JointPtr beta_joint_;
+      std::string alpha_joint_name_;
+      std::string beta_joint_name_;
 
       std::string vane_topic_;
       transport::PublisherPtr vane_pub_;
-      gz_sensor_msgs::JointState vane_msg_;
+      gazebo::msgs::Vector2d vane_msg_;
 
   };
 }

@@ -62,9 +62,12 @@
 #include <Lidar.pb.h>
 #include <SITLGps.pb.h>
 #include <Float32.pb.h>
+#include "vector2d.pb.h"
 #include "vector3d.pb.h"
+#include "WindSpeedBeta.pb.h"
 
-#include <mavlink/v2.0/common/mavlink.h>
+#include <mavlink/v2.0/ASLUAV/mavlink.h>
+
 #include "msgbuffer.h"
 
 #include <rotors_gazebo_plugins/geo_mag_declination_tmp.h>
@@ -82,6 +85,9 @@ static constexpr size_t MAX_TXQ_SIZE = 1000;
 
 namespace gazebo {
 
+typedef ignition::math::Vector3d V3D;
+typedef ignition::math::Matrix3<double> M3D;
+
 typedef const boost::shared_ptr<const gz_mav_msgs::CommandMotorSpeed> CommandMotorSpeedPtr;
 typedef const boost::shared_ptr<const gz_sensor_msgs::Actuators> ActuatorsPtr;
 typedef const boost::shared_ptr<const gz_sensor_msgs::Imu> ImuPtr;
@@ -89,6 +95,8 @@ typedef const boost::shared_ptr<const lidar_msgs::msgs::lidar> LidarPtr;
 typedef const boost::shared_ptr<const opticalFlow_msgs::msgs::opticalFlow> OpticalFlowPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::SITLGps> GpsPtr;
 //typedef const boost::shared_ptr<const sensor_msgs::msgs::Groundtruth> GpsGtPtr;
+typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeedBeta> WindPtr;
+typedef const boost::shared_ptr<const gazebo::msgs::Vector2d> VanePtr;
 
 // Default values
 // static const std::string kDefaultNamespace = "";
@@ -220,6 +228,7 @@ private:
   void OpticalFlowCallback(OpticalFlowPtr& opticalFlow_msg);
   void GpsCallback(GpsPtr& gps_msg);
   void GpsGtCallback(GpsPtr& gps_gt_msg);
+  void VaneCallback(VanePtr& vane_msg);
   void SendSensorMessages();
   void send_mavlink_message(const mavlink_message_t *message, const int destination_port = 0);
   void handle_message(mavlink_message_t *msg);
@@ -300,7 +309,6 @@ private:
       transport::PublisherPtr joint_control_pub_;
   };
 
-
   int n_chan;
   ctrl_chan* channels;
 
@@ -317,18 +325,78 @@ private:
   transport::PublisherPtr joint_control_pub_[n_out_max];
   */
 
+  struct Wind {
+      Wind(){}
+
+      transport::SubscriberPtr wind_sub_ = nullptr;
+      std::mutex wind_lock;
+      std::string wind_topic;
+
+      V3D pos_ned = V3D(0,0,0);
+      V3D wind_ned = V3D(0,0,0);
+      M3D wind_grad_ned = M3D(0,0,0,0,0,0,0,0,0);
+
+      void Callback(WindPtr& wind){
+          std::unique_lock<std::mutex> lock(wind_lock);
+
+          pos_ned = V3D(wind->pos_ned().x(),
+                        wind->pos_ned().y(),
+                        wind->pos_ned().z());
+
+          wind_ned = V3D(wind->wind_ned().x(),
+                         wind->wind_ned().y(),
+                         wind->wind_ned().z());
+
+          wind_grad_ned = M3D(wind->wind_grad_ned().xx(),
+                              wind->wind_grad_ned().xy(),
+                              wind->wind_grad_ned().xz(),
+                              wind->wind_grad_ned().yx(),
+                              wind->wind_grad_ned().yy(),
+                              wind->wind_grad_ned().yz(),
+                              wind->wind_grad_ned().zx(),
+                              wind->wind_grad_ned().zy(),
+                              wind->wind_grad_ned().zz());
+          lock.unlock();
+      }
+
+      V3D GetWind(V3D p_cp){
+          std::unique_lock<std::mutex> lock(wind_lock);   //necessary? atomic V3D?
+          V3D wind_local = wind_ned + wind_grad_ned*(p_cp-pos_ned);
+          //V3D wind_local = wind_grad_ned*(p_cp-pos_ned);
+          lock.unlock();
+          return wind_local;
+      }
+  };
+
+  Wind * wind;
+  V3D wind_sens = V3D(0,0,0);
+  int n_wind = 0;
+
+  void UpdateWind(V3D w_cp){
+      wind_sens = V3D(0,0,0);
+      for(int j=0; j<n_wind; j++){
+          wind_sens += wind[j].GetWind(w_cp);
+      }
+  }
+
+  physics::LinkPtr link_ = NULL;
+  V3D airspeed_pos_ = V3D(0,0,0);
+  V3D barometer_pos_ = V3D(0,0,0);
+
   transport::SubscriberPtr imu_sub_;
   transport::SubscriberPtr lidar_sub_;
   transport::SubscriberPtr sonar_sub_;
   transport::SubscriberPtr opticalFlow_sub_;
   transport::SubscriberPtr gps_sub_;
   transport::SubscriberPtr gps_gt_sub_; // for ground truth and custom magnetometer
+  transport::SubscriberPtr vane_sub_;
 
   std::string imu_sub_topic_;
   std::string lidar_sub_topic_;
   std::string opticalFlow_sub_topic_;
   std::string gps_sub_topic_;
   std::string gps_gt_sub_topic_;
+  std::string vane_sub_topic_;
 
   common::Time last_time_;
   common::Time last_imu_time_;

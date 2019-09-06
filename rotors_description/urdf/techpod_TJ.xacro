@@ -676,6 +676,12 @@
       <use_tcp>false</use_tcp>
       <motorSpeedCommandPubTopic>/command/motor_speed_old</motorSpeedCommandPubTopic>
       <actuatorsPubTopic>/command/motor_speed</actuatorsPubTopic>
+      <linkName>${namespace}/base_link</linkName> <!-- reference link frame for airspeed and baro alt-->
+      <pitotPos>0.7 0 0.184</pitotPos>            <!-- pitot position wrt reference link -->
+      <baroPos>0.3 0 0.023</baroPos>              <!-- baro position wrt reference link -->
+      <wind name="wind">                          <!-- include wind in airspeed measurement -->
+        <topic>wind_base_link</topic>
+      </wind>
       <control_channels>
       <channel name="propeller">
         <input_index>4</input_index>

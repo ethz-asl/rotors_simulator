@@ -948,14 +948,6 @@
       <xacro:box_inertia x="0.1" y="0.02" z="0.02" mass="0.02" />
    </xacro:angle_vane>
 
-   <gazebo>
-      <plugin filename="librotors_gazebo_vane_plugin.so" name="alpha_1_vane_plugin">
-         <robotNamespace>${namespace}</robotNamespace>
-         <vaneJoint>${namespace}/alpha_1_joint</vaneJoint>
-         <vaneTopic>alpha_1_vane_sensor</vaneTopic>
-      </plugin>
-   </gazebo>
-
    <xacro:angle_vane robot_namespace="${namespace}"
       vane_name="beta_1"
       type="beta"
@@ -973,9 +965,10 @@
 
    <gazebo>
       <plugin filename="librotors_gazebo_vane_plugin.so" name="beta_1_vane_plugin">
-         <robotNamespace>${namespace}</robotNamespace>
-         <vaneJoint>${namespace}/beta_1_joint</vaneJoint>
-         <vaneTopic>beta_1_vane_sensor</vaneTopic>
+        <robotNamespace>${namespace}</robotNamespace>
+        <alphaJoint>${namespace}/alpha_1_joint</alphaJoint>
+        <betaJoint>${namespace}/beta_1_joint</betaJoint>
+        <vaneTopic>vanes</vaneTopic>
       </plugin>
    </gazebo>
 
@@ -1144,6 +1137,7 @@
          <gpsGtSubTopic>/gps_gt</gpsGtSubTopic>
          <lidarSubTopic />
          <opticalFlowSubTopic />
+         <vaneSubTopic>/vanes</vaneSubTopic>
          <mavlink_addr>INADDR_ANY</mavlink_addr>
          <mavlink_udp_port>14560</mavlink_udp_port>
          <serialEnabled>true</serialEnabled>
@@ -1157,6 +1151,12 @@
          <use_tcp>false</use_tcp>
          <motorSpeedCommandPubTopic>/command/motor_speed_old</motorSpeedCommandPubTopic>
          <actuatorsPubTopic>/command/motor_speed</actuatorsPubTopic>
+         <linkName>${namespace}/base_link</linkName> <!-- reference link frame for airspeed and baro alt-->
+         <pitotPos>0.54 0 0.184</pitotPos>           <!-- pitot position wrt reference link -->
+         <baroPos>0.14 0.0 0.07</baroPos>            <!-- baro position wrt reference link -->
+         <wind name="wind">                          <!-- include wind in airspeed measurement -->
+           <topic>wind_base_link</topic>
+         </wind>
          <control_channels>
             <channel name="propeller">
                <input_index>4</input_index>
