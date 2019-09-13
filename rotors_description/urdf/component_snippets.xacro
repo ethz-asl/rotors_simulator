@@ -987,7 +987,7 @@
       pose_with_covariance_topic="t1"
       position_topic="t2"
       transform_topic="t3"
-      odometry_topic="t4"
+      odometry_topic="cam_${suffix}/odometry"
       parent_frame_id="world"
       child_frame_id="odometry_sensor_camera_${suffix}"
       mass_odometry_sensor="0.001"
