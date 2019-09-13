@@ -27,6 +27,9 @@
   <arg name="target_name" default="$(arg namespace)"/>
   <arg name="target_link" default="$(arg namespace)/base_link"/>
 
+  <arg name="record_rosbag" default="false"/>
+  <arg name="rosbag_path" default=""/>
+
   <!-- send the robot XML to param server -->
   <param name="robot_description" command="
     $(find xacro)/xacro.py '$(arg model)'
@@ -58,6 +61,20 @@
          -Y $(arg Y)
          -model $(arg namespace)"
    respawn="false" output="screen">
+  </node>
+
+  <node pkg="rosbag" type="record" name="trinocular"
+   args="-o $(arg rosbag_path)$(arg namespace)
+            /$(arg namespace)/cam_left/odometry
+            /$(arg namespace)/cam_left/image_raw
+            /$(arg namespace)/camImu0/data_raw
+            /$(arg namespace)/cam_center/odometry
+            /$(arg namespace)/cam_center/image_raw
+            /$(arg namespace)/adis/data_raw
+            /$(arg namespace)/cam_right/odometry
+            /$(arg namespace)/cam_right/image_raw
+            /$(arg namespace)/camImu1/data_raw"
+   if="$(arg record_rosbag)">
   </node>
 
 </launch>

@@ -12,6 +12,8 @@
   <arg name="verbose" default="false"/>
   <arg name="spawn_tc" default="false"/>
   <arg name="enable_wind" default="true"/>
+  <arg name="record_rosbag" default="false"/>
+  <arg name="rosbag_path" default=""/>
 
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
@@ -32,6 +34,8 @@
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
       <arg name="log_file" value="$(arg log_file)" />
       <arg name="enable_wind" value="$(arg enable_wind)"/>
+      <arg name="record_rosbag" default="$(arg record_rosbag)"/>
+      <arg name="rosbag_path" default="$(arg rosbag_path)"/>
     </include>
 
     <!--

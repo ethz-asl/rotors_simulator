@@ -13,6 +13,8 @@
   <arg name="verbose" default="false"/>
   <arg name="spawn_tc" default="false"/>
   <arg name="enable_wind" default="true"/>
+  <arg name="record_rosbag" default="false"/>
+  <arg name="rosbag_path" default=""/>
 
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
@@ -35,6 +37,8 @@
       <arg name="log_file" value="$(arg log_file)" />
       <arg name="serial_device" value="/dev/ttyACM0"/>
       <arg name="enable_wind" value="$(arg enable_wind)"/>
+      <arg name="record_rosbag" default="$(arg record_rosbag)"/>
+      <arg name="rosbag_path" default="$(arg rosbag_path)"/>
     </include>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
@@ -54,6 +58,8 @@
       <arg name="log_file" value="$(arg log_file)" />
       <arg name="serial_device" value="/dev/ttyACM1"/>
       <arg name="enable_wind" value="$(arg enable_wind)"/>
+      <arg name="record_rosbag" default="$(arg record_rosbag)"/>
+      <arg name="rosbag_path" default="$(arg rosbag_path)"/>
     </include>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">

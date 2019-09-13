@@ -242,14 +242,14 @@ source ~/catkin_ws/devel/setup.bash
 
 ## To launch a fw-simulation, go to your catkin workspace and invoke (choosing one of the param values at a time...):
 ##
-## "roslaunch rotors_gazebo fixed_wing_hil.launch verbose:={false|true} world_name:={fw_playground|yosemite|davos|hinwil}
-## uav_name:={techpod_TJ_flex|techpod_TJ|techpod_X_flex|techpod_X} spawn_tc:={false|true} enable_wind:={true|false}"
+## "roslaunch rotors_gazebo fixed_wing_hil.launch verbose:={false|true} world_name:={fw_playground|yosemite|davos|hinwil} uav_name:={techpod_TJ_flex|techpod_TJ|techpod_X_flex|techpod_X} spawn_tc:={false|true} enable_wind:={true|false} record_rosbag:={false|true} rosbag_path:={""|/path/to/somewhere/"}
 ##
 ## where "verbose" can be used to enable debug output (e.g. sim-rate, message statistics etc), "world_name" sets the world in which 
 ## the UAV spawns and "uav_name" is used to select the UAV. "spawn_tc" further controls if tracking cameras are placed (ground view) and
-## "enable_wind" indicates if the wind specified in the uav's *.xacro is enabled. Defaults are the first options in each brace. E.g.:
+## "enable_wind" indicates if the wind specified in the uav's *.xacro is enabled. Rosbags logging for trinocular vision can be enabled with 
+## "record_rosbag", writing to "rosbag_path" (currently only works for techpod_TJ_flex) Defaults are the first options in each brace. E.g.:
 
-roslaunch rotors_gazebo fixed_wing_hil.launch verbose:=true world_name:=fw_playground uav_name:=techpod_X spawn_tc:=true enable_wind:=true
+roslaunch rotors_gazebo fixed_wing_hil.launch verbose:=true world_name:=fw_playground uav_name:=techpod_X spawn_tc:=true enable_wind:=true record_rosbag:=true rosbag_path:=/path/to/somewhere/
 
 ## The listed sets of parameters include tested and working UAV/world combinations. More UAVs/worlds will be tested or added in the future. 
 ## Note:
