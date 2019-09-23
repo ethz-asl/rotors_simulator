@@ -78,6 +78,7 @@
     <origin xyz="-2 0 0.5" rpy="0 0.2 0" />
   </xacro:camera_macro_2>
 
+  <!--
   <xacro:asl_mono_vi_1
     namespace="${namespace}"
     parent_link="${namespace}/base_link"
@@ -124,6 +125,54 @@
     <origin xyz="0.05 -0.38 0.025" rpy="0 0.3 0" />
     <origin xyz="-0.0083 -0.0177 -0.0469" rpy="-3.1363 -0.0648 1.5500" />
     <origin xyz="-0.0083 -0.0177 -0.0469" rpy="-3.1363 -0.0648 1.5500" />
+  </xacro:asl_mono_vi_1>-->
+
+  <xacro:asl_mono_vi_1
+    namespace="${namespace}"
+    parent_link="${namespace}/base_link"
+    suffix="center"
+    fps="30"
+    h_fov="1.3672"
+    imu_topic="adis/data_raw"
+    acc_nd="0.0100"
+    acc_rw="0.0020"
+    gyr_nd="0.0050"
+    gyr_rw="0.00004">
+    <origin xyz="0.35 0 0.11" rpy="0 0.3 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:asl_mono_vi_1>
+
+  <xacro:asl_mono_vi_1
+    namespace="${namespace}"
+    parent_link="${namespace}/wl_3"
+    suffix="left"
+    fps="30"
+    h_fov="1.3672"
+    imu_topic="camImu0/data_raw"
+    acc_nd="0.1006"
+    acc_rw="0.0040"
+    gyr_nd="0.0258"
+    gyr_rw="0.0007">
+    <origin xyz="0.05 0.38 0.025" rpy="0 0.3 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:asl_mono_vi_1>
+
+  <xacro:asl_mono_vi_1
+    namespace="${namespace}"
+    parent_link="${namespace}/wr_3"
+    suffix="right"
+    fps="30"
+    h_fov="1.3672"
+    imu_topic="camImu1/data_raw"
+    acc_nd="0.1006"
+    acc_rw="0.0040"
+    gyr_nd="0.0258"
+    gyr_rw="0.0007">
+    <origin xyz="0.05 -0.38 0.025" rpy="0 0.3 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:asl_mono_vi_1>
 
   <!--
