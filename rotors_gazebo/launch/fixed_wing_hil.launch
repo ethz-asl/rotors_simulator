@@ -14,6 +14,7 @@
   <arg name="enable_wind" default="true"/>
   <arg name="record_rosbag" default="false"/>
   <arg name="rosbag_path" default=""/>
+  <arg name="serial_device" default="/dev/ttyACM0"/>
 
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
@@ -36,6 +37,7 @@
       <arg name="enable_wind" value="$(arg enable_wind)"/>
       <arg name="record_rosbag" default="$(arg record_rosbag)"/>
       <arg name="rosbag_path" default="$(arg rosbag_path)"/>
+      <arg name="serial_device" value="$(arg serial_device)" />
     </include>
 
     <!--
