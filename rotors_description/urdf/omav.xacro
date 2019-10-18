@@ -30,8 +30,8 @@
     <xacro:property name="rotor_velocity_slowdown_sim" value="10"/>
     <xacro:property name="use_mesh_file_core" value="true"/>
     <xacro:property name="use_mesh_file_rotor_unit" value="true"/>
-    <xacro:property name="mesh_file_core" value="package://rotors_description/meshes/voliro/voliroX_core.dae"/>
-    <xacro:property name="mesh_file_tilt_unit" value="package://rotors_description/meshes/voliro/voliroX_tiltarm.dae"/>-->
+    <xacro:property name="mesh_file_core" value="package://rotors_description/meshes/omav/omav_core.dae"/>
+    <xacro:property name="mesh_file_tilt_unit" value="package://rotors_description/meshes/omav/omav_tiltarm.dae"/>-->
 
     <xacro:property name="mass_core" value="2.30"/>    <!-- [kg] -->
     <xacro:property name="mass_tilt_unit" value="0.277"/>    <!-- [kg] -->

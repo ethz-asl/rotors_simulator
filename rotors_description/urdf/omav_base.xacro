@@ -22,8 +22,8 @@
 <robot name="$(arg mav_name)" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro"/>
 
-  <!-- Instantiate voliro "mechanics". -->
-  <xacro:include filename="$(find rotors_description)/urdf/voliro.xacro"/>
+  <!-- Instantiate OMAV "mechanics". -->
+  <xacro:include filename="$(find rotors_description)/urdf/omav.xacro"/>
 
   <!-- Instantiate a controller. -->
   <xacro:controller_plugin_macro namespace="${namespace}" imu_sub_topic="imu"/>
