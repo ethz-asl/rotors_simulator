@@ -27,7 +27,6 @@
   <exec_depend>rotors_evaluation</exec_depend>
   <exec_depend>rotors_gazebo</exec_depend>
   <exec_depend>rotors_gazebo_plugins</exec_depend>
-  <exec_depend>rotors_hil_interface</exec_depend>
   <exec_depend>rotors_joy_interface</exec_depend>
   <exec_depend>rqt_rotors</exec_depend>
 
