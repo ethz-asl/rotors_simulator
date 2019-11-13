@@ -244,10 +244,10 @@ void GazeboMavlinkInterface::Load(
     if (_sdf->HasElement("baudRate")) {
       baudrate_ = _sdf->GetElement("baudRate")->Get<int>();
     }
-    io_service.post(std::bind(&GazeboMavlinkInterface::do_read, this));
+    io_service_.post(std::bind(&GazeboMavlinkInterface::do_read, this));
 
     // run io_service for async io
-    io_thread = std::thread([this]() { io_service.run(); });
+    io_thread_ = std::thread([this]() { io_service_.run(); });
     open();
   }
 
@@ -294,29 +294,29 @@ void GazeboMavlinkInterface::Load(
     return;
   }
 
-  memset((char*)&_myaddr, 0, sizeof(_myaddr));
-  _myaddr.sin_family = AF_INET;
-  _srcaddr.sin_family = AF_INET;
+  memset((char*)&myaddr_, 0, sizeof(myaddr_));
+  myaddr_.sin_family = AF_INET;
+  srcaddr_.sin_family = AF_INET;
 
   if (serial_enabled_) {
     // gcs link
-    _myaddr.sin_addr.s_addr = mavlink_addr_;
-    _myaddr.sin_port = htons(mavlink_udp_port_);
-    _srcaddr.sin_addr.s_addr = qgc_addr_;
-    _srcaddr.sin_port = htons(qgc_udp_port_);
+    myaddr_.sin_addr.s_addr = mavlink_addr_;
+    myaddr_.sin_port = htons(mavlink_udp_port_);
+    srcaddr_.sin_addr.s_addr = qgc_addr_;
+    srcaddr_.sin_port = htons(qgc_udp_port_);
   }
 
   else {
-    _myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    myaddr_.sin_addr.s_addr = htonl(INADDR_ANY);
     // Let the OS pick the port
-    _myaddr.sin_port = htons(0);
-    _srcaddr.sin_addr.s_addr = mavlink_addr_;
-    _srcaddr.sin_port = htons(mavlink_udp_port_);
+    myaddr_.sin_port = htons(0);
+    srcaddr_.sin_addr.s_addr = mavlink_addr_;
+    srcaddr_.sin_port = htons(mavlink_udp_port_);
   }
 
-  _addrlen = sizeof(_srcaddr);
+  addrlen_ = sizeof(srcaddr_);
 
-  if (bind(_fd, (struct sockaddr*)&_myaddr, sizeof(_myaddr)) < 0) {
+  if (bind(_fd, (struct sockaddr*)&myaddr_, sizeof(myaddr_)) < 0) {
     printf("bind failed\n");
     return;
   }
@@ -379,14 +379,14 @@ void GazeboMavlinkInterface::send_mavlink_message(
     }
 
     {
-      lock_guard lock(mutex);
+      lock_guard lock(mutex_);
 
-      if (tx_q.size() >= MAX_TXQ_SIZE) {
+      if (tx_q_.size() >= MAX_TXQ_SIZE) {
         //         gzwarn << "TX queue overflow. \n";
       }
-      tx_q.emplace_back(message);
+      tx_q_.emplace_back(message);
     }
-    io_service.post(std::bind(&GazeboMavlinkInterface::do_write, this, true));
+    io_service_.post(std::bind(&GazeboMavlinkInterface::do_write, this, true));
   }
 
   else {
@@ -394,15 +394,15 @@ void GazeboMavlinkInterface::send_mavlink_message(
     int packetlen = mavlink_msg_to_send_buffer(buffer, message);
 
     struct sockaddr_in dest_addr;
-    memcpy(&dest_addr, &_srcaddr, sizeof(_srcaddr));
+    memcpy(&dest_addr, &srcaddr_, sizeof(srcaddr_));
 
     if (destination_port != 0) {
       dest_addr.sin_port = htons(destination_port);
     }
 
     ssize_t len = sendto(
-        _fd, buffer, packetlen, 0, (struct sockaddr*)&_srcaddr,
-        sizeof(_srcaddr));
+        _fd, buffer, packetlen, 0, (struct sockaddr*)&srcaddr_,
+        sizeof(srcaddr_));
 
     if (len <= 0) {
       printf("Failed sending mavlink message\n");
@@ -516,7 +516,7 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
     static uint32_t last_dt_us = sensor_msg.time_usec;
     uint32_t dt_us = sensor_msg.time_usec - last_dt_us;
     if (dt_us > 1000) {
-      optflow_gyro += gyro_b * (dt_us / 1000000.0f);
+      optflow_gyro_ += gyro_b * (dt_us / 1000000.0f);
       last_dt_us = sensor_msg.time_usec;
     }
 
@@ -594,7 +594,7 @@ void GazeboMavlinkInterface::LidarCallback(LidarPtr& lidar_message) {
   sensor_msg.covariance = 0;
 
   // distance needed for optical flow message
-  optflow_distance = lidar_message->current_distance();  //[m]
+  optflow_distance_ = lidar_message->current_distance();  //[m]
 
   mavlink_message_t msg;
   mavlink_msg_distance_sensor_encode_chan(
@@ -611,20 +611,20 @@ void GazeboMavlinkInterface::OpticalFlowCallback(
   sensor_msg.integrated_x = opticalFlow_message->integrated_x();
   sensor_msg.integrated_y = opticalFlow_message->integrated_y();
   sensor_msg.integrated_xgyro =
-      opticalFlow_message->quality() ? -optflow_gyro.Y() : 0.0f;  // xy switched
+      opticalFlow_message->quality() ? -optflow_gyro_.Y() : 0.0f;  // xy switched
   sensor_msg.integrated_ygyro =
-      opticalFlow_message->quality() ? optflow_gyro.X() : 0.0f;  // xy switched
+      opticalFlow_message->quality() ? optflow_gyro_.X() : 0.0f;  // xy switched
   sensor_msg.integrated_zgyro = opticalFlow_message->quality()
-                                    ? -optflow_gyro.Z()
+                                    ? -optflow_gyro_.Z()
                                     : 0.0f;  // change direction
   sensor_msg.temperature = opticalFlow_message->temperature();
   sensor_msg.quality = opticalFlow_message->quality();
   sensor_msg.time_delta_distance_us =
       opticalFlow_message->time_delta_distance_us();
-  sensor_msg.distance = optflow_distance;
+  sensor_msg.distance = optflow_distance_;
 
   // reset gyro integral
-  optflow_gyro.Set();
+  optflow_gyro_.Set();
 
   mavlink_message_t msg;
   mavlink_msg_hil_optical_flow_encode_chan(
@@ -644,12 +644,12 @@ void GazeboMavlinkInterface::pollForMAVLinkMessages(
 
   if (fds[0].revents & POLLIN) {
     int len = recvfrom(
-        _fd, _buf, sizeof(_buf), 0, (struct sockaddr*)&_srcaddr, &_addrlen);
+        _fd, buf_, sizeof(buf_), 0, (struct sockaddr*)&srcaddr_, &addrlen_);
     if (len > 0) {
       mavlink_message_t msg;
       mavlink_status_t status;
       for (unsigned i = 0; i < len; ++i) {
-        if (mavlink_parse_char(MAVLINK_COMM_0, _buf[i], &msg, &status)) {
+        if (mavlink_parse_char(MAVLINK_COMM_0, buf_[i], &msg, &status)) {
           if (serial_enabled_) {
             // forward message from qgc to serial
             send_mavlink_message(&msg);
@@ -770,14 +770,14 @@ void GazeboMavlinkInterface::handle_control(double _dt) {
 
 void GazeboMavlinkInterface::open() {
   try {
-    serial_dev.open(device_);
-    serial_dev.set_option(boost::asio::serial_port_base::baud_rate(baudrate_));
-    serial_dev.set_option(boost::asio::serial_port_base::character_size(8));
-    serial_dev.set_option(boost::asio::serial_port_base::parity(
+    serial_dev_.open(device_);
+    serial_dev_.set_option(boost::asio::serial_port_base::baud_rate(baudrate_));
+    serial_dev_.set_option(boost::asio::serial_port_base::character_size(8));
+    serial_dev_.set_option(boost::asio::serial_port_base::parity(
         boost::asio::serial_port_base::parity::none));
-    serial_dev.set_option(boost::asio::serial_port_base::stop_bits(
+    serial_dev_.set_option(boost::asio::serial_port_base::stop_bits(
         boost::asio::serial_port_base::stop_bits::one));
-    serial_dev.set_option(boost::asio::serial_port_base::flow_control(
+    serial_dev_.set_option(boost::asio::serial_port_base::flow_control(
         boost::asio::serial_port_base::flow_control::none));
     gzdbg << "Opened serial device " << device_ << "\n";
   } catch (boost::system::system_error& err) {
@@ -786,20 +786,20 @@ void GazeboMavlinkInterface::open() {
 }
 
 void GazeboMavlinkInterface::close() {
-  lock_guard lock(mutex);
+  lock_guard lock(mutex_);
   if (!is_open())
     return;
 
-  io_service.stop();
-  serial_dev.close();
+  io_service_.stop();
+  serial_dev_.close();
 
-  if (io_thread.joinable())
-    io_thread.join();
+  if (io_thread_.joinable())
+    io_thread_.join();
 }
 
 void GazeboMavlinkInterface::do_read(void) {
-  serial_dev.async_read_some(
-      boost::asio::buffer(rx_buf),
+  serial_dev_.async_read_some(
+      boost::asio::buffer(rx_buf_),
       boost::bind(
           &GazeboMavlinkInterface::parse_buffer, this,
           boost::asio::placeholders::error,
@@ -811,24 +811,24 @@ void GazeboMavlinkInterface::parse_buffer(
     const boost::system::error_code& err, std::size_t bytes_t) {
   mavlink_status_t status;
   mavlink_message_t message;
-  uint8_t* buf = this->rx_buf.data();
+  uint8_t* buf = this->rx_buf_.data();
 
-  assert(rx_buf.size() >= bytes_t);
+  assert(rx_buf_.size() >= bytes_t);
 
   for (; bytes_t > 0; bytes_t--) {
     auto c = *buf++;
 
     auto msg_received = static_cast<Framing>(
-        mavlink_frame_char_buffer(&m_buffer, &m_status, c, &message, &status));
+        mavlink_frame_char_buffer(&m_buffer_, &m_status_, c, &message, &status));
     if (msg_received == Framing::bad_crc ||
         msg_received == Framing::bad_signature) {
-      _mav_parse_error(&m_status);
-      m_status.msg_received = MAVLINK_FRAMING_INCOMPLETE;
-      m_status.parse_state = MAVLINK_PARSE_STATE_IDLE;
+      _mav_parse_error(&m_status_);
+      m_status_.msg_received = MAVLINK_FRAMING_INCOMPLETE;
+      m_status_.parse_state = MAVLINK_PARSE_STATE_IDLE;
       if (c == MAVLINK_STX) {
-        m_status.parse_state = MAVLINK_PARSE_STATE_GOT_STX;
-        m_buffer.len = 0;
-        mavlink_start_checksum(&m_buffer);
+        m_status_.parse_state = MAVLINK_PARSE_STATE_GOT_STX;
+        m_buffer_.len = 0;
+        mavlink_start_checksum(&m_buffer_);
       }
     }
 
@@ -842,17 +842,17 @@ void GazeboMavlinkInterface::parse_buffer(
 }
 
 void GazeboMavlinkInterface::do_write(bool check_tx_state) {
-  if (check_tx_state && tx_in_progress)
+  if (check_tx_state && tx_in_progress_)
     return;
 
-  lock_guard lock(mutex);
-  if (tx_q.empty())
+  lock_guard lock(mutex_);
+  if (tx_q_.empty())
     return;
 
-  tx_in_progress = true;
-  auto& buf_ref = tx_q.front();
+  tx_in_progress_ = true;
+  auto& buf_ref = tx_q_.front();
 
-  serial_dev.async_write_some(
+  serial_dev_.async_write_some(
       boost::asio::buffer(buf_ref.dpos(), buf_ref.nbytes()),
       [this, &buf_ref](
           boost::system::error_code error, size_t bytes_transferred) {
@@ -862,22 +862,22 @@ void GazeboMavlinkInterface::do_write(bool check_tx_state) {
           return;
         }
 
-        lock_guard lock(mutex);
+        lock_guard lock(mutex_);
 
-        if (tx_q.empty()) {
-          tx_in_progress = false;
+        if (tx_q_.empty()) {
+          tx_in_progress_ = false;
           return;
         }
 
         buf_ref.pos += bytes_transferred;
         if (buf_ref.nbytes() == 0) {
-          tx_q.pop_front();
+          tx_q_.pop_front();
         }
 
-        if (!tx_q.empty()) {
+        if (!tx_q_.empty()) {
           do_write(false);
         } else {
-          tx_in_progress = false;
+          tx_in_progress_ = false;
         }
       });
 }

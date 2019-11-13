@@ -140,12 +140,12 @@ class GazeboMavlinkInterface : public ModelPlugin {
         mavlink_udp_port_(kDefaultMavlinkUdpPort),
         qgc_udp_port_(kDefaultMavlinkUdpPort),
         serial_enabled_(false),
-        tx_q{},
-        rx_buf{},
-        m_status{},
-        m_buffer{},
-        io_service(),
-        serial_dev(io_service),
+        tx_q_{},
+        rx_buf_{},
+        m_status_{},
+        m_buffer_{},
+        io_service_(),
+        serial_dev_(io_service_),
         device_(kDefaultDevice),
         baudrate_(kDefaultBaudRate),
         hil_mode_(false),
@@ -215,7 +215,7 @@ class GazeboMavlinkInterface : public ModelPlugin {
   void parse_buffer(const boost::system::error_code& err, std::size_t bytes_t);
   void do_write(bool check_tx_state);
   inline bool is_open() {
-    return serial_dev.is_open();
+    return serial_dev_.is_open();
   }
 
   // Set the number of BLDC motors and tilting servos,
@@ -266,18 +266,15 @@ class GazeboMavlinkInterface : public ModelPlugin {
   std::normal_distribution<float> randn_;
 
   int _fd;
-  struct sockaddr_in _myaddr;   ///< The locally bound address
-  struct sockaddr_in _srcaddr;  ///< SITL instance
-  socklen_t _addrlen;
-  unsigned char _buf[65535];
+  struct sockaddr_in myaddr_;   ///< The locally bound address
+  struct sockaddr_in srcaddr_;  ///< SITL instance
+  socklen_t addrlen_;
+  unsigned char buf_[65535];
   struct pollfd fds[1];
 
-  struct sockaddr_in _srcaddr_2;  ///< MAVROS
-
   // so we dont have to do extra callbacks
-  ignition::math::Vector3d optflow_gyro{};
-  double optflow_distance;
-  double sonar_distance;
+  ignition::math::Vector3d optflow_gyro_{};
+  double optflow_distance_;
 
   in_addr_t mavlink_addr_;
   int mavlink_udp_port_;
@@ -286,18 +283,18 @@ class GazeboMavlinkInterface : public ModelPlugin {
   int qgc_udp_port_;
 
   // Serial interface
-  mavlink_status_t m_status;
-  mavlink_message_t m_buffer;
+  mavlink_status_t m_status_;
+  mavlink_message_t m_buffer_;
   bool serial_enabled_;
-  std::thread io_thread;
+  std::thread io_thread_;
   std::string device_;
-  std::array<uint8_t, MAX_SIZE> rx_buf;
-  std::recursive_mutex mutex;
+  std::array<uint8_t, MAX_SIZE> rx_buf_;
+  std::recursive_mutex mutex_;
   unsigned int baudrate_;
-  std::atomic<bool> tx_in_progress;
-  std::deque<MsgBuffer> tx_q;
-  boost::asio::io_service io_service;
-  boost::asio::serial_port serial_dev;
+  std::atomic<bool> tx_in_progress_;
+  std::deque<MsgBuffer> tx_q_;
+  boost::asio::io_service io_service_;
+  boost::asio::serial_port serial_dev_;
 
   bool hil_mode_;
   bool hil_state_level_;
