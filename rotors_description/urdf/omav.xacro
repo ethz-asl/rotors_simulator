@@ -22,7 +22,6 @@
 <robot name="$(arg mav_name)" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- Included URDF Files -->
-  <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro"/>
   <xacro:include filename="$(find rotors_description)/urdf/overactuated_base.xacro"/>
 
     <!-- Properties -->
@@ -41,8 +40,8 @@
     <xacro:property name="arm_length" value="0.300"/>    <!-- [m] -->
     <xacro:property name="rotor_offset_top" value="0.060"/>    <!-- [m] -->
     <xacro:property name="radius_rotor" value="0.1143"/>    <!-- [m] -->
-    <xacro:property name="motor_constant" value="${8.54858e-06}"/>    <!-- [kg m/s^2] -->
-    <xacro:property name="motor_constant_lower" value="${8.54858e-06}"/>    <!-- [kg m/s^2] -->
+    <xacro:property name="motor_constant" value="${7.2e-06}"/>    <!-- [kg m/s^2] -->
+    <xacro:property name="motor_constant_lower" value="${7.2e-06}"/>    <!-- [kg m/s^2] -->
     <xacro:property name="moment_constant" value="0.015"/>    <!-- [m] -->
     <xacro:property name="moment_constant_lower" value="0.005"/>    <!-- [m] -->
     <xacro:property name="time_constant_up" value="0.0125"/>    <!-- [s] -->
@@ -65,7 +64,7 @@
 
     <!-- Body Interia / CoM Offset -->
     <xacro:property name="body_inertia_origin">
-      <origin xyz="0 0 -0.05" />
+      <origin xyz="0 0 0" />
     </xacro:property>
 
     <!-- Rotor unit inertia without the propellor. -->
