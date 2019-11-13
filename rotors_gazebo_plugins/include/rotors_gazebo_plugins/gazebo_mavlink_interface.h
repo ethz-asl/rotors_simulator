@@ -70,6 +70,7 @@ static const uint32_t kDefaultQGCUdpPort = 14550;
 using lock_guard = std::lock_guard<std::recursive_mutex>;
 static constexpr auto kDefaultDevice = "/dev/ttyACM0";
 static constexpr auto kDefaultBaudRate = 921600;
+static constexpr double kDefaultImuInterval = 0.004;
 
 //! Maximum buffer size with padding for CRC bytes (280 + padding)
 static constexpr ssize_t MAX_SIZE = MAVLINK_MAX_PACKET_LEN + 16;
@@ -252,7 +253,7 @@ class GazeboMavlinkInterface : public ModelPlugin {
   common::Time last_time_;
   common::Time last_imu_time_;
   common::Time last_actuator_time_;
-  double imu_update_interval_ = 0.004;
+  double imu_update_interval_ = kDefaultImuInterval;
   double lat_rad_;
   double lon_rad_;
 
