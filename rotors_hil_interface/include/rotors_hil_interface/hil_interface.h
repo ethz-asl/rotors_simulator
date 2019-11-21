@@ -20,7 +20,9 @@
 #include <mav_msgs/Actuators.h>
 #include <mav_msgs/default_topics.h>
 #include <mavros_msgs/HilControls.h>
-#include <mavros_msgs/mavlink_convert.h>
+#include <mavros_msgs/HilGPS.h>
+#include <mavros_msgs/HilSensor.h>
+#include <mavros_msgs/HilStateQuaternion.h>
 
 #ifndef MAVLINK_H
   typedef mavlink::mavlink_message_t mavlink_message_t;
@@ -37,103 +39,87 @@ static constexpr int kAllFieldsUpdated = 4095;
 static constexpr double kDefaultGpsFrequency = 5.0;
 static const std::string kDefaultPressureSubTopic = "air_pressure";
 
-/// \brief Convert ros::Time into single value in microseconds.
-/// \param[in] rostime Time, in ROS format, to be converted.
-/// \return Time in microseconds.
-inline u_int64_t RosTimeToMicroseconds(const ros::Time& rostime) {
-  return (static_cast<uint64_t>(rostime.nsec * 1e-3) +
-          static_cast<uint64_t>(rostime.sec * 1e6));
-}
 
 class HilInterface {
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  /// \brief Destructor
-  virtual ~HilInterface() {};
+	/// \brief Destructor
+	virtual ~HilInterface() {};
 
-  /// \brief Gather data collected from ROS messages into MAVLINK messages.
-  /// \return Vector of MAVLINK messages (in MAVROS format) to be publised.
-  std::vector<mavros_msgs::Mavlink> virtual CollectData() = 0;
+	/// \brief Gather data collected from ROS messages into MAVROS HilGPS message.
+	/// \return HilSensor message to be publised.
+	virtual mavros_msgs::HilGPS CollectGPSData() {};
 
- protected:
-  /// ROS node handle.
-  ros::NodeHandle nh_;
+	/// \brief Gather data collected from ROS messages into MAVROS HilSensor message.
+	/// \return MAVROS HilSensor message to be publised.
+	virtual mavros_msgs::HilSensor CollectSensorData() {};
 
-  /// ROS air speed subscriber.
-  ros::Subscriber air_speed_sub_;
+	/// \brief Gather data collected from ROS messages into MAVROS HilSensor message.
+	/// \return MAVROS HilStateQuaternion message to be publised.
+	virtual mavros_msgs::HilStateQuaternion CollectStateData() {};
 
-  /// ROS GPS subscriber.
-  ros::Subscriber gps_sub_;
+protected:
+	/// ROS node handle.
+	ros::NodeHandle nh_;
 
-  /// ROS ground speed subscriber.
-  ros::Subscriber ground_speed_sub_;
+	/// ROS air speed subscriber.
+	ros::Subscriber air_speed_sub_;
 
-  /// ROS IMU subscriber.
-  ros::Subscriber imu_sub_;
+	/// ROS GPS subscriber.
+	ros::Subscriber gps_sub_;
 
-  /// ROS magnetometer subscriber.
-  ros::Subscriber mag_sub_;
+	/// ROS ground speed subscriber.
+	ros::Subscriber ground_speed_sub_;
 
-  /// ROS air pressure subscriber.
-  ros::Subscriber pressure_sub_;
+	/// ROS IMU subscriber.
+	ros::Subscriber imu_sub_;
 
-  /// Rotation, in quaternion form, from body into sensor (NED) frame.
-  Eigen::Quaterniond q_S_B_;
+	/// ROS magnetometer subscriber.
+	ros::Subscriber mag_sub_;
 
-  /// Rotation, in matrix form, from body into sensor (NED) frame.
-  Eigen::Matrix3f R_S_B_;
+	/// ROS air pressure subscriber.
+	ros::Subscriber pressure_sub_;
 
-  /// Object for storing the latest data.
-  HilData hil_data_;
+	/// Object for storing the latest data.
+	HilData hil_data_;
 
-  /// Object with callbacks for receiving data.
-  HilListeners hil_listeners_;
+	/// Object with callbacks for receiving data.
+	HilListeners hil_listeners_;
 
-  /// Mutex lock for thread safety of reading hil data.
-  boost::mutex mtx_;
+	/// Mutex lock for thread safety of reading hil data.
+	boost::mutex mtx_;
 };
 
 class HilSensorLevelInterface : public HilInterface {
- public:
-  /// \brief Constructor
-  /// \param[in] q_S_B Quaternion rotation from body frame to NED frame.
-  HilSensorLevelInterface(const Eigen::Quaterniond& q_S_B);
+public:
+	/// \brief Constructor
+	HilSensorLevelInterface();
 
-  /// \brief Destructor
-  virtual ~HilSensorLevelInterface();
+	/// \brief Destructor
+	virtual ~HilSensorLevelInterface();
 
-  std::vector<mavros_msgs::Mavlink> CollectData();
+	mavros_msgs::HilGPS CollectGPSData();
+	mavros_msgs::HilSensor CollectSensorData();
 
- private:
-  /// MAVLINK HIL_GPS message.
-  mavlink_hil_gps_t hil_gps_msg_;
+private:
+	/// Interval between outgoing HIL_GPS messages.
+	uint64_t gps_interval_nsec_;
 
-  /// MAVLINK HIL_SENSOR message.
-  mavlink_hil_sensor_t hil_sensor_msg_;
-
-  /// Interval between outgoing HIL_GPS messages.
-  uint64_t gps_interval_nsec_;
-
-  /// Nanosecond portion of the last HIL_GPS message timestamp.
-  uint64_t last_gps_pub_time_nsec_;
+	/// Nanosecond portion of the last HIL_GPS message timestamp.
+	uint64_t last_gps_pub_time_nsec_;
 };
 
 class HilStateLevelInterface : public HilInterface {
- public:
-  /// \brief Constructor
-  /// \param[in] q_S_B Quaternion rotation from body frame to NED frame.
-  HilStateLevelInterface(const Eigen::Quaterniond &q_S_B);
+public:
+	/// \brief Constructor
+	HilStateLevelInterface();
 
-  /// \brief Destructor
-  virtual ~HilStateLevelInterface();
+	/// \brief Destructor
+	virtual ~HilStateLevelInterface();
 
-  std::vector<mavros_msgs::Mavlink> CollectData();
-
- private:
-  /// MAVLINK HIL_STATE_QUATERNION message.
-  mavlink_hil_state_quaternion_t hil_state_qtrn_msg_;
+	mavros_msgs::HilStateQuaternion CollectStateData();
 };
-}
+}	// namespace rotors_hil
 
-#endif // ROTORS_HIL_INTERFACE_H_
+#endif	// ROTORS_HIL_INTERFACE_H_
