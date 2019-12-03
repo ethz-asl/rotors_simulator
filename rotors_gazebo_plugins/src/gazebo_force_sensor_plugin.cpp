@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-#include "../include/rotors_gazebo_plugins/gazebo_force_sensor_plugin.h"
+#include <rotors_gazebo_plugins/gazebo_force_sensor_plugin.h>
 
 #include <chrono>
 #include <iostream>
