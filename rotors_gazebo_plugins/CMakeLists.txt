@@ -467,7 +467,7 @@ endif()
 if(BUILD_AERIAL_MANIPULATION_PLUGINS)
 
   add_library(rotors_gazebo_force_sensor_plugin SHARED src/gazebo_force_sensor_plugin.cpp)
-  target_link_libraries(rotors_gazebo_force_sensor_plugin ${target_linking_LIBRARIES}})
+  target_link_libraries(rotors_gazebo_force_sensor_plugin ${target_linking_LIBRARIES})
   if (NOT NO_ROS)
     add_dependencies(rotors_gazebo_force_sensor_plugin ${catkin_EXPORTED_TARGETS})
   endif()
