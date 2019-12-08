@@ -49,6 +49,7 @@
 namespace gazebo {
 // Default values
 //static const std::string kDefaultNamespace = "";
+static const std::string kDefaultPublishFrameId = "world";
 static const std::string kDefaultParentFrameId = "world";
 static const std::string kDefaultReferenceFrameId = "world";
 static const std::string kDefaultLinkName = "f2g_sensor_link";
@@ -120,6 +121,7 @@ class GazeboForceSensorPlugin : public ModelPlugin {
   GazeboForceSensorPlugin()
       : ModelPlugin(),
         random_generator_(random_device_()),
+        publish_frame_id_(kDefaultPublishFrameId),
         parent_frame_id_(kDefaultParentFrameId),
         reference_frame_id_(kDefaultReferenceFrameId),
         link_name_(kDefaultLinkName),
@@ -158,6 +160,7 @@ class GazeboForceSensorPlugin : public ModelPlugin {
   std::string force_sensor_pub_topic_;
   std::string force_sensor_truth_pub_topic_;
   std::string wrench_vector_pub_topic_;
+  std::string publish_frame_id_;
   std::string parent_frame_id_;
   std::string reference_frame_id_;
   std::string link_name_;

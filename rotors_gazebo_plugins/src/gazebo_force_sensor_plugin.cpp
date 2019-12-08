@@ -82,6 +82,7 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
   getSdfParam<std::string>(_sdf, "forceSensorTopic", force_sensor_pub_topic_, force_sensor_pub_topic_);
   getSdfParam<std::string>(_sdf, "forceSensorTruthTopic", force_sensor_truth_pub_topic_, force_sensor_truth_pub_topic_);
   getSdfParam<std::string>(_sdf, "wrenchVectorTopic", wrench_vector_pub_topic_, wrench_vector_pub_topic_);
+  getSdfParam<std::string>(_sdf, "publishFrameId", publish_frame_id_, publish_frame_id_);
   getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
   getSdfParam<std::string>(_sdf, "referenceFrameId", reference_frame_id_, reference_frame_id_);
   getSdfParam<ignition::math::Vector3d>(_sdf, "noiseNormalLinearForce", noise_normal_linear_force, zeros3);
@@ -159,7 +160,6 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
   ignition::math::Pose3d W_pose_W_R = ignition::math::Pose3d::Zero;
 
   if (parent_frame_id_ != kDefaultParentFrameId) {
-//    W_pose_W_P = parent_link_->WorldCoGPose();
     W_pose_W_P = model_->GetJoint(parent_frame_id_)->WorldPose();
     ignition::math::Pose3d C_pose_P_C = W_pose_W_C - W_pose_W_P;
     gazebo_pose = C_pose_P_C;
@@ -207,17 +207,18 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   if (gazebo_sequence_ % measurement_divisor_ == 0) {
     // Copy data into wrench message.
-    wrench_msg_.header.frame_id = parent_frame_id_;
+    wrench_msg_.header.frame_id = publish_frame_id_;
     wrench_msg_.header.seq = wrench_sequence_++;
     wrench_msg_.header.stamp.sec = (world_->SimTime()).sec + ros::Duration(unknown_delay_).sec;
     wrench_msg_.header.stamp.nsec = (world_->SimTime()).nsec + ros::Duration(unknown_delay_).nsec;
 
-    wrench_msg_.wrench.force.x  = force[0];
+    // HUUUUUUGE HACK. 
+    wrench_msg_.wrench.force.x  = -force[2];
     wrench_msg_.wrench.force.y  = force[1];
-    wrench_msg_.wrench.force.z  = force[2];
-    wrench_msg_.wrench.torque.x = torque[0];
+    wrench_msg_.wrench.force.z  = force[0];
+    wrench_msg_.wrench.torque.x = -torque[2];
     wrench_msg_.wrench.torque.y = torque[1];
-    wrench_msg_.wrench.torque.z = torque[2];
+    wrench_msg_.wrench.torque.z = torque[0];
 
     if (publish_forces)
       wrench_queue_.push_back(std::make_pair(gazebo_sequence_ + measurement_delay_, wrench_msg_));
