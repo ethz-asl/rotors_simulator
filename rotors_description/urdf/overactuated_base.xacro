@@ -221,7 +221,7 @@
         <joint_control_pid>
             <p>1.0</p>
             <i>0.0</i>
-            <d>0.01</d>
+            <d>0.005</d>
             <iMax>1.0</iMax>
             <iMin>-1.0</iMin>
             <cmdMax>2.0</cmdMax>
