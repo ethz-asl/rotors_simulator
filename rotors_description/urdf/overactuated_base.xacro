@@ -179,7 +179,7 @@
 
   <!-- Double tilt unit joint and link -->
   <xacro:macro name="double_tilt_unit"
-    params="robot_namespace suffix direction_upper direction_lower motor_constant motor_constant_lower moment_constant moment_constant_lower parent mass_rotor mass_tilt_unit time_constant_up time_constant_down max_rot_velocity rotor_offset_top motor_number rotor_drag_coefficient rolling_moment_coefficient color mesh mesh_tilt_unit *origin *inertia">
+    params="robot_namespace suffix direction_upper direction_lower motor_constant motor_constant_lower moment_constant moment_constant_lower parent mass_rotor mass_tilt_unit time_constant_up time_constant_down max_rot_velocity rotor_offset_top motor_number rotor_drag_coefficient rolling_moment_coefficient color mesh mesh_tilt_unit p_gain i_gain d_gain *origin *inertia">
 
     <!-- Rotor tilt_unit -->
     <joint name="${robot_namespace}/tilt_unit_${motor_number}_revolutejoint" type="continuous">
@@ -219,9 +219,9 @@
         <motorSpeedPubTopic>/tilt_motor_${motor_number}/velocity</motorSpeedPubTopic>
         <motorPositionPubTopic>/tilt_motor_${motor_number}/position</motorPositionPubTopic>
         <joint_control_pid>
-            <p>1.0</p>
-            <i>0.0</i>
-            <d>0.005</d>
+            <p>${p_gain}</p>
+            <i>${i_gain}</i>
+            <d>${d_gain}</d>
             <iMax>1.0</iMax>
             <iMin>-1.0</iMin>
             <cmdMax>2.0</cmdMax>

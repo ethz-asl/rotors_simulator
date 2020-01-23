@@ -56,6 +56,10 @@
     <xacro:property name="rotor_drag_coefficient" value="${8.06428e-05}"/>
     <xacro:property name="rolling_moment_coefficient" value="0.000001"/>
 
+    <xacro:property name="tilt_p_gain" value="1.0"/>
+    <xacro:property name="tilt_i_gain" value="0.0"/>
+    <xacro:property name="tilt_d_gain" value="0.1"/>
+
     <!-- Property Blocks -->
     <xacro:property name="body_inertia">
         <inertia ixx="0.0075" ixy="${-3.4208e-05}" ixz="${2.4695e-05}" iyy="0.010939" iyz="${-3.8826e-06}" izz="0.01369"/>
@@ -111,7 +115,10 @@
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
     mesh_tilt_unit="${mesh_file_tilt_unit}"
-    color="Black">
+    color="Black"
+    p_gain="${tilt_p_gain}"
+    i_gain="${tilt_i_gain}"
+    d_gain="${tilt_d_gain}">
     <origin xyz="0 -${arm_length} 0" rpy="0 0 4.71238898038"/>
     <xacro:insert_block name="rotor_inertia" />
   </xacro:double_tilt_unit>
@@ -137,7 +144,10 @@
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
     mesh_tilt_unit="${mesh_file_tilt_unit}"
-    color="Black">
+    color="Black"
+    p_gain="${tilt_p_gain}"
+    i_gain="${tilt_i_gain}"
+    d_gain="${tilt_d_gain}">
     <origin xyz="0 ${arm_length} 0" rpy="0 0 1.57079632679"/>
     <xacro:insert_block name="rotor_inertia" />
   </xacro:double_tilt_unit>
@@ -163,7 +173,10 @@
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
     mesh_tilt_unit="${mesh_file_tilt_unit}"
-    color="Orange">
+    color="Orange"
+    p_gain="${tilt_p_gain}"
+    i_gain="${tilt_i_gain}"
+    d_gain="${tilt_d_gain}">
     <origin xyz="${cos30*arm_length} ${sin30*arm_length} 0" rpy="0 0 0.52359877559"/>
     <xacro:insert_block name="rotor_inertia" />
   </xacro:double_tilt_unit>
@@ -188,7 +201,10 @@
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
     mesh_tilt_unit="${mesh_file_tilt_unit}"
-    color="DarkGrey">
+    color="DarkGrey"
+    p_gain="${tilt_p_gain}"
+    i_gain="${tilt_i_gain}"
+    d_gain="${tilt_d_gain}">
     <origin xyz="-${cos30*arm_length} -${sin30*arm_length} 0" rpy="0 0 3.66519142919"/>
     <xacro:insert_block name="rotor_inertia" />
   </xacro:double_tilt_unit>
@@ -213,7 +229,10 @@
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
     mesh_tilt_unit="${mesh_file_tilt_unit}"
-    color="Orange">
+    color="Orange"
+    p_gain="${tilt_p_gain}"
+    i_gain="${tilt_i_gain}"
+    d_gain="${tilt_d_gain}">
     <origin xyz="${cos30*arm_length} -${sin30*arm_length} 0" rpy="0 0 5.75958653158"/>
     <xacro:insert_block name="rotor_inertia" />
   </xacro:double_tilt_unit>
@@ -238,7 +257,10 @@
     rolling_moment_coefficient="${rolling_moment_coefficient}"
     mesh="propeller"
     mesh_tilt_unit="${mesh_file_tilt_unit}"
-    color="DarkGrey">
+    color="DarkGrey"
+    p_gain="${tilt_p_gain}"
+    i_gain="${tilt_i_gain}"
+    d_gain="${tilt_d_gain}">
     <origin xyz="-${cos30*arm_length} ${sin30*arm_length} 0" rpy="0 0 2.61799387799"/>
     <xacro:insert_block name="rotor_inertia" />
   </xacro:double_tilt_unit>
