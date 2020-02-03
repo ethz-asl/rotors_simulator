@@ -99,6 +99,17 @@ void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world,
   gz_broadcast_transform_sub_ = gz_node_handle_->Subscribe(
       "~/" + kBroadcastTransformSubtopic,
       &GazeboRosInterfacePlugin::GzBroadcastTransformMsgCallback, this);
+
+  // ================================= //
+  // ====== WORLD ORIGIN SETUP ======= //
+  // ================================= //
+
+  //world_origin_ = world_->SphericalCoords();
+  ignition::math::Vector3d lat_lon_alt = world_->SphericalCoords()->SphericalFromLocal(ignition::math::Vector3d(0.0,0.0,0.0));
+  world_origin_msg_.latitude = lat_lon_alt.X();  // gazebo origin latitude in degrees
+  world_origin_msg_.longitude = lat_lon_alt.Y(); // gazebo origin longitude in degrees
+  world_origin_msg_.altitude = lat_lon_alt.Z();  // gazebo origin amsl in meters
+
 }
 
 void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
@@ -152,6 +163,15 @@ void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
         //GazeboRosInterfacePlugin::GzJointStateMsgCallback(boost::shared_ptr<gz_sensor_msgs::JointState>(&every_joint_state), ros_joint_state_publisher);
         ros_joint_state_publisher.publish(ros_all_joint_state_msg_);
     }
+
+    if(true){
+      if(!world_origin_advertised_){
+        world_origin_advertised_ = true;
+        ros_world_origin_publisher_ = ros_node_handle_->advertise<geographic_msgs::GeoPoint>("/gazebo_world_origin", 1);
+      }
+        ros_world_origin_publisher_.publish(world_origin_msg_);
+    }
+
     /*
     gzdbg<<"segfault dbg1\n";
     ConvertHeaderGzToRos(gz_joint_state_msg->header(),
@@ -1230,6 +1250,10 @@ void GazeboRosInterfacePlugin::RosWindSpeedMsgCallback(
   // Publish to Gazebo
   gz_publisher_ptr->Publish(gz_wind_speed_msg);
 }
+
+// ========================================================== //
+// ===== GAZEBO -> ROS BROADCAST TRANSFORM MESSAGE SETUP ==== //
+// ========================================================== //
 
 void GazeboRosInterfacePlugin::GzBroadcastTransformMsgCallback(
     GzTransformStampedWithFrameIdsMsgPtr& broadcast_transform_msg) {

@@ -77,6 +77,7 @@
 #include <std_msgs/Float32.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <geographic_msgs/GeoPoint.h>
 
 #include "rotors_gazebo_plugins/common.h"
 
@@ -350,6 +351,15 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   bool joint_states_advertised = false;
   ros::Publisher ros_joint_state_publisher;
   sensor_msgs::JointState ros_all_joint_state_msg_;
+
+  // =================================== //
+  // ====== WORLD ORIGIN RELATED ======= //
+  // =================================== //
+
+  bool world_origin_advertised_ = false;
+  common::SphericalCoordinatesPtr world_origin_;
+  ros::Publisher ros_world_origin_publisher_;
+  geographic_msgs::GeoPoint world_origin_msg_;
 
 };
 
