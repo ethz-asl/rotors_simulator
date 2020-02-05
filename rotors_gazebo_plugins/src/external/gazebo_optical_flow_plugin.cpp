@@ -72,7 +72,7 @@ void OpticalFlowPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
       gzmsg << "It is a depth camera sensor\n";
   }
 
-  this->camera = this->parentSensor->Camera();
+  this->camera = this->parentSensor->GetCamera();
 
   if (!this->parentSensor)
   {
@@ -80,10 +80,10 @@ void OpticalFlowPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
     return;
   }
 
-  this->width = this->camera->ImageWidth();
-  this->height = this->camera->ImageHeight();
-  this->depth = this->camera->ImageDepth();
-  this->format = this->camera->ImageFormat();
+  this->width = this->camera->GetImageWidth();
+  this->height = this->camera->GetImageHeight();
+  this->depth = this->camera->GetImageDepth();
+  this->format = this->camera->GetImageFormat();
 
   if (this->width != 64 || this->height != 64) {
     gzerr << "[gazebo_optical_flow_plugin] Incorrect image size, must by 64 x 64.\n";
@@ -97,15 +97,15 @@ void OpticalFlowPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
   node_handle_ = transport::NodePtr(new transport::Node());
   node_handle_->Init(namespace_);
 
-  const string scopedName = _sensor->ParentName();
+  const string scopedName = _sensor->GetParentName();
 
   string topicName = "~/" + scopedName + "/opticalFlow";
   boost::replace_all(topicName, "::", "/");
 
   opticalFlow_pub_ = node_handle_->Advertise<opticalFlow_msgs::msgs::opticalFlow>(topicName, 10);
 
-  hfov = float(this->camera->HFOV().Radian());
-  first_frame_time = this->camera->LastRenderWallTime().Double();
+  hfov = float(this->camera->GetHFOV().Radian());
+  first_frame_time = this->camera->GetLastRenderWallTime().Double();
 
   old_frame_time = first_frame_time;
   focal_length = (this->width/2)/tan(hfov/2);
@@ -130,9 +130,9 @@ void OpticalFlowPlugin::OnNewFrame(const unsigned char * _image,
                               const std::string &_format)
 {
 
-  rate = this->camera->AvgFPS();
-  _image = this->camera->ImageData(0);
-  frame_time = this->camera->LastRenderWallTime().Double();
+  rate = this->camera->GetAvgFPS();
+  _image = this->camera->GetImageData(0);
+  frame_time = this->camera->GetLastRenderWallTime().Double();
 
   frame_time_us = (frame_time - first_frame_time) * 1e6; //since start
 

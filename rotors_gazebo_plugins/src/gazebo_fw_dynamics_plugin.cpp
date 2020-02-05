@@ -137,26 +137,26 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
   // Express the air speed and angular velocity in the body frame.
   // B denotes body frame and W world frame ... e.g., W_rot_W_B denotes
   // rotation of B wrt. W expressed in W.
-  ignition::math::Quaterniond W_rot_W_B = link_->WorldPose().Rot();
-  ignition::math::Vector3d B_air_speed_W_B = W_rot_W_B.RotateVectorReverse(
-      link_->WorldLinearVel() - W_wind_speed_W_B_);
-  ignition::math::Vector3d B_angular_velocity_W_B = link_->RelativeAngularVel();
+  math::Quaternion W_rot_W_B = link_->GetWorldPose().rot;
+  math::Vector3 B_air_speed_W_B = W_rot_W_B.RotateVectorReverse(
+      link_->GetWorldLinearVel() - W_wind_speed_W_B_);
+  math::Vector3 B_angular_velocity_W_B = link_->GetRelativeAngularVel();
 
   // Traditionally, fixed-wing aerodynamics use NED (North-East-Down) frame,
   // but since our model's body frame is in North-West-Up frame we rotate the
   // linear and angular velocities by 180 degrees around the X axis.
-  double u = B_air_speed_W_B.X();
-  double v = -B_air_speed_W_B.Y();
-  double w = -B_air_speed_W_B.Z();
+  double u = B_air_speed_W_B.x;
+  double v = -B_air_speed_W_B.y;
+  double w = -B_air_speed_W_B.z;
 
-  double p = B_angular_velocity_W_B.X();
-  double q = -B_angular_velocity_W_B.Y();
-  double r = -B_angular_velocity_W_B.Z();
+  double p = B_angular_velocity_W_B.x;
+  double q = -B_angular_velocity_W_B.y;
+  double r = -B_angular_velocity_W_B.z;
 
   // Compute the angle of attack (alpha) and the sideslip angle (beta). To
   // avoid division by zero, there is a minimum air speed threshold below which
   // alpha and beta are zero.
-  double V = B_air_speed_W_B.Length();
+  double V = B_air_speed_W_B.GetLength();
   double beta = (V < kMinAirSpeedThresh) ? 0.0 : asin(v / V);
   double alpha = (u < kMinAirSpeedThresh) ? 0.0 : atan(w / u);
 
@@ -271,10 +271,10 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
 
   // Once again account for the difference between our body frame orientation
   // and the traditional aerodynamics frame.
-  const ignition::math::Vector3d forces =
-      ignition::math::Vector3d (forces_B[0], -forces_B[1], -forces_B[2]);
-  const ignition::math::Vector3d moments =
-      ignition::math::Vector3d (moments_B[0], -moments_B[1], -moments_B[2]);
+  const math::Vector3 forces =
+      math::Vector3 (forces_B[0], -forces_B[1], -forces_B[2]);
+  const math::Vector3 moments =
+      math::Vector3 (moments_B[0], -moments_B[1], -moments_B[2]);
 
   // Apply the calculated forced and moments to the main body link.
   link_->AddRelativeForce(forces);
@@ -399,9 +399,9 @@ void GazeboFwDynamicsPlugin::WindSpeedCallback(
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
 
-  W_wind_speed_W_B_.X() = wind_speed_msg->velocity().x();
-  W_wind_speed_W_B_.Y() = wind_speed_msg->velocity().y();
-  W_wind_speed_W_B_.Z() = wind_speed_msg->velocity().z();
+  W_wind_speed_W_B_.x = wind_speed_msg->velocity().x();
+  W_wind_speed_W_B_.y = wind_speed_msg->velocity().y();
+  W_wind_speed_W_B_.z = wind_speed_msg->velocity().z();
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboFwDynamicsPlugin);

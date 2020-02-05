@@ -53,13 +53,13 @@ class OctomapFromGazeboWorld : public WorldPlugin {
   /// \param[in] _sdf SDF element that describes the plugin.
   void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf);
 
-  bool CheckIfInterest(const ignition::math::Vector3d & central_point,
+  bool CheckIfInterest(const math::Vector3 & central_point,
                        gazebo::physics::RayShapePtr ray,
                        const double leaf_size);
 
-  void FloodFill(const ignition::math::Vector3d & seed_point,
-                 const ignition::math::Vector3d & bounding_box_origin,
-                 const ignition::math::Vector3d & bounding_box_lengths,
+  void FloodFill(const math::Vector3 & seed_point,
+                 const math::Vector3 & bounding_box_origin,
+                 const math::Vector3 & bounding_box_lengths,
                  const double leaf_size);
   
   /*! \brief Creates octomap by floodfilling freespace.

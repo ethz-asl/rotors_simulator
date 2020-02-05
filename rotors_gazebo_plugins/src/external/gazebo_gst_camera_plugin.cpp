@@ -200,7 +200,7 @@ void GstCameraPlugin::Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf)
       gzmsg << "It is a depth camera sensor\n";
   }
 
-  this->camera = this->parentSensor->Camera();
+  this->camera = this->parentSensor->GetCamera();
 
   if (!this->parentSensor)
   {
@@ -208,11 +208,11 @@ void GstCameraPlugin::Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf)
     return;
   }
 
-  this->width = this->camera->ImageWidth();
-  this->height = this->camera->ImageHeight();
-  this->depth = this->camera->ImageDepth();
-  this->format = this->camera->ImageFormat();
-  this->rate = this->camera->RenderRate();
+  this->width = this->camera->GetImageWidth();
+  this->height = this->camera->GetImageHeight();
+  this->depth = this->camera->GetImageDepth();
+  this->format = this->camera->GetImageFormat();
+  this->rate = this->camera->GetRenderRate();
 
  if (!isfinite(this->rate)) {
    this->rate =  60.0;
@@ -250,7 +250,7 @@ void GstCameraPlugin::OnNewFrame(const unsigned char * image,
                               const std::string &format)
 {
 
-  image = this->camera->ImageData(0);
+  image = this->camera->GetImageData(0);
 
   std::lock_guard<std::mutex> guard(frameBufferMutex);
 

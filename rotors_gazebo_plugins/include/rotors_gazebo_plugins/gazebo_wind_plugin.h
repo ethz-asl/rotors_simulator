@@ -54,8 +54,8 @@ static constexpr double kDefaultWindGustDuration = 0.0;
 static constexpr double kDefaultWindSpeedMean = 0.0;
 static constexpr double kDefaultWindSpeedVariance = 0.0;
 
-static const ignition::math::Vector3d kDefaultWindDirection = ignition::math::Vector3d (1, 0, 0);
-static const ignition::math::Vector3d kDefaultWindGustDirection = ignition::math::Vector3d (0, 1, 0);
+static const math::Vector3 kDefaultWindDirection = math::Vector3 (1, 0, 0);
+static const math::Vector3 kDefaultWindGustDirection = math::Vector3 (0, 1, 0);
 
 static constexpr bool kDefaultUseCustomStaticWindField = false;
 
@@ -131,9 +131,9 @@ class GazeboWindPlugin : public ModelPlugin {
   double wind_speed_mean_;
   double wind_speed_variance_;
 
-  ignition::math::Vector3d xyz_offset_;
-  ignition::math::Vector3d wind_direction_;
-  ignition::math::Vector3d wind_gust_direction_;
+  math::Vector3 xyz_offset_;
+  math::Vector3 wind_direction_;
+  math::Vector3 wind_gust_direction_;
 
   common::Time wind_gust_end_;
   common::Time wind_gust_start_;
@@ -165,7 +165,7 @@ class GazeboWindPlugin : public ModelPlugin {
   ///                    of the two points to interpolate from (12 and 13).
   ///             points Pointer to an array of size 2 containing the y-coordinate 
   ///                    of the two points to interpolate from.
-  ignition::math::Vector3d LinearInterpolation(double position, ignition::math::Vector3d * values, double* points) const;
+  math::Vector3 LinearInterpolation(double position, math::Vector3 * values, double* points) const;
   
   /// \brief  Bilinear interpolation
   /// \param[in]  position Pointer to an array of size 2 containing the x- and 
@@ -176,7 +176,7 @@ class GazeboWindPlugin : public ModelPlugin {
   ///                    of the eight points to interpolate from, the x-coordinate 
   ///                    of the four intermediate points (8, 9, 10 and 11), and the 
   ///                    y-coordinate of the last two intermediate points (12 and 13).
-  ignition::math::Vector3d BilinearInterpolation(double* position, ignition::math::Vector3d * values, double* points) const;
+  math::Vector3 BilinearInterpolation(double* position, math::Vector3 * values, double* points) const;
   
   /// \brief  Trilinear interpolation
   /// \param[in]  link_position Vector3 containing the x, y and z-coordinates
@@ -187,7 +187,7 @@ class GazeboWindPlugin : public ModelPlugin {
   ///                    of the eight points to interpolate from, the x-coordinate 
   ///                    of the four intermediate points (8, 9, 10 and 11), and the 
   ///                    y-coordinate of the last two intermediate points (12 and 13).
-  ignition::math::Vector3d TrilinearInterpolation(ignition::math::Vector3d link_position, ignition::math::Vector3d * values, double* points) const;
+  math::Vector3 TrilinearInterpolation(math::Vector3 link_position, math::Vector3 * values, double* points) const;
   
   gazebo::transport::PublisherPtr wind_force_pub_;
   gazebo::transport::PublisherPtr wind_speed_pub_;

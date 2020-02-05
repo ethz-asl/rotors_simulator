@@ -84,7 +84,7 @@ void GazeboControllerInterface::OnUpdate(const common::UpdateInfo& /*_info*/) {
     return;
   }
 
-  common::Time now = world_->SimTime();
+  common::Time now = world_->GetSimTime();
 
   gz_sensor_msgs::Actuators turning_velocities_msg;
 

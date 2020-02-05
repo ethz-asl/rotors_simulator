@@ -259,9 +259,9 @@ class GazeboMavlinkInterface : public ModelPlugin {
 
   void handle_control(double _dt);
 
-  ignition::math::Vector3d gravity_W_;
-  ignition::math::Vector3d velocity_prev_W_;
-  ignition::math::Vector3d mag_d_;
+  math::Vector3 gravity_W_;
+  math::Vector3 velocity_prev_W_;
+  math::Vector3 mag_d_;
 
   std::default_random_engine rand_;
   std::normal_distribution<float> randn_;
@@ -274,7 +274,7 @@ class GazeboMavlinkInterface : public ModelPlugin {
   struct pollfd fds[1];
 
   // so we dont have to do extra callbacks
-  ignition::math::Vector3d optflow_gyro_{};
+  math::Vector3 optflow_gyro_{};
   double optflow_distance_;
 
   in_addr_t mavlink_addr_;

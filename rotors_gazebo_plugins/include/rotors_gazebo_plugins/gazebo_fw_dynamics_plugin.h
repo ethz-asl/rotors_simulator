@@ -118,7 +118,7 @@ class GazeboFwDynamicsPlugin : public ModelPlugin {
   event::ConnectionPtr updateConnection_;
 
   /// \brief    Most current wind speed reading [m/s].
-  ignition::math::Vector3d W_wind_speed_W_B_;
+  math::Vector3 W_wind_speed_W_B_;
 
   /// \brief    The aerodynamic properties of the aircraft.
   FWAerodynamicParameters aero_params_;

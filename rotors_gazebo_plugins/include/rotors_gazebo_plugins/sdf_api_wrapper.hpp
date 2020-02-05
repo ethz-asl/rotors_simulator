@@ -27,7 +27,7 @@
 namespace gazebo {
 
 #if SDF_MAJOR_VERSION >= 3
-  typedef ignition::math::Vector3d SdfVector3;
+  typedef math::Vector3 SdfVector3;
 #else
   class SdfVector3 : public sdf::Vector3 {
   /*

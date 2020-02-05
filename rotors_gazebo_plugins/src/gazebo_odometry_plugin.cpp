@@ -143,73 +143,73 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model,
   getSdfParam<double>(_sdf, "covarianceImageScale", covariance_image_scale_,
                       covariance_image_scale_);
 
-  parent_link_ = world_->EntityByName(parent_frame_id_);
+  parent_link_ = world_->GetEntity(parent_frame_id_);
   if (parent_link_ == NULL && parent_frame_id_ != kDefaultParentFrameId) {
     gzthrow("[gazebo_odometry_plugin] Couldn't find specified parent link \""
             << parent_frame_id_ << "\".");
   }
 
-  position_n_[0] = NormalDistribution(0, noise_normal_position.X());
-  position_n_[1] = NormalDistribution(0, noise_normal_position.Y());
-  position_n_[2] = NormalDistribution(0, noise_normal_position.Z());
+  position_n_[0] = NormalDistribution(0, noise_normal_position.x);
+  position_n_[1] = NormalDistribution(0, noise_normal_position.y);
+  position_n_[2] = NormalDistribution(0, noise_normal_position.z);
 
-  attitude_n_[0] = NormalDistribution(0, noise_normal_quaternion.X());
-  attitude_n_[1] = NormalDistribution(0, noise_normal_quaternion.Y());
-  attitude_n_[2] = NormalDistribution(0, noise_normal_quaternion.Z());
+  attitude_n_[0] = NormalDistribution(0, noise_normal_quaternion.x);
+  attitude_n_[1] = NormalDistribution(0, noise_normal_quaternion.y);
+  attitude_n_[2] = NormalDistribution(0, noise_normal_quaternion.z);
 
   linear_velocity_n_[0] =
-      NormalDistribution(0, noise_normal_linear_velocity.X());
+      NormalDistribution(0, noise_normal_linear_velocity.x);
   linear_velocity_n_[1] =
-      NormalDistribution(0, noise_normal_linear_velocity.Y());
+      NormalDistribution(0, noise_normal_linear_velocity.y);
   linear_velocity_n_[2] =
-      NormalDistribution(0, noise_normal_linear_velocity.Z());
+      NormalDistribution(0, noise_normal_linear_velocity.z);
 
   angular_velocity_n_[0] =
-      NormalDistribution(0, noise_normal_angular_velocity.X());
+      NormalDistribution(0, noise_normal_angular_velocity.x);
   angular_velocity_n_[1] =
-      NormalDistribution(0, noise_normal_angular_velocity.Y());
+      NormalDistribution(0, noise_normal_angular_velocity.y);
   angular_velocity_n_[2] =
-      NormalDistribution(0, noise_normal_angular_velocity.Z());
+      NormalDistribution(0, noise_normal_angular_velocity.z);
 
-  position_u_[0] = UniformDistribution(-noise_uniform_position.X(),
-                                       noise_uniform_position.X());
-  position_u_[1] = UniformDistribution(-noise_uniform_position.Y(),
-                                       noise_uniform_position.Y());
-  position_u_[2] = UniformDistribution(-noise_uniform_position.Z(),
-                                       noise_uniform_position.Z());
+  position_u_[0] = UniformDistribution(-noise_uniform_position.x,
+                                       noise_uniform_position.x);
+  position_u_[1] = UniformDistribution(-noise_uniform_position.y,
+                                       noise_uniform_position.y);
+  position_u_[2] = UniformDistribution(-noise_uniform_position.z,
+                                       noise_uniform_position.z);
 
-  attitude_u_[0] = UniformDistribution(-noise_uniform_quaternion.X(),
-                                       noise_uniform_quaternion.X());
-  attitude_u_[1] = UniformDistribution(-noise_uniform_quaternion.Y(),
-                                       noise_uniform_quaternion.Y());
-  attitude_u_[2] = UniformDistribution(-noise_uniform_quaternion.Z(),
-                                       noise_uniform_quaternion.Z());
+  attitude_u_[0] = UniformDistribution(-noise_uniform_quaternion.x,
+                                       noise_uniform_quaternion.x);
+  attitude_u_[1] = UniformDistribution(-noise_uniform_quaternion.y,
+                                       noise_uniform_quaternion.y);
+  attitude_u_[2] = UniformDistribution(-noise_uniform_quaternion.z,
+                                       noise_uniform_quaternion.z);
 
   linear_velocity_u_[0] = UniformDistribution(
-      -noise_uniform_linear_velocity.X(), noise_uniform_linear_velocity.X());
+      -noise_uniform_linear_velocity.x, noise_uniform_linear_velocity.x);
   linear_velocity_u_[1] = UniformDistribution(
-      -noise_uniform_linear_velocity.Y(), noise_uniform_linear_velocity.Y());
+      -noise_uniform_linear_velocity.y, noise_uniform_linear_velocity.y);
   linear_velocity_u_[2] = UniformDistribution(
-      -noise_uniform_linear_velocity.Z(), noise_uniform_linear_velocity.Z());
+      -noise_uniform_linear_velocity.z, noise_uniform_linear_velocity.z);
 
   angular_velocity_u_[0] = UniformDistribution(
-      -noise_uniform_angular_velocity.X(), noise_uniform_angular_velocity.X());
+      -noise_uniform_angular_velocity.x, noise_uniform_angular_velocity.x);
   angular_velocity_u_[1] = UniformDistribution(
-      -noise_uniform_angular_velocity.Y(), noise_uniform_angular_velocity.Y());
+      -noise_uniform_angular_velocity.y, noise_uniform_angular_velocity.y);
   angular_velocity_u_[2] = UniformDistribution(
-      -noise_uniform_angular_velocity.Z(), noise_uniform_angular_velocity.Z());
+      -noise_uniform_angular_velocity.z, noise_uniform_angular_velocity.z);
 
   // Fill in covariance. We omit uniform noise here.
   Eigen::Map<Eigen::Matrix<double, 6, 6> > pose_covariance(
       pose_covariance_matrix_.data());
   Eigen::Matrix<double, 6, 1> pose_covd;
 
-  pose_covd << noise_normal_position.X() * noise_normal_position.X(),
-      noise_normal_position.Y() * noise_normal_position.Y(),
-      noise_normal_position.Z() * noise_normal_position.Z(),
-      noise_normal_quaternion.X() * noise_normal_quaternion.X(),
-      noise_normal_quaternion.Y() * noise_normal_quaternion.Y(),
-      noise_normal_quaternion.Z() * noise_normal_quaternion.Z();
+  pose_covd << noise_normal_position.x * noise_normal_position.x,
+      noise_normal_position.y * noise_normal_position.y,
+      noise_normal_position.z * noise_normal_position.z,
+      noise_normal_quaternion.x * noise_normal_quaternion.x,
+      noise_normal_quaternion.y * noise_normal_quaternion.y,
+      noise_normal_quaternion.z * noise_normal_quaternion.z;
   pose_covariance = pose_covd.asDiagonal();
 
   // Fill in covariance. We omit uniform noise here.
@@ -217,13 +217,13 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model,
       twist_covariance_matrix_.data());
   Eigen::Matrix<double, 6, 1> twist_covd;
 
-  twist_covd << noise_normal_linear_velocity.X() *
-                    noise_normal_linear_velocity.X(),
-      noise_normal_linear_velocity.Y() * noise_normal_linear_velocity.Y(),
-      noise_normal_linear_velocity.Z() * noise_normal_linear_velocity.Z(),
-      noise_normal_angular_velocity.X() * noise_normal_angular_velocity.X(),
-      noise_normal_angular_velocity.Y() * noise_normal_angular_velocity.Y(),
-      noise_normal_angular_velocity.Z() * noise_normal_angular_velocity.Z();
+  twist_covd << noise_normal_linear_velocity.x *
+                    noise_normal_linear_velocity.x,
+      noise_normal_linear_velocity.y * noise_normal_linear_velocity.y,
+      noise_normal_linear_velocity.z * noise_normal_linear_velocity.z,
+      noise_normal_angular_velocity.x * noise_normal_angular_velocity.x,
+      noise_normal_angular_velocity.y * noise_normal_angular_velocity.y,
+      noise_normal_angular_velocity.z * noise_normal_angular_velocity.z;
   twist_covariance = twist_covd.asDiagonal();
 
   // Listen to the update event. This event is broadcast every
@@ -245,36 +245,36 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // C denotes child frame, P parent frame, and W world frame.
   // Further C_pose_W_P denotes pose of P wrt. W expressed in C.
-  ignition::math::Pose3d W_pose_W_C = link_->WorldCoGPose();
-  ignition::math::Vector3d C_linear_velocity_W_C = link_->RelativeLinearVel();
-  ignition::math::Vector3d C_angular_velocity_W_C = link_->RelativeAngularVel();
+  math::Pose W_pose_W_C = link_->GetWorldCoGPose();
+  math::Vector3 C_linear_velocity_W_C = link_->GetRelativeLinearVel();
+  math::Vector3 C_angular_velocity_W_C = link_->GetRelativeAngularVel();
 
-  ignition::math::Vector3d gazebo_linear_velocity = C_linear_velocity_W_C;
-  ignition::math::Vector3d gazebo_angular_velocity = C_angular_velocity_W_C;
-  ignition::math::Pose3d gazebo_pose = W_pose_W_C;
+  math::Vector3 gazebo_linear_velocity = C_linear_velocity_W_C;
+  math::Vector3 gazebo_angular_velocity = C_angular_velocity_W_C;
+  math::Pose gazebo_pose = W_pose_W_C;
 
   if (parent_frame_id_ != kDefaultParentFrameId) {
-    ignition::math::Pose3d W_pose_W_P = parent_link_->WorldPose();
-    ignition::math::Vector3d P_linear_velocity_W_P = parent_link_->RelativeLinearVel();
-    ignition::math::Vector3d P_angular_velocity_W_P =
-        parent_link_->RelativeAngularVel();
-    ignition::math::Pose3d C_pose_P_C_ = W_pose_W_C - W_pose_W_P;
-    ignition::math::Vector3d C_linear_velocity_P_C;
+    math::Pose W_pose_W_P = parent_link_->GetWorldPose();
+    math::Vector3 P_linear_velocity_W_P = parent_link_->GetRelativeLinearVel();
+    math::Vector3 P_angular_velocity_W_P =
+        parent_link_->GetRelativeAngularVel();
+    math::Pose C_pose_P_C_ = W_pose_W_C - W_pose_W_P;
+    math::Vector3 C_linear_velocity_P_C;
     // \prescript{}{C}{\dot{r}}_{PC} = -R_{CP}
     //       \cdot \prescript{}{P}{\omega}_{WP} \cross \prescript{}{P}{r}_{PC}
     //       + \prescript{}{C}{v}_{WC}
     //                                 - R_{CP} \cdot \prescript{}{P}{v}_{WP}
     C_linear_velocity_P_C =
-        -C_pose_P_C_.Rot().Inverse() *
-            P_angular_velocity_W_P.Cross(C_pose_P_C_.Pos()) +
+        -C_pose_P_C_.rot.GetInverse() *
+            P_angular_velocity_W_P.Cross(C_pose_P_C_.pos) +
         C_linear_velocity_W_C -
-        C_pose_P_C_.Rot().Inverse() * P_linear_velocity_W_P;
+        C_pose_P_C_.rot.GetInverse() * P_linear_velocity_W_P;
 
     // \prescript{}{C}{\omega}_{PC} = \prescript{}{C}{\omega}_{WC}
     //       - R_{CP} \cdot \prescript{}{P}{\omega}_{WP}
     gazebo_angular_velocity =
         C_angular_velocity_W_C -
-        C_pose_P_C_.Rot().Inverse() * P_angular_velocity_W_P;
+        C_pose_P_C_.rot.GetInverse() * P_angular_velocity_W_P;
     gazebo_linear_velocity = C_linear_velocity_P_C;
     gazebo_pose = C_pose_P_C_;
   }
@@ -290,10 +290,10 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     int width = covariance_image_.cols;
     int height = covariance_image_.rows;
     int x = static_cast<int>(
-                std::floor(gazebo_pose.Pos().X() / covariance_image_scale_)) +
+                std::floor(gazebo_pose.pos.x / covariance_image_scale_)) +
             width / 2;
     int y = static_cast<int>(
-                std::floor(gazebo_pose.Pos().Y() / covariance_image_scale_)) +
+                std::floor(gazebo_pose.pos.y / covariance_image_scale_)) +
             height / 2;
 
     if (x >= 0 && x < width && y >= 0 && y < height) {
@@ -310,40 +310,40 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
     gz_geometry_msgs::Odometry odometry;
     odometry.mutable_header()->set_frame_id(parent_frame_id_);
     odometry.mutable_header()->mutable_stamp()->set_sec(
-        (world_->SimTime()).sec + static_cast<int32_t>(unknown_delay_));
+        (world_->GetSimTime()).sec + static_cast<int32_t>(unknown_delay_));
     odometry.mutable_header()->mutable_stamp()->set_nsec(
-        (world_->SimTime()).nsec + static_cast<int32_t>(unknown_delay_));
+        (world_->GetSimTime()).nsec + static_cast<int32_t>(unknown_delay_));
     odometry.set_child_frame_id(child_frame_id_);
 
     odometry.mutable_pose()->mutable_pose()->mutable_position()->set_x(
-        gazebo_pose.Pos().X());
+        gazebo_pose.pos.x);
     odometry.mutable_pose()->mutable_pose()->mutable_position()->set_y(
-        gazebo_pose.Pos().Y());
+        gazebo_pose.pos.y);
     odometry.mutable_pose()->mutable_pose()->mutable_position()->set_z(
-        gazebo_pose.Pos().Z());
+        gazebo_pose.pos.z);
 
     odometry.mutable_pose()->mutable_pose()->mutable_orientation()->set_x(
-        gazebo_pose.Rot().X());
+        gazebo_pose.rot.x);
     odometry.mutable_pose()->mutable_pose()->mutable_orientation()->set_y(
-        gazebo_pose.Rot().Y());
+        gazebo_pose.rot.y);
     odometry.mutable_pose()->mutable_pose()->mutable_orientation()->set_z(
-        gazebo_pose.Rot().Z());
+        gazebo_pose.rot.z);
     odometry.mutable_pose()->mutable_pose()->mutable_orientation()->set_w(
-        gazebo_pose.Rot().W());
+        gazebo_pose.rot.w);
 
     odometry.mutable_twist()->mutable_twist()->mutable_linear()->set_x(
-        gazebo_linear_velocity.X());
+        gazebo_linear_velocity.x);
     odometry.mutable_twist()->mutable_twist()->mutable_linear()->set_y(
-        gazebo_linear_velocity.Y());
+        gazebo_linear_velocity.y);
     odometry.mutable_twist()->mutable_twist()->mutable_linear()->set_z(
-        gazebo_linear_velocity.Z());
+        gazebo_linear_velocity.z);
 
     odometry.mutable_twist()->mutable_twist()->mutable_angular()->set_x(
-        gazebo_angular_velocity.X());
+        gazebo_angular_velocity.x);
     odometry.mutable_twist()->mutable_twist()->mutable_angular()->set_y(
-        gazebo_angular_velocity.Y());
+        gazebo_angular_velocity.y);
     odometry.mutable_twist()->mutable_twist()->mutable_angular()->set_z(
-        gazebo_angular_velocity.Z());
+        gazebo_angular_velocity.z);
 
     if (publish_odometry)
       odometry_queue_.push_back(

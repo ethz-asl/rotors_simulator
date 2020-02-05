@@ -37,7 +37,7 @@ void GazeboMotorModel::Publish() {
     motor_velocity_pub_->Publish(turning_velocity_msg_);
   }
   if (publish_position_) {
-    position_msg_.set_data(joint_->Position(0));
+    position_msg_.set_data(joint_->GetAngle(0).Radian());
     motor_position_pub_->Publish(position_msg_);
   }
   if (publish_force_) {
@@ -363,9 +363,9 @@ void GazeboMotorModel::WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg) {
 
   // TODO(burrimi): Transform velocity to world frame if frame_id is set to
   // something else.
-  wind_speed_W_.X() = wind_speed_msg->velocity().x();
-  wind_speed_W_.Y() = wind_speed_msg->velocity().y();
-  wind_speed_W_.Z() = wind_speed_msg->velocity().z();
+  wind_speed_W_.x = wind_speed_msg->velocity().x();
+  wind_speed_W_.y = wind_speed_msg->velocity().y();
+  wind_speed_W_.z = wind_speed_msg->velocity().z();
 }
 
 double GazeboMotorModel::NormalizeAngle(double input){
@@ -390,7 +390,7 @@ double GazeboMotorModel::NormalizeAngle(double input){
 void GazeboMotorModel::UpdateForcesAndMoments() {
   switch (motor_type_) {
     case (MotorType::kPosition): {
-      double err = NormalizeAngle(joint_->Position(0)) - NormalizeAngle(ref_motor_input_);
+      double err = NormalizeAngle(joint_->GetAngle(0).Radian()) - NormalizeAngle(ref_motor_input_);
 
       // Angles are element of [0..2pi).
       // Constrain difference of angles to be in [-pi..pi).
@@ -431,19 +431,19 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
                       motor_constant_;
 
       // Apply a force to the link.
-      link_->AddRelativeForce(ignition::math::Vector3d (0, 0, thrust));
+      link_->AddRelativeForce(math::Vector3 (0, 0, thrust));
 
       // Forces from Philppe Martin's and Erwan Salaün's
       // 2010 IEEE Conference on Robotics and Automation paper
       // The True Role of Accelerometer Feedback in Quadrotor Control
       // - \omega * \lambda_1 * V_A^{\perp}
-      ignition::math::Vector3d joint_axis = joint_->GlobalAxis(0);
-      ignition::math::Vector3d body_velocity_W = link_->WorldLinearVel();
-      ignition::math::Vector3d relative_wind_velocity_W = body_velocity_W - wind_speed_W_;
-      ignition::math::Vector3d body_velocity_perpendicular =
+      math::Vector3 joint_axis = joint_->GetGlobalAxis(0);
+      math::Vector3 body_velocity_W = link_->GetWorldLinearVel();
+      math::Vector3 relative_wind_velocity_W = body_velocity_W - wind_speed_W_;
+      math::Vector3 body_velocity_perpendicular =
           relative_wind_velocity_W -
           (relative_wind_velocity_W.Dot(joint_axis) * joint_axis);
-      ignition::math::Vector3d air_drag = -std::abs(real_motor_velocity) *
+      math::Vector3 air_drag = -std::abs(real_motor_velocity) *
                                rotor_drag_coefficient_ *
                                body_velocity_perpendicular;
 
@@ -453,17 +453,17 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
       // applied.
       physics::Link_V parent_links = link_->GetParentJointsLinks();
       // The tansformation from the parent_link to the link_.
-      ignition::math::Pose3d pose_difference =
-          link_->WorldCoGPose() - parent_links.at(0)->WorldCoGPose();
-      ignition::math::Vector3d drag_torque(
+      math::Pose pose_difference =
+          link_->GetWorldCoGPose() - parent_links.at(0)->GetWorldCoGPose();
+      math::Vector3 drag_torque(
           0, 0, -turning_direction_ * thrust * moment_constant_);
       // Transforming the drag torque into the parent frame to handle
       // arbitrary rotor orientations.
-      ignition::math::Vector3d drag_torque_parent_frame =
-          pose_difference.Rot().RotateVector(drag_torque);
+      math::Vector3 drag_torque_parent_frame =
+          pose_difference.rot.RotateVector(drag_torque);
       parent_links.at(0)->AddRelativeTorque(drag_torque_parent_frame);
 
-      ignition::math::Vector3d rolling_moment;
+      math::Vector3 rolling_moment;
       // - \omega * \mu_1 * V_A^{\perp}
       rolling_moment = -std::abs(real_motor_velocity) *
                        rolling_moment_coefficient_ *

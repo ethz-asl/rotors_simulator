@@ -97,7 +97,7 @@ void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
   }
 
   // Get the current simulation time.
-  common::Time now = world_->SimTime();
+  common::Time now = world_->GetSimTime();
 
   actuators_msg_.mutable_header()->mutable_stamp()->set_sec(now.sec);
   actuators_msg_.mutable_header()->mutable_stamp()->set_nsec(now.nsec);
@@ -120,7 +120,7 @@ void GazeboMultirotorBasePlugin::OnUpdate(const common::UpdateInfo& _info) {
     actuators_msg_.add_angular_velocities(motor_rot_vel);
 
     joint_state_msg_.add_name(m->second->GetName());
-    joint_state_msg_.add_position(m->second->Position(0));
+    joint_state_msg_.add_position(m->second->GetAngle(0).Radian());
   }
 
   joint_state_pub_->Publish(joint_state_msg_);

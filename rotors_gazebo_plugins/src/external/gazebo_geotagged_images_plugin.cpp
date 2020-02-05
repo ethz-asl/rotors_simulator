@@ -61,7 +61,7 @@ void GeotaggedImagesPlugin::Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf)
     gzerr << "GeotaggedImagesPlugin requires a CameraSensor.\n";
   }
 
-  this->camera_ = this->parentSensor_->Camera();
+  this->camera_ = this->parentSensor_->GetCamera();
 
   if (!this->parentSensor_)
   {
@@ -69,12 +69,12 @@ void GeotaggedImagesPlugin::Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf)
     return;
   }
   scene_ = camera_->GetScene();
-  lastImageTime_ = scene_->SimTime();
+  lastImageTime_ = scene_->GetSimTime();
 
-  this->width_ = this->camera_->ImageWidth();
-  this->height_ = this->camera_->ImageHeight();
-  this->depth_ = this->camera_->ImageDepth();
-  this->format_ = this->camera_->ImageFormat();
+  this->width_ = this->camera_->GetImageWidth();
+  this->height_ = this->camera_->GetImageHeight();
+  this->depth_ = this->camera_->GetImageDepth();
+  this->format_ = this->camera_->GetImageFormat();
 
   if (sdf->HasElement("robotNamespace")) {
     namespace_ = sdf->GetElement("robotNamespace")->Get<std::string>();
@@ -130,9 +130,9 @@ void GeotaggedImagesPlugin::OnNewGpsPosition(ConstVector3dPtr& v)
 void GeotaggedImagesPlugin::OnNewFrame(const unsigned char * image)
 {
 
-  image = this->camera_->ImageData(0);
+  image = this->camera_->GetImageData(0);
 
-  common::Time currentTime = scene_->SimTime();
+  common::Time currentTime = scene_->GetSimTime();
   if (currentTime.Double() - lastImageTime_.Double() < storeIntervalSec_) {
     return;
   }

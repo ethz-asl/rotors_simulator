@@ -513,6 +513,14 @@ if (NOT NO_ROS)
 endif()
 list(APPEND targets_to_install rotors_gazebo_wind_plugin)
 
+#=================================== LANDING TARGET PLUGIN ======================================//
+add_library(rotors_gazebo_landing_target_plugin SHARED src/gazebo_landing_target_plugin.cpp)
+target_link_libraries(rotors_gazebo_landing_target_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_landing_target_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_landing_target_plugin)
+
 # =============================================================================================== #
 # ======================================= EXTERNAL LIBRARIES ==================================== #
 # =============================================================================================== #

@@ -72,10 +72,10 @@ void GazeboLidarPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   if (!this->parentSensor)
     gzthrow("RayPlugin requires a Ray Sensor as its parent");
 
-  this->world = physics::get_world(this->parentSensor->WorldName());
+  this->world = physics::get_world(this->parentSensor->GetWorldName());
 
   this->newLaserScansConnection =
-    this->parentSensor->LaserShape()->ConnectNewLaserScans(
+    this->parentSensor->GetLaserShape()->ConnectNewLaserScans(
       boost::bind(&GazeboLidarPlugin::OnNewLaserScans, this));
 
   if (_sdf->HasElement("robotNamespace"))
@@ -86,7 +86,7 @@ void GazeboLidarPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   node_handle_ = transport::NodePtr(new transport::Node());
   node_handle_->Init(namespace_);
 
-  const string scopedName = _parent->ParentName();
+  const string scopedName = _parent->GetParentName();
 
   string topicName = "~/" + scopedName + "/lidar";
   boost::replace_all(topicName, "::", "/");
@@ -98,9 +98,9 @@ void GazeboLidarPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 void GazeboLidarPlugin::OnNewLaserScans()
 {
   lidar_message.set_time_msec(0);
-  lidar_message.set_min_distance(parentSensor->RangeMin());
-  lidar_message.set_max_distance(parentSensor->RangeMax());
-  lidar_message.set_current_distance(parentSensor->Range(0));
+  lidar_message.set_min_distance(parentSensor->GetRangeMin());
+  lidar_message.set_max_distance(parentSensor->GetRangeMax());
+  lidar_message.set_current_distance(parentSensor->GetRange(0));
 
   lidar_pub_->Publish(lidar_message);
 }

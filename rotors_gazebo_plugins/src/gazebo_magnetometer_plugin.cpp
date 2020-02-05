@@ -92,22 +92,22 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model,
       boost::bind(&GazeboMagnetometerPlugin::OnUpdate, this, _1));
 
   // Create the normal noise distributions
-  noise_n_[0] = NormalDistribution(0, noise_normal.X());
-  noise_n_[1] = NormalDistribution(0, noise_normal.Y());
-  noise_n_[2] = NormalDistribution(0, noise_normal.Z());
+  noise_n_[0] = NormalDistribution(0, noise_normal.x);
+  noise_n_[1] = NormalDistribution(0, noise_normal.y);
+  noise_n_[2] = NormalDistribution(0, noise_normal.z);
 
   // Create the uniform noise distribution for initial bias
   UniformDistribution initial_bias[3];
-  initial_bias[0] = UniformDistribution(-noise_uniform_initial_bias.X(),
-                                        noise_uniform_initial_bias.X());
-  initial_bias[1] = UniformDistribution(-noise_uniform_initial_bias.Y(),
-                                        noise_uniform_initial_bias.Y());
-  initial_bias[2] = UniformDistribution(-noise_uniform_initial_bias.Z(),
-                                        noise_uniform_initial_bias.Z());
+  initial_bias[0] = UniformDistribution(-noise_uniform_initial_bias.x,
+                                        noise_uniform_initial_bias.x);
+  initial_bias[1] = UniformDistribution(-noise_uniform_initial_bias.y,
+                                        noise_uniform_initial_bias.y);
+  initial_bias[2] = UniformDistribution(-noise_uniform_initial_bias.z,
+                                        noise_uniform_initial_bias.z);
 
   // Initialize the reference magnetic field vector in world frame, taking into
   // account the initial bias
-  mag_W_ = ignition::math::Vector3d (ref_mag_north + initial_bias[0](random_generator_),
+  mag_W_ = math::Vector3 (ref_mag_north + initial_bias[0](random_generator_),
                          ref_mag_east + initial_bias[1](random_generator_),
                          ref_mag_down + initial_bias[2](random_generator_));
 
@@ -117,8 +117,8 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model,
   for (int i = 0; i < 9; i++) {
     switch (i) {
       case 0:
-        mag_message_.add_magnetic_field_covariance(noise_normal.X() *
-                                                   noise_normal.X());
+        mag_message_.add_magnetic_field_covariance(noise_normal.x *
+                                                   noise_normal.x);
         break;
       case 1:
       case 2:
@@ -126,8 +126,8 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model,
         mag_message_.add_magnetic_field_covariance(0);
         break;
       case 4:
-        mag_message_.add_magnetic_field_covariance(noise_normal.Y() *
-                                                   noise_normal.Y());
+        mag_message_.add_magnetic_field_covariance(noise_normal.y *
+                                                   noise_normal.y);
         break;
       case 5:
       case 6:
@@ -135,8 +135,8 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model,
         mag_message_.add_magnetic_field_covariance(0);
         break;
       case 8:
-        mag_message_.add_magnetic_field_covariance(noise_normal.Z() *
-                                                   noise_normal.Z());
+        mag_message_.add_magnetic_field_covariance(noise_normal.z *
+                                                   noise_normal.z);
         break;
     }
   }
@@ -153,23 +153,23 @@ void GazeboMagnetometerPlugin::OnUpdate(const common::UpdateInfo& _info) {
   }
 
   // Get the current pose and time from Gazebo
-  ignition::math::Pose3d T_W_B = link_->WorldPose();
-  common::Time current_time = world_->SimTime();
+  math::Pose T_W_B = link_->GetWorldPose();
+  common::Time current_time = world_->GetSimTime();
 
   // Calculate the magnetic field noise.
-  ignition::math::Vector3d mag_noise(noise_n_[0](random_generator_),
+  math::Vector3 mag_noise(noise_n_[0](random_generator_),
                           noise_n_[1](random_generator_),
                           noise_n_[2](random_generator_));
 
   // Rotate the earth magnetic field into the inertial frame
-  ignition::math::Vector3d field_B = T_W_B.Rot().RotateVectorReverse(mag_W_ + mag_noise);
+  math::Vector3 field_B = T_W_B.rot.RotateVectorReverse(mag_W_ + mag_noise);
 
   // Fill the magnetic field message
   mag_message_.mutable_header()->mutable_stamp()->set_sec(current_time.sec);
   mag_message_.mutable_header()->mutable_stamp()->set_nsec(current_time.nsec);
-  mag_message_.mutable_magnetic_field()->set_x(field_B.X());
-  mag_message_.mutable_magnetic_field()->set_y(field_B.Y());
-  mag_message_.mutable_magnetic_field()->set_z(field_B.Z());
+  mag_message_.mutable_magnetic_field()->set_x(field_B.x);
+  mag_message_.mutable_magnetic_field()->set_y(field_B.y);
+  mag_message_.mutable_magnetic_field()->set_z(field_B.z);
 
   // Publish the message
   magnetometer_pub_->Publish(mag_message_);

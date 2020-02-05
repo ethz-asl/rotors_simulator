@@ -130,7 +130,7 @@ void GazeboBagPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   // Get the contact manager.
   std::vector<std::string> collisions;
-  contact_mgr_ = world_->Physics()->GetContactManager();
+  contact_mgr_ = world_->GetPhysicsEngine()->GetContactManager();
   for (unsigned int i = 0; i < link_->GetCollisions().size(); ++i) {
     physics::CollisionPtr collision = link_->GetCollision(i);
     collisions.push_back(collision->GetScopedName());
@@ -157,7 +157,7 @@ void GazeboBagPlugin::OnUpdate(const common::UpdateInfo& _info) {
   }
 
   // Get the current simulation time.
-  common::Time now = world_->SimTime();
+  common::Time now = world_->GetSimTime();
   LogWrenches(now);
   LogGroundTruth(now);
   LogMotorVelocities(now);
@@ -256,35 +256,35 @@ void GazeboBagPlugin::StopRecording() {
 }
 
 void GazeboBagPlugin::ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg) {
-  common::Time now = world_->SimTime();
+  common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(namespace_ + "/" + imu_topic_, ros_now, imu_msg);
 }
 
 void GazeboBagPlugin::ExternalForceCallback(
     const geometry_msgs::WrenchStampedConstPtr& force_msg) {
-  common::Time now = world_->SimTime();
+  common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(namespace_ + "/" + external_force_topic_, ros_now, force_msg);
 }
 
 void GazeboBagPlugin::WaypointCallback(
     const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_msg) {
-  common::Time now = world_->SimTime();
+  common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(namespace_ + "/" + waypoint_topic_, ros_now, trajectory_msg);
 }
 
 void GazeboBagPlugin::CommandPoseCallback(
     const geometry_msgs::PoseStampedConstPtr& pose_msg) {
-  common::Time now = world_->SimTime();
+  common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(namespace_ + "/" + command_pose_topic_, ros_now, pose_msg);
 }
 
 void GazeboBagPlugin::AttitudeThrustCallback(
     const mav_msgs::AttitudeThrustConstPtr& control_msg) {
-  common::Time now = world_->SimTime();
+  common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(namespace_ + "/" + control_attitude_thrust_topic_, ros_now,
            control_msg);
@@ -292,21 +292,21 @@ void GazeboBagPlugin::AttitudeThrustCallback(
 
 void GazeboBagPlugin::ActuatorsCallback(
     const mav_msgs::ActuatorsConstPtr& control_msg) {
-  common::Time now = world_->SimTime();
+  common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(namespace_ + "/" + control_motor_speed_topic_, ros_now, control_msg);
 }
 
 void GazeboBagPlugin::RateThrustCallback(
     const mav_msgs::RateThrustConstPtr& control_msg) {
-  common::Time now = world_->SimTime();
+  common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(namespace_ + "/" + control_rate_thrust_topic_, ros_now, control_msg);
 }
 
 void GazeboBagPlugin::WindSpeedCallback(
     const rotors_comm::WindSpeedConstPtr& wind_speed_msg) {
-  common::Time now = world_->SimTime();
+  common::Time now = world_->GetSimTime();
   ros::Time ros_now = ros::Time(now.sec, now.nsec);
   writeBag(namespace_ + "/" + wind_speed_topic_, ros_now, wind_speed_msg);
 }
@@ -336,32 +336,32 @@ void GazeboBagPlugin::LogGroundTruth(const common::Time now) {
   geometry_msgs::TwistStamped twist_msg;
 
   // Get pose and update the message.
-  ignition::math::Pose3d pose = link_->WorldPose();
+  math::Pose pose = link_->GetWorldPose();
   pose_msg.header.frame_id = frame_id_;
   pose_msg.header.stamp.sec = now.sec;
   pose_msg.header.stamp.nsec = now.nsec;
-  pose_msg.pose.position.x = pose.Pos().X();
-  pose_msg.pose.position.y = pose.Pos().Y();
-  pose_msg.pose.position.z = pose.Pos().Z();
-  pose_msg.pose.orientation.w = pose.Rot().W();
-  pose_msg.pose.orientation.x = pose.Rot().X();
-  pose_msg.pose.orientation.y = pose.Rot().Y();
-  pose_msg.pose.orientation.z = pose.Rot().Z();
+  pose_msg.pose.position.x = pose.pos.x;
+  pose_msg.pose.position.y = pose.pos.y;
+  pose_msg.pose.position.z = pose.pos.z;
+  pose_msg.pose.orientation.w = pose.rot.w;
+  pose_msg.pose.orientation.x = pose.rot.x;
+  pose_msg.pose.orientation.y = pose.rot.y;
+  pose_msg.pose.orientation.z = pose.rot.z;
 
   writeBag(namespace_ + "/" + ground_truth_pose_topic_, ros_now, pose_msg);
 
   // Get twist and update the message.
-  ignition::math::Vector3d linear_veloctiy = link_->WorldLinearVel();
-  ignition::math::Vector3d angular_veloctiy = link_->WorldAngularVel();
+  math::Vector3 linear_veloctiy = link_->GetWorldLinearVel();
+  math::Vector3 angular_veloctiy = link_->GetWorldAngularVel();
   twist_msg.header.frame_id = frame_id_;
   twist_msg.header.stamp.sec = now.sec;
   twist_msg.header.stamp.nsec = now.nsec;
-  twist_msg.twist.linear.x = linear_veloctiy.X();
-  twist_msg.twist.linear.y = linear_veloctiy.Y();
-  twist_msg.twist.linear.z = linear_veloctiy.Z();
-  twist_msg.twist.angular.x = angular_veloctiy.X();
-  twist_msg.twist.angular.y = angular_veloctiy.Y();
-  twist_msg.twist.angular.z = angular_veloctiy.Z();
+  twist_msg.twist.linear.x = linear_veloctiy.x;
+  twist_msg.twist.linear.y = linear_veloctiy.y;
+  twist_msg.twist.linear.z = linear_veloctiy.z;
+  twist_msg.twist.angular.x = angular_veloctiy.x;
+  twist_msg.twist.angular.y = angular_veloctiy.y;
+  twist_msg.twist.angular.z = angular_veloctiy.z;
 
   writeBag(namespace_ + "/" + ground_truth_twist_topic_, ros_now, twist_msg);
 }
@@ -372,7 +372,7 @@ void GazeboBagPlugin::LogWrenches(const common::Time now) {
   for (int i = 0; i < contact_mgr_->GetContactCount(); ++i) {
     std::string collision2_name =
         contacts[i]->collision2->GetLink()->GetScopedName();
-    double body1_force = contacts[i]->wrench->body1Force.Length();
+    double body1_force = contacts[i]->wrench->body1Force.GetLength();
 
     // Exclude extremely small forces.
     if (body1_force < 1e-10) continue;
@@ -384,12 +384,12 @@ void GazeboBagPlugin::LogWrenches(const common::Time now) {
     wrench_msg.header.frame_id = collision1_name + "--" + collision2_name;
     wrench_msg.header.stamp.sec = now.sec;
     wrench_msg.header.stamp.nsec = now.nsec;
-    wrench_msg.wrench.force.x = contacts[i]->wrench->body1Force.X();
-    wrench_msg.wrench.force.y = contacts[i]->wrench->body1Force.Y();
-    wrench_msg.wrench.force.z = contacts[i]->wrench->body1Force.Z();
-    wrench_msg.wrench.torque.x = contacts[i]->wrench->body1Torque.X();
-    wrench_msg.wrench.torque.y = contacts[i]->wrench->body1Torque.Y();
-    wrench_msg.wrench.torque.z = contacts[i]->wrench->body1Torque.Z();
+    wrench_msg.wrench.force.x = contacts[i]->wrench->body1Force.x;
+    wrench_msg.wrench.force.y = contacts[i]->wrench->body1Force.y;
+    wrench_msg.wrench.force.z = contacts[i]->wrench->body1Force.z;
+    wrench_msg.wrench.torque.x = contacts[i]->wrench->body1Torque.x;
+    wrench_msg.wrench.torque.y = contacts[i]->wrench->body1Torque.y;
+    wrench_msg.wrench.torque.z = contacts[i]->wrench->body1Torque.z;
 
     writeBag(namespace_ + "/" + wrench_topic_, ros_now, wrench_msg);
   }

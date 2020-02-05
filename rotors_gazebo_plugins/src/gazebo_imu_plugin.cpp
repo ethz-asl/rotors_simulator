@@ -116,7 +116,7 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
                       imu_parameters_.accelerometer_turn_on_bias_sigma,
                       imu_parameters_.accelerometer_turn_on_bias_sigma);
 
-  last_time_ = world_->SimTime();
+  last_time_ = world_->GetSimTime();
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -191,8 +191,8 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     }
   }
 
-  gravity_W_ = world_->Gravity();
-  imu_parameters_.gravity_magnitude = gravity_W_.Length();
+  gravity_W_ = world_->GetPhysicsEngine()->GetGravity();
+  imu_parameters_.gravity_magnitude = gravity_W_.GetLength();
 
   standard_normal_distribution_ = std::normal_distribution<double>(0.0, 1.0);
 
@@ -273,23 +273,23 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
     pubs_and_subs_created_ = true;
   }
 
-  common::Time current_time = world_->SimTime();
+  common::Time current_time = world_->GetSimTime();
   double dt = (current_time - last_time_).Double();
   last_time_ = current_time;
   double t = current_time.Double();
 
-  ignition::math::Pose3d T_W_I = link_->WorldPose();  // TODO(burrimi): Check tf.
-  ignition::math::Quaterniond C_W_I = T_W_I.Rot();
+  math::Pose T_W_I = link_->GetWorldPose();  // TODO(burrimi): Check tf.
+  math::Quaternion C_W_I = T_W_I.rot;
 
-  ignition::math::Vector3d acceleration_I =
-      link_->RelativeLinearAccel() - C_W_I.RotateVectorReverse(gravity_W_);
+  math::Vector3 acceleration_I =
+      link_->GetRelativeLinearAccel() - C_W_I.RotateVectorReverse(gravity_W_);
 
-  ignition::math::Vector3d angular_vel_I = link_->RelativeAngularVel();
+  math::Vector3 angular_vel_I = link_->GetRelativeAngularVel();
 
-  Eigen::Vector3d linear_acceleration_I(acceleration_I.X(), acceleration_I.Y(),
-                                        acceleration_I.Z());
-  Eigen::Vector3d angular_velocity_I(angular_vel_I.X(), angular_vel_I.Y(),
-                                     angular_vel_I.Z());
+  Eigen::Vector3d linear_acceleration_I(acceleration_I.x, acceleration_I.y,
+                                        acceleration_I.z);
+  Eigen::Vector3d angular_velocity_I(angular_vel_I.x, angular_vel_I.y,
+                                     angular_vel_I.z);
 
   AddNoise(&linear_acceleration_I, &angular_velocity_I, dt);
 
@@ -313,10 +313,10 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   /// \todo(burrimi): add noise.
   gazebo::msgs::Quaternion* orientation = new gazebo::msgs::Quaternion();
-  orientation->set_w(C_W_I.W());
-  orientation->set_x(C_W_I.X());
-  orientation->set_y(C_W_I.Y());
-  orientation->set_z(C_W_I.Z());
+  orientation->set_w(C_W_I.w);
+  orientation->set_x(C_W_I.x);
+  orientation->set_y(C_W_I.y);
+  orientation->set_z(C_W_I.z);
   imu_message_.set_allocated_orientation(orientation);
 
   gazebo::msgs::Vector3d* linear_acceleration = new gazebo::msgs::Vector3d();
