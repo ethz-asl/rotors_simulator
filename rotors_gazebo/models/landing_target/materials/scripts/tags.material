@@ -1,0 +1,16 @@
+material Tags/CustomTag
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 1.0 1.0 1.0 1.00000
+      texture_unit
+      {
+        texture custom_tag.png
+      }
+    }
+  }
+}

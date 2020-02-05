@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<sdf version="1.0">
+  <model name="landing_target">
+    <link name='landing_target/base_link'>
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>1.0</mass>
+        <inertia>
+          <ixx>1.0</ixx>
+          <iyy>1.0</iyy>
+          <izz>1.0</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+    
+      <visual name='visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.8001 0.8001 0.001</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://landing_target/materials/scripts</uri>
+            <uri>model://landing_target/materials/textures</uri>
+            <name>Tags/CustomTag</name>
+          </script>
+        </material>
+        <transparency>0</transparency>
+      </visual>
+
+      <collision name='collision'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.8001 0.8001 0.001</size>
+          </box>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.0</mu>
+              <mu2>0.0</mu2>
+              <slip1>0.0</slip1>
+              <slip2>0.0</slip2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+    <plugin name="landing_target_plugin" filename="librotors_gazebo_landing_target_plugin.so"/>
+  </model>
+</sdf>
