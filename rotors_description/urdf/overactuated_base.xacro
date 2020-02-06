@@ -218,10 +218,11 @@
         <motorNumber>${motor_number+12}</motorNumber>
         <motorSpeedPubTopic>/tilt_motor_${motor_number}/velocity</motorSpeedPubTopic>
         <motorPositionPubTopic>/tilt_motor_${motor_number}/position</motorPositionPubTopic>
+        <motorForcePubTopic>/tilt_motor_${motor_number}/force</motorForcePubTopic>
         <joint_control_pid>
-            <p>1.0</p>
+            <p>0.11</p>
             <i>0.0</i>
-            <d>0.01</d>
+            <d>0.006</d>
             <iMax>1.0</iMax>
             <iMin>-1.0</iMin>
             <cmdMax>2.0</cmdMax>

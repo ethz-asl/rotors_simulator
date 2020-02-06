@@ -98,7 +98,8 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         time_constant_up_(kDefaultTimeConstantUp),
         node_handle_(nullptr),
         wind_speed_W_(0, 0, 0),
-        pubs_and_subs_created_(false) {}
+        pubs_and_subs_created_(false)
+        {}
 
   virtual ~GazeboMotorModel();
 
@@ -151,7 +152,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   double rotor_velocity_slowdown_sim_;
   double time_constant_down_;
   double time_constant_up_;
-
+  double pErrLast_;
   common::PID pids_;
 
   gazebo::transport::NodePtr node_handle_;
@@ -186,7 +187,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   void WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg);
 
   std::unique_ptr<FirstOrderFilter<double>> rotor_velocity_filter_;
-  ignition::math::Vector3d wind_speed_W_;
+  math::Vector3 wind_speed_W_;
 };
 
 } // namespace gazebo {
