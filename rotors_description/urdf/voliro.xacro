@@ -41,8 +41,8 @@
     <xacro:property name="arm_length" value="0.300"/>    <!-- [m] -->
     <xacro:property name="rotor_offset_top" value="0.060"/>    <!-- [m] -->
     <xacro:property name="radius_rotor" value="0.1143"/>    <!-- [m] -->
-    <xacro:property name="motor_constant" value="${8.54858e-06}"/>    <!-- [kg m/s^2] -->
-    <xacro:property name="motor_constant_lower" value="${8.54858e-06}"/>    <!-- [kg m/s^2] -->
+    <xacro:property name="motor_constant" value="${7.24858e-06}"/>    <!-- [kg m/s^2] -->
+    <xacro:property name="motor_constant_lower" value="${7.24858e-06}"/>    <!-- [kg m/s^2] -->
     <xacro:property name="moment_constant" value="0.015"/>    <!-- [m] -->
     <xacro:property name="moment_constant_lower" value="0.005"/>    <!-- [m] -->
     <xacro:property name="time_constant_up" value="0.0125"/>    <!-- [s] -->

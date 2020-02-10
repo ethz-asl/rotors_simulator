@@ -219,6 +219,10 @@
         <motorSpeedPubTopic>/tilt_motor_${motor_number}/velocity</motorSpeedPubTopic>
         <motorPositionPubTopic>/tilt_motor_${motor_number}/position</motorPositionPubTopic>
         <motorForcePubTopic>/tilt_motor_${motor_number}/force</motorForcePubTopic>
+        <!-- Relationship between the p, d gain and the closed-loop dynamics behaviour of the system:
+        It behaves like a second-order system in the frequency domain: Y(s) = U(s)*(ds + p)/(Is**2 + ds + p)
+        Y(s) is the Laplace transform of the actual tilt motor angle and U(s) is the one of the tilt motor angle command, p and d are the gains, I is the inertia of the link.
+         -->
         <joint_control_pid>
             <p>0.11</p>
             <i>0.0</i>
