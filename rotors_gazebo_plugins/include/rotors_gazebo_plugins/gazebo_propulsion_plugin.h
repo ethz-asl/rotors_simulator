@@ -131,10 +131,14 @@ private:
 
         PropellerParameters prop_params;
 
-        physics::LinkPtr parent_link = nullptr;
+        physics::LinkPtr ref_link = nullptr;  // reference link for force/torque calculation
+        physics::LinkPtr act_link = nullptr;  // link to apply force/torque to
+
         ignition::math::Vector3d p_joint{1,0,0};    // propeller joint, pos. rot. dir., expr. in parent link
         ignition::math::Vector3d p_cp{0,0,0};       // propeller hub position w.r.t parent link, expr. in parent link
         int turning_direction = 1;                  // 1: if thrust and rot. vect in same dir, otherwise -1
+
+        V3D H_Omega_Prev_{0,0,0};
 
         M3D inertia;           // propeller (disk) inertia tensor, expressed in parent frame
         double omega = 0;      // propeller angular speed (wrt parent link) [rad/s]

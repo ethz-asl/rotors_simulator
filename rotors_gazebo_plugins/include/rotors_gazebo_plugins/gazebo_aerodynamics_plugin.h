@@ -56,6 +56,8 @@
 #include "gazebo/transport/transport.hh"
 #include <iomanip>
 
+#define AIRFOIL_N_VIS_VEC 6
+#define BODY_N_VIS_VEC 2
 
 namespace gazebo
 {
@@ -223,6 +225,9 @@ private:
     struct Segment {
         Segment(){}
 
+        physics::LinkPtr ref_link = nullptr;  // reference link for force/torque calculation
+        physics::LinkPtr act_link = nullptr;  // link to apply force/torque to
+
         // To include hyteresis in future implementation, currently not used
         double alpha_prev = 0;
         double alpha_dot = 0;
@@ -237,7 +242,7 @@ private:
 
         double seg_chord;
         double ellp_mult;
-        
+
         ControlSurface * cs;
         int n_cs = 0;
 
@@ -251,20 +256,20 @@ private:
         V3D wind_cp;
         int n_wind = 0;
 
-        /// \brief Force and torque visualization in rviz
+        /// \brief For visualization in rviz
+        std::string vector_vis_array_topic;
+        gazebo::transport::PublisherPtr vector_vis_array_pub;
+        gz_visualization_msgs::VisVectorArray vector_vis_array_msg;
+        std::array<gz_visualization_msgs::ArrowMarker*, AIRFOIL_N_VIS_VEC> vec_vis;
 
-        gz_visualization_msgs::ArrowMarker* lift_vis;
-        gz_visualization_msgs::ArrowMarker* slpstr_vis;
-        gz_visualization_msgs::ArrowMarker* wind_vis;
-
-        void UpdateIndVel(V3D w_cp){
+        void UpdateIndVel(V3D w_cp) {
             v_ind_cp = V3D(0,0,0);
             for(int j=0; j<n_slpstr; j++){
                 v_ind_cp += slpstr[j].GetIndVel(w_cp);
             }
         }
 
-        void UpdateWind(V3D w_cp){
+        void UpdateWind(V3D w_cp) {
             wind_cp = V3D(0,0,0);
             for(int j=0; j<n_wind; j++){
                 wind_cp += wind[j].GetWind(w_cp);
@@ -279,7 +284,6 @@ private:
     struct Body {
 
         Body():
-            index(0),
             a_fus_xx(0),
             a_fus_yy(0),
             a_fus_zz(0),
@@ -289,7 +293,8 @@ private:
             fwd(1,0,0),
             upwd(0,0,1){}
 
-        int index;
+        physics::LinkPtr ref_link = nullptr;  // reference link for force/torque calculation
+        physics::LinkPtr act_link = nullptr;  // link to apply force/torque to
 
         double a_fus_xx;                      // forward-projected area of fuselage, [m^2]
         double a_fus_yy;                      // side-projected area of fuselage, [m^2]
@@ -305,16 +310,18 @@ private:
         V3D wind_cp;
         int n_wind = 0;
 
-        gz_visualization_msgs::ArrowMarker* force_vis;
-        gz_visualization_msgs::ArrowMarker* wind_vis;
+        /// \brief For visualization in rviz
+        std::string vector_vis_array_topic;
+        gazebo::transport::PublisherPtr vector_vis_array_pub;
+        gz_visualization_msgs::VisVectorArray vector_vis_array_msg;
+        std::array<gz_visualization_msgs::ArrowMarker*, BODY_N_VIS_VEC> vec_vis;
 
-        void UpdateWind(V3D w_cp){
+        void UpdateWind(V3D w_cp) {
             wind_cp = V3D(0,0,0);
             for(int j=0; j<n_wind; j++){
                 wind_cp += wind[j].GetWind(w_cp);
             }
         }
-
     };
 
     Body * bodies_;
@@ -327,7 +334,6 @@ private:
     common::Time last_time_;
 
     bool pubs_and_subs_created_ = false;
-    int update_counter_ = 0;
 
 };
 
