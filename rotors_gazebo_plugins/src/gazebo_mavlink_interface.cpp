@@ -139,9 +139,9 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
             if (servo_params->HasElement("slew"))
                 channels[i].srv.slew = servo_params->Get<double>("slew");
             if (servo_params->HasElement("p"))
-                channels[i].srv.slew = servo_params->Get<double>("p");
+                channels[i].srv.P_pos = servo_params->Get<double>("p");
             if (servo_params->HasElement("d"))
-                channels[i].srv.slew = servo_params->Get<double>("d");
+                channels[i].srv.P_vel = servo_params->Get<double>("d");
           }
 
           // setup publisher handle to topic
@@ -151,6 +151,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
               channels[i].gztopic_ = "control_gz_msg_" + std::to_string(i);
 
           channels[i].joint_control_pub_ = node_handle_->Advertise<gz_std_msgs::Float32>(channels[i].gztopic_);
+          std::cout<<"\33[1m[gazebo_mavlink_interface]\33[0m Advertising \33[1;32m" << channels[i].joint_control_pub_->GetTopic() << "\33[0m gazebo message\n";
 
           if (channel->HasElement("joint_name"))
           {
@@ -257,41 +258,51 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
   // Subscriber to IMU sensor_msgs::Imu Message and SITL message
   imu_sub_ = node_handle_->Subscribe("~/" + namespace_ + imu_sub_topic_, &GazeboMavlinkInterface::ImuCallback, this);
-  gzdbg<<"subscribing to ~/" + namespace_ + imu_sub_topic_<<std::endl;
+  //gzmsg<<"subscribing to " + imu_sub_->GetTopic()<<std::endl;
+  std::cout<<"\33[1m[gazebo_mavlink_interface]\33[0m Subscribing to \33[1;34m"<<imu_sub_->GetTopic()<<"\33[0m gazebo message\n";
 
-  lidar_sub_ = node_handle_->Subscribe("~/" + namespace_  + lidar_sub_topic_, &GazeboMavlinkInterface::LidarCallback, this);
-  gzdbg<<"subscribing to ~/" + namespace_ + lidar_sub_topic_<<std::endl;
+  lidar_sub_ = node_handle_->Subscribe(namespace_  + lidar_sub_topic_, &GazeboMavlinkInterface::LidarCallback, this);
+  //gzmsg<<"subscribing to " + lidar_sub_->GetTopic()<<std::endl;
+  std::cout<<"\33[1m[gazebo_mavlink_interface]\33[0m Subscribing to \33[1;34m" << lidar_sub_->GetTopic() << "\33[0m gazebo message\n";
 
   opticalFlow_sub_ = node_handle_->Subscribe("~/" + namespace_  + opticalFlow_sub_topic_, &GazeboMavlinkInterface::OpticalFlowCallback, this);
-  gzdbg<<"subscribing to ~/" + namespace_ + opticalFlow_sub_topic_<<std::endl;
+  //gzdbg<<"subscribing to ~/" + namespace_ + opticalFlow_sub_topic_<<std::endl;
+  std::cout<<"\33[1m[gazebo_mavlink_interface]\33[0m Subscribing to \33[1;34m" << opticalFlow_sub_->GetTopic() << "\33[0m gazebo message\n";
 
   gps_sub_ = node_handle_->Subscribe("~/" + namespace_  + gps_sub_topic_ + "_hil", &GazeboMavlinkInterface::GpsCallback, this);
-  gzdbg<<"subscribing to ~/" + namespace_ + gps_sub_topic_ + "_hil"<<std::endl;
+  //gzdbg<<"subscribing to ~/" + namespace_ + gps_sub_topic_ + "_hil"<<std::endl;
+  std::cout<<"\33[1m[gazebo_mavlink_interface]\33[0m Subscribing to \33[1;34m" << gps_sub_->GetTopic() << "\33[0m gazebo message\n";
 
   gps_gt_sub_ = node_handle_->Subscribe("~/" + namespace_  + gps_gt_sub_topic_ + "_hil", &GazeboMavlinkInterface::GpsGtCallback, this);
-  gzdbg<<"subscribing to ~/" + namespace_ + gps_gt_sub_topic_ + "_hil"<<std::endl;
+  //gzdbg<<"subscribing to ~/" + namespace_ + gps_gt_sub_topic_ + "_hil"<<std::endl;
+  std::cout<<"\33[1m[gazebo_mavlink_interface]\33[0m Subscribing to \33[1;34m" << gps_gt_sub_->GetTopic() << "\33[0m gazebo message\n";
 
   if (use_vane) {
     vane_sub_ = node_handle_->Subscribe("~/" + namespace_  + vane_sub_topic_, &GazeboMavlinkInterface::VaneCallback, this);
-    gzdbg<<"subscribing to ~/" + namespace_ + vane_sub_topic_<<std::endl;
+    //gzdbg<<"subscribing to ~/" + namespace_ + vane_sub_topic_<<std::endl;
+    std::cout<<"\33[1m[gazebo_mavlink_interface]\33[0m Subscribing to \33[1;34m" << vane_sub_->GetTopic() << "\33[0m gazebo message\n";
   }
 
   for (int j=0; j<n_wind; j++) {
       wind[j].wind_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + wind[j].wind_topic, &GazeboMavlinkInterface::Wind::Callback, &wind[j]);
-      gzdbg<<"subscribing to ~/" + namespace_ + "/" + wind[j].wind_topic + "\n";
+      //gzdbg<<"subscribing to ~/" + namespace_ + "/" + wind[j].wind_topic + "\n";
+      std::cout<<"\33[1m[gazebo_mavlink_interface]\33[0m Subscribing to \33[1;34m" << wind[j].wind_sub_->GetTopic() << "\33[0m gazebo message\n";
   }
 
   // Publish gazebo's motor_speed message
   motor_velocity_reference_pub_ = node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>("~/" + namespace_ + motor_velocity_reference_pub_topic_, 1);
-  gzdbg<<"advertising ~/" + namespace_ + motor_velocity_reference_pub_topic_<<std::endl;
+  //gzdbg<<"advertising ~/" + namespace_ + motor_velocity_reference_pub_topic_<<std::endl;
+  std::cout<<"\33[1m[gazebo_mavlink_interface]\33[0m Advertising \33[1;32m" << motor_velocity_reference_pub_->GetTopic() << "\33[0m gazebo message\n";
 
   // Publish gazebo's actuators message
   actuators_reference_pub_ = node_handle_->Advertise<gz_sensor_msgs::Actuators>("~/" + namespace_ + actuators_reference_pub_topic_, 1);
-  gzdbg<<"advertising ~/" + namespace_ + actuators_reference_pub_topic_<<std::endl;
+  //gzdbg<<"advertising ~/" + namespace_ + actuators_reference_pub_topic_<<std::endl;
+  std::cout<<"\33[1m[gazebo_mavlink_interface]\33[0m Advertising \33[1;32m" << actuators_reference_pub_->GetTopic() << "\33[0m gazebo message\n";
 
   //Publish robot world position message to be used by tracking camera
   tracking_pos_pub_ = node_handle_->Advertise<gazebo::msgs::Vector3d>(namespace_ + tracking_pos_pub_topic_, 1);
-  gzdbg<<"advertising ~/" + namespace_ + tracking_pos_pub_topic_<<std::endl;
+  //gzdbg<<"advertising ~/" + namespace_ + tracking_pos_pub_topic_<<std::endl;
+  std::cout<<"\33[1m[gazebo_mavlink_interface]\33[0m Advertising \33[1;32m" << tracking_pos_pub_->GetTopic() << "\33[0m gazebo message\n";
 
   _rotor_count = 5;
 #if GAZEBO_MAJOR_VERSION >= 9
@@ -561,7 +572,7 @@ void GazeboMavlinkInterface::send_mavlink_message(const mavlink_message_t *messa
             lock_guard lock(mutex);
 
             if (tx_q.size() >= MAX_TXQ_SIZE) {
-               gzwarn << "TX queue overflow. \n";
+               gzwarn << "TX queue overflow, size:"<< tx_q.size() <<" \n";
             }
             tx_q.emplace_back(message);
         }
@@ -1260,7 +1271,6 @@ void GazeboMavlinkInterface::handle_control(double _dt)
 
         common::Time now;
         double pos;
-        double pos_ref;
         double rate;
         double rate_ref;
 
@@ -1271,6 +1281,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
 #else
         now = world_->GetSimTime();
         pos = channels[i].joint_->GetAngle(0).Radian();
+        rate = channels[i].joint_->GetVelocity(0);
 #endif
 
         if (!channels[i].srv.init) {
@@ -1298,14 +1309,20 @@ void GazeboMavlinkInterface::handle_control(double _dt)
         if (isnan(channels[i].srv.ref))
             channels[i].srv.ref = 0.0;
 
+        if (isnan(rate_ref))
+            rate_ref = 0.0;
+
         channels[i].srv.ref = ignition::math::clamp(channels[i].srv.ref,
                                                     -abs(channels[i].input_scaling_),
                                                     +abs(channels[i].input_scaling_));
 
         double err_pos = channels[i].srv.ref-pos;
-        double err_vel = -rate;
+        double err_vel = rate_ref-rate;
         double torque = channels[i].srv.P_pos*err_pos + channels[i].srv.P_vel*err_vel;
         channels[i].joint_->SetForce(0, torque);
+
+        //if(dt>0 && std::abs(err_pos)>0.02)
+        //  channels[i].joint_->SetVelocity(0,rate_ref+(err_pos/dt/2.0));
 
         //publish servo position (without link dynamics)
         gz_std_msgs::Float32 m;
@@ -1350,12 +1367,18 @@ void GazeboMavlinkInterface::handle_control(double _dt)
     }
   }
 
+  for(int i=0; i<n_chan; i++){
+       if(isnan(channels[i].input_reference_))
+            gzerr<<"ch_"<<i<<" input_reference_: NaN \n";
+  }
+
   if (dbg_counter_%100==0&&true) {
       for(int i=0; i<n_chan; i++){
-          if (channels[i].joint_)
+          gzdbg<<"ch_"<<i<<"("<<channels[i].input_index_<<") Ref: "<<channels[i].input_reference_<<" Raw:"<<channels[i].control<<"\n";
+          /*if (channels[i].joint_)
               gzdbg<<channels[i].joint_name <<": "<<channels[i].joint_->Position(0)
                   <<" | ref: "<<channels[i].input_reference_
-                 <<" | srv_ref: "<<channels[i].srv.ref<<"\n";
+                 <<" | srv_ref: "<<channels[i].srv.ref<<"\n";*/
       }
       gzdbg<<"\n";
   }
