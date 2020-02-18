@@ -109,3 +109,5 @@ Upon start of ROS/Gazebo with the desired world and UAV, the simulation should s
 - All "techpod" versions require an AAERTFF mixer on the Pixhawk to work properly.
 - Once the simulation is running, you can start QGC to introspect e.g. the telemetry from the sim. Make sure QGC connects to the Pixhawk only via UDP (and not serial as this interferes with Gazebo). To this end, only select "UDP" in QGC under General->AutoConnect. If you restart the simulation, make sure to quit QGC first because it would block the connection between the sim and Pixhawk
 - Streams of simulated cameras and other signals published as ROS messages can be displayed with rqt.
+- If your robot depends on *.yaml files, for some reason you need to mount a camera on the robot for the yaml-parser to work - absolutely no idea why this is, seems completely unrelated
+- Don't use special characters within *.xacro/*.urdf files, not even within comments. (didn't launched when there was a superscript on a unit in the comments)
