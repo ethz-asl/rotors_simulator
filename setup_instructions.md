@@ -60,7 +60,7 @@ $ cd ~/catkin_ws/src
 $ git clone git@github.com:ethz-asl/fw_mavros
 $ catkin build mavros
 ```
-Note: HIL simulation currently requires the extended ASLUAV mavlink dialect defined here: https://github.com/ethz-asl/fw_mavlink/blob/55397e58ebba631165b0528eb75d2ffec0ccf919/message_definitions/v1.0/ASLUAV.xml. After the above installation steps, replace the ASLUAV.xml in /catkin_ws/src/mavlink-gbp-release/message_definitions/v1.0/ with the the ASLUAV.xml found under the link given above... A bit hacky at the moment, tb improved in the future. You can then proceed to build the catkin workspace:
+Note: HIL simulation currently requires the extended ASLUAV mavlink dialect defined here: https://github.com/ethz-asl/fw_mavlink/blob/55397e58ebba631165b0528eb75d2ffec0ccf919/message_definitions/v1.0/ASLUAV.xml. After the above installation steps, replace the ASLUAV.xml in /catkin_ws/src/mavlink-gbp-release/message_definitions/v1.0/ with the ASLUAV.xml found under the link given above... A bit hacky at the moment, tb improved in the future. You can then proceed to build the catkin workspace:
 
 ### 4. Build
 ```
@@ -91,7 +91,7 @@ Hook up Pixhawk to your computer via USB (should appear as /dev/ttyACM0 on linux
 
 To launch a fixed-wing simulation, go to your catkin workspace and invoke (choosing one of the param values at a time...):
 
-"roslaunch rotors_gazebo fixed_wing_hil.launch verbose:={false|true} world_name:={fw_playground|yosemite|davos|hinwil} uav_name:={techpod_TJ_flex|techpod_TJ|techpod_X_flex|techpod_X|list_not_complete} spawn_tc:={false|true} enable_wind:={true|false} record_rosbag:={false|true} rosbag_path:={""|/path/to/somewhere/"}
+"roslaunch rotors_gazebo fixed_wing_hil.launch verbose:={false, true} world_name:={fw_playground, yosemite, davos, hinwil} uav_name:={techpod_TJ_flex, techpod_TJ, techpod_X_flex, techpod_X, list_not_complete} spawn_tc:={false, true} enable_wind:={true, false} record_rosbag:={false, true} rosbag_path:={"/path/to/somewhere/"}
 
 where "verbose" can be used to enable debug output (e.g. sim-rate, message statistics etc), "world_name" sets the world in which the UAV spawns and "uav_name" is used to select the UAV. "spawn_tc" further controls if tracking cameras are placed (ground view) and "enable_wind" indicates if the wind specified in the uav's *.xacro is enabled. Defaults are the first options in each brace. In your workspace e.g.invoke:
 
