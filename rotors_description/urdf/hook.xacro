@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+<!-- Macro to add a hook for payload grasping-->
+<xacro:macro name="payload_hook" params="namespace">
+
+  <xacro:include filename="$(find rotors_description)/urdf/inertias.xacro" />
+  <link name="${namespace}/payload_hook">
+    <inertial>
+      <origin xyz="-0.7 0 -0.170" rpy="0 0 0" />
+      <mass value="0.1" />
+      <xacro:tube_inertia_x r1="0.008" r2="0.01" h="0.5" mass="0.1"/>
+    </inertial>
+    <visual>
+       <origin xyz="-0.022 0 -0.163" rpy="0 0 0" />
+       <geometry>
+           <mesh filename="package://rotors_description/meshes/payloads/hook_main.stl" scale="1 1 1" />
+       </geometry>
+    </visual>
+  </link>
+  <gazebo reference="${namespace}/payload_hook">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <joint name="${namespace}/pyld_hk_joint" type="revolute">
+    <origin xyz="0.022 0 0.163" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+    <dynamics damping="0.0"/>
+    <limit lower="-1.5" upper="0.05" effort="10" velocity="10"/>
+    <parent link="${namespace}/base_link" />
+    <child link="${namespace}/payload_hook" />
+  </joint>
+
+  <link name="${namespace}/payload_hook_ext">
+    <inertial>
+      <origin xyz="-0.2 0 0" rpy="0 0 0" />
+      <mass value="0.1" />
+      <xacro:tube_inertia_x r1="0.006" r2="0.008" h="0.5" mass="0.1"/>
+    </inertial>
+    <visual>
+       <origin xyz="0.65 0 0" rpy="0 0 0" />
+       <geometry>
+           <mesh filename="package://rotors_description/meshes/payloads/hook_tail.stl" scale="1 1 1" />
+       </geometry>
+    </visual>
+    <collision>
+       <origin xyz="-0.215 0 -0.005" rpy="0 0 0" />
+       <geometry>
+          <box size = "0.02 0.02 0.02" />
+       </geometry>
+    </collision>
+  </link>
+  <gazebo reference="${namespace}/payload_hook_ext">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <joint name="${namespace}/pyld_hk_ext_joint" type="prismatic">
+    <origin xyz="-0.65 0 -0.163" rpy="0 0 0" />
+    <axis xyz="1 0 0" />
+    <limit lower="-0.25" upper="0.1" effort="10" velocity="10"/>
+    <dynamics damping="0.5"/>
+    <parent link="${namespace}/payload_hook" />
+    <child link="${namespace}/payload_hook_ext" />
+  </joint>
+  <gazebo reference="${namespace}/pyld_hk_ext">
+    <implicitSpringDamper>true</implicitSpringDamper>
+    <springStiffness>7</springStiffness>
+  </gazebo>
+
+  <xacro:control_surface robot_namespace="${namespace}"
+     surface_name="hook_elev"
+     parent="${namespace}/payload_hook_ext"
+     mass_surface="0.1"
+     min_angle="-1"
+     max_angle="0.3"
+     color="White"
+     use_mesh_file="true"
+     mesh_file="package://rotors_description/meshes/payloads/hook_elev.stl"
+     surface_length="0.1"
+     surface_width="0.1"
+     surface_height="0.1">
+     <axis xyz="0 -1 0" />
+     <origin xyz="-0.204 0 0.047" rpy="0 0 0" />
+     <origin xyz="0 0 0" rpy="0 0 0" />
+     <origin xyz="0.852 0 -0.047" rpy="0 0 0" />
+     <xacro:box_inertia x="0.05" y="0.15" z="0.01" mass="0.1"/>
+  </xacro:control_surface>
+
+  <gazebo>
+     <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+        <robotNamespace>${namespace}</robotNamespace>
+        <linkName>${namespace}/hook_elev</linkName>
+        <aeroForcesVis>aero_force_vis_hook_elev</aeroForcesVis>
+        <airfoil>
+           <segment name="HS_HK">
+              <forward>1 0 0</forward>
+              <upward>0 0 1</upward>
+              <cp>0 0 0</cp>
+              <!--<seg_area>0.008</seg_area>-->
+              <seg_area>0.04</seg_area>
+              <seg_chord>0.12</seg_chord>
+              <aeroParamsYAML>${yaml_path}/techpod_TJ_tail_h.yaml</aeroParamsYAML>
+              <wind name="wind">
+                <topic>wind_base_link</topic>
+              </wind>
+           </segment>
+        </airfoil>
+     </plugin>
+  </gazebo>
+</xacro:macro>
+
+</robot>

@@ -47,6 +47,7 @@ void GazeboPayloadPlugin::Load(physics::ModelPtr _model,
 
     this->model_ = _model;
     this->world_ = this->model_->GetWorld();
+    hook_ctrl_.world = this->model_->GetWorld();
     GZ_ASSERT(this->world_, "GazeboPayloadPlugin world pointer is NULL");
     
     namespace_.clear();
@@ -109,16 +110,99 @@ void GazeboPayloadPlugin::Load(physics::ModelPtr _model,
     if (_sdf->HasElement("dropTopic")) {
         drop_topic_ = _sdf->Get<std::string>("dropTopic");
     }
+
+    if (_sdf->HasElement("omega")) {
+        omega_ = _sdf->Get<float>("omega");
+    }
+
+    if (_sdf->HasElement("posOnly")) {
+        pos_only_ = _sdf->Get<bool>("posOnly");
+    }
+
+    if (_sdf->HasElement("proxRec")) {
+        proximity_recovery_ = _sdf->Get<bool>("proxRec");
+    }
+
+    if (_sdf->HasElement("radiusRec")) {
+        recovery_radius_ = _sdf->Get<float>("radiusRec");
+    }
+
+    if (_sdf->HasElement("hookStab")) {
+
+        do_hook_ctrl = true;
+        sdf::ElementPtr _sdf_hookStab= _sdf->GetElement("hookStab");
+
+        if (_sdf_hookStab->HasElement("hookJoint")) {
+            hook_ctrl_.hook_joint_name = _sdf_hookStab->Get<std::string>("hookJoint");
+            hook_ctrl_.hook_joint = model_->GetJoint(hook_ctrl_.hook_joint_name);
+
+            if (hook_ctrl_.hook_joint == nullptr) {
+                gzwarn << "joint " << hook_ctrl_.hook_joint_name << " not found.\n";
+            }
+
+        } else {
+            gzwarn<<"Missing hookJoint element\n";
+        }
+
+        if (_sdf_hookStab->HasElement("hookElevJoint")) {
+            hook_ctrl_.hook_elev_joint_name = _sdf_hookStab->Get<std::string>("hookElevJoint");
+            hook_ctrl_.hook_elev_joint = model_->GetJoint(hook_ctrl_.hook_elev_joint_name);
+
+            if (hook_ctrl_.hook_elev_joint == nullptr) {
+                gzwarn << "joint " << hook_ctrl_.hook_elev_joint_name << " not found.\n";
+            }
+
+        } else {
+            gzwarn<<"Missing hookElevJoint element\n";
+        }
+
+        if (_sdf_hookStab->HasElement("hookRefTopic")) {
+            hook_ctrl_.hook_ref_topic = _sdf_hookStab->Get<std::string>("hookRefTopic");
+
+        } else {
+            gzwarn<<"Missing hookRefTopic\n";
+        }
+
+        if (_sdf_hookStab->HasElement("hookNoLoadPID")) {
+            V3D gains = _sdf_hookStab->Get<V3D>("hookNoLoadPID");
+            hook_ctrl_.pid_no_load.Init(gains.X(),gains.Y(),gains.Z(),0.3,-1,0.3,-1);
+
+        } else {
+            gzwarn<<"Missing hookNoLoadPID, using default values\n";
+        }
+
+        if (_sdf_hookStab->HasElement("hookLoadPID")) {
+            V3D gains = _sdf_hookStab->Get<V3D>("hookLoadPID");
+            hook_ctrl_.pid_w_load.Init(gains.X(),gains.Y(),gains.Z(),0,0,0.3,-1);
+        } else {
+            gzwarn<<"Missing hookLoadPID, using default values\n";
+        }
+
+        if (_sdf_hookStab->HasElement("lidarTopic")) {
+            hook_ctrl_.lidar_topic = _sdf_hookStab->Get<std::string>("lidarTopic");
+        } else {
+            gzwarn<<"Missing lidarTopic\n";
+        }
+
+    }
 }
 
 /////////////////////////////////////////////////
-void GazeboPayloadPlugin::CreatePubsAndSubs(){
-
+void GazeboPayloadPlugin::CreatePubsAndSubs()
+{
     drop_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + drop_topic_, &GazeboPayloadPlugin::DropCallback, this);
+
+    if (do_hook_ctrl) {
+        hook_ctrl_.hook_ref_sub = node_handle_->Subscribe("~/" + namespace_ + "/" + hook_ctrl_.hook_ref_topic,
+                                                          &GazeboPayloadPlugin::HookControl::RefCallback, &hook_ctrl_);
+        hook_ctrl_.lidar_sub = node_handle_->Subscribe(namespace_ + "/" + hook_ctrl_.lidar_topic,
+                                                          &GazeboPayloadPlugin::HookControl::LidarCallback, &hook_ctrl_);
+    }
 }
 
 /////////////////////////////////////////////////
-void GazeboPayloadPlugin::DropCallback(Float32Ptr &drop_msg){
+void GazeboPayloadPlugin::DropCallback(Float32Ptr &drop_msg)
+{
 
     if (drop_msg->data()>0.0) {
         trigg_ = true;
@@ -126,6 +210,93 @@ void GazeboPayloadPlugin::DropCallback(Float32Ptr &drop_msg){
     } else {
         trigg_ = false;
     }
+}
+
+void GazeboPayloadPlugin::HookControl::DoControl(){
+
+    common::Time now = world->SimTime();
+    if (!init) {
+        init = true;
+        last_time = now;
+    }
+    double dt = (now - last_time).Double();
+    last_time = now;
+
+    float u;
+    float h, h_min, h_max;
+
+    std::unique_lock<std::mutex> lock1(ref_lock);
+    u = hook_ref;
+    lock1.unlock();
+
+    std::unique_lock<std::mutex> lock2(lidar_lock);
+    h = lidar_dist;
+    h_min = lidar_min_dist;
+    h_max = lidar_max_dist;
+    lock2.unlock();
+
+    double err = u - hook_joint->Position(0);
+    double force = pid_no_load.Update(-err, dt);
+
+    if (isnan(force)){
+        force = 0;
+        pid_no_load.Reset();
+    }
+
+    //force = pid_no_load.GetPGain()*err - pid_no_load.GetDGain()*hook_joint->GetVelocity(0);
+
+    double elev_ref = force;
+
+    /*
+    gzdbg<<"ref: "<<u<<"\n";
+    gzdbg<<"err: "<<err<<"\n";
+    gzdbg<<"dt: "<<dt<<"\n";
+    gzdbg<<"pid_out: "<<force<<"\n";
+    gzdbg<<"\n";
+    */
+
+    // Servo-like actuation of hook-elevator
+    double elev_pos = hook_elev_joint->Position(0);
+    double elev_rate = hook_elev_joint->GetVelocity(0);
+
+    if (!srv.init) {
+        srv.last_srv_time = now;
+        srv.init = true;
+    }
+
+    double d_ref = srv.slew * dt;
+
+    // implementation of slew-rate constraint
+    double rate_ref;
+    if (elev_ref>srv.ref+d_ref) {
+        rate_ref = srv.slew;
+        srv.ref+=d_ref;
+    } else if (elev_ref<srv.ref-d_ref) {
+        rate_ref = -srv.slew;
+        srv.ref -= d_ref;
+    } else {
+        rate_ref = (elev_ref-srv.ref)/dt;
+        srv.ref = elev_ref;
+    }
+
+    // sanity
+    if (isnan(srv.ref))
+        srv.ref = 0.0;
+
+    double err_pos = srv.ref-elev_pos;
+    //double err_vel = rate_ref-elev_rate;
+    double err_vel = -elev_rate;
+    double torque = srv.P_pos*err_pos + srv.P_vel*err_vel;
+    hook_elev_joint->SetForce(0, torque);
+
+    /*gzdbg<<hook_elev_joint->Position(0)<<"\n";
+    gzdbg<<hook_elev_joint->GetForceTorque(0).body2Torque.Y()<<"\n";
+    gzdbg<<"\n";
+    gzdbg<<"ref: "<<u<<"\n";
+    gzdbg<<"lidar: "<<h<<"\n";
+    gzdbg<<"hook_joint: "<<hook_joint->Position(0)<<"\n";
+    gzdbg<<"hook_elev_torque: "<<torque<<"\n";
+    */
 }
 
 /////////////////////////////////////////////////
@@ -168,31 +339,50 @@ void GazeboPayloadPlugin::OnUpdate()
     rot_err *= -angle_err;
 
     //state machine
-    bool close;
+    bool close;    
     if (pos_err.Length()<0.05 && lin_vel_err.Length()<0.1 && rot_err.Length()<0.17 && rot_vel_err.Length()<0.17)
         close = true;
     else
         close = false;
 
-    if (trigg_ && !reload_ && !drop_) {
-        drop_ = true;
-        reload_ = false;
-        reload_timer_.Start();
+    if (!proximity_recovery_) {
+        if (trigg_ && !reload_ && !drop_) {
+            drop_ = true;
+            reload_ = false;
+            reload_timer_.Start();
 
-    } else if (drop_ && reload_timer_.GetElapsed().Float()>8.0) {
-        drop_ = false;
-        reload_ = true;
-        reload_timer_.Stop();
-        reload_timer_.Reset();
+        } else if (drop_ && reload_timer_.GetElapsed().Float()>8.0) {
+            drop_ = false;
+            reload_ = true;
+            reload_timer_.Stop();
+            reload_timer_.Reset();
 
-    } else if (close && reload_) {
-        drop_ = false;
-        reload_ = false;
+        } else if (close && reload_) {
+            drop_ = false;
+            reload_ = false;
+        }
+
+    } else {
+        if (trigg_ && !reload_ && !drop_) {
+            drop_ = true;
+            reload_ = false;
+            reload_timer_.Start();
+
+        } else if (drop_ && reload_timer_.GetElapsed().Float()>2.0 && pos_err.Length()<=recovery_radius_) {
+            drop_ = false;
+            reload_ = true;
+            reload_timer_.Stop();
+            reload_timer_.Reset();
+
+        } else if (reload_) {
+            drop_ = false;
+            reload_ = false;
+        }
     }
 
     //ignition::math::Quaterniond rot_err = q_pr_pa_.Inverse()*pose_parent.Rot().Inverse()*pose_payload.Rot();
 
-    double omega = 3*33.3;    // natural frequency
+    double omega = omega_;//0.2*33.3;    // natural frequency
     double zeta = 1.0;      // damping ratio
     double mass = 0.25;
     double inertia = 0.4*mass*0.0025; // inertia of solid sphere: 0.4*m*r²
@@ -202,7 +392,7 @@ void GazeboPayloadPlugin::OnUpdate()
     double k_d_rot = 2*zeta*omega*inertia;
     double reactio;
 
-    if(drop_) {
+    if (drop_) {
         k_p_lin = 0;
         k_d_lin = 0;
         k_p_rot = 0;
@@ -215,8 +405,15 @@ void GazeboPayloadPlugin::OnUpdate()
         if(!reset_){
             //get it somewhat close...
             payload_->SetWorldPose(pose_payload_reset);
-            payload_->SetAngularVel(pose_payload.Rot().RotateVectorReverse(parent_->WorldAngularVel()));
-            payload_->SetLinearVel(pose_payload.Rot().RotateVectorReverse(parent_->WorldLinearVel(hoist_pos_parent_)));
+            if (!proximity_recovery_){
+                payload_->SetAngularVel(pose_payload.Rot().RotateVectorReverse(parent_->WorldAngularVel()));
+                payload_->SetLinearVel(pose_payload.Rot().RotateVectorReverse(parent_->WorldLinearVel(hoist_pos_parent_)));
+
+            } else {
+                payload_->SetAngularVel(ignition::math::Vector3d(0,0,0));
+                payload_->SetLinearVel(ignition::math::Vector3d(0,0,0));
+            }
+
             k_p_lin = 0;
             k_d_lin = 0;
             k_p_rot = 0;
@@ -248,7 +445,12 @@ void GazeboPayloadPlugin::OnUpdate()
 
     parent_->AddForceAtRelativePosition(-reactio*force, hoist_pos_parent_);
     payload_->AddForceAtRelativePosition(force, hoist_pos_payload_);
-    payload_->AddRelativeTorque(torque);
+
+    if (!pos_only_)
+      payload_->AddRelativeTorque(torque);
+
+    if (do_hook_ctrl)
+        hook_ctrl_.DoControl();
 
 }
 
