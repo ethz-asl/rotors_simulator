@@ -87,11 +87,11 @@ source ~/.bashrc
 ```
 
 ### 2. Run Simulation
-Hook up Pixhawk to your computer via USB (should appear as /dev/ttyACM0 on linux/ubuntu). It needs to run in HIL-mode and have the proper firmware and airframe installed. Make sure that the gazebo_mavlink_interface.cpp plugin of Gazebo is configured to match the control channel assignment as defined in the PX4 mixer file of the airframe set on the Pixhawk. This can be checked (or changes made) in the respective *.xacro file of the uav/robot under the <plugin filename="librotors_gazebo_mavlink_interface.so" .../> tag (*.xacro files are located in your workspace under /src/rotors_simulator/rotors_description/urdf/your_robot.xacro). Wait until the Pixhawk booted before you start the simulation.
+Hook up Pixhawk to your computer via USB (should appear as /dev/ttyACM0 on linux/ubuntu). It needs to run in HIL-mode and have the proper firmware and airframe installed. Make sure that the gazebo_mavlink_interface.cpp plugin of Gazebo is configured to match the control channel assignment as defined in the PX4 mixer file of the airframe set on the Pixhawk. This can be checked (or changes made) in the respective \*.xacro file of the uav/robot under the <plugin filename="librotors_gazebo_mavlink_interface.so" .../> tag (\*.xacro files are located in your workspace under /src/rotors_simulator/rotors_description/urdf/your_robot.xacro). Wait until the Pixhawk booted before you start the simulation.
 
 To launch a fixed-wing simulation, go to your catkin workspace and invoke (choosing one of the param values at a time...):
 
-"roslaunch rotors_gazebo fixed_wing_hil.launch verbose:={false, true} world_name:={fw_playground, yosemite, davos, hinwil} uav_name:={techpod_TJ_flex, techpod_TJ, techpod_X_flex, techpod_X, list_not_complete} spawn_tc:={false, true} enable_wind:={true, false} record_rosbag:={false, true} rosbag_path:={"/path/to/somewhere/"}
+"roslaunch rotors_gazebo fixed_wing_hil.launch verbose:={false, true} world_name:={fw_playground, yosemite, davos, hinwil} uav_name:={techpod_TJ_flex, techpod_TJ, techpod_X_flex, techpod_X, list_not_complete} spawn_tc:={false, true} enable_wind:={true, false} record_rosbag:={false, true} rosbag_path:={"/path/to/somewhere/"}"
 
 where "verbose" can be used to enable debug output (e.g. sim-rate, message statistics etc), "world_name" sets the world in which the UAV spawns and "uav_name" is used to select the UAV. "spawn_tc" further controls if tracking cameras are placed (ground view) and "enable_wind" indicates if the wind specified in the uav's *.xacro is enabled. Defaults are the first options in each brace. In your workspace e.g.invoke:
 
@@ -99,7 +99,7 @@ where "verbose" can be used to enable debug output (e.g. sim-rate, message stati
 $ roslaunch rotors_gazebo fixed_wing_hil.launch world_name:=fw_playground uav_name:=techpod_X spawn_tc:=true enable_wind:=true verbose:=false
 
 ```
-Upon start of ROS/Gazebo with the desired world and UAV, the simulation should start to communicate with the Pixhawk. The connection is established by the gazebo_mavlink_interface plugin of the UAV which sets up a mavlink connection (its configuration can again be found/changed in the robot's *.xacro). The UAV/simulation obtains actuator commands via the mavlink message HIL_ACTUATOR_CONTROLS. The mavlink messages HIL_SENSOR (for sensor-level hil) or HIL_STATE_QUATERNION (state-level hil) and HIL_GPS are, amongst others, sent back to the Pixhawk to provide feedback for control.
+Upon start of ROS/Gazebo with the desired world and UAV, the simulation should start to communicate with the Pixhawk. The connection is established by the gazebo_mavlink_interface plugin of the UAV which sets up a mavlink connection (its configuration can again be found/changed in the robot's \*.xacro). The UAV/simulation obtains actuator commands via the mavlink message HIL_ACTUATOR_CONTROLS. The mavlink messages HIL_SENSOR (for sensor-level hil) or HIL_STATE_QUATERNION (state-level hil) and HIL_GPS are, amongst others, sent back to the Pixhawk to provide feedback for control.
 
 ### 3. Notes
 - RESTARTING the simulation: In case you face problems with the simulation (e.g. UAV crashes, Pixhawk lost connection, Gazebo crashed etc.), you need to restart it. Since the Pixhawk's estimator doesn't like timouts of sensor data, we suggest to also reboot the pixhawk when restarting the sim, e.g. disconnect it and start over from point 2 above. Make sure GQC doesn't run when you start the sim as it might block the connection to the Pixhawk (Sim acts as proxy between QGC and Pixhawk).
@@ -109,3 +109,5 @@ Upon start of ROS/Gazebo with the desired world and UAV, the simulation should s
 - All "techpod" versions require an AAERTFF mixer on the Pixhawk to work properly.
 - Once the simulation is running, you can start QGC to introspect e.g. the telemetry from the sim. Make sure QGC connects to the Pixhawk only via UDP (and not serial as this interferes with Gazebo). To this end, only select "UDP" in QGC under General->AutoConnect. If you restart the simulation, make sure to quit QGC first because it would block the connection between the sim and Pixhawk
 - Streams of simulated cameras and other signals published as ROS messages can be displayed with rqt.
+- If your robot depends on *.yaml files, for some reason you need to mount a camera on the robot for the yaml-parser to work - absolutely no idea why this is, seems completely unrelated
+- Don't use special characters within \*.xacro/\*.urdf files, not even within comments. (didn't launched when there was a superscript on a unit in the comments)
