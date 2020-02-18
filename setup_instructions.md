@@ -96,7 +96,7 @@ To launch a fixed-wing simulation, go to your catkin workspace and invoke (choos
 where "verbose" can be used to enable debug output (e.g. sim-rate, message statistics etc), "world_name" sets the world in which the UAV spawns and "uav_name" is used to select the UAV. "spawn_tc" further controls if tracking cameras are placed (ground view) and "enable_wind" indicates if the wind specified in the uav's *.xacro is enabled. Defaults are the first options in each brace. In your workspace e.g.invoke:
 
 ```
-$ roslaunch rotors_gazebo fixed_wing_hil.launch verbose:=true world_name:=fw_playground uav_name:=techpod_X spawn_tc:=true enable_wind:=true verbose:=false
+$ roslaunch rotors_gazebo fixed_wing_hil.launch world_name:=fw_playground uav_name:=techpod_X spawn_tc:=true enable_wind:=true verbose:=false
 
 ```
 Upon start of ROS/Gazebo with the desired world and UAV, the simulation should start to communicate with the Pixhawk. The connection is established by the gazebo_mavlink_interface plugin of the UAV which sets up a mavlink connection (its configuration can again be found/changed in the robot's *.xacro). The UAV/simulation obtains actuator commands via the mavlink message HIL_ACTUATOR_CONTROLS. The mavlink messages HIL_SENSOR (for sensor-level hil) or HIL_STATE_QUATERNION (state-level hil) and HIL_GPS are, amongst others, sent back to the Pixhawk to provide feedback for control.
