@@ -60,7 +60,7 @@ $ cd ~/catkin_ws/src
 $ git clone git@github.com:ethz-asl/fw_mavros
 $ catkin build mavros
 ```
-Note: HIL simulation currently requires the extended ASLUAV mavlink dialect defined here: https://github.com/ethz-asl/fw_mavlink/blob/feature/hil_extended/message_definitions/v1.0/ASLUAV.xml (commit: 55397e58ebba631165b0528eb75d2ffec0ccf919). After the above installation steps, replace the ASLUAV.xml in /catkin_ws/src/mavlink-gbp-release/message_definitions/v1.0/ with the the ASLUAV.xml found under the link given above... A bit hacky at the moment, tb improved in the future. You can then proceed to build the catkin workspace:
+Note: HIL simulation currently requires the extended ASLUAV mavlink dialect defined here: https://github.com/ethz-asl/fw_mavlink/blob/55397e58ebba631165b0528eb75d2ffec0ccf919/message_definitions/v1.0/ASLUAV.xml. After the above installation steps, replace the ASLUAV.xml in /catkin_ws/src/mavlink-gbp-release/message_definitions/v1.0/ with the the ASLUAV.xml found under the link given above... A bit hacky at the moment, tb improved in the future. You can then proceed to build the catkin workspace:
 
 ### 4. Build
 ```
