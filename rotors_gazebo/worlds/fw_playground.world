@@ -65,7 +65,7 @@
     </light>
 
     <!-- Ground -->
-    <model name="grass_takeoff_plane">
+    <model name="ground_collision_plane">
       <static>true</static>
         <link name='link'>
           <collision name='collision'>
@@ -90,6 +90,35 @@
               </contact>
             </surface>
           </collision>
+	</link>
+    </model>
+
+    <!--
+    <model name="floor">
+      <static>true</static>
+        <link name='link'>
+          <visual name='floor'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>true</cast_shadows>
+            <geometry>
+              <box>
+                <size>500 500 0.02</size>
+              </box>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Grey</name>
+              </script>
+            </material>
+          </visual>
+        </link>
+      </model>
+    -->
+
+    <model name="grass_takeoff_plane">
+      <static>true</static>
+        <link name='link'>
           <visual name='visual_1'>
             <pose>125 125 0 0 0 0</pose>
             <cast_shadows>false</cast_shadows>
@@ -362,9 +391,15 @@
               </script>
             </material>
           </visual>
+        </link>
+    </model>
+
+    <model name="runway">
+      <static>true</static>
+        <link name='link'>
           <visual name='runway'>
             <pose>85 0 0 0 0 0</pose>
-            <cast_shadows>false</cast_shadows>
+            <cast_shadows>true</cast_shadows>
             <geometry>
               <box>
                 <size>150 10 0.04</size>
@@ -379,7 +414,7 @@
           </visual>
           <visual name='runway_line'>
             <pose>85 0 0 0 0 0</pose>
-            <cast_shadows>false</cast_shadows>
+            <cast_shadows>true</cast_shadows>
             <geometry>
               <box>
                 <size>150 0.15 0.05</size>
@@ -424,6 +459,12 @@
             </material>
           </visual>
           -->
+        </link>
+    </model>
+
+    <model name="bulls_eye">
+      <static>true</static>
+        <link name='link'>
           <visual name='bulls_eye_r1'>
             <pose>0 0 0 0 0 0</pose>
             <cast_shadows>false</cast_shadows>

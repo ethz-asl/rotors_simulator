@@ -355,7 +355,7 @@
       </plugin>
     </gazebo>
   </xacro:macro>
-  
+
   <!-- =============================================================== -->
   <!-- ==================== ROS INTERFACE MACRO ====================== -->
   <!-- =============================================================== -->
@@ -374,10 +374,10 @@
   <!-- =============================================================== -->
   <!-- ================== MAVLINK INTERFACE MACRO ==================== -->
   <!-- =============================================================== -->
-  <xacro:macro name="mavlink_interface_macro" 
-    params="namespace mavlink_sub_topic imu_sub_topic mavlink_pub_topic 
-      motors_speeds_pub_topic gps_update_freq rotor_count reference_magnetic_field_north 
-      reference_magnetic_field_east reference_magnetic_field_down reference_latitude 
+  <xacro:macro name="mavlink_interface_macro"
+    params="namespace mavlink_sub_topic imu_sub_topic mavlink_pub_topic
+      motors_speeds_pub_topic gps_update_freq rotor_count reference_magnetic_field_north
+      reference_magnetic_field_east reference_magnetic_field_down reference_latitude
       reference_longitude reference_altitude">
     <gazebo>
       <plugin name="mavlink_interface" filename="librotors_gazebo_mavlink_interface.so">
@@ -390,7 +390,7 @@
 	<rotorCount>${rotor_count}</rotorCount>
         <!-- [Gauss] Below are the North, East, and Down components of the Earth's magnetic field at the reference location.
              The default reference location is Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84).
-	     You can obtain the magnetic field strength for your location using the World Magnetic Model: 
+	     You can obtain the magnetic field strength for your location using the World Magnetic Model:
              https://www.ngdc.noaa.gov/geomag/WMM/calculators.shtml -->
         <referenceMagNorth>${reference_magnetic_field_north}</referenceMagNorth>
         <referenceMagEast>${reference_magnetic_field_east}</referenceMagEast>
@@ -628,10 +628,69 @@
     </gazebo>
   </xacro:macro>
 
+  <!-- Macro to add a single-ray LIDAR. -->
+  <xacro:macro name="lidar_plugin_macro"
+    params="namespace lidar_suffix mass_lidar_sensor
+            parent_link lidar_topic n_hrz n_vrt
+            rng_min rng_max ang_min_hrz ang_max_hrz
+            ang_min_vrt ang_max_vrt noise_std *inertia *origin">
+    <!-- LIDAR link -->
+    <link name="${namespace}/lidar${lidar_suffix}_link">
+      <inertial>
+        <xacro:insert_block name="inertia" />
+        <mass value="${mass_lidar_sensor}" />  <!-- [kg] -->
+        <origin xyz="0 0 0" rpy="0 0 0" />
+      </inertial>
+    </link>
+    <!-- LIDAR joint -->
+    <joint name="${namespace}/lidar${lidar_suffix}_joint" type="revolute">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/lidar${lidar_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+    <gazebo reference="${namespace}/lidar${lidar_suffix}_link">
+      <sensor type="ray" name="${namespace}_lidar${lidar_suffix}">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>1</visualize>
+        <always_on>1</always_on>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>${n_hrz}</samples>
+              <resolution>1</resolution>
+              <min_angle>${ang_min_hrz}</min_angle>
+              <max_angle>${ang_max_hrz}</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>${n_vrt}</samples>
+              <resolution>1</resolution>
+              <min_angle>${ang_min_vrt}</min_angle>
+              <max_angle>${ang_max_vrt}</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>${rng_min}</min>
+            <max>${rng_max}</max>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>${noise_std}</stddev>
+          </noise>
+        </ray>
+        <plugin filename="librotors_gazebo_lidar_plugin.so" name="rotors_gazebo_lidar${lidar_suffix}_plugin">
+          <robotNamespace>${namespace}</robotNamespace>
+          <lidarTopic>${lidar_topic}</lidarTopic>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
   <!-- Macro to add a magnetometer. -->
   <xacro:macro name="magnetometer_plugin_macro"
     params="namespace magnetometer_suffix parent_link magnetometer_topic
-      mass_magnetometer_sensor ref_mag_north ref_mag_east ref_mag_down 
+      mass_magnetometer_sensor ref_mag_north ref_mag_east ref_mag_down
       noise_normal noise_uniform_initial_bias *inertia *origin">
     <!-- Magnetometer link -->
     <link name="${namespace}/magnetometer${magnetometer_suffix}_link">
@@ -655,7 +714,7 @@
         <magnetometerTopic>${magnetometer_topic}</magnetometerTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to 'magnetic_field') -->
         <!-- [Tesla] Below is the reference Earth's magnetic field at the reference location in NED frame.
              The default reference location is Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84).
-	     You can obtain the magnetic field strength for your location using the World Magnetic Model: 
+	     You can obtain the magnetic field strength for your location using the World Magnetic Model:
              http://www.ngdc.noaa.gov/geomag-web/#igrfwmm -->
         <refMagNorth>${ref_mag_north}</refMagNorth>
         <refMagEast>${ref_mag_east}</refMagEast>
@@ -701,7 +760,7 @@
   <xacro:macro name="wind_plugin_macro"
     params="namespace xyz_offset wind_direction wind_force_mean
       wind_gust_direction wind_gust_duration wind_gust_start
-      wind_gust_force_mean wind_speed_mean use_custom_static_wind_field 
+      wind_gust_force_mean wind_speed_mean use_custom_static_wind_field
       custom_wind_field_path">
     <gazebo>
       <plugin filename="librotors_gazebo_wind_plugin.so" name="wind_plugin">
@@ -984,9 +1043,9 @@
       odometry_sensor_suffix="_camera_${suffix}"
       parent_link="${namespace}/camera_${suffix}_optical_link"
       pose_topic="cam_${suffix}/pose"
-      pose_with_covariance_topic="t1"
-      position_topic="t2"
-      transform_topic="t3"
+      pose_with_covariance_topic="cam_${suffix}/t1"
+      position_topic="cam_${suffix}/t2"
+      transform_topic="cam_${suffix}/t3"
       odometry_topic="cam_${suffix}/odometry"
       parent_frame_id="world"
       child_frame_id="odometry_sensor_camera_${suffix}"
@@ -1084,6 +1143,26 @@
     </xacro:imu_plugin_macro>
   </xacro:macro>
 
+  <xacro:macro name="ideal_imu" params="namespace parent_link *origin">
+    <xacro:imu_plugin_macro
+      namespace="${namespace}"
+      imu_suffix=""
+      parent_link="${parent_link}"
+      imu_topic="imu"
+      mass_imu_sensor="0.015"
+      gyroscope_noise_density="0.0"
+      gyroscope_random_walk="0.0"
+      gyroscope_bias_correlation_time="10000.0"
+      gyroscope_turn_on_bias_sigma="0.0"
+      accelerometer_noise_density="0.0"
+      accelerometer_random_walk="0.0"
+      accelerometer_bias_correlation_time="10000.0"
+      accelerometer_turn_on_bias_sigma="0.0">
+      <xacro:cube_inertia l="0.02" mass="0.015" />
+      <xacro:insert_block name="origin" />
+    </xacro:imu_plugin_macro>
+  </xacro:macro>
+
   <xacro:macro name="default_camera" params="namespace parent_link camera_suffix *origin">
     <xacro:camera_macro_2
       namespace="${namespace}"
@@ -1140,6 +1219,38 @@
     </xacro:gps_plugin_macro>
   </xacro:macro>
 
+  <xacro:macro name="default_odometry" params="namespace parent_link">
+    <xacro:odometry_plugin_macro
+      namespace="${namespace}"
+      odometry_sensor_suffix="gt"
+      parent_link="${parent_link}"
+      pose_topic="ground_truth/pose"
+      pose_with_covariance_topic="ground_truth/pose_with_covariance"
+      position_topic="ground_truth/position"
+      transform_topic="ground_truth/transform"
+      odometry_topic="ground_truth/odometry"
+      parent_frame_id="world"
+      child_frame_id="${namespace}/base_link"
+      mass_odometry_sensor="0.00001"
+      measurement_divisor="1"
+      measurement_delay="0"
+      unknown_delay="0.0"
+      noise_normal_position="0 0 0"
+      noise_normal_quaternion="0 0 0"
+      noise_normal_linear_velocity="0 0 0"
+      noise_normal_angular_velocity="0 0 0"
+      noise_uniform_position="0 0 0"
+      noise_uniform_quaternion="0 0 0"
+      noise_uniform_linear_velocity="0 0 0"
+      noise_uniform_angular_velocity="0 0 0"
+      enable_odometry_map="false"
+      odometry_map=""
+      image_scale="">
+      <xacro:cube_inertia l="0.001" mass="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+    </xacro:odometry_plugin_macro>
+  </xacro:macro>
+
   <xacro:macro name="default_magnetometer" params="namespace parent_link">
     <!-- ADIS16448 Magnetometer. -->
     <xacro:magnetometer_plugin_macro
@@ -1188,6 +1299,27 @@
       reference_longitude="8.5500"
       reference_altitude="500.0">
     </xacro:mavlink_interface_macro>
+  </xacro:macro>
+
+  <xacro:macro name="default_lidar" params="namespace parent_link *origin">
+    <xacro:lidar_plugin_macro
+      namespace="${namespace}"
+      lidar_suffix=""
+      mass_lidar_sensor="0.05"
+      parent_link="${parent_link}"
+      lidar_topic="lidar_lite_v3"
+      n_hrz="1"
+      n_vrt="1"
+      rng_min="0.05"
+      rng_max="40"
+      ang_min_hrz="0.01"
+      ang_max_hrz="-0.01"
+      ang_min_vrt="0.01"
+      ang_max_vrt="-0.01"
+      noise_std="0.015">
+      <xacro:cube_inertia l="0.02" mass="0.05" />
+      <xacro:insert_block name="origin" />
+    </xacro:lidar_plugin_macro>
   </xacro:macro>
 
 </robot>

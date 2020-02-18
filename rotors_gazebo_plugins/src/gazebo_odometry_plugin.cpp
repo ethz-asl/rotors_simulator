@@ -351,7 +351,7 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
   }
 
   // Is it time to publish the front element?
-  if (gazebo_sequence_ == odometry_queue_.front().first) {
+  if (!odometry_queue_.empty() && gazebo_sequence_ == odometry_queue_.front().first) {
     // Copy the odometry message that is on the queue
     gz_geometry_msgs::Odometry odometry_msg(odometry_queue_.front().second);
 
@@ -609,7 +609,7 @@ void GazeboOdometryPlugin::CreatePubsAndSubs() {
 
   broadcast_transform_pub_ =
       node_handle_->Advertise<gz_geometry_msgs::TransformStampedWithFrameIds>(
-          "~/" + kBroadcastTransformSubtopic, 1);
+          "~/" + kBroadcastTransformSubtopic, 1); // kBroadcastTransformSubtopic = "broadcast_transform"
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboOdometryPlugin);

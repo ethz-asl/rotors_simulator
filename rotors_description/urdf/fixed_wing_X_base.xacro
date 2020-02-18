@@ -135,7 +135,6 @@
 
   </xacro:macro>
 
-
   <!-- Control surface joint and link -->
   <xacro:macro name="control_surface"
     params="robot_namespace surface_name parent mass_surface min_angle
@@ -236,7 +235,7 @@
   <!-- Aerodyn. angle vane -->
   <xacro:macro name="angle_vane"
     params="robot_namespace vane_name type chord arm_cp parent wind_topic mass_vane
-            color mesh_file *joint_origin *vis_coll_origin *inertia">
+            color *joint_origin *inertia">
 
     <joint name="${robot_namespace}/${vane_name}_joint" type="continuous">
       <xacro:insert_block name="joint_origin" />
@@ -248,7 +247,7 @@
        </xacro:if>
        <parent link="${parent}" />
        <child link="${robot_namespace}/${vane_name}" />
-       <dynamics friction="0" damping="0.001"/>
+       <dynamics friction="0" damping="0.00001"/>
     </joint>
 
     <link name="${robot_namespace}/${vane_name}">
@@ -257,7 +256,6 @@
         <xacro:insert_block name="inertia" />
       </inertial>
       <visual>
-        <xacro:insert_block name="vis_coll_origin" />
         <geometry>
           <box size="0.1 0.003 0.003" />
         </geometry>

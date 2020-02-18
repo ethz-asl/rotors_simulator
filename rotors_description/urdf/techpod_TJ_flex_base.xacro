@@ -36,36 +36,19 @@
   <!--
   <xacro:default_magnetometer namespace="${namespace}" parent_link="${namespace}/base_link" />
   -->
-
   <!-- Mount a pressure sensor. note: mavlink interface already does this -->
   <!--
   <xacro:default_pressure_sensor namespace="${namespace}" parent_link="${namespace}/base_link" />
   -->
 
-
-  <xacro:default_camera
-    namespace="${namespace}"
-    parent_link="${namespace}/base_link"
-    camera_suffix="fus_left">
-    <origin xyz="0.21 0.045 0.145" rpy="0 -0.1 2.2" />
-  </xacro:default_camera>
-
-  <xacro:default_camera
-    namespace="${namespace}"
-    parent_link="${namespace}/base_link"
-    camera_suffix="fus_right">
-    <origin xyz="0.21 -0.045 0.145" rpy="0 -0.1 -2.2" />
-  </xacro:default_camera>
-  <!---->
-
   <xacro:camera_macro_2
     namespace="${namespace}"
     parent_link="${namespace}/base_link"
-    camera_suffix="3pv_lowres"
+    camera_suffix="3pv"
     frame_rate="60"
     horizontal_fov="1.3962634"
-    image_width="188"
-    image_height="120"
+    image_width="752"
+    image_height="480"
     image_format="L8"
     min_distance="0.02"
     max_distance="8000"
@@ -78,55 +61,25 @@
     <origin xyz="-2 0 0.5" rpy="0 0.2 0" />
   </xacro:camera_macro_2>
 
-  <!--
-  <xacro:asl_mono_vi_1
+  <!-- Trinocular Setup -->
+
+  <!-- Camera Fuselage Left -->
+  <xacro:default_camera
     namespace="${namespace}"
     parent_link="${namespace}/base_link"
-    suffix="center"
-    fps="30"
-    h_fov="1.3514"
-    imu_topic="adis/data_raw"
-    acc_nd="0.0100"
-    acc_rw="0.0020"
-    gyr_nd="0.0050"
-    gyr_rw="0.00004">
-    <origin xyz="0.35 0 0.11" rpy="0 0.3 0" />
-    <origin xyz="-0.0014 0.0146 -0.1175" rpy="-3.1228 -1.1414 -1.6129" />
-    <origin xyz="-0.0014 0.0146 -0.1175" rpy="-3.1228 -1.1414 -1.6129" />
-  </xacro:asl_mono_vi_1>
+    camera_suffix="fus_left">
+    <origin xyz="0.21 0.045 0.145" rpy="0 -0.1 2.2" />
+  </xacro:default_camera>
 
-  <xacro:asl_mono_vi_1
+  <!-- Camera Fuselage Right -->
+  <xacro:default_camera
     namespace="${namespace}"
-    parent_link="${namespace}/wl_3"
-    suffix="left"
-    fps="30"
-    h_fov="1.3560"
-    imu_topic="camImu0/data_raw"
-    acc_nd="0.1006"
-    acc_rw="0.0040"
-    gyr_nd="0.0258"
-    gyr_rw="0.0007">
-    <origin xyz="0.05 0.38 0.025" rpy="0 0.3 0" />
-    <origin xyz="-0.0264 0.0061 -0.0331" rpy="3.1298 0.0029 1.5626" />
-    <origin xyz="-0.0264 0.0061 -0.0331" rpy="3.1298 0.0029 1.5626" />
-  </xacro:asl_mono_vi_1>
+    parent_link="${namespace}/base_link"
+    camera_suffix="fus_right">
+    <origin xyz="0.21 -0.045 0.145" rpy="0 -0.1 -2.2" />
+  </xacro:default_camera>
 
-  <xacro:asl_mono_vi_1
-    namespace="${namespace}"
-    parent_link="${namespace}/wr_3"
-    suffix="right"
-    fps="30"
-    h_fov="1.3626"
-    imu_topic="camImu1/data_raw"
-    acc_nd="0.1006"
-    acc_rw="0.0040"
-    gyr_nd="0.0258"
-    gyr_rw="0.0007">
-    <origin xyz="0.05 -0.38 0.025" rpy="0 0.3 0" />
-    <origin xyz="-0.0083 -0.0177 -0.0469" rpy="-3.1363 -0.0648 1.5500" />
-    <origin xyz="-0.0083 -0.0177 -0.0469" rpy="-3.1363 -0.0648 1.5500" />
-  </xacro:asl_mono_vi_1>-->
-
+  <!-- Camera/IMU Fuselage Center -->
   <xacro:asl_mono_vi_1
     namespace="${namespace}"
     parent_link="${namespace}/base_link"
@@ -143,6 +96,7 @@
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:asl_mono_vi_1>
 
+  <!-- Camera/IMU Wing Left -->
   <xacro:asl_mono_vi_1
     namespace="${namespace}"
     parent_link="${namespace}/wl_3"
@@ -159,6 +113,7 @@
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:asl_mono_vi_1>
 
+  <!-- Camera/IMU Wing Right -->
   <xacro:asl_mono_vi_1
     namespace="${namespace}"
     parent_link="${namespace}/wr_3"
@@ -174,23 +129,5 @@
     <origin xyz="0 0 0" rpy="0 0 0" />
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:asl_mono_vi_1>
-
-  <!--
-  <xacro:default_camera
-    namespace="${namespace}"
-    parent_link="${namespace}/base_link"
-    camera_suffix="cam_aft">
-    <origin xyz="-0.7 0 0.02" rpy="0 0.4 3.14" />
-  </xacro:default_camera>
-  -->
-
-  <!--
-  <xacro:default_camera
-    namespace="${namespace}"
-    parent_link="${namespace}/payload_1"
-    camera_suffix="cam_payload">
-    <origin xyz="0.125 0 0" rpy="0 0 0" />
-  </xacro:default_camera>
-  -->
 
 </robot>

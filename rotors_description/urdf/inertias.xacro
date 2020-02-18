@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+ <!-- See https://en.wikipedia.org/wiki/List_of_moments_of_inertia -->
+
+ <!-- Macro for the inertia of a box -->
+  <xacro:macro name="box_inertia" params="x y z mass">
+    <inertia ixx="${0.0833333 * mass * (y*y + z*z)}" ixy="0.0" ixz="0.0"
+      iyy="${0.0833333 * mass * (x*x + z*z)}" iyz="0.0"
+      izz="${0.0833333 * mass * (x*x + y*y)}" />
+  </xacro:macro>
+
+  <!-- Macro for the inertia of a sphere -->
+  <xacro:macro name="sphere_inertia" params="r mass">
+    <inertia ixx="${0.4 * mass * r*r}" ixy="0.0" ixz="0.0"
+           iyy="${0.4 * mass * r*r}" iyz="0.0"
+           izz="${0.4 * mass * r*r}" />
+  </xacro:macro>
+
+  <!-- Macro for the inertia of a cylinder, axis along x -->
+  <xacro:macro name="cylinder_inertia_x" params="r h mass">
+    <inertia ixx="$${0.5 * mass * r * r}" ixy="0.0" ixz="0.0"
+      iyy="${0.0833333 * mass * (3*r*r + h*h)}" iyz="0.0"
+      izz="{0.0833333 * mass * (3*r*r + h*h)}" />
+  </xacro:macro>
+
+  <!-- Macro for the inertia of a cylinder, axis along y -->
+  <xacro:macro name="cylinder_inertia_y" params="r h mass">
+    <inertia ixx="${0.0833333 * mass * (3*r*r + h*h)}" ixy="0.0" ixz="0.0"
+      iyy="${0.5 * mass * r * r}" iyz="0.0"
+      izz="${0.0833333 * mass * (3*r*r + h*h)}" />
+  </xacro:macro>
+
+  <!-- Macro for the inertia of a cylinder, axis along z -->
+  <xacro:macro name="cylinder_inertia_z" params="r h mass">
+    <inertia ixx="${0.0833333 * mass * (3*r*r + h*h)}" ixy="0.0" ixz="0.0"
+      iyy="${0.0833333 * mass * (3*r*r + h*h)}" iyz="0.0"
+      izz="${0.5 * mass * r * r}" />
+  </xacro:macro>
+
+  <!-- Macro for the inertia of a hollow tube, axis along x -->
+  <xacro:macro name="tube_inertia_x" params="r1 r2 h mass">
+    <inertia ixx="${0.5 * mass * (r1*r1 + r2*r2)}" ixy="0.0" ixz="0.0"
+      iyy="${0.0833333 * mass * (3*(r1*r1 + r2*r2) + h*h)}" iyz="0.0"
+      izz="${0.0833333 * mass * (3*(r1*r1 + r2*r2) + h*h)}" />
+  </xacro:macro>
+
+  <!-- Macro for the inertia of a hollow tube, axis along y -->
+  <xacro:macro name="tube_inertia_y" params="r1 r2 h mass">
+    <inertia ixx="${0.0833333 * mass * (3*(r1*r1 + r2*r2) + h*h)}" ixy="0.0" ixz="0.0"
+      iyy="${0.5 * mass * (r1*r1 + r2*r2)}" iyz="0.0"
+      izz="${0.0833333 * mass * (3*(r1*r1 + r2*r2) + h*h)}" />
+  </xacro:macro>
+
+  <!-- Macro for the inertia of a hollow tube, axis along z -->
+  <xacro:macro name="tube_inertia_z" params="r1 r2 h mass">
+    <inertia ixx="${0.0833333 * mass * (3*(r1*r1 + r2*r2) + h*h)}" ixy="0.0" ixz="0.0"
+      iyy="${0.0833333 * mass * (3*(r1*r1 + r2*r2) + h*h)}" iyz="0.0"
+      izz="${0.5 * mass * (r1*r1 + r2*r2)}" />
+  </xacro:macro>
+
+</robot>

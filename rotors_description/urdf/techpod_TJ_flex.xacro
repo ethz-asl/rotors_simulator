@@ -16,6 +16,9 @@
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="techpod_TJ_flex">
 
+   <!-- Include URDF files -->
+   <xacro:include filename="$(find rotors_description)/urdf/fixed_wing_X_base.xacro" />
+
    <!-- Global properties -->
    <xacro:property name="namespace" value="$(arg namespace)" />
    <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
@@ -28,21 +31,11 @@
    <!-- Constants -->
    <xacro:property name="PI" value="3.1415926535897931" />
 
-   <!-- Component masses -->
-   <!--<xacro:property name="mass_fuselage" value="2.124" />--><!-- [kg] -->
-   <xacro:property name="mass_fuselage" value="1.984" />
-   <xacro:property name="mass_aileron" value="0.01" /><!-- [kg] -->
-   <xacro:property name="mass_flap" value="0.01" /><!-- [kg] -->
-   <xacro:property name="mass_elevator" value="0.01" /><!-- [kg] -->
-   <xacro:property name="mass_rudder" value="0.01" /><!-- [kg] -->
-   <xacro:property name="mass_propeller" value="0.01" /><!-- [kg] -->
-
    <!-- Main body properties -->
    <xacro:property name="body_length" value="1.088" /><!-- [m] -->
    <xacro:property name="body_width" value="2.591" /><!-- [m] -->
    <xacro:property name="body_height" value="0.303" /><!-- [m] -->
    <xacro:property name="body_color" value="White" />
-   <xacro:property name="body_mesh_file" value="package://rotors_description/meshes/techpod/techpod_body.dae" />
 
    <!-- Aileron properties -->
    <xacro:property name="aileron_length" value="0.15" /><!-- [m] -->
@@ -51,8 +44,6 @@
    <xacro:property name="aileron_min_angle" value="-0.349066" /><!-- [rad] -->
    <xacro:property name="aileron_max_angle" value="0.349066" /><!-- [rad] -->
    <xacro:property name="aileron_color" value="${body_color}" />
-   <xacro:property name="aileron_left_mesh_file" value="package://rotors_description/meshes/techpod/techpod_aileron_left.dae" />
-   <xacro:property name="aileron_right_mesh_file" value="package://rotors_description/meshes/techpod/techpod_aileron_right.dae" />
 
    <!-- Elevator properties -->
    <xacro:property name="elevator_length" value="0.15" /><!-- [m] -->
@@ -61,7 +52,6 @@
    <xacro:property name="elevator_min_angle" value="-0.349066" /><!-- [rad] -->
    <xacro:property name="elevator_max_angle" value="0.349066" /><!-- [rad] -->
    <xacro:property name="elevator_color" value="${body_color}" />
-   <xacro:property name="elevator_mesh_file" value="package://rotors_description/meshes/techpod/techpod_elevator.dae" />
 
    <!-- Flap properties -->
    <xacro:property name="flap_length" value="0.18" /><!-- [m] -->
@@ -70,8 +60,6 @@
    <xacro:property name="flap_min_angle" value="-0.349066" /><!-- [rad] -->
    <xacro:property name="flap_max_angle" value="0.349066" /><!-- [rad] -->
    <xacro:property name="flap_color" value="${body_color}" />
-   <xacro:property name="flap_left_mesh_file" value="package://rotors_description/meshes/techpod/techpod_flap_left.dae" />
-   <xacro:property name="flap_right_mesh_file" value="package://rotors_description/meshes/techpod/techpod_flap_right.dae" />
 
    <!-- Rudder properties -->
    <xacro:property name="rudder_length" value="0.13" />
@@ -80,14 +68,12 @@
    <xacro:property name="rudder_min_angle" value="-0.349066" />
    <xacro:property name="rudder_max_angle" value="0.349066" />
    <xacro:property name="rudder_color" value="${body_color}" />
-   <xacro:property name="rudder_mesh_file" value="package://rotors_description/meshes/techpod/techpod_rudder.dae" />
 
    <!-- Propeller properties -->
    <xacro:property name="propeller_direction" value="cw" />
    <xacro:property name="propeller_radius" value="0.1" />
    <xacro:property name="propeller_height" value="0.003" />
    <xacro:property name="propeller_color" value="Gray" />
-   <xacro:property name="propeller_mesh_file" value="package://rotors_description/meshes/propeller_${propeller_direction}.dae" />
 
    <!-- Flexing properties -->
    <xacro:property name="k1" value="375" />
@@ -99,16 +85,43 @@
    <xacro:property name="k4" value="120" />
    <xacro:property name="d4" value="1.8" />
 
-   <!-- Inertia of the main body -->
    <!--
-   <xacro:property name="body_inertia">
-      <inertia ixx="0.16632" ixy="0.0" ixz="0.0755" iyy="0.3899" iyz="0.0" izz="0.5243" />
-   </xacro:property>
-   -->
+   Inertial properties - do not change without considering link-tree, i.e.:
 
-   <xacro:property name="body_inertia">
+   From System Identification, we obtain total mass m_tot and total inertia J_tot
+   wrt cg. For the Techpod, these are:
+
+   m_tot = 3.124 kg
+   J_tot = [ixx=0.6688, iyy=0.1623, izz=0.6936, ixz=0.0281] kgm^2  (wrt cg, FLU frame)
+   r_cg = [0, 0, 0.097] (cg position in baselink frame (FLU))
+
+   Considering the masses and positions of all leaf-links (root = baselink), we
+   calculate mass and inertia of the baselink s.t. the overall inertial properties
+   defined above are matched (ignoring the link-centric inertias of the links as
+   they are deliberately set to very small values...). With the link masses set below
+   and in the segment macros, we get for the baselink:
+
+   m_base_link = 1.984 kg
+   J_base_link = [ixx=0.1686, iyy=0.0498, izz=0.1100, ixz=0.0013]   (wrt cg, FLU frame)
+   r_cg_base_link = [0.0684, 0, 0.0511] (cg position in baselink frame (FLU))
+  -->
+
+   <xacro:property name="m_base_link" value="1.984" />
+   <xacro:property name="J_base_link">
      <inertia ixx="0.1686" ixy="0.0" ixz="0.0013" iyy="0.0498" iyz="0.0" izz="0.1100" />
    </xacro:property>
+   <xacro:property name="r_cg_base_link">
+      <!--<origin xyz="0.09 0 0.147" rpy="0 0 0" />-->
+      <origin xyz="0.068 0 ${0.051+0.05}" rpy="0 0 0" />
+   </xacro:property>
+
+   <!-- the following masses are deliberately small to get neglectable inertias,
+        basically 'dummy inertias'-->
+   <xacro:property name="mass_aileron" value="0.01" /><!-- [kg] -->
+   <xacro:property name="mass_flap" value="0.01" /><!-- [kg] -->
+   <xacro:property name="mass_elevator" value="0.01" /><!-- [kg] -->
+   <xacro:property name="mass_rudder" value="0.01" /><!-- [kg] -->
+   <xacro:property name="mass_propeller" value="0.01" /><!-- [kg] -->
 
    <!-- Inertia of the aileron, assuming it is a cuboid -->
    <xacro:property name="aileron_inertia">
@@ -131,26 +144,24 @@
    </xacro:property>
 
    <!-- Inertia of the propeller, assuming it is a cylinder -->
+   <!-- Note: Keep it small as possible, this is as well just a dummy inertia,
+        gyroscopic effects are simulated in propulsion plugin with the mass
+        specified in the propeller's *.yaml file-->
    <xacro:property name="propeller_inertia">
-      <xacro:cylinder_inertia r="${propeller_radius}" h="${propeller_height}" mass="${mass_propeller*rotor_velocity_slowdown_sim}" />
+      <xacro:cylinder_inertia r="${propeller_radius}" h="${propeller_height}" mass="${mass_propeller}" />
    </xacro:property>
-
-   <!-- Include URDF files -->
-   <xacro:include filename="$(find rotors_description)/urdf/fixed_wing_X_base.xacro" />
-   <xacro:include filename="$(find rotors_description)/urdf/rope.xacro" />
 
    <!-- Instantiate fixed_wing_base_macro once and adding fuselage parts -->
    <xacro:fixed_wing_base_macro robot_namespace="${namespace}"
-      mass="${mass_fuselage}"
+      mass="${m_base_link}"
       length="${body_length}"
       width="0.2"
       height="${body_height}"
       color="${body_color}"
       use_mesh_file="true"
       mesh_file="package://rotors_description/meshes/techpod_X_flex/fuselage_barless.stl">
-      <!--<origin xyz="0.09 0 0.147" rpy="0 0 0" />-->
-      <origin xyz="0.068 0 ${0.051+0.05}" rpy="0 0 0" />
-      <xacro:insert_block name="body_inertia" />
+      <xacro:insert_block name="r_cg_base_link" />
+      <xacro:insert_block name="J_base_link" />
    </xacro:fixed_wing_base_macro>
    <joint name="${namespace}/dome_joint" type="fixed">
       <parent link="${namespace}/base_link" />
@@ -247,21 +258,6 @@
    <gazebo reference="${namespace}/pitot">
       <material>Gazebo/Grey</material>
    </gazebo>
-
-   <!--
-   <link name="${namespace}/check_coordinates">
-      <inertial>
-         <mass value="0.1" />
-         <xacro:box_inertia x="0.1" y="0.1" z="0.1" mass="0.1" />
-      </inertial>
-   </link>
-   <joint name="${namespace}/check_coordinates_joint" type="revolute">
-     <origin xyz="0.54 0 0.184" rpy="0 0 0" />
-     <parent link="${namespace}/base_link" />
-     <child link="${namespace}/check_coordinates" />
-     <limit upper="0" lower="0" effort="0" velocity="0" />
-   </joint>
-   -->
 
    <!-- Instantiate (flexing) wing segments -->
    <xacro:airfoil_segment robot_namespace="${namespace}"
@@ -1125,10 +1121,8 @@
       mass_vane="0.02"
       parent="${namespace}/wl_1"
       wind_topic="wind_base_link"
-      color="Grey"
-      mesh_file="package://rotors_description/meshes/techpod_X_flex/flp_l_1.stl">
+      color="Grey">
       <origin xyz="0.15 0.345 0.05" rpy="0 0 0" /><!-- Joint origin -->
-      <origin xyz="0 0 0" rpy="0 0 0" /><!-- vis_coll origin -->
       <xacro:box_inertia x="0.1" y="0.02" z="0.02" mass="0.02" />
    </xacro:angle_vane>
 
@@ -1160,10 +1154,8 @@
       mass_vane="0.02"
       parent="${namespace}/wr_1"
       wind_topic="wind_base_link"
-      color="Grey"
-      mesh_file="package://rotors_description/meshes/techpod_X_flex/flp_l_1.stl">
+      color="Grey">
       <origin xyz="0.15 -0.34 0.057" rpy="0 0 0" /><!-- Joint origin -->
-      <origin xyz="0 0 0" rpy="0 0 0" /><!-- vis_coll origin -->
       <xacro:box_inertia x="0.1" y="0.02" z="0.02" mass="0.02" />
    </xacro:angle_vane>
 
@@ -1230,121 +1222,6 @@
      </gazebo>
    </xacro:if>
 
-   <!-- Tracing ribbon/Visual plugin -->
-   <!--
-   <gazebo reference="${namespace}/base_link">
-      <visual>
-         <plugin name="visual_plugin_base_link" filename="librotors_gazebo_template_visual_plugin.so" />
-      </visual>
-   </gazebo>
-   -->
-
-   <!-- Payload -->
-   <!--
-   <link name="${namespace}/payload_1">
-      <inertial>
-         <origin xyz="0.07 0 0" rpy="0 0 0" />
-         <mass value="0.25" />
-         <xacro:sphere_inertia r="0.05" mass="0.25" />
-      </inertial>
-      <visual>
-         <origin xyz="0.07 0 0" rpy="0 0 0" />
-         <geometry>
-            <mesh filename="package://rotors_description/meshes/payloads/payload.stl" scale="0.012 0.012 0.012" />
-         </geometry>
-      </visual>
-      <collision>
-         <origin xyz="0.01 0 0" rpy="0 0 0" />
-         <geometry>
-            <box size = "0.25 0.12 0.05" />
-         </geometry>
-      </collision>
-   </link>
-   <joint name="${namespace}/payload_1_joint" type="floating">
-      <parent link="${namespace}/wl_2" />
-      <child link="${namespace}/payload_1" />
-      <origin xyz="0 0 0" rpy="0 0 0" />
-   </joint>
-   <gazebo reference="${namespace}/payload_1">
-      <visual>
-         <plugin name="visual_plugin_payload_1" filename="librotors_gazebo_template_visual_plugin.so" />
-      </visual>
-      <material>Gazebo/Orange</material>
-      <mu1>0.2</mu1>
-      <mu2>0.2</mu2>
-      <kp>10000</kp>
-      <kd>1</kd>
-   </gazebo>
-   <gazebo>
-      <plugin filename="librotors_gazebo_payload_plugin.so" name="payload_plugin_1">
-         <robotNamespace>${namespace}</robotNamespace>
-         <joint>${namespace}/payload_1_joint</joint>
-         <payload>${namespace}/payload_1</payload>
-         <parent>${namespace}/wl_2</parent>
-         <hoistPosParent>0 -0.15 -0.04</hoistPosParent>
-         <hoistPosPayload>0 0 0</hoistPosPayload>
-         <dropTopic>drop_1</dropTopic>
-      </plugin>
-   </gazebo>
-   <gazebo>
-      <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
-         <robotNamespace>${namespace}</robotNamespace>
-         <linkName>${namespace}/payload_1</linkName>
-         <aeroForcesVis>aero_force_vis_payload_1</aeroForcesVis>
-         <airfoil>
-            <segment name="HS">
-               <forward>1 0 0</forward>
-               <upward>0 0 1</upward>
-               <cp>-0.15 0 0</cp>
-               <seg_area>0.005</seg_area>
-               <seg_chord>0.05</seg_chord>
-               <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
-               <wind name="wind">
-                 <topic>wind_payload</topic>
-               </wind>
-            </segment>
-            <segment name="VS">
-               <forward>1 0 0</forward>
-               <upward>0 -1 0</upward>
-               <cp>-0.15 0 0</cp>
-               <seg_area>0.005</seg_area>
-               <seg_chord>0.05</seg_chord>
-               <aeroParamsYAML>${yaml_path}/airfoil_test_2.yaml</aeroParamsYAML>
-               <wind name="wind">
-                 <topic>wind_payload</topic>
-               </wind>
-            </segment>
-         </airfoil>
-         <body>
-            <element>
-               <aBdyXX>0.0028</aBdyXX>
-               <aBdyYY>0.015</aBdyYY>
-               <aBdyZZ>0.015</aBdyZZ>
-               <forward>1 0 0</forward>
-               <upward>0 0 1</upward>
-               <cp>-0.05 0.0 0</cp>
-               <wind name="wind">
-                 <topic>wind_payload</topic>
-               </wind>
-            </element>
-         </body>
-      </plugin>
-   </gazebo>
-   -->
-
-   <!-- Payload on rope -->
-   <!--
-   <xacro:rope n="20"
-      length="10"
-      dia="0.01"
-      mass="0.05"
-      damping="10"
-      parent="${namespace}/base_link"
-      color="Red">
-      <origin xyz="-0.15 0 0.02" rpy="0 -1.57 0" />
-   </xacro:rope>
-   -->
-
    <!-- Mavlink interface -->
    <gazebo>
       <plugin filename="librotors_gazebo_mavlink_interface.so" name="gazebo_mavlink_interface">
@@ -1385,6 +1262,15 @@
                <zero_position_armed>15.03</zero_position_armed>
                <joint_control_type>gz_msg</joint_control_type>
                <gztopic>prop_ref_0</gztopic>
+            </channel>
+            <channel name="propeller_anim">
+               <input_index>4</input_index>
+               <input_offset>1</input_offset>
+               <input_scaling>20</input_scaling><!-- rdps_slope/2  [rad/s]-->
+               <zero_position_disarmed>0</zero_position_disarmed>
+               <zero_position_armed>0</zero_position_armed>
+               <joint_control_type>velocity</joint_control_type>
+               <joint_name>${namespace}/propeller_P0_joint</joint_name>
             </channel>
             <channel name="aileron_left">
                <input_index>0</input_index>
@@ -1466,16 +1352,23 @@
                <joint_name>${namespace}/flap_right_2_joint</joint_name>
                <gztopic>flap_r2_pos</gztopic>
             </channel>
-            <channel name="payload">
-               <input_index>8</input_index>
-               <input_offset>0</input_offset>
-               <input_scaling>1</input_scaling>
-               <zero_position_disarmed>0</zero_position_disarmed>
-               <zero_position_armed>0</zero_position_armed>
-               <joint_control_type>gz_msg</joint_control_type>
-               <gztopic>drop_1</gztopic>
-            </channel>
          </control_channels>
       </plugin>
    </gazebo>
+
+   <!-- Miscellaneous -->
+   <!--
+   <link name="${namespace}/check_coordinates">
+      <inertial>
+         <mass value="0.1" />
+         <xacro:box_inertia x="0.1" y="0.1" z="0.1" mass="0.1" />
+      </inertial>
+   </link>
+   <joint name="${namespace}/check_coordinates_joint" type="revolute">
+     <origin xyz="0.54 0 0.184" rpy="0 0 0" />
+     <parent link="${namespace}/base_link" />
+     <child link="${namespace}/check_coordinates" />
+     <limit upper="0" lower="0" effort="0" velocity="0" />
+   </joint>
+   -->
 </robot>
