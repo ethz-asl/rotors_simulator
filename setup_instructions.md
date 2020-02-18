@@ -29,13 +29,9 @@ Get RotorS and additional dependencies
 
 ```
 $ cd ~/catkin_ws/src
-$ git clone -b feature/fw_hil_rotors https://github.com/ethz-asl/rotors_simulator.git
+$ git clone -b feature/drop_and_recovery https://github.com/david-rohr/rotors_simulator.git
 $ git clone https://github.com/ethz-asl/mav_comm.git
 $ git clone https://github.com/catkin/catkin_simple.git
-```
-If you want upstream mavros, do:
-
-```
 $ cd ~/catkin_ws
 $ wstool init src
 $ rosinstall_generator --rosdistro melodic mavlink | tee /tmp/mavros.rosinstall
@@ -44,21 +40,6 @@ $ wstool merge -t src /tmp/mavros.rosinstall
 $ wstool update -t src -j4
 $ rosdep install --from-paths src --ignore-src -y
 $ ./src/mavros/mavros/scripts/install_geographiclib_datasets.sh
-```
-To use asl-ethz/fw_mavros version (not tested yet, adapted from https://github.com/ethz-asl/fw_mavros), do:
-
-```
-$ pip install future
-$ sudo apt-get update
-$ sudo apt-get install ros-kinetic-geographic-msgs libgeographic-dev ros-kinetic-diagnostic-updater ros-kinetic-tf2-ros ros-kinetic-tf2-eigen ros-kinetic-angles ros-kinetic-eigen-conversions
-$ sudo geographiclib-get-geoids egm96-5
-$ cd ~/catkin_ws/src
-$ git clone git@github.com:mavlink/mavlink-gbp-release
-$ cd ~/catkin_ws/src/mavlink-gbp-release
-$ git checkout debian/melodic/mavlink
-$ cd ~/catkin_ws/src
-$ git clone git@github.com:ethz-asl/fw_mavros
-$ catkin build mavros
 ```
 Note: HIL simulation currently requires the extended ASLUAV mavlink dialect defined here: https://github.com/ethz-asl/fw_mavlink/blob/55397e58ebba631165b0528eb75d2ffec0ccf919/message_definitions/v1.0/ASLUAV.xml. After the above installation steps, replace the ASLUAV.xml in /catkin_ws/src/mavlink-gbp-release/message_definitions/v1.0/ with the ASLUAV.xml found under the link given above... A bit hacky at the moment, tb improved in the future. You can then proceed to build the catkin workspace:
 
@@ -91,12 +72,12 @@ Hook up Pixhawk to your computer via USB (should appear as /dev/ttyACM0 on linux
 
 To launch a fixed-wing simulation, go to your catkin workspace and invoke (choosing one of the param values at a time...):
 
-"roslaunch rotors_gazebo fixed_wing_hil.launch verbose:={false, true} world_name:={fw_playground, yosemite, davos, hinwil} uav_name:={techpod_TJ_flex, techpod_TJ, techpod_X_flex, techpod_X, list_not_complete} spawn_tc:={false, true} enable_wind:={true, false} record_rosbag:={false, true} rosbag_path:={"/path/to/somewhere/"}"
+"roslaunch rotors_gazebo fixed_wing_hil.launch verbose:={false, true} world_name:={fw_playground, yosemite, davos, hinwil} uav_name:={techpod_TJ_flex, techpod_TJ, techpod_X_flex, techpod_X, techpod_exp_flex, list_not_complete} spawn_tc:={false, true} enable_wind:={true, false} record_rosbag:={false, true} rosbag_path:={"/path/to/somewhere/"}"
 
 where "verbose" can be used to enable debug output (e.g. sim-rate, message statistics etc), "world_name" sets the world in which the UAV spawns and "uav_name" is used to select the UAV. "spawn_tc" further controls if tracking cameras are placed (ground view) and "enable_wind" indicates if the wind specified in the uav's *.xacro is enabled. Defaults are the first options in each brace. In your workspace e.g.invoke:
 
 ```
-$ roslaunch rotors_gazebo fixed_wing_hil.launch world_name:=fw_playground uav_name:=techpod_X spawn_tc:=true enable_wind:=true verbose:=false
+$ roslaunch rotors_gazebo fixed_wing_hil.launch world_name:=fw_playground uav_name:=techpod_exp_flex spawn_tc:=true enable_wind:=false verbose:=true
 
 ```
 Upon start of ROS/Gazebo with the desired world and UAV, the simulation should start to communicate with the Pixhawk. The connection is established by the gazebo_mavlink_interface plugin of the UAV which sets up a mavlink connection (its configuration can again be found/changed in the robot's \*.xacro). The UAV/simulation obtains actuator commands via the mavlink message HIL_ACTUATOR_CONTROLS. The mavlink messages HIL_SENSOR (for sensor-level hil) or HIL_STATE_QUATERNION (state-level hil) and HIL_GPS are, amongst others, sent back to the Pixhawk to provide feedback for control.
