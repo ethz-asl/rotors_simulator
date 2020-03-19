@@ -173,7 +173,6 @@ private:
 
         void PropSpeedCallback(GzFloat32MsgPtr& ref){
             omega_ref = (double)ref->data();
-            MotorDyn();
         }
 
         void MotorDyn(){
