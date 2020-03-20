@@ -28,5 +28,6 @@
   <depend>rotors_gazebo_plugins</depend>
   <depend>sensor_msgs</depend>
   <depend>xacro</depend>
+  <depend>pid</depend>
 
 </package>

@@ -86,8 +86,8 @@ bool OctomapFromGazeboWorld::ServiceCallback(
   }
 
   common::SphericalCoordinatesPtr sphericalCoordinates = world_->GetSphericalCoordinates();
-  ignition::math::Vector3d origin_cartesian(0.0, 0.0, 0.0);
-  ignition::math::Vector3d origin_spherical = sphericalCoordinates->
+  math::Vector3 origin_cartesian(0.0, 0.0, 0.0);
+  math::Vector3 origin_spherical = sphericalCoordinates->
       SphericalFromLocal(origin_cartesian);
 
   res.origin_latitude = origin_spherical.x;

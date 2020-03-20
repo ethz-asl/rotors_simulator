@@ -7,11 +7,20 @@
     <include>
       <uri>model://sun</uri>
     </include>
+    <!-- Target -->
     <include>
           <static>false</static>
       <uri>model://landing_target</uri>
       <pose>3 0 0 0 0 0</pose>
     </include>
+    <!-- MAV -->
+    <!-- <model name="mav">
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <include>
+        <uri>model://mav</uri>
+      </include>
+    </model> -->
+
 
     <!-- Only one ROS interface plugin is required per world, as any other plugin can connect a Gazebo
          topic to a ROS topic (or vise versa). -->

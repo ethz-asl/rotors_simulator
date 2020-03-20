@@ -203,23 +203,23 @@ void GimbalControllerPlugin::OnYawStringMsg(ConstAnyPtr &_msg)
 }
 
 /////////////////////////////////////////////////
-ignition::math::Vector3d GimbalControllerPlugin::ThreeAxisRot(
+math::Vector3 GimbalControllerPlugin::ThreeAxisRot(
   double r11, double r12, double r21, double r31, double r32)
 {
-  return ignition::math::Vector3d d(
+  return math::Vector3 d(
     atan2( r31, r32 ),
     asin ( r21 ),
     atan2( r11, r12 ));
 }
 
 /////////////////////////////////////////////////
-ignition::math::Vector3d GimbalControllerPlugin::QtoZXY(
+math::Vector3 GimbalControllerPlugin::QtoZXY(
   const math::Quaternion &_q)
 {
   // taken from
   // http://bediyap.com/programming/convert-quaternion-to-euler-rotations/
   // case zxy:
-  ignition::math::Vector3d result = this->ThreeAxisRot(
+  math::Vector3 result = this->ThreeAxisRot(
     -2*(_q.X()*_q.Y() - _q.W()*_q.Z()),
     _q.W()*_q.W() - _q.X()*_q.X() + _q.Y()*_q.Y() - _q.Z()*_q.Z(),
     2*(_q.Y()*_q.Z() + _q.W()*_q.X()),
@@ -271,18 +271,18 @@ void GimbalControllerPlugin::OnUpdate()
 
     /// currentAngleYPRVariable is defined in roll-pitch-yaw-fixed-axis
     /// and gimbal is constructed using yaw-roll-pitch-variable-axis
-    ignition::math::Vector3d currentAngleYPRVariable(
+    math::Vector3 currentAngleYPRVariable(
       this->imuSensor->Orientation().Euler());
-    ignition::math::Vector3d currentAnglePRYVariable(
+    math::Vector3 currentAnglePRYVariable(
       this->QtoZXY(currentAngleYPRVariable));
 
     /// get joint limits (in sensor frame)
     /// TODO: move to Load() if limits do not change
-    ignition::math::Vector3d lowerLimitsPRY
+    math::Vector3 lowerLimitsPRY
       (pDir*this->pitchJoint->GetLowerLimit(0).Radian(),
        rDir*this->rollJoint->GetLowerLimit(0).Radian(),
        yDir*this->yawJoint->GetLowerLimit(0).Radian());
-    ignition::math::Vector3d upperLimitsPRY
+    math::Vector3 upperLimitsPRY
       (pDir*this->pitchJoint->GetUpperLimit(0).Radian(),
        rDir*this->rollJoint->GetUpperLimit(0).Radian(),
        yDir*this->yawJoint->GetUpperLimit(0).Radian());
@@ -351,7 +351,7 @@ void GimbalControllerPlugin::OnUpdate()
     double yawForce = this->yawPid.Update(yawError, dt);
     this->yawJoint->SetForce(0, yDir*yawForce);
 
-    // ignition::math::Vector3d angles = this->imuSensor->Orientation().Euler();
+    // math::Vector3 angles = this->imuSensor->Orientation().Euler();
     // gzerr << "ang[" << angles.x << ", " << angles.y << ", " << angles.z
     //       << "] cmd[ " << this->rollCommand
     //       << ", " << this->pitchCommand << ", " << this->yawCommand
