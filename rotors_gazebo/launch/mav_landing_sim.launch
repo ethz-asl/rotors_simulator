@@ -36,7 +36,7 @@
     </node>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-    <node name="height_pid" pkg="pid" type="controller">
+    <!-- <node name="height_pid" pkg="pid" type="controller">
       <param name="Kp" value="5.0" />
       <param name="Ki" value="0.0" />
       <param name="Kd" value="0.1" />
@@ -47,7 +47,7 @@
       <param name="max_loop_frequency" value="105.0" />
       <param name="min_loop_frequency" value="95.0" />
       <param name="setpoint_timeout" value="-1.0" />
-    </node>
+    </node> -->
 
 
   </group>
