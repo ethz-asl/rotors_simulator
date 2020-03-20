@@ -6,7 +6,7 @@
   <arg name="log_file" default="$(arg mav_name)"/>
   <arg name="debug" default="false"/>
   <arg name="gui" default="true"/>
-  <arg name="paused" default="true"/>
+  <arg name="paused" default="false"/>
   <!-- The following line causes gzmsg and gzerr messages to be printed to the console
       (even when Gazebo is started through roslaunch) -->
   <arg name="verbose" default="false"/>
@@ -36,18 +36,25 @@
     </node>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-    <!-- <node name="height_pid" pkg="pid" type="controller">
+    <node name="pid_wrapper_node" pkg="rotors_control" type="pid_wrapper_node" output="screen">
+      <param name="pid_rate" value="100" />
+      <remap from="pose_with_covariance" to="odometry_sensor1/pose_with_covariance" />
+    </node>
+    <node name="height_pid" pkg="pid" type="controller">
       <param name="Kp" value="5.0" />
-      <param name="Ki" value="0.0" />
-      <param name="Kd" value="0.1" />
-      <param name="upper_limit" value="10" />
-      <param name="lower_limit" value="-10" />
+      <param name="Ki" value="1.0" />
+      <param name="Kd" value="3.0" />
+      <param name="upper_limit" value="150" />
+      <param name="lower_limit" value="0" />
       <param name="windup_limit" value="10" />
       <param name="cutoff_frequency" value="20" />
       <param name="max_loop_frequency" value="105.0" />
       <param name="min_loop_frequency" value="95.0" />
       <param name="setpoint_timeout" value="-1.0" />
-    </node> -->
+      <param name="topic_from_controller" value="thrust_ref" />
+      <param name="topic_from_plant" value="height_state" />
+      <param name="setpoint_topic" value="command/height_ref" />
+    </node>
 
 
   </group>
