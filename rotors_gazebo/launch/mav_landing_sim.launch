@@ -42,7 +42,7 @@
     </node>
     <node name="height_pid" pkg="pid" type="controller">
       <param name="Kp" value="5.0" />
-      <param name="Ki" value="1.0" />
+      <param name="Ki" value="1.25" />
       <param name="Kd" value="3.0" />
       <param name="upper_limit" value="150" />
       <param name="lower_limit" value="0" />
@@ -55,7 +55,21 @@
       <param name="topic_from_plant" value="height_state" />
       <param name="setpoint_topic" value="command/height_ref" />
     </node>
-
-
+    <node name="yaw_pid" pkg="pid" type="controller">
+      <param name="Kp" value="3.5" />
+      <param name="Ki" value="0.0" />
+      <param name="Kd" value="0.0" />
+      <param name="upper_limit" value="10" />
+      <param name="lower_limit" value="-10" />
+      <param name="windup_limit" value="10" />
+      <param name="cutoff_frequency" value="20" />
+      <param name="max_loop_frequency" value="105.0" />
+      <param name="min_loop_frequency" value="95.0" />
+      <param name="setpoint_timeout" value="-1.0" />
+      <param name="angle_error" value="true" />
+      <param name="topic_from_controller" value="yaw_rate_ref" />
+      <param name="topic_from_plant" value="yaw_state" />
+      <param name="setpoint_topic" value="command/yaw_ref" />
+    </node>
   </group>
 </launch>
