@@ -39,6 +39,6 @@
     noise_stddev="0.007"
     enable_visual="true">
     <box size="0.05 0.05 0.02" />
-    <origin xyz="0.1 0.0 -0.03" rpy="0.0 0.0 0.0" />
+    <origin xyz="0.1 0.0 -0.03" rpy="0.0 1.57 0.0" />
   </xacro:camera_macro>
 </robot>
