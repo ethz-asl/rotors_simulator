@@ -41,9 +41,9 @@
       <remap from="pose_with_covariance" to="odometry_sensor1/pose_with_covariance" />
     </node>
     <node name="height_pid" pkg="pid" type="controller">
-      <param name="Kp" value="5.0" />
-      <param name="Ki" value="1.25" />
-      <param name="Kd" value="3.0" />
+      <param name="Kp" value="7.0" />
+      <param name="Ki" value="2.0" />
+      <param name="Kd" value="4.0" />
       <param name="upper_limit" value="150" />
       <param name="lower_limit" value="0" />
       <param name="windup_limit" value="10" />
@@ -56,9 +56,9 @@
       <param name="setpoint_topic" value="command/height_ref" />
     </node>
     <node name="yaw_pid" pkg="pid" type="controller">
-      <param name="Kp" value="3.5" />
+      <param name="Kp" value="4.0" />
       <param name="Ki" value="0.0" />
-      <param name="Kd" value="0.0" />
+      <param name="Kd" value="0.005" />
       <param name="upper_limit" value="10" />
       <param name="lower_limit" value="-10" />
       <param name="windup_limit" value="10" />
