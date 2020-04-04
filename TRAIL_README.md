@@ -1,7 +1,8 @@
 # TRAIL RotorS
 
 ## How to use for drone landing project
-1. Clone this repository and follow the instructions for compilation in `README.md`
+1. Clone this repository and follow the instructions for compilation in `README.md`. Make sure you have the `pid` package installed for ros
+`sudo apt install ros-kinetic-pid`
 2. Run the launch file. It will default to the Pelican model, PID gains are tuned for this.
 `roslaunch rotors_gazebo mav_landing_sim.launch`
 3. The simulation will automatically run. Check out the published topics with `rostopic echo`. We care about the following topics:
