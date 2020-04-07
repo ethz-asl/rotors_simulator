@@ -1,6 +1,6 @@
 <launch>
   <arg name="mav_name" default="pelican"/>
-  <arg name="world_name" default="landing_target"/>
+  <arg name="world_name" default="basic"/>
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
   <arg name="log_file" default="$(arg mav_name)"/>
@@ -21,6 +21,16 @@
     <arg name="verbose" value="$(arg verbose)"/>
   </include>
 
+  <group ns="target">
+    <include file="$(find rotors_gazebo)/launch/spawn_target.launch">
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg log_file)"/>
+    </include>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  </group>
+
   <group ns="$(arg mav_name)">
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
       <arg name="mav_name" value="$(arg mav_name)" />
@@ -29,14 +39,14 @@
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
       <arg name="log_file" value="$(arg log_file)"/>
     </include>
-    <node name="roll_pitch_yawrate_thrust_controller_node" pkg="rotors_control" type="roll_pitch_yawrate_thrust_controller_node" output="screen">
+    <node name="roll_pitch_yawrate_thrust_controller_node" pkg="rotors_control" type="roll_pitch_yawrate_thrust_controller_node">
       <rosparam command="load" file="$(find rotors_gazebo)/resource/roll_pitch_yawrate_thrust_controller_$(arg mav_name).yaml" />
       <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name).yaml" />
       <remap from="odometry" to="odometry_sensor1/odometry" />
     </node>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-    <node name="pid_wrapper_node" pkg="rotors_control" type="pid_wrapper_node" output="screen">
+    <node name="pid_wrapper_node" pkg="rotors_control" type="pid_wrapper_node">
       <param name="pid_rate" value="100" />
       <remap from="pose_with_covariance" to="odometry_sensor1/pose_with_covariance" />
     </node>
