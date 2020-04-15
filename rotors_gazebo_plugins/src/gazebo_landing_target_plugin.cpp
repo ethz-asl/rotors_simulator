@@ -1,174 +1,232 @@
-#include <functional>
-#include <thread>
+/*
+ * Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+ * Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+ * Copyright 2016 Geoffrey Hunter <gbmhunter@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
 
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/common/common.hh>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// MODULE HEADER INCLUDE
+#include "rotors_gazebo_plugins/gazebo_landing_target_plugin.h"
+
+// STANDARD LIB INCLUDES
+#include <ctime>
+
+#include "ConnectGazeboToRosTopic.pb.h"
+
 #include <ignition/math/Vector3.hh>
 #include <ignition/math/Quaternion.hh>
-
-#include <ros/ros.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/TwistStamped.h>
 
 namespace gazebo
 {
 
-struct GazeboLandingTargetPlugin : ModelPlugin
+GazeboLandingTargetPlugin::~GazeboLandingTargetPlugin()
 {
-    // Gazebo
-    physics::ModelPtr model_;
-    event::ConnectionPtr conn_;
-    sdf::ElementPtr sdf_;
-    double prev_sim_time_ = 0; // [seconds]
+    delete ros_node_handle_;
+}
 
-    // ROS
-    std::thread ros_th_;
-    ros::NodeHandle *ros_nh_;
-    ros::Subscriber pos_sub_;
-    ros::Subscriber vel_sub_;
-    ros::Publisher pose_pub_;
-    ros::Publisher twist_pub_;
-    size_t ros_seq_ = 0;
-
-    GazeboLandingTargetPlugin() {}
-    ~GazeboLandingTargetPlugin() { delete ros_nh_; }
-
-    void Load(physics::ModelPtr parent, sdf::ElementPtr sdf)
+void GazeboLandingTargetPlugin::Load(physics::ModelPtr _model,
+                                     sdf::ElementPtr _sdf)
+{
+    if (kPrintOnPluginLoad)
     {
-        // Gazebo things
-        model_ = parent;
-        sdf_ = sdf;
-        conn_ = event::Events::ConnectWorldUpdateBegin(
-            std::bind(&GazeboLandingTargetPlugin::on_update, this));
-        prev_sim_time_ = model_->GetWorld()->GetSimTime().Double();
-
-        // Start ROS thread
-        ros_th_ = std::thread(&GazeboLandingTargetPlugin::ros_thread, this);
-        sleep(1);
+        gzdbg << __FUNCTION__ << "() called." << std::endl;
     }
 
-    void ros_thread()
+    model_ = _model;
+    world_ = model_->GetWorld();
+    namespace_.clear();
+
+    getSdfParam<std::string>(_sdf, "robotNamespace", namespace_, namespace_,
+                             true);
+    getSdfParam<std::string>(_sdf, "linkName", link_name_, link_name_, true);
+
+    node_handle_ = gazebo::transport::NodePtr(new transport::Node());
+
+    // Initialise with default namespace (typically /gazebo/default/)
+    node_handle_->Init();
+
+    frame_id_ = link_name_;
+
+    link_ = model_->GetLink(link_name_);
+    if (link_ == NULL)
+        gzthrow("[gazebo_multirotor_base_plugin] Couldn't find specified link \""
+                << link_name_ << "\".");
+
+    // Listen to the update event. This event is broadcast every
+    // simulation iteration.
+    update_connection_ = event::Events::ConnectWorldUpdateBegin(
+        boost::bind(&GazeboLandingTargetPlugin::OnUpdate, this, _1));
+}
+
+// This gets called by the world update start event.
+void GazeboLandingTargetPlugin::OnUpdate(const common::UpdateInfo &_info)
+{
+    if (kPrintOnUpdates)
     {
-        // Initialize ros node
-        if (ros::isInitialized() == false)
-        {
-            ROS_FATAL("ROS is not initialized!");
-        }
-        ros_nh_ = new ros::NodeHandle();
-
-        // Register pos subscriber
-        {
-            std::string topic_name = "landing_target/set_position";
-            if (sdf_->HasElement("set_position_topic"))
-            {
-                topic_name = sdf_->Get<std::string>("set_position_topic");
-            }
-            pos_sub_ = ros_nh_->subscribe(topic_name,
-                                          1,
-                                          &GazeboLandingTargetPlugin::position_callback,
-                                          this);
-        }
-
-        // Register vel subscriber
-        {
-            std::string topic_name = "landing_target/set_velocity";
-            if (sdf_->HasElement("set_velocity_topic"))
-            {
-                topic_name = sdf_->Get<std::string>("set_velocity_topic");
-            }
-            vel_sub_ = ros_nh_->subscribe(topic_name,
-                                          1,
-                                          &GazeboLandingTargetPlugin::velocity_callback,
-                                          this);
-        }
-
-        // Register pose publisher
-        {
-            std::string topic_name = "landing_target/pose";
-            if (sdf_->HasElement("pose_topic"))
-            {
-                topic_name = sdf_->Get<std::string>("pose_topic");
-            }
-            pose_pub_ = ros_nh_->advertise<geometry_msgs::PoseStamped>(topic_name, 1);
-        }
-
-        // Register twist publisher
-        {
-            std::string topic_name = "landing_target/twist";
-            if (sdf_->HasElement("twist_topic"))
-            {
-                topic_name = sdf_->Get<std::string>("twist_topic");
-            }
-            twist_pub_ =
-                ros_nh_->advertise<geometry_msgs::TwistStamped>(topic_name, 1);
-        }
+        gzdbg << __FUNCTION__ << "() called." << std::endl;
     }
 
-    void on_update()
+    if (!pubs_and_subs_created_)
     {
-        publish_pose();
-        publish_twist();
-        ros_seq_++;
+        CreatePubsAndSubs();
+        pubs_and_subs_created_ = true;
     }
 
-    void position_callback(const geometry_msgs::Vector3::ConstPtr &msg)
+    // Get the current simulation time.
+    common::Time now = world_->GetSimTime();
+
+    odom_msg_.mutable_header()->mutable_stamp()->set_sec(now.sec);
+    odom_msg_.mutable_header()->mutable_stamp()->set_nsec(now.nsec);
+    odom_msg_.mutable_header()->set_frame_id("world");
+    odom_msg_.set_child_frame_id("target/base_link");
+
+    // Calculate odometry
+    const math::Pose T_WR = model_->GetWorldPose();
+    const math::Vector3 r_WR = T_WR.pos;
+    const math::Quaternion q_WR = T_WR.rot;
+    const math::Vector3 linear_velocity = model_->GetWorldLinearVel();
+    const math::Vector3 angular_velocity = model_->GetWorldAngularVel();
+    odom_msg_.mutable_pose()->mutable_pose()->mutable_position()->set_x(r_WR.x);
+    odom_msg_.mutable_pose()->mutable_pose()->mutable_position()->set_y(r_WR.y);
+    odom_msg_.mutable_pose()->mutable_pose()->mutable_position()->set_z(r_WR.z);
+    odom_msg_.mutable_pose()->mutable_pose()->mutable_orientation()->set_w(q_WR.w);
+    odom_msg_.mutable_pose()->mutable_pose()->mutable_orientation()->set_x(q_WR.x);
+    odom_msg_.mutable_pose()->mutable_pose()->mutable_orientation()->set_y(q_WR.y);
+    odom_msg_.mutable_pose()->mutable_pose()->mutable_orientation()->set_z(q_WR.z);
+    odom_msg_.mutable_pose()->mutable_covariance()->Clear();
+    odom_msg_.mutable_twist()->mutable_twist()->mutable_linear()->set_x(linear_velocity.x);
+    odom_msg_.mutable_twist()->mutable_twist()->mutable_linear()->set_y(linear_velocity.y);
+    odom_msg_.mutable_twist()->mutable_twist()->mutable_linear()->set_z(linear_velocity.z);
+    odom_msg_.mutable_twist()->mutable_twist()->mutable_angular()->set_x(angular_velocity.x);
+    odom_msg_.mutable_twist()->mutable_twist()->mutable_angular()->set_y(angular_velocity.y);
+    odom_msg_.mutable_twist()->mutable_twist()->mutable_angular()->set_z(angular_velocity.z);
+    odom_msg_.mutable_twist()->mutable_covariance()->Clear();
+    for (int i = 0; i < 36; i++)
     {
-        math::Pose T_WR = model_->GetWorldPose();
-        math::Vector3 pos{msg->x, msg->y, msg->z};
-        T_WR.pos = pos;
-        model_->SetWorldPose(T_WR);
+        odom_msg_.mutable_pose()->mutable_covariance()->Add(0.);
+        odom_msg_.mutable_twist()->mutable_covariance()->Add(0.);
     }
+    // Set joint state
+    joint_state_msg_.mutable_header()->mutable_stamp()->set_sec(now.sec);
+    joint_state_msg_.mutable_header()->mutable_stamp()->set_nsec(now.nsec);
+    joint_state_msg_.mutable_header()->set_frame_id(frame_id_);
 
-    void velocity_callback(const geometry_msgs::Vector3::ConstPtr &msg)
-    {
-        math::Vector3 vel{msg->x, msg->y, msg->z};
-        model_->SetLinearVel(vel);
-    }
+    // Broadcast TF
+    gazebo::msgs::Vector3d *p =
+        odom_msg_.mutable_pose()->mutable_pose()->mutable_position();
+    gazebo::msgs::Quaternion *q_W_L =
+        odom_msg_.mutable_pose()->mutable_pose()->mutable_orientation();
+    gz_geometry_msgs::TransformStampedWithFrameIds
+        transform_stamped_with_frame_ids_msg;
+    transform_stamped_with_frame_ids_msg.mutable_header()->CopyFrom(
+        odom_msg_.header());
+    transform_stamped_with_frame_ids_msg.mutable_transform()
+        ->mutable_translation()
+        ->set_x(p->x());
+    transform_stamped_with_frame_ids_msg.mutable_transform()
+        ->mutable_translation()
+        ->set_y(p->y());
+    transform_stamped_with_frame_ids_msg.mutable_transform()
+        ->mutable_translation()
+        ->set_z(p->z());
+    transform_stamped_with_frame_ids_msg.mutable_transform()
+        ->mutable_rotation()
+        ->CopyFrom(*q_W_L);
+    transform_stamped_with_frame_ids_msg.set_parent_frame_id("world");
+    transform_stamped_with_frame_ids_msg.set_child_frame_id("target/base_link");
 
-    void publish_pose()
-    {
-        const double time = model_->GetWorld()->GetSimTime().Double();
-        const math::Pose T_WR = model_->GetWorldPose();
-        const math::Vector3 r_WR = T_WR.pos;
-        const math::Quaternion q_WR = T_WR.rot;
+    joint_state_pub_->Publish(joint_state_msg_);
+    odom_pub_->Publish(odom_msg_);
+    broadcast_transform_pub_->Publish(transform_stamped_with_frame_ids_msg);
+}
 
-        geometry_msgs::PoseStamped msg;
-        msg.header.seq = ros_seq_;
-        msg.header.stamp = ros::Time(time);
-        msg.header.frame_id = "world";
-        msg.pose.position.x = r_WR.x;
-        msg.pose.position.y = r_WR.y;
-        msg.pose.position.z = r_WR.z;
-        msg.pose.orientation.w = q_WR.w;
-        msg.pose.orientation.x = q_WR.x;
-        msg.pose.orientation.y = q_WR.y;
-        msg.pose.orientation.z = q_WR.z;
+void GazeboLandingTargetPlugin::CreatePubsAndSubs()
+{
+    // Create temporary "ConnectGazeboToRosTopic" publisher and message
+    gazebo::transport::PublisherPtr connect_gazebo_to_ros_topic_pub =
+        node_handle_->Advertise<gz_std_msgs::ConnectGazeboToRosTopic>(
+            "~/" + kConnectGazeboToRosSubtopic, 1);
 
-        pose_pub_.publish(msg);
-    }
+    gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
 
-    void publish_twist()
-    {
-        const double time = model_->GetWorld()->GetSimTime().Double();
-        const math::Vector3 linear_velocity = model_->GetWorldLinearVel();
-        const math::Pose T_WR = model_->GetWorldPose();
-        const math::Vector3 angular_velocity = model_->GetWorldAngularVel();
+    // =========================================== //
+    // =========== ODOMETRY MSG SETUP ============ //
+    // =========================================== //
+    odom_pub_ = node_handle_->Advertise<gz_geometry_msgs::Odometry>(
+        "~/" + namespace_ + "/" + "odometry", 10);
 
-        geometry_msgs::TwistStamped msg;
-        msg.header.seq = ros_seq_;
-        msg.header.stamp = ros::Time(time);
-        msg.header.frame_id = "world";
-        msg.twist.linear.x = linear_velocity.x;
-        msg.twist.linear.y = linear_velocity.y;
-        msg.twist.linear.z = linear_velocity.z;
-        msg.twist.angular.x = angular_velocity.x;
-        msg.twist.angular.y = angular_velocity.y;
-        msg.twist.angular.z = angular_velocity.z;
+    // connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
+    connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + model_->GetName() +
+                                                     "/" + "odometry");
+    connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" +
+                                                  "odometry");
+    connect_gazebo_to_ros_topic_msg.set_msgtype(
+        gz_std_msgs::ConnectGazeboToRosTopic::ODOMETRY);
+    connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg,
+                                             true);
 
-        twist_pub_.publish(msg);
-    }
-};
+    // ============================================ //
+    // ========== JOINT STATE MSG SETUP =========== //
+    // ============================================ //
+    joint_state_pub_ = node_handle_->Advertise<gz_sensor_msgs::JointState>(
+        "~/" + namespace_ + "/" + joint_state_pub_topic_, 1);
 
-GZ_REGISTER_MODEL_PLUGIN(GazeboLandingTargetPlugin)
+    // connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
+    connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
+                                                     joint_state_pub_topic_);
+    connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" +
+                                                  joint_state_pub_topic_);
+    connect_gazebo_to_ros_topic_msg.set_msgtype(
+        gz_std_msgs::ConnectGazeboToRosTopic::JOINT_STATE);
+    connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg,
+                                             true);
+
+    // ========================================== //
+    // ===== BROADCAST TRANSFORM MSG SETUP =====  //
+    // ========================================== //
+    broadcast_transform_pub_ =
+        node_handle_->Advertise<gz_geometry_msgs::TransformStampedWithFrameIds>(
+            "~/" + kBroadcastTransformSubtopic, 1);
+
+    ros_node_handle_ = new ros::NodeHandle();
+    std::string twist_topic_name = namespace_ + "/" + "set_twist";
+    twist_sub_ = ros_node_handle_->subscribe(twist_topic_name, 1, &GazeboLandingTargetPlugin::TwistCallback, this);
+    std::string pose_topic_name = namespace_ + "/" + "set_pose";
+    pose_sub_ = ros_node_handle_->subscribe(pose_topic_name, 1, &GazeboLandingTargetPlugin::PoseCallback, this);
+}
+
+void GazeboLandingTargetPlugin::PoseCallback(const geometry_msgs::Pose::ConstPtr &msg)
+{
+    math::Pose T_WR = model_->GetWorldPose();
+    math::Vector3 pos{msg->position.x, msg->position.y, msg->position.z};
+    math::Quaternion rot{msg->orientation.w, msg->orientation.x, msg->orientation.y, msg->orientation.z};
+    T_WR.pos = pos;
+    T_WR.rot = rot;
+    model_->SetWorldPose(T_WR);
+}
+
+void GazeboLandingTargetPlugin::TwistCallback(const geometry_msgs::Twist::ConstPtr &msg)
+{
+    math::Vector3 lin{msg->linear.x, msg->linear.y, msg->linear.z};
+    math::Vector3 ang{msg->angular.x, msg->angular.y, msg->angular.z};
+    model_->SetLinearVel(lin);
+    model_->SetAngularVel(ang);
+}
+
+GZ_REGISTER_MODEL_PLUGIN(GazeboLandingTargetPlugin);
+
 } // namespace gazebo

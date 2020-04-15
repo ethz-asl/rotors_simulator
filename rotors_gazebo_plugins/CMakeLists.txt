@@ -114,6 +114,7 @@ if (NOT NO_ROS)
     roscpp
     rotors_comm
     rotors_control
+    sensor_msgs
     std_srvs
     tf
   )
@@ -514,12 +515,12 @@ endif()
 list(APPEND targets_to_install rotors_gazebo_wind_plugin)
 
 #=================================== LANDING TARGET PLUGIN ======================================//
-add_library(rotors_gazebo_landing_target_plugin SHARED src/gazebo_landing_target_plugin.cpp)
-target_link_libraries(rotors_gazebo_landing_target_plugin ${target_linking_LIBRARIES} )
 if (NOT NO_ROS)
+  add_library(rotors_gazebo_landing_target_plugin SHARED src/gazebo_landing_target_plugin.cpp)
+  target_link_libraries(rotors_gazebo_landing_target_plugin ${target_linking_LIBRARIES} )
   add_dependencies(rotors_gazebo_landing_target_plugin ${catkin_EXPORTED_TARGETS})
+  list(APPEND targets_to_install rotors_gazebo_landing_target_plugin)
 endif()
-list(APPEND targets_to_install rotors_gazebo_landing_target_plugin)
 
 # =============================================================================================== #
 # ======================================= EXTERNAL LIBRARIES ==================================== #
