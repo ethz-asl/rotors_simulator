@@ -24,6 +24,7 @@
 
 // STANDARD LIB INCLUDES
 #include <ctime>
+#include <cmath>
 
 #include "ConnectGazeboToRosTopic.pb.h"
 
@@ -221,10 +222,19 @@ void GazeboLandingTargetPlugin::PoseCallback(const geometry_msgs::Pose::ConstPtr
 
 void GazeboLandingTargetPlugin::TwistCallback(const geometry_msgs::Twist::ConstPtr &msg)
 {
-    math::Vector3 lin{msg->linear.x, msg->linear.y, msg->linear.z};
-    math::Vector3 ang{msg->angular.x, msg->angular.y, msg->angular.z};
-    model_->SetLinearVel(lin);
-    model_->SetAngularVel(ang);
+    math::Pose T_WR = model_->GetWorldPose();
+    math::Quaternion rot = T_WR.rot;
+    math::Vector3 ang = rot.GetAsEuler();
+
+    double vel_x = msg->linear.x * cos(ang.z);
+    double vel_y = msg->linear.x * sin(ang.z);
+    double vel_th = msg->angular.z;
+
+    math::Vector3 lin_cmd{vel_x, vel_y, 0.};
+    math::Vector3 ang_cmd{0., 0., vel_th};
+
+    model_->SetLinearVel(lin_cmd);
+    model_->SetAngularVel(ang_cmd);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboLandingTargetPlugin);
