@@ -12,6 +12,7 @@
     <!-- <arg name="debug" value="true"/> -->
     <arg name="paused" value="true"/>
     <!-- <arg name="gui" value="false"/> -->
+    <!-- <arg name="verbose" value="true"/> -->
   </include>
 
   <group ns="$(arg mav_name)">

@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<robot name="$(arg mav_name)" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
+
+  <!-- Note that whenever possible, values from Realsense D435 were used.
+       See Intel Document 337029-004: Intel RealSense TM D400 Series Product Family Datasheet.
+       https://www.intel.com/content/dam/support/us/en/documents/emerging-technologies/intel-realsense-technology/Intel-RealSense-D400-Series-Datasheet.pdf
+
+       Here, RGBD camera baselink frame corresponds to the left IR camera center, which is also the camera
+       the sensor is calibrated to in real life and the point cloud is registered to.
+  -->
+
+  <link name="rgbd_camera/base_link">
+    <collision>
+      <origin xyz="0 -0.0175 0" rpy="${pi/2} 0 ${pi/2}" />
+      <geometry>
+              <mesh filename="package://rotors_description/meshes/d435_simple.dae" scale="1 1 1" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 -0.0175 0" rpy="${pi/2} 0 ${pi/2}" />
+      <geometry>
+              <mesh filename="package://rotors_description/meshes/d435_simple.dae" scale="1 1 1" />
+      </geometry>
+      <material name="black" />
+    </visual>
+  </link>
+
+ 
+<!-- Define Macro to add a depth camera using noisy depth plugin  -->
+  <xacro:macro name="rgbd_sensor_depth_macro"
+    params="namespace parent_link camera_suffix frame_rate width height fov max_range min_range baseline *origin">
+    <link name="${namespace}/camera_${camera_suffix}_link">
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <cylinder length="0.01" radius="0.007" />
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
+    <joint name="${namespace}/camera_${camera_suffix}_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/camera_${camera_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+
+    <link name="${namespace}/camera_${camera_suffix}_optical_center_link" />
+    <joint name="${namespace}/camera_${camera_suffix}_optical_center_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+      <parent link="${namespace}/camera_${camera_suffix}_link" />
+      <child link="${namespace}/camera_${camera_suffix}_optical_center_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+
+    <!-- Call rgb sensor macro-->
+    <!-- RGB sensor has "unlimited ranges"-->
+    <xacro:camera_macro
+            namespace="${namespace}"
+            parent_link="rgbd_camera/base_link"
+            camera_suffix="rgb"
+            frame_rate="${frame_rate}"
+            horizontal_fov="${fov}"
+            image_width="${width}"
+            image_height="${height}"
+            image_format="R8G8B8"
+            min_distance="0.01"
+            max_distance="500"
+            noise_mean="0.0"
+            noise_stddev="0.007"
+            enable_visual="false">
+      <box size="0.01 0.01 0.1" />
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+    </xacro:camera_macro>
+
+    <gazebo reference="${namespace}/camera_${camera_suffix}_link">
+      <sensor type="depth" name="${namespace}_camera_{camera_suffix}">
+        <always_on>true</always_on>
+        <update_rate>${frame_rate}</update_rate>
+        <camera>
+          <horizontal_fov>${fov}</horizontal_fov>
+          <image>
+            <format>L8</format>
+            <width>${width}</width>
+            <height>${height}</height>
+          </image>
+          <clip>
+            <near>${min_range}</near>
+            <far>${max_range}</far>
+          </clip>
+        </camera>
+        <plugin name="${namespace}_camera_{camera_suffix}" filename="librotors_gazebo_noisydepth_plugin.so">
+          <robotNamespace>${namespace}</robotNamespace>
+          <alwaysOn>true</alwaysOn>
+          <baseline>${baseline}</baseline>
+          <updateRate>${frame_rate}</updateRate>
+          <cameraName>camera_${camera_suffix}</cameraName>
+          <horizontal_fov>${fov}</horizontal_fov>
+ 	  <depthNoiseModelName>D435</depthNoiseModelName>
+ 	  <depthNoiseMinDist>0.02</depthNoiseMinDist>
+ 	  <depthNoiseMaxDist>50.0</depthNoiseMaxDist>
+	  <D435NoiseSubpixelErr>0.25</D435NoiseSubpixelErr> 
+	  <D435MaxStdev>3</D435MaxStdev> 
+          <imageTopicName>camera/image_raw</imageTopicName>
+          <cameraInfoTopicName>camera/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>depth/image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>depth/points</pointCloudTopicName>
+          <frameName>camera_${camera_suffix}_optical_center_link</frameName>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Call depth sensor macro
+    Realsense values -
+      91.2 Deg Horizontal FOV
+      848x480 Optimal depth resolution
+        w 195 mm minimium-z depth
+      5 cm baseline.
+  -->
+  <xacro:rgbd_sensor_depth_macro
+    namespace="${namespace}/rgbd" parent_link="rgbd_camera/base_link"
+    camera_suffix="depth"
+    frame_rate="30.0"
+    fov = "1.59174"
+    baseline = "0.05"
+    width = "848"
+    height = "480"
+    max_range="50.0"
+    min_range="0.195">
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+  </xacro:rgbd_sensor_depth_macro>
+
+</robot>

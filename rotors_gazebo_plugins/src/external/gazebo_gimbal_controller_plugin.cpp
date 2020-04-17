@@ -123,13 +123,10 @@ void GimbalControllerPlugin::Load(
     // Add names to map
     imuSensorName = sdf->Get<std::string>("imu");
   }
-#if GAZEBO_MAJOR_VERSION >= 7
+
   this->imuSensor = std::static_pointer_cast<sensors::ImuSensor>(
     sensors::SensorManager::Instance()->GetSensor(imuSensorName));
-#elif GAZEBO_MAJOR_VERSION >= 6
-  this->imuSensor = boost::static_pointer_cast<sensors::ImuSensor>(
-    sensors::SensorManager::Instance()->GetSensor(imuSensorName));
-#endif
+
   if (!this->imuSensor)
   {
     gzerr << "GimbalControllerPlugin::Load ERROR! Can't get imu sensor '"
@@ -168,38 +165,22 @@ void GimbalControllerPlugin::Init()
   // publish pitch status via gz transport
   pitchTopic = std::string("~/") +  this->model->GetName()
     + "/gimbal_pitch_status";
-#if GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4
-  /// only gazebo 7.4 and above support Any
   this->pitchPub = node->Advertise<gazebo::msgs::Any>(pitchTopic);
-#else
-  this->pitchPub = node->Advertise<gazebo::msgs::GzString>(pitchTopic);
-#endif
 
   // publish roll status via gz transport
   rollTopic = std::string("~/") +  this->model->GetName()
     + "/gimbal_roll_status";
-#if GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4
-  /// only gazebo 7.4 and above support Any
   this->rollPub = node->Advertise<gazebo::msgs::Any>(rollTopic);
-#else
-  this->rollPub = node->Advertise<gazebo::msgs::GzString>(rollTopic);
-#endif
+
 
   // publish yaw status via gz transport
   yawTopic = std::string("~/") +  this->model->GetName()
     + "/gimbal_yaw_status";
-#if GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4
-  /// only gazebo 7.4 and above support Any
   this->yawPub = node->Advertise<gazebo::msgs::Any>(yawTopic);
-#else
-  this->yawPub = node->Advertise<gazebo::msgs::GzString>(yawTopic);
-#endif
 
   gzmsg << "GimbalControllerPlugin::Init" << std::endl;
 }
 
-#if GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4
-/// only gazebo 7.4 and above support Any
 /////////////////////////////////////////////////
 void GimbalControllerPlugin::OnPitchStringMsg(ConstAnyPtr &_msg)
 {
@@ -220,47 +201,25 @@ void GimbalControllerPlugin::OnYawStringMsg(ConstAnyPtr &_msg)
 //  gzdbg << "yaw command received " << _msg->double_value() << std::endl;
   this->yawCommand = _msg->double_value();
 }
-#else
-/////////////////////////////////////////////////
-void GimbalControllerPlugin::OnPitchStringMsg(ConstGzStringPtr &_msg)
-{
-//  gzdbg << "pitch command received " << _msg->data() << std::endl;
-  this->pitchCommand = atof(_msg->data().c_str());
-}
 
 /////////////////////////////////////////////////
-void GimbalControllerPlugin::OnRollStringMsg(ConstGzStringPtr &_msg)
-{
-//  gzdbg << "roll command received " << _msg->data() << std::endl;
-  this->rollCommand = atof(_msg->data().c_str());
-}
-
-/////////////////////////////////////////////////
-void GimbalControllerPlugin::OnYawStringMsg(ConstGzStringPtr &_msg)
-{
-//  gzdbg << "yaw command received " << _msg->data() << std::endl;
-  this->yawCommand = atof(_msg->data().c_str());
-}
-#endif
-
-/////////////////////////////////////////////////
-ignition::math::Vector3d GimbalControllerPlugin::ThreeAxisRot(
+ignition::ignition::math::Vector3d GimbalControllerPlugin::ThreeAxisRot(
   double r11, double r12, double r21, double r31, double r32)
 {
-  return ignition::math::Vector3d(
+  return ignition::ignition::math::Vector3d d(
     atan2( r31, r32 ),
     asin ( r21 ),
     atan2( r11, r12 ));
 }
 
 /////////////////////////////////////////////////
-ignition::math::Vector3d GimbalControllerPlugin::QtoZXY(
+ignition::ignition::math::Vector3d GimbalControllerPlugin::QtoZXY(
   const ignition::math::Quaterniond &_q)
 {
   // taken from
   // http://bediyap.com/programming/convert-quaternion-to-euler-rotations/
   // case zxy:
-  ignition::math::Vector3d result = this->ThreeAxisRot(
+  ignition::ignition::math::Vector3d result = this->ThreeAxisRot(
     -2*(_q.X()*_q.Y() - _q.W()*_q.Z()),
     _q.W()*_q.W() - _q.X()*_q.X() + _q.Y()*_q.Y() - _q.Z()*_q.Z(),
     2*(_q.Y()*_q.Z() + _q.W()*_q.X()),
@@ -312,18 +271,18 @@ void GimbalControllerPlugin::OnUpdate()
 
     /// currentAngleYPRVariable is defined in roll-pitch-yaw-fixed-axis
     /// and gimbal is constructed using yaw-roll-pitch-variable-axis
-    ignition::math::Vector3d currentAngleYPRVariable(
+    ignition::ignition::math::Vector3d currentAngleYPRVariable(
       this->imuSensor->Orientation().Euler());
-    ignition::math::Vector3d currentAnglePRYVariable(
+    ignition::ignition::math::Vector3d currentAnglePRYVariable(
       this->QtoZXY(currentAngleYPRVariable));
 
     /// get joint limits (in sensor frame)
     /// TODO: move to Load() if limits do not change
-    ignition::math::Vector3d lowerLimitsPRY
+    ignition::ignition::math::Vector3d lowerLimitsPRY
       (pDir*this->pitchJoint->GetLowerLimit(0).Radian(),
        rDir*this->rollJoint->GetLowerLimit(0).Radian(),
        yDir*this->yawJoint->GetLowerLimit(0).Radian());
-    ignition::math::Vector3d upperLimitsPRY
+    ignition::ignition::math::Vector3d upperLimitsPRY
       (pDir*this->pitchJoint->GetUpperLimit(0).Radian(),
        rDir*this->rollJoint->GetUpperLimit(0).Radian(),
        yDir*this->yawJoint->GetUpperLimit(0).Radian());
@@ -392,7 +351,7 @@ void GimbalControllerPlugin::OnUpdate()
     double yawForce = this->yawPid.Update(yawError, dt);
     this->yawJoint->SetForce(0, yDir*yawForce);
 
-    // ignition::math::Vector3d angles = this->imuSensor->Orientation().Euler();
+    // ignition::ignition::math::Vector3d angles = this->imuSensor->Orientation().Euler();
     // gzerr << "ang[" << angles.X() << ", " << angles.Y() << ", " << angles.Z()
     //       << "] cmd[ " << this->rollCommand
     //       << ", " << this->pitchCommand << ", " << this->yawCommand
@@ -409,7 +368,7 @@ void GimbalControllerPlugin::OnUpdate()
   if (++i>100)
   {
     i = 0;
-#if GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4
+
     gazebo::msgs::Any m;
     m.set_type(gazebo::msgs::Any_ValueType_DOUBLE);
 
@@ -421,22 +380,6 @@ void GimbalControllerPlugin::OnUpdate()
 
     m.set_double_value(this->yawJoint->GetAngle(0).Radian());
     this->yawPub->Publish(m);
-#else
-    std::stringstream ss;
-    gazebo::msgs::GzString m;
-
-    ss << this->pitchJoint->GetAngle(0).Radian();
-    m.set_data(ss.str());
-    this->pitchPub->Publish(m);
-
-    ss << this->rollJoint->GetAngle(0).Radian();
-    m.set_data(ss.str());
-    this->rollPub->Publish(m);
-
-    ss << this->yawJoint->GetAngle(0).Radian();
-    m.set_data(ss.str());
-    this->yawPub->Publish(m);
-#endif
   }
 }
 

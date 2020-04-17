@@ -28,7 +28,7 @@
 namespace gazebo {
 
 GazeboForceSensorPlugin::~GazeboForceSensorPlugin() {
-  event::Events::DisconnectWorldUpdateBegin(updateConnection_);
+  updateConnection_.reset();
   if (node_handle_) {
     node_handle_->shutdown();
     delete node_handle_;
@@ -43,11 +43,11 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
   model_ = _model;
   world_ = model_->GetWorld();
 
-  sdf::Vector3 noise_normal_linear_force;
-  sdf::Vector3 noise_normal_torque;
-  sdf::Vector3 noise_uniform_linear_force;
-  sdf::Vector3 noise_uniform_torque;
-  const sdf::Vector3 zeros3(0.0, 0.0, 0.0);
+  ignition::math::Vector3d noise_normal_linear_force;
+  ignition::math::Vector3d noise_normal_torque;
+  ignition::math::Vector3d noise_uniform_linear_force;
+  ignition::math::Vector3d noise_uniform_torque;
+  const ignition::math::Vector3d zeros3(0.0, 0.0, 0.0);
 
   wrench_queue_.clear();
 
@@ -82,12 +82,13 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
   getSdfParam<std::string>(_sdf, "forceSensorTopic", force_sensor_pub_topic_, force_sensor_pub_topic_);
   getSdfParam<std::string>(_sdf, "forceSensorTruthTopic", force_sensor_truth_pub_topic_, force_sensor_truth_pub_topic_);
   getSdfParam<std::string>(_sdf, "wrenchVectorTopic", wrench_vector_pub_topic_, wrench_vector_pub_topic_);
+  getSdfParam<std::string>(_sdf, "publishFrameId", publish_frame_id_, publish_frame_id_);
   getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
   getSdfParam<std::string>(_sdf, "referenceFrameId", reference_frame_id_, reference_frame_id_);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalLinearForce", noise_normal_linear_force, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseNormalTorque", noise_normal_torque, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformLinearForce", noise_uniform_linear_force, zeros3);
-  getSdfParam<sdf::Vector3>(_sdf, "noiseUniformTorque", noise_uniform_torque, zeros3);
+  getSdfParam<ignition::math::Vector3d>(_sdf, "noiseNormalLinearForce", noise_normal_linear_force, zeros3);
+  getSdfParam<ignition::math::Vector3d>(_sdf, "noiseNormalTorque", noise_normal_torque, zeros3);
+  getSdfParam<ignition::math::Vector3d>(_sdf, "noiseUniformLinearForce", noise_uniform_linear_force, zeros3);
+  getSdfParam<ignition::math::Vector3d>(_sdf, "noiseUniformTorque", noise_uniform_torque, zeros3);
   getSdfParam<int>(_sdf, "measurementDelay", measurement_delay_, measurement_delay_);
   getSdfParam<int>(_sdf, "measurementDivisor", measurement_divisor_, measurement_divisor_);
   getSdfParam<double>(_sdf, "unknownDelay", unknown_delay_, unknown_delay_);
@@ -107,13 +108,13 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
   }
 
   if (lin_force_meas_enabled_) {
-    linear_force_n_[0] = NormalDistribution(0, noise_normal_linear_force.x);
-    linear_force_n_[1] = NormalDistribution(0, noise_normal_linear_force.y);
-    linear_force_n_[2] = NormalDistribution(0, noise_normal_linear_force.z);
+    linear_force_n_[0] = NormalDistribution(0, noise_normal_linear_force[0]);
+    linear_force_n_[1] = NormalDistribution(0, noise_normal_linear_force[1]);
+    linear_force_n_[2] = NormalDistribution(0, noise_normal_linear_force[2]);
 
-    linear_force_u_[0] = UniformDistribution(-noise_uniform_linear_force.x, noise_uniform_linear_force.x);
-    linear_force_u_[1] = UniformDistribution(-noise_uniform_linear_force.y, noise_uniform_linear_force.y);
-    linear_force_u_[2] = UniformDistribution(-noise_uniform_linear_force.z, noise_uniform_linear_force.z);
+    linear_force_u_[0] = UniformDistribution(-noise_uniform_linear_force[0], noise_uniform_linear_force[0]);
+    linear_force_u_[1] = UniformDistribution(-noise_uniform_linear_force[1], noise_uniform_linear_force[1]);
+    linear_force_u_[2] = UniformDistribution(-noise_uniform_linear_force[2], noise_uniform_linear_force[2]);
 
     // Linear forces publisher
     lin_force_sensor_pub_ = node_handle_->advertise<geometry_msgs::Vector3Stamped>(force_sensor_pub_topic_+"/linear", 10);
@@ -121,13 +122,13 @@ void GazeboForceSensorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sd
   }
 
   if (torque_meas_enabled_) {
-    torque_n_[0] = NormalDistribution(0, noise_normal_torque.x);
-    torque_n_[1] = NormalDistribution(0, noise_normal_torque.y);
-    torque_n_[2] = NormalDistribution(0, noise_normal_torque.z);
+    torque_n_[0] = NormalDistribution(0, noise_normal_torque[0]);
+    torque_n_[1] = NormalDistribution(0, noise_normal_torque[1]);
+    torque_n_[2] = NormalDistribution(0, noise_normal_torque[2]);
 
-    torque_u_[0] = UniformDistribution(-noise_uniform_torque.x, noise_uniform_torque.x);
-    torque_u_[1] = UniformDistribution(-noise_uniform_torque.y, noise_uniform_torque.y);
-    torque_u_[2] = UniformDistribution(-noise_uniform_torque.z, noise_uniform_torque.z);
+    torque_u_[0] = UniformDistribution(-noise_uniform_torque[0], noise_uniform_torque[0]);
+    torque_u_[1] = UniformDistribution(-noise_uniform_torque[1], noise_uniform_torque[1]);
+    torque_u_[2] = UniformDistribution(-noise_uniform_torque[2], noise_uniform_torque[2]);
 
     // Torques publisher
     ang_force_sensor_pub_ = node_handle_->advertise<geometry_msgs::Vector3Stamped>(force_sensor_pub_topic_+"/angular", 10);
@@ -150,25 +151,24 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
   /* APPLICATION POINT COMPUTATION */
   // C denotes child frame, P parent frame, R reference frame and W world frame.
   // Further C_pose_W_P denotes pose of P wrt. W expressed in C.
-  math::Pose W_pose_W_C = link_->GetWorldCoGPose();
-//  math::Pose W_pose_W_C = joint_->GetWorldPose();
-  math::Pose gazebo_pose = W_pose_W_C;
-  math::Pose gazebo_parent_pose = math::Pose::Zero;
-  math::Pose gazebo_reference_pose = math::Pose::Zero;
-  math::Pose W_pose_W_P = math::Pose::Zero;
-  math::Pose W_pose_W_R = math::Pose::Zero;
+  ignition::math::Pose3d W_pose_W_C = link_->WorldCoGPose();
+//  math::Pos()e W_pose_W_C = joint_->WorldPose();
+  ignition::math::Pose3d gazebo_pose = W_pose_W_C;
+  ignition::math::Pose3d gazebo_parent_pose = ignition::math::Pose3d::Zero;
+  ignition::math::Pose3d gazebo_reference_pose = ignition::math::Pose3d::Zero;
+  ignition::math::Pose3d W_pose_W_P = ignition::math::Pose3d::Zero;
+  ignition::math::Pose3d W_pose_W_R = ignition::math::Pose3d::Zero;
 
   if (parent_frame_id_ != kDefaultParentFrameId) {
-//    W_pose_W_P = parent_link_->GetWorldCoGPose();
-    W_pose_W_P = model_->GetJoint(parent_frame_id_)->GetWorldPose();
-    math::Pose C_pose_P_C = W_pose_W_C - W_pose_W_P;
+    W_pose_W_P = model_->GetJoint(parent_frame_id_)->WorldPose();
+    ignition::math::Pose3d C_pose_P_C = W_pose_W_C - W_pose_W_P;
     gazebo_pose = C_pose_P_C;
     gazebo_parent_pose = W_pose_W_P;
   }
 
   if (reference_frame_id_ != kDefaultReferenceFrameId && reference_frame_id_ != parent_frame_id_) {
-    W_pose_W_R = reference_link_->GetWorldCoGPose();
-    math::Pose P_pose_R_P = W_pose_W_P - W_pose_W_R;
+    W_pose_W_R = reference_link_->WorldCoGPose();
+    ignition::math::Pose3d P_pose_R_P = W_pose_W_P - W_pose_W_R;
     gazebo_parent_pose = P_pose_R_P;
     gazebo_reference_pose = W_pose_W_R;
   }
@@ -178,8 +178,8 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // sensor joint by child link (i.e. force sensor itself). The values of the two 3D vectors are the coordinates in
   // parent frame coordinates system of the tip of an arrow starting at the origin of parent frame.
 
-  math::Vector3 torque;
-  math::Vector3 force;
+  ignition::math::Vector3d torque;
+  ignition::math::Vector3d force;
   bool publish_forces = true;
 
   // Get internal forces and torques at force sensor joint.
@@ -207,17 +207,18 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   if (gazebo_sequence_ % measurement_divisor_ == 0) {
     // Copy data into wrench message.
-    wrench_msg_.header.frame_id = parent_frame_id_;
+    wrench_msg_.header.frame_id = publish_frame_id_;
     wrench_msg_.header.seq = wrench_sequence_++;
-    wrench_msg_.header.stamp.sec = (world_->GetSimTime()).sec + ros::Duration(unknown_delay_).sec;
-    wrench_msg_.header.stamp.nsec = (world_->GetSimTime()).nsec + ros::Duration(unknown_delay_).nsec;
+    wrench_msg_.header.stamp.sec = (world_->SimTime()).sec + ros::Duration(unknown_delay_).sec;
+    wrench_msg_.header.stamp.nsec = (world_->SimTime()).nsec + ros::Duration(unknown_delay_).nsec;
 
-    wrench_msg_.wrench.force.x  = force.x;
-    wrench_msg_.wrench.force.y  = force.y;
-    wrench_msg_.wrench.force.z  = force.z;
-    wrench_msg_.wrench.torque.x = torque.x;
-    wrench_msg_.wrench.torque.y = torque.y;
-    wrench_msg_.wrench.torque.z = torque.z;
+    // HUUUUUUGE HACK. 
+    wrench_msg_.wrench.force.x  = -force[2];
+    wrench_msg_.wrench.force.y  = force[1];
+    wrench_msg_.wrench.force.z  = force[0];
+    wrench_msg_.wrench.torque.x = -torque[2];
+    wrench_msg_.wrench.torque.y = torque[1];
+    wrench_msg_.wrench.torque.z = torque[0];
 
     if (publish_forces)
       wrench_queue_.push_back(std::make_pair(gazebo_sequence_ + measurement_delay_, wrench_msg_));
@@ -308,22 +309,22 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
     }
 
     // Transformation between sensor link and parent link.
-    tf::Quaternion tf_q_P_C(gazebo_pose.rot.x, gazebo_pose.rot.y, gazebo_pose.rot.z, gazebo_pose.rot.w);
-    tf::Vector3 tf_p_P_C(gazebo_pose.pos.x, gazebo_pose.pos.y, gazebo_pose.pos.z);
+    tf::Quaternion tf_q_P_C(gazebo_pose.Rot().X(), gazebo_pose.Rot().Y(), gazebo_pose.Rot().Z(), gazebo_pose.Rot().W());
+    tf::Vector3 tf_p_P_C(gazebo_pose.Pos().X(), gazebo_pose.Pos().Y(), gazebo_pose.Pos().Z());
     tf_ = tf::Transform(tf_q_P_C, tf_p_P_C);
     transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, wrench_queue_.front().second.header.stamp, parent_frame_id_, link_name_));
     if (parent_frame_id_ != kDefaultParentFrameId && reference_frame_id_ != parent_frame_id_) {
       // Transformation between parent link and reference frame.
-      tf::Quaternion tf_q_R_P(gazebo_parent_pose.rot.x, gazebo_parent_pose.rot.y, gazebo_parent_pose.rot.z, gazebo_parent_pose.rot.w);
-      tf::Vector3 tf_p_R_P(gazebo_parent_pose.pos.x, gazebo_parent_pose.pos.y, gazebo_parent_pose.pos.z);
+      tf::Quaternion tf_q_R_P(gazebo_parent_pose.Rot().X(), gazebo_parent_pose.Rot().Y(), gazebo_parent_pose.Rot().Z(), gazebo_parent_pose.Rot().W());
+      tf::Vector3 tf_p_R_P(gazebo_parent_pose.Pos().X(), gazebo_parent_pose.Pos().Y(), gazebo_parent_pose.Pos().Z());
       tf_.setOrigin(tf_p_R_P);
       tf_.setRotation(tf_q_R_P);
       transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, wrench_queue_.front().second.header.stamp, reference_frame_id_, parent_frame_id_));
     }
     if (reference_frame_id_ != kDefaultReferenceFrameId) {
       // Transformation between reference frame and world (default).
-      tf::Quaternion tf_q_W_R(gazebo_reference_pose.rot.x, gazebo_reference_pose.rot.y, gazebo_reference_pose.rot.z, gazebo_reference_pose.rot.w);
-      tf::Vector3 tf_p_W_R(gazebo_reference_pose.pos.x, gazebo_reference_pose.pos.y, gazebo_reference_pose.pos.z);
+      tf::Quaternion tf_q_W_R(gazebo_reference_pose.Rot().X(), gazebo_reference_pose.Rot().Y(), gazebo_reference_pose.Rot().Z(), gazebo_reference_pose.Rot().W());
+      tf::Vector3 tf_p_W_R(gazebo_reference_pose.Pos().X(), gazebo_reference_pose.Pos().Y(), gazebo_reference_pose.Pos().Z());
       tf_.setOrigin(tf_p_W_R);
       tf_.setRotation(tf_q_W_R);
       transform_broadcaster_.sendTransform(tf::StampedTransform(tf_, wrench_queue_.front().second.header.stamp, "world", reference_frame_id_));
@@ -338,7 +339,7 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
 void GazeboForceSensorPlugin::PrintJointWrench(physics::JointWrench jw_){
   ROS_INFO("[gazebo_force_sensor_plugin]\nJoint Wrench Forces:\n  Fx = %f  Fy = %f  Fz = %f\nJoint Wrench Torques:\n  Tx = %f  Ty = %f  Tz = %f\n",
-           jw_.body1Force.x, jw_.body1Force.y, jw_.body1Force.z, jw_.body1Torque.x, jw_.body1Torque.y, jw_.body1Torque.z);
+           jw_.body1Force[0], jw_.body1Force[1], jw_.body1Force[2], jw_.body1Torque[0], jw_.body1Torque[1], jw_.body1Torque[2]);
 }
 
 

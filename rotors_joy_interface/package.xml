@@ -1,6 +1,6 @@
 <package>
   <name>rotors_joy_interface</name>
-  <version>2.1.1</version>
+  <version>2.2.3</version>
   <description>The rotors_joy_interface package to control MAVs with a joystick</description>
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>

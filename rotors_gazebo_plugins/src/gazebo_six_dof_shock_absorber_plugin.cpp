@@ -24,7 +24,7 @@ namespace gazebo {
 
 GazeboShockAbsorber::~GazeboShockAbsorber()
 {
-  event::Events::DisconnectWorldUpdateBegin(updateConnection_);
+  updateConnection_.reset();
 }
 
 void GazeboShockAbsorber::InitializeParams()
@@ -68,25 +68,25 @@ void GazeboShockAbsorber::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   if (_sdf->HasElement("translational_spring_constant")) {
     translational_spring_constant_ = _sdf->GetElement("translational_spring_constant")
-        ->Get<math::Vector3>();
+        ->Get<ignition::math::Vector3d>();
   } else {
     gzthrow("[gazebo_shock_absorber] Couldn't find translational_spring_constant.");
   }
   if (_sdf->HasElement("translational_damper_constant")) {
     translational_damper_constant_ = _sdf->GetElement("translational_damper_constant")
-        ->Get<math::Vector3>();
+        ->Get<ignition::math::Vector3d>();
   } else {
     gzthrow("[gazebo_shock_absorber] Couldn't find translational_damper_constant.");
   }
   if (_sdf->HasElement("rotational_spring_constant")) {
     rotational_spring_constant_ =
-        _sdf->GetElement("rotational_spring_constant")->Get<math::Vector3>();
+        _sdf->GetElement("rotational_spring_constant")->Get<ignition::math::Vector3d>();
   } else {
     gzthrow("[gazebo_shock_absorber] Couldn't find rotational_spring_constant.");
   }
   if (_sdf->HasElement("rotational_damper_constant")) {
     rotational_damper_constant_ =
-        _sdf->GetElement("rotational_damper_constant")->Get<math::Vector3>();
+        _sdf->GetElement("rotational_damper_constant")->Get<ignition::math::Vector3d>();
   } else {
     gzthrow("[gazebo_shock_absorber] Couldn't find rotational_damper_constant.");
   }
@@ -112,28 +112,28 @@ void GazeboShockAbsorber::OnUpdate(const common::UpdateInfo& _info)
   sampling_time_ = limit(sampling_time_, 0.1, 0.001);
 
   //get links poses
-  math::Pose parent_link_pose = parent_link_->GetWorldCoGPose();
-  math::Pose child_link_pose = child_link_->GetWorldCoGPose();
-  math::Pose initial_child_pos = child_link_->GetInitialRelativePose();
+  ignition::math::Pose3d parent_link_pose = parent_link_->WorldCoGPose();
+  ignition::math::Pose3d child_link_pose = child_link_->WorldCoGPose();
+  ignition::math::Pose3d initial_child_pos = child_link_->InitialRelativePose();
 
   //translational shock absorber
-  math::Vector3 delta_position = parent_link_pose.pos - child_link_pose.pos + initial_child_pos.pos;
-  math::Vector3 delta_velocity = parent_link_->GetWorldLinearVel() - child_link_->GetWorldLinearVel();
-  math::Vector3 force = translational_spring_constant_*delta_position + translational_damper_constant_*delta_velocity;
+  ignition::math::Vector3d delta_position = parent_link_pose.Pos() - child_link_pose.Pos() + initial_child_pos.Pos();
+  ignition::math::Vector3d delta_velocity = parent_link_->WorldLinearVel() - child_link_->WorldLinearVel();
+  ignition::math::Vector3d force = translational_spring_constant_*delta_position + translational_damper_constant_*delta_velocity;
 
   child_link_->AddForce(force);
   parent_link_->AddForce(-force);
 
   //rotational
-  math::Quaternion delta_rotation = parent_link_pose.rot.GetInverse() * child_link_pose.rot
-      * initial_child_pos.rot;
-  math::Vector3 delta_angular_velocity_world_frame = parent_link_->GetWorldAngularVel()
-      - child_link_->GetWorldAngularVel();
+  ignition::math::Quaterniond delta_rotation = parent_link_pose.Rot().Inverse() * child_link_pose.Rot()
+      * initial_child_pos.Rot();
+  ignition::math::Vector3d delta_angular_velocity_world_frame = parent_link_->WorldAngularVel()
+      - child_link_->WorldAngularVel();
 
-  math::Vector3 torque = rotational_spring_constant_*delta_rotation.GetAsEuler();
-  math::Vector3 damping_torque = rotational_damper_constant_*delta_angular_velocity_world_frame;
+  ignition::math::Vector3d torque = rotational_spring_constant_*delta_rotation.Euler();
+  ignition::math::Vector3d damping_torque = rotational_damper_constant_*delta_angular_velocity_world_frame;
 
-  child_link_->AddRelativeTorque(initial_child_pos.rot.RotateVectorReverse(torque));
+  child_link_->AddRelativeTorque(initial_child_pos.Rot().RotateVectorReverse(torque));
   child_link_->AddTorque(damping_torque);
   parent_link_->AddRelativeTorque(-torque);
   parent_link_->AddTorque(-damping_torque);

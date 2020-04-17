@@ -2,6 +2,39 @@
 Changelog for package rotors_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.3 (2018-12-13)
+------------------
+
+2.2.2 (2018-12-12)
+------------------
+
+2.2.0 (2018-12-10)
+------------------
+* fixed xmlns:xacro link
+* switch to xacro from xacro.py
+* switch to package format 2
+* Merge branch 'feature/mavlink_build' into feature/gazebo9-autobackport
+* Merge pull request `#521 <https://github.com/ethz-asl/rotors_simulator/issues/521>`_ from scpeters/rotors_gazebo_run_depend
+  rotors_gazebo/package.xml: alphabetize and add missing run depends
+* rotors_gazebo: run_depend on joy, xacro
+  Fixes `#501 <https://github.com/ethz-asl/rotors_simulator/issues/501>`_. Partial fix for `#500 <https://github.com/ethz-asl/rotors_simulator/issues/500>`_.
+* rotors_gazebo/package.xml: alphabetize depends
+* Merge pull request `#425 <https://github.com/ethz-asl/rotors_simulator/issues/425>`_ from ethz-asl/fix/add_ros_plugin_to_example_worlds
+  fix/add_ros_plugin_to_example_worlds
+* add ros_interface_plugin to all example worlds
+* Merge pull request `#374 <https://github.com/ethz-asl/rotors_simulator/issues/374>`_ from ethz-asl/feature/wind_plugin_extended
+  Extending wind plugin
+* Merge pull request `#406 <https://github.com/ethz-asl/rotors_simulator/issues/406>`_ from ethz-asl/fix/waypoint_publisher
+  FIX publish msg and not msg pointer in waypoint_publisher
+* FIX publish msg in waypoint_publisher and waypoint_publisher_file `#373 <https://github.com/ethz-asl/rotors_simulator/issues/373>`_
+* FIX waypoint_publisher; revert *msg -> msg and ros:shutdown() before exit
+* FIX publish msg and not msg pointer in waypoint_publisher
+* Merge pull request `#397 <https://github.com/ethz-asl/rotors_simulator/issues/397>`_ from ethz-asl/v2.1.1
+  update to 2.1.1
+* Additional requested changes for PR.
+* Added example world and custom wind field text file, as well as documentation.
+* Contributors: Fadri Furrer, Marius Fehr, Mina Kamel, Nicolas El Hayek, Steven Peters, Tim, Tim Taubner, Timo Hinzmann, michaelpantic
+
 2.1.1 (2017-04-27)
 -----------
 * update maintainers

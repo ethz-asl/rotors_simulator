@@ -25,7 +25,6 @@ namespace gazebo {
 
 GazeboServoMotor::~GazeboServoMotor()
 {
-  event::Events::DisconnectWorldUpdateBegin(updateConnection_);
   if (node_handle_) {
     node_handle_->shutdown();
     delete node_handle_;
@@ -165,7 +164,7 @@ void GazeboServoMotor::OnUpdate(const common::UpdateInfo& _info)
 
   if (gazebo_sequence_ % measurement_divisor_ == 0) {
     // Get the current simulation time.
-    common::Time now = model_->GetWorld()->GetSimTime();
+    common::Time now = model_->GetWorld()->SimTime();
     sensor_msgs::JointState joint_state;
 
     joint_state.header.frame_id = joint_->GetParent()->GetScopedName();
@@ -173,7 +172,7 @@ void GazeboServoMotor::OnUpdate(const common::UpdateInfo& _info)
     joint_state.header.stamp.sec = now.sec + ros::Duration(unknown_delay_).sec;
     joint_state.header.stamp.nsec = now.nsec + ros::Duration(unknown_delay_).nsec;
     joint_state.name.push_back(joint_name_);
-    joint_state.position.push_back(joint_->GetAngle(0).Radian());
+    joint_state.position.push_back(joint_->Position(0));
     joint_state.velocity.push_back(joint_->GetVelocity(0));
     joint_state.effort.push_back(joint_->GetForce(0));
 
@@ -219,7 +218,7 @@ void GazeboServoMotor::CommandCallback(const trajectory_msgs::JointTrajectoryPtr
 
 void GazeboServoMotor::RunController()
 {
-  double angle_error = (angle_reference_ - joint_->GetAngle(0)).Radian();
+  double angle_error = (angle_reference_ - joint_->Position(0)).Radian();
   double omega_error = angular_velocity_reference_ - joint_->GetVelocity(0);
   angle_error_integral_ += angle_error * sampling_time_;
   angle_error_integral_ = limit(angle_error_integral_, max_angle_error_integral_,

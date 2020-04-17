@@ -2,6 +2,39 @@
 Changelog for package rotors_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.3 (2018-12-13)
+------------------
+
+2.2.2 (2018-12-12)
+------------------
+
+2.2.0 (2018-12-10)
+------------------
+* fixed xmlns:xacro link
+* switch to package format 2
+* Merge pull request `#529 <https://github.com/ethz-asl/rotors_simulator/issues/529>`_ from ethz-asl/feature/gazebo9-noisydepth
+  Feature/gazebo9 noisydepth
+* Added parameters for noise models and reformatted code
+* Cleanup of .xacro file
+* Disabled sensor visual
+* Fixed orientation and position of mesh relative to camera center (here, left imager) as per datasheet)
+* Realsense definiton (positions etc wrong, to be corrected)
+* Merge pull request `#464 <https://github.com/ethz-asl/rotors_simulator/issues/464>`_ from ethz-asl/fix/set_rate_back
+  Set odometry rate back to 1/1 of real-time rate.
+* Set odometry rate back to 1/1 of real-time rate.
+* Merge pull request `#457 <https://github.com/ethz-asl/rotors_simulator/issues/457>`_ from ethz-asl/fix/odom_rate
+  Set publish rate to 100 Hz instead of 1000Hz to better match real system
+* Set publish rate to 100 Hz instead of 1000Hz to better match real system
+* Fix/neo11 namespace (`#418 <https://github.com/ethz-asl/rotors_simulator/issues/418>`_)
+  * Change argument from 'mav_name' to 'namespace' to ease spawning of multiple neo11s
+* Merge pull request `#374 <https://github.com/ethz-asl/rotors_simulator/issues/374>`_ from ethz-asl/feature/wind_plugin_extended
+  Extending wind plugin
+* Requested changes for PR.
+* Merge pull request `#397 <https://github.com/ethz-asl/rotors_simulator/issues/397>`_ from ethz-asl/v2.1.1
+  update to 2.1.1
+* Extended wind plugin to read custom wind values from a text file.
+* Contributors: Andrea Tagliabue, Christian Witting, Fadri Furrer, Helen Oleynikova, Mina Kamel, Nicolas El Hayek, Timo Hinzmann, cwitting, michaelpantic, nelhayek
+
 2.1.1 (2017-04-27)
 -----------
 * update maintainers

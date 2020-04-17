@@ -21,20 +21,27 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_HEBI_SEA_H
 #define ROTORS_GAZEBO_PLUGINS_HEBI_SEA_H
 
+#include <cmath>
+#include <deque>
+#include <random>
 #include <stdio.h>
 
-#include <boost/bind.hpp>
-#include <Eigen/Eigen>
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
+#include <rotors_gazebo_plugins/common.h>
+
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+
 #include <sensor_msgs/JointState.h>
-#include <ros/callback_queue.h>
-#include <ros/ros.h>
 #include <trajectory_msgs/JointTrajectory.h>
 #include <limits>
-#include "rotors_gazebo_plugins/common.h"
+
+#include <ros/ros.h>
+#include <ros/callback_queue.h>
+
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
 
 namespace gazebo {
 // Default values
@@ -264,7 +271,7 @@ class GazeboHebiSEA : public ModelPlugin
 
   bool received_first_command_;
 
-  math::Angle position_reference_;
+  ignition::math::Angle position_reference_;
   double velocity_reference_;
   double effort_reference_;
 

@@ -137,7 +137,7 @@ class GazeboServoMotor : public ModelPlugin
 
   bool received_first_command_;
 
-  math::Angle angle_reference_;
+  ignition::math::Angle angle_reference_;
   double angular_velocity_reference_;
 
   double angle_error_integral_;

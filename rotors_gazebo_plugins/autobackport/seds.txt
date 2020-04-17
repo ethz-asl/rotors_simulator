@@ -1,0 +1,70 @@
+# ignition math namespaces
+s/( |^|<|\()ignition::math::Vector3d/\1math::Vector3/g
+s/( |^|<|\()ignition::math::Pose3d/\1math::Pose/g
+s/( |^|<|\()ignition::math::clamp/\1math::clamp/g
+s/( |^|<|\()ignition::math::Quaterniond/\1math::Quaternion/g
+s/( |^|<|\()octoignition::math::Vector3d/\octomath::Vector3/g
+s/( |^|<|\()ignition::ignition::math::Vector3d/\1ignition::math::Vector3d/g
+
+#removals 
+s/event::Events::DisconnectWorldUpdateBegin\(.*\)\;//g
+
+# includes
+s/(#include +)"ignition\/math\/Vector3.hh"/\1"gazebo\/math\/Vector3.hh"/g
+
+# pointer casting
+#Gazebo pre 7 s/std::dynamic_pointer_cast</boost::dynamic_pointer_cast</g
+
+#vector members
+s/([^q](->|\.))X(\(\))/\1x/g
+s/([^q](->|\.))Y(\(\))/\1y/g
+s/([^q](->|\.))Z(\(\))/\1z/g
+s/([^q](->|\.))W(\(\))/\1w/g
+s/([^q](->|\.))Rot(\(\))/\1rot/g
+s/([^q](->|\.))Pos(\(\))/\1pos/g
+
+#[^q] is for the one time we modify a quaternion that we don't want to change
+
+#special function calls (manually added)
+s/(->|\.)Physics(\()/\1GetPhysicsEngine\2/g
+s/(->|\.)Gravity(\()/\1GetPhysicsEngine\(\)->GetGravity\2/g
+s/(->|\.)EntityByName(\(.*name)/\1GetByName\2/g
+s/(->|\.)EntityByName(\(.*id)/\1GetEntity\2/g
+s/(->|\.)Position(\(0)/\1GetAngle(0).Radian(/g
+
+#function calls! (automatically generated)
+#s/(->|\.)Altitude(\()/\1GetAltitude\2/g
+s/(->|\.)AvgFPS(\()/\1GetAvgFPS\2/g
+s/(->|\.)Camera(\()/\1GetCamera\2/g
+s/(->|\.)CoG(\()/\1GetCoG\2/g
+s/(->|\.)GlobalAxis(\()/\1GetGlobalAxis\2/g
+s/(->|\.)HFOV(\()/\1GetHFOV\2/g
+s/(->|\.)ImageData(\()/\1GetImageData\2/g
+s/(->|\.)ImageDepth(\()/\1GetImageDepth\2/g
+s/(->|\.)ImageFormat(\()/\1GetImageFormat\2/g
+s/(->|\.)ImageHeight(\()/\1GetImageHeight\2/g
+s/(->|\.)ImageWidth(\()/\1GetImageWidth\2/g
+s/(->|\.)Inverse(\()/\1GetInverse\2/g
+s/(->|\.)LaserShape(\()/\1GetLaserShape\2/g
+s/(->|\.)LastMeasurementTime(\()/\1GetLastMeasurementTime\2/g
+s/(->|\.)LastRenderWallTime(\()/\1GetLastRenderWallTime\2/g
+#s/(->|\.)Latitude(\()/\1GetLatitude\2/g
+s/(->|\.)Length(\()/\1GetLength\2/g
+s/(->|\.)Link(\()/\1GetLink\2/g
+#s/(->|\.)Longitude(\()/\1GetLongitude\2/g
+s/(->|\.)Name(\()/\1GetName\2/g
+s/(->|\.)ParentName(\()/\1GetParentName\2/g
+s/(->|\.)Range(\()/\1GetRange\2/g
+s/(->|\.)RangeMax(\()/\1GetRangeMax\2/g
+s/(->|\.)RangeMin(\()/\1GetRangeMin\2/g
+s/(->|\.)RelativeAngularVel(\()/\1GetRelativeAngularVel\2/g
+s/(->|\.)RelativeLinearAccel(\()/\1GetRelativeLinearAccel\2/g
+s/(->|\.)RelativeLinearVel(\()/\1GetRelativeLinearVel\2/g
+s/(->|\.)RenderRate(\()/\1GetRenderRate\2/g
+s/(->|\.)SimTime(\()/\1GetSimTime\2/g
+#s/(->|\.)SetPosition(\()/\1SetAngle\2/g
+s/(->|\.)WorldAngularVel(\()/\1GetWorldAngularVel\2/g
+s/(->|\.)WorldCoGPose(\()/\1GetWorldCoGPose\2/g
+s/(->|\.)WorldLinearVel(\()/\1GetWorldLinearVel\2/g
+s/(->|\.)WorldName(\()/\1GetWorldName\2/g
+s/(->|\.)WorldPose(\()/\1GetWorldPose\2/g

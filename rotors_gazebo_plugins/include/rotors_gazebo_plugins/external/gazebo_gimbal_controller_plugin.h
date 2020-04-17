@@ -44,16 +44,9 @@ namespace gazebo
 
     private: void OnUpdate();
 
-#if GAZEBO_MAJOR_VERSION >= 7 && GAZEBO_MINOR_VERSION >= 4
-    /// only gazebo 7.4 and above support Any
     private: void OnPitchStringMsg(ConstAnyPtr &_msg);
     private: void OnRollStringMsg(ConstAnyPtr &_msg);
     private: void OnYawStringMsg(ConstAnyPtr &_msg);
-#else
-    private: void OnPitchStringMsg(ConstGzStringPtr &_msg);
-    private: void OnRollStringMsg(ConstGzStringPtr &_msg);
-    private: void OnYawStringMsg(ConstGzStringPtr &_msg);
-#endif
 
     /// \TODO something to move into Angle class
     /// \brief returns _angle1 normalized about
@@ -108,9 +101,9 @@ namespace gazebo
     private: common::PID yawPid;
     private: common::Time lastUpdateTime;
 
-    private: ignition::math::Vector3d ThreeAxisRot(
+    private: ignition::ignition::math::Vector3d ThreeAxisRot(
       double r11, double r12, double r21, double r31, double r32);
-    private: ignition::math::Vector3d QtoZXY(
+    private: ignition::ignition::math::Vector3d QtoZXY(
       const ignition::math::Quaterniond &_q);
   };
 }

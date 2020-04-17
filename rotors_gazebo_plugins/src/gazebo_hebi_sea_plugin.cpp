@@ -25,7 +25,7 @@ namespace gazebo {
 
 GazeboHebiSEA::~GazeboHebiSEA()
 {
-  event::Events::DisconnectWorldUpdateBegin(updateConnection_);
+  updateConnection_.reset();
   if (node_handle_) {
     node_handle_->shutdown();
     delete node_handle_;
@@ -257,7 +257,7 @@ void GazeboHebiSEA::OnUpdate(const common::UpdateInfo& _info)
 
   if (gazebo_sequence_ % measurement_divisor_ == 0) {
     // Get the current simulation time.
-    common::Time now = model_->GetWorld()->GetSimTime();
+    common::Time now = model_->GetWorld()->SimTime();
     sensor_msgs::JointState joint_state;
 
     joint_state.header.frame_id = joint_->GetParent()->GetScopedName();
@@ -265,7 +265,7 @@ void GazeboHebiSEA::OnUpdate(const common::UpdateInfo& _info)
     joint_state.header.stamp.sec = now.sec + ros::Duration(unknown_delay_).sec;
     joint_state.header.stamp.nsec = now.nsec + ros::Duration(unknown_delay_).nsec;
     joint_state.name.push_back(motor_name_);
-    joint_state.position.push_back(joint_->GetAngle(0).Radian());
+    joint_state.position.push_back(joint_->Position(0));
     joint_state.velocity.push_back(joint_->GetVelocity(0));
     joint_state.effort.push_back(joint_->GetForce(0));
 
@@ -298,7 +298,7 @@ void GazeboHebiSEA::CommandCallback(const trajectory_msgs::JointTrajectoryPtr& m
         position_reference_ = msg->points.at(0).positions.at(i);
         received_first_command_ = true;
       } else {
-        position_reference_ = joint_->GetAngle(0);
+        position_reference_ = joint_->Position(0);
       }
       if (msg->points.at(0).velocities.size() > i) {
         velocity_reference_ = msg->points.at(0).velocities.at(i);
@@ -320,7 +320,7 @@ void GazeboHebiSEA::CommandCallback(const trajectory_msgs::JointTrajectoryPtr& m
 void GazeboHebiSEA::RunController()
 {
   double output_pwm_ = 0.0;
-  double current_position = joint_->GetAngle(0).Radian();
+  double current_position = joint_->Position(0);
   double current_velocity = joint_->GetVelocity(0);
   double current_effort = joint_->GetForce(0);
 

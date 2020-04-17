@@ -65,11 +65,11 @@ class GazeboShockAbsorber : public ModelPlugin
   bool first_call_;
 
   // spring damper parameters
-  math::Vector3 translational_spring_constant_;
-  math::Vector3 translational_damper_constant_;
+  ignition::math::Vector3d translational_spring_constant_;
+  ignition::math::Vector3d translational_damper_constant_;
 
-  math::Vector3 rotational_spring_constant_;
-  math::Vector3 rotational_damper_constant_;
+  ignition::math::Vector3d rotational_spring_constant_;
+  ignition::math::Vector3d rotational_damper_constant_;
 
 
   //double max_elongation_;

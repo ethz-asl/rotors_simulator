@@ -55,6 +55,7 @@ static constexpr double kDefaultAdisAccelerometerTurnOnBiasSigma =
     20.0e-3 * 9.8;
 // Earth's gravity in Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84)
 static constexpr double kDefaultGravityMagnitude = 9.8068;
+static constexpr int kDefaultMeasurementDivisor = 1;
 
 // A description of the parameters:
 // https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model-and-Intrinsics
@@ -163,14 +164,17 @@ class GazeboImuPlugin : public ModelPlugin {
   //            and then published onto a topic
   gz_sensor_msgs::Imu imu_message_;
 
-  math::Vector3 gravity_W_;
-  math::Vector3 velocity_prev_W_;
+  ignition::math::Vector3d gravity_W_;
+  ignition::math::Vector3d velocity_prev_W_;
 
   Eigen::Vector3d gyroscope_bias_;
   Eigen::Vector3d accelerometer_bias_;
 
   Eigen::Vector3d gyroscope_turn_on_bias_;
   Eigen::Vector3d accelerometer_turn_on_bias_;
+
+  int measurement_divisor_;
+  int gazebo_sequence_;
 
   ImuParameters imu_parameters_;
 };

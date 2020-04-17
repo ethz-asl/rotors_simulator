@@ -2,6 +2,24 @@
 Changelog for package rotors_hil_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.3 (2018-12-13)
+------------------
+
+2.2.2 (2018-12-12)
+------------------
+* Merge branch 'feature/hil_mavros_fix' into feature/gazebo9-autobackport
+* fix not including message types
+* Contributors: Zachary Taylor, michaelpantic
+
+2.2.0 (2018-12-10)
+------------------
+* Merge pull request `#430 <https://github.com/ethz-asl/rotors_simulator/issues/430>`_ from ethz-asl/fix/hil_eigen
+  Fix compile error with new Eigen on implicit Eigen typecasts.
+* Fix compile error with new Eigen on implicit Eigen typecasts.
+* Merge pull request `#397 <https://github.com/ethz-asl/rotors_simulator/issues/397>`_ from ethz-asl/v2.1.1
+  update to 2.1.1
+* Contributors: Helen Oleynikova, Mina Kamel
+
 2.1.1 (2017-04-27)
 -----------
 * Update maintainers.

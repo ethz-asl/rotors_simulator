@@ -28,6 +28,7 @@
 // 3RD PARTY
 #include <boost/bind.hpp>
 #include <Eigen/Eigen>
+#include <Eigen/Core>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gazebo.hh>
@@ -46,13 +47,16 @@ const static int CCW = 1;
 const static int CW = -1;
 } // namespace turning_direction
 
+enum class MotorType {
+  kVelocity,
+  kPosition,
+  kForce
+};
+
 namespace gazebo {
 
-// Default values
-//static const std::string kDefaultCommandSubTopic = "gazebo/command/motor_speed";
-//static const std::string kDefaultWindSpeedSubTopic = "gazebo/wind_speed";
-
-typedef const boost::shared_ptr<const gz_mav_msgs::CommandMotorSpeed> GzCommandMotorSpeedMsgPtr;
+// Changed name from speed to input for more generality. TODO(kajabo): integrate general actuator command.
+typedef const boost::shared_ptr<const gz_mav_msgs::CommandMotorSpeed> GzCommandMotorInputMsgPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
 
 // Set the max_force_ to the max double value. The limitations get handled by the FirstOrderFilter.
@@ -74,13 +78,19 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         command_sub_topic_(mav_msgs::default_topics::COMMAND_ACTUATORS),
         wind_speed_sub_topic_(mav_msgs::default_topics::WIND_SPEED),
         motor_speed_pub_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
+        motor_position_pub_topic_(mav_msgs::default_topics::MOTOR_POSITION_MEASUREMENT),
+        motor_force_pub_topic_(mav_msgs::default_topics::MOTOR_FORCE_MEASUREMENT),
+        publish_speed_(true),
+        publish_position_(false),
+        publish_force_(false),
         motor_number_(0),
         turning_direction_(turning_direction::CW),
+        motor_type_(MotorType::kVelocity),
         max_force_(kDefaultMaxForce),
         max_rot_velocity_(kDefaulMaxRotVelocity),
         moment_constant_(kDefaultMomentConstant),
         motor_constant_(kDefaultMotorConstant),
-        ref_motor_rot_vel_(0.0),
+        ref_motor_input_(0.0),
         rolling_moment_coefficient_(kDefaultRollingMomentCoefficient),
         rotor_drag_coefficient_(kDefaultRotorDragCoefficient),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
@@ -101,7 +111,6 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   virtual void OnUpdate(const common::UpdateInfo & /*_info*/);
 
  private:
-
   /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
   ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
   bool pubs_and_subs_created_;
@@ -112,30 +121,46 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
   void CreatePubsAndSubs();
 
+  /// \brief    Ensures any input angle is element of [0..2pi)
+  double NormalizeAngle(double input);
+
   std::string command_sub_topic_;
   std::string wind_speed_sub_topic_;
   std::string joint_name_;
   std::string link_name_;
   std::string motor_speed_pub_topic_;
+  std::string motor_position_pub_topic_;
+  std::string motor_force_pub_topic_;
   std::string namespace_;
+
+  bool publish_speed_;
+  bool publish_position_;
+  bool publish_force_;
 
   int motor_number_;
   int turning_direction_;
+  MotorType motor_type_;
 
   double max_force_;
   double max_rot_velocity_;
   double moment_constant_;
   double motor_constant_;
-  double ref_motor_rot_vel_;
+  double ref_motor_input_;
   double rolling_moment_coefficient_;
   double rotor_drag_coefficient_;
   double rotor_velocity_slowdown_sim_;
   double time_constant_down_;
   double time_constant_up_;
 
+  common::PID pids_;
+
   gazebo::transport::NodePtr node_handle_;
 
   gazebo::transport::PublisherPtr motor_velocity_pub_;
+
+  gazebo::transport::PublisherPtr motor_position_pub_;
+
+  gazebo::transport::PublisherPtr motor_force_pub_;
 
   gazebo::transport::SubscriberPtr command_sub_;
 
@@ -153,13 +178,15 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   void QueueThread();
 
   gz_std_msgs::Float32 turning_velocity_msg_;
+  gz_std_msgs::Float32 position_msg_;
+  gz_std_msgs::Float32 force_msg_;
 
-  void ControlVelocityCallback(GzCommandMotorSpeedMsgPtr& command_motor_speed_msg);
+  void ControlCommandCallback(GzCommandMotorInputMsgPtr& command_motor_input_msg);
 
   void WindSpeedCallback(GzWindSpeedMsgPtr& wind_speed_msg);
 
   std::unique_ptr<FirstOrderFilter<double>> rotor_velocity_filter_;
-  math::Vector3 wind_speed_W_;
+  ignition::math::Vector3d wind_speed_W_;
 };
 
 } // namespace gazebo {

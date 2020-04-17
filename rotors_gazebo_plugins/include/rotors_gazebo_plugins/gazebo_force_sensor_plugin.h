@@ -49,6 +49,7 @@
 namespace gazebo {
 // Default values
 //static const std::string kDefaultNamespace = "";
+static const std::string kDefaultPublishFrameId = "world";
 static const std::string kDefaultParentFrameId = "world";
 static const std::string kDefaultReferenceFrameId = "world";
 static const std::string kDefaultLinkName = "f2g_sensor_link";
@@ -72,12 +73,12 @@ class FirstOrderFilterJointWrench {
     FirstOrderFilterJointWrench(double timeConstantUp, double timeConstantDown, physics::JointWrench initialState):
       previousState_(initialState) {
       // Initialize filters, one for each wrench element.
-      force_x_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Force.x));
-      force_y_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Force.y));
-      force_z_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Force.z));
-      torque_x_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Torque.x));
-      torque_y_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Torque.y));
-      torque_z_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Torque.z));
+      force_x_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Force[0]));
+      force_y_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Force[1]));
+      force_z_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Force[2]));
+      torque_x_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Torque[0]));
+      torque_y_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Torque[1]));
+      torque_z_filter_.reset(new FirstOrderFilter<double>(timeConstantUp, timeConstantDown, initialState.body1Torque[2]));
     }
 
     physics::JointWrench updateFilter(physics::JointWrench inputState, double samplingTime) {
@@ -86,12 +87,12 @@ class FirstOrderFilterJointWrench {
       */
       physics::JointWrench outputState;
 
-      outputState.body1Force.x = force_x_filter_->updateFilter(inputState.body1Force.x,samplingTime);
-      outputState.body1Force.y = force_y_filter_->updateFilter(inputState.body1Force.y,samplingTime);
-      outputState.body1Force.z = force_z_filter_->updateFilter(inputState.body1Force.z,samplingTime);
-      outputState.body1Torque.x = torque_x_filter_->updateFilter(inputState.body1Torque.x,samplingTime);
-      outputState.body1Torque.y = torque_y_filter_->updateFilter(inputState.body1Torque.y,samplingTime);
-      outputState.body1Torque.z = torque_z_filter_->updateFilter(inputState.body1Torque.z,samplingTime);
+      outputState.body1Force[0] = force_x_filter_->updateFilter(inputState.body1Force[0],samplingTime);
+      outputState.body1Force[1] = force_y_filter_->updateFilter(inputState.body1Force[1],samplingTime);
+      outputState.body1Force[2] = force_z_filter_->updateFilter(inputState.body1Force[2],samplingTime);
+      outputState.body1Torque[0] = torque_x_filter_->updateFilter(inputState.body1Torque[0],samplingTime);
+      outputState.body1Torque[1] = torque_y_filter_->updateFilter(inputState.body1Torque[1],samplingTime);
+      outputState.body1Torque[2] = torque_z_filter_->updateFilter(inputState.body1Torque[2],samplingTime);
 
       previousState_ = outputState;
       return outputState;
@@ -120,6 +121,7 @@ class GazeboForceSensorPlugin : public ModelPlugin {
   GazeboForceSensorPlugin()
       : ModelPlugin(),
         random_generator_(random_device_()),
+        publish_frame_id_(kDefaultPublishFrameId),
         parent_frame_id_(kDefaultParentFrameId),
         reference_frame_id_(kDefaultReferenceFrameId),
         link_name_(kDefaultLinkName),
@@ -158,6 +160,7 @@ class GazeboForceSensorPlugin : public ModelPlugin {
   std::string force_sensor_pub_topic_;
   std::string force_sensor_truth_pub_topic_;
   std::string wrench_vector_pub_topic_;
+  std::string publish_frame_id_;
   std::string parent_frame_id_;
   std::string reference_frame_id_;
   std::string link_name_;
