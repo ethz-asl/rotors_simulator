@@ -1,0 +1,155 @@
+<?xml version="1.0" ?>
+
+<robot name="zenmuse" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <link name="gimbal_mount_base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.5 0.5 0.5"/>
+      <mass value="0.02867"/>
+      <inertia
+          ixx = "0.00001726"
+          ixy = "0"
+          ixz = "0"
+          iyy = "0.00001726"
+          iyz = "0"
+          izz = "0.00000616"/>
+      </inertial>
+      <collision>
+        <origin rpy="0 0 0" xyz="0.5 0.5 0.5"/>
+        <geometry>
+          <mesh
+            filename="package://zenmuse_description/meshes/dji_zenmuse_x4s_gimbal_mount_base_link.STL"/>
+          </geometry>
+      </collision>
+      <visual>
+        <origin rpy="0 0 0" xyz="0.5 0.5 0.5"/>
+        <geometry>
+          <mesh
+            filename="package://zenmuse_description/meshes/dji_zenmuse_x4s_gimbal_mount_base_link.STL"/>
+          </geometry>
+          <material name="dimgrey">
+        <color rgba="${60/255} ${60/255} ${60/255} 1.0"/>
+      </material>
+    </visual>
+  </link>
+
+    <joint name="gimbal_yaw_arm_joint" type="revolute">
+      <axis xyz="0 0 1"/>
+      <limit effort="0" lower="-2.87979" upper="2.87979" velocity="0"/>
+      <origin rpy="0 0 0" xyz="0.5 0.5 0.47686"/>
+      <parent link="gimbal_mount_base_link"/>
+      <child link="gimbal_yaw_arm_link"/>
+    </joint>
+
+  <link name="gimbal_yaw_arm_link">
+    <inertial>
+      <origin rpy="0 0 3.14" xyz="0 0 0"/>
+      <mass value="0.055"/>
+      <inertia
+            ixx = "0.00130781"
+            ixy = "-0.00072901"
+            ixz = "-0.00120474"
+            iyy = "0.00268421"
+            iyz = "0.00056798"
+            izz = "0.00205994"/>
+    </inertial>
+    <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh
+            filename="package://zenmuse_description/meshes/dji_zenmuse_x4s_gimbal_yaw_arm_link.STL"/>
+          </geometry>
+    </collision>
+    <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh
+            filename="package://zenmuse_description/meshes/dji_zenmuse_x4s_gimbal_yaw_arm_link.STL"/>
+            <material name="dimgrey">
+          <color rgba="${60/255} ${60/255} ${60/255} 1.0"/>
+        </material>
+      </geometry>
+      <material name="dimgrey">
+    <!--color rgba="${240/255} ${158/255} ${30/255} 1.0"/-->
+  </material>
+   </visual>
+  </link>
+
+  <joint name="gimbal_roll_arm_joint" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="0" lower="-0.872665" upper="1.5708" velocity="0"/>
+    <origin rpy="0 0 0" xyz="-0.053 -0.001 -0.0805"/>
+    <parent link="gimbal_yaw_arm_link"/>
+    <child link ="gimbal_roll_arm_link"/>
+  </joint>
+
+  <link name="gimbal_roll_arm_link">
+    <inertial>
+      <mass value="0.06"/>
+        <origin rpy="0 1.5708 0" xyz="0.0 0 0"/>
+        <inertia
+            ixx = "0.00004324"
+            ixy = "-0.0000003"
+            ixz = "-0.0000000"
+            iyy = "0.00007669"
+            iyz = "0.00001022"
+            izz = "0.00010797"/>
+      </inertial>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh
+            filename="package://zenmuse_description/meshes/dji_zenmuse_x4s_gimbal_roll_arm_link.STL"/>
+          </geometry>
+      </collision>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh
+            filename="package://zenmuse_description/meshes/dji_zenmuse_x4s_gimbal_roll_arm_link.STL"/>
+      </geometry>
+      <material name="dimgrey">
+    <color rgba="${60/255} ${60/255} ${60/255} 1.0"/>
+  </material>
+    </visual>
+  </link>
+
+  <joint name="gimbal_pitch_link_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="0.01" lower="-1.5708" upper="1.5708" velocity="0"/>
+    <origin rpy="0 0 0" xyz="0.06 0 0"/>
+    <parent link="gimbal_roll_arm_link"/>
+    <child link ="gimbal_pitch_arm_link"/>
+  </joint>
+
+  <link name="gimbal_pitch_arm_link">
+    <inertial>
+      <mass value="0.10326"/>
+        <origin rpy="0 1.5708 0" xyz="0.0 0 0"/>
+        <inertia
+            ixx = "0.00018527"
+            ixy = "-0.00000006"
+            ixz = "0.00000042"
+            iyy = "0.00019531"
+            iyz = "0.00000701"
+            izz = "0.00003509"/>
+      </inertial>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh
+            filename="package://zenmuse_description/meshes/dji_zenmuse_x4s_gimbal_pitch_arm_link.STL"/>
+        </geometry>
+      </collision>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh
+            filename="package://zenmuse_description/meshes/dji_zenmuse_x4s_gimbal_pitch_arm_link.STL"/>
+      </geometry>
+      <material name="dimgrey">
+    <color rgba="${60/255} ${60/255} ${60/255} 1.0"/>
+  </material>
+    </visual>
+  </link>
+</robot>
