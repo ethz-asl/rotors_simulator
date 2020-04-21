@@ -4,6 +4,8 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include "pid_wrapper.h"
 
+#include "rotors_control/parameters_ros.h"
+
 #include <cmath>
 
 namespace rotors_control
@@ -14,6 +16,8 @@ PIDWrapper::PIDWrapper()
     InitializeParams();
 
     ros::NodeHandle nh;
+
+    nh.getParam("/pelican/roll_pitch_yawrate_thrust_controller_node/mass", controller_.drone_mass);
 
     // Initialize subscribers
     std::string yaw_pid_output_topic = "yaw_rate_ref";
@@ -40,10 +44,7 @@ PIDWrapper::PIDWrapper()
     yaw_obs_pub_ = nh.advertise<std_msgs::Float64>(yaw_obs_topic, 1);
     height_obs_pub_ = nh.advertise<std_msgs::Float64>(height_obs_topic, 1);
     roll_pitch_yawrate_thrust_ref_pub_ = nh.advertise<mav_msgs::RollPitchYawrateThrust>(roll_pitch_yawrate_thrust_ref_topic, 1);
-}
 
-PIDWrapper::~PIDWrapper()
-{
 }
 
 void PIDWrapper::InitializeParams()
@@ -52,6 +53,10 @@ void PIDWrapper::InitializeParams()
 
     // Read parameters from rosparam.
     pnh.getParam("pid_rate", pid_rate_);
+
+//    GetRosParameter(pnh, "mass",
+//                    controller_.drone_mass,
+//                    &controller_.drone_mass);
 }
 
 void PIDWrapper::PublishPIDRef()
@@ -87,7 +92,11 @@ void PIDWrapper::PublishControllerRef()
 void PIDWrapper::HeightPIDOutputCallback(const std_msgs::Float64ConstPtr &height_pid_output_msg)
 {
     // Get output from PID
-    thrust_ref_ = height_pid_output_msg->data;
+    double PID_output_ = height_pid_output_msg->data;
+
+    // Get full control input from height controller
+    controller_.generate_thrust_command(PID_output_);
+    thrust_ref_ = controller_.getThrust_command();
 }
 
 void PIDWrapper::YawPIDOutputCallback(const std_msgs::Float64ConstPtr &yaw_pid_output_msg)
@@ -121,7 +130,12 @@ void PIDWrapper::PoseCallback(const geometry_msgs::PoseWithCovarianceStampedCons
     const double qy2 = qy * qy;
     const double qz2 = qz * qz;
 
-    yaw_ = atan2(2 * (qx * qy + qz * qw), (qw2 + qx2 - qy2 - qz2));
+    yaw_ = atan2(2.0 * (qx * qy + qz * qw), (qw2 + qx2 - qy2 - qz2));
+    roll_= atan2(2.0 * (qw * qx + qy * qz), 1.0 - 2.0*(qx2 + qy2));
+    pitch_ = asin(2.0 * (qw * qy - qx * qz));
+
+    //Update height controller
+    controller_.updatePlant(roll_,pitch_, height_);
 }
 }
 
