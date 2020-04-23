@@ -7,6 +7,7 @@
 #include <ros/ros.h>
 
 #include "rotors_control/common.h"
+#include "rotors_control/height_controller_hover.h"
 
 namespace rotors_control
 {
@@ -14,8 +15,8 @@ namespace rotors_control
 class PIDWrapper
 {
 public:
-    PIDWrapper();
-    ~PIDWrapper();
+  PIDWrapper();
+
 
     void InitializeParams();
     void PublishPIDRef();
@@ -29,6 +30,8 @@ private:
     // State estimates
     double height_ = 0.;
     double yaw_ = 0.;
+    double roll_ = 0.;
+    double pitch_ = 0.;
 
     // PID inputs
     double height_ref_ = 0.;
@@ -53,6 +56,11 @@ private:
     ros::Publisher height_ref_pub_;
     ros::Publisher yaw_obs_pub_;
     ros::Publisher height_obs_pub_;
+
+    // Height controller object
+    HeightControllerHover controller_;
+
+
 
     void HeightPIDOutputCallback(const std_msgs::Float64ConstPtr &height_pid_output_msg);
 
