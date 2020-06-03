@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<!--
+  Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<robot name="hebi" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <link name="world"/>
+
+  <link name="hebi_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/actuators/X5_hebi_actuator.dae"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/actuators/X5_hebi_actuator.dae"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.35"/>
+      <inertia ixx="0.015" ixy="0.0" ixz="0"
+        iyy="0.013" iyz="0.0"
+        izz="0.014"/>
+    </inertial>
+  </link>
+
+  <link name="arm_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/delta_manipulator/link_1.dae"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://rotors_description/meshes/delta_manipulator/link_1.dae"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin xyz="0.12 0 0" rpy="0 0 0"/>
+      <mass value="0.012"/>
+      <inertia ixx="0.000948062" ixy="0.0" ixz="-0.001716204"
+        iyy="0.00730949" iyz="0.0"
+        izz="0.006364922"/>
+    </inertial>
+  </link>
+
+
+  <joint name="mounting_joint" type="fixed">
+    <parent link="world"/>
+    <child link="hebi_link"/>
+  </joint>
+
+  <joint name="hebi_joint" type="continuous">
+    <parent link="hebi_link"/>
+    <child  link="arm_link"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="0.1"/>
+    <dynamics friction="0"/>
+    <limit velocity="1e+16" effort="1e+16" />
+    <origin xyz="0 0 0.03" rpy="0 0 0"/>
+  </joint>
+
+
+  <gazebo>
+    <plugin name="hebi_sea" filename="librotors_gazebo_hebi_sea_plugin.so">
+      <robotNamespace>hebi</robotNamespace>
+      <jointName>hebi_joint</jointName>
+      <motorName>X5-4</motorName>
+      <velocity_kp>0.1</velocity_kp>
+      <effort_kp>0.1</effort_kp>
+      <effort_kd>0.02</effort_kd>
+      <effort_output_lp>0.5</effort_output_lp>
+      <effort_D_on_error>false</effort_D_on_error>
+    </plugin>
+  </gazebo>
+
+</robot>

@@ -1,0 +1,5 @@
+link_1_1: 296 mm
+link_1_2: 296 mm
+link_2_1: 500 mm
+link_2_2: 500 mm
+link_1_straight: 320 mm

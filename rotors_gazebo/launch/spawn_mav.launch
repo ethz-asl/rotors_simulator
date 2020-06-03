@@ -13,6 +13,7 @@
   <arg name="log_file" default="$(arg mav_name)"/>
   <arg name="wait_to_record_bag" default="false"/>
   <arg name="enable_mavlink_interface" default="false"/>
+  <arg name="odometry_noise" default="false"/>
 
   <!-- send the robot XML to param server -->
   <param name="robot_description" command="
@@ -23,6 +24,7 @@
     log_file:=$(arg log_file)
     wait_to_record_bag:=$(arg wait_to_record_bag)
     mav_name:=$(arg mav_name)
+    odometry_noise:=$(arg odometry_noise)
     namespace:=$(arg namespace)"
   />
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />

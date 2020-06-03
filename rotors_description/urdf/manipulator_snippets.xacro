@@ -1,0 +1,329 @@
+<?xml version="1.0"?>
+<!--
+  Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="kgcm2Nm" value="0.0981"/>
+
+ <!-- Include components snippets -->
+  <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
+
+<!--
+#########################################################################################################################
+Closed kinematic loop macro
+
+#########################################################################################################################
+-->
+
+<xacro:macro name="gazebo_revolute_joint_macro"
+  params="namespace joint_name parent_link child_link pose axis friction damping spring_reference spring_stiffness
+          lower_limit upper_limit effort_limit">
+  <gazebo>
+    <joint name="${joint_name}" type="revolute">
+      <pose>${pose}</pose>
+      <child>${child_link}</child>
+      <parent>${parent_link}</parent>
+      <axis>
+        <xyz>${axis}</xyz>
+        <use_parent_model_frame>False</use_parent_model_frame>
+        <dynamics>
+          <damping>${damping}</damping>
+          <friction>${friction}</friction>
+          <spring_reference>${spring_reference}</spring_reference>
+          <spring_stiffness>${spring_stiffness}</spring_stiffness>
+        </dynamics>
+        <limit>
+          <lower>${lower_limit}</lower>
+          <upper>${upper_limit}</upper>
+          <effort>${effort_limit}</effort>
+        </limit>
+      </axis>
+    </joint>
+  </gazebo>
+</xacro:macro>
+
+<!--
+#########################################################################################################################
+Rigid connection macro
+
+#########################################################################################################################
+-->
+
+<xacro:macro name="fixed_joint_macro"
+  params="namespace joint_name parent_link child_link *origin">
+  <joint name="${joint_name}" type="fixed">
+    <parent link="${parent_link}"/>
+    <child  link="${child_link}"/>
+    <xacro:insert_block name="origin" />
+  </joint>
+</xacro:macro>
+
+ <!--
+#########################################################################################################################
+Continous revolute joint macro
+
+#########################################################################################################################
+-->
+
+<xacro:macro name="revolute_joint_macro"
+  params="namespace joint_name parent_link child_link axis friction damping *origin">
+  <joint name="${joint_name}" type="continuous">
+    <parent link="${parent_link}"/>
+    <child  link="${child_link}"/>
+    <axis xyz="${axis}"/>
+    <dynamics damping="${damping}"/>
+    <dynamics friction="${friction}"/>
+    <limit velocity="1e+16" effort="1e+16" />
+    <xacro:insert_block name="origin" />
+  </joint>
+</xacro:macro>
+
+ <!--
+#########################################################################################################################
+Prismatic joint macro
+
+#########################################################################################################################
+-->
+
+<xacro:macro name="prismatic_joint_macro"
+  params="namespace joint_name parent_link child_link axis friction damping lower_limit upper_limit
+          effort_limit velocity_limit *origin">
+  <joint name="${joint_name}" type="prismatic">
+    <parent link="${parent_link}"/>
+    <child link="${child_link}"/>
+    <axis xyz="${axis}"/>
+    <dynamics damping="${damping}"/>
+    <dynamics friction="${friction}"/>
+    <limit lower="${lower_limit}" velocity="${velocity_limit}" upper="${upper_limit}" effort="${effort_limit}" />
+    <xacro:insert_block name="origin" />
+  </joint>
+</xacro:macro>
+
+<!--
+#########################################################################################################################
+Actuators Macros:
+
+#########################################################################################################################
+-->
+
+<xacro:macro name="servo_motor_macro"
+  params="namespace motor_name parent_link actuated_joint maxTorque noLoadSpeed
+          Kp Kd Ki maxAngle minAngle measurement_divisor measurement_delay unknown_delay
+          noise_normal_angle noise_normal_angular_velocity noise_normal_torque noise_uniform_angle
+          noise_uniform_angular_velocity noise_uniform_torque enable_visual visual_scale color *origin *inertial">
+
+  <link name="${namespace}/${motor_name}">
+    <xacro:insert_block name="inertial" />
+    <xacro:if value="${enable_visual}">
+      <visual>
+        <geometry>
+          <mesh filename="package://rotors_description/meshes/actuators/generic_servo.dae"
+             scale="${visual_scale} ${visual_scale} ${visual_scale}"/>
+        </geometry>
+      </visual>
+    </xacro:if>
+  </link>
+  <gazebo reference="${namespace}/${motor_name}">
+    <material>Gazebo/${color}</material>
+  </gazebo>
+  <joint name="${namespace}/${motor_name}" type="revolute">
+    <parent link="${parent_link}"/>
+    <child link="${namespace}/${motor_name}"/>
+    <xacro:insert_block name="origin" />
+    <limit upper="0" lower="0" effort="0" velocity="0" />
+  </joint>
+  <gazebo>
+    <plugin name="${namespace}/${motor_name}" filename="librotors_gazebo_servo_motor_plugin.so">
+      <robotNamespace>${namespace}</robotNamespace>
+      <jointName>${actuated_joint}</jointName>
+      <motorName>${motor_name}</motorName>
+      <commandSubTopic>command/trajectory</commandSubTopic>
+      <jointStatePubTopic>${motor_name}</jointStatePubTopic>
+      <maxTorque>${maxTorque}</maxTorque>
+      <noLoadSpeed>${noLoadSpeed}</noLoadSpeed>
+      <maxAngleIntegralError>1.0</maxAngleIntegralError>
+      <maxAngle>${maxAngle}</maxAngle>
+      <minAngle>${minAngle}</minAngle>
+      <measurementDivisor>${measurement_divisor}</measurementDivisor>
+      <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
+      <measurementDelay>${measurement_delay}</measurementDelay>
+      <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
+      <unknownDelay>${unknown_delay}</unknownDelay>
+      <!-- additional delay, that just gets added to the timestamp [s] -->
+      <noiseNormalAngle>${noise_normal_angle}</noiseNormalAngle>
+      <noiseNormalAngularVelocity>${noise_normal_angular_velocity}</noiseNormalAngularVelocity>
+      <noiseNormalTorque>${noise_normal_torque}</noiseNormalTorque>
+      <noiseUniformAngle>${noise_uniform_angle}</noiseUniformAngle>
+      <noiseUniformAngularVelocity>${noise_uniform_angular_velocity}</noiseUniformAngularVelocity>
+      <noiseUniformTorque>${noise_uniform_torque}</noiseUniformTorque>
+      <Kp>${Kp}</Kp>
+      <Kd>${Kd}</Kd>
+      <Ki>${Ki}</Ki>
+    </plugin>
+  </gazebo>
+</xacro:macro>
+
+
+<xacro:macro name="hebi_actuator_plugin"
+  params="namespace motor_name parent_link actuated_joint maxTorque noLoadSpeed
+          Kp Kd Ki maxAngle minAngle measurement_divisor measurement_delay unknown_delay
+          noise_normal_angle noise_normal_angular_velocity noise_normal_torque noise_uniform_angle
+          noise_uniform_angular_velocity noise_uniform_torque enable_visual visual_scale color *origin *inertial">
+
+  <link name="${namespace}/${motor_name}">
+    <xacro:insert_block name="inertial" />
+    <xacro:if value="${enable_visual}">
+      <visual>
+        <geometry>
+          <mesh filename="package://rotors_description/meshes/actuators/hebi_X5-4.dae"
+             scale="${visual_scale} ${visual_scale} ${visual_scale}"/>
+        </geometry>
+      </visual>
+    </xacro:if>
+  </link>
+  <gazebo reference="${namespace}/${motor_name}">
+    <material>Gazebo/${color}</material>
+  </gazebo>
+  <!-- name does not contain namespace to match hardware -->
+  <joint name="${motor_name}" type="revolute">
+    <parent link="${parent_link}"/>
+    <child link="${namespace}/${motor_name}"/>
+    <xacro:insert_block name="origin" />
+    <limit upper="0" lower="0" effort="0" velocity="0" />
+  </joint>
+  <gazebo>
+    <plugin name="${namespace}/${motor_name}" filename="librotors_gazebo_hebi_sea_plugin.so">
+      <robotNamespace>${namespace}</robotNamespace>
+      <jointName>${actuated_joint}</jointName>
+      <motorName>${motor_name}</motorName>
+      <jointStatePubTopic>${motor_name}</jointStatePubTopic>
+      <!-- <position_kp>0.2</position_kp> -->
+      <!-- <velocity_kp>0.1</velocity_kp> -->
+      <position_kp>0.0</position_kp>
+      <velocity_kp>0.0</velocity_kp>
+      <effort_kp>0.2</effort_kp>
+      <effort_kd>0.0</effort_kd>
+      <effort_output_lp>0.05</effort_output_lp>
+      <effort_D_on_error>true</effort_D_on_error>
+    </plugin>
+  </gazebo>
+</xacro:macro>
+<!--
+#########################################################################################################################
+Sensors Macros:
+
+#########################################################################################################################
+-->
+
+<xacro:macro name="force_sensor_plugin_macro"
+  params="namespace force_sensor_suffix parent_link force_sensor_topic
+    force_sensor_truth_topic wrench_vector_pub_topic parent_frame_id reference_frame_id mass_force_sensor lin_force_meas_enabled
+    torque_meas_enabled disp_wrench_vector measurement_divisor  measurement_delay unknown_delay cutoff_frequency noise_normal_linear_force
+    noise_normal_torque noise_uniform_linear_force noise_uniform_torque *inertia *origin">
+    <!-- force sensor link -->
+    <link name="${namespace}/force_sensor_${force_sensor_suffix}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <cylinder length="0.05" radius="0.01" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <cylinder length="0.05" radius="0.01" />
+        </geometry>
+      </collision>
+      <inertial>
+        <xacro:insert_block name="inertia" />
+        <mass value="${mass_force_sensor}" />  <!-- [kg] -->
+      </inertial>
+    </link>
+    <gazebo reference="${namespace}/force_sensor_${force_sensor_suffix}">
+      <material>Gazebo/Yellow</material>
+    </gazebo>
+        <!-- force-to-ground joint -->
+    <joint name="${namespace}/force_sensor_${force_sensor_suffix}" type="revolute">
+      <parent link="${parent_link}" />
+      <xacro:insert_block name="origin" />
+      <child link="${namespace}/force_sensor_${force_sensor_suffix}" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+    <gazebo reference="${namespace}/force_sensor_${force_sensor_suffix}">
+      <provideFeedback>true</provideFeedback>
+    </gazebo>
+    <gazebo>
+      <plugin filename="librotors_gazebo_force_sensor_plugin.so" name="force_sensor_${force_sensor_suffix}">
+        <linkName>${namespace}/force_sensor_${force_sensor_suffix}</linkName>
+        <robotNamespace>${namespace}</robotNamespace>
+        <forceSensorTopic>${force_sensor_topic}</forceSensorTopic>
+        <forceSensorTruthTopic>${force_sensor_truth_topic}</forceSensorTruthTopic>
+        <wrenchVectorTopic>${wrench_vector_pub_topic}</wrenchVectorTopic>
+        <parentFrameId>${parent_frame_id}</parentFrameId> <!-- Use the scoped link name here. e.g. Model::link. -->
+        <referenceFrameId>${reference_frame_id}</referenceFrameId>
+        <linForceMeasEnabled>${lin_force_meas_enabled}</linForceMeasEnabled>
+        <torqueMeasEnabled>${torque_meas_enabled}</torqueMeasEnabled>
+        <dispWrenchVector>${disp_wrench_vector}</dispWrenchVector>
+        <measurementDivisor>${measurement_divisor}</measurementDivisor>
+        <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
+        <measurementDelay>${measurement_delay}</measurementDelay>
+        <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
+        <unknownDelay>${unknown_delay}</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
+        <cutoffFrequency>${cutoff_frequency}</cutoffFrequency> <!-- cut-off frequency of first order filter [Hz] -->
+        <noiseNormalLinearForce>${noise_normal_linear_force}</noiseNormalLinearForce>
+        <!-- standard deviation of additive white gaussian noise [N] -->
+        <noiseNormalTorque>${noise_normal_torque}</noiseNormalTorque> <!-- standard deviation of additive white gaussian noise [N*m] -->
+        <noiseUniformLinearForce>${noise_uniform_linear_force}</noiseUniformLinearForce> <!-- symmetric bounds of uniform noise [N] -->
+        <noiseUniformTorque>${noise_uniform_torque}</noiseUniformTorque> <!-- symmetric bounds of uniform noise [N*m] -->
+      </plugin>
+    </gazebo>
+</xacro:macro>
+
+<!-- default force/torque sensor settings -->
+<xacro:macro name="default_force_sensor" params="namespace suffix parent_link reference_frame">
+  <xacro:force_sensor_plugin_macro
+    namespace="${namespace}"
+    force_sensor_suffix="${suffix}"
+    parent_link="${parent_link}"
+    force_sensor_topic="force_sensor"
+    force_sensor_truth_topic="force_sensor_truth"
+    wrench_vector_pub_topic="wrench_vector"
+    parent_frame_id="${parent_link}"
+    reference_frame_id="${reference_frame}"
+    mass_force_sensor="0.001"
+    lin_force_meas_enabled="true"
+    torque_meas_enabled="true"
+    disp_wrench_vector="true"
+    measurement_divisor="1"
+    measurement_delay="0"
+    unknown_delay="0.0"
+    cutoff_frequency="10.0"
+    noise_normal_linear_force="0 0 0"
+    noise_normal_torque="0 0 0"
+    noise_uniform_linear_force="0 0 0"
+    noise_uniform_torque="0 0 0" >
+    <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+    <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+  </xacro:force_sensor_plugin_macro>
+</xacro:macro>
+
+
+</robot>
