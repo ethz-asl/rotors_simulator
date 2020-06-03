@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rotors_comm)
 find_package(catkin REQUIRED
-  COMPONENTS cmake_modules geometry_msgs message_generation octomap_msgs std_msgs)
+  COMPONENTS cmake_modules geometry_msgs sensor_msgs message_generation octomap_msgs std_msgs)
 
 # Declare the service files to be built
 add_service_files(
@@ -13,9 +13,11 @@ add_service_files(
 add_message_files(
   FILES
   WindSpeed.msg
+  PiksiRTKPos.msg
+  PiksiBaseline.msg
 )
 
-generate_messages(DEPENDENCIES geometry_msgs octomap_msgs std_msgs)
+generate_messages(DEPENDENCIES sensor_msgs geometry_msgs octomap_msgs std_msgs)
 
 catkin_package(
   CATKIN_DEPENDS message_runtime

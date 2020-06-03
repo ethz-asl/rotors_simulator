@@ -566,6 +566,14 @@ if (NOT NO_ROS)
 endif()
 list(APPEND targets_to_install rotors_gazebo_wind_plugin)
 
+#========================================= PIKSI PLUGIN ==========================================//
+add_library(rotors_gazebo_piksi_plugin src/gazebo_piksi_plugin.cpp)
+target_link_libraries(rotors_gazebo_piksi_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_piksi_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_piksi_plugin)
+
 # =============================================================================================== #
 # ======================================= EXTERNAL LIBRARIES ==================================== #
 # =============================================================================================== #

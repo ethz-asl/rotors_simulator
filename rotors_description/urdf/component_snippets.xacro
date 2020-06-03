@@ -551,6 +551,57 @@
     </gazebo>
   </xacro:macro>
 
+  <!-- Macro to add a Piksi RTK GPS sensor. -->
+  <xacro:macro name="piksi_plugin_macro"
+    params="
+      namespace piksi_sensor_suffix parent_link spp_position_topic rtk_position_topic
+      rtk_mode_topic frame_id parent_frame_id mass_piksi publish_ground_truth start_fixed
+      spp_noise_normal spp_offset rtk_fixed_noise_normal rtk_fixed_offset 
+      gps_start_position update_rate convergence_speed fix_loss_probability fix_loss_time
+      rtk_navsatfix_covariance spp_navsatfix_covariance rtk_piksi_topic baseline_topic
+      *inertia *origin">
+    <!-- piksi link -->
+    <link name="${namespace}/piksi_sensor${piksi_sensor_suffix}_link">
+      <inertial>
+        <xacro:insert_block name="inertia" />
+        <mass value="${mass_piksi}" />  <!-- [kg] -->
+      </inertial>
+    </link>
+    <!-- piksi joint -->
+    <joint name="${namespace}/piksi_sensor${piksi_sensor_suffix}_joint" type="revolute">
+      <parent link="${parent_link}" />
+      <xacro:insert_block name="origin" />
+      <child link="${namespace}/piksi_sensor${piksi_sensor_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+    <gazebo>
+      <plugin filename="librotors_gazebo_piksi_plugin.so" name="piksi_sensor${piksi_sensor_suffix}">
+        <linkName>${namespace}/piksi_sensor${piksi_sensor_suffix}_link</linkName>
+        <robotNamespace>${namespace}</robotNamespace>
+        <sppPositionTopic>${spp_position_topic}</sppPositionTopic>
+	      <rtkPositionTopic>${rtk_position_topic}</rtkPositionTopic>
+	      <rtkModeTopic>${rtk_mode_topic}</rtkModeTopic>
+	      <rtkPiksiTopic>${rtk_piksi_topic}</rtkPiksiTopic>
+	      <baselineTopic>${baseline_topic}</baselineTopic> <!-- Piksi baseline with the base at [0, 0, 0] [m] -->
+	      <publishGroundTruth>${publish_ground_truth}</publishGroundTruth>
+	      <startFixed>${start_fixed}</startFixed>
+              <parentFrameId>${parent_frame_id}</parentFrameId> <!-- Use the scoped link name here. e.g. Model::link. -->
+	      <frameId>${frame_id}</frameId> <!-- Coordinate frame of the GPS receiver with respect to the base link -->
+	      <sppNoiseNormal>${spp_noise_normal}</sppNoiseNormal> <!-- standard deviation of additive white gaussian noise [m] -->
+	      <sppOffset>${spp_offset}</sppOffset> <!-- offset against ground truth for SPP GPS output [m] -->
+              <rtkFixedNoiseNormal>${rtk_fixed_noise_normal}</rtkFixedNoiseNormal> <!-- standard deviation of additive white gaussian noise [m] -->
+	      <rtkFixedOffset>${rtk_fixed_offset}</rtkFixedOffset> <!-- offset against ground truth for RTK Fixed GPS output [m] -->
+	      <gpsStartPosition>${gps_start_position}</gpsStartPosition> <!-- GPS position of Gazebo origin [lat lon alt] -->
+	      <updateRate>${update_rate}</updateRate> <!-- update rate of the sensor [Hz] -->
+	      <sppNavsatfixCovariance>${spp_navsatfix_covariance}</sppNavsatfixCovariance> <!-- noise covariance published in the NavSatFix SPP message -->
+	      <rtkNavsatfixCovariance>${rtk_navsatfix_covariance}</rtkNavsatfixCovariance> <!-- noise covariance published in the NavSatFix RTK message -->
+	      <convergenceSpeed>${convergence_speed}</convergenceSpeed> <!-- the higher, the faster the sensor converges to RTK Fixed [<1]-->
+	      <fixLossProbability>${fix_loss_probability}</fixLossProbability> <!-- probability that RTK Fix is lost per update -->
+	      <fixLossTime>${fix_loss_time}</fixLossTime> <!-- time at which fix is lost -->
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
   <!-- Macro to add the wind plugin. -->
   <xacro:macro name="wind_plugin_macro"
     params="namespace xyz_offset wind_direction wind_force_mean
