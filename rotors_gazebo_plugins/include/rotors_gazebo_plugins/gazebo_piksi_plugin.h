@@ -18,22 +18,14 @@
  * limitations under the License.
  */
 
-
 #ifndef ROTORS_GAZEBO_PLUGINS_GAZEBO_PIKSI_PLUGIN_H
 #define ROTORS_GAZEBO_PLUGINS_GAZEBO_PIKSI_PLUGIN_H
 
+#include <stdio.h>
 #include <cmath>
 #include <deque>
 #include <random>
-#include <stdio.h>
 
-#include <boost/bind.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/range/algorithm/transform.hpp>
-#include <gazebo/common/common.hh>
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/Pose.h>
@@ -47,17 +39,24 @@
 #include <geometry_msgs/TwistWithCovariance.h>
 #include <geometry_msgs/TwistWithCovarianceStamped.h>
 #include <nav_msgs/Odometry.h>
-#include <std_msgs/String.h>
-#include <sensor_msgs/NavSatFix.h>
-#include <opencv2/core/core.hpp>
-#include <ros/ros.h>
 #include <ros/callback_queue.h>
-#include <tf/transform_broadcaster.h>
-#include <rotors_comm/PiksiRTKPos.h>
+#include <ros/ros.h>
 #include <rotors_comm/PiksiBaseline.h>
+#include <rotors_comm/PiksiRTKPos.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <std_msgs/String.h>
+#include <tf/transform_broadcaster.h>
+#include <boost/bind.hpp>
+#include <boost/range/algorithm/transform.hpp>
+#include <boost/tokenizer.hpp>
+#include <gazebo/common/Plugin.hh>
+#include <gazebo/common/common.hh>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+#include <opencv2/core/core.hpp>
 
-
-namespace gazebo {
+namespace gazebo
+{
 // Default values
 static const std::string kDefaultParentFrameId = "world";
 static const std::string kDefaultLinkName = "piksi_sensor_link";
@@ -65,32 +64,35 @@ static const std::string kDefaultSPPPositionPubTopic = "spp_position";
 static const std::string kDefaultRTKPositionPubTopic = "rtk_position";
 static const std::string kDefaultRTKModePubTopic = "rtk_mode";
 
-class GazeboPiksiPlugin : public ModelPlugin {
- public:
+class GazeboPiksiPlugin : public ModelPlugin
+{
+public:
   typedef std::normal_distribution<> NormalDistribution;
   typedef std::uniform_real_distribution<> UniformDistribution;
 
   GazeboPiksiPlugin()
-      : ModelPlugin(),
-        random_generator_(random_device_()),
-        spp_position_pub_topic_(kDefaultSPPPositionPubTopic),
-        rtk_position_pub_topic_(kDefaultRTKPositionPubTopic),
-        rtk_mode_pub_topic_(kDefaultRTKModePubTopic),
-        parent_frame_id_(kDefaultParentFrameId),
-        link_name_(kDefaultLinkName),
-        node_handle_(NULL) {}
+    : ModelPlugin()
+    , random_generator_(random_device_())
+    , spp_position_pub_topic_(kDefaultSPPPositionPubTopic)
+    , rtk_position_pub_topic_(kDefaultRTKPositionPubTopic)
+    , rtk_mode_pub_topic_(kDefaultRTKModePubTopic)
+    , parent_frame_id_(kDefaultParentFrameId)
+    , link_name_(kDefaultLinkName)
+    , node_handle_(NULL)
+  {
+  }
 
   ~GazeboPiksiPlugin();
 
   void InitializeParams();
   void Publish();
 
- protected:
+protected:
   void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
- private:
-  double update_rate_ = 10;        // default update rate: 10Hz
+private:
+  double update_rate_ = 10;  // default update rate: 10Hz
   common::Time prev_update_time_;
 
   double lat_start_;
@@ -103,7 +105,7 @@ class GazeboPiksiPlugin : public ModelPlugin {
   double convergence_speed_;
   double fix_loss_probability_;
   double fix_loss_time_;
-  const double rtk_float_start_error_width_= 400;  //[m]
+  const double rtk_float_start_error_width_ = 400;  //[m]
   double spp_navsatfix_covariance_[9];
   double rtk_navsatfix_covariance_[9];
 
@@ -118,9 +120,9 @@ class GazeboPiksiPlugin : public ModelPlugin {
   std::string link_name_;
   std::string publish_ground_truth_;
 
-  sdf::Vector3 offset_spp_;
-  sdf::Vector3 offset_rtk_fixed_;
-  sdf::Vector3 gps_start_position_;
+  ignition::math::Vector3d offset_spp_;
+  ignition::math::Vector3d offset_rtk_fixed_;
+  ignition::math::Vector3d gps_start_position_;
 
   NormalDistribution rtk_position_n_[3];
   NormalDistribution spp_position_n_[3];
@@ -159,17 +161,19 @@ class GazeboPiksiPlugin : public ModelPlugin {
   void QueueThread();
 
   // \brief Used to convert numbers in a string to doubles
-  void strToDoubleArray(std::string string, double* array, int array_len) {
+  void strToDoubleArray(std::string string, double* array, int array_len)
+  {
     boost::char_separator<char> sep(" ");
-    boost::tokenizer<boost::char_separator<char>> tok(string , sep);
+    boost::tokenizer<boost::char_separator<char>> tok(string, sep);
     int i = 0;
-    for(boost::tokenizer<boost::char_separator<char>>::iterator beg=tok.begin(); beg!=tok.end();++beg){
-        if(i < array_len)
-          array[i] = atof(beg->c_str());
-        i++;
+    for (boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin(); beg != tok.end(); ++beg)
+    {
+      if (i < array_len)
+        array[i] = atof(beg->c_str());
+      i++;
     }
   };
 };
-}
+}  // namespace gazebo
 
-#endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_PIKSI_PLUGIN_H
+#endif  // ROTORS_GAZEBO_PLUGINS_GAZEBO_PIKSI_PLUGIN_H
