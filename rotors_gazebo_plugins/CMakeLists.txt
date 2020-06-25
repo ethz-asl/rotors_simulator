@@ -537,6 +537,14 @@ if (NOT NO_ROS)
 endif()
 list(APPEND targets_to_install rotors_gazebo_wind_plugin)
 
+#========================================= EXTERNAL DISTURBANCE PLUGIN ==========================================//
+add_library(rotors_gazebo_external_wrench_plugin SHARED src/gazebo_external_wrench_plugin.cpp)
+target_link_libraries(rotors_gazebo_external_wrench_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_external_wrench_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_external_wrench_plugin)
+
 # =============================================================================================== #
 # ======================================= EXTERNAL LIBRARIES ==================================== #
 # =============================================================================================== #
