@@ -296,7 +296,8 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   // ============================================ //
   // = CONTROL COMMAND MSG SETUP (ROS->GAZEBO) = //
   // ============================================ //
-
+  std::string cmd_topic = "~/" + namespace_ + "/" + command_sub_topic_;
+  std::cout << "cmd_topic is " << cmd_topic << std::endl;
   command_sub_ = node_handle_->Subscribe(
       "~/" + namespace_ + "/" + command_sub_topic_,
       &GazeboMotorModel::ControlCommandCallback, this);
@@ -304,7 +305,7 @@ void GazeboMotorModel::CreatePubsAndSubs() {
   connect_ros_to_gazebo_topic_msg.set_ros_topic(
       namespace_ + "/" + command_sub_topic_);
   connect_ros_to_gazebo_topic_msg.set_gazebo_topic(
-      "~/" + namespace_ + "/" + command_sub_topic_);
+      "~/" + namespace_ + command_sub_topic_);
   connect_ros_to_gazebo_topic_msg.set_msgtype(
       gz_std_msgs::ConnectRosToGazeboTopic::COMMAND_MOTOR_SPEED);
   gz_connect_ros_to_gazebo_topic_pub->Publish(

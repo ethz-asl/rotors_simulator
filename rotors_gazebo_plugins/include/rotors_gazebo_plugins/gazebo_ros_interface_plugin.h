@@ -65,6 +65,7 @@
 #include <geometry_msgs/WrenchStamped.h>
 #include <mav_msgs/Actuators.h>
 #include <mav_msgs/RollPitchYawrateThrust.h>
+#include <mav_msgs/TorqueThrust.h>
 #include <nav_msgs/Odometry.h>
 #include <rotors_comm/WindSpeed.h>
 #include <sensor_msgs/FluidPressure.h>
@@ -292,6 +293,10 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   // ============================================ //
   // ===== ROS->GAZEBO CALLBACKS/CONVERTERS ===== //
   // ============================================ //
+  // Wrench (for external disturbance except from wind)
+  void RosWrenchMsgCallback(
+            const mav_msgs::TorqueThrustConstPtr& ros_wrench_msg_ptr,
+            gazebo::transport::PublisherPtr gz_publisher_ptr);
 
   // ACTUATORS (change name??? motor control? motor speed?)
   void RosActuatorsMsgCallback(

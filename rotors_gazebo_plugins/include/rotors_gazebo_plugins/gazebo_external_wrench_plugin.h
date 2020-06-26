@@ -34,10 +34,23 @@
 
 #include "rotors_gazebo_plugins/common.h"
 
+//============= GAZEBO MSG TYPES ==============//
+#include "ConnectGazeboToRosTopic.pb.h"
+#include "ConnectRosToGazeboTopic.pb.h"
 #include "WindSpeed.pb.h"             // Wind speed message
 #include "WrenchStamped.pb.h"         // Wind force message
 
+// ros
+// #include <ros/callback_queue.h>
+//=============== ROS MSG TYPES ===============//
+#include <ros/ros.h>
+#include <mav_msgs/TorqueThrust.h>
+
 namespace gazebo {
+// typedef's to make life easier
+typedef const boost::shared_ptr<const gz_std_msgs::ConnectRosToGazeboTopic>
+            GzConnectRosToGazeboTopicMsgPtr;
+typedef const boost::shared_ptr<const gz_geometry_msgs::WrenchStamped> GzWrenchStampedMsgPtr;
 // Default values
 static const std::string kDefaultFrameId = "world";
 static const std::string kDefaultLinkName = "base_link";
@@ -82,7 +95,8 @@ class GazeboExternalWrenchPlugin : public ModelPlugin {
         use_custom_static_wind_field_(kDefaultUseCustomStaticWindField),
         frame_id_(kDefaultFrameId),
         link_name_(kDefaultLinkName),
-        node_handle_(nullptr),
+        gz_node_handle_(0),
+        ros_node_handle_(0),
         pubs_and_subs_created_(false) {}
 
   virtual ~GazeboExternalWrenchPlugin();
@@ -99,6 +113,16 @@ class GazeboExternalWrenchPlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
+
+    void ConvertHeaderRosToGz(
+            const std_msgs::Header_<std::allocator<void> >& ros_header,
+            gz_std_msgs::Header* gz_header);
+
+    /// \brief  Handle for the Gazebo node.
+    transport::NodePtr gz_node_handle_;
+
+    /// \brief  Handle for the ROS node.
+    ros::NodeHandle* ros_node_handle_;
 
   /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
   ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
@@ -121,6 +145,7 @@ class GazeboExternalWrenchPlugin : public ModelPlugin {
 
   std::string frame_id_;
   std::string link_name_;
+  std::string external_wrench_sub_topic_;
   std::string wind_force_pub_topic_;
   std::string wind_speed_pub_topic_;
 
@@ -156,6 +181,11 @@ class GazeboExternalWrenchPlugin : public ModelPlugin {
   /// \brief  Reads wind data from a text file and saves it.
   /// \param[in] custom_wind_field_path Path to the wind field from ~/.ros.
   void ReadCustomWindField(std::string& custom_wind_field_path);
+
+  void GzConnectRosToGazeboTopicMsgCallback(
+            GzConnectRosToGazeboTopicMsgPtr& gz_connect_ros_to_gazebo_topic_msg);
+
+  void RosWrenchMsgCallback(GzWrenchStampedMsgPtr& wrench_stamped_msg);
   
   /// \brief  Functions for trilinear interpolation of wind field at aircraft position.
   
@@ -191,12 +221,12 @@ class GazeboExternalWrenchPlugin : public ModelPlugin {
   
   gazebo::transport::PublisherPtr wind_force_pub_;
   gazebo::transport::PublisherPtr wind_speed_pub_;
+  ros::Publisher wrench_msg_pub_;
+  transport::SubscriberPtr external_wrench_sub_;
 
-  gazebo::transport::NodePtr node_handle_;
-
-  /// \brief    Gazebo message for sending wind data.
+  /// \brief    Gazebo message for sending external wrench data.
   /// \details  This is defined at the class scope so that it is re-created
-  ///           everytime a wind message needs to be sent, increasing performance.
+  ///           everytime a external message needs to be sent, increasing performance.
   gz_geometry_msgs::WrenchStamped wrench_stamped_msg_;
 
   /// \brief    Gazebo message for sending wind speed data.

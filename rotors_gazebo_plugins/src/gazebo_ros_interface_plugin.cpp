@@ -87,7 +87,7 @@ void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world,
   // ============================================ //
   // === CONNECT ROS TO GAZEBO MESSAGES SETUP === //
   // ============================================ //
-
+  std::cout << "kConnectRosToGazeboSubtopic" << kConnectRosToGazeboSubtopic << std::endl;
   gz_connect_ros_to_gazebo_topic_sub_ = gz_node_handle_->Subscribe(
       "~/" + kConnectRosToGazeboSubtopic,
       &GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback, this);
@@ -303,6 +303,28 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
 
       break;
     }
+
+    case gz_std_msgs::ConnectRosToGazeboTopic::WRENCH_STAMPED: {
+        //todo: correct the following messages here
+      gazebo::transport::PublisherPtr gz_publisher_ptr =
+              gz_node_handle_->Advertise<gz_geometry_msgs::WrenchStamped>(
+                      gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
+
+      // Create ROS subscriber.
+      ros::Subscriber ros_subscriber =
+              ros_node_handle_->subscribe<mav_msgs::TorqueThrust>(
+                      gz_connect_ros_to_gazebo_topic_msg->ros_topic(), 1,
+                      boost::bind(
+                              &GazeboRosInterfacePlugin::RosWrenchMsgCallback,
+                              this, _1, gz_publisher_ptr));
+
+      // Save reference to the ROS subscriber so callback will continue to be
+      // called.
+      ros_subscribers.push_back(ros_subscriber);
+
+      break;
+    }
+
     case gz_std_msgs::ConnectRosToGazeboTopic::COMMAND_MOTOR_SPEED: {
       gazebo::transport::PublisherPtr gz_publisher_ptr =
           gz_node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>(
@@ -967,7 +989,6 @@ void GazeboRosInterfacePlugin::RosCommandMotorSpeedMsgCallback(
     const mav_msgs::ActuatorsConstPtr& ros_actuators_msg_ptr,
     gazebo::transport::PublisherPtr gz_publisher_ptr) {
   // Convert ROS message to Gazebo message
-
   gz_mav_msgs::CommandMotorSpeed gz_command_motor_speed_msg;
 
   for (int i = 0; i < ros_actuators_msg_ptr->angular_velocities.size(); i++) {
@@ -977,6 +998,24 @@ void GazeboRosInterfacePlugin::RosCommandMotorSpeedMsgCallback(
 
   // Publish to Gazebo
   gz_publisher_ptr->Publish(gz_command_motor_speed_msg);
+}
+
+void GazeboRosInterfacePlugin::RosWrenchMsgCallback(
+        const mav_msgs::TorqueThrustConstPtr& ros_wrench_msg_ptr,
+        gazebo::transport::PublisherPtr gz_publisher_ptr){
+
+    // Convert ROS message to Gazebo message
+    gz_geometry_msgs::WrenchStamped gz_wrench_stamped_msg;
+
+    ConvertHeaderRosToGz(ros_wrench_msg_ptr->header, gz_wrench_stamped_msg.mutable_header());
+    gz_wrench_stamped_msg.mutable_wrench()->mutable_force()->set_x(ros_wrench_msg_ptr->thrust.x);
+    gz_wrench_stamped_msg.mutable_wrench()->mutable_force()->set_y(ros_wrench_msg_ptr->thrust.y);
+    gz_wrench_stamped_msg.mutable_wrench()->mutable_force()->set_z(ros_wrench_msg_ptr->thrust.z);
+    gz_wrench_stamped_msg.mutable_wrench()->mutable_torque()->set_x(ros_wrench_msg_ptr->torque.x);
+    gz_wrench_stamped_msg.mutable_wrench()->mutable_torque()->set_y(ros_wrench_msg_ptr->torque.y);
+    gz_wrench_stamped_msg.mutable_wrench()->mutable_torque()->set_z(ros_wrench_msg_ptr->torque.z);
+    // Publish to Gazebo
+    gz_publisher_ptr->Publish(gz_wrench_stamped_msg);
 }
 
 void GazeboRosInterfacePlugin::RosRollPitchYawrateThrustMsgCallback(
