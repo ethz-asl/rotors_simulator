@@ -331,6 +331,7 @@ void GazeboPropulsion::OnUpdate() {
 
     for (int idx = 0; idx<num_props_; idx++) {
         propellers_[idx].dt = sampling_time_;
+        propellers_[idx].MotorDyn();            // update propeller speed
 
         // pose of parent frame
 #if GAZEBO_MAJOR_VERSION >= 9
