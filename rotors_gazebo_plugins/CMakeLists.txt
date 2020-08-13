@@ -253,7 +253,7 @@ include_directories(${Eigen_INCLUDE_DIRS})
 
 #==================================== AERODYNAMICS PLUGIN ========================================//
 add_library(rotors_gazebo_aerodynamics_plugin SHARED src/gazebo_aerodynamics_plugin.cpp)
-target_link_libraries(rotors_gazebo_aerodynamics_plugin ${target_linking_LIBRARIES} )
+target_link_libraries(rotors_gazebo_aerodynamics_plugin ${target_linking_LIBRARIES} ${YamlCpp_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_aerodynamics_plugin ${catkin_EXPORTED_TARGETS})
 endif()
@@ -529,7 +529,7 @@ list(APPEND targets_to_install rotors_gazebo_pressure_plugin)
 
 #==================================== PROPULSION PLUGIN ========================================//
 add_library(rotors_gazebo_propulsion_plugin SHARED src/gazebo_propulsion_plugin.cpp)
-target_link_libraries(rotors_gazebo_propulsion_plugin ${target_linking_LIBRARIES} )
+target_link_libraries(rotors_gazebo_propulsion_plugin ${target_linking_LIBRARIES} ${YamlCpp_LIBRARIES})
 if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_propulsion_plugin ${catkin_EXPORTED_TARGETS})
 endif()
