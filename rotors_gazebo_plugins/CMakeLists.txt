@@ -1,6 +1,7 @@
 # Optional arguments to be passed into file
 # ADDITIONAL_INCLUDE_DIRS           string  Additional include directories to add to every build target (PX4 uses this).
-# BUILD_MAVLINK_INTERFACE_PLUGIN    bool    Build mavlink_interface_plugin (requires mav dependency).
+# BUILD_MAVLINK_TOGGLE              bool    Enable or disable mavlink plugin
+# BUILD_MAVLINK_INTERFACE_PLUGIN    bool    Build mavlink_interface_plugin if mavlink found (requires mav dependency).
 # BUILD_OCTOMAP_PLUGIN              bool    Build the optical map plugin (requires Octomap).
 # BUILD_OPTICAL_FLOW_PLUGIN         bool    Build the optical flow plugin (requires OpenCV).
 # MAVLINK_HEADER_DIR                string  Location of MAVLink header files. If not provided, this CMakeLists.txt file will
@@ -22,12 +23,19 @@ project(rotors_gazebo_plugins)
 # ========================== SET DEFAULTS FOR PASSED-IN VARIABLES =============================== #
 # =============================================================================================== #
 
-find_package(mavlink QUIET)
-if(${mavlink_FOUND})
-  message(STATUS " mavlink found, building MAVLINK_INTERFACE_PLUGIN.")
-  set(BUILD_MAVLINK_INTERFACE_PLUGIN TRUE)
+set(BUILD_MAVLINK_TOGGLE TRUE) # Set to TRUE to build MAVLINK plugin
+
+if(${BUILD_MAVLINK_TOGGLE})
+  find_package(mavlink QUIET)
+  if(${mavlink_FOUND})
+    message(STATUS " mavlink found, building MAVLINK_INTERFACE_PLUGIN.")
+    set(BUILD_MAVLINK_INTERFACE_PLUGIN TRUE)
+  else()
+    message(STATUS " mavlink not found, not building MAVLINK_INTERFACE_PLUGIN.")
+    set(BUILD_MAVLINK_INTERFACE_PLUGIN FALSE)
+  endif()
 else()
-  message(STATUS " mavlink not found, not building MAVLINK_INTERFACE_PLUGIN.")
+  message(STATUS " mavlink toggle off, not building MAVLINK_INTERFACE_PLUGIN.")
   set(BUILD_MAVLINK_INTERFACE_PLUGIN FALSE)
 endif()
 
@@ -377,14 +385,14 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
   else()
     message(WARN "MAVLINK_HEADER_DIR not provided, falling back to looking at default paths...")
     # fist check if there's a mavlink dir in the current workspace
-    if(EXISTS ${mavlink_INCLUDE_DIRS}/mavlink/v1.0)
-      message(STATUS "Found MAVLink headers in workspace at ' ${mavlink_INCLUDE_DIRS}/mavlink/v1.0/'.")
-      include_directories("${mavlink_INCLUDE_DIRS}/mavlink/v1.0/")
+    if(EXISTS ${mavlink_INCLUDE_DIRS}/mavlink/v2.0)
+      message(STATUS "Found MAVLink headers in workspace at ' ${mavlink_INCLUDE_DIRS}/mavlink/v2.0/'.")
+      include_directories("${mavlink_INCLUDE_DIRS}/mavlink/v2.0/")
       set(MAVLINK_HEADERS_FOUND TRUE)
     # If ROS is installed, we should be able to find them at the path below
-    elseif(EXISTS /opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/)
-      message(STATUS "Found MAVLink headers at '/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/'.")
-      include_directories("/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v1.0/")
+    elseif(EXISTS /opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v2.0/)
+      message(STATUS "Found MAVLink headers at '/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v2.0/'.")
+      include_directories("/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v2.0/")
       set(MAVLINK_HEADERS_FOUND TRUE)
     endif()
 

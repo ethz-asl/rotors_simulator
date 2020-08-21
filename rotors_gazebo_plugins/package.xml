@@ -4,6 +4,7 @@
   <description>The rotors_gazebo_plugins package</description>
 
   <maintainer email="fadri.furrer@mavt.ethz.ch">Fadri Furrer</maintainer>
+  <maintainer email="michael.pantic@mavt.ethz.ch">Michael Pantic</maintainer>
   <maintainer email="mina.kamel@mavt.ethz.ch">Mina Kamel</maintainer>
 
   <author>Fadri Furrer</author>

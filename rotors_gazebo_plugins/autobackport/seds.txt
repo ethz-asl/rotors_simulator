@@ -52,6 +52,7 @@ s/(->|\.)LastRenderWallTime(\()/\1GetLastRenderWallTime\2/g
 s/(->|\.)Length(\()/\1GetLength\2/g
 s/(->|\.)Link(\()/\1GetLink\2/g
 #s/(->|\.)Longitude(\()/\1GetLongitude\2/g
+s/(->|\.)Name(\()/\1GetName\2/g
 s/(->|\.)ParentName(\()/\1GetParentName\2/g
 s/(->|\.)Range(\()/\1GetRange\2/g
 s/(->|\.)RangeMax(\()/\1GetRangeMax\2/g
