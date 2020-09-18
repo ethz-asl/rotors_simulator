@@ -141,8 +141,10 @@ void GazeboExternalWrenchPlugin::OnUpdate(const common::UpdateInfo& _info) {
   common::Time now = world_->SimTime();
   
   ignition::math::Vector3d wind_velocity(0.0, 0.0, 0.0);
-  ignition::math::Vector3d disturbance_force(0.0, 0.0, 0.0);
+  ignition::math::Vector3d disturbance_force(wrench_stamped_msg_.wrench().force().x(), wrench_stamped_msg_.wrench().force().y(), wrench_stamped_msg_.wrench().force().z());
   ignition::math::Vector3d disturbance_torque(wrench_stamped_msg_.wrench().torque().x(), wrench_stamped_msg_.wrench().torque().y(), wrench_stamped_msg_.wrench().torque().z());
+  std::cout << "disturbance_force: (" << wrench_stamped_msg_.wrench().force().x() << ", " << wrench_stamped_msg_.wrench().force().y() << ", " << wrench_stamped_msg_.wrench().force().z() << ")" << std::endl;
+  std::cout << "disturbance_torque: (" << wrench_stamped_msg_.wrench().torque().x() << ", " << wrench_stamped_msg_.wrench().torque().y() << ", " << wrench_stamped_msg_.wrench().torque().z() << ")" << std::endl;
   link_->AddForce(disturbance_force);
   link_->AddTorque(disturbance_torque);
 
