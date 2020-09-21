@@ -145,8 +145,9 @@ void GazeboExternalWrenchPlugin::OnUpdate(const common::UpdateInfo& _info) {
   ignition::math::Vector3d disturbance_torque(wrench_stamped_msg_.wrench().torque().x(), wrench_stamped_msg_.wrench().torque().y(), wrench_stamped_msg_.wrench().torque().z());
   std::cout << "disturbance_force: (" << wrench_stamped_msg_.wrench().force().x() << ", " << wrench_stamped_msg_.wrench().force().y() << ", " << wrench_stamped_msg_.wrench().force().z() << ")" << std::endl;
   std::cout << "disturbance_torque: (" << wrench_stamped_msg_.wrench().torque().x() << ", " << wrench_stamped_msg_.wrench().torque().y() << ", " << wrench_stamped_msg_.wrench().torque().z() << ")" << std::endl;
-  link_->AddForce(disturbance_force);
-  link_->AddTorque(disturbance_torque);
+  //add disturbance force and torque in the vehicle's own frame 
+  link_->AddRelativeForce(disturbance_force); 
+  link_->AddRelativeTorque(disturbance_torque);
 
 
   
