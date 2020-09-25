@@ -20,6 +20,7 @@
    <xacro:include filename="$(find rotors_description)/urdf/fixed_wing_X_base.xacro" />
    <xacro:include filename="$(find rotors_description)/urdf/rope.xacro" />
    <xacro:include filename="$(find rotors_description)/urdf/hook.xacro" />
+   <xacro:include filename="$(find rotors_description)/urdf/hook_simple.xacro" />
 
    <!-- Global properties -->
    <xacro:property name="namespace" value="$(arg namespace)" />
@@ -1225,15 +1226,160 @@
    </xacro:if>
 
    <!-- Tracing ribbon/Visual plugin -->
-   <!--
+   <!---->
    <gazebo reference="${namespace}/base_link">
       <visual>
          <plugin name="visual_plugin_base_link" filename="librotors_gazebo_template_visual_plugin.so" />
       </visual>
    </gazebo>
-   -->
+
+   <!-- fw challenge payloads -->
+   <xacro:payload_hook_simple namespace="${namespace}">
+   </xacro:payload_hook_simple>
+
+   <link name="${namespace}/payload_1">
+      <inertial>
+         <origin xyz="0 0 0" rpy="0 0 0" />
+         <mass value="0.25" />
+         <xacro:sphere_inertia r="0.05" mass="0.25" />
+      </inertial>
+      <visual>
+         <origin xyz="0 0 0" rpy="0 0 0" />
+         <geometry>
+            <box size = "0.5 0.5 0.5" />
+         </geometry>
+      </visual>
+      <collision>
+         <origin xyz="0 0 0" rpy="0 0 0" />
+         <geometry>
+            <box size = "0.5 0.5 0.5" />
+         </geometry>
+      </collision>
+   </link>
+   <joint name="${namespace}/payload_1_joint" type="floating">
+      <parent link="${namespace}/payload_hook" />
+      <child link="${namespace}/payload_1" />
+      <origin xyz="-1.5 0 0" rpy="0 0 0" />
+   </joint>
+   <gazebo reference="${namespace}/payload_1">
+      <material>Gazebo/Yellow</material>
+      <mu1>0.2</mu1>
+      <mu2>0.2</mu2>
+      <kp>10000</kp>
+      <kd>1</kd>
+   </gazebo>
+   <gazebo>
+      <plugin filename="librotors_gazebo_payload_plugin.so" name="payload_plugin_1">
+         <robotNamespace>${namespace}</robotNamespace>
+         <joint>${namespace}/payload_1_joint</joint>
+         <payload>${namespace}/payload_1</payload>
+         <parent>${namespace}/payload_hook</parent>
+         <proxRec>true</proxRec>
+         <radiusRec>5</radiusRec>
+         <hoistPosParent>-1.5 0 0</hoistPosParent>
+         <hoistPosPayload>0 0 0</hoistPosPayload>
+         <pickupWorldPosPayload>256.65 43.54 80</pickupWorldPosPayload>
+         <initialState>3</initialState> <!-- 0: attached, 1: falling, 2: teleporting, 3: resting @ pickup pos-->
+         <dropTopic>drop_1</dropTopic>
+      </plugin>
+   </gazebo>
+
+   <link name="${namespace}/payload_2">
+      <inertial>
+         <origin xyz="0 0 0" rpy="0 0 0" />
+         <mass value="0.25" />
+         <xacro:sphere_inertia r="0.05" mass="0.25" />
+      </inertial>
+      <visual>
+         <origin xyz="0 0 0" rpy="0 0 0" />
+         <geometry>
+            <box size = "0.5 0.5 0.5" />
+         </geometry>
+      </visual>
+      <collision>
+         <origin xyz="0 0 0" rpy="0 0 0" />
+         <geometry>
+            <box size = "0.5 0.5 0.5" />
+         </geometry>
+      </collision>
+   </link>
+   <joint name="${namespace}/payload_2_joint" type="floating">
+      <parent link="${namespace}/payload_hook" />
+      <child link="${namespace}/payload_2" />
+      <origin xyz="-1.5 0 0" rpy="0 0 0" />
+   </joint>
+   <gazebo reference="${namespace}/payload_2">
+      <material>Gazebo/Red</material>
+      <mu1>0.2</mu1>
+      <mu2>0.2</mu2>
+      <kp>10000</kp>
+      <kd>1</kd>
+   </gazebo>
+   <gazebo>
+      <plugin filename="librotors_gazebo_payload_plugin.so" name="payload_plugin_1">
+         <robotNamespace>${namespace}</robotNamespace>
+         <joint>${namespace}/payload_2_joint</joint>
+         <payload>${namespace}/payload_2</payload>
+         <parent>${namespace}/payload_hook</parent>
+         <proxRec>true</proxRec>
+         <radiusRec>5</radiusRec>
+         <hoistPosParent>-1.5 0 0</hoistPosParent>
+         <hoistPosPayload>0 0 0</hoistPosPayload>
+         <pickupWorldPosPayload>246.65 38.54 80</pickupWorldPosPayload>
+         <initialState>3</initialState> <!-- 0: attached, 1: falling, 2: teleporting, 3: resting @ pickup pos-->
+         <dropTopic>drop_1</dropTopic>
+      </plugin>
+   </gazebo>
+
+   <link name="${namespace}/payload_3">
+      <inertial>
+         <origin xyz="0 0 0" rpy="0 0 0" />
+         <mass value="0.25" />
+         <xacro:sphere_inertia r="0.05" mass="0.25" />
+      </inertial>
+      <visual>
+         <origin xyz="0 0 0" rpy="0 0 0" />
+         <geometry>
+            <box size = "0.5 0.5 0.5" />
+         </geometry>
+      </visual>
+      <collision>
+         <origin xyz="0 0 0" rpy="0 0 0" />
+         <geometry>
+            <box size = "0.5 0.5 0.5" />
+         </geometry>
+      </collision>
+   </link>
+   <joint name="${namespace}/payload_3_joint" type="floating">
+      <parent link="${namespace}/payload_hook" />
+      <child link="${namespace}/payload_3" />
+      <origin xyz="-1.5 0 0" rpy="0 0 0" />
+   </joint>
+   <gazebo reference="${namespace}/payload_3">
+      <material>Gazebo/Blue</material>
+      <mu1>0.2</mu1>
+      <mu2>0.2</mu2>
+      <kp>10000</kp>
+      <kd>1</kd>
+   </gazebo>
+   <gazebo>
+      <plugin filename="librotors_gazebo_payload_plugin.so" name="payload_plugin_1">
+         <robotNamespace>${namespace}</robotNamespace>
+         <joint>${namespace}/payload_3_joint</joint>
+         <payload>${namespace}/payload_3</payload>
+         <parent>${namespace}/payload_hook</parent>
+         <proxRec>true</proxRec>
+         <radiusRec>5</radiusRec>
+         <hoistPosParent>-1.5 0 0</hoistPosParent>
+         <hoistPosPayload>0 0 0</hoistPosPayload>
+         <pickupWorldPosPayload>246.65 48.54 80</pickupWorldPosPayload>
+         <initialState>3</initialState> <!-- 0: attached, 1: falling, 2: teleporting, 3: resting @ pickup pos-->
+         <dropTopic>drop_1</dropTopic>
+      </plugin>
+   </gazebo>
 
    <!-- Payload on hook -->
+   <!--
    <xacro:payload_hook namespace="${namespace}">
    </xacro:payload_hook>
    <link name="${namespace}/payload_hk">
@@ -1285,11 +1431,10 @@
          </hookStab>
       </plugin>
    </gazebo>
-
    <xacro:default_lidar namespace="${namespace}" parent_link="${namespace}/payload_hook_ext" >
      <origin xyz="-0.2 0 0" rpy="0 2.356 0" />
    </xacro:default_lidar>
-   <!---->
+   -->
 
    <!-- Payload on wing -->
    <!--
@@ -1335,6 +1480,8 @@
          <parent>${namespace}/wl_2</parent>
          <hoistPosParent>0 -0.15 -0.04</hoistPosParent>
          <hoistPosPayload>0 0 0</hoistPosPayload>
+         <teleportBackToAircraft>true</teleportBackToAircraft>
+         <initialState>0</initialState>
          <dropTopic>drop_1</dropTopic>
       </plugin>
    </gazebo>
@@ -1558,19 +1705,4 @@
       </plugin>
    </gazebo>
 
-   <!-- Miscellaneous -->
-   <!--
-   <link name="${namespace}/check_coordinates">
-      <inertial>
-         <mass value="0.1" />
-         <xacro:box_inertia x="0.1" y="0.1" z="0.1" mass="0.1" />
-      </inertial>
-   </link>
-   <joint name="${namespace}/check_coordinates_joint" type="revolute">
-     <origin xyz="0.54 0 0.184" rpy="0 0 0" />
-     <parent link="${namespace}/base_link" />
-     <child link="${namespace}/check_coordinates" />
-     <limit upper="0" lower="0" effort="0" velocity="0" />
-   </joint>
-   -->
 </robot>

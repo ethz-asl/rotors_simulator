@@ -69,6 +69,7 @@ protected:
 
     V3D hoist_pos_payload_;
     V3D hoist_pos_parent_;
+    V3D pickup_world_pos_payload_;
     ignition::math::Quaterniond q_pr_pa_;
 
 private:
@@ -77,6 +78,17 @@ private:
     std::string namespace_;
     float omega_ = 100;
     float recovery_radius_ = 1;
+
+    enum State {
+      ATTACHED,
+      FALLING,
+      TELEPORTING,
+      RESTING
+    };
+
+    State state_ = RESTING;
+    State prev_state_;
+
     bool drop_ = false;
     bool reload_ = false;
     bool trigg_ = false;
@@ -84,6 +96,9 @@ private:
     bool reset_ = false;
     bool pos_only_ = false;
     bool proximity_recovery_ = false;
+    bool teleport_back_to_pickup_ = false;
+    bool teleport_back_to_aircraft_ = false;
+
     common::Timer reload_timer_;
 
     std::string drop_topic_;
