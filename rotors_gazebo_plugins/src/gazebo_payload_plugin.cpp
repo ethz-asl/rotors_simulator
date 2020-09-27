@@ -107,6 +107,10 @@ void GazeboPayloadPlugin::Load(physics::ModelPtr _model,
         drop_topic_ = _sdf->Get<std::string>("dropTopic");
     }
 
+    if (_sdf->HasElement("payloadTrackingTopic")) {
+        tracking_pos_pub_topic_ = _sdf->Get<std::string>("payloadTrackingTopic");
+    }
+
     if (_sdf->HasElement("omega")) {
         omega_ = _sdf->Get<float>("omega");
     }
@@ -194,6 +198,8 @@ void GazeboPayloadPlugin::CreatePubsAndSubs()
         hook_ctrl_.lidar_sub = node_handle_->Subscribe(namespace_ + "/" + hook_ctrl_.lidar_topic,
                                                           &GazeboPayloadPlugin::HookControl::LidarCallback, &hook_ctrl_);
     }
+
+    tracking_pos_pub_ = node_handle_->Advertise<gazebo::msgs::Vector3d>(namespace_ + "/" + tracking_pos_pub_topic_, 1);
 }
 
 /////////////////////////////////////////////////
@@ -436,7 +442,7 @@ void GazeboPayloadPlugin::OnUpdate()
     state_ = next_state;
 
     // update connection
-    parent_->AddForceAtRelativePosition(-reactio*force, hoist_pos_parent_);
+    //parent_->AddForceAtRelativePosition(-reactio*force, hoist_pos_parent_);
     payload_->AddForceAtRelativePosition(actio*force, hoist_pos_payload_);
 
     if (!pos_only_)
@@ -445,5 +451,11 @@ void GazeboPayloadPlugin::OnUpdate()
     // others
     if (do_hook_ctrl)
         hook_ctrl_.DoControl();
+
+    gazebo::msgs::Vector3d tracking_pos;
+    tracking_pos.set_x(pose_payload.Pos().X());
+    tracking_pos.set_y(pose_payload.Pos().Y());
+    tracking_pos.set_z(pose_payload.Pos().Z());
+    tracking_pos_pub_->Publish(tracking_pos);
 
 }

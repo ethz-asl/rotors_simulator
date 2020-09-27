@@ -1,0 +1,103 @@
+<launch>
+  <arg name="uav_name" default="techpod_TJ_flex"/>
+  <arg name="world_name" default="fw_playground"/>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="$(arg uav_name)"/>
+  <arg name="debug" default="false"/>
+  <arg name="gui" default="true"/>
+  <arg name="paused" default="false"/>
+  <!-- The following line causes gzmsg and gzerr messages to be printed to the console
+      (even when Gazebo is started through roslaunch) -->
+  <arg name="verbose" default="false"/>
+  <arg name="spawn_tc" default="false"/>
+  <arg name="enable_wind" default="true"/>
+  <arg name="record_rosbag" default="false"/>
+  <arg name="rosbag_path" default=""/>
+
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="paused" value="$(arg paused)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="verbose" value="$(arg verbose)"/>
+  </include>
+
+  <group ns="uav_1">
+    <include file="$(find rotors_gazebo)/launch/spawn_fixed_wing.launch">
+      <arg name="uav_name" value="$(arg uav_name)" />
+      <arg name="namespace" value="uav_1" />
+      <arg name="model" value="$(find rotors_description)/urdf/$(arg uav_name)_base.xacro" />
+      <arg name="enable_logging" value="$(arg enable_logging)" />
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+      <arg name="log_file" value="$(arg log_file)" />
+      <arg name="enable_wind" value="$(arg enable_wind)"/>
+      <arg name="record_rosbag" default="$(arg record_rosbag)"/>
+      <arg name="rosbag_path" default="$(arg rosbag_path)"/>
+      <arg name="x" default="30.0"/>
+      <arg name="y" default="125.0"/>
+      <arg name="z" default="-19.8"/>
+      <arg name="Y" default="3.14159"/>
+    </include>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <rosparam param = "source_list"> ["/all_joint_states"]</rosparam>
+      <!--<param name = "use_gui" value = "true"/>-->
+    </node>
+
+  </group>
+
+  <group if="$(arg spawn_tc)">
+    <group ns="uav_1_tc">
+      <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
+        <arg name="target_uav" value="uav_1" />
+        <arg name="namespace" value="uav_1_tc_1" />
+        <arg name="target_pos_topic" value="uav_1/tracking_pos" />
+        <arg name="x" value="25.0"/>
+        <arg name="horizontal_fov" value="2"/>
+      </include>
+    </group>
+    <group ns="soccer_cam_1">
+      <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
+        <arg name="target_uav" value="uav_1" />
+        <arg name="namespace" value="soccer_cam_1" />
+        <arg name="target_pos_topic" value="uav_1/soccer_ball_1" />
+        <arg name="x" value="-17.0"/>
+        <arg name="y" value="-267.0"/>
+        <arg name="z" value="22.0"/>
+        <arg name="horizontal_fov" value="0.5"/>
+      </include>
+    </group>
+    <group ns="soccer_cam_2">
+      <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
+        <arg name="target_uav" value="uav_1" />
+        <arg name="namespace" value="soccer_cam_2" />
+        <arg name="target_pos_topic" value="uav_1/soccer_ball_2" />
+        <arg name="x" value="-20.0"/>
+        <arg name="y" value="-267.0"/>
+        <arg name="z" value="22.0"/>
+        <arg name="horizontal_fov" value="0.5"/>
+      </include>
+    </group>
+    <group ns="steak_cam_1">
+      <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
+        <arg name="target_uav" value="uav_1" />
+        <arg name="namespace" value="steak_cam_1" />
+        <arg name="target_pos_topic" value="uav_1/steak_1" />
+        <arg name="x" value="-229.5"/>
+        <arg name="y" value="323.5"/>
+        <arg name="z" value="105.5"/>
+        <arg name="horizontal_fov" value="0.5"/>
+      </include>
+    </group>
+  </group>
+
+  <!--
+  <node name="hil_plugin_gui" pkg="rqt_rotors" type="hil_plugin" clear_params="true" output="screen" />
+  -->
+
+</launch>

@@ -183,7 +183,7 @@
    </link>
    <gazebo reference="${namespace}/dome">
       <material>Gazebo/GreyTransparent</material>
-   </gazebo>-->
+   </gazebo>
    <joint name="${namespace}/bar_joint" type="fixed">
       <parent link="${namespace}/base_link" />
       <child link="${namespace}/bar" />
@@ -1226,18 +1226,18 @@
    </xacro:if>
 
    <!-- Tracing ribbon/Visual plugin -->
-   <!---->
+   <!--
    <gazebo reference="${namespace}/base_link">
       <visual>
          <plugin name="visual_plugin_base_link" filename="librotors_gazebo_template_visual_plugin.so" />
       </visual>
-   </gazebo>
+   </gazebo>-->
 
    <!-- fw challenge payloads -->
    <xacro:payload_hook_simple namespace="${namespace}">
    </xacro:payload_hook_simple>
 
-   <link name="${namespace}/payload_1">
+   <link name="${namespace}/soccer_ball_1">
       <inertial>
          <origin xyz="0 0 0" rpy="0 0 0" />
          <mass value="0.25" />
@@ -1246,23 +1246,23 @@
       <visual>
          <origin xyz="0 0 0" rpy="0 0 0" />
          <geometry>
-            <box size = "0.5 0.5 0.5" />
+            <sphere radius = "0.5" />
          </geometry>
       </visual>
       <collision>
          <origin xyz="0 0 0" rpy="0 0 0" />
          <geometry>
-            <box size = "0.5 0.5 0.5" />
+            <sphere radius = "0.5" />
          </geometry>
       </collision>
    </link>
    <joint name="${namespace}/payload_1_joint" type="floating">
       <parent link="${namespace}/payload_hook" />
-      <child link="${namespace}/payload_1" />
+      <child link="${namespace}/soccer_ball_1" />
       <origin xyz="-1.5 0 0" rpy="0 0 0" />
    </joint>
-   <gazebo reference="${namespace}/payload_1">
-      <material>Gazebo/Yellow</material>
+   <gazebo reference="${namespace}/soccer_ball_1">
+      <material>Gazebo/White</material>
       <mu1>0.2</mu1>
       <mu2>0.2</mu2>
       <kp>10000</kp>
@@ -1272,19 +1272,20 @@
       <plugin filename="librotors_gazebo_payload_plugin.so" name="payload_plugin_1">
          <robotNamespace>${namespace}</robotNamespace>
          <joint>${namespace}/payload_1_joint</joint>
-         <payload>${namespace}/payload_1</payload>
+         <payload>${namespace}/soccer_ball_1</payload>
          <parent>${namespace}/payload_hook</parent>
          <proxRec>true</proxRec>
          <radiusRec>5</radiusRec>
          <hoistPosParent>-1.5 0 0</hoistPosParent>
          <hoistPosPayload>0 0 0</hoistPosPayload>
-         <pickupWorldPosPayload>256.65 43.54 80</pickupWorldPosPayload>
+         <pickupWorldPosPayload>22 -306 22.5</pickupWorldPosPayload>
          <initialState>3</initialState> <!-- 0: attached, 1: falling, 2: teleporting, 3: resting @ pickup pos-->
          <dropTopic>drop_1</dropTopic>
+         <payloadTrackingTopic>soccer_ball_1</payloadTrackingTopic>
       </plugin>
    </gazebo>
 
-   <link name="${namespace}/payload_2">
+   <link name="${namespace}/soccer_ball_2">
       <inertial>
          <origin xyz="0 0 0" rpy="0 0 0" />
          <mass value="0.25" />
@@ -1293,23 +1294,23 @@
       <visual>
          <origin xyz="0 0 0" rpy="0 0 0" />
          <geometry>
-            <box size = "0.5 0.5 0.5" />
+            <sphere radius = "0.5" />
          </geometry>
       </visual>
       <collision>
          <origin xyz="0 0 0" rpy="0 0 0" />
          <geometry>
-            <box size = "0.5 0.5 0.5" />
+            <sphere radius = "0.5" />
          </geometry>
       </collision>
    </link>
    <joint name="${namespace}/payload_2_joint" type="floating">
       <parent link="${namespace}/payload_hook" />
-      <child link="${namespace}/payload_2" />
+      <child link="${namespace}/soccer_ball_2" />
       <origin xyz="-1.5 0 0" rpy="0 0 0" />
    </joint>
-   <gazebo reference="${namespace}/payload_2">
-      <material>Gazebo/Red</material>
+   <gazebo reference="${namespace}/soccer_ball_2">
+      <material>Gazebo/White</material>
       <mu1>0.2</mu1>
       <mu2>0.2</mu2>
       <kp>10000</kp>
@@ -1319,19 +1320,20 @@
       <plugin filename="librotors_gazebo_payload_plugin.so" name="payload_plugin_1">
          <robotNamespace>${namespace}</robotNamespace>
          <joint>${namespace}/payload_2_joint</joint>
-         <payload>${namespace}/payload_2</payload>
+         <payload>${namespace}/soccer_ball_2</payload>
          <parent>${namespace}/payload_hook</parent>
          <proxRec>true</proxRec>
          <radiusRec>5</radiusRec>
          <hoistPosParent>-1.5 0 0</hoistPosParent>
          <hoistPosPayload>0 0 0</hoistPosPayload>
-         <pickupWorldPosPayload>246.65 38.54 80</pickupWorldPosPayload>
+         <pickupWorldPosPayload>-49 -328 22.5</pickupWorldPosPayload>
          <initialState>3</initialState> <!-- 0: attached, 1: falling, 2: teleporting, 3: resting @ pickup pos-->
          <dropTopic>drop_1</dropTopic>
+         <payloadTrackingTopic>soccer_ball_2</payloadTrackingTopic>
       </plugin>
    </gazebo>
 
-   <link name="${namespace}/payload_3">
+   <link name="${namespace}/steak_1">
       <inertial>
          <origin xyz="0 0 0" rpy="0 0 0" />
          <mass value="0.25" />
@@ -1340,7 +1342,7 @@
       <visual>
          <origin xyz="0 0 0" rpy="0 0 0" />
          <geometry>
-            <box size = "0.5 0.5 0.5" />
+           <mesh filename="package://rotors_gazebo/models/fw_challenge/meshes/fw_challenge_grill_steak_a.stl" scale="1 1 1" />
          </geometry>
       </visual>
       <collision>
@@ -1350,31 +1352,68 @@
          </geometry>
       </collision>
    </link>
-   <joint name="${namespace}/payload_3_joint" type="floating">
-      <parent link="${namespace}/payload_hook" />
-      <child link="${namespace}/payload_3" />
-      <origin xyz="-1.5 0 0" rpy="0 0 0" />
-   </joint>
-   <gazebo reference="${namespace}/payload_3">
-      <material>Gazebo/Blue</material>
+   <gazebo reference="${namespace}/steak_1">
+      <material>Gazebo/Red</material>
       <mu1>0.2</mu1>
       <mu2>0.2</mu2>
       <kp>10000</kp>
       <kd>1</kd>
    </gazebo>
+   <joint name="${namespace}/steak_vis_ab_1_joint" type="fixed">
+      <parent link="${namespace}/steak_1" />
+      <child link="${namespace}/steak_vis_b_1" />
+   </joint>
+   <link name="${namespace}/steak_vis_b_1">
+      <inertial>
+         <mass value="0.001" />
+         <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+      </inertial>
+      <visual>
+         <geometry>
+            <mesh filename="package://rotors_gazebo/models/fw_challenge/meshes/fw_challenge_grill_steak_b.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+   </link>
+   <gazebo reference="${namespace}/steak_vis_b_1">
+      <material>Gazebo/White</material>
+   </gazebo>
+   <joint name="${namespace}/steak_vis_bc_1_joint" type="fixed">
+      <parent link="${namespace}/steak_vis_b_1" />
+      <child link="${namespace}/steak_vis_c_1" />
+   </joint>
+   <link name="${namespace}/steak_vis_c_1">
+      <inertial>
+         <mass value="0.001" />
+         <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+      </inertial>
+      <visual>
+         <geometry>
+            <mesh filename="package://rotors_gazebo/models/fw_challenge/meshes/fw_challenge_grill_steak_c.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+   </link>
+   <gazebo reference="${namespace}/steak_vis_c_1">
+      <material>Gazebo/Red</material>
+   </gazebo>
+   <joint name="${namespace}/payload_3_joint" type="floating">
+      <parent link="${namespace}/payload_hook" />
+      <child link="${namespace}/steak_1" />
+      <origin xyz="-1.5 0 0" rpy="0 0 0" />
+   </joint>
    <gazebo>
       <plugin filename="librotors_gazebo_payload_plugin.so" name="payload_plugin_1">
          <robotNamespace>${namespace}</robotNamespace>
          <joint>${namespace}/payload_3_joint</joint>
-         <payload>${namespace}/payload_3</payload>
+         <payload>${namespace}/steak_1</payload>
          <parent>${namespace}/payload_hook</parent>
          <proxRec>true</proxRec>
          <radiusRec>5</radiusRec>
          <hoistPosParent>-1.5 0 0</hoistPosParent>
          <hoistPosPayload>0 0 0</hoistPosPayload>
-         <pickupWorldPosPayload>246.65 48.54 80</pickupWorldPosPayload>
+         <pickupWorldPosPayload>251.65 43.54 80</pickupWorldPosPayload>
          <initialState>3</initialState> <!-- 0: attached, 1: falling, 2: teleporting, 3: resting @ pickup pos-->
          <dropTopic>drop_1</dropTopic>
+         <payloadTrackingTopic>steak_1</payloadTrackingTopic>
       </plugin>
    </gazebo>
 
@@ -1571,7 +1610,7 @@
          <qgc_addr>INADDR_ANY</qgc_addr>
          <qgc_udp_port>14550</qgc_udp_port>
          <hil_mode>true</hil_mode>
-         <hil_state_level>false</hil_state_level>
+         <hil_state_level>true</hil_state_level>
          <enable_lockstep>false</enable_lockstep>
          <use_tcp>false</use_tcp>
          <motorSpeedCommandPubTopic>/command/motor_speed_old</motorSpeedCommandPubTopic>

@@ -102,7 +102,10 @@ private:
     common::Timer reload_timer_;
 
     std::string drop_topic_;
+    std::string tracking_pos_pub_topic_;
+
     transport::SubscriberPtr drop_sub_;
+    transport::PublisherPtr tracking_pos_pub_;
 
     struct Servo {
 
