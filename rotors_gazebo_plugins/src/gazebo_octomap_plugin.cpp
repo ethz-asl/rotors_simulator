@@ -23,7 +23,7 @@
 #include <octomap_msgs/conversions.h>
 #include <gazebo/common/Time.hh>
 #include <gazebo/common/CommonTypes.hh>
-#include <gazebo/math/Vector3.hh>
+#include <ignition/math/Vector3.hh>
 
 namespace gazebo {
 
@@ -72,7 +72,7 @@ bool OctomapFromGazeboWorld::ServiceCallback(
       ROS_ERROR("The octree is NULL. Will not save that.");
     }
   }
-  common::Time now = world_->GetSimTime();
+  common::Time now = world_->SimTime();
   res.map.header.frame_id = "world";
   res.map.header.stamp = ros::Time(now.sec, now.nsec);
 
@@ -85,9 +85,9 @@ bool OctomapFromGazeboWorld::ServiceCallback(
     octomap_publisher_.publish(res.map);
   }
 
-  common::SphericalCoordinatesPtr sphericalCoordinates = world_->GetSphericalCoordinates();
-  ignition::ignition::math::Vector3d origin_cartesian(0.0, 0.0, 0.0);
-  ignition::ignition::math::Vector3d origin_spherical = sphericalCoordinates->
+  common::SphericalCoordinatesPtr sphericalCoordinates = world_->SphericalCoords();
+  ignition::math::Vector3d origin_cartesian(0.0, 0.0, 0.0);
+  ignition::math::Vector3d origin_spherical = sphericalCoordinates->
       SphericalFromLocal(origin_cartesian);
 
   res.origin_latitude = origin_spherical.X();
@@ -100,31 +100,31 @@ void OctomapFromGazeboWorld::FloodFill(
     const ignition::math::Vector3d & seed_point, const ignition::math::Vector3d & bounding_box_origin,
     const ignition::math::Vector3d & bounding_box_lengths, const double leaf_size) {
   octomap::OcTreeNode* seed =
-      octomap_->search(seed_point.x, seed_point.y, seed_point.z);
+      octomap_->search(seed_point.X(), seed_point.Y(), seed_point.Z());
   // do nothing if point occupied
   if (seed != NULL && seed->getOccupancy()) return;
 
-  std::stack<octoignition::math::Vector3d > to_check;
-  to_check.push(octoignition::math::Vector3d (seed_point.x, seed_point.y, seed_point.z));
+  std::stack<octomath::Vector3 > to_check;
+  to_check.push(octomath::Vector3 (seed_point.X(), seed_point.Y(), seed_point.Z()));
 
   while (to_check.size() > 0) {
-    octoignition::math::Vector3d p = to_check.top();
+    octomath::Vector3 p = to_check.top();
 
-    if ((p.x() > bounding_box_origin.x - bounding_box_lengths.x / 2) &&
-        (p.x() < bounding_box_origin.x + bounding_box_lengths.x / 2) &&
-        (p.y() > bounding_box_origin.y - bounding_box_lengths.y / 2) &&
-        (p.y() < bounding_box_origin.y + bounding_box_lengths.y / 2) &&
-        (p.z() > bounding_box_origin.z - bounding_box_lengths.z / 2) &&
-        (p.z() < bounding_box_origin.z + bounding_box_lengths.z / 2) &&
+    if ((p.x() > bounding_box_origin.X() - bounding_box_lengths.X() / 2) &&
+        (p.x() < bounding_box_origin.X() + bounding_box_lengths.X() / 2) &&
+        (p.y() > bounding_box_origin.Y() - bounding_box_lengths.Y() / 2) &&
+        (p.y() < bounding_box_origin.Y() + bounding_box_lengths.Y() / 2) &&
+        (p.z() > bounding_box_origin.Z() - bounding_box_lengths.Z() / 2) &&
+        (p.z() < bounding_box_origin.Z() + bounding_box_lengths.Z() / 2) &&
         (!octomap_->search(p))) {
       octomap_->setNodeValue(p, 0);
       to_check.pop();
-      to_check.push(octoignition::math::Vector3d (p.x() + leaf_size, p.y(), p.z()));
-      to_check.push(octoignition::math::Vector3d (p.x() - leaf_size, p.y(), p.z()));
-      to_check.push(octoignition::math::Vector3d (p.x(), p.y() + leaf_size, p.z()));
-      to_check.push(octoignition::math::Vector3d (p.x(), p.y() - leaf_size, p.z()));
-      to_check.push(octoignition::math::Vector3d (p.x(), p.y(), p.z() + leaf_size));
-      to_check.push(octoignition::math::Vector3d (p.x(), p.y(), p.z() - leaf_size));
+      to_check.push(octomath::Vector3 (p.x() + leaf_size, p.y(), p.z()));
+      to_check.push(octomath::Vector3 (p.x() - leaf_size, p.y(), p.z()));
+      to_check.push(octomath::Vector3 (p.x(), p.y() + leaf_size, p.z()));
+      to_check.push(octomath::Vector3 (p.x(), p.y() - leaf_size, p.z()));
+      to_check.push(octomath::Vector3 (p.x(), p.y(), p.z() + leaf_size));
+      to_check.push(octomath::Vector3 (p.x(), p.y(), p.z() - leaf_size));
 
     } else {
       to_check.pop();
@@ -141,8 +141,8 @@ bool OctomapFromGazeboWorld::CheckIfInterest(const ignition::math::Vector3d & ce
   double dist;
   std::string entity_name;
 
-  start_point.x += leaf_size / 2;
-  end_point.x -= leaf_size / 2;
+  start_point.X() += leaf_size / 2;
+  end_point.X() -= leaf_size / 2;
   ray->SetPoints(start_point, end_point);
   ray->GetIntersection(dist, entity_name);
 
@@ -150,8 +150,8 @@ bool OctomapFromGazeboWorld::CheckIfInterest(const ignition::math::Vector3d & ce
 
   start_point = central_point;
   end_point = central_point;
-  start_point.y += leaf_size / 2;
-  end_point.y -= leaf_size / 2;
+  start_point.Y() += leaf_size / 2;
+  end_point.Y() -= leaf_size / 2;
   ray->SetPoints(start_point, end_point);
   ray->GetIntersection(dist, entity_name);
 
@@ -159,8 +159,8 @@ bool OctomapFromGazeboWorld::CheckIfInterest(const ignition::math::Vector3d & ce
 
   start_point = central_point;
   end_point = central_point;
-  start_point.z += leaf_size / 2;
-  end_point.z -= leaf_size / 2;
+  start_point.Z() += leaf_size / 2;
+  end_point.Z() -= leaf_size / 2;
   ray->SetPoints(start_point, end_point);
   ray->GetIntersection(dist, entity_name);
 
@@ -190,7 +190,7 @@ void OctomapFromGazeboWorld::CreateOctomap(
   octomap_->setClampingThresMax(0.97);
   octomap_->setOccupancyThres(0.7);
 
-  gazebo::physics::PhysicsEnginePtr engine = world_->PhysicsEngine();
+  gazebo::physics::PhysicsEnginePtr engine = world_->Physics();
   engine->InitForThread();
   gazebo::physics::RayShapePtr ray =
       boost::dynamic_pointer_cast<gazebo::physics::RayShape>(
@@ -199,21 +199,21 @@ void OctomapFromGazeboWorld::CreateOctomap(
   std::cout << "Rasterizing world and checking collisions" << std::endl;
 
   for (double x =
-           leaf_size / 2 + bounding_box_origin.x - bounding_box_lengths.x / 2;
-       x < bounding_box_origin.x + bounding_box_lengths.x / 2; x += leaf_size) {
+           leaf_size / 2 + bounding_box_origin.X() - bounding_box_lengths.X() / 2;
+       x < bounding_box_origin.X() + bounding_box_lengths.X() / 2; x += leaf_size) {
     int progress =
-        round(100 * (x + bounding_box_lengths.x / 2 - bounding_box_origin.x) /
-              bounding_box_lengths.x);
+        round(100 * (x + bounding_box_lengths.X() / 2 - bounding_box_origin.X()) /
+              bounding_box_lengths.X());
     std::cout << "\rPlacing model edges into octomap... " << progress
               << "%                 ";
 
     for (double y =
-             leaf_size / 2 + bounding_box_origin.y - bounding_box_lengths.y / 2;
-         y < bounding_box_origin.y + bounding_box_lengths.y / 2;
+             leaf_size / 2 + bounding_box_origin.Y() - bounding_box_lengths.Y() / 2;
+         y < bounding_box_origin.Y() + bounding_box_lengths.Y() / 2;
          y += leaf_size) {
-      for (double z = leaf_size / 2 + bounding_box_origin.z -
-                      bounding_box_lengths.z / 2;
-           z < bounding_box_origin.z + bounding_box_lengths.z / 2;
+      for (double z = leaf_size / 2 + bounding_box_origin.Z() -
+                      bounding_box_lengths.Z() / 2;
+           z < bounding_box_origin.Z() + bounding_box_lengths.Z() / 2;
            z += leaf_size) {
         ignition::math::Vector3d point(x, y, z);
         if (CheckIfInterest(point, ray, leaf_size)) {
@@ -227,14 +227,14 @@ void OctomapFromGazeboWorld::CreateOctomap(
 
   // flood fill from top and bottom
   std::cout << "\rFlood filling freespace...                                  ";
-  FloodFill(ignition::math::Vector3d (bounding_box_origin.x + leaf_size / 2,
-                          bounding_box_origin.y + leaf_size / 2,
-                          bounding_box_origin.z + bounding_box_lengths.z / 2 -
+  FloodFill(ignition::math::Vector3d (bounding_box_origin.X() + leaf_size / 2,
+                          bounding_box_origin.Y() + leaf_size / 2,
+                          bounding_box_origin.Z() + bounding_box_lengths.Z() / 2 -
                               leaf_size / 2),
             bounding_box_origin, bounding_box_lengths, leaf_size);
-  FloodFill(ignition::math::Vector3d (bounding_box_origin.x + leaf_size / 2,
-                          bounding_box_origin.y + leaf_size / 2,
-                          bounding_box_origin.z - bounding_box_lengths.z / 2 +
+  FloodFill(ignition::math::Vector3d (bounding_box_origin.X() + leaf_size / 2,
+                          bounding_box_origin.Y() + leaf_size / 2,
+                          bounding_box_origin.Z() - bounding_box_lengths.Z() / 2 +
                               leaf_size / 2),
             bounding_box_origin, bounding_box_lengths, leaf_size);
 
@@ -243,20 +243,20 @@ void OctomapFromGazeboWorld::CreateOctomap(
 
   // set unknown to filled
   for (double x =
-           leaf_size / 2 + bounding_box_origin.x - bounding_box_lengths.x / 2;
-       x < bounding_box_origin.x + bounding_box_lengths.x / 2; x += leaf_size) {
+           leaf_size / 2 + bounding_box_origin.X() - bounding_box_lengths.X() / 2;
+       x < bounding_box_origin.X() + bounding_box_lengths.X() / 2; x += leaf_size) {
     int progress =
-        round(100 * (x + bounding_box_lengths.x / 2 - bounding_box_origin.x) /
-              bounding_box_lengths.x);
+        round(100 * (x + bounding_box_lengths.X() / 2 - bounding_box_origin.X()) /
+              bounding_box_lengths.X());
     std::cout << "\rFilling closed spaces... " << progress << "%              ";
 
     for (double y =
-             leaf_size / 2 + bounding_box_origin.y - bounding_box_lengths.y / 2;
-         y < bounding_box_origin.y + bounding_box_lengths.y / 2;
+             leaf_size / 2 + bounding_box_origin.Y() - bounding_box_lengths.Y() / 2;
+         y < bounding_box_origin.Y() + bounding_box_lengths.Y() / 2;
          y += leaf_size) {
-      for (double z = leaf_size / 2 + bounding_box_origin.z -
-                      bounding_box_lengths.z / 2;
-           z < bounding_box_origin.z + bounding_box_lengths.z / 2;
+      for (double z = leaf_size / 2 + bounding_box_origin.Z() -
+                      bounding_box_lengths.Z() / 2;
+           z < bounding_box_origin.Z() + bounding_box_lengths.Z() / 2;
            z += leaf_size) {
         octomap::OcTreeNode* seed = octomap_->search(x, y, z);
         if (!seed) octomap_->setNodeValue(x, y, z, 1);
