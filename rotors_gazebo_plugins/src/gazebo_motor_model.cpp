@@ -405,7 +405,21 @@ void GazeboMotorModel::UpdateForcesAndMoments() {
         err = -M_PI;
       }
 
-      double force = pids_.Update(err, sampling_time_);
+      // double force = pids_.Update(err, sampling_time_);
+      double pTerm, dTerm, iTerm, dErr;
+      double pErr = err;
+
+      // Calculate proportional contribution to command
+      pTerm = pids_.GetPGain() * pErr;
+
+      // Calculate the derivative error, assuming zero reference angular velocity
+      dErr = joint_->GetVelocity(0);
+
+      // Calculate derivative contribution to command
+      dTerm = pids_.GetDGain() * dErr;
+      double force = -pTerm - dTerm;
+
+      // double force = pids_.Update(err, sampling_time_);
       joint_->SetForce(0, force);
       break;
     }
