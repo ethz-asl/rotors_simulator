@@ -40,10 +40,10 @@
     <node name="delta_manipulator_joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" clear_params="true">
       <param name="rate" value="1000"/>
       <rosparam param="source_list">
-        [/neo11/delta_manipulator/joint_0_actuator,
-        /neo11/delta_manipulator/joint_1_actuator,
-        /neo11/delta_manipulator/joint_2_actuator,
-        /neo11/delta_manipulator/end_effector_joint_actuator]
+        [/firefly/delta_manipulator/joint_0_actuator,
+        /firefly/delta_manipulator/joint_1_actuator,
+        /firefly/delta_manipulator/joint_2_actuator,
+        /firefly/delta_manipulator/end_effector_joint_actuator]
       </rosparam>
       <remap from="joint_states" to="delta_manipulator/joint_states"/>
     </node>
