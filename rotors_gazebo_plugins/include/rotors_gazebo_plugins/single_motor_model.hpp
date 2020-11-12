@@ -84,6 +84,17 @@ class SingleMotorModel : public MotorModel {
 
   virtual ~SingleMotorModel() {}
 
+  void GetActuatorState(/*&position, &velocity, &effort*/){
+    // Returns actuator position, velocity and effort
+    UpdateForcesAndMoments();
+    // TODO: return results.
+  }
+
+  void SetActuatorReference(/*position, velocity, effort*/){
+    // Set reference actuator position, velocity and effort (type dependent)
+    // TODO: Set refs.
+  }
+
  protected:
   // Parameters
   MotorType type_;
@@ -102,6 +113,7 @@ class SingleMotorModel : public MotorModel {
   double min_rot_position_;
   double position_zero_offset_;
   double rotor_velocity_slowdown_sim_;
+  // TODO: add pids, torque limits
 
   sdf::ElementPtr motor_;
   physics::JointPtr joint_;
@@ -164,9 +176,11 @@ class SingleMotorModel : public MotorModel {
                         rotor_velocity_slowdown_sim_, 10);
   }
 
-  void Publish(){}
+  void Publish(){} // No publishing here
 
-  void UpdateForcesAndMoments(){}
+  void UpdateForcesAndMoments(){
+    // TODO: add force/moment updates 
+  }
 };
 
 }  // namespace gazebo

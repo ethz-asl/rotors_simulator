@@ -86,7 +86,8 @@ void GazeboMultimotorPlugin::OnUpdate(const common::UpdateInfo &) {
     return;
   }
 
-  
+  // TODO: get updated physics.
+
   Publish();
 }
 
@@ -148,6 +149,7 @@ void GazeboMultimotorPlugin::CreatePubsAndSubs() {
 void GazeboMultimotorPlugin::CommandMotorCallback(
     GzActuatorsMsgPtr &actuators_msg) {
   
+	// TODO: update motor refs
 
   received_first_reference_ = true;
 }
