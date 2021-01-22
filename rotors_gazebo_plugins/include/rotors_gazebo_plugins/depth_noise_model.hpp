@@ -45,6 +45,14 @@ class KinectDepthNoiseModel : public DepthNoiseModel {
   void ApplyNoise(uint32_t width, uint32_t height, float *data);
 };
 
+class PMDDepthNoiseModel : public DepthNoiseModel {
+ public:
+  PMDDepthNoiseModel() : DepthNoiseModel() {}
+
+  void ApplyNoise(uint32_t width, uint32_t height, float *data);
+};
+
+
 class D435DepthNoiseModel : public DepthNoiseModel {
  public:
   D435DepthNoiseModel()

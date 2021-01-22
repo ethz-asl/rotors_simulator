@@ -1,0 +1,160 @@
+<?xml version="1.0"?>
+<robot name="$(arg mav_name)" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
+
+  <link name="rgbd_camera/base_link">
+    <collision>
+      <origin xyz="0 -0.0175 0" rpy="0 0 0" />
+      <geometry>
+              <box size="0.04 0.04 0.02" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+		<box size="0.04 0.04 0.02"/>
+      </geometry>
+      <material name="black" />
+    </visual>
+  </link>
+
+<link name="rgbd_camera/base_link_gazebo"/>
+
+<joint name="rgbd_camera/base_link_gazebo_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${pi/2} ${-pi/2} 0" />
+   <parent link="rgbd_camera/base_link"/>
+   <child link="rgbd_camera/base_link_gazebo"/>
+
+</joint>
+
+ 
+<!-- Define Macro to add a depth camera using noisy depth plugin  -->
+  <xacro:macro name="rgbd_sensor_depth_macro"
+    params="namespace parent_link camera_suffix frame_rate width height fov max_range min_range baseline *origin">
+    <link name="${namespace}/camera_${camera_suffix}_link">
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <cylinder length="0.01" radius="0.007" />
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
+    <joint name="${namespace}/camera_${camera_suffix}_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/camera_${camera_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+
+    <link name="${namespace}/camera_${camera_suffix}_optical_center_link" />
+    <joint name="${namespace}/camera_${camera_suffix}_optical_center_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+      <parent link="${namespace}/camera_${camera_suffix}_link" />
+      <child link="${namespace}/camera_${camera_suffix}_optical_center_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+
+    <!-- Call rgb sensor macro-->
+
+    <gazebo reference="${namespace}/camera_${camera_suffix}_link">
+      <sensor type="depth" name="${namespace}_camera_${camera_suffix}">
+        <always_on>true</always_on>
+        <update_rate>${frame_rate}</update_rate>
+        <camera>
+          <horizontal_fov>${fov}</horizontal_fov>
+          <image>
+            <format>L8</format>
+            <width>${width}</width>
+            <height>${height}</height>
+          </image>
+          <clip>
+            <near>${min_range}</near>
+            <far>${max_range}</far>
+          </clip>
+        </camera>
+        <plugin name="${namespace}_camera_${camera_suffix}" filename="librotors_gazebo_noisydepth_plugin.so">
+          <robotNamespace>${namespace}</robotNamespace>
+          <alwaysOn>true</alwaysOn>
+          <baseline>${baseline}</baseline>
+          <updateRate>${frame_rate}</updateRate>
+          <cameraName>camera_${camera_suffix}</cameraName>
+          <horizontal_fov>${fov}</horizontal_fov>
+ 	  <depthNoiseModelName>PMD</depthNoiseModelName>
+ 	  <depthNoiseMinDist>0.1</depthNoiseMinDist>
+ 	  <depthNoiseMaxDist>6.0</depthNoiseMaxDist>
+	 
+          <imageTopicName>camera/image_raw</imageTopicName>
+          <cameraInfoTopicName>camera/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>depth/image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>depth/points</pointCloudTopicName>
+          <frameName>camera_${camera_suffix}_optical_center_link</frameName>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+      </sensor>
+
+  <sensor type="camera" name="${namespace}_camera_${camera_suffix}">
+        <update_rate>${frame_rate}</update_rate>
+        <camera name="intensity">
+          <horizontal_fov>${fov}</horizontal_fov>
+          <image>
+            <width>${width}</width>
+            <height>${height}</height>
+            <format>L8</format>
+          </image>
+          <clip>
+            <near>0.01</near>
+            <far>100.0</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <!-- Noise is sampled independently per pixel on each frame.
+                 That pixel's noise value is added to each of its color
+                 channels, which at that point lie in the range [0,1]. -->
+            <mean>0.07</mean>
+            <stddev>0.0</stddev>
+          </noise>
+        </camera>
+        <plugin name="${namespace}_camera_${camera_suffix}_controller" filename="libgazebo_ros_camera.so">
+          <robotNamespace>${namespace}</robotNamespace>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>${frame_rate}</updateRate>
+          <cameraName>camera_${camera_suffix}</cameraName>
+          <imageTopicName>intensity/image_raw</imageTopicName>
+          <cameraInfoTopicName>intensity/camera_info</cameraInfoTopicName>
+          <frameName>camera_${camera_suffix}_optical_center_link</frameName>
+          <hackBaseline>0.0</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+</sensor>
+    </gazebo>	
+
+  </xacro:macro>
+
+  <xacro:rgbd_sensor_depth_macro
+    namespace="${namespace}/rgbd" parent_link="rgbd_camera/base_link_gazebo"
+    camera_suffix="depth"
+    frame_rate="5.0"
+    fov = "1.59174"
+    baseline = "0.05"
+    width = "352"
+    height = "287"
+    max_range="7.0"
+    min_range="0.05">
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+  </xacro:rgbd_sensor_depth_macro>
+
+</robot>
