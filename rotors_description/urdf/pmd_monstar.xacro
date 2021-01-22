@@ -2,14 +2,6 @@
 <robot name="$(arg mav_name)" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
 
-  <!-- Note that whenever possible, values from Realsense D435 were used.
-       See Intel Document 337029-004: Intel RealSense TM D400 Series Product Family Datasheet.
-       https://www.intel.com/content/dam/support/us/en/documents/emerging-technologies/intel-realsense-technology/Intel-RealSense-D400-Series-Datasheet.pdf
-
-       Here, RGBD camera baselink frame corresponds to the left IR camera center, which is also the camera
-       the sensor is calibrated to in real life and the point cloud is registered to.
-  -->
-
   <link name="rgbd_camera/base_link">
     <collision>
       <origin xyz="0 -0.0175 0" rpy="0 0 0" />
@@ -34,7 +26,6 @@
    <child link="rgbd_camera/base_link_gazebo"/>
 
 </joint>
-
 
  
 <!-- Define Macro to add a depth camera using noisy depth plugin  -->
@@ -71,7 +62,7 @@
     <!-- Call rgb sensor macro-->
 
     <gazebo reference="${namespace}/camera_${camera_suffix}_link">
-      <sensor type="depth" name="${namespace}_camera_{camera_suffix}">
+      <sensor type="depth" name="${namespace}_camera_${camera_suffix}">
         <always_on>true</always_on>
         <update_rate>${frame_rate}</update_rate>
         <camera>
@@ -86,7 +77,7 @@
             <far>${max_range}</far>
           </clip>
         </camera>
-        <plugin name="${namespace}_camera_{camera_suffix}" filename="librotors_gazebo_noisydepth_plugin.so">
+        <plugin name="${namespace}_camera_${camera_suffix}" filename="librotors_gazebo_noisydepth_plugin.so">
           <robotNamespace>${namespace}</robotNamespace>
           <alwaysOn>true</alwaysOn>
           <baseline>${baseline}</baseline>
@@ -153,13 +144,6 @@
 
   </xacro:macro>
 
-  <!-- Call depth sensor macro
-    Realsense values -
-      91.2 Deg Horizontal FOV
-      848x480 Optimal depth resolution
-        w 195 mm minimium-z depth
-      5 cm baseline.
-  -->
   <xacro:rgbd_sensor_depth_macro
     namespace="${namespace}/rgbd" parent_link="rgbd_camera/base_link_gazebo"
     camera_suffix="depth"
