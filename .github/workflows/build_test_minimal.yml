@@ -1,5 +1,5 @@
 
-name: Build Test
+name: HIL Build Test
 on:
   push:
     branches:
@@ -37,7 +37,7 @@ jobs:
         cd $HOME/catkin_ws/src
         ln -s $GITHUB_WORKSPACE
         cd $HOME/catkin_ws
-        wstool init src src/rotors_simulator/rotors_hil.rosinstall
+        wstool init src src/rotors_simulator/rotors_minimal.rosinstall
         wstool update -t src -j4
         rosdep update
         rosdep install --from-paths src --ignore-src -y --rosdistro ${{matrix.config.rosdistro}}
