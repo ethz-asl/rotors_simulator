@@ -72,6 +72,10 @@ class GazeboFwDynamicsPlugin : public ModelPlugin {
   double NormalizedInputToAngle(const ControlSurface& surface, double input);
 
  private:
+
+  /// \brief    Flag to indicate that gazebo_mavlink_interface plugin handles
+  ///           routing of actuation data (instead of gazebo_ros_interface_plugin)
+  bool use_gazebo_mavlink_interface_;
   /// \brief    Are the input commands coming from a joystick (as opposed to
   ///           a remote control via HIL interface, for example)?
   bool is_input_joystick_;

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="target_uav" default="techpod"/>
+  <arg name="namespace" default="$(arg target_uav)_tc"/>
+  <arg name="tracking_cam" default="$(find rotors_description)/urdf/tracking_cam.xacro"/>
+  <arg name="target_pos_topic" default="todo"/>
+  <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
+  <arg name="x" default="20.0"/>
+  <arg name="y" default="5.0"/>
+  <arg name="z" default="0.0"/>
+  <arg name="R" default="0.0"/>
+  <arg name="P" default="0.0"/>
+  <arg name="Y" default="0.0"/>
+  <arg name="horizontal_fov" default="0.3"/>
+
+  <!-- send the tracking camera XML to param server -->
+  <param name="tracking_cam_description" command="
+    $(find xacro)/xacro.py '$(arg tracking_cam)'
+    namespace:=$(arg namespace)
+    target_pos_topic:=$(arg target_pos_topic)
+    h_fov:=$(arg horizontal_fov)"
+  />
+  <!--<param name="tf_prefix" type="string" value="$(arg tf_prefix)" />-->
+
+  <!-- push tracking_cam_description to factory and spawn camera in gazebo -->
+  <node name="spawn_tracking_cam" pkg="gazebo_ros" type="spawn_model"
+   args="-param tracking_cam_description
+         -urdf
+         -x $(arg x)
+         -y $(arg y)
+         -z $(arg z)
+         -R $(arg R)
+         -P $(arg P)
+         -Y $(arg Y)
+        -model $(arg namespace)"
+        respawn="false" output="screen">
+  </node>
+
+</launch>

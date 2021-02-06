@@ -99,11 +99,105 @@ void GazeboRosInterfacePlugin::Load(physics::WorldPtr _world,
   gz_broadcast_transform_sub_ = gz_node_handle_->Subscribe(
       "~/" + kBroadcastTransformSubtopic,
       &GazeboRosInterfacePlugin::GzBroadcastTransformMsgCallback, this);
+
+  // ================================= //
+  // ====== WORLD ORIGIN SETUP ======= //
+  // ================================= //
+
+  //world_origin_ = world_->SphericalCoords();
+  ignition::math::Vector3d lat_lon_alt = world_->SphericalCoords()->SphericalFromLocal(ignition::math::Vector3d(0.0,0.0,0.0));
+  world_origin_msg_.latitude = lat_lon_alt.X();  // gazebo origin latitude in degrees
+  world_origin_msg_.longitude = lat_lon_alt.Y(); // gazebo origin longitude in degrees
+  world_origin_msg_.altitude = lat_lon_alt.Z();  // gazebo origin amsl in meters
+
 }
 
 void GazeboRosInterfacePlugin::OnUpdate(const common::UpdateInfo& _info) {
-  // Do nothing
-  // This plugins actions are all executed through message callbacks.
+    // Do nothing
+    // This plugins actions are all executed through message callbacks.
+
+    //gzdbg<<"onUpdate\n";
+    gz_sensor_msgs::JointState every_joint_state;
+
+    /*
+    every_joint_state.mutable_header()->set_frame_id("");
+    every_joint_state.mutable_header()->mutable_stamp()->set_sec(0);
+    every_joint_state.mutable_header()->mutable_stamp()->set_nsec(0);
+   */
+    ros_all_joint_state_msg_.header.stamp.sec = 0;
+    ros_all_joint_state_msg_.header.stamp.nsec = 0;
+    ros_all_joint_state_msg_.header.frame_id = "";
+
+    int n_joints = 0;
+    for (physics::ModelPtr model : world_->Models()) {
+        for (physics::JointPtr joint : model->GetJoints()) {
+            ++n_joints;
+        }
+    }
+
+    ros_all_joint_state_msg_.name.resize(n_joints);
+    ros_all_joint_state_msg_.position.resize(n_joints);
+
+    int idx=0;
+    for (physics::ModelPtr model : world_->Models()) {
+        for (physics::JointPtr joint : model->GetJoints()) {
+            if(idx<n_joints){
+                ros_all_joint_state_msg_.name[idx] = joint->GetName();
+                ros_all_joint_state_msg_.position[idx] = joint->Position();
+            }
+            ++idx;
+            /*
+            std::string* name = every_joint_state.add_name();
+            every_joint_state.add_position(joint->Position());
+            *name = joint->GetName();
+            */
+        }
+    }
+
+    if(n_joints>0){
+        if(!joint_states_advertised){
+            joint_states_advertised = true;
+            ros_joint_state_publisher = ros_node_handle_->advertise<sensor_msgs::JointState>("/all_joint_states", 1);
+        }
+
+        //GazeboRosInterfacePlugin::GzJointStateMsgCallback(boost::shared_ptr<gz_sensor_msgs::JointState>(&every_joint_state), ros_joint_state_publisher);
+        ros_joint_state_publisher.publish(ros_all_joint_state_msg_);
+    }
+
+    if(true){
+      if(!world_origin_advertised_){
+        world_origin_advertised_ = true;
+        ros_world_origin_publisher_ = ros_node_handle_->advertise<geographic_msgs::GeoPoint>("/gazebo_world_origin", 1);
+      }
+        ros_world_origin_publisher_.publish(world_origin_msg_);
+    }
+
+    /*
+    gzdbg<<"segfault dbg1\n";
+    ConvertHeaderGzToRos(gz_joint_state_msg->header(),
+                         &ros_joint_state_msg_.header);
+
+    gzdbg<<"segfault dbg2\n";
+    ros_joint_state_msg_.name.resize(gz_joint_state_msg->name_size());
+    for (int i = 0; i < gz_joint_state_msg->name_size(); i++) {
+      ros_joint_state_msg_.name[i] = gz_joint_state_msg->name(i);
+    }
+
+    gzdbg<<"segfault dbg3\n";
+    ros_joint_state_msg_.position.resize(gz_joint_state_msg->position_size());
+    for (int i = 0; i < gz_joint_state_msg->position_size(); i++) {
+      ros_joint_state_msg_.position[i] = gz_joint_state_msg->position(i);
+    }
+
+    gzdbg<<"n_name: "<<gz_joint_state_msg->name_size()<<"n_pos: "<<gz_joint_state_msg->position_size()<<"\n";
+    gzdbg<<"publisher: "<<ros_publisher<<"\n";
+
+    gzdbg<<"segfault dbg4\n";
+
+    // Publish to ROS.
+    ros_publisher.publish(ros_joint_state_msg_);
+    gzdbg<<"segfault dbg5\n";
+    */
 }
 
 /// \brief      A helper class that provides storage for additional parameters
@@ -166,6 +260,9 @@ void GazeboRosInterfacePlugin::ConnectHelper(
   // Save a reference to the subscriber pointer so subscriber
   // won't be deleted.
   subscriberPtrs_.push_back(subscriberPtr);
+
+  gzdbg << "Connecting Gazebo topic \"" << gazeboTopicName
+        << "\" to ROS topic \"" << rosTopicName << "\"." << std::endl;
 }
 
 void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
@@ -180,9 +277,6 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
       gz_connect_gazebo_to_ros_topic_msg->gazebo_topic();
   const std::string rosTopicName =
       gz_connect_gazebo_to_ros_topic_msg->ros_topic();
-
-  gzdbg << "Connecting Gazebo topic \"" << gazeboTopicName
-        << "\" to ROS topic \"" << rosTopicName << "\"." << std::endl;
 
   switch (gz_connect_gazebo_to_ros_topic_msg->msgtype()) {
     case gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS:
@@ -267,13 +361,28 @@ void GazeboRosInterfacePlugin::GzConnectGazeboToRosTopicMsgCallback(
           &GazeboRosInterfacePlugin::GzWrenchStampedMsgCallback, this,
           gazeboNamespace, gazeboTopicName, rosTopicName, gz_node_handle_);
       break;
+    case gz_std_msgs::ConnectGazeboToRosTopic::VIS_VECTOR:
+      ConnectHelper<gz_visualization_msgs::VisVector,
+                    visualization_msgs::Marker>(
+          &GazeboRosInterfacePlugin::GzVisVectorMsgCallback, this,
+          gazeboNamespace, gazeboTopicName, rosTopicName, gz_node_handle_);
+      break;
+
+    case gz_std_msgs::ConnectGazeboToRosTopic::VIS_VECTOR_ARRAY:
+      ConnectHelper<gz_visualization_msgs::VisVectorArray,
+                    visualization_msgs::MarkerArray>(
+          &GazeboRosInterfacePlugin::GzVisVectorArrayMsgCallback, this,
+          gazeboNamespace, gazeboTopicName, rosTopicName, gz_node_handle_);
+      break;
     default:
       gzthrow("ConnectGazeboToRosTopic message type with enum val = "
               << gz_connect_gazebo_to_ros_topic_msg->msgtype()
               << " is not supported by GazeboRosInterfacePlugin.");
   }
 
-  gzdbg << __FUNCTION__ << "() finished." << std::endl;
+  if (kPrintOnMsgCallback) {
+    gzdbg << __FUNCTION__ << "() finished." << std::endl;
+  }
 }
 
 void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
@@ -284,8 +393,17 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
 
   static std::vector<ros::Subscriber> ros_subscribers;
 
+  const std::string gazeboTopicName =
+      gz_connect_ros_to_gazebo_topic_msg->gazebo_topic();
+  const std::string rosTopicName =
+      gz_connect_ros_to_gazebo_topic_msg->ros_topic();
+
+  gzdbg << "Connecting ROS topic \"" <<rosTopicName
+        << "\" to Gazebo topic \"" << gazeboTopicName << "\"." << std::endl;
+
   switch (gz_connect_ros_to_gazebo_topic_msg->msgtype()) {
     case gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS: {
+      gzdbg << "ACTUATORS msgtype: "<<gz_connect_ros_to_gazebo_topic_msg->msgtype()<<std::endl;
       gazebo::transport::PublisherPtr gz_publisher_ptr =
           gz_node_handle_->Advertise<gz_sensor_msgs::Actuators>(
               gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
@@ -304,6 +422,7 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       break;
     }
     case gz_std_msgs::ConnectRosToGazeboTopic::COMMAND_MOTOR_SPEED: {
+      gzdbg << "COMMAND_MOTOR_SPEED msgtype: "<<gz_connect_ros_to_gazebo_topic_msg->msgtype()<<std::endl;
       gazebo::transport::PublisherPtr gz_publisher_ptr =
           gz_node_handle_->Advertise<gz_mav_msgs::CommandMotorSpeed>(
               gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
@@ -323,6 +442,7 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       break;
     }
     case gz_std_msgs::ConnectRosToGazeboTopic::ROLL_PITCH_YAWRATE_THRUST: {
+      gzdbg << "ROLL_PITCH_YAWRATE_THRUST msgtype: "<<gz_connect_ros_to_gazebo_topic_msg->msgtype()<<std::endl;
       gazebo::transport::PublisherPtr gz_publisher_ptr =
           gz_node_handle_->Advertise<gz_mav_msgs::RollPitchYawrateThrust>(
               gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
@@ -343,6 +463,7 @@ void GazeboRosInterfacePlugin::GzConnectRosToGazeboTopicMsgCallback(
       break;
     }
     case gz_std_msgs::ConnectRosToGazeboTopic::WIND_SPEED: {
+      gzdbg << "WIND_SPEED msgtype: "<<gz_connect_ros_to_gazebo_topic_msg->msgtype()<<std::endl;
       gazebo::transport::PublisherPtr gz_publisher_ptr =
           gz_node_handle_->Advertise<gz_mav_msgs::WindSpeed>(
               gz_connect_ros_to_gazebo_topic_msg->gazebo_topic(), 1);
@@ -930,6 +1051,107 @@ void GazeboRosInterfacePlugin::GzWrenchStampedMsgCallback(
   ros_publisher.publish(ros_wrench_stamped_msg_);
 }
 
+void GazeboRosInterfacePlugin::GzVisVectorMsgCallback(
+        GzVisVectorMsgPtr& gz_vis_vector_msg,
+        ros::Publisher ros_publisher){
+
+    visualization_msgs::Marker ros_marker_msg_;
+    geometry_msgs::Point ros_point_msg_;
+
+    ConvertHeaderGzToRos(gz_vis_vector_msg->header(),
+                         &ros_marker_msg_.header);
+
+    ros_marker_msg_.header.stamp = ros::Time();
+    ros_marker_msg_.ns = gz_vis_vector_msg->ns();
+    ros_marker_msg_.id = gz_vis_vector_msg->id();
+    ros_marker_msg_.type = visualization_msgs::Marker::ARROW;
+    ros_marker_msg_.action = visualization_msgs::Marker::ADD;
+
+    // add vector starting point
+    ros_point_msg_.x = gz_vis_vector_msg->startpoint().x();
+    ros_point_msg_.y = gz_vis_vector_msg->startpoint().y();
+    ros_point_msg_.z = gz_vis_vector_msg->startpoint().z();
+    ros_marker_msg_.points.push_back(ros_point_msg_);
+
+    // add vector end point
+    ros_point_msg_.x = gz_vis_vector_msg->startpoint().x() + gz_vis_vector_msg->vector().x();
+    ros_point_msg_.y = gz_vis_vector_msg->startpoint().y() + gz_vis_vector_msg->vector().y();
+    ros_point_msg_.z = gz_vis_vector_msg->startpoint().z() + gz_vis_vector_msg->vector().z();
+    ros_marker_msg_.points.push_back(ros_point_msg_);
+
+    // scale of arraw (shaft dia./head dia./head length)
+    ros_marker_msg_.scale.x = gz_vis_vector_msg->scale().x();
+    ros_marker_msg_.scale.y = gz_vis_vector_msg->scale().y();
+    ros_marker_msg_.scale.z = gz_vis_vector_msg->scale().z();
+
+    ros_marker_msg_.color.a = 1.0;
+    ros_marker_msg_.color.r = gz_vis_vector_msg->color().x();
+    ros_marker_msg_.color.g = gz_vis_vector_msg->color().y();
+    ros_marker_msg_.color.b = gz_vis_vector_msg->color().z();
+
+    ros_publisher.publish(ros_marker_msg_);
+}
+
+// MARKER ARRAY (Multiple Vector Visualization)
+void GazeboRosInterfacePlugin::GzVisVectorArrayMsgCallback(GzVisVectorArrayMsgPtr& gz_vis_vector_array_msg,
+                                 ros::Publisher ros_publisher){
+
+    // involved message types
+    visualization_msgs::MarkerArray ros_marker_array_msg_;
+    visualization_msgs::Marker ros_marker_msg_;
+    geometry_msgs::Point ros_point_msg_;
+
+    // get number of markers
+    size_t n_vect = gz_vis_vector_array_msg->vector_size();
+
+    ConvertHeaderGzToRos(gz_vis_vector_array_msg->header(),
+                         &ros_marker_msg_.header);
+
+    ros_marker_msg_.header.stamp = ros::Time();
+    ros_marker_msg_.type = visualization_msgs::Marker::ARROW;
+    ros_marker_msg_.action = visualization_msgs::Marker::ADD;
+
+    // gz_vis_vector_array_msg->vector(0).scale().x();
+
+    // scale of arraw (shaft dia./head dia./head length)
+    ros_marker_msg_.scale.x = gz_vis_vector_array_msg->vector(0).scale().x();
+    ros_marker_msg_.scale.y = gz_vis_vector_array_msg->vector(0).scale().y();
+    ros_marker_msg_.scale.z = gz_vis_vector_array_msg->vector(0).scale().z();
+
+    ros_marker_msg_.color.a = 1.0;
+
+    //gzdbg<<"VVACb vector_size: "<<gz_vis_vector_array_msg->vector_size()<<" capacity: "<<ros_marker_array_msg_.markers.capacity()<<"\n";
+
+    for(int n=0; n<n_vect; n++){
+
+        ros_marker_msg_.ns = gz_vis_vector_array_msg->vector(n).ns();
+        ros_marker_msg_.id = gz_vis_vector_array_msg->vector(n).id();
+
+        ros_marker_msg_.color.r = gz_vis_vector_array_msg->vector(n).color().x();
+        ros_marker_msg_.color.g = gz_vis_vector_array_msg->vector(n).color().y();
+        ros_marker_msg_.color.b = gz_vis_vector_array_msg->vector(n).color().z();
+
+        // add vector starting point
+        ros_point_msg_.x = gz_vis_vector_array_msg->vector(n).startpoint().x();
+        ros_point_msg_.y = gz_vis_vector_array_msg->vector(n).startpoint().y();
+        ros_point_msg_.z = gz_vis_vector_array_msg->vector(n).startpoint().z();
+        ros_marker_msg_.points.push_back(ros_point_msg_);
+
+        // add vector end point
+        ros_point_msg_.x = gz_vis_vector_array_msg->vector(n).startpoint().x() + gz_vis_vector_array_msg->vector(n).vector().x();
+        ros_point_msg_.y = gz_vis_vector_array_msg->vector(n).startpoint().y() + gz_vis_vector_array_msg->vector(n).vector().y();
+        ros_point_msg_.z = gz_vis_vector_array_msg->vector(n).startpoint().z() + gz_vis_vector_array_msg->vector(n).vector().z();
+        ros_marker_msg_.points.push_back(ros_point_msg_);
+
+        // add marker to array
+        ros_marker_array_msg_.markers.push_back(ros_marker_msg_);
+        ros_marker_msg_.points.clear();
+
+    }
+
+    ros_publisher.publish(ros_marker_array_msg_);
+}
+
 //===========================================================================//
 //================ ROS -> GAZEBO MSG CALLBACKS/CONVERTERS ===================//
 //===========================================================================//
@@ -1029,6 +1251,10 @@ void GazeboRosInterfacePlugin::RosWindSpeedMsgCallback(
   gz_publisher_ptr->Publish(gz_wind_speed_msg);
 }
 
+// ========================================================== //
+// ===== GAZEBO -> ROS BROADCAST TRANSFORM MESSAGE SETUP ==== //
+// ========================================================== //
+
 void GazeboRosInterfacePlugin::GzBroadcastTransformMsgCallback(
     GzTransformStampedWithFrameIdsMsgPtr& broadcast_transform_msg) {
   ros::Time stamp;
@@ -1044,10 +1270,12 @@ void GazeboRosInterfacePlugin::GzBroadcastTransformMsgCallback(
                    broadcast_transform_msg->transform().translation().y(),
                    broadcast_transform_msg->transform().translation().z());
 
+
   tf_ = tf::Transform(tf_q_W_L, tf_p);
   transform_broadcaster_.sendTransform(tf::StampedTransform(
       tf_, stamp, broadcast_transform_msg->parent_frame_id(),
       broadcast_transform_msg->child_frame_id()));
+
 }
 
 GZ_REGISTER_WORLD_PLUGIN(GazeboRosInterfacePlugin);

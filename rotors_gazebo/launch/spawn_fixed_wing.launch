@@ -5,10 +5,11 @@
   <arg name="namespace" default="$(arg uav_name)"/>
   <arg name="aero_params_yaml_file" default="$(find rotors_gazebo)/resource/fixed_wing/aero_params_$(arg uav_name).yaml"/>
   <arg name="vehicle_params_yaml_file" default="$(find rotors_gazebo)/resource/fixed_wing/$(arg uav_name).yaml"/>
+  <arg name="yaml_path" default="$(find rotors_gazebo)/resource/fixed_wing"/>
   <arg name="is_input_joystick" default="false"/>
   <arg name="model" default="$(find rotors_description)/urdf/$(arg uav_name)_base.xacro"/>
   <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
-  <arg name="x" default="0.0"/>
+  <arg name="x" default="10.0"/>
   <arg name="y" default="0.0"/>
   <arg name="z" default="0.1"/>
   <arg name="R" default="0.0"/>
@@ -18,7 +19,16 @@
   <arg name="enable_ground_truth" default="true"/>
   <arg name="log_file" default="$(arg uav_name)"/>
   <arg name="wait_to_record_bag" default="false"/>
-  <arg name="enable_mavlink_interface" default="false"/>
+  <arg name="enable_mavlink_interface" default="true"/>
+  <arg name="serial_device" default="/dev/ttyACM0"/>
+  <arg name="enable_wind" default="true"/>
+
+  <arg name="tracking_cam" default="$(find rotors_description)/urdf/tracking_cam.xacro"/>
+  <arg name="target_name" default="$(arg namespace)"/>
+  <arg name="target_link" default="$(arg namespace)/base_link"/>
+
+  <arg name="record_rosbag" default="false"/>
+  <arg name="rosbag_path" default=""/>
 
   <!-- send the robot XML to param server -->
   <param name="robot_description" command="
@@ -32,7 +42,10 @@
     namespace:=$(arg namespace)
     aero_params_yaml_file:=$(arg aero_params_yaml_file)
     vehicle_params_yaml_file:=$(arg vehicle_params_yaml_file)
-    is_input_joystick:=$(arg is_input_joystick)"
+    yaml_path:=$(arg yaml_path)
+    is_input_joystick:=$(arg is_input_joystick)
+    serial_device:=$(arg serial_device)
+    enable_wind:=$(arg enable_wind)"
   />
   <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
 
@@ -49,4 +62,19 @@
          -model $(arg namespace)"
    respawn="false" output="screen">
   </node>
+
+  <node pkg="rosbag" type="record" name="trinocular"
+   args="-o $(arg rosbag_path)$(arg namespace)
+            /$(arg namespace)/cam_left/odometry
+            /$(arg namespace)/cam_left/image_raw
+            /$(arg namespace)/camImu0/data_raw
+            /$(arg namespace)/cam_center/odometry
+            /$(arg namespace)/cam_center/image_raw
+            /$(arg namespace)/adis/data_raw
+            /$(arg namespace)/cam_right/odometry
+            /$(arg namespace)/cam_right/image_raw
+            /$(arg namespace)/camImu1/data_raw"
+   if="$(arg record_rosbag)">
+  </node>
+
 </launch>

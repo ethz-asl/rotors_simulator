@@ -1,0 +1,208 @@
+<?xml version="1.0"?>
+<robot name="test">
+  
+  <link name="fuselage">
+    <visual>
+      <geometry>
+        <cylinder length="1.0" radius="0.05"/>
+      </geometry>
+      <origin xyz="-0.1 0 0" rpy="0 1.57 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="1.0" radius="0.05"/>
+      </geometry>
+      <origin xyz="-0.1 0 0" rpy="0 1.57 0"/>
+    </collision>
+  </link>
+
+  <link name="wing_left_1">
+    <visual>
+      <geometry>
+        <box size="0.15 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 0.1 0" rpy="0 0 0"/>
+    </visual>
+    <collision>
+       <geometry>
+        <box size="0.15 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 0.1 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <link name="wing_left_2">
+    <visual>
+      <geometry>
+        <box size="0.15 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 0.1 0" rpy="0 0 0"/>
+    </visual>
+    <collision>
+       <geometry>
+        <box size="0.15 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 0.1 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <link name="wing_left_3">
+    <visual>
+      <geometry>
+        <box size="0.15 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 0.1 0" rpy="0 0 0"/>
+    </visual>
+    <collision>
+       <geometry>
+        <box size="0.15 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 0.1 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <link name="wing_right_1">
+    <visual>
+      <geometry>
+        <box size="0.15 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 -0.1 0" rpy="0 0 0"/>
+    </visual>
+    <collision>
+       <geometry>
+        <box size="0.15 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 -0.1 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <link name="wing_right_2">
+    <visual>
+      <geometry>
+        <box size="0.15 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 -0.1 0" rpy="0 0 0"/>
+    </visual>
+    <collision>
+       <geometry>
+        <box size="0.15 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 -0.1 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <link name="wing_right_3">
+    <visual>
+      <geometry>
+        <box size="0.15 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 -0.1 0" rpy="0 0 0"/>
+    </visual>
+    <collision>
+       <geometry>
+        <box size="0.15 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 -0.1 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <link name="elevator_left">
+    <visual>
+      <geometry>
+        <box size="0.1 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 0.1 0" rpy="0 0 0"/>
+    </visual>
+    <collision>
+       <geometry>
+        <box size="0.1 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 0.1 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <link name="elevator_right">
+    <visual>
+      <geometry>
+        <box size="0.1 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 -0.1 0" rpy="0 0 0"/>
+    </visual>
+    <collision>
+       <geometry>
+        <box size="0.1 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 -0.1 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <link name="rudder">
+    <visual>
+      <geometry>
+        <box size="0.1 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 0 0.1" rpy="1.57 0 0"/>
+    </visual>
+    <collision>
+       <geometry>
+        <box size="0.1 0.2 0.02"/>
+      </geometry>
+      <origin xyz="0 0 0.1" rpy="1.57 0 0"/>
+    </collision>
+  </link>
+
+  <joint name="wing_joint_l1" type="fixed">
+    <parent link="fuselage"/>
+    <child link="wing_left_1"/>
+    <origin xyz="0 0.05 0"/>
+  </joint>
+
+  <joint name="wing_joint_l2" type="fixed">
+    <parent link="wing_left_1"/>
+    <child link="wing_left_2"/>
+    <origin xyz="-0.05 0.2 0"/>
+  </joint>
+
+  <joint name="wing_joint_l3" type="fixed">
+    <parent link="wing_left_2"/>
+    <child link="wing_left_3"/>
+    <origin xyz="-0.05 0.2 0"/>
+  </joint>
+
+  <joint name="wing_joint_r1" type="fixed">
+    <parent link="fuselage"/>
+    <child link="wing_right_1"/>
+    <origin xyz="0 -0.05 0"/>
+  </joint>
+
+  <joint name="wing_joint_r2" type="fixed">
+    <parent link="wing_right_1"/>
+    <child link="wing_right_2"/>
+    <origin xyz="-0.05 -0.2 0"/>
+  </joint>
+
+  <joint name="wing_joint_r3" type="fixed">
+    <parent link="wing_right_2"/>
+    <child link="wing_right_3"/>
+    <origin xyz="-0.05 -0.2 0"/>
+  </joint>
+
+  <joint name="elevator_joint_l1" type="fixed">
+    <parent link="fuselage"/>
+    <child link="elevator_left"/>
+    <origin xyz="-0.5 0.04 0" rpy="0 0 0.2"/>
+  </joint>
+
+  <joint name="elevator_joint_r1" type="fixed">
+    <parent link="fuselage"/>
+    <child link="elevator_right"/>
+    <origin xyz="-0.5 -0.04 0" rpy="0 0 -0.2"/>
+  </joint>
+
+  <joint name="rudder_joint" type="fixed">
+    <parent link="fuselage"/>
+    <child link="rudder"/>
+    <origin xyz="-0.5 0.0 0.04" rpy="0 -0.2 0"/>
+  </joint>
+
+</robot>

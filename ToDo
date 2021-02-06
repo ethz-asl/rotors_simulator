@@ -1,0 +1,7 @@
+- Prevent seg-faults when joints missing, wrong joint names etc. Instead output message and don't start plugins
+- Make yaml load
+- zero-mass/inertia links and setPosition ok?
+- gps plugin, sensor location!=ground speed query location
+- would simbody engine (kinematics implicitly satisfied, generalized coordinates) be better than ode ? Not supported: "ROS get_physics_properties service call does not yet support physics engine [simbody].
+- catapult
+- better robustness against missing parameters in xacros

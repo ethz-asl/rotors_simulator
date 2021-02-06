@@ -1,0 +1,1374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2016 Pavel Vechersky, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="techpod_TJ_flex">
+
+   <!-- Include URDF files -->
+   <xacro:include filename="$(find rotors_description)/urdf/fixed_wing_X_base.xacro" />
+
+   <!-- Global properties -->
+   <xacro:property name="namespace" value="$(arg namespace)" />
+   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
+   <xacro:property name="flexing" value="true" />
+   <xacro:property name="meshes_path" value="package://rotors_description/meshes/techpod_X_flex"/>
+   <xacro:property name="yaml_path" value="$(arg yaml_path)" />
+   <xacro:property name="serial_device" value="$(arg serial_device)" />
+   <xacro:property name="enable_wind" value="$(arg enable_wind)"/>
+
+   <!-- Constants -->
+   <xacro:property name="PI" value="3.1415926535897931" />
+
+   <!-- Main body properties -->
+   <xacro:property name="body_length" value="1.088" /><!-- [m] -->
+   <xacro:property name="body_width" value="2.591" /><!-- [m] -->
+   <xacro:property name="body_height" value="0.303" /><!-- [m] -->
+   <xacro:property name="body_color" value="White" />
+
+   <!-- Aileron properties -->
+   <xacro:property name="aileron_length" value="0.15" /><!-- [m] -->
+   <xacro:property name="aileron_width"  value="0.35" /><!-- [m] -->
+   <xacro:property name="aileron_height" value="0.01" /><!-- [m] -->
+   <xacro:property name="aileron_min_angle" value="-0.349066" /><!-- [rad] -->
+   <xacro:property name="aileron_max_angle" value="0.349066" /><!-- [rad] -->
+   <xacro:property name="aileron_color" value="${body_color}" />
+
+   <!-- Elevator properties -->
+   <xacro:property name="elevator_length" value="0.15" /><!-- [m] -->
+   <xacro:property name="elevator_width"  value="0.46" /><!-- [m] -->
+   <xacro:property name="elevator_height" value="0.01" /><!-- [m] -->
+   <xacro:property name="elevator_min_angle" value="-0.349066" /><!-- [rad] -->
+   <xacro:property name="elevator_max_angle" value="0.349066" /><!-- [rad] -->
+   <xacro:property name="elevator_color" value="${body_color}" />
+
+   <!-- Flap properties -->
+   <xacro:property name="flap_length" value="0.18" /><!-- [m] -->
+   <xacro:property name="flap_width"  value="0.23" /><!-- [m] -->
+   <xacro:property name="flap_height" value="0.01" /><!-- [m] -->
+   <xacro:property name="flap_min_angle" value="-0.349066" /><!-- [rad] -->
+   <xacro:property name="flap_max_angle" value="0.349066" /><!-- [rad] -->
+   <xacro:property name="flap_color" value="${body_color}" />
+
+   <!-- Rudder properties -->
+   <xacro:property name="rudder_length" value="0.13" />
+   <xacro:property name="rudder_width"  value="0.02" />
+   <xacro:property name="rudder_height" value="0.24" />
+   <xacro:property name="rudder_min_angle" value="-0.349066" />
+   <xacro:property name="rudder_max_angle" value="0.349066" />
+   <xacro:property name="rudder_color" value="${body_color}" />
+
+   <!-- Propeller properties -->
+   <xacro:property name="propeller_direction" value="cw" />
+   <xacro:property name="propeller_radius" value="0.1" />
+   <xacro:property name="propeller_height" value="0.003" />
+   <xacro:property name="propeller_color" value="Gray" />
+
+   <!-- Flexing properties -->
+   <xacro:property name="k1" value="375" />
+   <xacro:property name="d1" value="3" />
+   <xacro:property name="k2" value="180" />
+   <xacro:property name="d2" value="1.5" />
+   <xacro:property name="k3" value="45" />
+   <xacro:property name="d3" value="1.05" />
+   <xacro:property name="k4" value="120" />
+   <xacro:property name="d4" value="1.8" />
+
+   <!--
+   Inertial properties - do not change without considering link-tree, i.e.:
+
+   From System Identification, we obtain total mass m_tot and total inertia J_tot
+   wrt cg. For the Techpod, these are:
+
+   m_tot = 3.124 kg
+   J_tot = [ixx=0.6688, iyy=0.1623, izz=0.6936, ixz=0.0281] kgm^2  (wrt cg, FLU frame)
+   r_cg = [0, 0, 0.097] (cg position in baselink frame (FLU))
+
+   Considering the masses and positions of all leaf-links (root = baselink), we
+   calculate mass and inertia of the baselink s.t. the overall inertial properties
+   defined above are matched (ignoring the link-centric inertias of the links as
+   they are deliberately set to very small values...). With the link masses set below
+   and in the segment macros, we get for the baselink:
+
+   m_base_link = 1.984 kg
+   J_base_link = [ixx=0.1686, iyy=0.0498, izz=0.1100, ixz=0.0013]   (wrt cg, FLU frame)
+   r_cg_base_link = [0.0684, 0, 0.0511] (cg position in baselink frame (FLU))
+  -->
+
+   <xacro:property name="m_base_link" value="1.984" />
+   <xacro:property name="J_base_link">
+     <inertia ixx="0.1686" ixy="0.0" ixz="0.0013" iyy="0.0498" iyz="0.0" izz="0.1100" />
+   </xacro:property>
+   <xacro:property name="r_cg_base_link">
+      <!--<origin xyz="0.09 0 0.147" rpy="0 0 0" />-->
+      <origin xyz="0.068 0 ${0.051+0.05}" rpy="0 0 0" />
+   </xacro:property>
+
+   <!-- the following masses are deliberately small to get neglectable inertias,
+        basically 'dummy inertias'-->
+   <xacro:property name="mass_aileron" value="0.01" /><!-- [kg] -->
+   <xacro:property name="mass_flap" value="0.01" /><!-- [kg] -->
+   <xacro:property name="mass_elevator" value="0.01" /><!-- [kg] -->
+   <xacro:property name="mass_rudder" value="0.01" /><!-- [kg] -->
+   <xacro:property name="mass_propeller" value="0.01" /><!-- [kg] -->
+
+   <!-- Inertia of the aileron, assuming it is a cuboid -->
+   <xacro:property name="aileron_inertia">
+      <xacro:box_inertia x="${aileron_length}" y="${aileron_width}" z="${aileron_height}" mass="${mass_aileron}" />
+   </xacro:property>
+
+   <!-- Inertia of the elevator, assuming it is a cuboid -->
+   <xacro:property name="elevator_inertia">
+      <xacro:box_inertia x="${elevator_length}" y="${elevator_width}" z="${elevator_height}" mass="${mass_elevator}" />
+   </xacro:property>
+
+   <!-- Inertia of the flap, assuming it is a cuboid -->
+   <xacro:property name="flap_inertia">
+      <xacro:box_inertia x="${flap_length}" y="${flap_width}" z="${flap_height}" mass="${mass_flap}" />
+   </xacro:property>
+
+   <!-- Inertia of the rudder, assuming it is a cuboid -->
+   <xacro:property name="rudder_inertia">
+      <xacro:box_inertia x="${rudder_length}" y="${rudder_width}" z="${rudder_height}" mass="${mass_rudder}" />
+   </xacro:property>
+
+   <!-- Inertia of the propeller, assuming it is a cylinder -->
+   <!-- Note: Keep it small as possible, this is as well just a dummy inertia,
+        gyroscopic effects are simulated in propulsion plugin with the mass
+        specified in the propeller's *.yaml file-->
+   <xacro:property name="propeller_inertia">
+      <xacro:cylinder_inertia r="${propeller_radius}" h="${propeller_height}" mass="${mass_propeller}" />
+   </xacro:property>
+
+   <!-- Instantiate fixed_wing_base_macro once and adding fuselage parts -->
+   <xacro:fixed_wing_base_macro robot_namespace="${namespace}"
+      mass="${m_base_link}"
+      length="${body_length}"
+      width="0.2"
+      height="${body_height}"
+      color="${body_color}"
+      use_mesh_file="true"
+      mesh_file="package://rotors_description/meshes/techpod_X_flex/fuselage_barless.stl">
+      <xacro:insert_block name="r_cg_base_link" />
+      <xacro:insert_block name="J_base_link" />
+   </xacro:fixed_wing_base_macro>
+   <joint name="${namespace}/dome_joint" type="fixed">
+      <parent link="${namespace}/base_link" />
+      <child link="${namespace}/dome" />
+   </joint>
+   <link name="${namespace}/dome">
+      <inertial>
+         <mass value="0.001" />
+         <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+      </inertial>
+      <visual>
+         <geometry>
+            <mesh filename="package://rotors_description/meshes/techpod_X_flex/dome.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+   </link>
+   <gazebo reference="${namespace}/dome">
+      <material>Gazebo/GreyTransparent</material>
+   </gazebo>
+   <joint name="${namespace}/bar_joint" type="fixed">
+      <parent link="${namespace}/base_link" />
+      <child link="${namespace}/bar" />
+   </joint>
+   <link name="${namespace}/bar">
+      <inertial>
+         <mass value="0.001" />
+         <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+      </inertial>
+      <visual>
+         <geometry>
+            <mesh filename="package://rotors_description/meshes/techpod_X_flex/bar.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+   </link>
+   <gazebo reference="${namespace}/bar">
+      <material>Gazebo/Grey</material>
+   </gazebo>
+   <joint name="${namespace}/cover" type="fixed">
+      <parent link="${namespace}/base_link" />
+      <child link="${namespace}/cover" />
+   </joint>
+   <link name="${namespace}/cover">
+      <inertial>
+         <mass value="0.001" />
+         <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+      </inertial>
+      <visual>
+         <geometry>
+            <mesh filename="package://rotors_description/meshes/techpod_X_flex/cover_hole.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+   </link>
+   <gazebo reference="${namespace}/cover">
+      <material>Gazebo/White</material>
+   </gazebo>
+   <joint name="${namespace}/motor_joint" type="fixed">
+      <parent link="${namespace}/base_link" />
+      <child link="${namespace}/motor" />
+   </joint>
+   <link name="${namespace}/motor">
+      <inertial>
+         <mass value="0.001" />
+         <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+      </inertial>
+      <visual>
+         <geometry>
+            <mesh filename="package://rotors_description/meshes/techpod_X_flex/motor.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+   </link>
+   <gazebo reference="${namespace}/motor">
+      <material>Gazebo/Black</material>
+   </gazebo>
+   <joint name="${namespace}/pitot" type="fixed">
+      <parent link="${namespace}/base_link" />
+      <child link="${namespace}/pitot" />
+   </joint>
+   <link name="${namespace}/pitot">
+      <inertial>
+         <mass value="0.001" />
+         <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+      </inertial>
+      <visual>
+         <geometry>
+            <mesh filename="package://rotors_description/meshes/techpod_X_flex/pitot_mount.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+      <visual>
+         <geometry>
+            <mesh filename="package://rotors_description/meshes/techpod_X_flex/pitot_tube.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+   </link>
+   <gazebo reference="${namespace}/pitot">
+      <material>Gazebo/Grey</material>
+   </gazebo>
+
+   <!-- Instantiate (flexing) wing segments -->
+   <xacro:airfoil_segment robot_namespace="${namespace}"
+      segment_name="wl_1"
+      parent="${namespace}/base_link"
+      mass_segment="0.15"
+      do_flex="${flexing}"
+      k="${k1}"
+      c="${d1}"
+      color="${body_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/wing_l_1.stl"
+      segment_length="0.1"
+      segment_width="0.4"
+      segment_height="0.02">
+      <axis xyz="1 0 0" /><!-- Joint axis -->
+      <origin xyz="0 0 0.162" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 0.195 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0 0 -0.162" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="aileron_inertia" />
+   </xacro:airfoil_segment>
+
+   <gazebo>
+      <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <linkName>${namespace}/wl_1</linkName>
+         <aeroForcesVis>aero_force_vis_wl1</aeroForcesVis>
+         <airfoil>
+            <segment name="WL1_1">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0.015 0.075 0</cp>
+               <seg_area>0.029</seg_area>
+               <seg_chord>0.194</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+            </segment>
+            <segment name="WL1_2">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0.012 0.265 0</cp>
+               <seg_area>0.042</seg_area>
+               <seg_chord>0.183</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+               <control>
+                  <cs name="flap_left">
+                     <controlJoint>${namespace}/flap_left_1_joint</controlJoint>
+                     <fromTopic>true</fromTopic>
+                     <csRefTopic>flap_l1_pos</csRefTopic>
+                     <radToCLift>1.6228 0</radToCLift>
+                     <radToCDrag>0.1431 0.8085</radToCDrag>
+                     <radToCPitch>0.0880 0</radToCPitch>
+                     <radToAoAB>-0.08</radToAoAB>
+                  </cs>
+               </control>
+            </segment>
+         </airfoil>
+      </plugin>
+   </gazebo>
+
+   <xacro:airfoil_segment robot_namespace="${namespace}"
+      segment_name="wr_1"
+      parent="${namespace}/base_link"
+      mass_segment="0.15"
+      do_flex="${flexing}"
+      k="${k1}"
+      c="${d1}"
+      color="${body_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/wing_r_1.stl"
+      segment_length="0.1"
+      segment_width="0.4"
+      segment_height="0.02">
+      <axis xyz="1 0 0" /><!-- Joint axis -->
+      <origin xyz="0 0 0.162" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 -0.195 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0 0 -0.162" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="aileron_inertia" />
+   </xacro:airfoil_segment>
+
+   <gazebo>
+      <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <linkName>${namespace}/wr_1</linkName>
+         <aeroForcesVis>aero_force_vis_wr1</aeroForcesVis>
+         <airfoil>
+            <segment name="WR1_1">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0.015 -0.075 0</cp>
+               <seg_area>0.029</seg_area>
+               <seg_chord>0.194</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+            </segment>
+            <segment name="WR1_2">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0.012 -0.265 0</cp>
+               <seg_area>0.042</seg_area>
+               <seg_chord>0.183</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+               <control>
+                  <cs name="flap_right">
+                     <controlJoint>${namespace}/flap_right_1_joint</controlJoint>
+                     <fromTopic>true</fromTopic>
+                     <csRefTopic>flap_r1_pos</csRefTopic>
+                     <radToCLift>1.6228 0</radToCLift>
+                     <radToCDrag>0.1431 0.8085</radToCDrag>
+                     <radToCPitch>0.0880 0</radToCPitch>
+                     <radToAoAB>-0.08</radToAoAB>
+                  </cs>
+               </control>
+            </segment>
+         </airfoil>
+      </plugin>
+   </gazebo>
+
+   <xacro:airfoil_segment robot_namespace="${namespace}"
+      segment_name="wl_2"
+      parent="${namespace}/wl_1"
+      mass_segment="0.1"
+      do_flex="${flexing}"
+      k="${k2}"
+      c="${d2}"
+      color="${body_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/wl_2_uh2.stl"
+      segment_length="0.1"
+      segment_width="0.43"
+      segment_height="0.02">
+      <axis xyz="1 0 0" /><!-- Joint axis -->
+      <origin xyz="0 0.39 0" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 0.215 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0 -0.39 -0.162" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="aileron_inertia" />
+   </xacro:airfoil_segment>
+
+   <joint name="${namespace}/wl2lhj" type="fixed">
+      <parent link="${namespace}/wl_2" />
+      <child link="${namespace}/wl2lh" />
+   </joint>
+   <link name="${namespace}/wl2lh">
+      <inertial>
+         <mass value="0.001" />
+         <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+      </inertial>
+      <visual>
+         <origin xyz="0 -0.39 -0.162" rpy="0 0 0" />
+         <geometry>
+            <mesh filename="package://rotors_description/meshes/techpod_X_flex/wl_2_lh2.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+   </link>
+   <gazebo reference="${namespace}/wl2lh">
+      <material>Gazebo/Red</material>
+   </gazebo>
+
+   <gazebo>
+      <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <linkName>${namespace}/wl_2</linkName>
+         <aeroForcesVis>aero_force_vis_wl2</aeroForcesVis>
+         <airfoil>
+            <segment name="WL2_1">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0.009 0.105 0</cp>
+               <seg_area>0.039</seg_area>
+               <seg_chord>0.170</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+               <control>
+                  <cs name="flap_left">
+                     <controlJoint>${namespace}/flap_left_2_joint</controlJoint>
+                     <fromTopic>true</fromTopic>
+                     <csRefTopic>flap_l2_pos</csRefTopic>
+                     <radToCLift>1.6228 0</radToCLift>
+                     <radToCDrag>0.1431 0.8085</radToCDrag>
+                     <radToCPitch>0.0880 0</radToCPitch>
+                     <radToAoAB>-0.08</radToAoAB>
+                  </cs>
+               </control>
+            </segment>
+            <segment name="WL2_2">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0.005 0.325 0</cp>
+               <seg_area>0.033</seg_area>
+               <seg_chord>0.157</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+            </segment>
+         </airfoil>
+      </plugin>
+   </gazebo>
+
+   <xacro:airfoil_segment robot_namespace="${namespace}"
+      segment_name="wr_2"
+      parent="${namespace}/wr_1"
+      mass_segment="0.1"
+      do_flex="${flexing}"
+      k="${k2}"
+      c="${d2}"
+      color="${body_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/wr_2_uh2.stl"
+      segment_length="0.1"
+      segment_width="0.43"
+      segment_height="0.02">
+      <axis xyz="1 0 0" /><!-- Joint axis -->
+      <origin xyz="0 -0.39 0" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 -0.215 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0 0.39 -0.162" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="aileron_inertia" />
+   </xacro:airfoil_segment>
+
+   <joint name="${namespace}/wr2lhj" type="fixed">
+      <parent link="${namespace}/wr_2" />
+      <child link="${namespace}/wr2lh" />
+   </joint>
+   <link name="${namespace}/wr2lh">
+      <inertial>
+         <mass value="0.001" />
+         <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+      </inertial>
+      <visual>
+         <origin xyz="0 0.39 -0.162" rpy="0 0 0" />
+         <geometry>
+            <mesh filename="package://rotors_description/meshes/techpod_X_flex/wr_2_lh2.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+   </link>
+   <gazebo reference="${namespace}/wr2lh">
+      <material>Gazebo/Red</material>
+   </gazebo>
+
+   <gazebo>
+      <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <linkName>${namespace}/wr_2</linkName>
+         <aeroForcesVis>aero_force_vis_wr2</aeroForcesVis>
+         <airfoil>
+            <segment name="WR2_1">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0.009 -0.105 0</cp>
+               <seg_area>0.039</seg_area>
+               <seg_chord>0.170</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+               <control>
+                  <cs name="flap_right">
+                     <controlJoint>${namespace}/flap_right_2_joint</controlJoint>
+                     <fromTopic>true</fromTopic>
+                     <csRefTopic>flap_r2_pos</csRefTopic>
+                     <radToCLift>1.6228 0</radToCLift>
+                     <radToCDrag>0.1431 0.8085</radToCDrag>
+                     <radToCPitch>0.0880 0</radToCPitch>
+                     <radToAoAB>-0.08</radToAoAB>
+                  </cs>
+               </control>
+            </segment>
+            <segment name="WR2_2">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0.005 -0.325 0</cp>
+               <seg_area>0.033</seg_area>
+               <seg_chord>0.157</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+            </segment>
+         </airfoil>
+      </plugin>
+   </gazebo>
+
+   <xacro:airfoil_segment robot_namespace="${namespace}"
+      segment_name="wl_3"
+      parent="${namespace}/wl_2"
+      mass_segment="0.1"
+      do_flex="${flexing}"
+      k="${k3}"
+      c="${d3}"
+      color="${body_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/wl_3_uh.stl"
+      segment_length="0.1"
+      segment_width="0.5"
+      segment_height="0.02">
+      <axis xyz="1 0 0" /><!-- Joint axis -->
+      <origin xyz="0 0.43 0" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 0.25 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0 -0.82 -0.162" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="aileron_inertia" />
+   </xacro:airfoil_segment>
+
+   <joint name="${namespace}/wl3lhj" type="fixed">
+      <parent link="${namespace}/wl_3" />
+      <child link="${namespace}/wl3lh" />
+   </joint>
+   <link name="${namespace}/wl3lh">
+      <inertial>
+         <mass value="0.001" />
+         <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+      </inertial>
+      <visual>
+         <origin xyz="0 -0.82 -0.162" rpy="0 0 0" />
+         <geometry>
+            <mesh filename="package://rotors_description/meshes/techpod_X_flex/wl_3_lh.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+   </link>
+   <gazebo reference="${namespace}/wl3lh">
+      <material>Gazebo/Red</material>
+   </gazebo>
+
+   <gazebo>
+      <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <linkName>${namespace}/wl_3</linkName>
+         <aeroForcesVis>aero_force_vis_wl3</aeroForcesVis>
+         <airfoil>
+            <segment name="WL3_1">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0.002 0.087 0</cp>
+               <seg_area>0.026</seg_area>
+               <seg_chord>0.146</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+               <control>
+                  <cs name="aileron_left">
+                     <controlJoint>${namespace}/aileron_left_joint</controlJoint>
+                     <fromTopic>true</fromTopic>
+                     <csRefTopic>ail_l_pos</csRefTopic>
+                     <radToCLift>1.8386 0</radToCLift>
+                     <radToCDrag>0.1053 0.5616</radToCDrag>
+                     <radToCPitch>-0.0518 0</radToCPitch>
+                     <radToAoAB>0.0</radToAoAB>
+                  </cs>
+               </control>
+            </segment>
+            <segment name="WL3_2">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0 0.263 0</cp>
+               <seg_area>0.024</seg_area>
+               <seg_chord>0.136</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+               <control>
+                  <cs name="aileron_left">
+                     <controlJoint>${namespace}/aileron_left_joint</controlJoint>
+                     <fromTopic>true</fromTopic>
+                     <csRefTopic>ail_l_pos</csRefTopic>
+                     <radToCLift>1.8386 0</radToCLift>
+                     <radToCDrag>0.1053 0.5616</radToCDrag>
+                     <radToCPitch>-0.0518 0</radToCPitch>
+                     <radToAoAB>0.0</radToAoAB>
+                  </cs>
+               </control>
+            </segment>
+            <segment name="WL3_3">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>-0.003 0.414 0</cp>
+               <seg_area>0.016</seg_area>
+               <seg_chord>0.127</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+            </segment>
+         </airfoil>
+      </plugin>
+   </gazebo>
+
+   <xacro:airfoil_segment robot_namespace="${namespace}"
+      segment_name="wr_3"
+      parent="${namespace}/wr_2"
+      mass_segment="0.1"
+      do_flex="${flexing}"
+      k="${k3}"
+      c="${d3}"
+      color="${body_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/wr_3_uh.stl"
+      segment_length="0.1"
+      segment_width="0.5"
+      segment_height="0.02">
+      <axis xyz="1 0 0" /><!-- Joint axis -->
+      <origin xyz="0 -0.43 0" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 -0.25 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0 0.82 -0.162" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="aileron_inertia" />
+   </xacro:airfoil_segment>
+
+   <joint name="${namespace}/wr3lhj" type="fixed">
+      <parent link="${namespace}/wr_3" />
+      <child link="${namespace}/wr3lh" />
+   </joint>
+   <link name="${namespace}/wr3lh">
+      <inertial>
+         <mass value="0.001" />
+         <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+      </inertial>
+      <visual>
+         <origin xyz="0 0.82 -0.162" rpy="0 0 0" />
+         <geometry>
+            <mesh filename="package://rotors_description/meshes/techpod_X_flex/wr_3_lh.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+   </link>
+   <gazebo reference="${namespace}/wr3lh">
+      <material>Gazebo/Red</material>
+   </gazebo>
+
+   <gazebo>
+      <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <linkName>${namespace}/wr_3</linkName>
+         <aeroForcesVis>aero_force_vis_wr3</aeroForcesVis>
+         <airfoil>
+            <segment name="WR3_1">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0.002 -0.087 0</cp>
+               <seg_area>0.026</seg_area>
+               <seg_chord>0.146</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+               <control>
+                  <cs name="aileron_right">
+                     <controlJoint>${namespace}/aileron_right_joint</controlJoint>
+                     <fromTopic>true</fromTopic>
+                     <csRefTopic>ail_r_pos</csRefTopic>
+                     <radToCLift>1.8386 0</radToCLift>
+                     <radToCDrag>0.1053 0.5616</radToCDrag>
+                     <radToCPitch>-0.0518 0</radToCPitch>
+                     <radToAoAB>0.0</radToAoAB>
+                  </cs>
+               </control>
+            </segment>
+            <segment name="WR3_2">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0 -0.263 0</cp>
+               <seg_area>0.024</seg_area>
+               <seg_chord>0.136</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+               <control>
+                  <cs name="aileron_right">
+                     <controlJoint>${namespace}/aileron_right_joint</controlJoint>
+                     <fromTopic>true</fromTopic>
+                     <csRefTopic>ail_r_pos</csRefTopic>
+                     <radToCLift>1.8386 0</radToCLift>
+                     <radToCDrag>0.1053 0.5616</radToCDrag>
+                     <radToCPitch>-0.0518 0</radToCPitch>
+                     <radToAoAB>0.0</radToAoAB>
+                  </cs>
+               </control>
+            </segment>
+            <segment name="WR3_3">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>-0.003 -0.414 0</cp>
+               <seg_area>0.016</seg_area>
+               <seg_chord>0.127</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_wing.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+            </segment>
+         </airfoil>
+      </plugin>
+   </gazebo>
+
+   <xacro:airfoil_segment robot_namespace="${namespace}"
+      segment_name="vs"
+      parent="${namespace}/base_link"
+      mass_segment="0.15"
+      do_flex="${flexing}"
+      k="${k4}"
+      c="${d4}"
+      color="${body_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/v_stb.stl"
+      segment_length="0.1"
+      segment_width="0.02"
+      segment_height="0.3">
+      <axis xyz="1 0 0" /><!-- Joint axis -->
+      <origin xyz="-0.618 0 0.031" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 0 0.15" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0.618 0 -0.031" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="aileron_inertia" />
+   </xacro:airfoil_segment>
+
+   <gazebo>
+      <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <linkName>${namespace}/vs</linkName>
+         <aeroForcesVis>aero_force_vis_vs</aeroForcesVis>
+         <airfoil>
+            <segment name="vs">
+               <forward>1 0 0</forward>
+               <upward>0 -1 0</upward>
+               <cp>0.045 0.0 0.133</cp>
+               <seg_area>0.044</seg_area>
+               <seg_chord>0.1525</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_tail_v.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+               <indVel name="prop0">
+                  <topic>prop_slpstr_0</topic>
+               </indVel>
+               <control>
+                  <cs name="rudder">
+                     <controlJoint>${namespace}/rudder_joint</controlJoint>
+                     <fromTopic>true</fromTopic>
+                     <csRefTopic>rudd_pos</csRefTopic>
+                     <radToCLift>2.2801 0</radToCLift>
+                     <radToCDrag>0 0</radToCDrag>
+                     <radToCPitch>0 0</radToCPitch>
+                     <radToAoAB>0</radToAoAB>
+                  </cs>
+               </control>
+            </segment>
+         </airfoil>
+      </plugin>
+   </gazebo>
+
+   <xacro:airfoil_segment robot_namespace="${namespace}"
+      segment_name="hs"
+      parent="${namespace}/vs"
+      mass_segment="0.15"
+      do_flex="${flexing}"
+      k="${k4}"
+      c="${d4}"
+      color="${body_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/h_stb.stl"
+      segment_length="0.1"
+      segment_width="0.4"
+      segment_height="0.02">
+      <axis xyz="1 0 0" /><!-- Joint axis -->
+      <origin xyz="-0.039 0 0.274" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="-0.03 0 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0.657 0 -0.305" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="aileron_inertia" />
+   </xacro:airfoil_segment>
+
+   <gazebo>
+      <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <linkName>${namespace}/hs</linkName>
+         <aeroForcesVis>aero_force_vis_hs</aeroForcesVis>
+         <airfoil>
+            <segment name="HSL_1">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0.013 0.165 0.012</cp>
+               <seg_area>0.0475</seg_area>
+               <seg_chord>0.144</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_tail_h.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+               <indVel name="prop0">
+                  <topic>prop_slpstr_0</topic>
+               </indVel>
+               <control>
+                  <cs name="elevator_left">
+                     <controlJoint>${namespace}/elevator_joint</controlJoint>
+                     <fromTopic>true</fromTopic>
+                     <csRefTopic>elev_pos</csRefTopic>
+                     <radToCLift>1.5676 0</radToCLift>
+                     <radToCDrag>0 0</radToCDrag>
+                     <radToCPitch>0 0</radToCPitch>
+                     <radToAoAB>0</radToAoAB>
+                  </cs>
+               </control>
+            </segment>
+            <segment name="HSR_1">
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0.013 -0.165 0.012</cp>
+               <seg_area>0.0475</seg_area>
+               <seg_chord>0.144</seg_chord>
+               <aeroParamsYAML>${yaml_path}/techpod_TJ_tail_h.yaml</aeroParamsYAML>
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+               <indVel name="prop0">
+                  <topic>prop_slpstr_0</topic>
+               </indVel>
+               <control>
+                  <cs name="elevator_right">
+                     <controlJoint>${namespace}/elevator_joint</controlJoint>
+                     <fromTopic>true</fromTopic>
+                     <csRefTopic>elev_pos</csRefTopic>
+                     <radToCLift>1.5676 0</radToCLift>
+                     <radToCDrag>0 0</radToCDrag>
+                     <radToCPitch>0 0</radToCPitch>
+                     <radToAoAB>0</radToAoAB>
+                  </cs>
+               </control>
+            </segment>
+         </airfoil>
+      </plugin>
+   </gazebo>
+
+   <!-- Instantiate the ailerons -->
+   <xacro:control_surface robot_namespace="${namespace}"
+      surface_name="aileron_left"
+      parent="${namespace}/wl_3"
+      mass_surface="${mass_aileron}"
+      min_angle="${aileron_min_angle}"
+      max_angle="${aileron_max_angle}"
+      color="${aileron_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/ail_l.stl"
+      surface_length="${aileron_length}"
+      surface_width="${aileron_width}"
+      surface_height="${aileron_height}">
+      <axis xyz="0 -1 0" /><!-- Joint axis -->
+      <origin xyz="-0.062 0.2 0" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 0 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0.062 -1.02 -0.162" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="aileron_inertia" />
+   </xacro:control_surface>
+
+   <xacro:control_surface robot_namespace="${namespace}"
+      surface_name="aileron_right"
+      parent="${namespace}/wr_3"
+      mass_surface="${mass_aileron}"
+      min_angle="${aileron_min_angle}"
+      max_angle="${aileron_max_angle}"
+      color="${aileron_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/ail_r.stl"
+      surface_length="${aileron_length}"
+      surface_width="${aileron_width}"
+      surface_height="${aileron_height}">
+      <axis xyz="0 -1 0" /><!-- Joint axis -->
+      <origin xyz="-0.062 -0.2 0" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 0 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0.062 1.02 -0.162" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="aileron_inertia" />
+   </xacro:control_surface>
+
+   <!-- Instantiate the flaps -->
+   <xacro:control_surface robot_namespace="${namespace}"
+      surface_name="flap_left_1"
+      parent="${namespace}/wl_1"
+      mass_surface="${mass_flap}"
+      min_angle="${flap_min_angle}"
+      max_angle="${flap_max_angle}"
+      color="${flap_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/flp_l_1.stl"
+      surface_length="${flap_length}"
+      surface_width="${flap_width}"
+      surface_height="${flap_height}">
+      <axis xyz="0 -1 0" /><!-- Joint axis -->
+      <origin xyz="-0.062 0.282 0" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 0 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0.062 -0.282 -0.162" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="flap_inertia" />
+   </xacro:control_surface>
+
+   <xacro:control_surface robot_namespace="${namespace}"
+      surface_name="flap_left_2"
+      parent="${namespace}/wl_2"
+      mass_surface="${mass_flap}"
+      min_angle="${flap_min_angle}"
+      max_angle="${flap_max_angle}"
+      color="${flap_color}" use_mesh_file="true"
+      mesh_file="${meshes_path}/flp_l_2.stl"
+      surface_length="${flap_length}"
+      surface_width="${flap_width}"
+      surface_height="${flap_height}">
+      <axis xyz="0 -1 0" /><!-- Joint axis -->
+      <origin xyz="-0.062 0.109 0" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 0 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0.062 -0.499 -0.162" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="flap_inertia" />
+   </xacro:control_surface>
+
+   <xacro:control_surface robot_namespace="${namespace}"
+      surface_name="flap_right_1"
+      parent="${namespace}/wr_1"
+      mass_surface="${mass_flap}"
+      min_angle="${flap_min_angle}"
+      max_angle="${flap_max_angle}"
+      color="${flap_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/flp_r_1.stl"
+      surface_length="${flap_length}"
+      surface_width="${flap_width}"
+      surface_height="${flap_height}">
+      <axis xyz="0 -1 0" /><!-- Joint axis -->
+      <origin xyz="-0.062 -0.282 0" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 0 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0.062 0.282 -0.162" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="flap_inertia" />
+   </xacro:control_surface>
+
+   <xacro:control_surface robot_namespace="${namespace}"
+      surface_name="flap_right_2"
+      parent="${namespace}/wr_2"
+      mass_surface="${mass_flap}"
+      min_angle="${flap_min_angle}"
+      max_angle="${flap_max_angle}"
+      color="${flap_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/flp_r_2.stl"
+      surface_length="${flap_length}"
+      surface_width="${flap_width}"
+      surface_height="${flap_height}">
+      <axis xyz="0 -1 0" /><!-- Joint axis -->
+      <origin xyz="-0.062 -0.109 0" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 0 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0.062 0.499 -0.162" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="flap_inertia" />
+   </xacro:control_surface>
+
+   <!-- Instantiate the elevator/rudder -->
+   <xacro:control_surface robot_namespace="${namespace}"
+      surface_name="elevator"
+      parent="${namespace}/hs"
+      mass_surface="${mass_elevator}"
+      min_angle="${elevator_min_angle}"
+      max_angle="${elevator_max_angle}"
+      color="${elevator_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/elev.stl"
+      surface_length="${elevator_length}"
+      surface_width="${elevator_width}"
+      surface_height="${elevator_height}">
+      <axis xyz="0 -1 0" /><!-- Joint axis -->
+      <origin xyz="-0.078 0 0" rpy="0 0 0" /><!-- Joint origin -->
+      <origin xyz="0 0 0" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0.735 0 -0.305" rpy="0 0 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="elevator_inertia" />
+   </xacro:control_surface>
+
+   <xacro:control_surface robot_namespace="${namespace}"
+      surface_name="rudder"
+      parent="${namespace}/vs"
+      mass_surface="${mass_rudder}"
+      min_angle="${rudder_min_angle}"
+      max_angle="${rudder_max_angle}"
+      color="${rudder_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/rudd.stl"
+      surface_length="0.1"
+      surface_width="0.1"
+      surface_height="0.1">
+      <axis xyz="0 0 -1" /><!-- Joint axis -->
+      <origin xyz="0.041 0 -0.031" rpy="0 -0.3 0" /><!-- Joint origin -->
+      <origin xyz="-0.05 0 0.12" rpy="0 0 0" /><!-- Inertia origin -->
+      <origin xyz="0.551 0 -0.1705" rpy="0 0.3 0" /><!-- Visuals/Collision origin -->
+      <xacro:insert_block name="rudder_inertia" />
+   </xacro:control_surface>
+
+   <!-- Instantiate the propeller -->
+   <xacro:propeller robot_namespace="${namespace}"
+      suffix="P0"
+      parent="${namespace}/base_link"
+      mass_propeller="${mass_propeller}"
+      propeller_radius="${propeller_radius}"
+      color="${propeller_color}"
+      use_mesh_file="true"
+      mesh_file="${meshes_path}/prop.stl">
+      <origin xyz="-0.1672 0 0.1955" rpy="0 ${-0.5*PI} 0" />
+      <origin xyz="-0.1955 0 -0.1672" rpy="0 ${0.5*PI} 0" />
+      <xacro:insert_block name="propeller_inertia" />
+   </xacro:propeller>
+
+   <gazebo>
+      <plugin filename="librotors_gazebo_propulsion_plugin.so" name="propulsion_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <prop name="P0">
+            <jointName>${namespace}/propeller_P0_joint</jointName>
+            <linkNameParent>${namespace}/base_link</linkNameParent>
+            <cp>-0.16 0 0.197</cp>
+            <axisPosRot>-1 0.0 0.1</axisPosRot>
+            <turnDir>cw</turnDir>
+            <speedRefTopic>prop_ref_0</speedRefTopic>
+            <propParamsYAML>${yaml_path}/techpod_TJ_prop.yaml</propParamsYAML>
+            <tauUp>0.1963</tauUp>
+            <tauDown>0.3777</tauDown>
+            <tauSpoolUp>2.0422</tauSpoolUp>
+            <rdpsDead>200</rdpsDead>
+            <rdpsMax>1028</rdpsMax>
+            <slpstrTopic>prop_slpstr_0</slpstrTopic>
+            <visTopic>prop_vis_0</visTopic>
+            <wind name="wind">
+              <topic>wind_base_link</topic>
+            </wind>
+         </prop>
+      </plugin>
+   </gazebo>
+
+   <!-- Fuselage aerodynamics -->
+   <gazebo>
+      <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <linkName>${namespace}/base_link</linkName>
+         <aeroForcesVis>aero_force_vis_0</aeroForcesVis>
+         <body>
+            <element>
+               <aBdyXX>0.0176</aBdyXX>
+               <aBdyYY>0.0640</aBdyYY>
+               <aBdyZZ>0.0560</aBdyZZ>
+               <forward>1 0 0</forward>
+               <upward>0 0 1</upward>
+               <cp>0 0.0 0.097</cp>     <!-- ... in (uncorrected) cg -->
+               <wind name="wind">
+                 <topic>wind_base_link</topic>
+               </wind>
+            </element>
+         </body>
+      </plugin>
+   </gazebo>
+
+   <!-- Flow angle vanes -->
+   <xacro:angle_vane robot_namespace="${namespace}"
+      vane_name="alpha_1"
+      type="alpha"
+      chord="0.02"
+      arm_cp="0.05"
+      mass_vane="0.02"
+      parent="${namespace}/wl_1"
+      wind_topic="wind_base_link"
+      color="Grey">
+      <origin xyz="0.15 0.345 0.05" rpy="0 0 0" /><!-- Joint origin -->
+      <xacro:box_inertia x="0.1" y="0.02" z="0.02" mass="0.02" />
+   </xacro:angle_vane>
+
+   <joint name="${namespace}/vane_mount_l" type="fixed">
+      <parent link="${namespace}/wl_1" />
+      <child link="${namespace}/vane_mount_l" />
+   </joint>
+   <link name="${namespace}/vane_mount_l">
+      <inertial>
+         <mass value="0.001" />
+         <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+      </inertial>
+      <visual>
+         <origin xyz="0 0.34 -0.162" rpy="0 0 0" />
+         <geometry>
+            <mesh filename="package://rotors_description/meshes/techpod_X_flex/vane_mount.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+   </link>
+   <gazebo reference="${namespace}/vane_mount_l">
+      <material>Gazebo/Grey</material>
+   </gazebo>
+
+   <xacro:angle_vane robot_namespace="${namespace}"
+      vane_name="beta_1"
+      type="beta"
+      chord="0.02"
+      arm_cp="0.05"
+      mass_vane="0.02"
+      parent="${namespace}/wr_1"
+      wind_topic="wind_base_link"
+      color="Grey">
+      <origin xyz="0.15 -0.34 0.057" rpy="0 0 0" /><!-- Joint origin -->
+      <xacro:box_inertia x="0.1" y="0.02" z="0.02" mass="0.02" />
+   </xacro:angle_vane>
+
+   <joint name="${namespace}/vane_mount_r" type="fixed">
+      <parent link="${namespace}/wr_1" />
+      <child link="${namespace}/vane_mount_r" />
+   </joint>
+   <link name="${namespace}/vane_mount_r">
+      <inertial>
+         <mass value="0.001" />
+         <xacro:box_inertia x="0.001" y="0.001" z="0.001" mass="0.001" />
+      </inertial>
+      <visual>
+         <origin xyz="0 -0.34 -0.162" rpy="0 0 0" />
+         <geometry>
+            <mesh filename="package://rotors_description/meshes/techpod_X_flex/vane_mount.stl" scale="1 1 1" />
+         </geometry>
+      </visual>
+   </link>
+   <gazebo reference="${namespace}/vane_mount_r">
+      <material>Gazebo/Grey</material>
+   </gazebo>
+
+   <gazebo>
+      <plugin filename="librotors_gazebo_vane_plugin.so" name="alpha_1_vane_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <alphaJoint>${namespace}/alpha_1_joint</alphaJoint>
+         <betaJoint>${namespace}/beta_1_joint</betaJoint>
+         <vaneTopic>vanes</vaneTopic>
+      </plugin>
+   </gazebo>
+
+   <!-- Wind -->
+   <xacro:if value="${enable_wind}">
+     <gazebo>
+       <plugin filename="librotors_gazebo_wind_beta_plugin.so" name="wind_beta_plugin">
+         <robotNamespace>${namespace}</robotNamespace>
+         <windLayer>
+           <layer name="layer1">
+             <altitude>10</altitude>
+             <windMeanNED>-3 0 0</windMeanNED>
+           </layer>
+           <layer name="layer2">
+             <altitude>25</altitude>
+             <windMeanNED>-4 0 0</windMeanNED>
+           </layer>
+           <layer name="layer3">
+             <altitude>35</altitude>
+             <windMeanNED>-9 0 0</windMeanNED>
+           </layer>
+         </windLayer>
+         <findWind>
+           <query name="q1">
+             <linkName>${namespace}/base_link</linkName>
+             <windTopic>wind_base_link</windTopic>
+           </query>
+         </findWind>
+         <lambdaMin>2</lambdaMin>
+         <lengthScale>725</lengthScale>
+         <fourierNNN>10 10 10</fourierNNN>
+         <sigma>2</sigma>
+         <trnspVelTurbNED>-3 0 0</trnspVelTurbNED>
+       </plugin>
+     </gazebo>
+   </xacro:if>
+
+   <!-- Mavlink interface -->
+   <gazebo>
+      <plugin filename="librotors_gazebo_mavlink_interface.so" name="gazebo_mavlink_interface">
+         <robotNamespace>${namespace}</robotNamespace>
+         <protocol_version>2.0</protocol_version>
+         <imuSubTopic>/imu</imuSubTopic>            <!-- subscription of imu topic to relay acc/gyro to autopilot -->
+         <imu_rate>250</imu_rate>
+         <gpsSubTopic>/gps</gpsSubTopic>            <!-- subscription of gnss topic to relay pos to autopilot -->
+         <gpsGtSubTopic>/gps_gt</gpsGtSubTopic>
+         <lidarSubTopic />
+         <opticalFlowSubTopic />
+         <vaneSubTopic>/vanes</vaneSubTopic>        <!-- subscription of vane topic to relay aoa/slip to autopilot -->
+         <mavlink_addr>INADDR_ANY</mavlink_addr>
+         <mavlink_udp_port>14560</mavlink_udp_port>
+         <serialEnabled>true</serialEnabled>
+         <serialDevice>${serial_device}</serialDevice>
+         <baudRate>921600</baudRate>
+         <qgc_addr>INADDR_ANY</qgc_addr>
+         <qgc_udp_port>14550</qgc_udp_port>
+         <hil_mode>true</hil_mode>
+         <hil_state_level>false</hil_state_level>
+         <enable_lockstep>false</enable_lockstep>
+         <use_tcp>false</use_tcp>
+         <motorSpeedCommandPubTopic>/command/motor_speed_old</motorSpeedCommandPubTopic>
+         <actuatorsPubTopic>/command/motor_speed</actuatorsPubTopic>
+         <linkName>${namespace}/base_link</linkName> <!-- reference link frame for airspeed and baro alt-->
+         <pitotPos>0.54 0 0.184</pitotPos>           <!-- pitot position wrt reference link -->
+         <baroPos>0.14 0.0 0.07</baroPos>            <!-- baro position wrt reference link -->
+         <wind name="wind">                          <!-- include wind in airspeed measurement -->
+           <topic>wind_base_link</topic>
+         </wind>
+         <control_channels>
+            <channel name="propeller">
+               <input_index>4</input_index>
+               <input_offset>1</input_offset>
+               <input_scaling>578.7</input_scaling><!-- rdps_slope/2  [rad/s]-->
+               <zero_position_disarmed>0</zero_position_disarmed>
+               <zero_position_armed>15.03</zero_position_armed>
+               <joint_control_type>gz_msg</joint_control_type>
+               <gztopic>prop_ref_0</gztopic>
+            </channel>
+            <channel name="propeller_anim">
+               <input_index>4</input_index>
+               <input_offset>1</input_offset>
+               <input_scaling>20</input_scaling><!-- rdps_slope/2  [rad/s]-->
+               <zero_position_disarmed>0</zero_position_disarmed>
+               <zero_position_armed>0</zero_position_armed>
+               <joint_control_type>velocity</joint_control_type>
+               <joint_name>${namespace}/propeller_P0_joint</joint_name>
+            </channel>
+            <channel name="aileron_left">
+               <input_index>0</input_index>
+               <input_offset>0</input_offset>
+               <input_scaling>0.3</input_scaling>
+               <zero_position_disarmed>0</zero_position_disarmed>
+               <zero_position_armed>0</zero_position_armed>
+               <joint_control_type>servo</joint_control_type>
+               <joint_name>${namespace}/aileron_left_joint</joint_name>
+               <gztopic>ail_l_pos</gztopic>
+            </channel>
+            <channel name="aileron_right">
+               <input_index>0</input_index>
+               <input_offset>0</input_offset>
+               <input_scaling>-0.3</input_scaling>
+               <zero_position_disarmed>0</zero_position_disarmed>
+               <zero_position_armed>0</zero_position_armed>
+               <joint_control_type>servo</joint_control_type>
+               <joint_name>${namespace}/aileron_right_joint</joint_name>
+               <gztopic>ail_r_pos</gztopic>
+            </channel>
+            <channel name="elevator">
+               <input_index>2</input_index>
+               <input_offset>0</input_offset>
+               <input_scaling>0.3</input_scaling>
+               <zero_position_disarmed>0</zero_position_disarmed>
+               <zero_position_armed>0</zero_position_armed>
+               <joint_control_type>servo</joint_control_type>
+               <joint_name>${namespace}/elevator_joint</joint_name>
+               <gztopic>elev_pos</gztopic>
+            </channel>
+            <channel name="rudder">
+               <input_index>3</input_index>
+               <input_offset>-0.5</input_offset>
+               <input_scaling>-0.6</input_scaling>
+               <zero_position_disarmed>0</zero_position_disarmed>
+               <zero_position_armed>0</zero_position_armed>
+               <joint_control_type>servo</joint_control_type>
+               <joint_name>${namespace}/rudder_joint</joint_name>
+               <gztopic>rudd_pos</gztopic>
+            </channel>
+            <channel name="flap_left_1">
+               <input_index>5</input_index>
+               <input_offset>0</input_offset>
+               <input_scaling>0.3</input_scaling>
+               <zero_position_disarmed>0</zero_position_disarmed>
+               <zero_position_armed>0</zero_position_armed>
+               <joint_control_type>servo</joint_control_type>
+               <joint_name>${namespace}/flap_left_1_joint</joint_name>
+               <gztopic>flap_l1_pos</gztopic>
+            </channel>
+            <channel name="flap_left_2">
+               <input_index>5</input_index>
+               <input_offset>0</input_offset>
+               <input_scaling>0.3</input_scaling>
+               <zero_position_disarmed>0</zero_position_disarmed>
+               <zero_position_armed>0</zero_position_armed>
+               <joint_control_type>servo</joint_control_type>
+               <joint_name>${namespace}/flap_left_2_joint</joint_name>
+               <gztopic>flap_l2_pos</gztopic>
+            </channel>
+            <channel name="flap_right_1">
+               <input_index>5</input_index>
+               <input_offset>0</input_offset>
+               <input_scaling>0.3</input_scaling>
+               <zero_position_disarmed>0</zero_position_disarmed>
+               <zero_position_armed>0</zero_position_armed>
+               <joint_control_type>servo</joint_control_type>
+               <joint_name>${namespace}/flap_right_1_joint</joint_name>
+               <gztopic>flap_r1_pos</gztopic>
+            </channel>
+            <channel name="flap_right_2">
+               <input_index>5</input_index>
+               <input_offset>0</input_offset>
+               <input_scaling>0.3</input_scaling>
+               <zero_position_disarmed>0</zero_position_disarmed>
+               <zero_position_armed>0</zero_position_armed>
+               <joint_control_type>servo</joint_control_type>
+               <joint_name>${namespace}/flap_right_2_joint</joint_name>
+               <gztopic>flap_r2_pos</gztopic>
+            </channel>
+         </control_channels>
+      </plugin>
+   </gazebo>
+
+   <!-- Miscellaneous -->
+   <!--
+   <link name="${namespace}/check_coordinates">
+      <inertial>
+         <mass value="0.1" />
+         <xacro:box_inertia x="0.1" y="0.1" z="0.1" mass="0.1" />
+      </inertial>
+   </link>
+   <joint name="${namespace}/check_coordinates_joint" type="revolute">
+     <origin xyz="0.54 0 0.184" rpy="0 0 0" />
+     <parent link="${namespace}/base_link" />
+     <child link="${namespace}/check_coordinates" />
+     <limit upper="0" lower="0" effort="0" velocity="0" />
+   </joint>
+   -->
+</robot>

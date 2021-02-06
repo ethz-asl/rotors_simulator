@@ -58,7 +58,6 @@ GazeboLidarPlugin::~GazeboLidarPlugin()
   this->world.reset();
 }
 
-
 void GazeboLidarPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 {
   if(kPrintOnPluginLoad) {
@@ -86,12 +85,20 @@ void GazeboLidarPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   node_handle_ = transport::NodePtr(new transport::Node());
   node_handle_->Init(namespace_);
 
-  const string scopedName = _parent->ParentName();
+  string topicName;
 
-  string topicName = "~/" + scopedName + "/lidar";
-  boost::replace_all(topicName, "::", "/");
+  if (_sdf->HasElement("lidarTopic")) {
+      topicName = _sdf->GetElement("lidarTopic")->Get<std::string>();
+      lidar_pub_ = node_handle_->Advertise<lidar_msgs::msgs::lidar>(namespace_ + "/" + topicName, 10);
 
-  lidar_pub_ = node_handle_->Advertise<lidar_msgs::msgs::lidar>(topicName, 10);
+  } else {
+      const string scopedName = _parent->ParentName();
+      topicName = "~/" + scopedName + "/lidar";
+      boost::replace_all(topicName, "::", "/");
+      lidar_pub_ = node_handle_->Advertise<lidar_msgs::msgs::lidar>(topicName, 10);
+  }
+
+  std::cout<<"\33[1m[gazebo_lidar_plugin]\33[0m Advertising \33[1;32m" << lidar_pub_->GetTopic() << "\33[0m \n";
 }
 
 
@@ -101,6 +108,5 @@ void GazeboLidarPlugin::OnNewLaserScans()
   lidar_message.set_min_distance(parentSensor->RangeMin());
   lidar_message.set_max_distance(parentSensor->RangeMax());
   lidar_message.set_current_distance(parentSensor->Range(0));
-
   lidar_pub_->Publish(lidar_message);
 }

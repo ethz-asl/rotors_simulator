@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <model name="davos">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <heightmap>
+            <uri>model://davos/materials/textures/davos_heightmap_small.png</uri>
+            <size>8000 8000 1030</size>
+            <pos>0 0 -60</pos>
+          </heightmap>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.2</mu>
+              <mu2>0.2</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1000000</kp>
+              <kd>1</kd>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <heightmap>
+            <texture>
+              <diffuse>model://davos/materials/textures/davos_texture_scaled.png</diffuse>
+              <normal>file://media/materials/textures/flat_normal.png</normal>
+              <size>8000</size>
+            </texture>
+            <uri>model://davos/materials/textures/davos_heightmap_small.png</uri>
+            <size>8000 8000 1030</size>
+            <pos>0 0 -60</pos>
+          </heightmap>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>

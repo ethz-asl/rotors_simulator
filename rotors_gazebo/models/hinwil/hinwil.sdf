@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="hinwil">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <heightmap>
+            <uri>model://hinwil/materials/textures/heightmap_996m_513_8bit.png</uri>
+            <size>996 996 45</size>
+            <pos>0 0 -5</pos>
+          </heightmap>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.2</mu>
+              <mu2>0.2</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1000000</kp>
+              <kd>1</kd>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <heightmap>
+            <uri>model://hinwil/materials/textures/heightmap_996m_1025_8bit.png</uri>
+            <size>996 996 45</size>
+            <pos>0 0 -5</pos>
+            <texture>
+              <size>996</size>
+              <diffuse>model://hinwil/materials/textures/texture_996m_4000.png</diffuse>
+              <normal>file://media/materials/textures/flat_normal.png</normal>
+            </texture>
+          </heightmap>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>

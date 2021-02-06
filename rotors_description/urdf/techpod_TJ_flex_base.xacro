@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<!--
+  Copyright 2016 Pavel Vechersky, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<robot name="techpod_TJ_flex" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
+
+  <!-- Instantiate fixed wing "mechanics" -->
+  <xacro:include filename="$(find rotors_description)/urdf/techpod_TJ_flex.xacro" />
+
+  <!-- Mount an ADIS16448 IMU. -->
+  <xacro:default_imu namespace="${namespace}" parent_link="${namespace}/base_link" >
+    <origin xyz="0.14 -0.01 0.07" rpy="0 0 0" />
+  </xacro:default_imu>
+
+  <!-- Mount a GPS. -->
+  <xacro:default_gps namespace="${namespace}" parent_link="${namespace}/base_link" >
+    <origin xyz="0.06 0 0.19" rpy="0 0 0" />
+  </xacro:default_gps>
+
+  <!-- Mount a magnetometer. note: mavlink interface already does this based on position from gps-->
+  <!--
+  <xacro:default_magnetometer namespace="${namespace}" parent_link="${namespace}/base_link" />
+  -->
+  <!-- Mount a pressure sensor. note: mavlink interface already does this -->
+  <!--
+  <xacro:default_pressure_sensor namespace="${namespace}" parent_link="${namespace}/base_link" />
+  -->
+
+  <xacro:camera_macro_2
+    namespace="${namespace}"
+    parent_link="${namespace}/base_link"
+    camera_suffix="3pv"
+    frame_rate="60"
+    horizontal_fov="1.3962634"
+    image_width="752"
+    image_height="480"
+    image_format="L8"
+    min_distance="0.02"
+    max_distance="8000"
+    noise_mean="0.0"
+    noise_stddev="0.007"
+    mass = "0.01"
+    enable_visual="false">
+    <mesh filename="package://rotors_description/meshes/vi_camera.dae" scale="1 1 1" />
+    <xacro:cube_inertia l="0.02" mass="0.01" />
+    <origin xyz="-2 0 0.5" rpy="0 0.2 0" />
+  </xacro:camera_macro_2>
+
+  <!-- Trinocular Setup -->
+
+  <!-- Camera Fuselage Left -->
+  <xacro:default_camera
+    namespace="${namespace}"
+    parent_link="${namespace}/base_link"
+    camera_suffix="fus_left">
+    <origin xyz="0.21 0.045 0.145" rpy="0 -0.1 2.2" />
+  </xacro:default_camera>
+
+  <!-- Camera Fuselage Right -->
+  <xacro:default_camera
+    namespace="${namespace}"
+    parent_link="${namespace}/base_link"
+    camera_suffix="fus_right">
+    <origin xyz="0.21 -0.045 0.145" rpy="0 -0.1 -2.2" />
+  </xacro:default_camera>
+
+  <!-- Camera/IMU Fuselage Center -->
+  <xacro:asl_mono_vi_1
+    namespace="${namespace}"
+    parent_link="${namespace}/base_link"
+    suffix="center"
+    fps="30"
+    h_fov="1.3672"
+    imu_topic="adis/data_raw"
+    acc_nd="0.0100"
+    acc_rw="0.0020"
+    gyr_nd="0.0050"
+    gyr_rw="0.00004">
+    <origin xyz="0.35 0 0.11" rpy="0 0.3 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:asl_mono_vi_1>
+
+  <!-- Camera/IMU Wing Left -->
+  <xacro:asl_mono_vi_1
+    namespace="${namespace}"
+    parent_link="${namespace}/wl_3"
+    suffix="left"
+    fps="30"
+    h_fov="1.3672"
+    imu_topic="camImu0/data_raw"
+    acc_nd="0.1006"
+    acc_rw="0.0040"
+    gyr_nd="0.0258"
+    gyr_rw="0.0007">
+    <origin xyz="0.05 0.38 0.025" rpy="0 0.3 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:asl_mono_vi_1>
+
+  <!-- Camera/IMU Wing Right -->
+  <xacro:asl_mono_vi_1
+    namespace="${namespace}"
+    parent_link="${namespace}/wr_3"
+    suffix="right"
+    fps="30"
+    h_fov="1.3672"
+    imu_topic="camImu1/data_raw"
+    acc_nd="0.1006"
+    acc_rw="0.0040"
+    gyr_nd="0.0258"
+    gyr_rw="0.0007">
+    <origin xyz="0.05 -0.38 0.025" rpy="0 0.3 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:asl_mono_vi_1>
+
+</robot>

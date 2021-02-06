@@ -51,6 +51,8 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
 
   namespace_.clear();
 
+  gzdbg << "dbg1" << std::endl;
+
   // Get the robot namespace.
   if (_sdf->HasElement("robotNamespace"))
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
@@ -62,6 +64,8 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
 
   // Initialise with default namespace (typically /gazebo/default/).
   node_handle_->Init();
+
+  gzdbg << "dbg2" << std::endl;
 
   // Get the link name.
   std::string link_name;
@@ -76,9 +80,12 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
             << link_name << "\".");
   }
 
+  gzdbg << "dbg3" << std::endl;
+
   // Get the path to fixed-wing aerodynamics parameters YAML file. If not
   // provided, default Techpod parameters are used.
   if (_sdf->HasElement("aeroParamsYAML")) {
+    gzdbg << "dbg3.0" << std::endl;
     std::string aero_params_yaml =
         _sdf->GetElement("aeroParamsYAML")->Get<std::string>();
 
@@ -100,19 +107,25 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
         << " specified, using default Techpod parameters.\n";
   }
 
+  gzdbg << "dbg4" << std::endl;
+
   // Get the rest of the sdf parameters.
+  getSdfParam<bool>(_sdf, "useGzMavlinkInterface", use_gazebo_mavlink_interface_,
+                    true);
   getSdfParam<bool>(_sdf, "isInputJoystick", is_input_joystick_,
                     kDefaultIsInputJoystick);
   getSdfParam<std::string>(_sdf, "actuatorsSubTopic",
                            actuators_sub_topic_,
-                           mav_msgs::default_topics::COMMAND_ACTUATORS);
+                           mav_msgs::default_topics::COMMAND_ACTUATORS); // "command/motor_speeds"
   getSdfParam<std::string>(_sdf, "rollPitchYawrateThrustSubTopic",
                            roll_pitch_yawrate_thrust_sub_topic_,
                            mav_msgs::default_topics::
-                               COMMAND_ROLL_PITCH_YAWRATE_THRUST);
+                               COMMAND_ROLL_PITCH_YAWRATE_THRUST);  // "command/roll_pitch_yawrate_thrust"
   getSdfParam<std::string>(_sdf, "windSpeedSubTopic",
                            wind_speed_sub_topic_,
-                           mav_msgs::default_topics::WIND_SPEED);
+                           mav_msgs::default_topics::WIND_SPEED);   // "wind_speed"
+
+  gzdbg << "dbg5" << std::endl;
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -279,6 +292,10 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
   // Apply the calculated forced and moments to the main body link.
   link_->AddRelativeForce(forces);
   link_->AddRelativeTorque(moments);
+
+  //gzdbg<<"force: x="<<forces[0]<<" y="<<forces[1]<<" z="<<forces[2]<<std::endl;
+  //gzdbg<<"moment: x="<<moments[0]<<" y="<<moments[1]<<" z="<<moments[2]<<std::endl;
+
 }
 
 double GazeboFwDynamicsPlugin::NormalizedInputToAngle(
@@ -327,12 +344,16 @@ void GazeboFwDynamicsPlugin::CreatePubsAndSubs() {
             roll_pitch_yawrate_thrust_sub_topic_,
             &GazeboFwDynamicsPlugin::RollPitchYawrateThrustCallback, this);
 
-    connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
-        roll_pitch_yawrate_thrust_sub_topic_);
-    connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
-        roll_pitch_yawrate_thrust_sub_topic_);
-    connect_ros_to_gazebo_topic_msg.set_msgtype(
-        gz_std_msgs::ConnectRosToGazeboTopic::ROLL_PITCH_YAWRATE_THRUST);
+        gzdbg<<"Aircraft actuation signal from ~/" << namespace_ << "/" <<
+           roll_pitch_yawrate_thrust_sub_topic_<<" gazebo topic"<<std::endl;
+
+        connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
+            roll_pitch_yawrate_thrust_sub_topic_);
+        connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
+            roll_pitch_yawrate_thrust_sub_topic_);
+        connect_ros_to_gazebo_topic_msg.set_msgtype(
+            gz_std_msgs::ConnectRosToGazeboTopic::ROLL_PITCH_YAWRATE_THRUST);
+
   } else {
     // ============================================ //
     // ===== ACTUATORS MSG SETUP (ROS->GAZEBO) ==== //
@@ -342,17 +363,21 @@ void GazeboFwDynamicsPlugin::CreatePubsAndSubs() {
         node_handle_->Subscribe("~/" + namespace_ + "/" + actuators_sub_topic_,
                                 &GazeboFwDynamicsPlugin::ActuatorsCallback,
                                 this);
+        gzdbg<<"Aircraft actuation signal from " << "~/" + namespace_ + "/" + actuators_sub_topic_
+             <<" gazebo topic"<<std::endl;
 
-    connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
+        connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
                                                   actuators_sub_topic_);
-    connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
+        connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
                                                      actuators_sub_topic_);
-    connect_ros_to_gazebo_topic_msg.set_msgtype(
-        gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
+        connect_ros_to_gazebo_topic_msg.set_msgtype(
+            gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
   }
 
-  gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg,
-                                              true);
+  if(!use_gazebo_mavlink_interface_){
+      // prevent gazebo_ros_interface_plugin from publishing actuator data if mavlink_interface is used for doing so
+       gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
+  }
 }
 
 void GazeboFwDynamicsPlugin::ActuatorsCallback(
@@ -363,7 +388,7 @@ void GazeboFwDynamicsPlugin::ActuatorsCallback(
 
   delta_aileron_left_ = NormalizedInputToAngle(vehicle_params_.aileron_left,
       actuators_msg->normalized(vehicle_params_.aileron_left.channel));
-  delta_aileron_right_ = NormalizedInputToAngle(vehicle_params_.aileron_right,
+  delta_aileron_right_ = -NormalizedInputToAngle(vehicle_params_.aileron_right,
       actuators_msg->normalized(vehicle_params_.aileron_right.channel));
   delta_elevator_ = NormalizedInputToAngle(vehicle_params_.elevator,
       actuators_msg->normalized(vehicle_params_.elevator.channel));

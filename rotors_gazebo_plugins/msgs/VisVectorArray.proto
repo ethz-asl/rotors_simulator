@@ -1,0 +1,14 @@
+syntax = "proto2";
+package gz_visualization_msgs;
+
+import "ArrowMarker.proto";
+import "Header.proto";
+
+// VisVectorArray is used to plot multiple vectors in rviz, e.g. lift and drag of wing segments
+message VisVectorArray
+{
+
+  required gz_std_msgs.Header header = 1; 		// stamp & link frame in/to which the below data is relative to/expressed
+  repeated gz_visualization_msgs.ArrowMarker vector = 2;	// arrow-type marker
+
+}

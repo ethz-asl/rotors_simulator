@@ -19,6 +19,7 @@
 
 #include <Eigen/Dense>
 #include <yaml-cpp/yaml.h>
+#include <exception>
 
 namespace gazebo {
 
@@ -88,12 +89,12 @@ static constexpr double kDefaultControlSurfaceDeflectionMin =
 static constexpr double kDefaultControlSurfaceDeflectionMax =
     20.0 * M_PI / 180.0;
 
-static constexpr int kDefaultAileronLeftChannel = 4;
+static constexpr int kDefaultAileronLeftChannel = 0;
 static constexpr int kDefaultAileronRightChannel = 0;
 static constexpr int kDefaultElevatorChannel = 1;
-static constexpr int kDefaultFlapChannel = 2;
-static constexpr int kDefaultRudderChannel = 3;
-static constexpr int kDefaultThrottleChannel = 5;
+static constexpr int kDefaultFlapChannel = 4;
+static constexpr int kDefaultRudderChannel = 2;
+static constexpr int kDefaultThrottleChannel = 3;
 
 /// \brief  Wrapper function for extracting control surface parameters from a
 ///         YAML node.
@@ -178,7 +179,17 @@ struct FWAerodynamicParameters {
   Eigen::Vector3d c_thrust;
 
   void LoadAeroParamsYAML(const std::string& yaml_path) {
+
     const YAML::Node node = YAML::LoadFile(yaml_path);
+
+    gzdbg << yaml_path <<std::endl;
+    gzdbg<<"IsDefined"<<node.IsDefined()<<std::endl;
+    gzdbg<<"IsMap"<<node.IsMap()<<std::endl;
+    gzdbg<<"IsNull"<<node.IsNull()<<std::endl;
+    gzdbg<<"IsScalar"<<node.IsScalar()<<std::endl;
+    gzdbg<<"IsSequence"<<node.IsSequence()<<std::endl;
+
+    try{
 
     READ_PARAM(node, alpha_max);
     READ_PARAM(node, alpha_min);
@@ -209,6 +220,16 @@ struct FWAerodynamicParameters {
     READ_EIGEN_VECTOR(node, c_yaw_moment_delta_rud);
 
     READ_EIGEN_VECTOR(node, c_thrust);
+
+    } catch (const std::exception& ex) {
+        gzerr<<ex.what()<<std::endl;
+    } catch (const std::string& ex) {
+        gzerr<<ex<<std::endl;
+    } catch (...) {
+        gzerr<<"meeep"<<std::endl;
+    }
+
+    gzdbg << "dbg3.4" << std::endl;
   }
 };
 
@@ -261,6 +282,14 @@ struct FWVehicleParameters {
   void LoadVehicleParamsYAML(const std::string& yaml_path) {
     const YAML::Node node = YAML::LoadFile(yaml_path);
 
+    gzdbg << yaml_path <<std::endl;
+    gzdbg<<"IsDefined"<<node.IsDefined()<<std::endl;
+    gzdbg<<"IsMap"<<node.IsMap()<<std::endl;
+    gzdbg<<"IsNull"<<node.IsNull()<<std::endl;
+    gzdbg<<"IsScalar"<<node.IsScalar()<<std::endl;
+    gzdbg<<"IsSequence"<<node.IsSequence()<<std::endl;
+
+    try{
     READ_PARAM(node, wing_span);
     READ_PARAM(node, wing_surface);
     READ_PARAM(node, chord_length);
@@ -273,6 +302,14 @@ struct FWVehicleParameters {
     READ_CONTROL_SURFACE(node, elevator);
     READ_CONTROL_SURFACE(node, flap);
     READ_CONTROL_SURFACE(node, rudder);
+
+    } catch (const std::exception& ex) {
+        gzerr<<ex.what()<<std::endl;
+    } catch (const std::string& ex) {
+        gzerr<<ex<<std::endl;
+    } catch (...) {
+        gzerr<<"meeep"<<std::endl;
+    }
   }
 };
 

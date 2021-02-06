@@ -1,0 +1,15 @@
+# default propeller parameters (~APC11x7E)
+
+diameter: 0.28
+mass: 0.023
+
+k_t: -0.13
+k_t0: 0.11
+k_q: -0.011
+k_q0: -0.01
+rolling_moment_coefficient: 1e-06
+rotor_drag_coefficient: 5.3849e-04
+d_flow: 5
+
+#To Do: approx calculation based on standard propeller characteristics (dia, pitch, profile?, No of blades)
+#       Load propeller data from e.g. APC database

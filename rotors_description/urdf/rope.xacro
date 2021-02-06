@@ -1,0 +1,307 @@
+<?xml version="1.0"?>
+<!--
+  Copyright 2019, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Macro for the inertia of a cylinder -->
+  <xacro:macro name="cylinder_inertia" params="r h mass">
+    <inertia ixx="${0.0833333 * mass * (3*r*r + h*h)}" ixy="0.0" ixz="0.0"
+      iyy="${0.0833333 * mass * (3*r*r + h*h)}" iyz="0.0"
+      izz="${0.5 * mass * r * r}" />
+  </xacro:macro>
+
+  <!-- Macro for the inertia of a sphere -->
+  <xacro:macro name="sphere_inertia" params="r mass">
+    <inertia ixx="${0.4 * mass * r*r}" ixy="0.0" ixz="0.0"
+         iyy="${0.4 * mass * r*r}" iyz="0.0"
+         izz="${0.4 * mass * r*r}" />
+  </xacro:macro>
+
+  <!-- Macro for adding a rope -->
+  <xacro:macro name="rope" params="n length dia mass damping parent color prefix *joint_origin">
+
+       <xacro:property name="seg_len" value="${length/n}"/>
+       <xacro:property name="seg_mass" value="${mass/n}"/>
+
+       <link name="${prefix}_rope_seg_${n-1}">
+         <inertial>
+           <origin xyz="0 0 ${seg_len/2}" rpy="0 0 0" />
+           <mass value="${seg_mass}" />
+           <xacro:cylinder_inertia r="${dia/2}" h="${seg_len}" mass="${seg_mass}"/>
+         </inertial>
+         <visual>
+            <origin xyz="0 0 ${seg_len/2}" rpy="0 0 0" />
+            <geometry>
+              <cylinder radius="${dia/2}" length="${seg_len}"/>
+            </geometry>
+         </visual>
+       </link>
+       <gazebo>
+          <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+             <robotNamespace></robotNamespace>
+             <linkName>${prefix}_rope_seg_${n-1}</linkName>
+             <aeroForcesVis>${prefix}_aero_force_rope_${n-1}</aeroForcesVis>
+             <body>
+                <element>
+                   <aBdyXX>${seg_len*dia}</aBdyXX>
+                   <aBdyYY>${seg_len*dia}</aBdyYY>
+                   <aBdyZZ>${dia*dia/4.0*3.14}</aBdyZZ>
+                   <forward>0 0 1</forward>
+                   <upward>0 1 0</upward>
+                   <cp>0 0 ${seg_len/2}</cp>
+                </element>
+             </body>
+          </plugin>
+       </gazebo>
+       <gazebo reference="${prefix}_rope_seg_${n-1}">
+         <material>Gazebo/${color}</material>
+       </gazebo>
+
+       <xacro:rope_joint
+         parent="${parent}"
+         child="${prefix}_rope_seg_${n-1}"
+         name="p_${n-1}"
+         c="${damping}"
+         prefix="${prefix}">
+         <xacro:insert_block name="joint_origin" />
+       </xacro:rope_joint>
+
+       <xacro:if value="${n-1}">
+          <xacro:add_seg n="${n-2}" dia="${dia}" seg_len="${seg_len}" seg_mass="${seg_mass}" color="${color}" damping="${damping}" parent="rope_seg_${n-1}" prefix="${prefix}"/>
+       </xacro:if>
+
+       <!-- add payload -->
+       <link name="${prefix}_rope_payload">
+         <inertial>
+           <origin xyz="0 0 0" rpy="0 0 0" />
+           <mass value="0.1" />
+           <xacro:sphere_inertia r="0.1" mass="0.2"/>
+         </inertial>
+         <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+              <box size="0.1 0.1 0.1" />
+            </geometry>
+         </visual>
+         <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+              <box size="0.1 0.1 0.1" />
+            </geometry>
+         </collision>
+       </link>
+       <gazebo reference="${prefix}_rope_payload">
+          <visual>
+             <plugin name="visual_plugin_rope_payload" filename="librotors_gazebo_template_visual_plugin.so" />
+          </visual>
+          <material>Gazebo/Orange</material>
+          <mu1>0.2</mu1>
+          <mu2>0.2</mu2>
+          <kp>10000</kp>
+          <kd>1</kd>
+       </gazebo>
+       <gazebo>
+          <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+             <robotNamespace></robotNamespace>
+             <linkName>${prefix}_rope_payload</linkName>
+             <aeroForcesVis>${prefix}_aero_force_rope_payload</aeroForcesVis>
+             <body>
+                <element>
+                   <aBdyXX>0.01</aBdyXX>
+                   <aBdyYY>0.01</aBdyYY>
+                   <aBdyZZ>0.01</aBdyZZ>
+                   <forward>0 0 1</forward>
+                   <upward>0 1 0</upward>
+                   <cp>0 0 0</cp>
+                </element>
+             </body>
+          </plugin>
+       </gazebo>
+       <xacro:rope_joint
+         parent="${prefix}_rope_seg_0"
+         child="${prefix}_rope_payload"
+         name="0_pyld"
+         c="0.5"
+         prefix="${prefix}">
+         <origin xyz="0 0 ${seg_len}" rpy="0 0 1.57"/>
+       </xacro:rope_joint>
+
+  </xacro:macro>
+
+  <xacro:macro name="add_seg" params="n dia seg_len seg_mass color damping parent prefix">
+
+       <link name="${prefix}_rope_seg_${n}">
+         <inertial>
+           <origin xyz="0 0 ${seg_len/2}" rpy="0 0 0" />
+           <mass value="${seg_mass}" />
+           <xacro:cylinder_inertia r="${dia/2}" h="${seg_len}" mass="${seg_mass}"/>
+         </inertial>
+         <visual>
+            <origin xyz="0 0 ${seg_len/2}" rpy="0 0 0" />
+            <geometry>
+              <cylinder radius="${dia/2}" length="${seg_len}"/>
+            </geometry>
+         </visual>
+       </link>
+
+       <gazebo reference="${prefix}_rope_seg_${n}">
+         <material>Gazebo/${color}</material>
+       </gazebo>
+
+       <gazebo>
+          <plugin filename="librotors_gazebo_aerodynamics_plugin.so" name="aerodynamics_plugin">
+             <robotNamespace></robotNamespace>
+             <linkName>${prefix}_rope_seg_${n}</linkName>
+             <aeroForcesVis>${prefix}_aero_force_rope_${n}</aeroForcesVis>
+             <body>
+                <element>
+                   <aBdyXX>${seg_len*dia}</aBdyXX>
+                   <aBdyYY>${seg_len*dia}</aBdyYY>
+                   <aBdyZZ>${dia*dia/4.0*3.14}</aBdyZZ>
+                   <forward>0 0 1</forward>
+                   <upward>0 1 0</upward>
+                   <cp>0 0 ${seg_len/2}</cp>
+                </element>
+             </body>
+          </plugin>
+       </gazebo>
+
+       <xacro:rope_joint
+           parent="${prefix}_rope_seg_${n+1}"
+           child="${prefix}_rope_seg_${n}"
+           name="${n+1}_${n}"
+           c="${damping}"
+           prefix="${prefix}">
+           <origin xyz="0 0 ${seg_len}" rpy="0 0 0"/>
+       </xacro:rope_joint>
+
+       <xacro:if value="${n}">
+          <xacro:add_seg n="${n-1}" dia="${dia}" seg_len="${seg_len}" seg_mass="${seg_mass}" color="${color}" damping="${damping}" parent="rope_seg_${n}" prefix="${prefix}"/>
+       </xacro:if>
+  </xacro:macro>
+
+  <xacro:macro name="rope_joint" params="parent child name c prefix *joint_origin">
+
+       <!--
+       <joint name="rj_${name}_a" type="continuous">
+         <xacro:insert_block name="joint_origin" />
+         <axis xyz="1 0 0"/>
+         <parent link="${parent}" />
+         <child link="rl_${name}_a"/>
+         <dynamics damping="${c}"/>
+       </joint>
+       <gazebo reference="rj_${name}_a">
+         <implicitSpringDamper>true</implicitSpringDamper>
+         <springStiffness>0</springStiffness>
+       </gazebo>
+
+       <link name="rl_${name}_a">
+         <inertial>
+           <origin xyz="0 0 0" rpy="0 0 0"/>
+           <mass value="0.0001" />
+           <xacro:sphere_inertia r="0.001" mass="0.0001"/>
+         </inertial>
+       </link>
+
+       <joint name="rj_${name}_b" type="continuous">
+         <origin xyz="0 0 0" rpy="0 0 0"/>
+         <axis xyz="0 1 0"/>
+         <parent link="rl_${name}_a" />
+         <child link="rl_${name}_b"/>
+         <dynamics damping="${c}"/>
+       </joint>
+       <gazebo reference="rj_${name}_b">
+         <implicitSpringDamper>true</implicitSpringDamper>
+         <springStiffness>0</springStiffness>
+       </gazebo>
+
+       <link name="rl_${name}_b">
+         <inertial>
+           <origin xyz="0 0 0" rpy="0 0 0"/>
+           <mass value="0.0001" />
+           <xacro:sphere_inertia r="0.001" mass="0.0001"/>
+         </inertial>
+       </link>
+
+       <joint name="rj_${name}_c" type="continuous">
+         <origin xyz="0 0 0" rpy="0 0 0"/>
+         <axis xyz="1 0 0"/>
+         <parent link="rl_${name}_b" />
+         <child link="${child}"/>
+         <dynamics damping="${c}"/>
+       </joint>
+       <gazebo reference="rj_${name}_c">
+         <implicitSpringDamper>true</implicitSpringDamper>
+         <springStiffness>0</springStiffness>
+       </gazebo>
+       -->
+
+       <joint name="${prefix}_rj_${name}_a" type="continuous">
+         <xacro:insert_block name="joint_origin" />
+         <axis xyz="1 0 0"/>
+         <parent link="${parent}" />
+         <child link="${prefix}_rl_${name}_a"/>
+         <dynamics damping="${c}"/>
+       </joint>
+       <gazebo reference="${prefix}_rj_${name}_a">
+         <implicitSpringDamper>true</implicitSpringDamper>
+         <springStiffness>0</springStiffness>
+       </gazebo>
+
+       <link name="${prefix}_rl_${name}_a">
+         <inertial>
+           <origin xyz="0 0 0" rpy="0 0 0"/>
+           <mass value="0.0001" />
+           <xacro:sphere_inertia r="0.001" mass="0.0001"/>
+         </inertial>
+       </link>
+
+       <joint name="${prefix}_rj_${name}_b" type="continuous">
+         <origin xyz="0 0 0" rpy="0 0 0"/>
+         <axis xyz="0 1 0"/>
+         <parent link="${prefix}_rl_${name}_a" />
+         <child link="${child}"/>
+         <dynamics damping="${c}"/>
+       </joint>
+       <gazebo reference="${prefix}_rj_${name}_b">
+         <implicitSpringDamper>true</implicitSpringDamper>
+         <springStiffness>0</springStiffness>
+       </gazebo>
+
+       <!--
+       <joint name="rj_${name}" type="continuous">
+         <xacro:insert_block name="joint_origin" />
+         <parent link="${parent}" />
+         <child link="${child}"/>
+         <axis xyz="0 1 0" />
+         <dynamics damping="${c}"/>
+       </joint>
+       <gazebo reference="rj_${name}">
+         <implicitSpringDamper>true</implicitSpringDamper>
+         <springStiffness>0</springStiffness>
+       </gazebo>
+       -->
+
+  </xacro:macro>
+
+</robot>
+
+
+
+
+
+

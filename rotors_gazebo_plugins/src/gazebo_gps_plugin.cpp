@@ -44,6 +44,13 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   parent_sensor_ = std::dynamic_pointer_cast<sensors::GpsSensor>(_sensor);
   world_ = physics::get_world(parent_sensor_->WorldName());
 
+#if GAZEBO_MAJOR_VERSION >= 9
+  last_gps_time_ = world_->SimTime();
+#else
+  last_gps_time_ = world_->GetSimTime();
+#endif
+
+
   //==============================================//
   //========== READ IN PARAMS FROM SDF ===========//
   //==============================================//
@@ -94,6 +101,14 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
                       kDefaultHorVelStdDev);
   getSdfParam<double>(_sdf, "verVelStdDev", ver_vel_std_dev,
                       kDefaultVerVelStdDev);
+  getSdfParam<bool>(_sdf, "enableDelay", enable_delay,
+                      kDefaultEnableDelay);
+  getSdfParam<double>(_sdf, "updateInterval", gps_update_interval_,
+                      kDefaultUpdateItv);
+  getSdfParam<double>(_sdf, "delay", gps_delay,
+                      kDefaultDelay);
+  /*getSdfParam<bool>(_sdf, "rqstFwdToRos", rqst_fwd_to_ros,
+                      kDefaultRqstFwdToRos);*/
 
   // Connect to the sensor update event.
   this->updateConnection_ = this->parent_sensor_->ConnectUpdated(
@@ -173,6 +188,11 @@ void GazeboGpsPlugin::OnUpdate() {
                                       ground_speed_n_[1](random_generator_),
                                       ground_speed_n_[2](random_generator_));
 
+  // (Why does gazebo gps sensor has velocity noise property but doesn't give access to velocity?)
+
+  ignition::math::Vector3d W_ground_speed_W_L_xy = W_ground_speed_W_L;
+  W_ground_speed_W_L_xy.Z()=0;
+
   // Fill the GPS message.
   current_time = parent_sensor_->LastMeasurementTime();
 
@@ -196,6 +216,54 @@ void GazeboGpsPlugin::OnUpdate() {
   gz_ground_speed_message_.mutable_header()->mutable_stamp()->set_nsec(
       current_time.nsec);
 
+  // Fill the GPS message for hil
+  std_xy = 1.0;
+  std_z = 1.0;
+
+  gz_gps_hil_message_.set_time_usec(current_time.Double() * 1e6);
+  gz_gps_hil_message_.set_latitude_deg(parent_sensor_->Latitude().Degree());
+  gz_gps_hil_message_.set_longitude_deg(parent_sensor_->Longitude().Degree());
+  gz_gps_hil_message_.set_altitude(parent_sensor_->Altitude());
+  gz_gps_hil_message_.set_eph(std_xy);
+  gz_gps_hil_message_.set_epv(std_z);
+  gz_gps_hil_message_.set_velocity(W_ground_speed_W_L_xy.Length());
+  gz_gps_hil_message_.set_velocity_east(W_ground_speed_W_L.X());
+  gz_gps_hil_message_.set_velocity_north(W_ground_speed_W_L.Y());
+  gz_gps_hil_message_.set_velocity_up(W_ground_speed_W_L.Z());
+
+  // add msg to buffer
+  gps_delay_buffer.push(gz_gps_hil_message_);
+
+  // apply GPS delay
+  if (enable_delay && ((current_time - last_gps_time_).Double() > gps_update_interval_)) {
+      last_gps_time_ = current_time;
+
+      while (true) {
+          gz_gps_hil_message_ = gps_delay_buffer.front();
+          double gps_current_delay = current_time.Double() - gps_delay_buffer.front().time_usec() / 1e6f;
+          if (gps_delay_buffer.empty()) {
+              // abort if buffer is empty already
+              break;
+          }
+          // remove data that is too old or if buffer size is too large
+          if (gps_current_delay > gps_delay) {
+              gps_delay_buffer.pop();
+              // remove data if buffer too large
+          } else if (gps_delay_buffer.size() > gps_buffer_size_max) {
+              gps_delay_buffer.pop();
+          } else {
+              // if we get here, we have good data, stop
+              break;
+          }
+      }
+      // publish SITLGps msg at 5hz
+      gz_gps_hil_pub_->Publish(gz_gps_hil_message_);
+
+  } else if(!enable_delay && ((current_time - last_gps_time_).Double() > gps_update_interval_)) {
+      last_gps_time_ = current_time;
+      gz_gps_hil_pub_->Publish(gz_gps_hil_message_);
+  }
+
   // Publish the GPS message.
   gz_gps_pub_->Publish(gz_gps_message_);
 
@@ -217,6 +285,8 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   gz_gps_pub_ = node_handle_->Advertise<gz_sensor_msgs::NavSatFix>(
       "~/" + namespace_ + "/" + gps_topic_, 1);
 
+  gzdbg<<"advertised  ~/" + namespace_ + "/" + gps_topic_ + " gazebo message."<<std::endl;
+
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
                                                    gps_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + gps_topic_);
@@ -232,6 +302,8 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
       node_handle_->Advertise<gz_geometry_msgs::TwistStamped>(
           "~/" + namespace_ + "/" + ground_speed_topic_, 1);
 
+  gzdbg<<"advertised  ~/" + namespace_ + "/" + ground_speed_topic_ + " gazebo message."<<std::endl;
+
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
                                                    ground_speed_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" +
@@ -239,6 +311,15 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
   connect_gazebo_to_ros_topic_msg.set_msgtype(
       gz_std_msgs::ConnectGazeboToRosTopic::TWIST_STAMPED);
   connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg);
+
+  // ============================================ //
+  // =========== GPS MSG SETUP ========== //
+  // ============================================ //
+  gz_gps_hil_pub_ = node_handle_->Advertise<sensor_msgs::msgs::SITLGps>(
+      "~/" + namespace_ + "/" + gps_topic_+ "_hil", 1);
+
+  gzdbg<<"advertised  ~/" + namespace_ + "/" + gps_topic_+ "_hil" + " gazebo message."<<std::endl;
+
 }
 
 GZ_REGISTER_SENSOR_PLUGIN(GazeboGpsPlugin);

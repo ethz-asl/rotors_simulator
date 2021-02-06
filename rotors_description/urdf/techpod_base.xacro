@@ -16,15 +16,42 @@
 -->
 
 <robot name="techpod" xmlns:xacro="http://ros.org/wiki/xacro">
+
   <xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
+
   <!-- Instantiate fixed wing "mechanics" -->
   <xacro:include filename="$(find rotors_description)/urdf/techpod.xacro" />
+
+  <!--
+  <xacro:default_camera
+    namespace="${namespace}"
+    parent_link="${namespace}/base_link"
+    camera_suffix="cam_left">
+    <origin xyz="0.3 0.1 0.075" rpy="0 0.1 1.75" />
+  </xacro:default_camera>
+
+  <xacro:default_camera
+    namespace="${namespace}"
+    parent_link="${namespace}/base_link"
+    camera_suffix="cam_right">
+    <origin xyz="0.3 -0.1 0.075" rpy="0 0.1 -1.75" />
+  </xacro:default_camera>
+
+  <xacro:default_camera
+    namespace="${namespace}"
+    parent_link="${namespace}/base_link"
+    camera_suffix="cam_front">
+    <origin xyz="0.5 0 0.06" rpy="0 -0.2 0" />
+  </xacro:default_camera>
+  -->
 
   <!-- Mount an ADIS16448 IMU. -->
   <xacro:default_imu namespace="${namespace}" parent_link="${namespace}/base_link" />
 
   <!-- Mount a GPS. -->
-  <xacro:default_gps namespace="${namespace}" parent_link="${namespace}/base_link" />
+  <xacro:default_gps namespace="${namespace}" parent_link="${namespace}/base_link" >
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:default_gps>
 
   <!-- Mount a magnetometer. -->
   <xacro:default_magnetometer namespace="${namespace}" parent_link="${namespace}/base_link" />
@@ -41,7 +68,7 @@
     <xacro:bag_plugin_macro
       namespace="${namespace}"
       bag_file="$(arg log_file)"
-      rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}" 
+      rotor_velocity_slowdown_sim="${rotor_velocity_slowdown_sim}"
       wait_to_record_bag="$(arg wait_to_record_bag)" />
   </xacro:if>
 

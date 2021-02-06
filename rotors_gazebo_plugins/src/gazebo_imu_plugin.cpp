@@ -44,6 +44,7 @@ GazeboImuPlugin::GazeboImuPlugin()
       pubs_and_subs_created_(false) {}
 
 GazeboImuPlugin::~GazeboImuPlugin() {
+    updateConnection_->~Connection();
 }
 
 void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
@@ -116,7 +117,11 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
                       imu_parameters_.accelerometer_turn_on_bias_sigma,
                       imu_parameters_.accelerometer_turn_on_bias_sigma);
 
-  last_time_ = world_->SimTime();
+  #if GAZEBO_MAJOR_VERSION >= 9
+     last_time_ = world_->SimTime();
+  #else
+     last_time_ = world_->GetSimTime();
+  #endif
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -331,10 +336,11 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   angular_velocity->set_z(angular_velocity_I[2]);
   imu_message_.set_allocated_angular_velocity(angular_velocity);
 
+  imu_message_.set_seq(seq_++);
+
   // Publish the IMU message
   imu_pub_->Publish(imu_message_);
-
-  // std::cout << "Published IMU message.\n";
+  // gzdbg<<"imu publishing"<<std::endl;
 }
 
 void GazeboImuPlugin::CreatePubsAndSubs() {
@@ -349,16 +355,14 @@ void GazeboImuPlugin::CreatePubsAndSubs() {
 
   imu_pub_ = node_handle_->Advertise<gz_sensor_msgs::Imu>(
       "~/" + namespace_ + "/" + imu_topic_, 1);
+  gzdbg<<"advertised  ~/" + namespace_ + "/" + imu_topic_ + " gazebo message."<<std::endl;
 
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
-  // connect_gazebo_to_ros_topic_msg.set_gazebo_namespace(namespace_);
   connect_gazebo_to_ros_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
                                                    imu_topic_);
   connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + imu_topic_);
-  connect_gazebo_to_ros_topic_msg.set_msgtype(
-      gz_std_msgs::ConnectGazeboToRosTopic::IMU);
-  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg,
-                                           true);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::IMU);
+  connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboImuPlugin);

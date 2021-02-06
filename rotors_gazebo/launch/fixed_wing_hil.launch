@@ -1,6 +1,6 @@
 <launch>
-  <arg name="uav_name" default="techpod"/>
-  <arg name="world_name" default="yosemite"/>
+  <arg name="uav_name" default="techpod_TJ_flex"/>
+  <arg name="world_name" default="fw_playground"/>
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
   <arg name="log_file" default="$(arg uav_name)"/>
@@ -10,6 +10,10 @@
   <!-- The following line causes gzmsg and gzerr messages to be printed to the console
       (even when Gazebo is started through roslaunch) -->
   <arg name="verbose" default="false"/>
+  <arg name="spawn_tc" default="false"/>
+  <arg name="enable_wind" default="true"/>
+  <arg name="record_rosbag" default="false"/>
+  <arg name="rosbag_path" default=""/>
 
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
@@ -21,31 +25,66 @@
     <arg name="verbose" value="$(arg verbose)"/>
   </include>
 
-  <group ns="$(arg uav_name)">
+  <group ns="uav_1">
     <include file="$(find rotors_gazebo)/launch/spawn_fixed_wing.launch">
       <arg name="uav_name" value="$(arg uav_name)" />
+      <arg name="namespace" value="uav_1" />
       <arg name="model" value="$(find rotors_description)/urdf/$(arg uav_name)_base.xacro" />
       <arg name="enable_logging" value="$(arg enable_logging)" />
       <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
       <arg name="log_file" value="$(arg log_file)" />
+      <arg name="enable_wind" value="$(arg enable_wind)"/>
+      <arg name="record_rosbag" default="$(arg record_rosbag)"/>
+      <arg name="rosbag_path" default="$(arg rosbag_path)"/>
     </include>
 
+    <!--
     <node name="hil_interface" pkg="rotors_hil_interface" type="rotors_hil_interface_node" clear_params="true" output="screen">
       <param name="gps_topic" value="gps" />
       <param name="imu_topic" value="imu" />
       <param name="odometry_topic" value="ground_truth/odometry" />
-      <param name="hil_controls_sub_topic" value="/mavros/hil_controls/hil_controls" />
-      <param name="actuators_pub_topic" value="gazebo/command/motor_speed" />
+      <param name="hil_controls_sub_topic" value="/mavros/hil/controls" />
+      <param name="actuators_pub_topic" value="command/motor_speed" />
       <param name="mavlink_pub_topic" value="/mavlink/to" />
       <param name="sensor_level_hil" value="true" />
       <param name="hil_gps_frequency" value="5.0" />
-      <param name="hil_frequency" value="100.0" />
+      <param name="hil_frequency" value="250.0" />
+    </node>
+    -->
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <rosparam param = "source_list"> ["/all_joint_states"]</rosparam>
+      <!--<param name = "use_gui" value = "true"/>-->
     </node>
 
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
   </group>
 
+  <group if="$(arg spawn_tc)">
+    <group ns="uav_1_tc">
+      <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
+        <arg name="target_uav" value="uav_1" />
+        <arg name="namespace" value="uav_1_tc_1" />
+        <arg name="target_pos_topic" value="uav_1/tracking_pos" />
+        <arg name="x" value="25.0"/>
+        <arg name="horizontal_fov" value="2"/>
+      </include>
+    </group>
+    <group ns="uav_1_tc_2">
+      <include file="$(find rotors_gazebo)/launch/spawn_tracking_cam.launch">
+        <arg name="target_uav" value="uav_1" />
+        <arg name="namespace" value="uav_1_tc_2" />
+        <arg name="target_pos_topic" value="uav_1/tracking_pos" />
+        <arg name="x" value="30.0"/>
+        <arg name="horizontal_fov" value="0.2"/>
+      </include>
+    </group>
+  </group>
+
+  <!--
   <node name="hil_plugin_gui" pkg="rqt_rotors" type="hil_plugin" clear_params="true" output="screen" />
+  -->
+
 </launch>
 

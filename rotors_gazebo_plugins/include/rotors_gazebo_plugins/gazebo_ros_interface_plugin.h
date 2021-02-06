@@ -54,6 +54,8 @@
 #include "Vector3dStamped.pb.h"
 #include "WindSpeed.pb.h"
 #include "WrenchStamped.pb.h"
+#include "VisVector.pb.h"
+#include "VisVectorArray.pb.h"
 
 //=============== ROS MSG TYPES ===============//
 #include <geometry_msgs/Point.h>
@@ -73,6 +75,9 @@
 #include <sensor_msgs/MagneticField.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <std_msgs/Float32.h>
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <geographic_msgs/GeoPoint.h>
 
 #include "rotors_gazebo_plugins/common.h"
 
@@ -101,6 +106,10 @@ typedef const boost::shared_ptr<const gz_geometry_msgs::Vector3dStamped>
     GzVector3dStampedMsgPtr;
 typedef const boost::shared_ptr<const gz_geometry_msgs::WrenchStamped>
     GzWrenchStampedMsgPtr;
+typedef const boost::shared_ptr<const gz_visualization_msgs::VisVector>
+    GzVisVectorMsgPtr;
+typedef const boost::shared_ptr<const gz_visualization_msgs::VisVectorArray>
+    GzVisVectorArrayMsgPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::RollPitchYawrateThrust>
     GzRollPitchYawrateThrustPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
@@ -289,6 +298,14 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
                                   ros::Publisher ros_publisher);
   geometry_msgs::WrenchStamped ros_wrench_stamped_msg_;
 
+  // MARKER (Vector Visualization)
+  void GzVisVectorMsgCallback(GzVisVectorMsgPtr& gz_vis_vector_msg,
+                                ros::Publisher ros_publisher);
+
+  // MARKER ARRAY (Multiple Vector Visualization)
+  void GzVisVectorArrayMsgCallback(GzVisVectorArrayMsgPtr& gz_vis_vector_array_msg,
+                                ros::Publisher ros_publisher);
+
   // ============================================ //
   // ===== ROS->GAZEBO CALLBACKS/CONVERTERS ===== //
   // ============================================ //
@@ -329,6 +346,21 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
 
   tf::Transform tf_;
   tf::TransformBroadcaster transform_broadcaster_;
+
+  // publishing joint states of all robots in world
+  bool joint_states_advertised = false;
+  ros::Publisher ros_joint_state_publisher;
+  sensor_msgs::JointState ros_all_joint_state_msg_;
+
+  // =================================== //
+  // ====== WORLD ORIGIN RELATED ======= //
+  // =================================== //
+
+  bool world_origin_advertised_ = false;
+  common::SphericalCoordinatesPtr world_origin_;
+  ros::Publisher ros_world_origin_publisher_;
+  geographic_msgs::GeoPoint world_origin_msg_;
+
 };
 
 }  // namespace gazebo

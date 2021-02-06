@@ -1,0 +1,19 @@
+syntax = "proto2";
+package gz_mav_msgs;
+import "vector3d.proto";
+import "time.proto";
+
+message PropulsionSlipstream
+{
+    required gazebo.msgs.Vector3d rotor_pos = 1;
+    required gazebo.msgs.Vector3d ind_vel_disk = 2;
+    required gazebo.msgs.Vector3d ind_vel_end = 3;
+    required gazebo.msgs.Vector3d wake_dir = 4;
+
+    required double l_a = 5;
+    required double l_p = 6;
+
+    optional double k_w = 7;
+    optional double prop_diam = 8;
+    optional gazebo.msgs.Time timestamp = 9;
+}

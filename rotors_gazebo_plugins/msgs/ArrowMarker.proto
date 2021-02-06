@@ -1,0 +1,20 @@
+syntax = "proto2";
+package gz_visualization_msgs;
+
+import "vector3d.proto";
+//import "Header.proto";
+
+// VisVector is used to plot any vector in rviz, e.g. lift and drag for a wing segment
+message ArrowMarker
+{
+
+  //required gz_std_msgs.Header header = 1; // stamp & link frame in/to which the below data is relative to/expressed
+
+  required int32 id = 2; // unique marker id
+  required string ns = 3;
+  required gazebo.msgs.Vector3d startpoint = 4; // Vector starting point
+  required gazebo.msgs.Vector3d vector = 5;	// Vector
+  required gazebo.msgs.Vector3d scale = 6;	// Vector shaft diam./head diam./head length
+  required gazebo.msgs.Vector3d color = 7;	// RGB values [0,1]
+
+}

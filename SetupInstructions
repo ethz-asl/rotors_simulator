@@ -1,0 +1,274 @@
+################################ Setting up HIL simulation ################################
+##
+## Based on:
+##
+## - Ubuntu 18.04 LTS
+## - ROS (melodic) with Gazebo 9.x
+## - A running Pixhawk FCU in HIL-mode, mixer files matching channels set in sim
+## - PX4 Firmware to code for FCU (optional)
+##
+## The following setup instructions are mainly based on:
+##
+## 1) PX4 installation bash scripts for the PX4 source + toolchain + jMavSim + ROS/Gazebo + MAVROS etc.
+##    See: https://dev.px4.io/en/setup/dev_env_linux_ubuntu.html#convenience-bash-scripts
+## 2) Rotors HIL install instructions
+##    See: https://github.com/ethz-asl/rotors_simulator/wiki/Setting-up-RotorS-as-Fixed-Wing-HiL-Simulation-(Pixhawk,-Mavros,-Mavlink,-QGC)
+## 3) General ROS install instructions
+##    See: http://wiki.ros.org/melodic/Installation/Ubuntu
+##
+###########################################################################################
+
+################################ PX4-related installations ################################
+##
+## If you already have a working environment to code and build PX4 for your target, the following
+## steps can likely be skipped. The commands are mostly copy-pasted from 
+## https://raw.githubusercontent.com/PX4/Devguide/master/build_scripts/ubuntu_sim_common_deps.sh 
+## https://raw.githubusercontent.com/PX4/Devguide/master/build_scripts/ubuntu_sim_nuttx.sh
+## 
+## Installs:
+## - Common dependencies and tools for all targets (including: Ninja build system, Qt Creator, 
+##   pyulog)
+## - FastRTPS and FastCDR
+## - jMAVSim simulator dependencies
+## - PX4/Firmware source (to ~/src/Firmware/)
+##
+###########################################################################################
+
+## Ubuntu Config
+sudo apt remove modemmanager
+
+## Common dependencies
+sudo apt update
+sudo apt install git zip qtcreator cmake build-essential genromfs ninja-build exiftool astyle
+
+## Make sure xxd is installed, dedicated xxd package since Ubuntu 18.04 but was squashed into vim-common before
+which xxd || sudo apt install xxd || sudo apt install vim-common --no-install-recommends
+
+## Required python packages
+sudo apt install python-argparse python-empy python-toml python-numpy python-dev python-pip
+sudo -H pip install --upgrade pip
+sudo -H pip install pandas jinja2 pyserial pyyaml
+
+## Optional python tools
+sudo -H pip install pyulog
+
+## Install FastRTPS 1.5.0 and FastCDR-1.0.7
+fastrtps_dir=$HOME/eProsima_FastRTPS-1.5.0-Linux
+echo "Installing FastRTPS to: $fastrtps_dir"
+if [ -d "$fastrtps_dir" ]
+then
+    echo " FastRTPS already installed."
+else
+    pushd .
+    cd ~
+    wget http://www.eprosima.com/index.php/component/ars/repository/eprosima-fast-rtps/eprosima-fast-rtps-1-5-0/eprosima_fastrtps-1-5-0-linux-tar-gz -O eprosima_fastrtps-1-5-0-linux.tar.gz
+    tar -xzf eprosima_fastrtps-1-5-0-linux.tar.gz eProsima_FastRTPS-1.5.0-Linux/
+    tar -xzf eprosima_fastrtps-1-5-0-linux.tar.gz requiredcomponents
+    tar -xzf requiredcomponents/eProsima_FastCDR-1.0.7-Linux.tar.gz
+    cpucores=$(( $(lscpu | grep Core.*per.*socket | awk -F: '{print $2}') * $(lscpu | grep Socket\(s\) | awk -F: '{print $2}') ))
+    (cd eProsima_FastCDR-1.0.7-Linux && ./configure --libdir=/usr/lib && make -j$cpucores && sudo make install)
+    (cd eProsima_FastRTPS-1.5.0-Linux && ./configure --libdir=/usr/lib && make -j$cpucores && sudo make install)
+    rm -rf requiredcomponents eprosima_fastrtps-1-5-0-linux.tar.gz
+    popd
+fi
+
+## jMAVSim simulator dependencies
+sudo apt install ant openjdk-8-jdk openjdk-8-jre -y
+
+## Clone PX4/Firmware
+clone_dir=~/src
+echo "Cloning PX4 to: $clone_dir."
+if [ -d "$clone_dir" ]
+then
+    echo " Firmware already cloned."
+else
+    mkdir -p $clone_dir
+    cd $clone_dir
+    git clone https://github.com/PX4/Firmware.git
+fi
+
+## Get submodules
+git submodule update --init --recursive
+
+## Setting-up NuttX toolchain
+## Get dependencies
+sudo apt install python-serial openocd flex bison libncurses5-dev autoconf texinfo libftdi-dev libtool zlib1g-dev
+
+## Clean up old GCC
+sudo apt remove gcc-arm-none-eabi gdb-arm-none-eabi binutils-arm-none-eabi gcc-arm-embedded
+sudo add-apt-repository --remove ppa:team-gcc-arm-embedded/ppa
+
+## GNU Arm Embedded Toolchain: 7-2017-q4-major December 18, 2017
+gcc_dir=$HOME/gcc-arm-none-eabi-7-2017-q4-major
+echo "Installing GCC to: $gcc_dir"
+if [ -d "$gcc_dir" ]
+then
+    echo " GCC already installed."
+else
+    pushd .
+    cd ~    
+    wget https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/7-2017q4/gcc-arm-none-eabi-7-2017-q4-major-linux.tar.bz2
+    tar -jxf gcc-arm-none-eabi-7-2017-q4-major-linux.tar.bz2
+    exportline="export PATH=$HOME/gcc-arm-none-eabi-7-2017-q4-major/bin:\$PATH"
+    if grep -Fxq "$exportline" ~/.profile; then echo " GCC path already set."; else echo $exportline >> ~/.profile; fi
+    . ~/.profile
+    popd
+fi
+
+################################ QGC installation #########################################
+##
+## If you already have QGC, the following steps can be skipped. 
+## The commands are copy-pasted from 
+## https://docs.qgroundcontrol.com/en/getting_started/download_and_install.html
+##
+## Installs:
+## - Current stable version of QGC, installation from binary
+##
+###########################################################################################
+
+## QGC:
+sudo usermod -a -G dialout $USER
+sudo apt remove modemmanager
+sudo apt install gstreamer1.0-plugins-bad gstreamer1.0-libav
+
+## - Logout and login again to enable the change to user permissions.
+## - Download QGroundControl.AppImage
+## - Install and run using 
+chmod +x ./QGroundControl.AppImage
+./QGroundControl.AppImage 
+
+
+################################ ROS melodic installation #################################
+##
+## The commands are copy-pasted from http://wiki.ros.org/melodic/Installation/Ubuntu
+##
+## Installs:
+## - ROS melodic, rqt, rviz, robot-generic libraries, 2D/3D simulators (Gazebo 9) and 2D/3D perception
+##	
+###########################################################################################
+
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+## check following on ROS page, keys might change
+sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+sudo apt update
+
+## Get Desktop-Full: ROS, rqt, rviz, robot-generic libraries, 2D/3D simulators (Gazebo) and 2D/3D perception 
+sudo apt install ros-melodic-desktop-full
+
+## Initialize rosdep
+sudo rosdep init
+rosdep update
+
+## Add ROS environment variables
+rossource="source /opt/ros/melodic/setup.bash"
+if grep -Fxq "$rossource" ~/.bashrc; then echo ROS setup.bash already in .bashrc;
+else echo "$rossource" >> ~/.bashrc; fi
+source ~/.bashrc
+
+## Dependencies for building packages
+sudo apt install python-rosinstall python-rosinstall-generator python-wstool build-essential
+
+## Create a ROS Workspace
+sudo apt install python-catkin-tools
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/
+#catkin_make
+
+## Overlay workspace on top of environment (only for current shell)
+#source devel/setup.bash
+
+################################ RotorS simulator #########################################
+##
+## The commands are copy-pasted from the following sources:
+## https://github.com/ethz-asl/rotors_simulator/wiki/Setting-up-RotorS-as-Fixed-Wing-HiL-Simulation-(Pixhawk,-Mavros,-Mavlink,-QGC)
+## https://github.com/ethz-asl/rotors_simulator/wiki/Setting-up-the-RotorS-Simulator
+## https://github.com/mavlink/mavros/tree/master/mavros#installation
+##
+## Installs:
+## - RotorS simulator inside a user-defined ROS workspace including
+## - Additional dependencies (yaml, mavlink, mavros,...)
+##
+###########################################################################################
+
+## In the top-level of the ROS workspace (e.g. ~/catkin_ws) where RotorS is to be installed:
+cd ~/catkin_ws/
+catkin init  							# initialize your catkin workspace
+catkin config --merge-devel 					# Necessary for catkin_tools >= 0.4.
+catkin config --extend /opt/ros/melodic
+catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release
+cd ~/catkin_ws/src
+wstool init 							# Initialize wstool
+
+## Get the simulator and additional dependencies: (execute in the src folder of the ROS workspace)
+cd ~/catkin_ws/src
+git clone -b feature/fw_hil_rotors https://github.com/ethz-asl/rotors_simulator.git
+git clone https://github.com/ethz-asl/mav_comm.git
+git clone https://github.com/catkin/catkin_simple.git
+
+## For HIL we also need MAVLINK and (optionally) MAVROS
+## Ref: https://github.com/mavlink/mavros/tree/master/mavros#installation
+cd ~/catkin_ws
+rosinstall_generator --rosdistro melodic mavlink | tee /tmp/mavros.rosinstall
+rosinstall_generator --upstream mavros | tee -a /tmp/mavros.rosinstall
+wstool merge -t src /tmp/mavros.rosinstall
+wstool update -t src -j4
+rosdep install --from-paths src --ignore-src -y
+#./src/mavros/mavros/scripts/install_geographiclib_datasets.sh 	# might not be required
+
+# Note: HIL simulation newly requires ASLUAV mavlink dialect as of ethz-asl/fw_mavlink/ 
+# feature/hil_extended branch (commit: 55397e5). After the above installation steps, replace 
+# the ASLUAV.xml in /catkin_ws/src/mavlink-gbp-release/message_definitions/v1.0 with the the 
+# ASLUAV.xml found on ethz-asl/fw_mavlink/ in feature/hil_extended branch (commit: 55397e5). 
+# You can then proceed to build the catkin workspace, see below.
+
+################################ Build and Run #########################################
+
+## Build workspace, takes some minutes
+catkin build
+
+## Don't forget to overlay workspace on top of environment (active only in current shell)
+source ~/catkin_ws/devel/setup.bash
+
+## Hook up Pixhawk to computer via USB (should appear as /dev/ttyACM0 on linux/ubuntu)
+## It needs to run in HIL-mode (Airframe: e.g. HILStar(XPlane)). Make sure that the gazebo_mavlink_interface 
+## plugin is configured to match the control channel assignement as defined in the PX4 mixer file of the Airframe. Changes
+## can be made in the respective *.xacro file of the robot under the <plugin filename="librotors_gazebo_mavlink_interface.so" .../> 
+## tag.
+
+## Upon start of ROS/Gazebo with the desired world and UAV, the simulation should start to communicate with the Pixhawk. 
+## The connection is established by the gazebo_mavlink_interface plugin of the UAV which sets up a mavlink connection. 
+## The UAV/simulation obtains control messages via the "hil_actuator_controls" mavlink message. "hil_sensor" (for sensor-level hil) 
+## or "hil_state_quaternion" (state-level hil) and "hil_gps" mavlink messages are sent back to the Pixhawk to provide feedback.
+
+## To launch a fw-simulation, go to your catkin workspace and invoke (choosing one of the param values at a time...):
+##
+## "roslaunch rotors_gazebo fixed_wing_hil.launch verbose:={false|true} world_name:={fw_playground|yosemite|davos|hinwil} uav_name:={techpod_TJ_flex|techpod_TJ|techpod_X_flex|techpod_X} spawn_tc:={false|true} enable_wind:={true|false} record_rosbag:={false|true} rosbag_path:={""|/path/to/somewhere/"}
+##
+## where "verbose" can be used to enable debug output (e.g. sim-rate, message statistics etc), "world_name" sets the world in which 
+## the UAV spawns and "uav_name" is used to select the UAV. "spawn_tc" further controls if tracking cameras are placed (ground view) and
+## "enable_wind" indicates if the wind specified in the uav's *.xacro is enabled. Rosbags logging for trinocular vision can be enabled with 
+## "record_rosbag", writing to "rosbag_path" (currently only works for techpod_TJ_flex) Defaults are the first options in each brace. E.g.:
+
+roslaunch rotors_gazebo fixed_wing_hil.launch verbose:=true world_name:=fw_playground uav_name:=techpod_X spawn_tc:=true enable_wind:=true record_rosbag:=true rosbag_path:=/path/to/somewhere/
+
+## The listed sets of parameters include tested and working UAV/world combinations. More UAVs/worlds will be tested or added in the future. 
+## Note:
+## - In the "davos" world  (avalmapper terrain), the UAV currently spawns in mid-air and, subsequently, crashes into the ground -> use 
+##   gazebos 'follow' function to find the UAV again.
+## - All "techpod" versions require an AAERTFF mixer on the Pixhawk to work properly.
+
+## Once the simulation is running, you can start QGC to introspect e.g. the telemetry from the sim. Make sure QGC connects to the Pixhawk 
+## only via UDP (and not serial as this interferes with gazebo). To this end, only select "UDP" in QGC under General->AutoConnect.
+## Streams of installed cameras and other signals published as ROS messages can be displayed with rqt.
+
+## Optional: If Mavros should be used to relay messages from Gazebo via ROS to FCU, start Mavros in addition to above
+## commands and make sure no gazebo_mavlink_interface plugin is running (otherwise "double" communication). To be tested. 
+## So far I was trying to keep Mavros out of the loop by using direct communiction between Gazebo and FCU.
+# roslaunch mavros px4.launch fcu_url:=/dev/ttyACM0:921600 gcs_url:=udp://127.0.0.1:14555@127.0.0.1:14560
+
+################################ Misc #########################################
+
+## Screen/FTDI:
+sudo apt install screen
+
+

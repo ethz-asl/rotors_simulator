@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<!--
+  Copyright 2016 Pavel Vechersky, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<robot name="tracking_cam" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:property name="namespace" value="$(arg namespace)" />
+    <xacro:property name="target_pos_topic" value="$(arg target_pos_topic)" />
+    <xacro:property name="h_fov" value="$(arg h_fov)" />
+
+    <xacro:macro name="cylinder_inertia" params="r h mass">
+      <inertia ixx="${0.0833333 * mass * (3*r*r + h*h)}" ixy="0.0" ixz="0.0"
+        iyy="${0.0833333 * mass * (3*r*r + h*h)}" iyz="0.0"
+        izz="${0.5 * mass * r * r}" />
+    </xacro:macro>
+
+    <!-- Macro to add a camera-->
+    <xacro:macro name="camera_macro"
+      params="namespace parent_link camera_suffix frame_rate
+        horizontal_fov image_width image_height image_format min_distance
+        max_distance noise_mean noise_stddev enable_visual *geometry *origin">
+
+      <link name="${namespace}/camera_${camera_suffix}_link">
+        <xacro:if value="${enable_visual}">
+        <visual>
+          <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
+          <geometry>
+            <xacro:insert_block name="geometry" />
+          </geometry>
+        </visual>
+        </xacro:if>
+        <inertial>
+          <mass value="1e-5" />
+          <origin xyz="0 0 0" rpy="0 0 0" />
+          <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+        </inertial>
+      </link>
+
+      <joint name="${namespace}/camera_${camera_suffix}_joint" type="fixed">
+        <xacro:insert_block name="origin" />
+        <parent link="${parent_link}" />
+        <child link="${namespace}/camera_${camera_suffix}_link" />
+      </joint>
+
+      <gazebo reference="${namespace}/camera_${camera_suffix}_link">
+        <sensor type="camera" name="${namespace}_camera_${camera_suffix}">
+          <update_rate>${frame_rate}</update_rate>
+          <camera name="head">
+            <horizontal_fov>${horizontal_fov}</horizontal_fov>
+            <image>
+              <width>${image_width}</width>
+              <height>${image_height}</height>
+              <format>${image_format}</format>
+            </image>
+            <clip>
+              <near>${min_distance}</near>
+              <far>${max_distance}</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <mean>${noise_mean}</mean>
+              <stddev>${noise_stddev}</stddev>
+            </noise>
+          </camera>
+          <plugin name="${namespace}_camera_${camera_suffix}_controller" filename="libgazebo_ros_camera.so">
+            <robotNamespace>${namespace}</robotNamespace>
+            <alwaysOn>true</alwaysOn>
+            <updateRate>${frame_rate}</updateRate>
+            <cameraName>camera_${camera_suffix}</cameraName>
+            <imageTopicName>image_raw</imageTopicName>
+            <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+            <frameName>camera_${camera_suffix}_link</frameName>
+            <hackBaseline>0.7</hackBaseline>
+            <distortionK1>0.0</distortionK1>
+            <distortionK2>0.0</distortionK2>
+            <distortionK3>0.0</distortionK3>
+            <distortionT1>0.0</distortionT1>
+            <distortionT2>0.0</distortionT2>
+          </plugin>
+        </sensor>
+      </gazebo>
+    </xacro:macro>
+
+    <link name="${namespace}/tripod">
+      <inertial>
+        <mass value="10" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <xacro:cylinder_inertia r="0.02" h="1.7" mass="10" />
+      </inertial>
+      <visual name="v1">
+        <origin xyz="0 0 0.85" rpy="0 0 0" />
+        <geometry>
+          <cylinder length="1.75" radius="0.02"/>
+        </geometry>
+      </visual>
+      <collision name="c2">
+        <origin xyz="0 0 0.01" rpy="0 0 0" />
+        <geometry>
+          <cylinder length="0.02" radius="0.5"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="${namespace}/panLink">
+      <inertial>
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
+
+    <link name="${namespace}/tiltLink">
+      <inertial>
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
+
+    <joint name="${namespace}/pan_joint" type="continuous">
+      <origin xyz="0 0 1.75" rpy="0 0 0" />
+      <parent link="${namespace}/tripod" />
+      <child link="${namespace}/panLink" />
+      <axis xyz="0 0 1" />
+    </joint>
+
+    <joint name="${namespace}/tilt_joint" type="revolute">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="${namespace}/panLink" />
+      <child link="${namespace}/tiltLink" />
+      <axis xyz="0 -1 0" />
+      <limit effort="30" velocity="10.0" lower="-1.56" upper="1.56" />
+    </joint>
+
+    <xacro:camera_macro
+      namespace="${namespace}"
+      parent_link="${namespace}/tiltLink"
+      camera_suffix="tc"
+      frame_rate="30"
+      horizontal_fov="${h_fov}"
+      image_width="1920"
+      image_height="1080"
+      image_format="R8G8B8"
+      min_distance="0.02"
+      max_distance="8000"
+      noise_mean="0.0"
+      noise_stddev="0.0"
+      enable_visual="true">
+      <mesh filename="package://rotors_description/meshes/vi_camera.dae" scale="1 1 1" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </xacro:camera_macro>
+
+    <gazebo>
+      <plugin filename="librotors_gazebo_tracking_cam_plugin.so" name="tracking_cam_plugin">
+          <panJoint>${namespace}/pan_joint</panJoint>
+          <tiltJoint>${namespace}/tilt_joint</tiltJoint>
+          <cameraBaseLink>${namespace}/tripod</cameraBaseLink>
+          <cameraLink>${namespace}/tiltLink</cameraLink>
+          <targetPosTopic>${target_pos_topic}</targetPosTopic>
+      </plugin>
+    </gazebo>
+
+</robot>

@@ -1,0 +1,1895 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="fw_playground">
+    <!-- Place user camera -->
+    <gui>
+      <camera name="user_camera">
+        <pose>-11.660200 -5.942800 6.053900 0.000000 0.443643 0.352194</pose>
+      </camera>
+    </gui>
+    <scene>
+      <ambient>0.7 0.7 0.7 1.0</ambient>
+      <grid>false</grid>
+      <sky>
+        <clouds>
+          <speed>4</speed>
+        </clouds>
+      </sky>
+    </scene>
+
+    <!-- Only one ROS interface plugin is required per world, as any other plugin can connect a Gazebo
+         topic to a ROS topic (or vise versa). -->
+    <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so"/>
+
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>47.3667</latitude_deg>
+      <longitude_deg>8.5500</longitude_deg>
+      <elevation>500.0</elevation>
+      <heading_deg>180</heading_deg>
+    </spherical_coordinates>
+
+    <physics type='ode'>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>75</iters>
+          <sor>1.3</sor>
+        </solver>
+        <constraints>
+          <cfm>0</cfm>
+          <erp>0.2</erp>
+          <contact_max_correcting_vel>100</contact_max_correcting_vel>
+          <contact_surface_layer>0.001</contact_surface_layer>
+        </constraints>
+      </ode>
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>250</real_time_update_rate>
+      <gravity>0 0 -9.8</gravity>
+    </physics>
+
+    <!-- Light Source -->
+    <light type="directional" name="sun">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 300 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.0 0.0 0.0 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>0.2 0.2 -0.9</direction>
+    </light>
+
+    <!-- Ground -->
+    <model name="ground_collision_plane">
+      <static>true</static>
+        <link name='link'>
+          <collision name='collision'>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>1000 1000</size>
+              </plane>
+            </geometry>
+            <surface>
+              <friction>
+                <ode>
+                  <mu>0.2</mu>
+                  <mu2>.2</mu2>
+                </ode>
+              </friction>
+              <contact>
+                <ode>
+                  <kp>1000000</kp>
+                  <kd>1</kd>
+                </ode>
+              </contact>
+            </surface>
+          </collision>
+	</link>
+    </model>
+
+    <!--
+    <model name="floor">
+      <static>true</static>
+        <link name='link'>
+          <visual name='floor'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>true</cast_shadows>
+            <geometry>
+              <box>
+                <size>500 500 0.02</size>
+              </box>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Grey</name>
+              </script>
+            </material>
+          </visual>
+        </link>
+      </model>
+    -->
+
+    <model name="grass_takeoff_plane">
+      <static>true</static>
+        <link name='link'>
+          <visual name='visual_1'>
+            <pose>125 125 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_2'>
+            <pose>-125 125 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_3'>
+            <pose>-125 -125 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_4'>
+            <pose>125 -125 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_5'>
+            <pose>375 125 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_6'>
+            <pose>375 375 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_7'>
+            <pose>125 375 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_8'>
+            <pose>-125 375 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_9'>
+            <pose>-375 375 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_10'>
+            <pose>-375 125 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_11'>
+            <pose>-375 -125 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_12'>
+            <pose>-375 -375 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_13'>
+            <pose>-125 -375 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_14'>
+            <pose>125 -375 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_15'>
+            <pose>375 -375 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='visual_16'>
+            <pose>375 -125 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <plane>
+                <normal>0 0 1</normal>
+                <size>250 250</size>
+              </plane>
+            </geometry>
+            <material>
+              <script>
+                <uri>model://grass_plane/materials/scripts</uri>
+                <uri>model://grass_plane/materials/textures</uri>
+                <name>vrc/grass</name>
+              </script>
+            </material>
+          </visual>
+        </link>
+    </model>
+
+    <model name="runway">
+      <static>true</static>
+        <link name='link'>
+          <visual name='runway'>
+            <pose>85 0 0 0 0 0</pose>
+            <cast_shadows>true</cast_shadows>
+            <geometry>
+              <box>
+                <size>150 10 0.04</size>
+              </box>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Grey</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='runway_line'>
+            <pose>85 0 0 0 0 0</pose>
+            <cast_shadows>true</cast_shadows>
+            <geometry>
+              <box>
+                <size>150 0.15 0.05</size>
+              </box>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Yellow</name>
+              </script>
+            </material>
+          </visual>
+          <!--
+          <visual name='runway_line_l'>
+            <pose>85 5 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <box>
+                <size>150 0.15 0.05</size>
+              </box>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Yellow</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='runway_line_r'>
+            <pose>85 -5 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <box>
+                <size>150 0.15 0.05</size>
+              </box>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Yellow</name>
+              </script>
+            </material>
+          </visual>
+          -->
+        </link>
+    </model>
+
+    <model name="bulls_eye">
+      <static>true</static>
+        <link name='link'>
+          <visual name='bulls_eye_r1'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>0.5</radius>
+                <length>0.12</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Black</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='bulls_eye_r2'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>1</radius>
+                <length>0.11</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/White</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='bulls_eye_r3'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>1.5</radius>
+                <length>0.1</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Black</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='bulls_eye_r4'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>2</radius>
+                <length>0.09</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/White</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='bulls_eye_r5'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>2.5</radius>
+                <length>0.08</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Black</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='bulls_eye_r6'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>3</radius>
+                <length>0.07</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/White</name>
+              </script>
+            </material>
+          </visual>
+          <visual name='bulls_eye_r7'>
+            <pose>0 0 0 0 0 0</pose>
+            <cast_shadows>false</cast_shadows>
+            <geometry>
+              <cylinder>
+                <radius>3.5</radius>
+                <length>0.06</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Black</name>
+              </script>
+            </material>
+          </visual>
+        </link>
+    </model>
+
+    <!-- Pylons -->
+
+    <!--
+    <model name="pylon1">
+     <static>true</static>
+     <link name="pylon">
+       <pose>0 20 0 0 0 0</pose>
+       <visual name="v1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <cast_shadows>false</cast_shadows>
+         <geometry>
+           <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <cast_shadows>false</cast_shadows>
+         <geometry>
+           <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v3">
+         <cast_shadows>false</cast_shadows>
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <cast_shadows>false</cast_shadows>
+         <geometry>
+           <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+    <visual name="v5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <cast_shadows>false</cast_shadows>
+         <geometry>
+           <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+     </link>
+    </model>
+    -->
+
+    <!--
+    <model name="pylon2">
+     <static>true</static>
+     <link name="pylon">
+       <pose>0 40 0 0 0 0</pose>
+       <visual name="v1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+    <visual name="v5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+     </link>
+    </model>
+    -->
+
+    <model name="pylon3">
+     <static>true</static>
+     <link name="pylon">
+       <pose>40 20 0 0 0 0</pose>
+       <visual name="v1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+    <visual name="v5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+     </link>
+    </model>
+
+    <model name="pylon4">
+     <static>true</static>
+     <link name="pylon">
+       <pose>40 40 0 0 0 0</pose>
+       <visual name="v1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+    <visual name="v5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+     </link>
+    </model>
+
+    <model name="pylon5">
+     <static>true</static>
+     <link name="pylon">
+       <pose>80 20 0 0 0 0</pose>
+       <visual name="v1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+    <visual name="v5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+     </link>
+    </model>
+
+    <model name="pylon6">
+     <static>true</static>
+     <link name="pylon">
+       <pose>80 40 0 0 0 0</pose>
+       <visual name="v1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+    <visual name="v5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+     </link>
+    </model>
+
+    <model name="pylon7">
+     <static>true</static>
+     <link name="pylon">
+       <pose>120 20 0 0 0 0</pose>
+       <visual name="v1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+    <visual name="v5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+     </link>
+    </model>
+
+    <model name="pylon8">
+     <static>true</static>
+     <link name="pylon">
+       <pose>120 40 0 0 0 0</pose>
+       <visual name="v1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+    <visual name="v5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+     </link>
+    </model>
+
+    <model name="pylon9">
+     <static>true</static>
+     <link name="pylon">
+       <pose>160 20 0 0 0 0</pose>
+       <visual name="v1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+    <visual name="v5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+     </link>
+    </model>
+
+    <model name="pylon10">
+     <static>true</static>
+     <link name="pylon">
+       <pose>160 40 0 0 0 0</pose>
+       <visual name="v1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c1">
+         <pose>0 0 1.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>2</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c2">
+         <pose>0 0 4.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.75</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c3">
+         <pose>0 0 7.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.5</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+
+    <visual name="v4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/White</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c4">
+         <pose>0 0 10.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1.25</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+    <visual name="v5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+           <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+         <material>
+           <script>
+             <uri>file://media/materials/scripts/gazebo.material</uri>
+             <name>Gazebo/Grey</name>
+           </script>
+         </material>
+       </visual>
+       <collision name="c5">
+         <pose>0 0 13.5 0 0 0</pose>
+         <geometry>
+            <cylinder>
+             <radius>1</radius>
+             <length>3</length>
+           </cylinder>
+         </geometry>
+       </collision>
+     </link>
+    </model>
+
+    </world>
+</sdf>

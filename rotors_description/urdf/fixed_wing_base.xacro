@@ -34,7 +34,7 @@
   <xacro:macro name="fixed_wing_base_macro"
     params="robot_namespace mass length width height color use_mesh_file 
       mesh_file aero_params_yaml vehicle_params_yaml is_input_joystick
-      *origin *inertia">
+      enable_mavlink_interface *origin *inertia">
     <link name="${robot_namespace}/base_link"></link>
 
     <joint name="${robot_namespace}/base_joint" type="fixed">
@@ -80,10 +80,104 @@
         <aeroParamsYAML>${aero_params_yaml}</aeroParamsYAML>
         <vehicleParamsYAML>${vehicle_params_yaml}</vehicleParamsYAML>
         <isInputJoystick>${is_input_joystick}</isInputJoystick>
+        <useGzMavlinkInterface>${enable_mavlink_interface}</useGzMavlinkInterface>
       </plugin>
     </gazebo>
-  </xacro:macro>
 
+  <xacro:if value="${enable_mavlink_interface}">
+    <gazebo>
+      <plugin filename="librotors_gazebo_mavlink_interface.so" name="gazebo_mavlink_interface">
+        <robotNamespace>${robot_namespace}</robotNamespace>
+        <protocol_version>2.0</protocol_version>
+        <imuSubTopic>/imu</imuSubTopic>
+        <imu_rate>100</imu_rate>
+        <gpsSubTopic>/gps</gpsSubTopic>
+        <lidarSubTopic></lidarSubTopic>
+        <opticalFlowSubTopic></opticalFlowSubTopic>
+        <mavlink_addr>INADDR_ANY</mavlink_addr>
+        <mavlink_udp_port>14560</mavlink_udp_port>
+        <serialEnabled>true</serialEnabled>
+        <serialDevice>/dev/ttyACM0</serialDevice>
+        <baudRate>921600</baudRate>
+        <qgc_addr>INADDR_ANY</qgc_addr>
+        <qgc_udp_port>14550</qgc_udp_port>
+        <hil_mode>true</hil_mode>
+        <hil_state_level>true</hil_state_level>
+        <enable_lockstep>false</enable_lockstep>
+        <use_tcp>false</use_tcp>
+        <motorSpeedCommandPubTopic>/command/motor_speed_old</motorSpeedCommandPubTopic>
+        <actuatorsPubTopic>/command/motor_speed</actuatorsPubTopic>
+        <control_channels>
+          <channel name="propeller">
+            <input_index>3</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>1</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>0</zero_position_armed>
+            <joint_control_type>position_gztopic</joint_control_type>
+            <joint_name></joint_name>
+          </channel>
+          <channel name="aileron_left">
+            <input_index>0</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>1</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>0</zero_position_armed>
+            <joint_control_type>position_gztopic</joint_control_type>
+            <joint_name></joint_name>
+          </channel>
+          <channel name="aileron_right">
+            <input_index>0</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>1</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>0</zero_position_armed>
+            <joint_control_type>position_gztopic</joint_control_type>
+            <joint_name></joint_name>
+          </channel>
+          <channel name="elevator">
+            <input_index>1</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>1</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>0</zero_position_armed>
+            <joint_control_type>position_gztopic</joint_control_type>
+            <joint_name></joint_name>
+          </channel>
+          <channel name="rudder">
+            <input_index>2</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>1</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>0</zero_position_armed>
+            <joint_control_type>position_gztopic</joint_control_type>
+            <joint_name></joint_name>
+          </channel>
+          <channel name="flap_left">
+            <input_index>5</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>1</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>0</zero_position_armed>
+            <joint_control_type>position_gztopic</joint_control_type>
+            <joint_name></joint_name>
+          </channel>
+          <channel name="flap_right">
+            <input_index>5</input_index>
+            <input_offset>0</input_offset>
+            <input_scaling>1</input_scaling>
+            <zero_position_disarmed>0</zero_position_disarmed>
+            <zero_position_armed>0</zero_position_armed>
+            <joint_control_type>position_gztopic</joint_control_type>
+            <joint_name></joint_name>
+          </channel>
+        </control_channels>
+      </plugin>
+    </gazebo>
+  </xacro:if>
+
+
+  </xacro:macro>
   <!-- Control surface joint and link -->
   <xacro:macro name="control_surface"
     params="robot_namespace surface_name parent mass_surface min_angle
