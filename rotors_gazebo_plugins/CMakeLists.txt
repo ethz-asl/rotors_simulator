@@ -107,6 +107,7 @@ if (NOT NO_ROS)
     gazebo_plugins
     cv_bridge
     geometry_msgs
+    trajectory_msgs
     mav_msgs
     octomap_msgs
     octomap_ros
@@ -224,11 +225,10 @@ link_libraries(mav_msgs)
 # ============================================== #
 
 if (NOT NO_ROS)
-
   if(${gazebo_dev_FOUND})
     catkin_package(
       INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
-      LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
+      LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface rotors_gazebo_multimotor_plugin
       CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp gazebo_plugins rotors_comm rotors_control std_srvs tf
       DEPENDS Eigen octomap OpenCV
       #CFG_EXTRAS rotors_gazebo_plugins.cmake
@@ -237,7 +237,7 @@ if (NOT NO_ROS)
   else()
     catkin_package(
       INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
-      LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
+      LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface rotors_gazebo_multimotor_plugin
       CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp gazebo_plugins rotors_comm rotors_control std_srvs tf
       DEPENDS Eigen octomap OpenCV
       #CFG_EXTRAS rotors_gazebo_plugins.cmake
@@ -428,6 +428,14 @@ if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_motor_model ${catkin_EXPORTED_TARGETS})
 endif()
 list(APPEND targets_to_install rotors_gazebo_motor_model)
+
+#==================================== MULTIMOTOR PLUGIN ==+======================================//
+add_library(rotors_gazebo_multimotor_plugin SHARED src/gazebo_multimotor_plugin.cpp)
+target_link_libraries(rotors_gazebo_multimotor_plugin ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_multimotor_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_multimotor_plugin)
 
 #==================================== MULTIROTOR BASE PLUGIN ====================================//
 add_library(rotors_gazebo_multirotor_base_plugin SHARED src/gazebo_multirotor_base_plugin.cpp)
