@@ -71,3 +71,25 @@ void KinectDepthNoiseModel::ApplyNoise(const uint32_t width,
     }
   }
 }
+
+
+
+void PMDDepthNoiseModel::ApplyNoise(const uint32_t width,
+                                       const uint32_t height, float *data) {
+  if (data == nullptr) {
+    return;
+  }
+
+  // 1% error claimed by PMD
+  Eigen::Map<Eigen::VectorXf> data_vector_map(data, width * height);
+  Eigen::VectorXf var_noise =  data_vector_map.array() * 0.01;
+
+  // Sample noise for each pixel and transform variance according to error at this depth.
+  for (int i = 0; i < width * height; ++i) {
+    if (InRange(data_vector_map[i])) {
+      data_vector_map[i] += this->dist(this->gen) * var_noise(i);
+    } else {
+      data_vector_map[i] = this->bad_point;
+    }
+  }
+}
