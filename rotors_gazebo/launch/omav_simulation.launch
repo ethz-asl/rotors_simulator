@@ -16,14 +16,14 @@
   <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
   <arg name="log_file" default="$(arg mav_name)"/>
-  <arg name="add_manipulator" default="true"/>
+  <arg name="add_manipulator" default="false"/>
   <arg name="add_rgbd_sensor" default="false"/>
   <arg name="delta_control_mode" default="position"/>
 
   <!-- LEE J309 room center -->
   <arg name="spawn_x" default="0.4"/>
   <arg name="spawn_y" default="0.025"/>
-  <arg name="spawn_z" default="0.25"/>
+  <arg name="spawn_z" default="0.3"/>
 
   <!-- ******************************* -->
   <!-- ****** Gazebo Simulation ****** -->
