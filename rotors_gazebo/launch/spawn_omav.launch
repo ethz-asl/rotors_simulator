@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="mav_name" default="omav"/>
+  <arg name="namespace" default="$(arg mav_name)"/>
+  <arg name="model" default="$(find rotors_description)/urdf/$(arg mav_name)_base.xacro"/>
+  <arg name="spawn_tether" default="false"/>
+  <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0.1"/>
+  <arg name="R" default="0.0"/>
+  <arg name="P" default="0.0"/>
+  <arg name="Y" default="0.0"/>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="$(arg mav_name)"/>
+  <arg name="wait_to_record_bag" default="false"/>
+  <arg name="add_manipulator" default="true"/>
+  <arg name="add_rgbd_sensor" default="false"/>
+  <arg name="model_roll" default="0.0"/>
+  <arg name="delta_control_mode" default="position"/>
+
+  <!-- Send the robot XML to param server. -->
+  <param name="robot_description" command="
+    $(find xacro)/xacro '$(arg model)'
+    spawn_tether:=$(arg spawn_tether)
+    enable_logging:=$(arg enable_logging)
+    enable_ground_truth:=$(arg enable_ground_truth)
+    log_file:=$(arg log_file)
+    wait_to_record_bag:=$(arg wait_to_record_bag)
+    mav_name:=$(arg mav_name)
+    namespace:=$(arg namespace)
+    add_manipulator:=$(arg add_manipulator)
+    add_rgbd_sensor:=$(arg add_rgbd_sensor)
+    model_roll:=$(arg model_roll)
+    delta_control_mode:=$(arg delta_control_mode)"
+  />
+  <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
+
+  <!-- Push robot_description to factory and spawn robot in gazebo. -->
+  <node name="spawn_$(arg namespace)" pkg="gazebo_ros" type="spawn_model"
+   args="-param robot_description
+         -urdf
+         -x $(arg x)
+         -y $(arg y)
+         -z $(arg z)
+         -R $(arg R)
+         -P $(arg P)
+         -Y $(arg Y)
+         -model $(arg namespace)"
+   respawn="false" output="screen">
+  </node>
+</launch>

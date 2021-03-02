@@ -1,0 +1,230 @@
+<?xml version="1.0"?>
+
+<robot name="$(arg mav_name)" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Motor Parameters -->
+  <xacro:property name="motor_constant" value="${7.2e-06}"/>    <!-- [kg m/s^2] -->
+  <xacro:property name="moment_constant" value="0.015"/>    <!-- [m] -->
+  <xacro:property name="time_constant_up" value="0.0125"/>    <!-- [s] -->
+  <xacro:property name="time_constant_down" value="0.025"/>    <!-- [s] -->
+  <xacro:property name="min_rot_velocity" value="100"/> 
+  <xacro:property name="max_rot_velocity" value="1700"/>    <!-- [rad/s] --> <!-- Velocity to produce 1 kg thrust -->
+  <xacro:property name="rotor_drag_coefficient" value="${8.06428e-05}"/>
+  <xacro:property name="rolling_moment_coefficient" value="0.000001"/>
+
+  <!-- Relationship between the p, d gain and the closed-loop dynamics behaviour of the system:
+  It behaves like a second-order system in the frequency domain: Y(s) = U(s)*(ds + p)/(Is**2 + ds + p)
+  Y(s) is the Laplace transform of the actual tilt motor angle and U(s) is the one of the tilt motor angle command, p and d are the gains, I is the inertia of the link.
+  The pid gain set here corresponds to p = 1200, i = 1000, d =500 on the firmware.
+   -->
+  <xacro:property name="tilt_control_mode" value="position" />
+  <xacro:property name="p_gain" value="0.11" />
+  <xacro:property name="i_gain" value="0.0" />
+  <xacro:property name="d_gain" value="0.1" />
+  <xacro:property name="servo_zero_offset" value="0.0" />
+
+  <!-- Add motors. -->
+  <gazebo>
+      <plugin name="multimotor_plugin" filename="librotors_gazebo_multimotor_plugin.so">
+        <robotNamespace>$(arg mav_name)</robotNamespace>
+        <rotors>
+            <rotor>
+              <jointName>rotor_0_joint</jointName>
+              <linkName>rotor_0</linkName>
+              <spinDirection>ccw</spinDirection>
+              <timeConstantUp>${time_constant_up}</timeConstantUp>
+              <timeConstantDown>${time_constant_down}</timeConstantDown>
+              <minRotVelocity>${min_rot_velocity}</minRotVelocity>
+              <maxRotVelocity>${max_rot_velocity}</maxRotVelocity>
+              <thrustConstant>${motor_constant}</thrustConstant>
+              <momentConstant>${moment_constant}</momentConstant>
+              <rotorDragCoefficient>${rotor_drag_coefficient}</rotorDragCoefficient>
+              <rollingMomentCoefficient>${rolling_moment_coefficient}</rollingMomentCoefficient>
+              <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+            </rotor>
+            <rotor>
+              <jointName>rotor_1_joint</jointName>
+              <linkName>rotor_1</linkName>
+              <spinDirection>cw</spinDirection>
+              <timeConstantUp>${time_constant_up}</timeConstantUp>
+              <timeConstantDown>${time_constant_down}</timeConstantDown>
+              <minRotVelocity>${min_rot_velocity}</minRotVelocity>
+              <maxRotVelocity>${max_rot_velocity}</maxRotVelocity>
+              <thrustConstant>${motor_constant}</thrustConstant>
+              <momentConstant>${moment_constant}</momentConstant>
+              <rotorDragCoefficient>${rotor_drag_coefficient}</rotorDragCoefficient>
+              <rollingMomentCoefficient>${rolling_moment_coefficient}</rollingMomentCoefficient>
+              <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+            </rotor>
+            <rotor>
+              <jointName>rotor_2_joint</jointName>
+              <linkName>rotor_2</linkName>
+              <spinDirection>ccw</spinDirection>
+              <timeConstantUp>${time_constant_up}</timeConstantUp>
+              <timeConstantDown>${time_constant_down}</timeConstantDown>
+              <minRotVelocity>${min_rot_velocity}</minRotVelocity>
+              <maxRotVelocity>${max_rot_velocity}</maxRotVelocity>
+              <thrustConstant>${motor_constant}</thrustConstant>
+              <momentConstant>${moment_constant}</momentConstant>
+              <rotorDragCoefficient>${rotor_drag_coefficient}</rotorDragCoefficient>
+              <rollingMomentCoefficient>${rolling_moment_coefficient}</rollingMomentCoefficient>
+              <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+            </rotor>
+            <rotor>
+              <jointName>rotor_3_joint</jointName>
+              <linkName>rotor_3</linkName>
+              <spinDirection>cw</spinDirection>
+              <timeConstantUp>${time_constant_up}</timeConstantUp>
+              <timeConstantDown>${time_constant_down}</timeConstantDown>
+              <minRotVelocity>${min_rot_velocity}</minRotVelocity>
+              <maxRotVelocity>${max_rot_velocity}</maxRotVelocity>
+              <thrustConstant>${motor_constant}</thrustConstant>
+              <momentConstant>${moment_constant}</momentConstant>
+              <rotorDragCoefficient>${rotor_drag_coefficient}</rotorDragCoefficient>
+              <rollingMomentCoefficient>${rolling_moment_coefficient}</rollingMomentCoefficient>
+              <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+            </rotor>
+            <rotor>
+              <jointName>rotor_4_joint</jointName>
+              <linkName>rotor_4</linkName>
+              <spinDirection>cw</spinDirection>
+              <timeConstantUp>${time_constant_up}</timeConstantUp>
+              <timeConstantDown>${time_constant_down}</timeConstantDown>
+              <minRotVelocity>${min_rot_velocity}</minRotVelocity>
+              <maxRotVelocity>${max_rot_velocity}</maxRotVelocity>
+              <thrustConstant>${motor_constant}</thrustConstant>
+              <momentConstant>${moment_constant}</momentConstant>
+              <rotorDragCoefficient>${rotor_drag_coefficient}</rotorDragCoefficient>
+              <rollingMomentCoefficient>${rolling_moment_coefficient}</rollingMomentCoefficient>
+              <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+            </rotor>
+            <rotor>
+              <jointName>rotor_5_joint</jointName>
+              <linkName>rotor_5</linkName>
+              <spinDirection>ccw</spinDirection>
+              <timeConstantUp>${time_constant_up}</timeConstantUp>
+              <timeConstantDown>${time_constant_down}</timeConstantDown>
+              <minRotVelocity>${min_rot_velocity}</minRotVelocity>
+              <maxRotVelocity>${max_rot_velocity}</maxRotVelocity>
+              <thrustConstant>${motor_constant}</thrustConstant>
+              <momentConstant>${moment_constant}</momentConstant>
+              <rotorDragCoefficient>${rotor_drag_coefficient}</rotorDragCoefficient>
+              <rollingMomentCoefficient>${rolling_moment_coefficient}</rollingMomentCoefficient>
+              <rotorVelocitySlowdownSim>${rotor_velocity_slowdown_sim}</rotorVelocitySlowdownSim>
+            </rotor>
+        </rotors>
+
+        <servos>
+            <servo>
+              <jointName>${namespace}/tilt_unit_0_revolutejoint</jointName>
+              <spinDirection>ccw</spinDirection>
+              <controlMode>${tilt_control_mode}</controlMode>
+              <maxRotVelocity>${10}</maxRotVelocity>
+              <minRotPosition>${-pi*6}</minRotPosition>
+              <maxRotPosition>${pi*6}</maxRotPosition>
+              <zeroOffset>${servo_zero_offset}</zeroOffset>
+              <joint_control_pid>
+                  <p>${p_gain}</p>
+                  <i>${i_gain}</i>
+                  <d>${d_gain}</d>
+                  <iMax>1.0</iMax>
+                  <iMin>-1.0</iMin>
+                  <cmdMax>2.0</cmdMax>
+                  <cmdMin>-2.0</cmdMin>
+              </joint_control_pid>
+            </servo>
+            <servo>
+              <jointName>${namespace}/tilt_unit_1_revolutejoint</jointName>
+              <spinDirection>ccw</spinDirection>
+              <controlMode>${tilt_control_mode}</controlMode>
+              <maxRotVelocity>${10}</maxRotVelocity>
+              <minRotPosition>${-pi*6}</minRotPosition>
+              <maxRotPosition>${pi*6}</maxRotPosition>
+              <zeroOffset>${servo_zero_offset}</zeroOffset>
+              <joint_control_pid>
+                  <p>${p_gain}</p>
+                  <i>${i_gain}</i>
+                  <d>${d_gain}</d>
+                  <iMax>1.0</iMax>
+                  <iMin>-1.0</iMin>
+                  <cmdMax>2.0</cmdMax>
+                  <cmdMin>-2.0</cmdMin>
+              </joint_control_pid>
+            </servo>
+            <servo>
+              <jointName>${namespace}/tilt_unit_2_revolutejoint</jointName>
+              <spinDirection>ccw</spinDirection>
+              <controlMode>${tilt_control_mode}</controlMode>
+              <maxRotVelocity>${10}</maxRotVelocity>
+              <minRotPosition>${-pi*6}</minRotPosition>
+              <maxRotPosition>${pi*6}</maxRotPosition>
+              <zeroOffset>${servo_zero_offset}</zeroOffset>
+              <joint_control_pid>
+                  <p>${p_gain}</p>
+                  <i>${i_gain}</i>
+                  <d>${d_gain}</d>
+                  <iMax>1.0</iMax>
+                  <iMin>-1.0</iMin>
+                  <cmdMax>2.0</cmdMax>
+                  <cmdMin>-2.0</cmdMin>
+              </joint_control_pid>
+            </servo>
+            <servo>
+              <jointName>${namespace}/tilt_unit_3_revolutejoint</jointName>
+              <spinDirection>ccw</spinDirection>
+              <controlMode>${tilt_control_mode}</controlMode>
+              <maxRotVelocity>${10}</maxRotVelocity>
+              <minRotPosition>${-pi*6}</minRotPosition>
+              <maxRotPosition>${pi*6}</maxRotPosition>
+              <zeroOffset>${servo_zero_offset}</zeroOffset>
+              <joint_control_pid>
+                  <p>${p_gain}</p>
+                  <i>${i_gain}</i>
+                  <d>${d_gain}</d>
+                  <iMax>1.0</iMax>
+                  <iMin>-1.0</iMin>
+                  <cmdMax>2.0</cmdMax>
+                  <cmdMin>-2.0</cmdMin>
+              </joint_control_pid>
+            </servo>
+            <servo>
+              <jointName>${namespace}/tilt_unit_4_revolutejoint</jointName>
+              <spinDirection>ccw</spinDirection>
+              <controlMode>${tilt_control_mode}</controlMode>
+              <maxRotVelocity>${10}</maxRotVelocity>
+              <minRotPosition>${-pi*6}</minRotPosition>
+              <maxRotPosition>${pi*6}</maxRotPosition>
+              <zeroOffset>${servo_zero_offset}</zeroOffset>
+              <joint_control_pid>
+                  <p>${p_gain}</p>
+                  <i>${i_gain}</i>
+                  <d>${d_gain}</d>
+                  <iMax>1.0</iMax>
+                  <iMin>-1.0</iMin>
+                  <cmdMax>2.0</cmdMax>
+                  <cmdMin>-2.0</cmdMin>
+              </joint_control_pid>
+            </servo>
+            <servo>
+              <jointName>${namespace}/tilt_unit_5_revolutejoint</jointName>
+              <spinDirection>ccw</spinDirection>
+              <controlMode>${tilt_control_mode}</controlMode>
+              <maxRotVelocity>${10}</maxRotVelocity>
+              <minRotPosition>${-pi*6}</minRotPosition>
+              <maxRotPosition>${pi*6}</maxRotPosition>
+              <zeroOffset>${servo_zero_offset}</zeroOffset>
+              <joint_control_pid>
+                  <p>${p_gain}</p>
+                  <i>${i_gain}</i>
+                  <d>${d_gain}</d>
+                  <iMax>1.0</iMax>
+                  <iMin>-1.0</iMin>
+                  <cmdMax>2.0</cmdMax>
+                  <cmdMin>-2.0</cmdMin>
+              </joint_control_pid>
+            </servo>
+        </servos>
+
+      </plugin>
+  </gazebo>
+
+</robot>
