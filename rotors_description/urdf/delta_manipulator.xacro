@@ -5,13 +5,13 @@
     <xacro:include filename="$(find rotors_description)/urdf/delta_elements.xacro" />
     <xacro:property name="mounting_link" default="world" />
     <xacro:property name="height_offset" default="-0.07" />
-    <xacro:property name="namespace" default="$(arg mav_name)" />
+    <xacro:property name="delta_namespace" default="${delta_namespace}" />
     <xacro:property name="delta_start_index" default="12" />
 
     <joint name="mounting_joint" type="fixed">
         <origin xyz="0 0 ${height_offset}" rpy="0.0 0.0 0.0"/>
         <parent link="${mounting_link}"/>
-        <child link="${namespace}/delta_base_link"/>
+        <child link="${delta_namespace}/delta_base_link"/>
     </joint>
 
     <xacro:base_plate_macro />
@@ -46,16 +46,16 @@
     <xacro:tool_plate_macro />
       
     <xacro:odometry_plugin_gz_macro
-        namespace="${namespace}"
+        namespace="${delta_namespace}"
         odometry_sensor_suffix="tool"
-        parent_link="${namespace}/delta_tool_plate"
+        parent_link="${delta_namespace}/delta_tool_plate"
         pose_topic="odometry_sensor_tool/pose"
         pose_with_covariance_topic="odometry_sensor_tool/pose_with_covariance"
         position_topic="odometry_sensor_tool/position"
         transform_topic="odometry_sensor_tool/transform"
         odometry_topic="odometry_sensor_tool/odometry"
         parent_frame_id="world"
-        child_frame_id="${namespace}/odometry_sensor_tool"
+        child_frame_id="${delta_namespace}/odometry_sensor_tool"
         mass_odometry_sensor="0.00001"
         measurement_divisor="16"
         measurement_delay="0.002"

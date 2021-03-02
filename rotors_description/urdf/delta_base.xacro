@@ -58,7 +58,7 @@
   </link>
 
   <xacro:property name="robot_name" value="$(arg mav_name)" />
-  <xacro:property name="namespace" value="$(arg namespace)" />
+  <xacro:property name="delta_namespace" value="$(arg namespace)" />
   <xacro:property name="mounting_link" value="${namespace}/base_link" />
   <xacro:property name="height_offset" value="0.0" />
   <xacro:include filename="$(find rotors_description)/urdf/delta_manipulator.xacro" />
