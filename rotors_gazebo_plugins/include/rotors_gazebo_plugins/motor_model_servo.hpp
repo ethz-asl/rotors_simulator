@@ -43,8 +43,7 @@ class MotorModelServo : public MotorModel {
         max_rot_velocity_(kDefaultMaxRotVelocity),
         max_torque_(kDefaultMaxTorque),
         max_rot_position_(kDefaultMaxRotPosition),
-        min_rot_position_(kDefaultMinRotPosition),
-        position_zero_offset_(kDefaultPositionOffset) {
+        min_rot_position_(kDefaultMinRotPosition) {
     joint_controller_ = _model->GetJointController();
     motor_ = _motor;
     joint_ = _model->GetJoint(motor_->GetElement("jointName")->Get<std::string>());
@@ -62,11 +61,6 @@ class MotorModelServo : public MotorModel {
   double max_torque_;
   double max_rot_position_;
   double min_rot_position_;
-  double position_zero_offset_;
-
-  // Gazebo PID implementation:
-  // https://github.com/arpg/Gazebo/blob/master/gazebo/common/PID.cc
-  common::PID pid_;
 
   physics::JointControllerPtr joint_controller_;
   sdf::ElementPtr motor_;
@@ -117,9 +111,10 @@ class MotorModelServo : public MotorModel {
       getSdfParam<double>(pid, "cmdMax", cmdMax, 0.0);
       getSdfParam<double>(pid, "cmdMin", cmdMin, 0.0);
 
-      // Setup a pid controller
-      pid_ = common::PID(p, i, d);
-      // pid_ = common::PID(p, i, d, iMax, iMin, cmdMax, cmdMin);
+      // Gazebo PID implementation:
+      // https://github.com/arpg/Gazebo/blob/master/gazebo/common/PID.cc
+      common::PID pid_;
+      pid_ = common::PID(p, i, d, iMax, iMin, cmdMax, cmdMin);
 
       switch (mode_) {
         case (ControlMode::kPosition): {

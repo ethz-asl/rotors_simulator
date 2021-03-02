@@ -39,9 +39,8 @@ static constexpr double kDefaultMaxRotVelocity = 838.0;
 static constexpr double kDefaultMinRotVelocity = 100.0;
 static constexpr double kDefaultMaxTorque = 10.0;
 static constexpr double kDefaultMaxForce = std::numeric_limits<double>::max();
-static constexpr double kDefaultMaxRotPosition = -M_PI;
-static constexpr double kDefaultMinRotPosition = M_PI;
-static constexpr double kDefaultPositionOffset = 0.0;
+static constexpr double kDefaultMaxRotPosition = -M_PI*10.0; // Some winding limits 
+static constexpr double kDefaultMinRotPosition = M_PI*10.0; // Some winding limits
 static constexpr double kDefaultRotorDragCoefficient = 1.0e-4;
 static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
 static constexpr double kDefaultPGain = 100;
@@ -58,6 +57,7 @@ class MotorModel {
         ref_motor_rot_pos_(0.0),
         ref_motor_rot_vel_(0.0),
         ref_motor_rot_effort_(0.0),
+        position_zero_offset_(0.0),
         prev_sim_time_(0.0),
         sampling_time_(0.01) {}
 
@@ -72,14 +72,14 @@ class MotorModel {
   void UpdatePhysics() { UpdateForcesAndMoments(); }
 
   void GetActuatorState(double *position, double *velocity, double *effort) {
-    *position = motor_rot_pos_;
+    *position = motor_rot_pos_ - position_zero_offset_;
     *velocity = motor_rot_vel_;
     *effort = motor_rot_effort_;
   }
 
   void SetActuatorReference(double ref_position, double ref_velocity,
                             double ref_effort) {
-    ref_motor_rot_pos_ = ref_position;
+    ref_motor_rot_pos_ = ref_position + position_zero_offset_;
     ref_motor_rot_vel_ = ref_velocity;
     ref_motor_rot_effort_ = ref_effort;
   }
@@ -96,6 +96,7 @@ class MotorModel {
   double ref_motor_rot_vel_;
   double ref_motor_rot_effort_;
   double prev_ref_motor_rot_vel_;
+  double position_zero_offset_;
   double prev_sim_time_;
   double sampling_time_;
 
