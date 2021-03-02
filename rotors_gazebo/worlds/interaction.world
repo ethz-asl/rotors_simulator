@@ -9,9 +9,10 @@
     <include>
       <uri>model://ground_plane</uri>
     </include>
- <!--    <include>
+    <include>
       <uri>model://asphalt_plane</uri>
-    </include> -->
+      <pose frame=''>0 0 -0.055 0 0 0</pose>
+    </include>
 
    <model name='unit_box'>
     <static>1</static>
