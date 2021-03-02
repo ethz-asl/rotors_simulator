@@ -142,7 +142,7 @@
     -->
     <!-- Base Plate Link Macro -->
     <xacro:macro name="base_plate_macro">
-        <link name="${namespace}/delta_base_link">
+        <link name="${delta_namespace}/delta_base_link">
 <!--             <visual>
                 <xacro:insert_block name="base_plate_origin"/>
                 <xacro:insert_block name="base_plate_geometry"/>
@@ -160,7 +160,7 @@
 
     <!-- Proximal Link Macro -->
     <xacro:macro name="link1_macro" params="suffix">
-        <link name="${namespace}/delta_link1_${suffix}">
+        <link name="${delta_namespace}/delta_link1_${suffix}">
             <visual>
                 <xacro:insert_block name="link_proximal_origin"/>
                 <xacro:insert_block name="link_proximal_geometry"/>
@@ -179,7 +179,7 @@
     <!-- Distal Link Macros -->
     <xacro:macro name="link2_right_macro" params="suffix base_angle">
         <gazebo>
-            <link name="${namespace}/delta_link2_right_${suffix}">
+            <link name="${delta_namespace}/delta_link2_right_${suffix}">
                 <pose>
                 ${(tool_plate_radius-link_distal_length*sin(angle_offset))*cos(base_angle)+(link_proximal_width/2)*sin(base_angle)} 
                 ${(tool_plate_radius-link_distal_length*sin(angle_offset))*sin(base_angle)+(-link_proximal_width/2)*cos(base_angle)} 
@@ -202,7 +202,7 @@
 
     <xacro:macro name="link2_left_macro" params="suffix base_angle">
         <gazebo>
-            <link name="${namespace}/delta_link2_left_${suffix}">
+            <link name="${delta_namespace}/delta_link2_left_${suffix}">
                 <pose>
                 ${(tool_plate_radius-link_distal_length*sin(angle_offset))*cos(base_angle)+(-link_proximal_width/2)*sin(base_angle)} 
                 ${(tool_plate_radius-link_distal_length*sin(angle_offset))*sin(base_angle)+(link_proximal_width/2)*cos(base_angle)} 
@@ -226,7 +226,7 @@
     <!-- Tool Plate Link Macro -->
     <xacro:macro name="tool_plate_macro">
         <gazebo>
-            <link name='${namespace}/delta_tool_plate'>
+            <link name='${delta_namespace}/delta_tool_plate'>
                 <pose>${tool_plate_radius} 
                     ${-link_proximal_width/2} 
                     ${-link_proximal_length*sin(angle_offset)+base_plate_height/2+tool_plate_height/2+height_offset} 
@@ -253,9 +253,9 @@
         ################################
     -->
     <xacro:macro name="shoulder_joint_macro" params="suffix base_angle motor_start_index">
-        <joint name="${namespace}/delta_joint_upper_${suffix}" type="continuous">
-            <parent link="${namespace}/delta_base_link"/>
-            <child link="${namespace}/delta_link1_${suffix}"/>
+        <joint name="${delta_namespace}/delta_joint_upper_${suffix}" type="continuous">
+            <parent link="${delta_namespace}/delta_base_link"/>
+            <child link="${delta_namespace}/delta_link1_${suffix}"/>
             <origin xyz="${base_plate_radius*cos(base_angle)} ${base_plate_radius*sin(base_angle)} 0.0" rpy="0.0 0.0 ${base_angle}"/>
             <axis xyz="0.0 1.0 0.0"/>
             <limit lower="${-pi/2}" upper="${pi/2}" effort="10.0" velocity="5.0"/>
@@ -265,9 +265,9 @@
 
 <!--         <gazebo>
           <plugin name="delta_${suffix}_motor_model" filename="librotors_gazebo_motor_model.so">
-            <robotNamespace>${namespace}</robotNamespace>
-            <jointName>${namespace}/delta_joint_upper_${suffix}</jointName>
-            <linkName>${namespace}/delta_link1_${suffix}</linkName>
+            <robotNamespace>${delta_namespace}</robotNamespace>
+            <jointName>${delta_namespace}/delta_joint_upper_${suffix}</jointName>
+            <linkName>${delta_namespace}/delta_link1_${suffix}</linkName>
             <turningDirection>ccw</turningDirection>
             <motorType>position</motorType>
             <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
@@ -289,9 +289,9 @@
 
     <xacro:macro name="universal_middle_joint_macro" params="type suffix base_angle">
         <gazebo>
-            <joint name='${namespace}/delta_joint_middle_${type}_${suffix}' type='universal'>
-                <child>${namespace}/delta_link2_${type}_${suffix}</child>
-                <parent>${namespace}/delta_link1_${suffix}</parent>
+            <joint name='${delta_namespace}/delta_joint_middle_${type}_${suffix}' type='universal'>
+                <child>${delta_namespace}/delta_link2_${type}_${suffix}</child>
+                <parent>${delta_namespace}/delta_link1_${suffix}</parent>
                 <axis>
                     <xyz>${-sin(base_angle)} ${cos(base_angle)} 0</xyz>
                     <limit>
@@ -312,9 +312,9 @@
 
     <xacro:macro name="universal_lower_joint_macro" params="type suffix base_angle">
         <gazebo>
-            <joint name='${namespace}/delta_joint_lower_${type}_${suffix}' type='universal'>
-                <child>${namespace}/delta_link2_${type}_${suffix}</child>
-                <parent>${namespace}/delta_tool_plate</parent>
+            <joint name='${delta_namespace}/delta_joint_lower_${type}_${suffix}' type='universal'>
+                <child>${delta_namespace}/delta_link2_${type}_${suffix}</child>
+                <parent>${delta_namespace}/delta_tool_plate</parent>
                 <pose>0 0 ${link_distal_length} 0 0 0</pose>
                 <axis>
                     <xyz>${-sin(base_angle)} ${cos(base_angle)} 0</xyz>
@@ -346,7 +346,7 @@
       noise_uniform_angular_velocity">
     <gazebo>
     <!-- odometry link -->
-    <link name="${namespace}/odometry_sensor_${odometry_sensor_suffix}_link">
+    <link name="${delta_namespace}/odometry_sensor_${odometry_sensor_suffix}_link">
         <pose>0 0 ${-link_proximal_length*sin(angle_offset)+base_plate_height/2+tool_plate_height/2+height_offset} 0 0 0</pose>
         <inertial>
             <pose frame=''>0 0 0 0 0 0</pose>
@@ -362,9 +362,9 @@
         </inertial>
     </link>
     <!-- odometry joint -->
-    <joint name="${namespace}/odometry_sensor${odometry_sensor_suffix}_joint" type="revolute">
+    <joint name="${delta_namespace}/odometry_sensor${odometry_sensor_suffix}_joint" type="revolute">
       <parent> ${parent_link} </parent>
-      <child> ${namespace}/odometry_sensor_${odometry_sensor_suffix}_link </child>
+      <child> ${delta_namespace}/odometry_sensor_${odometry_sensor_suffix}_link </child>
       <pose>0 0 0 0 0 0</pose>
       <axis>
         <xyz>1 0 0</xyz>
@@ -382,8 +382,8 @@
     </axis>
     </joint>
       <plugin filename="librotors_gazebo_odometry_plugin.so" name="odometry_sensor_${odometry_sensor_suffix}">
-        <linkName>${namespace}/odometry_sensor_${odometry_sensor_suffix}_link</linkName>
-        <robotNamespace>${namespace}</robotNamespace>
+        <linkName>${delta_namespace}/odometry_sensor_${odometry_sensor_suffix}_link</linkName>
+        <robotNamespace>${delta_namespace}</robotNamespace>
         <poseTopic>${pose_topic}</poseTopic>
         <poseWithCovarianceTopic>${pose_with_covariance_topic}</poseWithCovarianceTopic>
         <positionTopic>${position_topic}</positionTopic>

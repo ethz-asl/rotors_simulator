@@ -30,7 +30,7 @@
   <arg name="debug" default="false"/>
   <arg name="gui" default="true"/>
   <arg name="paused" default="false"/>
-  <arg name="verbose" default="true"/>
+  <arg name="verbose" default="false"/>
 
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models:$(find rotors_description)"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
