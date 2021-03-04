@@ -163,22 +163,28 @@ class MotorModelServo : public MotorModel {
 
     switch (mode_) {
       case (ControlMode::kPosition): {
-        joint_controller_->SetPositionTarget(joint_->GetScopedName(),
-                                             turning_direction_ * ref_motor_rot_pos_);
-        joint_controller_->Update();
+        if(!std::isnan(ref_motor_rot_pos_)){
+          joint_controller_->SetPositionTarget(joint_->GetScopedName(),
+                                               turning_direction_ * ref_motor_rot_pos_);
+          joint_controller_->Update();
+        }
         break;
       }
       case (ControlMode::kVelocity): {
-        joint_controller_->SetVelocityTarget(joint_->GetScopedName(),
-                                             turning_direction_ * ref_motor_rot_vel_);
-        joint_controller_->Update();
+        if(!std::isnan(ref_motor_rot_vel_)){
+          joint_controller_->SetVelocityTarget(joint_->GetScopedName(),
+                                               turning_direction_ * ref_motor_rot_vel_);
+          joint_controller_->Update();
+        }
         break;
       }
       case (ControlMode::kEffort): {
         // TODO(@kajabo): make motor torque feedback w gain.
-        double ref_torque = std::copysign(ref_motor_rot_effort_,
-                                          std::min(std::abs(ref_motor_rot_effort_), max_torque_));
-        joint_->SetForce(0, turning_direction_ * ref_torque);
+        if(!std::isnan(ref_motor_rot_effort_)){
+          double ref_torque = std::copysign(ref_motor_rot_effort_,
+                                            std::min(std::abs(ref_motor_rot_effort_), max_torque_));
+          joint_->SetForce(0, turning_direction_ * ref_torque);
+        }
         break;
       }
       default: {}

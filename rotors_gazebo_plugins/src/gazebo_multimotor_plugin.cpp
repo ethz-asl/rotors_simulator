@@ -161,19 +161,25 @@ void GazeboMultimotorPlugin::CreatePubsAndSubs() {
 
 void GazeboMultimotorPlugin::CommandMotorCallback(
     GzActuatorsMsgPtr& actuators_msg) {
-  int num_commands = actuators_msg->angular_velocities_size();
-  if (num_commands != motors_.size()) {
-    gzwarn << "Received " << std::to_string(num_commands)
-           << " motor commands for " << std::to_string(motors_.size())
-           << " motors.\n";
-    num_commands =
-        num_commands < motors_.size() ? num_commands : motors_.size();
+  std::vector<int> num_commands = { 
+    actuators_msg->angles_size(),
+    actuators_msg->angular_velocities_size(),
+    actuators_msg->normalized_size()};
+
+  // Warn if commands vector is not full.
+  int min_commands = *min_element(num_commands.begin(), num_commands.end());
+  if (min_commands != motors_.size()) {
+    gzwarn << "Received " << std::to_string(min_commands)
+           << " commands in some fields for " << std::to_string(motors_.size())
+           << " motors. Setting missing values to nan, ignoring extras.\n";
   }
 
-  for (int i = 0; i < num_commands; ++i) {
-    motors_.at(i)->SetActuatorReference(actuators_msg->angles(i),
-                                        actuators_msg->angular_velocities(i),
-                                        actuators_msg->normalized(i));
+  // Set unfilled commands to nan, for motors to handle independently.
+  for (int i = 0; i < motors_.size(); ++i) {
+    motors_.at(i)->SetActuatorReference(
+      i < num_commands.at(0) ? actuators_msg->angles(i) : std::numeric_limits<double>::quiet_NaN(),
+      i < num_commands.at(1) ? actuators_msg->angular_velocities(i) : std::numeric_limits<double>::quiet_NaN(),
+      i < num_commands.at(2) ? actuators_msg->normalized(i) : std::numeric_limits<double>::quiet_NaN());
   }
 
   received_first_reference_ = true;
