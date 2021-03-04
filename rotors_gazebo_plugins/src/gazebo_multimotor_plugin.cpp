@@ -2,8 +2,7 @@
 
 namespace gazebo {
 
-void GazeboMultimotorPlugin::Load(physics::ModelPtr _model,
-                                  sdf::ElementPtr _sdf) {
+void GazeboMultimotorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   // Store the pointer to the model.
   model_ = _model;
   world_ = model_->GetWorld();
@@ -24,11 +23,10 @@ void GazeboMultimotorPlugin::Load(physics::ModelPtr _model,
   // Initialise with default namespace (typically /gazebo/default/)
   node_handle_->Init();
 
-  getSdfParam<std::string>(_sdf, "actuatorCommandSubTopic",
-                           command_actuator_sub_topic_,
+  getSdfParam<std::string>(_sdf, "actuatorCommandSubTopic", command_actuator_sub_topic_,
                            command_actuator_sub_topic_);
-  getSdfParam<std::string>(_sdf, "actuatorStatePubTopic",
-                           motor_state_pub_topic_, motor_state_pub_topic_);
+  getSdfParam<std::string>(_sdf, "actuatorStatePubTopic", motor_state_pub_topic_,
+                           motor_state_pub_topic_);
 
   //=============================================//
   //========== LOAD ROTORS AND SERVOS ===========//
@@ -68,8 +66,7 @@ void GazeboMultimotorPlugin::Load(physics::ModelPtr _model,
       motor = motor->GetNextElement("servo");
     }
   }
-  gzdbg << "[gazebo_multimotor_plugin] Loaded " << motors_.size()
-        << " actuators.";
+  gzdbg << "[gazebo_multimotor_plugin] Loaded " << motors_.size() << " actuators.";
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -126,60 +123,52 @@ void GazeboMultimotorPlugin::CreatePubsAndSubs() {
 
   // Connect to ROS
   gz_std_msgs::ConnectGazeboToRosTopic connect_gazebo_to_ros_topic_msg;
-  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(namespace_ + "/" +
-                                                   motor_state_pub_topic_);
-  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" +
-                                                motor_state_pub_topic_);
-  connect_gazebo_to_ros_topic_msg.set_msgtype(
-      gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);
-  gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg,
-                                              true);
+  connect_gazebo_to_ros_topic_msg.set_gazebo_topic(namespace_ + "/" + motor_state_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_ros_topic(namespace_ + "/" + motor_state_pub_topic_);
+  connect_gazebo_to_ros_topic_msg.set_msgtype(gz_std_msgs::ConnectGazeboToRosTopic::ACTUATORS);
+  gz_connect_gazebo_to_ros_topic_pub->Publish(connect_gazebo_to_ros_topic_msg, true);
 
   // ===================================================== //
   // ===== ACTUATOR COMMAND MSG SETUP (ROS -> GAZEBO) ==== //
   // ===================================================== //
   //
   gzdbg << "Subscribing to Gazebo topic \""
-        << "~/" + namespace_ + "/" + command_actuator_sub_topic_ << "\"."
-        << std::endl;
-  cmd_motor_sub_ = node_handle_->Subscribe(
-      "~/" + namespace_ + "/" + command_actuator_sub_topic_,
-      &GazeboMultimotorPlugin::CommandMotorCallback, this);
+        << "~/" + namespace_ + "/" + command_actuator_sub_topic_ << "\"." << std::endl;
+  cmd_motor_sub_ = node_handle_->Subscribe("~/" + namespace_ + "/" + command_actuator_sub_topic_,
+                                           &GazeboMultimotorPlugin::CommandMotorCallback, this);
 
   // Connect to ROS
   gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
-  connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
-                                                command_actuator_sub_topic_);
+  connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" + command_actuator_sub_topic_);
   // connect_ros_to_gazebo_topic_msg.set_gazebo_namespace(namespace_);
   connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
                                                    command_actuator_sub_topic_);
-  connect_ros_to_gazebo_topic_msg.set_msgtype(
-      gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
-  gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg,
-                                              true);
+  connect_ros_to_gazebo_topic_msg.set_msgtype(gz_std_msgs::ConnectRosToGazeboTopic::ACTUATORS);
+  gz_connect_ros_to_gazebo_topic_pub->Publish(connect_ros_to_gazebo_topic_msg, true);
 }
 
-void GazeboMultimotorPlugin::CommandMotorCallback(
-    GzActuatorsMsgPtr& actuators_msg) {
-  std::vector<int> num_commands = { 
-    actuators_msg->angles_size(),
-    actuators_msg->angular_velocities_size(),
-    actuators_msg->normalized_size()};
+void GazeboMultimotorPlugin::CommandMotorCallback(GzActuatorsMsgPtr& actuators_msg) {
+  std::vector<int> num_commands = {actuators_msg->angles_size(),
+                                   actuators_msg->angular_velocities_size(),
+                                   actuators_msg->normalized_size()};
 
   // Warn if commands vector is not full.
   int min_commands = *min_element(num_commands.begin(), num_commands.end());
   if (min_commands != motors_.size()) {
-    gzwarn << "Received " << std::to_string(min_commands)
-           << " commands in some fields for " << std::to_string(motors_.size())
+    gzwarn << "Received " << std::to_string(min_commands) << " commands in some fields for "
+           << std::to_string(motors_.size())
            << " motors. Setting missing values to nan, ignoring extras.\n";
   }
 
   // Set unfilled commands to nan, for motors to handle independently.
   for (int i = 0; i < motors_.size(); ++i) {
     motors_.at(i)->SetActuatorReference(
-      i < num_commands.at(0) ? actuators_msg->angles(i) : std::numeric_limits<double>::quiet_NaN(),
-      i < num_commands.at(1) ? actuators_msg->angular_velocities(i) : std::numeric_limits<double>::quiet_NaN(),
-      i < num_commands.at(2) ? actuators_msg->normalized(i) : std::numeric_limits<double>::quiet_NaN());
+        i < num_commands.at(0) ? actuators_msg->angles(i)
+                               : std::numeric_limits<double>::quiet_NaN(),
+        i < num_commands.at(1) ? actuators_msg->angular_velocities(i)
+                               : std::numeric_limits<double>::quiet_NaN(),
+        i < num_commands.at(2) ? actuators_msg->normalized(i)
+                               : std::numeric_limits<double>::quiet_NaN());
   }
 
   received_first_reference_ = true;
@@ -193,8 +182,7 @@ bool GazeboMultimotorPlugin::IsValidLink(const sdf::ElementPtr motor) {
     std::string link_name = motor->GetElement("linkName")->Get<std::string>();
     physics::LinkPtr link = model_->GetLink(link_name);
     if (link == NULL) {
-      gzthrow("[multimotor_plugin] Couldn't find specified link \"" << link_name
-                                                                    << "\".");
+      gzthrow("[multimotor_plugin] Couldn't find specified link \"" << link_name << "\".");
       return false;
     }
   } else {
@@ -213,8 +201,7 @@ bool GazeboMultimotorPlugin::IsValidJoint(const sdf::ElementPtr motor) {
     physics::JointPtr joint = model_->GetJoint(joint_name);
     gzdbg << "Loaded motor on joint " << joint_name << std::endl;
     if (joint == NULL) {
-      gzthrow("[multimotor_plugin] Couldn't find specified joint \""
-              << joint_name << "\".");
+      gzthrow("[multimotor_plugin] Couldn't find specified joint \"" << joint_name << "\".");
       return false;
     }
   } else {
