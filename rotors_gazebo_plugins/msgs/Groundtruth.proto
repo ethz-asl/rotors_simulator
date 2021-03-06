@@ -1,0 +1,17 @@
+syntax = "proto2";
+package sensor_msgs.msgs;
+
+message Groundtruth
+{
+  required int64  time_usec             = 1;
+  required double latitude_rad          = 2;
+  required double longitude_rad         = 3;
+  required double altitude              = 4;
+  optional double velocity_east         = 5;
+  optional double velocity_north        = 6;
+  optional double velocity_up           = 7;
+  optional double attitude_q_w          = 8;
+  optional double attitude_q_x          = 9;
+  optional double attitude_q_y          = 10;
+  optional double attitude_q_z          = 11;
+}

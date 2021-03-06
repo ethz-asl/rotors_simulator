@@ -1,0 +1,12 @@
+syntax = "proto2";
+package sensor_msgs.msgs;
+
+message IRLock
+{
+  required int64 time_usec	= 1;
+  required int32 signature	= 2;
+  required float pos_x		= 3;
+  required float pos_y		= 4;
+  required float size_x		= 5;
+  required float size_y		= 6;
+}

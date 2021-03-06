@@ -259,6 +259,14 @@ if (NOT NO_ROS)
 endif()
 list(APPEND targets_to_install rotors_gazebo_aerodynamics_plugin)
 
+#==================================== AIRSPEED PLUGIN ========================================//
+add_library(rotors_gazebo_airspeed_plugin_px4 SHARED src/gazebo_airspeed_plugin_px4.cpp)
+target_link_libraries(rotors_gazebo_airspeed_plugin_px4 ${target_linking_LIBRARIES})
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_airspeed_plugin_px4 ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_airspeed_plugin_px4)
+
 #========================================= BAG PLUGIN ===========================================//
 # Entire GazeboBagPlugin is a heavy ROS dependency, and so rather than passing messages to
 # GazeboRosInterfacePlugin, this entire library is only included if ROS is present.
@@ -268,6 +276,15 @@ if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_bag_plugin ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_bag_plugin)
 endif()
+
+#======================================= BAROMETER PLUGIN ========================================//
+
+add_library(rotors_gazebo_barometer_plugin_px4 SHARED src/gazebo_barometer_plugin_px4.cpp)
+target_link_libraries(rotors_gazebo_barometer_plugin_px4 ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_barometer_plugin_px4 ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_barometer_plugin_px4)
 
 #================================= CONTROLLER INTERFACE PLUGIN ==================================//
 add_library(rotors_gazebo_controller_interface SHARED src/gazebo_controller_interface.cpp)
@@ -308,6 +325,15 @@ if (NOT NO_ROS)
   add_dependencies(rotors_gazebo_gps_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 list(APPEND targets_to_install rotors_gazebo_gps_plugin)
+
+#======================================= GROUNDTRUTH PLUGIN ========================================//
+
+add_library(rotors_gazebo_groundtruth_plugin_px4 SHARED src/gazebo_groundtruth_plugin_px4.cpp)
+target_link_libraries(rotors_gazebo_groundtruth_plugin_px4 ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_groundtruth_plugin_px4 ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_groundtruth_plugin_px4)
 
 #========================================= IMU PLUGIN ===========================================//
 add_library(rotors_gazebo_imu_plugin SHARED src/gazebo_imu_plugin.cpp)
@@ -376,6 +402,13 @@ if (NOT NO_ROS)
 endif()
 list(APPEND targets_to_install rotors_gazebo_magnetometer_plugin)
 
+add_library(rotors_gazebo_magnetometer_plugin_px4 SHARED src/gazebo_magnetometer_plugin_px4.cpp src/geo_mag_declination_px4.cpp)
+target_link_libraries(rotors_gazebo_magnetometer_plugin_px4 ${target_linking_LIBRARIES} )
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_magnetometer_plugin_px4 ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_magnetometer_plugin_px4)
+
 #================================= MAVLINK INTERFACE PLUGIN =====================================//
 
 if(BUILD_MAVLINK_INTERFACE_PLUGIN)
@@ -429,16 +462,22 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
   if(MAVLINK_HEADERS_FOUND AND MAVROS_VALID)
    message(WARN "Mavlink headers found and mavros version check successful, building MavlinkInterfacePlugin")
    # Note that this library includes TWO .cpp files.
-   add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/geo_mag_declination_tmp.cpp)
+   add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/geo_mag_declination_px4.cpp)
    target_link_libraries(rotors_gazebo_mavlink_interface ${target_linking_LIBRARIES}  ${mav_msgs})
    add_dependencies(rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
    list(APPEND targets_to_install rotors_gazebo_mavlink_interface)
 
    # Note that this library includes TWO .cpp files.
-   add_library(rotors_gazebo_mavlink_interface_tmp SHARED src/gazebo_mavlink_interface_tmp.cpp src/geo_mag_declination_tmp.cpp)
+   add_library(rotors_gazebo_mavlink_interface_tmp SHARED src/gazebo_mavlink_interface_tmp.cpp src/geo_mag_declination_px4.cpp)
    target_link_libraries(rotors_gazebo_mavlink_interface_tmp ${target_linking_LIBRARIES}  ${mav_msgs})
    add_dependencies(rotors_gazebo_mavlink_interface_tmp ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
    list(APPEND targets_to_install rotors_gazebo_mavlink_interface_tmp)
+
+   # Note that this library includes TWO .cpp files.
+   add_library(rotors_gazebo_mavlink_interface_px4 SHARED src/gazebo_mavlink_interface_px4.cpp src/mavlink_interface.cpp)
+   target_link_libraries(rotors_gazebo_mavlink_interface_px4 ${target_linking_LIBRARIES}  ${mav_msgs})
+   add_dependencies(rotors_gazebo_mavlink_interface_px4 ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
+   list(APPEND targets_to_install rotors_gazebo_mavlink_interface_px4)
 
   endif()
 

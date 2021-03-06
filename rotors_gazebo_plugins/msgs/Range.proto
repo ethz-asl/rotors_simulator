@@ -1,0 +1,15 @@
+syntax = "proto2";
+package sensor_msgs.msgs;
+import "quaternion.proto";
+
+message Range
+{
+  required int64 time_usec                    = 1;
+  required float min_distance                 = 2;
+  required float max_distance                 = 3;
+  required float current_distance             = 4;
+  optional float h_fov                        = 5;
+  optional float v_fov                        = 6;
+  optional gazebo.msgs.Quaternion orientation = 7;
+  optional int32 signal_quality               = 8;
+}
