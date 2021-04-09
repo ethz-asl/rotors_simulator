@@ -30,6 +30,8 @@ message ConnectGazeboToRosTopic
     VECTOR_3D_STAMPED = 12;
     WIND_SPEED = 13;
     WRENCH_STAMPED = 14;
+    VIS_VECTOR = 15;
+    VIS_VECTOR_ARRAY = 16;
   }
   required MsgType msgType = 4;
 }
