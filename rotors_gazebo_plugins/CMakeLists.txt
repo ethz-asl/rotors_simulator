@@ -495,7 +495,7 @@ list(APPEND targets_to_install rotors_gazebo_pressure_plugin)
 # This entire plugin is only built if ROS is a dependency
 if (NOT NO_ROS)
   add_library(rotors_gazebo_ros_interface_plugin SHARED src/gazebo_ros_interface_plugin.cpp)
-  target_link_libraries(rotors_gazebo_ros_interface_plugin ${target_linking_LIBRARIES} )
+  target_link_libraries(rotors_gazebo_ros_interface_plugin ${target_linking_LIBRARIES} mav_proto_msgs)
   add_dependencies(rotors_gazebo_ros_interface_plugin ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_ros_interface_plugin)
 endif()
