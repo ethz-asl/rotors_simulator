@@ -213,6 +213,7 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${msgs})
 # Create a shared library of protobuf messages (.so extension on Linux platforms)
 add_library(mav_proto_msgs SHARED ${PROTO_SRCS})
 target_link_libraries(mav_proto_msgs ${PROTOBUF_LIBRARY} gazebo_msgs)
+list(APPEND targets_to_install mav_proto_msgs)
 
 # ============================================== #
 # ==================== CATKIN ================== #
