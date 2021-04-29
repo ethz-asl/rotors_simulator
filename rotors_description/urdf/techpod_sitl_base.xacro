@@ -28,9 +28,9 @@
   </xacro:default_imu>
 
   <!-- Mount a GPS. -->
-  <xacro:default_gps namespace="${namespace}" parent_link="${namespace}/base_link" >
+  <xacro:default_gps_px4 namespace="${namespace}" parent_link="${namespace}/base_link" >
     <origin xyz="0.06 0 0.19" rpy="0 0 0" />
-  </xacro:default_gps>
+  </xacro:default_gps_px4>
 
   <!-- Mount a magnetometer. note: mavlink interface already does this based on position from gps-->
   <!--

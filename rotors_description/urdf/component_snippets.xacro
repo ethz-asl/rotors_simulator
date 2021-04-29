@@ -628,6 +628,46 @@
     </gazebo>
   </xacro:macro>
 
+  <!-- Macro to add a GPS sensor. -->
+  <xacro:macro name="gps_plugin_px4_macro"
+    params="namespace gps_suffix parent_link gps_topic
+      mass_gps_sensor Noise XYRandomWalk ZRandomWalk XYNoiseDensity
+      ZNoiseDensity VXYNoiseDensity VZNoiseDensity *inertia *origin">
+    <!-- GPS link -->
+    <link name="${namespace}/gps${gps_suffix}_link">
+      <inertial>
+        <xacro:insert_block name="inertia" />
+        <mass value="${mass_gps_sensor}" />  <!-- [kg] -->
+        <origin xyz="0 0 0" rpy="0 0 0" />
+      </inertial>
+    </link>
+    <!-- GPS joint -->
+    <joint name="${namespace}/gps${gps_suffix}_joint" type="revolute">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/gps${gps_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+    <gazebo reference="${namespace}/gps${gps_suffix}_link">
+      <sensor type="gps" name="${namespace}_gps${gps_suffix}">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>0</visualize>
+        <always_on>1</always_on>
+        <plugin filename="librotors_gazebo_gps_plugin_px4.so" name="rotors_gazebo_gps${gps_suffix}_plugin_px4">
+          <robotNamespace>${namespace}</robotNamespace> <!-- (string, required): ros namespace in which the messages are published -->
+          <gpsTopic>${gps_topic}</gpsTopic> <!-- (string): name of the sensor output topic and prefix of service names (defaults to 'gps') -->
+          <gpsNoise>${Noise}</gpsNoise>
+          <gpsXYRandomWalk>${XYRandomWalk}</gpsXYRandomWalk>
+          <gpsZRandomWalk>${ZRandomWalk}</gpsZRandomWalk>
+          <gpsXYNoiseDensity>${XYNoiseDensity}</gpsXYNoiseDensity>
+          <gpsZNoiseDensity>${ZNoiseDensity}</gpsZNoiseDensity>
+          <gpsVXYNoiseDensity>${VXYNoiseDensity}</gpsVXYNoiseDensity>
+          <gpsVZNoiseDensity>${VZNoiseDensity}</gpsVZNoiseDensity>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
   <!-- Macro to add a single-ray LIDAR. -->
   <xacro:macro name="lidar_plugin_macro"
     params="namespace lidar_suffix mass_lidar_sensor
@@ -1218,6 +1258,27 @@
       <xacro:insert_block name="origin" />
     </xacro:gps_plugin_macro>
   </xacro:macro>
+
+  <xacro:macro name="default_gps_px4" params="namespace parent_link *origin">
+    <!-- Default px4 GPS -->
+    <xacro:gps_plugin_px4_macro
+      namespace="${namespace}"
+      gps_suffix=""
+      parent_link="${parent_link}"
+      gps_topic="gps"
+      mass_gps_sensor="0.015"
+      Noise="1"
+      XYRandomWalk="1.0"
+      ZRandomWalk="4.0"
+      XYNoiseDensity="0.0002"
+      ZNoiseDensity="0.0004"
+      VXYNoiseDensity="0.2"
+      VZNoiseDensity="0.4">
+      <xacro:cube_inertia l="0.02" mass="0.015" />
+      <xacro:insert_block name="origin" />
+    </xacro:gps_plugin_px4_macro>
+  </xacro:macro>
+
 
   <xacro:macro name="default_odometry" params="namespace parent_link">
     <xacro:odometry_plugin_macro
