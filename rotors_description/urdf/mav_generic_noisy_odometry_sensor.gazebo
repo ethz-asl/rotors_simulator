@@ -19,11 +19,11 @@
   limitations under the License.
 -->
 
-<robot name="firefly" xmlns:xacro="http://ros.org/wiki/xacro">
-  <!-- Instantiate default firefly-->
-  <xacro:include filename="$(find rotors_description)/urdf/firefly_base.xacro" />
+<robot name="$(arg mav_name)" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Instantiate the mav-->
+  <xacro:include filename="$(find rotors_description)/urdf/$(arg mav_name)_base.xacro" />
 
-  <!-- Mount a generic pose sensor without pose map (working everywhere). -->
+  <!-- Mount a generic noisy odometry sensor without odometry map (working everywhere). -->
   <xacro:odometry_plugin_macro
     namespace="${namespace}"
     odometry_sensor_suffix="1"
@@ -54,4 +54,3 @@
     <origin xyz="0.03 -0.07 0.1" rpy="0.2 -0.1 0.3" />
   </xacro:odometry_plugin_macro>
 </robot>
-

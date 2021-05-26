@@ -1,0 +1,160 @@
+<?xml version="1.0"?>
+<!--
+  Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<robot name="$(arg mav_name)" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="pi" value="3.14159265359" />
+  <xacro:property name="radius" value="0.005" />
+  <xacro:property name="length" value="0.25" />
+  <!-- Instantiate the mav-->
+  <xacro:include filename="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+
+
+  <!-- Mount support arms for camera -->
+  <!-- _____________________________ -->
+  <link name="${namespace}/support_arm_x_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
+      <geometry>
+        <cylinder radius="${radius}" length="${length}" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
+      <geometry>
+        <cylinder radius="${radius}" length="${length}" />
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+  <link name="${namespace}/support_arm_y_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" />
+      <geometry>
+        <cylinder radius="${radius}" length="${length}" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" />
+      <geometry>
+        <cylinder radius="${radius}" length="${length}" />
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+  <joint name="${namespace}/support_arm_x_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="${namespace}/base_link" />
+    <child link="${namespace}/support_arm_x_link" />
+  </joint> 
+
+  <joint name="${namespace}/support_arm_y_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="${namespace}/base_link" />
+    <child link="${namespace}/support_arm_y_link" />
+  </joint> 
+
+
+  <!-- Mount RGBD-camera sensors with 90degre view angle -->
+  <!-- ________________________________________________ -->
+  <xacro:rgbd_sensor_macro
+    namespace="${namespace}/rgbd_sensor"
+    parent_link="${namespace}/support_arm_x_link"
+    camera_suffix="rgbd_front"
+    frame_rate="60.0"
+    fov = "1.5707"    
+    baseline = "0.05"
+    width = "128"
+    height = "128"
+    max_range="50.0"
+    min_range="0.195"
+    noise_mean="0.0"
+    noise_stddev="0.007"
+    enable_visual="true" >
+    <box size="0.03 0.05 0.02" />
+    <origin xyz="${length/2} 0.0 0" rpy="0 0 0" />
+  </xacro:rgbd_sensor_macro>
+  
+  <xacro:rgbd_sensor_macro
+    namespace="${namespace}/rgbd_sensor"
+    parent_link="${namespace}/support_arm_x_link"
+    camera_suffix="rgbd_back"
+    frame_rate="60.0"
+    fov = "1.5707"    
+    baseline = "0.05"
+    width = "128"
+    height = "128"
+    max_range="50.0"
+    min_range="0.195"
+    noise_mean="0.0"
+    noise_stddev="0.007"
+    enable_visual="true" >
+    <box size="0.03 0.05 0.02" />
+    <origin xyz="${-length/2} 0.0 0" rpy="0 0 ${-pi}" />
+  </xacro:rgbd_sensor_macro>
+
+  <xacro:rgbd_sensor_macro
+    namespace="${namespace}/rgbd_sensor"
+    parent_link="${namespace}/support_arm_y_link"
+    camera_suffix="rgbd_right"
+    frame_rate="60.0"
+    fov = "1.5707"    
+    baseline = "0.05"
+    width = "128"
+    height = "128"
+    max_range="50.0"
+    min_range="0.195"
+    noise_mean="0.0"
+    noise_stddev="0.007"
+    enable_visual="true" >
+    <box size="0.03 0.05 0.02" />
+    <origin xyz="0 ${-length/2} 0" rpy="0 0 ${-pi/2}" />
+  </xacro:rgbd_sensor_macro>
+  
+  <xacro:rgbd_sensor_macro
+    namespace="${namespace}/rgbd_sensor"
+    parent_link="${namespace}/support_arm_y_link"
+    camera_suffix="rgbd_left"
+    frame_rate="60.0"
+    fov = "1.5707"    
+    baseline = "0.05"
+    width = "128"
+    height = "128"
+    max_range="50.0"
+    min_range="0.195"
+    noise_mean="0.0"
+    noise_stddev="0.007"
+    enable_visual="true" >
+    <box size="0.03 0.05 0.02" />
+    <origin xyz="0 ${length/2} 0" rpy="0 0 ${pi/2}" />
+  </xacro:rgbd_sensor_macro>
+
+</robot>
+

@@ -55,7 +55,9 @@
           <geometry>
             <xacro:insert_block name="geometry" />
           </geometry>
-          <material name="red" />
+          <material name="red">
+            <color rgba="0.8 0 0 1"/>
+          </material>
         </visual>
       </xacro:if>
       <inertial>
@@ -134,7 +136,9 @@
           <geometry>
             <xacro:insert_block name="geometry" />
           </geometry>
-          <material name="red" />
+          <material name="red">
+            <color rgba="0.8 0 0 1"/>
+          </material>
         </visual>
       </xacro:if>
       <inertial>
@@ -933,6 +937,102 @@
       reference_longitude="8.5500"
       reference_altitude="500.0">
     </xacro:mavlink_interface_macro>
+  </xacro:macro>
+
+  <!-- RGBD SENSOR MACROS  -->
+  <!--_____________________________________________________________________________________________________-->
+  <xacro:macro name="rgbd_sensor_macro"
+    params="namespace parent_link camera_suffix frame_rate width height fov max_range min_range baseline noise_mean noise_stddev enable_visual *geometry *origin">
+
+    <link name="${namespace}/camera_${camera_suffix}_link">
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:insert_block name="geometry" />
+        </geometry>
+      </collision>
+      <xacro:if value="${enable_visual}">
+        <visual>
+          <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
+          <geometry>
+            <xacro:insert_block name="geometry" />
+          </geometry>
+          <material name="red">
+            <color rgba="0.8 0 0 1"/>
+          </material>
+        </visual>
+      </xacro:if>
+      <inertial>
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
+    <joint name="${namespace}/camera_${camera_suffix}_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent_link}" />
+      <child link="${namespace}/camera_${camera_suffix}_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+
+    <link name="${namespace}/camera_${camera_suffix}_optical_center_link" />
+    <joint name="${namespace}/camera_${camera_suffix}_optical_center_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+      <parent link="${namespace}/camera_${camera_suffix}_link" />
+      <child link="${namespace}/camera_${camera_suffix}_optical_center_link" />
+      <limit upper="0" lower="0" effort="0" velocity="0" />
+    </joint>
+
+    <gazebo reference="${namespace}/camera_${camera_suffix}_link">
+      <sensor type="depth" name="${namespace}_camera_{camera_suffix}">
+        <always_on>true</always_on>
+        <update_rate>${frame_rate}</update_rate>
+        <camera>
+          <horizontal_fov>${fov}</horizontal_fov>
+          <image>
+            <format>R8G8B8</format>
+            <width>${width}</width>
+            <height>${height}</height>
+          </image>
+          <clip>
+            <near>${min_range}</near>
+            <far>${max_range}</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <!-- Noise is sampled independently per pixel on each frame.
+                 That pixel's noise value is added to each of its color
+                 channels, which at that point lie in the range [0,1]. -->
+            <mean>${noise_mean}</mean>
+            <stddev>${noise_stddev}</stddev>
+          </noise>
+        </camera>
+        <plugin name="${namespace}_camera_{camera_suffix}" filename="librotors_gazebo_noisydepth_plugin.so">
+          <robotNamespace>${namespace}</robotNamespace>
+          <alwaysOn>true</alwaysOn>
+          <baseline>${baseline}</baseline>
+          <updateRate>${frame_rate}</updateRate>
+          <cameraName>camera_${camera_suffix}</cameraName>
+          <horizontal_fov>${fov}</horizontal_fov>
+          <depthNoiseModelName>D435</depthNoiseModelName>
+          <depthNoiseMinDist>0.02</depthNoiseMinDist>
+          <depthNoiseMaxDist>50.0</depthNoiseMaxDist>
+          <D435NoiseSubpixelErr>0.25</D435NoiseSubpixelErr> 
+          <D435MaxStdev>3</D435MaxStdev> 
+          <imageTopicName>camera/color/image_raw</imageTopicName>
+          <cameraInfoTopicName>camera/color/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>camera/depth/image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>camera/depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>camera/depth/points</pointCloudTopicName>
+          <frameName>camera_${camera_suffix}_optical_center_link</frameName>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+      </sensor>
+    </gazebo>
   </xacro:macro>
 
 </robot>
