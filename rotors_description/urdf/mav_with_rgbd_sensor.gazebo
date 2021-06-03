@@ -156,5 +156,41 @@
     <origin xyz="0 ${length/2} 0" rpy="0 0 ${pi/2}" />
   </xacro:rgbd_sensor_macro>
 
+  <xacro:rgbd_sensor_macro
+    namespace="${namespace}/rgbd_sensor"
+    parent_link="${namespace}/support_arm_y_link"
+    camera_suffix="rgbd_down"
+    frame_rate="60.0"
+    fov = "1.5707"    
+    baseline = "0.05"
+    width = "128"
+    height = "128"
+    max_range="50.0"
+    min_range="0.195"
+    noise_mean="0.0"
+    noise_stddev="0.007"
+    enable_visual="true" >
+    <box size="0.03 0.05 0.02" />
+    <origin xyz="0 0 -0.05" rpy="0 ${pi/2} 0" />
+  </xacro:rgbd_sensor_macro>
+
+  <xacro:rgbd_sensor_macro
+    namespace="${namespace}/rgbd_sensor"
+    parent_link="${namespace}/support_arm_y_link"
+    camera_suffix="rgbd_up"
+    frame_rate="60.0"
+    fov = "1.5707"    
+    baseline = "0.05"
+    width = "128"
+    height = "128"
+    max_range="50.0"
+    min_range="0.195"
+    noise_mean="0.0"
+    noise_stddev="0.007"
+    enable_visual="true" >
+    <box size="0.03 0.05 0.02" />
+    <origin xyz="0 0 0.05" rpy="0 ${-pi/2} 0" />
+  </xacro:rgbd_sensor_macro>
+
 </robot>
 
