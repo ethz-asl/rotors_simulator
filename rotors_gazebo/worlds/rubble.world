@@ -16,7 +16,7 @@
 
     <model name="right_wall">
       <static>true</static>
-      <pose>1.4 0.6 1.6 0 0 0</pose>
+      <pose>1.4 0.1 1.6 0 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -42,7 +42,7 @@
     </model>
     <model name="left_wall">
       <static>true</static>
-      <pose>1.4 1.6 1.6 0 0 0</pose>
+      <pose>1.4 2.1 1.6 0 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -73,14 +73,14 @@
         <collision name="collision">
           <geometry>
             <box>
-              <size>0.1 0.1 1.0</size>
+              <size>0.1 0.1 2.0</size>
             </box>
           </geometry>
         </collision>
         <visual name="visual">
           <geometry>
             <box>
-              <size>0.1 0.1 1.0</size>
+              <size>0.1 0.1 2.0</size>
             </box>
           </geometry>
           <material>
@@ -99,14 +99,14 @@
         <collision name="collision">
           <geometry>
             <box>
-              <size>0.1 0.1 1.0</size>
+              <size>0.1 0.1 2.0</size>
             </box>
           </geometry>
         </collision>
         <visual name="visual">
           <geometry>
             <box>
-              <size>0.1 0.1 1.0</size>
+              <size>0.1 0.1 2.0</size>
             </box>
           </geometry>
           <material>
@@ -121,7 +121,7 @@
 
     <model name="right_wall2">
       <static>true</static>
-      <pose>-2.4 2.0 1.6 0 0 0</pose>
+      <pose>-5.4 1.5 1.6 0 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -147,7 +147,7 @@
     </model>
     <model name="left_wall2">
       <static>true</static>
-      <pose>-2.4 3.0 1.6 0 0 0</pose>
+      <pose>-5.4 3.5 1.6 0 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -173,19 +173,19 @@
     </model>
         <model name="up_wall2">
       <static>true</static>
-      <pose>-2.4 2.5 2.1 1.570796327 0 0</pose>
+      <pose>-5.4 2.5 2.1 1.570796327 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
             <box>
-              <size>0.1 0.1 1.0</size>
+              <size>0.1 0.1 2.0</size>
             </box>
           </geometry>
         </collision>
         <visual name="visual">
           <geometry>
             <box>
-              <size>0.1 0.1 1.0</size>
+              <size>0.1 0.1 2.0</size>
             </box>
           </geometry>
           <material>
@@ -199,19 +199,19 @@
     </model>
     <model name="down_wall2">
       <static>true</static>
-      <pose>-2.4 2.5 1.1 1.570796327 0 0</pose>
+      <pose>-5.4 2.5 1.1 1.570796327 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
             <box>
-              <size>0.1 0.1 1.0</size>
+              <size>0.1 0.1 2.0</size>
             </box>
           </geometry>
         </collision>
         <visual name="visual">
           <geometry>
             <box>
-              <size>0.1 0.1 1.0</size>
+              <size>0.1 0.1 2.0</size>
             </box>
           </geometry>
           <material>
