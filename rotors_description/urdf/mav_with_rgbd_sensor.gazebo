@@ -25,6 +25,7 @@
   <xacro:property name="length" value="0.25" />
   <!-- Instantiate the mav-->
   <xacro:include filename="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+  <!-- <xacro:include filename="$(find rotors_description)/urdf/mav_generic_noisy_odometry_sensor.gazebo" /> -->
 
 
   <!-- Mount support arms for camera -->
@@ -85,14 +86,14 @@
   <!-- Mount RGBD-camera sensors with 90degre view angle -->
   <!-- ________________________________________________ -->
   <xacro:rgbd_sensor_macro
-    namespace="${namespace}/rgbd_sensor"
+    namespace="${namespace}"
     parent_link="${namespace}/support_arm_x_link"
     camera_suffix="rgbd_front"
-    frame_rate="60.0"
-    fov = "1.5707"    
+    frame_rate="30.0"
+    fov = "1.59174"    
     baseline = "0.05"
-    width = "128"
-    height = "128"
+    width = "848"
+    height = "480"
     max_range="50.0"
     min_range="0.195"
     noise_mean="0.0"
@@ -103,14 +104,14 @@
   </xacro:rgbd_sensor_macro>
   
   <xacro:rgbd_sensor_macro
-    namespace="${namespace}/rgbd_sensor"
+    namespace="${namespace}"
     parent_link="${namespace}/support_arm_x_link"
     camera_suffix="rgbd_back"
-    frame_rate="60.0"
-    fov = "1.5707"    
+    frame_rate="30.0"
+    fov = "1.59174"    
     baseline = "0.05"
-    width = "128"
-    height = "128"
+    width = "848"
+    height = "480"
     max_range="50.0"
     min_range="0.195"
     noise_mean="0.0"
@@ -121,14 +122,14 @@
   </xacro:rgbd_sensor_macro>
 
   <xacro:rgbd_sensor_macro
-    namespace="${namespace}/rgbd_sensor"
+    namespace="${namespace}"
     parent_link="${namespace}/support_arm_y_link"
     camera_suffix="rgbd_right"
-    frame_rate="60.0"
-    fov = "1.5707"    
+    frame_rate="30.0"
+    fov = "1.59174"    
     baseline = "0.05"
-    width = "128"
-    height = "128"
+    width = "848"
+    height = "480"
     max_range="50.0"
     min_range="0.195"
     noise_mean="0.0"
@@ -139,14 +140,14 @@
   </xacro:rgbd_sensor_macro>
   
   <xacro:rgbd_sensor_macro
-    namespace="${namespace}/rgbd_sensor"
+    namespace="${namespace}"
     parent_link="${namespace}/support_arm_y_link"
     camera_suffix="rgbd_left"
-    frame_rate="60.0"
-    fov = "1.5707"    
+    frame_rate="30.0"
+    fov = "1.59174"    
     baseline = "0.05"
-    width = "128"
-    height = "128"
+    width = "848"
+    height = "480"
     max_range="50.0"
     min_range="0.195"
     noise_mean="0.0"
@@ -157,14 +158,14 @@
   </xacro:rgbd_sensor_macro>
 
   <xacro:rgbd_sensor_macro
-    namespace="${namespace}/rgbd_sensor"
-    parent_link="${namespace}/support_arm_y_link"
+    namespace="${namespace}"
+    parent_link="${namespace}/base_link"
     camera_suffix="rgbd_down"
-    frame_rate="60.0"
-    fov = "1.5707"    
+    frame_rate="30.0"
+    fov = "1.59174"    
     baseline = "0.05"
-    width = "128"
-    height = "128"
+    width = "848"
+    height = "480"
     max_range="50.0"
     min_range="0.195"
     noise_mean="0.0"
@@ -175,14 +176,14 @@
   </xacro:rgbd_sensor_macro>
 
   <xacro:rgbd_sensor_macro
-    namespace="${namespace}/rgbd_sensor"
-    parent_link="${namespace}/support_arm_y_link"
+    namespace="${namespace}"
+    parent_link="${namespace}/base_link"
     camera_suffix="rgbd_up"
-    frame_rate="60.0"
-    fov = "1.5707"    
+    frame_rate="30.0"
+    fov = "1.59174"    
     baseline = "0.05"
-    width = "128"
-    height = "128"
+    width = "848"
+    height = "480"
     max_range="50.0"
     min_range="0.195"
     noise_mean="0.0"

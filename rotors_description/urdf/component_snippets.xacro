@@ -952,12 +952,12 @@
         </geometry>
       </collision>
       <xacro:if value="${enable_visual}">
-        <visual>
-          <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
-          <geometry>
-            <xacro:insert_block name="geometry" />
-          </geometry>
-          <material name="red">
+          <visual>
+            <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
+            <geometry>
+              <xacro:insert_block name="geometry" />
+            </geometry>
+            <material name="red">
             <color rgba="0.8 0 0 1"/>
           </material>
         </visual>
@@ -1024,7 +1024,7 @@
           <depthImageTopicName>camera/depth/image_raw</depthImageTopicName>
           <depthImageCameraInfoTopicName>camera/depth/camera_info</depthImageCameraInfoTopicName>
           <pointCloudTopicName>camera/depth/points</pointCloudTopicName>
-          <frameName>camera_${camera_suffix}_optical_center_link</frameName>
+          <frameName>${namespace}/camera_${camera_suffix}_optical_center_link</frameName>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
           <distortionK3>0.0</distortionK3>

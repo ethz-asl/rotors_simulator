@@ -14,7 +14,7 @@
          topic to a ROS topic (or vise versa). -->
     <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so"/>
 
-    <model name="right_wall">
+    <model name="right_wall1">
       <static>true</static>
       <pose>1.4 0.1 1.6 0 0 0</pose>
       <link name="link">
@@ -40,7 +40,7 @@
         </visual>
       </link>
     </model>
-    <model name="left_wall">
+    <model name="left_wall1">
       <static>true</static>
       <pose>1.4 2.1 1.6 0 0 0</pose>
       <link name="link">
@@ -66,7 +66,7 @@
         </visual>
       </link>
     </model>
-    <model name="up_wall">
+    <model name="up_wall1">
       <static>true</static>
       <pose>1.4 1.1 2.1 1.570796327 0 0</pose>
       <link name="link">
@@ -92,7 +92,7 @@
         </visual>
       </link>
     </model>
-    <model name="down_wall">
+    <model name="down_wall1">
       <static>true</static>
       <pose>1.4 1.1 1.1 1.570796327 0 0</pose>
       <link name="link">
@@ -119,7 +119,7 @@
       </link>
     </model>
 
-    <model name="right_wall2">
+    <!-- <model name="right_wall2">
       <static>true</static>
       <pose>1.0 0.1 1.6 0 0 0</pose>
       <link name="link">
@@ -171,7 +171,7 @@
         </visual>
       </link>
     </model>
-        <model name="up_wall2">
+    <model name="up_wall2">
       <static>true</static>
       <pose>1.0 1.1 2.1 1.570796327 0 0</pose>
       <link name="link">
@@ -222,12 +222,11 @@
           </material>
         </visual>
       </link>
-    </model>
+    </model> -->
 
-
-    <model name="right_wall3">
+    <!-- <model name="right_wall3">
       <static>true</static>
-      <pose>-6.0 3.0 1.6 0 0 0</pose>
+      <pose>0.6 0.3 1.6 0 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -253,7 +252,7 @@
     </model>
     <model name="left_wall3">
       <static>true</static>
-      <pose>-6.0 5.0 1.6 0 0 0</pose>
+      <pose>0.6 2.3 1.6 0 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -277,9 +276,9 @@
         </visual>
       </link>
     </model>
-        <model name="up_wall3">
+    <model name="up_wall3">
       <static>true</static>
-      <pose>-6.0 4.0 2.1 1.570796327 0 0</pose>
+      <pose>0.6 1.3 2.1 1.570796327 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -305,7 +304,7 @@
     </model>
     <model name="down_wall3">
       <static>true</static>
-      <pose>-6.0 4.0 1.1 1.570796327 0 0</pose>
+      <pose>0.6 1.3 1.1 1.570796327 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -328,11 +327,11 @@
           </material>
         </visual>
       </link>
-    </model>
+    </model> -->
 
-    <model name="right_wall4">
+    <!-- <model name="right_wall4">
       <static>true</static>
-      <pose>-6.0 0.0 1.6 0 0 0</pose>
+      <pose>0.0 0.6 1.6 0 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -358,7 +357,7 @@
     </model>
     <model name="left_wall4">
       <static>true</static>
-      <pose>-6.0 2.0 1.6 0 0 0</pose>
+      <pose>0.0 2.6 1.6 0 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -384,7 +383,7 @@
     </model>
     <model name="up_wall4">
       <static>true</static>
-      <pose>-6.0 1.0 2.1 1.570796327 0 0</pose>
+      <pose>0.0 1.6 2.1 1.570796327 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -410,6 +409,426 @@
     </model>
     <model name="down_wall4">
       <static>true</static>
+      <pose>0.0 1.6 1.1 1.570796327 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model> -->
+
+    <!-- <model name="right_wall5">
+      <static>true</static>
+      <pose>-0.6 0.8 1.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="left_wall5">
+      <static>true</static>
+      <pose>-0.6 2.8 1.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="up_wall5">
+      <static>true</static>
+      <pose>-0.6 1.8 2.1 1.570796327 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="down_wall5">
+      <static>true</static>
+      <pose>-0.6 1.8 1.1 1.570796327 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model> -->
+
+    <!-- <model name="right_wall6">
+      <static>true</static>
+      <pose>-0.8 1.0 1.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="left_wall6">
+      <static>true</static>
+      <pose>-0.8 3.0 1.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="up_wall6">
+      <static>true</static>
+      <pose>-0.8 2.0 2.1 1.570796327 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="down_wall6">
+      <static>true</static>
+      <pose>-0.8 2.0 1.1 1.570796327 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model> -->
+
+    <!-- <model name="right_wall7">
+      <static>true</static>
+      <pose>-6.0 3.0 1.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="left_wall7">
+      <static>true</static>
+      <pose>-6.0 5.0 1.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="up_wall7">
+      <static>true</static>
+      <pose>-6.0 4.0 2.1 1.570796327 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="down_wall7">
+      <static>true</static>
+      <pose>-6.0 4.0 1.1 1.570796327 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model> -->
+
+    <model name="right_wall8">
+      <static>true</static>
+      <pose>-6.0 0.0 1.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="left_wall8">
+      <static>true</static>
+      <pose>-6.0 2.0 1.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="up_wall8">
+      <static>true</static>
+      <pose>-6.0 1.0 2.1 1.570796327 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.1 2.0</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="down_wall8">
+      <static>true</static>
       <pose>-6.0 1.0 1.1 1.570796327 0 0</pose>
       <link name="link">
         <collision name="collision">
@@ -434,5 +853,34 @@
         </visual>
       </link>
     </model>
+  
+  
+  <!-- <model name="obstacle_1">
+      <static>true</static>
+      <pose>-2.0 0.6 1.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.7 0.7 3.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.7 0.7 3.5</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/RedGlow</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model> -->
+
   </world>
 </sdf>
