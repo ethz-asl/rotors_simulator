@@ -1,0 +1,4 @@
+# Lidar rotational frequency
+float64 frequency
+---
+std_msgs/Empty nothing

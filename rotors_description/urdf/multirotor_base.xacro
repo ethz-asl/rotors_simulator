@@ -36,6 +36,42 @@
     </inertial>
   </xacro:macro>
 
+  <!-- Macro for the inertia of a cylinder -->
+  <xacro:macro name="cylinder_inertia" params="radius length mass">
+    <inertia ixx="${(mass * (3.0*radius*radius + length*length)) / 12.0}" ixy="0" ixz="0"
+             iyy="${(mass * (3.0*radius*radius + length*length)) / 12.0}" iyz="0"
+             izz="${0.5 * mass * (radius*radius)}"/>
+  </xacro:macro>
+
+  <!-- Macro for the inertial properties of a cylinder -->
+  <xacro:macro name="cylinder_inertial" params="radius length mass *origin">
+    <inertial>
+      <mass value="${mass}"/>
+      <xacro:insert_block name="origin" />
+      <xacro:cylinder_inertia radius="${radius}" length="${length}" mass="${mass}" />
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="cylinder_link_complete" params="link_name radius length mass *origin">
+    <link name="${link_name}">
+      <xacro:cylinder_inertial radius="${radius}" length="${length}" mass="${mass}" >
+        <xacro:insert_block name="origin" />
+      </xacro:cylinder_inertial>
+      <collision name="${link_name}_collision">
+        <xacro:insert_block name="origin" />
+        <geometry>
+          <cylinder length="${length}" radius="${radius}"/>
+        </geometry>
+      </collision>
+      <visual name="${link_name}_visual">
+        <xacro:insert_block name="origin" />
+        <geometry>
+          <cylinder length="${length}" radius="${radius}"/>
+        </geometry>
+      </visual>
+    </link>
+  </xacro:macro>
+
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro"
     params="robot_namespace mass body_width body_height use_mesh_file mesh_file *inertia">
