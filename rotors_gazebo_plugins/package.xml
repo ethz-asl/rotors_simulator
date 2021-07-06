@@ -42,4 +42,8 @@
   <depend>tf</depend>
   <depend>yaml-cpp</depend>
 
+  <export>
+    <gazebo_ros plugin_path="${prefix}/lib"/>
+  </export>
+
 </package>
