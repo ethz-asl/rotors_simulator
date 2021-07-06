@@ -1,0 +1,15 @@
+syntax = "proto2";
+package gz_std_msgs;
+
+message Matrix3d
+{
+  required double xx = 1;
+  required double yx = 2;
+  required double zx = 3;
+  required double xy = 4;
+  required double yy = 5;
+  required double zy = 6;
+  required double xz = 7;
+  required double yz = 8;
+  required double zz = 9;
+}

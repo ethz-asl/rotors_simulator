@@ -1,0 +1,13 @@
+syntax = "proto2";
+package gz_mav_msgs;
+
+import "Header.proto";
+import "vector3d.proto";
+import "matrix3d.proto";
+
+message WindSpeedBeta {
+
+  required gazebo.msgs.Vector3d pos_ned = 2;
+  required gazebo.msgs.Vector3d wind_ned = 3;
+  required gz_std_msgs.Matrix3d wind_grad_ned = 4;
+}

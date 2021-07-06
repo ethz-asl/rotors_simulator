@@ -301,6 +301,27 @@ if (NOT NO_ROS)
   list(APPEND targets_to_install rotors_gazebo_fw_dynamics_plugin)
 endif()
 
+add_library(rotors_gazebo_aerodynamics_plugin SHARED src/gazebo_aerodynamics_plugin.cpp)
+target_link_libraries(rotors_gazebo_aerodynamics_plugin ${target_linking_LIBRARIES}  ${YamlCpp_LIBRARIES})
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_aerodynamics_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_aerodynamics_plugin)
+
+add_library(rotors_gazebo_wind_beta_plugin SHARED src/gazebo_wind_beta_plugin.cpp)
+target_link_libraries(rotors_gazebo_wind_beta_plugin ${target_linking_LIBRARIES}  ${YamlCpp_LIBRARIES})
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_wind_beta_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_wind_beta_plugin)
+
+add_library(rotors_gazebo_propulsion_plugin SHARED src/gazebo_propulsion_plugin.cpp)
+target_link_libraries(rotors_gazebo_propulsion_plugin ${target_linking_LIBRARIES}  ${YamlCpp_LIBRARIES})
+if (NOT NO_ROS)
+  add_dependencies(rotors_gazebo_propulsion_plugin ${catkin_EXPORTED_TARGETS})
+endif()
+list(APPEND targets_to_install rotors_gazebo_propulsion_plugin)
+
 #========================================= GPS PLUGIN ===========================================//
 if (NOT NO_ROS)
   add_library(rotors_gazebo_gps_plugin SHARED src/gazebo_gps_plugin.cpp)
