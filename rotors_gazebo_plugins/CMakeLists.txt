@@ -214,6 +214,8 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${msgs})
 add_library(mav_msgs SHARED ${PROTO_SRCS})
 target_link_libraries(mav_msgs ${PROTOBUF_LIBRARY} gazebo_msgs)
 
+list(APPEND targets_to_install mav_msgs)
+
 # This causes mav_msgs to be linked with every created library in this file from this
 # point forward.
 # NOTE: This is deprecated, should be using target_link_libraries instead
