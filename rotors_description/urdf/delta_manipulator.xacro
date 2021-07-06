@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+
+<robot name="${robot_name}"
+    xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:include filename="$(find rotors_description)/urdf/delta_elements.xacro" />
+    <xacro:property name="mounting_link" default="world" />
+    <xacro:property name="height_offset" default="-0.07" />
+    <xacro:property name="delta_namespace" default="${delta_namespace}" />
+    <xacro:property name="delta_start_index" default="12" />
+
+    <joint name="mounting_joint" type="fixed">
+        <origin xyz="0 0 ${height_offset}" rpy="0.0 0.0 0.0"/>
+        <parent link="${mounting_link}"/>
+        <child link="${delta_namespace}/delta_base_link"/>
+    </joint>
+
+    <xacro:base_plate_macro />
+
+    <xacro:link1_macro suffix="0" />
+    <xacro:shoulder_joint_macro suffix="0" base_angle="0" motor_start_index="${delta_start_index}" />
+    <xacro:link2_right_macro suffix="0" base_angle="0" />
+    <xacro:link2_left_macro suffix="0" base_angle="0" />
+    <xacro:universal_middle_joint_macro type="right" suffix="0" base_angle="${0}" />
+    <xacro:universal_middle_joint_macro type="left" suffix="0" base_angle="${0}" />
+    <xacro:universal_lower_joint_macro type="right" suffix="0" base_angle="${0}" />
+    <xacro:universal_lower_joint_macro type="left" suffix="0" base_angle="${0}" />
+
+    <xacro:link1_macro suffix="1" />
+    <xacro:shoulder_joint_macro suffix="1" base_angle="${2*pi/3}" motor_start_index="${delta_start_index}" />
+    <xacro:link2_right_macro suffix="1" base_angle="${2*pi/3}" />
+    <xacro:link2_left_macro suffix="1" base_angle="${2*pi/3}" />
+    <xacro:universal_middle_joint_macro type="right" suffix="1" base_angle="${2*pi/3}" />
+    <xacro:universal_middle_joint_macro type="left" suffix="1" base_angle="${2*pi/3}" />
+    <xacro:universal_lower_joint_macro type="right" suffix="1" base_angle="${2*pi/3}" />
+    <xacro:universal_lower_joint_macro type="left" suffix="1" base_angle="${2*pi/3}" />
+
+    <xacro:link1_macro suffix="2" />
+    <xacro:shoulder_joint_macro suffix="2" base_angle="${4*pi/3}" motor_start_index="${delta_start_index}" />
+    <xacro:link2_right_macro suffix="2" base_angle="${4*pi/3}" />
+    <xacro:link2_left_macro suffix="2" base_angle="${4*pi/3}" />
+    <xacro:universal_middle_joint_macro type="right" suffix="2" base_angle="${4*pi/3}" />
+    <xacro:universal_middle_joint_macro type="left" suffix="2" base_angle="${4*pi/3}" />
+    <xacro:universal_lower_joint_macro type="right" suffix="2" base_angle="${4*pi/3}" />
+    <xacro:universal_lower_joint_macro type="left" suffix="2" base_angle="${4*pi/3}" />
+
+    <xacro:tool_plate_macro />
+      
+    <xacro:odometry_plugin_gz_macro
+        namespace="${delta_namespace}"
+        odometry_sensor_suffix="tool"
+        parent_link="${delta_namespace}/delta_tool_plate"
+        pose_topic="odometry_sensor_tool/pose"
+        pose_with_covariance_topic="odometry_sensor_tool/pose_with_covariance"
+        position_topic="odometry_sensor_tool/position"
+        transform_topic="odometry_sensor_tool/transform"
+        odometry_topic="odometry_sensor_tool/odometry"
+        parent_frame_id="world"
+        child_frame_id="${delta_namespace}/odometry_sensor_tool"
+        mass_odometry_sensor="0.00001"
+        measurement_divisor="16"
+        measurement_delay="0.002"
+        unknown_delay="0.0"
+        noise_normal_position="0.0001 0.0001 0.0001"
+        noise_normal_quaternion="0.0001 0.0001 0.0001"
+        noise_normal_linear_velocity="0.001 0.001 0.001"
+        noise_normal_angular_velocity="0.001 0.001 0.001"
+        noise_uniform_position="0.0001 0.0001 0.0001"
+        noise_uniform_quaternion="0.0001 0.0001 0.0001"
+        noise_uniform_linear_velocity="0.0001 0.0001 0.0001"
+        noise_uniform_angular_velocity="0.0001 0.0001 0.0001">
+    </xacro:odometry_plugin_gz_macro>
+
+</robot>

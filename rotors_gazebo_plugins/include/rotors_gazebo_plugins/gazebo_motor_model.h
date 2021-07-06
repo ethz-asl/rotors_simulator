@@ -55,19 +55,8 @@ enum class MotorType {
 
 namespace gazebo {
 
-// Changed name from speed to input for more generality. TODO(kajabo): integrate general actuator command.
 typedef const boost::shared_ptr<const gz_mav_msgs::CommandMotorSpeed> GzCommandMotorInputMsgPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
-
-// Set the max_force_ to the max double value. The limitations get handled by the FirstOrderFilter.
-static constexpr double kDefaultMaxForce = std::numeric_limits<double>::max();
-static constexpr double kDefaultMotorConstant = 8.54858e-06;
-static constexpr double kDefaultMomentConstant = 0.016;
-static constexpr double kDefaultTimeConstantUp = 1.0 / 80.0;
-static constexpr double kDefaultTimeConstantDown = 1.0 / 40.0;
-static constexpr double kDefaulMaxRotVelocity = 838.0;
-static constexpr double kDefaultRotorDragCoefficient = 1.0e-4;
-static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
 
 class GazeboMotorModel : public MotorModel, public ModelPlugin {
 
@@ -87,7 +76,7 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         turning_direction_(turning_direction::CW),
         motor_type_(MotorType::kVelocity),
         max_force_(kDefaultMaxForce),
-        max_rot_velocity_(kDefaulMaxRotVelocity),
+        max_rot_velocity_(kDefaultMaxRotVelocity),
         moment_constant_(kDefaultMomentConstant),
         motor_constant_(kDefaultMotorConstant),
         ref_motor_input_(0.0),

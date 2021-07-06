@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+<!--
+  Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
+  Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<robot name="$(arg mav_name)" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Included URDF Files -->
+  <xacro:include filename="$(find rotors_description)/urdf/omav_snippets.xacro"/>
+
+    <!-- Properties -->
+    <xacro:property name="namespace" value="$(arg namespace)"/>
+    <xacro:property name="rotor_velocity_slowdown_sim" value="10"/>
+    <xacro:property name="use_mesh_file_core" value="true"/>
+    <xacro:property name="use_mesh_file_rotor_unit" value="true"/>
+    <xacro:property name="mesh_file_core" value="package://rotors_description/meshes/omav/omav3_base.stl"/>
+    <xacro:property name="mesh_file_core_collision" value="package://rotors_description/meshes/omav/omav3_base.stl"/>
+    <xacro:property name="mesh_file_tilt_unit" value="package://rotors_description/meshes/omav/omav3_tiltarm.stl"/>
+
+    <xacro:property name="mass_core" value="3.13"/>    <!-- [kg] -->
+    <xacro:property name="mass_tilt_unit" value="0.277"/>    <!-- [kg] -->
+    <xacro:property name="body_width" value="0.22"/>    <!-- [m] -->
+    <xacro:property name="body_height" value="0.45"/>    <!-- [m] -->
+    <xacro:property name="mass_rotor" value="0.0065"/>    <!-- [kg] -->
+    <xacro:property name="arm_length" value="0.350"/>    <!-- [m] -->
+    <xacro:property name="rotor_offset_top" value="0.035"/>    <!-- [m] -->
+    <xacro:property name="radius_rotor" value="${0.1143*4/3}"/>    <!-- 12 in [m] -->
+
+    <xacro:property name="tilt_unit_parent" value="${namespace}/base_link_inertia"/>    <!-- 12 in [m] -->
+    <xacro:property name="body_origin">
+      <origin xyz="0 0 0" rpy="${mounting_roll} 0 0" />
+    </xacro:property>
+
+    <xacro:property name="sin30" value="0.5"/>
+    <xacro:property name="cos30" value="0.866025403784"/>
+
+    <!-- Property Blocks -->
+    <xacro:property name="body_inertia">
+        <inertia ixx="0.0075" ixy="${-3.4208e-05}" ixz="${2.4695e-05}" iyy="0.010939" iyz="${-3.8826e-06}" izz="0.01369"/>
+        <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+    </xacro:property>
+
+    <!-- Body Interia / CoM Offset -->
+    <xacro:property name="body_inertia_origin">
+      <!-- <origin xyz="0.03 0 0.01" /> -->
+      <origin xyz="0.0 0.0 0.0" />
+    </xacro:property>
+
+    <!-- Rotor unit inertia without the propellor. -->
+    <xacro:property name="tilt_unit_inertia">
+        <inertia ixx="0.00034257" ixy="0" ixz="0" iyy="0.0013205" iyz="0" izz="0.0010037"/>
+        <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+    </xacro:property>
+
+    <!-- Inertia of a single rotor, assuming it is a cuboid. Height=3mm, width=15mm. -->
+    <xacro:property name="rotor_inertia">
+        <xacro:box_inertia x="${radius_rotor}" y="0.020" z="0.003" mass="${mass_rotor*rotor_velocity_slowdown_sim}"/>
+    </xacro:property>
+
+    <!-- Instantiate multirotor_base_macro once. -->
+    <xacro:omav_base_macro
+        robot_namespace="${namespace}"
+        mass="${mass_core}"
+        body_width="${body_width}"
+        body_height="${body_height}"
+        use_mesh_file="${use_mesh_file_core}"
+        mesh_file="${mesh_file_core}"
+        collision_mesh_file="${mesh_file_core_collision}">
+        <xacro:insert_block name="body_origin"/>
+        <xacro:insert_block name="body_inertia"/>
+        <xacro:insert_block name="body_inertia_origin"/>
+    </xacro:omav_base_macro>
+
+  <!-- Instantiate rotors -->
+  <!-- right -->
+  <xacro:single_tilt_unit_minimal 
+    robot_namespace="${namespace}"
+    direction="ccw"
+    parent="${tilt_unit_parent}"
+    mass_rotor="${mass_rotor}"
+    mass_tilt_unit="${mass_tilt_unit}"
+    rotor_offset_top="${rotor_offset_top}"
+    motor_number="0"
+    mesh="propeller"
+    mesh_tilt_unit="${mesh_file_tilt_unit}"
+    color="Black">
+    <origin xyz="0 -${arm_length} 0" rpy="0 0 4.71238898038"/>
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:single_tilt_unit_minimal>
+
+  <!-- left -->
+  <xacro:single_tilt_unit_minimal
+    robot_namespace="${namespace}"
+    direction="cw"
+    parent="${tilt_unit_parent}"
+    mass_rotor="${mass_rotor}"
+    mass_tilt_unit="${mass_tilt_unit}"
+    rotor_offset_top="${rotor_offset_top}"
+    motor_number="1"
+    mesh="propeller"
+    mesh_tilt_unit="${mesh_file_tilt_unit}"
+    color="Black">
+    <origin xyz="0 ${arm_length} 0" rpy="0 0 1.57079632679"/>
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:single_tilt_unit_minimal>
+
+  <!-- front left -->
+  <xacro:single_tilt_unit_minimal
+    robot_namespace="${namespace}"
+    direction="ccw"
+    parent="${tilt_unit_parent}"
+    mass_rotor="${mass_rotor}"
+    mass_tilt_unit="${mass_tilt_unit}"
+    rotor_offset_top="${rotor_offset_top}"
+    motor_number="2"
+    mesh="propeller"
+    mesh_tilt_unit="${mesh_file_tilt_unit}"
+    color="Orange">
+    <origin xyz="${cos30*arm_length} ${sin30*arm_length} 0" rpy="0 0 0.52359877559"/>
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:single_tilt_unit_minimal>
+
+  <!-- back right -->
+  <xacro:single_tilt_unit_minimal 
+    robot_namespace="${namespace}"
+    direction="cw"
+    parent="${tilt_unit_parent}"
+    mass_rotor="${mass_rotor}"
+    mass_tilt_unit="${mass_tilt_unit}"
+    rotor_offset_top="${rotor_offset_top}"
+    motor_number="3"
+    mesh="propeller"
+    mesh_tilt_unit="${mesh_file_tilt_unit}"
+    color="DarkGrey">
+    <origin xyz="-${cos30*arm_length} -${sin30*arm_length} 0" rpy="0 0 3.66519142919"/>
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:single_tilt_unit_minimal>
+
+  <!-- front right -->
+  <xacro:single_tilt_unit_minimal 
+    robot_namespace="${namespace}"
+    direction="cw"
+    parent="${tilt_unit_parent}"
+    mass_rotor="${mass_rotor}"
+    mass_tilt_unit="${mass_tilt_unit}"
+    rotor_offset_top="${rotor_offset_top}"
+    motor_number="4"
+    mesh="propeller"
+    mesh_tilt_unit="${mesh_file_tilt_unit}"
+    color="Orange">
+    <origin xyz="${cos30*arm_length} -${sin30*arm_length} 0" rpy="0 0 5.75958653158"/>
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:single_tilt_unit_minimal>
+
+  <!-- back left -->
+  <xacro:single_tilt_unit_minimal robot_namespace="${namespace}"
+    direction="ccw"
+    parent="${tilt_unit_parent}"
+    mass_rotor="${mass_rotor}"
+    mass_tilt_unit="${mass_tilt_unit}"
+    rotor_offset_top="${rotor_offset_top}"
+    motor_number="5"
+    mesh="propeller"
+    mesh_tilt_unit="${mesh_file_tilt_unit}"
+    color="DarkGrey">
+    <origin xyz="-${cos30*arm_length} ${sin30*arm_length} 0" rpy="0 0 2.61799387799"/>
+    <xacro:insert_block name="rotor_inertia" />
+  </xacro:single_tilt_unit_minimal>
+
+</robot>

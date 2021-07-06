@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+
+<launch>
+
+
+  <!-- ************************ -->
+  <!-- ****** Parameters ****** -->
+  <!-- ************************ -->
+
+  <arg name="mav_name" default="omav3"/>
+  <arg name="base_frame_name" default="$(arg mav_name)/base_link"/>
+  <arg name="tool_ref_frame_name" default="$(arg mav_name)/tool_nominal"/>
+
+  <!-- Vehicle params -->
+  <arg name="model" default="$(find rotors_description)/urdf/omav3_base.xacro"/>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="$(arg mav_name)"/>
+  <arg name="add_manipulator" default="false"/>
+  <arg name="add_rgbd_sensor" default="false"/>
+  <arg name="delta_control_mode" default="position"/>
+
+  <!-- LEE J309 room center -->
+  <arg name="spawn_x" default="0.4"/>
+  <arg name="spawn_y" default="0.025"/>
+  <arg name="spawn_z" default="0.3"/>
+
+  <!-- ******************************* -->
+  <!-- ****** Gazebo Simulation ****** -->
+  <!-- ******************************* -->
+
+  <arg name="world_name" default="interaction"/>
+  <arg name="debug" default="false"/>
+  <arg name="gui" default="true"/>
+  <arg name="paused" default="false"/>
+  <arg name="verbose" default="false"/>
+
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="verbose" value="$(arg verbose)"/>
+  </include>
+
+  <group if="$(arg add_manipulator)">
+    <!-- Add roll = pi for base manipulator -->
+    <arg name="spawn_roll" default="3.14"/>
+    <arg name="model_roll" default="$(arg spawn_roll)"/>
+
+      <!-- Spawn MAV. -->
+    <include file="$(find rotors_gazebo)/launch/spawn_omav.launch">
+      <arg name="mav_name" value="$(arg mav_name)"/>
+      <arg name="namespace" value="$(arg mav_name)"/>
+      <arg name="model" value="$(arg model)"/>
+      <arg name="enable_logging" value="$(arg enable_logging)"/>
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)"/>
+      <arg name="log_file" value="$(arg log_file)"/>
+      <arg name="add_manipulator" value="$(arg add_manipulator)"/>
+      <arg name="add_rgbd_sensor" value="$(arg add_rgbd_sensor)"/>
+      <arg name="model_roll" value="$(arg model_roll)"/>
+      <arg name="delta_control_mode" value="$(arg delta_control_mode)"/>
+      <arg name="x" value="$(arg spawn_x)"/>
+      <arg name="y" value="$(arg spawn_y)"/>
+      <arg name="z" value="$(arg spawn_z)"/>
+      <arg name="R" value="$(arg spawn_roll)"/>
+    </include>
+  </group>
+  <group unless="$(arg add_manipulator)">
+    <!-- Add roll = pi for base manipulator -->
+    <arg name="spawn_roll" default="0.0"/>
+    <arg name="model_roll" default="$(arg spawn_roll)"/>
+
+      <!-- Spawn MAV. -->
+    <include file="$(find rotors_gazebo)/launch/spawn_omav.launch">
+      <arg name="mav_name" value="$(arg mav_name)"/>
+      <arg name="namespace" value="$(arg mav_name)"/>
+      <arg name="model" value="$(arg model)"/>
+      <arg name="enable_logging" value="$(arg enable_logging)"/>
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)"/>
+      <arg name="log_file" value="$(arg log_file)"/>
+      <arg name="add_manipulator" value="$(arg add_manipulator)"/>
+      <arg name="add_rgbd_sensor" value="$(arg add_rgbd_sensor)"/>
+      <arg name="model_roll" value="$(arg model_roll)"/>
+      <arg name="delta_control_mode" value="$(arg delta_control_mode)"/>
+      <arg name="x" value="$(arg spawn_x)"/>
+      <arg name="y" value="$(arg spawn_y)"/>
+      <arg name="z" value="$(arg spawn_z)"/>
+      <arg name="R" value="$(arg spawn_roll)"/>
+    </include>
+  </group>
+
+  <!-- *************************** -->
+  <!-- ****** TF Publishers ****** -->
+  <!-- *************************** -->
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="tf_base_imu" args="0 0 0 0 0 0 1.0 $(arg base_frame_name) imu" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="tf_base_tool_nominal" args="0 0 -0.3 0 0 0 1.0 $(arg base_frame_name) $(arg tool_ref_frame_name)" />
+</launch>

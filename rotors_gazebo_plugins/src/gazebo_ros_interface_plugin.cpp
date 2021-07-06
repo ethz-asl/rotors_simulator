@@ -399,11 +399,25 @@ void GazeboRosInterfacePlugin::GzActuatorsMsgCallback(
 
   ConvertHeaderGzToRos(gz_actuators_msg->header(), &ros_actuators_msg_.header);
 
+  ros_actuators_msg_.angles.resize(
+      gz_actuators_msg->angles_size());
+  for (int i = 0; i < gz_actuators_msg->angles_size(); i++) {
+    ros_actuators_msg_.angles[i] =
+        gz_actuators_msg->angles(i);
+  }
+
   ros_actuators_msg_.angular_velocities.resize(
       gz_actuators_msg->angular_velocities_size());
   for (int i = 0; i < gz_actuators_msg->angular_velocities_size(); i++) {
     ros_actuators_msg_.angular_velocities[i] =
         gz_actuators_msg->angular_velocities(i);
+  }
+
+  ros_actuators_msg_.normalized.resize(
+      gz_actuators_msg->normalized_size());
+  for (int i = 0; i < gz_actuators_msg->normalized_size(); i++) {
+    ros_actuators_msg_.normalized[i] =
+        gz_actuators_msg->normalized(i);
   }
 
   // Publish to ROS.

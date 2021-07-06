@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+
+<launch>
+
+
+  <!-- ************************ -->
+  <!-- ****** Parameters ****** -->
+  <!-- ************************ -->
+
+  <arg name="mav_name" default="delta"/>
+  <arg name="namespace" default="$(arg mav_name)"/>
+
+  <!-- Vehicle params -->
+  <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="$(arg mav_name)"/>
+
+  <arg name="spawn_height" default="0.15"/>
+  <arg name="spawn_roll" default="0.0"/>
+
+  <!-- position, velocity, effort -->
+  <arg name="delta_control_mode" default="position"/>
+
+  <!-- ******************************* -->
+  <!-- ****** Gazebo Simulation ****** -->
+  <!-- ******************************* -->
+
+  <arg name="world_name" default="empty"/>
+  <arg name="debug" default="false"/>
+  <arg name="gui" default="true"/>
+  <arg name="paused" default="false"/>
+  <arg name="verbose" default="false"/>
+
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models:$(find rotors_description)"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="verbose" value="$(arg verbose)"/>
+  </include>
+
+    <!-- Spawn MAV. -->
+  <!-- Send the robot XML to param server. -->
+  <param name="robot_description" command="
+    $(find xacro)/xacro '$(arg model)'
+    enable_logging:=$(arg enable_logging)
+    enable_ground_truth:=$(arg enable_ground_truth)
+    log_file:=$(arg log_file)
+    mav_name:=$(arg mav_name)
+    namespace:=$(arg namespace)
+    delta_control_mode:=$(arg delta_control_mode)"
+  />
+
+  <param name="tf_prefix" type="string" value="$(optenv ROS_NAMESPACE)" />
+
+  <!-- Push robot_description to factory and spawn robot in gazebo. -->
+  <node name="spawn_$(arg namespace)" pkg="gazebo_ros" type="spawn_model"
+   args="-param robot_description
+         -urdf
+         -z $(arg spawn_height)
+         -R $(arg spawn_roll)
+         -model $(arg namespace)"
+   respawn="false" output="screen">
+  </node>
+
+  <!-- *************************** -->
+  <!-- ****** TF Publishers ****** -->
+  <!-- *************************** -->
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+</launch>
