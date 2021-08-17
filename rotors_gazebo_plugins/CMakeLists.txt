@@ -4,6 +4,7 @@
 # BUILD_MAVLINK_INTERFACE_PLUGIN    bool    Build mavlink_interface_plugin if mavlink found (requires mav dependency).
 # BUILD_OCTOMAP_PLUGIN              bool    Build the optical map plugin (requires Octomap).
 # BUILD_OPTICAL_FLOW_PLUGIN         bool    Build the optical flow plugin (requires OpenCV).
+# BUILD_AERIAL_MANIPULATION_PLUGINS bool    Build plugins related to aerial manipulation
 # MAVLINK_HEADER_DIR                string  Location of MAVLink header files. If not provided, this CMakeLists.txt file will
 #                                               search the default locations (e.g. ROS) for them. This variable is only required
 #                                               if BUILD_MAVLINK_INTERFACE_PLUGIN=TRUE.
@@ -26,6 +27,11 @@ project(rotors_gazebo_plugins)
 if(NOT DEFINED BUILD_OCTOMAP_PLUGIN)
   message(STATUS "BUILD_OCTOMAP_PLUGIN variable not provided, setting to FALSE.")
   set(BUILD_OCTOMAP_PLUGIN FALSE)
+endif()
+
+if(NOT DEFINED BUILD_AERIAL_MANIPULATION_PLUGINS)
+  message(STATUS "BUILD_AERIAL_MANIPULATION_PLUGINS variable not provided, setting to TRUE.")
+  set(BUILD_AERIAL_MANIPULATION_PLUGINS TRUE)
 endif()
 
 if(NOT DEFINED BUILD_OPTICAL_FLOW_PLUGIN)
@@ -82,6 +88,12 @@ if(BUILD_OPTICAL_FLOW_PLUGIN)
   message(STATUS "BUILD_OPTICAL_FLOW_PLUGIN = TRUE, building gazebo_optical_flow_plugin.")
 else ()
   message(STATUS "BUILD_OPTICAL_FLOW_PLUGIN = FALSE, NOT building gazebo_optical_flow_plugin.")
+endif ()
+
+if(BUILD_AERIAL_MANIPULATION_PLUGINS)
+  message(STATUS "BUILD_AERIAL_MANIPULATION_PLUGINS = TRUE, building aerial manipulation plugins.")
+else ()
+  message(STATUS "BUILD_AERIAL_MANIPULATION_PLUGINS = FALSE, NOT building aerial manipulation plugins.")
 endif ()
 
 if(NO_ROS)
@@ -455,6 +467,18 @@ if(BUILD_OCTOMAP_PLUGIN)
     add_dependencies(rotors_gazebo_octomap_plugin ${catkin_EXPORTED_TARGETS})
   endif()
   list(APPEND targets_to_install rotors_gazebo_octomap_plugin)
+endif()
+#====================================== Aerial Manipulation PLUGINs ==========================================//
+
+if(BUILD_AERIAL_MANIPULATION_PLUGINS)
+
+  add_library(rotors_gazebo_force_sensor_plugin SHARED src/gazebo_force_sensor_plugin.cpp)
+  target_link_libraries(rotors_gazebo_force_sensor_plugin ${target_linking_LIBRARIES})
+  if (NOT NO_ROS)
+    add_dependencies(rotors_gazebo_force_sensor_plugin ${catkin_EXPORTED_TARGETS})
+  endif()
+  list(APPEND targets_to_install rotors_gazebo_force_sensor_plugin)
+
 endif()
 
 #======================================= ODOMETRY PLUGIN ========================================//
