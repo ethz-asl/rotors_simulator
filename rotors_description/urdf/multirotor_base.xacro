@@ -36,6 +36,23 @@
     </inertial>
   </xacro:macro>
 
+  <!-- Macro for the collision detection plugin -->
+  <xacro:macro name="collision detection plugin" params="ns link_name">
+  <gazebo reference="${link_name}">
+    <sensor name="${link_name}_contact_sensor" type="contact">
+      <always_on>true</always_on>
+      <contact>
+        <!-- Name of the link + '_collision' : check sdf file for exact name -->
+        <collision>${link_name}_collision</collision>
+      </contact>
+      <plugin name="${link_name}_bumper_plugin" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>${ns}/plugin_collision</bumperTopicName>
+        <frameName>${link_name}</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+  </xacro:macro>
+
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro"
     params="robot_namespace mass body_width body_height use_mesh_file mesh_file *inertia">
@@ -141,6 +158,20 @@
     </gazebo>
     <gazebo reference="${robot_namespace}/rotor_${motor_number}">
       <material>Gazebo/${color}</material>
+    </gazebo>
+    <!-- Contact Sensor for the rotor link -->
+    <gazebo reference="${robot_namespace}/rotor_${motor_number}">
+      <sensor name="rotor_${motor_number}_contact_sensor" type="contact">
+        <always_on>true</always_on>
+        <contact>
+            <!-- Name of the link + '_collision' : check sdf file for exact name -->
+          <collision>${robot_namespace}/rotor_${motor_number}_collision</collision>
+        </contact>
+        <plugin name="${robot_namespace}/rotor_${motor_number}_bumper_plugin" filename="libgazebo_ros_bumper.so">
+          <bumperTopicName>${robot_namespace}/plugin_collision</bumperTopicName>
+          <frameName>${robot_namespace}/rotor_${motor_number}</frameName>
+        </plugin>
+      </sensor>
     </gazebo>
   </xacro:macro>
 </robot>
