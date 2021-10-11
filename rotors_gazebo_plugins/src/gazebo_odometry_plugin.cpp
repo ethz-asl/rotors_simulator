@@ -89,7 +89,7 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model,
   if (_sdf->HasElement("covarianceImage")) {
     std::string image_name =
         _sdf->GetElement("covarianceImage")->Get<std::string>();
-    covariance_image_ = cv::imread(image_name, CV_LOAD_IMAGE_GRAYSCALE);
+    covariance_image_ = cv::imread(image_name, cv::IMREAD_GRAYSCALE);
     if (covariance_image_.data == NULL)
       gzerr << "loading covariance image " << image_name << " failed"
             << std::endl;
