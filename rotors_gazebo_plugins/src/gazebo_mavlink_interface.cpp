@@ -657,7 +657,6 @@ void GazeboMavlinkInterface::pollForMAVLinkMessages(
 }
 
 void GazeboMavlinkInterface::handle_message(mavlink_message_t* msg) {
-  //printf("\n\n");
   switch (msg->msgid) {
     case MAVLINK_MSG_ID_HIL_ACTUATOR_CONTROLS:
       mavlink_hil_actuator_controls_t controls;
@@ -679,21 +678,10 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t* msg) {
         input_reference_.resize(kNOutMax);
         for (unsigned i = 0; i < kNumMotors; ++i) {
           if (armed) {
-            if (i == 4){ //provvisory solution to have negative velocities for motor 4
-              input_reference_[i] =
-                (controls.controls[input_index_[i]] * 2.0f -1.0f + input_offset_[i]) *
-                    input_scaling_[i] +
-                zero_position_armed_[i]*0;
-            } else {
-              input_reference_[i] =
+            input_reference_[i] =
                 (controls.controls[input_index_[i]] + input_offset_[i]) *
                     input_scaling_[i] +
-                zero_position_armed_[i]*0;
-            }
-                //printf("input value motor %d: %.2f \n", i, input_reference_[i]);
-                //printf("controls motor %d: %.2f \n", i, controls.controls[input_index_[i]]);
-                
-                
+                zero_position_armed_[i];
           } else {
             input_reference_[i] = zero_position_disarmed_[i];
           }
@@ -704,12 +692,9 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t* msg) {
           if (armed) {
             input_reference_[i] =
                 (controls.controls[input_index_[i - kNumMotors]] +
-                 input_offset_[i]) * input_scaling_[i] + zero_position_armed_[i];
-                //printf("controls %d: %.2f \n", i, (double)input_reference_[i]);
-                //printf("controls.controls[input_index_[i - kNumMotors]] %d: %.2f \n", i, (double)controls.controls[input_index_[i - kNumMotors]]);
-                //printf("input_offset %d: %.2f \n", i, (double)input_offset_[i]);
-                //printf("input_scaling_ %d: %.2f \n", i, (double)input_scaling_[i]);
-                //printf("zero_position_armed_ %d: %.2f \n", i, (double)zero_position_armed_[i]);
+                 input_offset_[i]) *
+                    input_scaling_[i] +
+                zero_position_armed_[i];
           } else {
             input_reference_[i] = zero_position_disarmed_[i];
           }

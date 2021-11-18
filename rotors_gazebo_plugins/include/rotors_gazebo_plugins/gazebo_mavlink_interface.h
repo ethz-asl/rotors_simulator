@@ -221,9 +221,9 @@ class GazeboMavlinkInterface : public ModelPlugin {
 
   // Set the number of BLDC motors and tilting servos,
   // if using flags to differentiate.
-  static const size_t kNOutMax = 9u;
-  static const size_t kNumMotors = 5u;
-  static const size_t kNumServos = 2u;
+  static const size_t kNOutMax = 18u;
+  static const size_t kNumMotors = 12u;
+  static const size_t kNumServos = 6u;
 
   static const u_int32_t kMotorSpeedFlag = 1;
   static const u_int32_t kServoPositionFlag = 2;
