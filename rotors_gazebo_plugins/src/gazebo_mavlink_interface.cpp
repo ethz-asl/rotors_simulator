@@ -679,21 +679,9 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t* msg) {
         input_reference_.resize(kNOutMax);
         for (unsigned i = 0; i < kNumMotors; ++i) {
           if (armed) {
-            if (i == 4){ //provvisory solution to have negative velocities for motor 4
-              input_reference_[i] =
-                (controls.controls[input_index_[i]] * 2.0f -1.0f + input_offset_[i]) *
-                    input_scaling_[i] +
-                zero_position_armed_[i]*0;
-            } else {
-              input_reference_[i] =
-                (controls.controls[input_index_[i]] + input_offset_[i]) *
-                    input_scaling_[i] +
-                zero_position_armed_[i]*0;
-            }
-                //printf("input value motor %d: %.2f \n", i, input_reference_[i]);
-                //printf("controls motor %d: %.2f \n", i, controls.controls[input_index_[i]]);
-                
-                
+            input_reference_[i] =
+              (controls.controls[input_index_[i]] + input_offset_[i]) *
+                  input_scaling_[i] + zero_position_armed_[i]*0;
           } else {
             input_reference_[i] = zero_position_disarmed_[i];
           }
