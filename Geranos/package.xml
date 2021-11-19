@@ -1,0 +1,34 @@
+<package format="2">
+
+<!-- <name> xxx </name> --> 
+  <version>1.0.0</version> <!-- version number of package --> 
+  <description> Gazebo is a fokusproject </description> 
+  <maintainer email="geranos-mavt@mavt.ethz.ch">Fadri Furrer</maintainer>
+
+  <author>Henriette Stadler</author>
+
+  <license>ASL 2.0 / Geranos Fokusprojekt</license>
+
+  <!-- <url type="website">https://github.com/ethz-asl/rotors_simulator</url>
+  <url type="bugtracker">https://github.com/ethz-asl/rotors_simulator/issues</url> -->
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Dependencies needed after this package is compiled.
+  <exec_depend>rotors_comm</exec_depend>
+  <exec_depend>rotors_control</exec_depend>
+  <exec_depend>rotors_description</exec_depend>
+  <exec_depend>rotors_evaluation</exec_depend>
+  <exec_depend>rotors_gazebo</exec_depend>
+  <exec_depend>rotors_gazebo_plugins</exec_depend>
+  <exec_depend>rotors_joy_interface</exec_depend>
+  <exec_depend>rqt_rotors</exec_depend>
+  -->
+
+  <export>
+    <metapackage/>
+  </export>
+
+
+</package>

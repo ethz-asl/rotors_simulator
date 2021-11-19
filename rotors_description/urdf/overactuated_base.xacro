@@ -25,7 +25,7 @@
 
   <xacro:macro name="overactuated_base_macro"
     params="robot_namespace mass body_width body_height use_mesh_file mesh_file *inertia *inertia_origin">
-    <link name="${robot_namespace}/base_link"></link>
+    <link name="geranos/base_link"></link>
 
     <joint name="${robot_namespace}/base_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -60,6 +60,7 @@
       </collision>
     </link>
 
+ 
     <!-- attach multirotor_base_plugin to the base_link -->
     <gazebo>
       <plugin filename="librotors_gazebo_multirotor_base_plugin.so" name="multirotor_base_plugin">
@@ -69,12 +70,13 @@
       </plugin>
     </gazebo>
   </xacro:macro>
-
+  
   <!-- Tilting rotor unit link and joint. -->
   <xacro:macro name="single_tilt_unit"
     params="robot_namespace suffix direction motor_constant moment_constant parent mass_rotor mass_tilt_unit time_constant_up time_constant_down max_rot_velocity rotor_offset_top motor_number rotor_drag_coefficient rolling_moment_coefficient color mesh mesh_tilt_unit *origin *inertia">
 
     <!-- Rotor tilt_unit -->
+    <!--
     <joint name="${robot_namespace}/tilt_unit_${motor_number}_revolutejoint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="1 0 0" />
@@ -84,7 +86,7 @@
 
     <link name="${namespace}/tilt_unit_${motor_number}">
       <inertial>
-        <mass value="${mass_tilt_unit}" /> <!-- [kg] -->
+        <mass value="${mass_tilt_unit}" /> <! [kg] >
         <xacro:insert_block name="tilt_unit_inertia" />
       </inertial>
       <visual>
@@ -95,11 +97,11 @@
       </visual>
       <collision>
         <geometry>
-          <box size="0.005 0.005 0.005"  /> <!-- [m] -->
+          <box size="0.005 0.005 0.005"  /> <![m] >
         </geometry>
       </collision>
     </link>
-
+  -->
     <gazebo>
       <plugin name="${suffix}_tilt_unit_model" filename="librotors_gazebo_motor_model.so">
         <robotNamespace>${robot_namespace}</robotNamespace>
@@ -142,7 +144,7 @@
       </inertial>
       <visual>
         <geometry>
-          <mesh filename="package://rotors_description/meshes/${mesh}_${direction}.dae"
+          <mesh filename="package://rotors_description/meshes/omav/${mesh}_${direction}.dae"
             scale="${radius_rotor} ${radius_rotor} ${radius_rotor}" />
         </geometry>
       </visual>
@@ -207,6 +209,7 @@
       </collision>
     </link>
 
+    
     <gazebo>
       <plugin name="${suffix}_tilt_unit_model" filename="librotors_gazebo_motor_model.so">
         <robotNamespace>${robot_namespace}</robotNamespace>
@@ -229,7 +232,7 @@
         </joint_control_pid>
       </plugin>
     </gazebo>
-
+  
     <gazebo reference="${namespace}/tilt_unit_${motor_number}">
       <material>Gazebo/White</material>
     </gazebo>

@@ -1,38 +1,20 @@
 <?xml version="1.0"?>
-<!--
-  Copyright 2015 Fadri Furrer, ASL, ETH Zurich, Switzerland
-  Copyright 2015 Michael Burri, ASL, ETH Zurich, Switzerland
-  Copyright 2015 Mina Kamel, ASL, ETH Zurich, Switzerland
-  Copyright 2015 Janosch Nikolic, ASL, ETH Zurich, Switzerland
-  Copyright 2015 Markus Achtelik, ASL, ETH Zurich, Switzerland
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
 
 <robot name="$(arg mav_name)" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- Included URDF Files -->
   <xacro:include filename="$(find rotors_description)/urdf/overactuated_base.xacro"/>
 
-    <!-- Properties -->
+    <!-- Properties --> <!-- TODO-->
     <xacro:property name="namespace" value="$(arg namespace)"/>
     <xacro:property name="rotor_velocity_slowdown_sim" value="10"/>
     <xacro:property name="use_mesh_file_core" value="true"/>
     <xacro:property name="use_mesh_file_rotor_unit" value="true"/>
-    <xacro:property name="mesh_file_core" value="package://rotors_description/meshes/omav/omav_core.dae"/>
-    <xacro:property name="mesh_file_tilt_unit" value="package://rotors_description/meshes/omav/omav_tiltarm.dae"/>
+    <xacro:property name="mesh_file_core" value="package://rotors_description/meshes/omav/rotor_big.dae"/> <!-- geranos_m3-->
+    <xacro:property name="mesh_file_tilt_unit" value="package://rotors_description/meshes/omav/rotor_big.dae"/>
 
-    <xacro:property name="mass_core" value="2.30"/>    <!-- [kg] -->
+    <xacro:property name="mass_core" value="6"/>    <!-- [kg] -->
     <xacro:property name="mass_tilt_unit" value="0.277"/>    <!-- [kg] -->
     <xacro:property name="body_width" value="0.22"/>    <!-- [m] -->
     <xacro:property name="body_height" value="0.35"/>    <!-- [m] -->
@@ -61,7 +43,7 @@
     <xacro:property name="tilt_d_gain" value="0.1"/>
 
     <!-- Property Blocks -->
-    <xacro:property name="body_inertia">
+    <xacro:property name="body_inertia"> <!-- TODO-->
         <inertia ixx="0.0075" ixy="${-3.4208e-05}" ixz="${2.4695e-05}" iyy="0.010939" iyz="${-3.8826e-06}" izz="0.01369"/>
         <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
     </xacro:property>
@@ -71,18 +53,18 @@
       <origin xyz="0 0 0" />
     </xacro:property>
 
-    <!-- Rotor unit inertia without the propellor. -->
+    <!-- Rotor unit inertia without the propellor. --> <!-- TODO-->
     <xacro:property name="tilt_unit_inertia">
         <inertia ixx="0.00034257" ixy="0" ixz="0" iyy="0.0013205" iyz="0" izz="0.0010037"/>
         <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
     </xacro:property>
 
-    <!-- Inertia of a single rotor, assuming it is a cuboid. Height=3mm, width=15mm. -->
+    <!-- Inertia of a single rotor, assuming it is a cuboid. Height=3mm, width=15mm. --> <!-- TODO-->
     <xacro:property name="rotor_inertia">
         <xacro:box_inertia x="${radius_rotor}" y="0.020" z="0.003" mass="${mass_rotor*rotor_velocity_slowdown_sim}"/>
     </xacro:property>
 
-    <!-- Instantiate multirotor_base_macro once. -->
+    <!-- Instantiate multirotor_base_macro once. --> 
     <xacro:overactuated_base_macro
         robot_namespace="${namespace}"
         mass="${mass_core}"
@@ -91,7 +73,8 @@
         use_mesh_file="${use_mesh_file_core}"
         mesh_file="${mesh_file_core}">
         <xacro:insert_block name="body_inertia"/>
-        <xacro:insert_block name="body_inertia_origin"/>
+        <xacro:insert_block name="body_inertia_
+        origin"/>
     </xacro:overactuated_base_macro>
 
   <!-- Instantiate rotors -->

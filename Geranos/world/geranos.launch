@@ -1,0 +1,32 @@
+<launch>
+
+<node name="listener_node" pkg="hello_world" type="listener.py" output="screen"/>
+<node name="talker_node" pkg="hello_world" type="talker.py" output="screen"/>
+
+
+<!-- arg -->
+<arg name="world_name" default="basic"/> <!-- basic world is opened-->
+<arg name="enable_logging" default="false"/>
+<arg name="enable_ground_truth" default="true"/>
+<arg name="paused" value="false"/>
+
+
+<arg name="mav_name" default="hafenchraenli"/> <!-- mav oder uav?-->
+<arg name="log_file" default="$(arg mav_name)"/> 
+
+
+<!-- env (applies only to nodes declared after)-->
+
+
+<!-- inlclude files-->
+<include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
+    <arg name="debug" value="$(arg debug)" /> <!-- start gzserver in debug mode using gdb-->
+    <arg name="paused" value="$(arg paused)" /> <!-- start gazebo in paused state-->
+    <arg name="gui" value="$(arg gui)" /> <!-- launch user interface window of gazebo-->
+    <arg name="verbose" value="$(arg verbose)"/>
+<!-- use_sim_time, headless-->
+</include>
+
+
+<launch>
