@@ -57,7 +57,7 @@
         parent_frame_id="world"
         child_frame_id="${delta_namespace}/odometry_sensor_tool"
         mass_odometry_sensor="0.00001"
-        measurement_divisor="16"
+        measurement_divisor="2"
         measurement_delay="0.002"
         unknown_delay="0.0"
         noise_normal_position="0.0001 0.0001 0.0001"
