@@ -261,18 +261,6 @@
     </gazebo>
   </xacro:macro>
   
-  <!-- =============================================================== -->
-  <!-- ==================== ROS INTERFACE MACRO ====================== -->
-  <!-- =============================================================== -->
-  <!-- <xacro:macro 
-  		name="ros_interface_plugin_macro"
-  		params="namespace">
-    <gazebo>
-      <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so">
-        <robotNamespace>${namespace}</robotNamespace>
-      </plugin>
-    </gazebo>
-  </xacro:macro>-->
 
   <!-- =============================================================== -->
   <!-- ================== MAVLINK INTERFACE MACRO ==================== -->
