@@ -213,11 +213,11 @@ void GazeboForceSensorPlugin::OnUpdate(const common::UpdateInfo& _info) {
     wrench_msg_.header.stamp.nsec = (world_->SimTime()).nsec + ros::Duration(unknown_delay_).nsec;
 
     // HUUUUUUGE HACK. 
-    wrench_msg_.wrench.force.x  = -force[2];
-    wrench_msg_.wrench.force.y  = force[1];
+    wrench_msg_.wrench.force.x  = force[1];
+    wrench_msg_.wrench.force.y  = force[2];
     wrench_msg_.wrench.force.z  = force[0];
-    wrench_msg_.wrench.torque.x = -torque[2];
-    wrench_msg_.wrench.torque.y = torque[1];
+    wrench_msg_.wrench.torque.x = torque[1];
+    wrench_msg_.wrench.torque.y = torque[2];
     wrench_msg_.wrench.torque.z = torque[0];
 
     if (publish_forces)
