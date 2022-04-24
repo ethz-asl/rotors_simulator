@@ -62,8 +62,13 @@ Installation Instructions - Ubuntu 16.04 with ROS Kinetic
    $ cd ~/catkin_ws/
    $ catkin build
    ```
-
- 4. Add sourcing to your `.bashrc` file
+ 3.1. If you don't have `rotors_simulator`
+   
+   ``` 
+   $ cd ~/catkin_ws/src
+   $ git clone https://github.com/ethz-asl/rotors_simulator.git
+   ```
+4. Add sourcing to your `.bashrc` file
 
    ```
    $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
