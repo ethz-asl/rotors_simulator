@@ -69,7 +69,7 @@ Installation Instructions - Ubuntu 20.04 with ROS Noetic
    $ cd ~/catkin_ws/src
    $ git clone https://github.com/ethz-asl/rotors_simulator.git
    ```
-4. Add sourcing to your `.bashrc` file
+ 4. Add sourcing to your `.bashrc` file
 
    ```
    $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
