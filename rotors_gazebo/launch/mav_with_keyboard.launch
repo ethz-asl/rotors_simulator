@@ -23,8 +23,13 @@
       <arg name="log_file" value="$(arg log_file)"/>
     </include>
     <node name="key_joystick" pkg="rotors_joy_interface" type="key_joystick.py" />
-    <node name="joy_node" pkg="joy" type="joy_node" />
-    <node name="rotors_joy_interface" pkg="rotors_joy_interface" type="rotors_joy_interface" />
+        <!-- joy node -->
+      <node respawn="true" pkg="joy" type="joy_node" name="joy_node" >
+        <param name="dev" type="string" value="/dev/input/js1" />
+      </node>
+    <node name="rotors_joy_interface" pkg="rotors_joy_interface" type="rotors_joy_interface" output="screen">
+      <param name="axis_direction_thrust" value="-1" />
+    </node>
     <node name="roll_pitch_yawrate_thrust_controller_node" pkg="rotors_control" type="roll_pitch_yawrate_thrust_controller_node" output="screen">
       <rosparam
         command="load" file="$(find rotors_gazebo)/resource/roll_pitch_yawrate_thrust_controller_$(arg mav_name).yaml" />

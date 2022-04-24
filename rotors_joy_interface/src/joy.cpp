@@ -89,14 +89,17 @@ void Joy::JoyCallback(const sensor_msgs::JoyConstPtr& msg) {
   else {
     current_yaw_vel_ = 0;
   }
-  control_msg_.yaw_rate = current_yaw_vel_;
-
+  control_msg_.yaw_rate = msg->axes[3] * max_.rate_yaw ;
+ROS_INFO("hello world! %d", axes_.thrust_direction);
   if (is_fixed_wing_) {
     double thrust = msg->axes[axes_.thrust] * axes_.thrust_direction;
     control_msg_.thrust.x = (thrust >= 0.0) ? thrust : 0.0;
   }
   else {
-    control_msg_.thrust.z = (msg->axes[axes_.thrust] + 1) * max_.thrust / 2.0 * axes_.thrust_direction;
+    control_msg_.thrust.z = (msg->axes[axes_.thrust] * axes_.thrust_direction + 1) * max_.thrust / 2.0 ;
+    
+
+
   }
 
   ros::Time update_time = ros::Time::now();
