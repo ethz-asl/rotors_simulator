@@ -29,7 +29,7 @@ doi="10.1007/978-3-319-26054-9_23",
 url="http://dx.doi.org/10.1007/978-3-319-26054-9_23"
 }
 ```
-Installation Instructions - Ubuntu 16.04 with ROS Kinetic
+Installation Instructions - Ubuntu 20.04 with ROS Noetic
 ---------------------------------------------------------
  1. Install and initialize ROS kinetic desktop full, additional ROS packages, catkin-tools, and wstool:
 
@@ -49,6 +49,7 @@ Installation Instructions - Ubuntu 16.04 with ROS Kinetic
  $ cd ~/catkin_ws/src
  $ catkin_init_workspace  # initialize your catkin workspace
  $ wstool init
+ $ git clone https://github.com/ethz-asl/rotors_simulator.git
  $ wget https://raw.githubusercontent.com/ethz-asl/rotors_simulator/master/rotors_hil.rosinstall
  $ wstool merge rotors_hil.rosinstall
  $ wstool update
@@ -75,17 +76,15 @@ Installation Instructions - Ubuntu 16.04 with ROS Kinetic
    $ source ~/.bashrc
    ```
    
-Installation Instructions - Ubuntu 20.04 with ROS Noetic
+Installation Instructions - Ubuntu 16.04 with ROS Kinetic
 ---------------------------------------------------------
  1. Install and initialize ROS kinetic desktop full, additional ROS packages, catkin-tools, and wstool:
 
  ```
- $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
- $ sudo apt install curl # if you haven't already installed curl
- $ curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
- $ sudo apt update
- $ sudo apt install ros-noetic-desktop-full # install ros noetic
- $ sudo apt install ros-noetic-joy ros-noetic-octomap-ros ros-noetic-mavlink python3-wstool python3-catkin-tools protobuf-compiler libgoogle-glog-dev ros-noetic-control-toolbox ros-noetic-mavros # install Dependencies
+ $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
+ $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+ $ sudo apt-get update
+ $ sudo apt-get install ros-kinetic-desktop-full ros-kinetic-joy ros-kinetic-octomap-ros ros-kinetic-mavlink python-wstool python-catkin-tools protobuf-compiler libgoogle-glog-dev ros-kinetic-control-toolbox ros-kinetic-mavros
  $ sudo rosdep init
  $ rosdep update
  $ source /opt/ros/kinetic/setup.bash
@@ -97,7 +96,6 @@ Installation Instructions - Ubuntu 20.04 with ROS Noetic
  $ cd ~/catkin_ws/src
  $ catkin_init_workspace  # initialize your catkin workspace
  $ wstool init
- $ git clone https://github.com/ethz-asl/rotors_simulator.git
  $ wget https://raw.githubusercontent.com/ethz-asl/rotors_simulator/master/rotors_hil.rosinstall
  $ wstool merge rotors_hil.rosinstall
  $ wstool update
