@@ -9,7 +9,7 @@
     <xacro:property name="delta_start_index" default="12" />
 
     <joint name="mounting_joint" type="fixed">
-        <origin xyz="0 0 ${height_offset}" rpy="0.0 0.0 0.0"/>
+        <origin xyz="0 -0.01 -0.077" rpy="0.0 0.0 0.0"/>
         <parent link="${mounting_link}"/>
         <child link="${delta_namespace}/delta_base_link"/>
     </joint>
