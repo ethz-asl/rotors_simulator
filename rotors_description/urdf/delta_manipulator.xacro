@@ -4,9 +4,9 @@
     xmlns:xacro="http://ros.org/wiki/xacro">
     <xacro:include filename="$(find rotors_description)/urdf/delta_elements.xacro" />
     <xacro:property name="mounting_link" default="world" />
-    <xacro:property name="x_offset" default="-0.0015" />
-    <xacro:property name="y_offset" default="0.0101" />
-    <xacro:property name="z_offset" default="0.07735" />
+    <xacro:property name="x_offset" default="-0.0" />
+    <xacro:property name="y_offset" default="0.0" />
+    <xacro:property name="z_offset" default="0.070" />
     <xacro:property name="delta_namespace" default="${delta_namespace}" />
     <xacro:property name="delta_start_index" default="12" />
 
