@@ -6,7 +6,7 @@
     <xacro:property name="mounting_link" default="world" />
     <xacro:property name="x_offset" default="0.0" />
     <xacro:property name="y_offset" default="0.0" />
-    <xacro:property name="height_offset" default="-0.7" />
+    <xacro:property name="height_offset" default="-0.07" />
     <xacro:property name="delta_namespace" default="${delta_namespace}" />
     <xacro:property name="delta_start_index" default="12" />
 
