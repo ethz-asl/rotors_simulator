@@ -21,7 +21,7 @@
     <xacro:property name="link_distal_izz" value="${0.5*link_distal_mass*(link_distal_radius+link_distal_radius)}" /> 
 
     <xacro:property name="tool_plate_height" value="${0.01}" />
-    <xacro:property name="tool_plate_radius" value="${0.03}" />
+    <xacro:property name="tool_plate_radius" value="${0.038}" />
     <xacro:property name="tool_plate_mass" value="${0.0233}" /> 
     <xacro:property name="tool_plate_ixx" value="${0.833*tool_plate_mass*(3.0*tool_plate_radius*tool_plate_radius+tool_plate_height*tool_plate_height)}" />
     <xacro:property name="tool_plate_iyy" value="${tool_plate_ixx}" />
