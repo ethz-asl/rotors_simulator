@@ -8,12 +8,12 @@
     <xacro:property name="base_plate_height" value="${0.003}" />
     <xacro:property name="base_plate_mass" value="${0.25}" />
 
-    <xacro:property name="link_proximal_length" value="${0.1558227}" />
+    <xacro:property name="link_proximal_length" value="${0.156}" />
     <xacro:property name="link_proximal_width" value="${0.019}" />
     <xacro:property name="link_proximal_height" value="${0.010}" />
     <xacro:property name="link_proximal_mass" value="${0.041}" />
 
-    <xacro:property name="link_distal_length" value="${0.2430566}" />
+    <xacro:property name="link_distal_length" value="${0.24}" />
     <xacro:property name="link_distal_radius" value="${0.0024}" />
     <xacro:property name="link_distal_mass" value="${0.020}" /> 
     <xacro:property name="link_distal_ixx" value="${0.833*link_distal_mass*(3.0*link_distal_radius*link_distal_radius+link_distal_length*link_distal_length)}" /> 
