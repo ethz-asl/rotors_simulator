@@ -12,7 +12,7 @@
     <arg name="paused" value="false"/>
     <!-- <arg name="gui" value="false"/> -->
   </include>
-
+  <!-- fdgf -->
   <group ns="$(arg mav_name)1">
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
       <arg name="mav_name" value="$(arg mav_name)" />
