@@ -53,9 +53,15 @@
       </visual>
 
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0" />
+        <origin xyz="0 0 0.0" rpy="0 0 0" />
         <geometry>
-          <box size="${body_width} ${body_width} ${body_height}" /> <!-- [m] [m] [m] -->
+          <box size="${body_width} ${body_width} 0.2" /> <!-- [m] [m] [m] -->
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0 0 -0.23" rpy="0 0 0" />
+        <geometry>
+          <box size="0.35 0.35 0.01" /> <!-- [m] [m] [m] -->
         </geometry>
       </collision>
     </link>
