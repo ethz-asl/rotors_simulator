@@ -52,12 +52,12 @@
         </geometry>
       </visual>
 
-      <collision>
+      <!-- <collision>
         <origin xyz="0 0 0.0" rpy="0 0 0" />
         <geometry>
-          <box size="${body_width} ${body_width} 0.2" /> <!-- [m] [m] [m] -->
+          <box size="${body_width} ${body_width} 0.2" />
         </geometry>
-      </collision>
+      </collision> -->
       <collision>
         <origin xyz="0 0 -0.23" rpy="0 0 0" />
         <geometry>
