@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+
+<robot name="${robot_name}" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Relationship between the p, d gain and the closed-loop dynamics behaviour of the system:
+  It behaves like a second-order system in the frequency domain: Y(s) = U(s)*(ds + p)/(Is**2 + ds + p)
+  Y(s) is the Laplace transform of the actual tilt motor angle and U(s) is the one of the tilt motor angle command, p and d are the gains, I is the inertia of the link.
+  The pid gain set here corresponds to p = 1200, i = 1000, d =500 on the firmware.
+   -->
+
+<xacro:property name="delta_control_mode" value="$(arg delta_control_mode)" />
+<xacro:property name="servo_zero_offset" value="0.0" />
+
+<!-- cmd_min/max = 0 for unlimited -->
+<xacro:property name="servo_cmd_min" value="-100.0" />
+<xacro:property name="servo_cmd_max" value="100.0" />
+<xacro:property name="servo_i_min" value="-20.0" />
+<xacro:property name="servo_i_max" value="20.0" />
+
+<xacro:if value="${delta_control_mode == 'position'}">
+  <xacro:property name="p_gain_delta" value="5.0" />
+  <xacro:property name="i_gain_delta" value="0.1" />
+  <xacro:property name="d_gain_delta" value="1.0" />
+</xacro:if>
+
+<xacro:if value="${delta_control_mode == 'velocity'}">
+  <xacro:property name="p_gain_delta" value="0.1" />
+  <xacro:property name="i_gain_delta" value="0.0" />
+  <xacro:property name="d_gain_delta" value="0.0" />
+</xacro:if>
+
+<!-- effort gains not used, just for macro compatibility -->
+<xacro:if value="${delta_control_mode == 'effort'}">
+  <xacro:property name="p_gain_delta" value="0.5" />
+  <xacro:property name="i_gain_delta" value="0.01" />
+  <xacro:property name="d_gain_delta" value="0.1" />
+</xacro:if>
+
+  <!-- Add motors. -->
+  <gazebo>
+      <plugin name="delta_multimotor_plugin" filename="librotors_gazebo_multimotor_plugin.so">
+        <robotNamespace>${delta_namespace}</robotNamespace>
+        <servos>
+            <servo>
+              <jointName>${delta_namespace}/delta_joint_upper_0</jointName>
+              <spinDirection>cw</spinDirection>
+              <controlMode>${delta_control_mode}</controlMode>
+              <maxRotVelocity>${10}</maxRotVelocity>
+              <minRotPosition>${-pi}</minRotPosition>
+              <maxRotPosition>${pi}</maxRotPosition>
+              <zeroOffset>${servo_zero_offset}</zeroOffset>
+              <joint_control_pid>
+                  <p>${p_gain_delta}</p>
+                  <i>${i_gain_delta}</i>
+                  <d>${d_gain_delta}</d>
+                  <iMax>${servo_i_max}</iMax>
+                  <iMin>${servo_i_min}</iMin>
+                  <cmdMax>${servo_cmd_max}</cmdMax>
+                  <cmdMin>${servo_cmd_min}</cmdMin>
+              </joint_control_pid>
+            </servo>
+            <servo>
+              <jointName>${delta_namespace}/delta_joint_upper_1</jointName>
+              <spinDirection>cw</spinDirection>
+              <controlMode>${delta_control_mode}</controlMode>
+              <maxRotVelocity>${10}</maxRotVelocity>
+              <minRotPosition>${-pi}</minRotPosition>
+              <maxRotPosition>${pi}</maxRotPosition>
+              <zeroOffset>${servo_zero_offset}</zeroOffset>
+              <joint_control_pid>
+                  <p>${p_gain_delta}</p>
+                  <i>${i_gain_delta}</i>
+                  <d>${d_gain_delta}</d>
+                  <iMax>${servo_i_max}</iMax>
+                  <iMin>${servo_i_min}</iMin>
+                  <cmdMax>${servo_cmd_max}</cmdMax>
+                  <cmdMin>${servo_cmd_min}</cmdMin>
+              </joint_control_pid>
+            </servo>
+            <servo>
+              <jointName>${delta_namespace}/delta_joint_upper_2</jointName>
+              <spinDirection>cw</spinDirection>
+              <controlMode>${delta_control_mode}</controlMode>
+              <maxRotVelocity>${10}</maxRotVelocity>
+              <minRotPosition>${-pi}</minRotPosition>
+              <maxRotPosition>${pi}</maxRotPosition>
+              <zeroOffset>${servo_zero_offset}</zeroOffset>
+              <joint_control_pid>
+                  <p>${p_gain_delta}</p>
+                  <i>${i_gain_delta}</i>
+                  <d>${d_gain_delta}</d>
+                  <iMax>${servo_i_max}</iMax>
+                  <iMin>${servo_i_min}</iMin>
+                  <cmdMax>${servo_cmd_max}</cmdMax>
+                  <cmdMin>${servo_cmd_min}</cmdMin>
+              </joint_control_pid>
+            </servo>
+        </servos>
+
+      </plugin>
+  </gazebo>
+
+</robot>

@@ -1,0 +1,409 @@
+<?xml version="1.0"?>
+
+<robot name="${robot_name}" 
+    xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!-- Constant Parameters -->
+    <xacro:property name="base_plate_radius" value="${0.0743656}" />
+    <xacro:property name="base_plate_height" value="${0.003}" />
+    <xacro:property name="base_plate_mass" value="${0.25}" />
+
+    <xacro:property name="link_proximal_length" value="${0.1558227}" />
+    <xacro:property name="link_proximal_width" value="${0.019}" />
+    <xacro:property name="link_proximal_height" value="${0.010}" />
+    <xacro:property name="link_proximal_mass" value="${0.041}" />
+
+    <xacro:property name="link_distal_length" value="${0.2430566}" />
+    <xacro:property name="link_distal_radius" value="${0.0024}" />
+    <xacro:property name="link_distal_mass" value="${0.020}" /> 
+    <xacro:property name="link_distal_ixx" value="${0.833*link_distal_mass*(3.0*link_distal_radius*link_distal_radius+link_distal_length*link_distal_length)}" /> 
+    <xacro:property name="link_distal_iyy" value="${link_distal_ixx}" /> 
+    <xacro:property name="link_distal_izz" value="${0.5*link_distal_mass*(link_distal_radius+link_distal_radius)}" /> 
+
+    <xacro:property name="tool_plate_height" value="${0.01}" />
+    <xacro:property name="tool_plate_radius" value="${0.03}" />
+    <xacro:property name="tool_plate_mass" value="${0.0233}" /> 
+    <xacro:property name="tool_plate_ixx" value="${0.833*tool_plate_mass*(3.0*tool_plate_radius*tool_plate_radius+tool_plate_height*tool_plate_height)}" />
+    <xacro:property name="tool_plate_iyy" value="${tool_plate_ixx}" />
+    <xacro:property name="tool_plate_izz" value="${0.5*tool_plate_mass*(tool_plate_radius+tool_plate_radius)}" />
+
+    <xacro:property name="damping" value="0.001" />
+    <xacro:property name="static_friction" value="0.001" />
+    <xacro:property name="delta_p_gain" value="1.0" />
+    <xacro:property name="delta_i_gain" value="0.0" />
+    <xacro:property name="delta_d_gain" value="0.1" />
+
+    <xacro:property name="height_offset" default="0.0" />
+    <xacro:property name="angle_offset" value="-0.9824450951" />
+
+    <xacro:macro name="cuboid_inertia" params="mass length width height">
+        <mass value="${mass}"/>
+        <inertia 
+            ixx="${0.833*mass*(width*width+height*height)}" ixy="0.0" ixz="0.0" 
+            iyy="${0.833*mass*(length*length+height*height)}" iyz="0.0" 
+            izz="${0.833*mass*(width*width+length*length)}" />
+    </xacro:macro>
+
+    <!-- solid cylinder : Izz=(m*r^2)/2; Ixx=Iyy=1/12*m*(3*r^2+h^2) -->
+    <xacro:macro name="cylinder_inertia" params="mass radius height">
+        <mass value="${mass}"/>
+        <inertia 
+            ixx="${0.833*mass*(3.0*radius*radius+height*height)}" ixy="0.0" ixz="0.0" 
+            iyy="${0.833*mass*(3.0*radius*radius+height*height)}" iyz="0.0" 
+            izz="${0.5*mass*(radius+radius)}" />
+    </xacro:macro>
+
+    <!-- 
+        ################################
+        Inertial and Geometry Properties 
+        ################################
+    -->
+    <xacro:property name="base_plate_origin">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:property>
+    <xacro:property name="base_plate_inertia">
+        <xacro:cylinder_inertia 
+            mass="${base_plate_mass}" 
+            radius="${base_plate_radius}" 
+            height="${base_plate_height}"/>
+    </xacro:property>
+    <xacro:property name="base_plate_geometry">
+        <geometry>
+            <cylinder radius="${base_plate_radius}" length="${base_plate_height}"/>
+        </geometry>
+    </xacro:property>
+
+    <xacro:property name="link_proximal_origin">
+        <origin xyz="${link_proximal_length/2} 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </xacro:property>
+    <xacro:property name="link_proximal_inertia">
+        <xacro:cuboid_inertia 
+            mass="${link_proximal_mass}" 
+            length="${link_proximal_length}" 
+            width="${link_proximal_width}" 
+            height="${link_proximal_height}"/>
+    </xacro:property>
+    <xacro:property name="link_proximal_geometry">
+        <geometry>
+            <box size="${link_proximal_length} ${link_proximal_width} ${link_proximal_height}"/>
+        </geometry>
+    </xacro:property>
+
+    <xacro:property name="link_distal_origin">
+        <pose frame=''>0 0 ${link_distal_length/2} 0 0 0</pose>
+    </xacro:property>
+    <xacro:property name="link_distal_inertia">
+        <mass>${link_distal_mass}</mass>
+        <inertia>
+            <ixx>${link_distal_ixx}</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>${link_distal_iyy}</iyy>
+            <iyz>0</iyz>
+            <izz>${link_distal_izz}</izz>
+        </inertia>
+    </xacro:property>
+    <xacro:property name="link_distal_geometry">
+        <geometry>
+            <cylinder>
+                <length>${link_distal_length}</length>
+                <radius>${link_distal_radius}</radius>
+            </cylinder>
+        </geometry>
+    </xacro:property>
+
+    <xacro:property name="tool_plate_origin">
+        <pose frame=''>${-tool_plate_radius} ${link_proximal_width/2} 0 0 0 0</pose>
+    </xacro:property>
+    <xacro:property name="tool_plate_inertia">
+        <mass>${tool_plate_mass}</mass>
+        <inertia>
+            <ixx>${tool_plate_ixx}</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>${tool_plate_iyy}</iyy>
+            <iyz>0</iyz>
+            <izz>${tool_plate_izz}</izz>
+        </inertia>
+    </xacro:property>
+    <xacro:property name="tool_plate_geometry">
+        <geometry>
+            <cylinder>
+                <length>${tool_plate_height}</length>
+                <radius>${tool_plate_radius}</radius>
+            </cylinder>
+        </geometry>
+    </xacro:property>
+
+    <!-- 
+        ################################
+                  Link Macros 
+        ################################
+    -->
+    <!-- Base Plate Link Macro -->
+    <xacro:macro name="base_plate_macro">
+        <link name="${delta_namespace}/delta_base_link">
+<!--             <visual>
+                <xacro:insert_block name="base_plate_origin"/>
+                <xacro:insert_block name="base_plate_geometry"/>
+            </visual> -->
+<!--             <collision>
+                <xacro:insert_block name="base_plate_origin"/>
+                <xacro:insert_block name="base_plate_geometry"/>
+            </collision> -->
+            <inertial>
+                <xacro:insert_block name="base_plate_origin"/>
+                <xacro:insert_block name="base_plate_inertia"/>
+            </inertial>
+        </link>
+    </xacro:macro>
+
+    <!-- Proximal Link Macro -->
+    <xacro:macro name="link1_macro" params="suffix">
+        <link name="${delta_namespace}/delta_link1_${suffix}">
+            <visual>
+                <xacro:insert_block name="link_proximal_origin"/>
+                <xacro:insert_block name="link_proximal_geometry"/>
+            </visual>
+            <collision>
+                <xacro:insert_block name="link_proximal_origin"/>
+                <xacro:insert_block name="link_proximal_geometry"/>
+            </collision>
+            <inertial>
+                <xacro:insert_block name="link_proximal_origin"/>
+                <xacro:insert_block name="link_proximal_inertia"/>
+            </inertial>
+        </link>
+    </xacro:macro>
+
+    <!-- Distal Link Macros -->
+    <xacro:macro name="link2_right_macro" params="suffix base_angle">
+        <gazebo>
+            <link name="${delta_namespace}/delta_link2_right_${suffix}">
+                <pose>
+                ${(tool_plate_radius-link_distal_length*sin(angle_offset))*cos(base_angle)+(link_proximal_width/2)*sin(base_angle)} 
+                ${(tool_plate_radius-link_distal_length*sin(angle_offset))*sin(base_angle)+(-link_proximal_width/2)*cos(base_angle)} 
+                ${height_offset} 0 ${angle_offset} ${base_angle}</pose>
+                <visual name='link2_right_${suffix}_visual'>
+                    <xacro:insert_block name="link_distal_origin"/>
+                    <xacro:insert_block name="link_distal_geometry"/>
+                </visual>
+                <collision name='link2_right_${suffix}_collision'>
+                    <xacro:insert_block name="link_distal_origin"/>
+                    <xacro:insert_block name="link_distal_geometry"/>
+                </collision>
+                <inertial>
+                    <xacro:insert_block name="link_distal_origin"/>
+                    <xacro:insert_block name="link_distal_inertia"/>
+                </inertial>
+            </link>
+        </gazebo>
+    </xacro:macro>
+
+    <xacro:macro name="link2_left_macro" params="suffix base_angle">
+        <gazebo>
+            <link name="${delta_namespace}/delta_link2_left_${suffix}">
+                <pose>
+                ${(tool_plate_radius-link_distal_length*sin(angle_offset))*cos(base_angle)+(-link_proximal_width/2)*sin(base_angle)} 
+                ${(tool_plate_radius-link_distal_length*sin(angle_offset))*sin(base_angle)+(link_proximal_width/2)*cos(base_angle)} 
+                ${height_offset} 0 ${angle_offset} ${base_angle}</pose>
+                <visual name='link2_left_${suffix}_visual'>
+                    <xacro:insert_block name="link_distal_origin"/>
+                    <xacro:insert_block name="link_distal_geometry"/>
+                </visual>
+                <collision name='link2_left_${suffix}_collision'>
+                    <xacro:insert_block name="link_distal_origin"/>
+                    <xacro:insert_block name="link_distal_geometry"/>
+                </collision>
+                <inertial>
+                    <xacro:insert_block name="link_distal_origin"/>
+                    <xacro:insert_block name="link_distal_inertia"/>
+                </inertial>
+            </link>
+        </gazebo>
+    </xacro:macro>
+
+    <!-- Tool Plate Link Macro -->
+    <xacro:macro name="tool_plate_macro">
+        <gazebo>
+            <link name='${delta_namespace}/delta_tool_plate'>
+                <pose>${tool_plate_radius} 
+                    ${-link_proximal_width/2} 
+                    ${-link_proximal_length*sin(angle_offset)+base_plate_height/2+tool_plate_height/2+height_offset} 
+                    0 0 0</pose>
+                <visual name='tool_plate_visual'>
+                    <xacro:insert_block name="tool_plate_origin"/>
+                    <xacro:insert_block name="tool_plate_geometry"/>
+                </visual>
+                <collision name='tool_plate_collision'>
+                    <xacro:insert_block name="tool_plate_origin"/>
+                    <xacro:insert_block name="tool_plate_geometry"/>
+                </collision>
+                <inertial>
+                    <xacro:insert_block name="tool_plate_origin"/>
+                    <xacro:insert_block name="tool_plate_inertia"/>
+                </inertial>
+            </link>
+        </gazebo>
+    </xacro:macro>
+
+    <!-- 
+        ################################
+                  Joint Macros 
+        ################################
+    -->
+    <xacro:macro name="shoulder_joint_macro" params="suffix base_angle motor_start_index">
+        <joint name="${delta_namespace}/delta_joint_upper_${suffix}" type="continuous">
+            <parent link="${delta_namespace}/delta_base_link"/>
+            <child link="${delta_namespace}/delta_link1_${suffix}"/>
+            <origin xyz="${base_plate_radius*cos(base_angle)} ${base_plate_radius*sin(base_angle)} 0.0" rpy="0.0 0.0 ${base_angle}"/>
+            <axis xyz="0.0 1.0 0.0"/>
+            <limit lower="${-pi/2}" upper="${pi/2}" effort="10.0" velocity="5.0"/>
+            <safety_controller k_velocity="0.5"/>
+            <dynamics damping="${damping}" friction="${static_friction}" />
+        </joint>
+
+<!--         <gazebo>
+          <plugin name="delta_${suffix}_motor_model" filename="librotors_gazebo_motor_model.so">
+            <robotNamespace>${delta_namespace}</robotNamespace>
+            <jointName>${delta_namespace}/delta_joint_upper_${suffix}</jointName>
+            <linkName>${delta_namespace}/delta_link1_${suffix}</linkName>
+            <turningDirection>ccw</turningDirection>
+            <motorType>position</motorType>
+            <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
+            <motorNumber>${suffix+motor_start_index}</motorNumber>
+            <motorSpeedPubTopic>/delta_motor_${suffix}/velocity</motorSpeedPubTopic>
+            <motorPositionPubTopic>/delta_motor_${suffix}/position</motorPositionPubTopic>
+            <joint_control_pid>
+                <p>${delta_p_gain}</p>
+                <i>${delta_i_gain}</i>
+                <d>${delta_d_gain}</d>
+                <iMax>1.0</iMax>
+                <iMin>-1.0</iMin>
+                <cmdMax>2.0</cmdMax>
+                <cmdMin>-2.0</cmdMin>
+            </joint_control_pid>
+          </plugin>
+        </gazebo> -->
+    </xacro:macro>
+
+    <xacro:macro name="universal_middle_joint_macro" params="type suffix base_angle">
+        <gazebo>
+            <joint name='${delta_namespace}/delta_joint_middle_${type}_${suffix}' type='universal'>
+                <child>${delta_namespace}/delta_link2_${type}_${suffix}</child>
+                <parent>${delta_namespace}/delta_link1_${suffix}</parent>
+                <axis>
+                    <xyz>${-sin(base_angle)} ${cos(base_angle)} 0</xyz>
+                    <limit>
+                        <lower>-1e+16</lower>
+                        <upper>1e+16</upper>
+                    </limit>
+                    <dynamics>
+                        <damping>${damping}</damping>
+                        <friction>${static_friction}</friction>
+                        <spring_reference>0</spring_reference>
+                        <spring_stiffness>0</spring_stiffness>
+                    </dynamics>
+                    <use_parent_model_frame>1</use_parent_model_frame>
+                </axis>
+            </joint>
+        </gazebo>
+    </xacro:macro>
+
+    <xacro:macro name="universal_lower_joint_macro" params="type suffix base_angle">
+        <gazebo>
+            <joint name='${delta_namespace}/delta_joint_lower_${type}_${suffix}' type='universal'>
+                <child>${delta_namespace}/delta_link2_${type}_${suffix}</child>
+                <parent>${delta_namespace}/delta_tool_plate</parent>
+                <pose>0 0 ${link_distal_length} 0 0 0</pose>
+                <axis>
+                    <xyz>${-sin(base_angle)} ${cos(base_angle)} 0</xyz>
+                    <limit>
+                        <lower>-1e+16</lower>
+                        <upper>1e+16</upper>
+                    </limit>
+                    <dynamics>
+                        <damping>${damping}</damping>
+                        <friction>${static_friction}</friction>
+                        <spring_reference>0</spring_reference>
+                        <spring_stiffness>0</spring_stiffness>
+                    </dynamics>
+                    <use_parent_model_frame>1</use_parent_model_frame>
+                </axis>
+            </joint>
+        </gazebo>
+    </xacro:macro>
+
+     <!-- Macro to add a generic odometry sensor. -->
+  <xacro:macro name="odometry_plugin_gz_macro"
+    params="
+      namespace odometry_sensor_suffix parent_link pose_topic pose_with_covariance_topic
+      position_topic transform_topic odometry_topic parent_frame_id child_frame_id
+      mass_odometry_sensor measurement_divisor measurement_delay unknown_delay
+      noise_normal_position noise_normal_quaternion noise_normal_linear_velocity
+      noise_normal_angular_velocity noise_uniform_position
+      noise_uniform_quaternion noise_uniform_linear_velocity
+      noise_uniform_angular_velocity">
+    <gazebo>
+    <!-- odometry link -->
+    <link name="${delta_namespace}/odometry_sensor_${odometry_sensor_suffix}_link">
+        <pose>0 0 ${-link_proximal_length*sin(angle_offset)+base_plate_height/2+tool_plate_height/2+height_offset} 0 0 0</pose>
+        <inertial>
+            <pose frame=''>0 0 0 0 0 0</pose>
+            <mass>${mass_odometry_sensor}</mass>
+            <inertia>
+                <ixx>${mass_odometry_sensor}</ixx>
+                <ixy>0</ixy>
+                <ixz>0</ixz>
+                <iyy>${mass_odometry_sensor}</iyy>
+                <iyz>0</iyz>
+                <izz>${mass_odometry_sensor}</izz>
+            </inertia>
+        </inertial>
+    </link>
+    <!-- odometry joint -->
+    <joint name="${delta_namespace}/odometry_sensor${odometry_sensor_suffix}_joint" type="revolute">
+      <parent> ${parent_link} </parent>
+      <child> ${delta_namespace}/odometry_sensor_${odometry_sensor_suffix}_link </child>
+      <pose>0 0 0 0 0 0</pose>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+            <lower>0</lower>
+            <upper>0</upper>
+        </limit>
+        <dynamics>
+            <damping>${damping}</damping>
+            <friction>${static_friction}</friction>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+    </axis>
+    </joint>
+      <plugin filename="librotors_gazebo_odometry_plugin.so" name="odometry_sensor_${odometry_sensor_suffix}">
+        <linkName>${delta_namespace}/odometry_sensor_${odometry_sensor_suffix}_link</linkName>
+        <robotNamespace>${delta_namespace}</robotNamespace>
+        <poseTopic>${pose_topic}</poseTopic>
+        <poseWithCovarianceTopic>${pose_with_covariance_topic}</poseWithCovarianceTopic>
+        <positionTopic>${position_topic}</positionTopic>
+        <transformTopic>${transform_topic}</transformTopic>
+        <odometryTopic>${odometry_topic}</odometryTopic>
+        <parentFrameId>${parent_frame_id}</parentFrameId> <!-- Use the scoped link name here. e.g. Model::link. -->
+        <childFrameId>${child_frame_id}</childFrameId>
+        <measurementDivisor>${measurement_divisor}</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
+        <measurementDelay>${measurement_delay}</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
+        <unknownDelay>${unknown_delay}</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
+        <noiseNormalPosition>${noise_normal_position}</noiseNormalPosition> <!-- standard deviation of additive white gaussian noise [m] -->
+        <noiseNormalQuaternion>${noise_normal_quaternion}</noiseNormalQuaternion> <!-- standard deviation white gaussian noise [rad]: q_m = q*quaternionFromSmallAngleApproximation(noiseNormalQ) -->
+        <noiseNormalLinearVelocity>${noise_normal_linear_velocity}</noiseNormalLinearVelocity> <!-- standard deviation of additive white gaussian noise [m/s] -->
+        <noiseNormalAngularVelocity>${noise_normal_angular_velocity}</noiseNormalAngularVelocity> <!-- standard deviation of additive white gaussian noise [rad/s] -->
+        <noiseUniformPosition>${noise_uniform_position}</noiseUniformPosition> <!-- symmetric bounds of uniform noise [m] -->
+        <noiseUniformQuaternion>${noise_uniform_quaternion}</noiseUniformQuaternion> <!-- symmetric bounds of uniform noise [rad], computation see above -->
+        <noiseUniformLinearVelocity>${noise_uniform_linear_velocity}</noiseUniformLinearVelocity> <!-- symmetric bounds of uniform noise [m/s] -->
+        <noiseUniformAngularVelocity>${noise_uniform_angular_velocity}</noiseUniformAngularVelocity> <!-- symmetric bounds of uniform noise [rad/s] -->
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
+</robot>
