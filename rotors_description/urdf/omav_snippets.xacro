@@ -24,7 +24,7 @@
   <xacro:include filename="$(find rotors_description)/urdf/multirotor_base.xacro"/>
 
   <xacro:macro name="omav_base_macro"
-    params="robot_namespace mass body_width body_height use_mesh_file mesh_file collision_mesh_file *origin *inertia *inertia_origin">
+    params="robot_namespace mass body_width body_height use_mesh_file mesh_file use_collision_mesh_file collision_mesh_file *origin *inertia *inertia_origin">
     <link name="${robot_namespace}/base_link"></link>
 
     <joint name="${robot_namespace}/base_joint" type="fixed">
@@ -55,10 +55,10 @@
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <xacro:if value="${use_mesh_file}">
+          <xacro:if value="${use_collision_mesh_file}">
             <mesh filename="${collision_mesh_file}" scale="1 1 1" />
           </xacro:if>
-          <xacro:unless value="${use_mesh_file}">
+          <xacro:unless value="${use_collision_mesh_file}">
             <box size="${body_width} ${body_width} ${body_height}"/> <!-- [m] [m] [m] -->
           </xacro:unless>
         </geometry>
