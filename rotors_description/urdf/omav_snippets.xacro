@@ -41,10 +41,12 @@
       </inertial>
 
       <visual>
-        <origin xyz="0 0 0" rpy="0 0 0" />
+        <!-- <origin xyz="0.21 0 -0.08" rpy="0 0 0" /> -->
+        <origin xyz="0.21 0 -0.08" rpy="0 0 0" />
         <geometry>
           <xacro:if value="${use_mesh_file}">
-            <mesh filename="${mesh_file}" scale="1 1 1" />
+            <!-- <mesh filename="${mesh_file}" scale="0.11 0.11 0.11" /> -->
+            <mesh filename="${mesh_file}" scale="0.11 0.11 0.11" />
           </xacro:if>
           <xacro:unless value="${use_mesh_file}">
             <box size="${body_width} ${body_width} ${body_height}"/> <!-- [m] [m] [m] -->
@@ -53,10 +55,10 @@
       </visual>
 
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0" />
+        <origin xyz="0.21 0 -0.08" rpy="0 0 0" />
         <geometry>
           <xacro:if value="${use_collision_mesh_file}">
-            <mesh filename="${collision_mesh_file}" scale="1 1 1" />
+            <mesh filename="${collision_mesh_file}" scale="0.11 0.11 0.11" />
           </xacro:if>
           <xacro:unless value="${use_collision_mesh_file}">
             <box size="${body_width} ${body_width} ${body_height}"/> <!-- [m] [m] [m] -->
