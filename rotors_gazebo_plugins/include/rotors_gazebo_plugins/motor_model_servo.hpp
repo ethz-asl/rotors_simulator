@@ -25,10 +25,14 @@
 #include <Eigen/Core>
 #include <boost/bind.hpp>
 #include <gazebo/physics/physics.hh>
+#include <torch/torch.h>
+#include <torch/script.h>
 
 // USER
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/motor_model.hpp"
+
+#define POSITION_HISTORY_LENGTH 8
 
 enum class ControlMode { kVelocity, kPosition, kEffort };
 
@@ -48,6 +52,14 @@ class MotorModelServo : public MotorModel {
     motor_ = _motor;
     joint_ = _model->GetJoint(motor_->GetElement("jointName")->Get<std::string>());
     InitializeParams();
+
+    // Init model and position error history array
+    try {
+      policy2_ = torch::jit::load("/root/catkin_ws/src/rotors_simulator/rotors_description/models/T_a.pt");
+    } catch (const c10::Error& e){
+      std::cerr << " Error loading the model\n";
+    }
+    std::cout << "model loaded ok\n";
   }
 
   virtual ~MotorModelServo() {}
@@ -65,6 +77,9 @@ class MotorModelServo : public MotorModel {
   physics::JointControllerPtr joint_controller_;
   sdf::ElementPtr motor_;
   physics::JointPtr joint_;
+
+  float pos_err_hist_ [POSITION_HISTORY_LENGTH] = { 0 };
+  float torque_;
 
   void InitializeParams() {
     // Check motor type.
@@ -156,17 +171,48 @@ class MotorModelServo : public MotorModel {
     return wrapped;
   }
 
+  float GetSiesta(){
+    // Prepare inputs
+    torch::Tensor model_input = torch::zeros({1, POSITION_HISTORY_LENGTH});
+    for(int i = 0; i < POSITION_HISTORY_LENGTH; i++){
+        model_input[0].index_put_({i}, pos_err_hist_[i]);
+    }
+    std::vector<torch::jit::IValue> input;
+    input.push_back(model_input);
+
+    //std::cout << input << std::endl;
+
+    // Compute output
+    try {
+      torch::Tensor model_output = policy2_.forward(input).toTensor();
+    } catch (const c10::Error& e){
+      std::cerr << " Error forward pass\n";
+    }
+
+    // Return torque
+    return 0; // model_output[0].item<float>();
+  }
+
   void UpdateForcesAndMoments() {
     motor_rot_pos_ = turning_direction_ * joint_->Position(0);
     motor_rot_vel_ = turning_direction_ * joint_->GetVelocity(0);
     motor_rot_effort_ = turning_direction_ * joint_->GetForce(0);
 
+    // Update position error history
+    // shift all elements
+    for(int i = POSITION_HISTORY_LENGTH-1; i > 0; i--){
+      pos_err_hist_[i] = pos_err_hist_[i-1];
+    }
+    pos_err_hist_[0] = ref_motor_rot_pos_-motor_rot_pos_;
+    torque_ = GetSiesta();
+
+    //printf("Force: %f\n",torque_);
+
     switch (mode_) {
       case (ControlMode::kPosition): {
         if (!std::isnan(ref_motor_rot_pos_)) {
-          joint_controller_->SetPositionTarget(joint_->GetScopedName(),
-                                               turning_direction_ * ref_motor_rot_pos_);
-          joint_controller_->Update();
+          joint_controller_->SetForce(joint_->GetScopedName(),
+                           torque_);
         }
         break;
       }
@@ -190,6 +236,10 @@ class MotorModelServo : public MotorModel {
       default: {}
     }
   }
+
+ private:
+  torch::jit::script::Module policy2_;
+
 };
 
 }  // namespace gazebo

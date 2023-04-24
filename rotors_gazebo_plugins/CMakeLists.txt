@@ -559,4 +559,26 @@ install(
   LIBRARY DESTINATION ${LIB_DESTINATION}
 )
 
+
+set(CMAKE_PREFIX_PATH "/root/catkin_ws/src/libtorch;/opt/ros/noetic")
+
+find_package(Torch REQUIRED)
+if(Torch_FOUND)
+message(WARNING "Torch FOUND, building torch modules.")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+else()
+message(WARNING "Torch NOT FOUND, skipping torch modules.")
+endif()
+set(CMAKE_BUILD_TYPE Release)
+#add_definitions(-std=c++11 -fPIC -Wall -Wno-reorder -Wno-unknown-pragmas)
+
+if(Torch_FOUND)
+target_link_libraries(rotors_gazebo_multirotor_base_plugin "${TORCH_LIBRARIES}") 
+#SET_TARGET_PROPERTIES(rotors_gazebo_multirotor_base_plugin PROPERTIES CXX_STANDARD 14)
+target_link_libraries(rotors_gazebo_motor_model "${TORCH_LIBRARIES}") 
+#SET_TARGET_PROPERTIES(rotors_gazebo_motor_model PROPERTIES CXX_STANDARD 14)
+target_link_libraries(rotors_gazebo_multimotor_plugin "${TORCH_LIBRARIES}") 
+#SET_TARGET_PROPERTIES(rotors_gazebo_multimotor_plugin PROPERTIES CXX_STANDARD 14)
+endif()
+
 #message(FATAL_ERROR "Reached EOF.")
