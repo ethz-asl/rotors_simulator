@@ -55,7 +55,7 @@ class MotorModelServo : public MotorModel {
 
     // Init model and position error history array
     try {
-      policy2_ = torch::jit::load("/root/catkin_ws/src/rotors_simulator/rotors_description/models/T_a.pt");
+      policy_ = torch::jit::load("/root/catkin_ws/src/rotors_simulator/rotors_description/models/T_a.pt");
     } catch (const c10::Error& e){
       std::cerr << " Error loading the model\n";
     }
@@ -78,7 +78,13 @@ class MotorModelServo : public MotorModel {
   sdf::ElementPtr motor_;
   physics::JointPtr joint_;
 
-  float pos_err_hist_ [POSITION_HISTORY_LENGTH] = { 0 };
+  std::vector<float> pos_err_hist_ = {0,0,0,0,0,0,0,0};
+  torch::jit::script::Module policy_;
+  at::TensorOptions tensor_options_ = torch::TensorOptions().dtype(torch::kFloat32);
+  at::Tensor input_tensor_;
+  at::Tensor output_tensor_;
+  std::vector<torch::jit::IValue> input_vect_;
+
   float torque_;
 
   void InitializeParams() {
@@ -172,25 +178,7 @@ class MotorModelServo : public MotorModel {
   }
 
   float GetSiesta(){
-    // Prepare inputs
-    torch::Tensor model_input = torch::zeros({1, POSITION_HISTORY_LENGTH});
-    for(int i = 0; i < POSITION_HISTORY_LENGTH; i++){
-        model_input[0].index_put_({i}, pos_err_hist_[i]);
-    }
-    std::vector<torch::jit::IValue> input;
-    input.push_back(model_input);
-
-    //std::cout << input << std::endl;
-
-    // Compute output
-    try {
-      torch::Tensor model_output = policy2_.forward(input).toTensor();
-    } catch (const c10::Error& e){
-      std::cerr << " Error forward pass\n";
-    }
-
-    // Return torque
-    return 0; // model_output[0].item<float>();
+    return 0;
   }
 
   void UpdateForcesAndMoments() {
@@ -199,14 +187,19 @@ class MotorModelServo : public MotorModel {
     motor_rot_effort_ = turning_direction_ * joint_->GetForce(0);
 
     // Update position error history
-    // shift all elements
-    for(int i = POSITION_HISTORY_LENGTH-1; i > 0; i--){
-      pos_err_hist_[i] = pos_err_hist_[i-1];
-    }
-    pos_err_hist_[0] = ref_motor_rot_pos_-motor_rot_pos_;
-    torque_ = GetSiesta();
+    pos_err_hist_.push_back(ref_motor_rot_pos_-motor_rot_pos_);
+    pos_err_hist_.erase(pos_err_hist_.begin());
 
-    //printf("Force: %f\n",torque_);
+    // Prepare input tensor
+    input_tensor_ = torch::from_blob(pos_err_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
+    input_vect_.push_back(input_tensor_);
+
+    std::cout << input_vect_ << std::endl;
+
+    // Compute forward pass
+    output_tensor_ = policy_.forward(input_vect_).toTensor();
+    torque_ = output_tensor_[0].item<float>();
+    printf("Force: %f\n",torque_);
 
     switch (mode_) {
       case (ControlMode::kPosition): {
@@ -238,7 +231,7 @@ class MotorModelServo : public MotorModel {
   }
 
  private:
-  torch::jit::script::Module policy2_;
+
 
 };
 
