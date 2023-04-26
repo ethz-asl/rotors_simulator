@@ -25,8 +25,10 @@
 #include <Eigen/Core>
 #include <boost/bind.hpp>
 #include <gazebo/physics/physics.hh>
-#include <torch/torch.h>
 #include <torch/script.h>
+#include <torch/torch.h>
+
+#include "onnxruntime_cxx_api.h"
 
 // USER
 #include "rotors_gazebo_plugins/common.h"
@@ -55,11 +57,52 @@ class MotorModelServo : public MotorModel {
 
     // Init model and position error history array
     try {
-      policy_ = torch::jit::load("/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/T_a.pt");
-    } catch (const c10::Error& e){
+      policy_ = torch::jit::load(
+          "/home/eugenio/catkin_ws/src/rotors_simulator/rotors_description/models/T_a.pt");
+    } catch (const c10::Error& e) {
       std::cerr << " Error loading the model\n";
     }
     std::cout << "model loaded ok\n";
+
+    // Ort::Env env;
+    // const char* model_path =
+    //     "/home/eugenio/catkin_ws/src/rotors_simulator/rotors_description/models/T_a.onnx";
+    // Ort::SessionOptions session_options;
+    // Ort::Session session = Ort::Session(env, model_path, session_options);
+
+    // const size_t num_input_nodes = session.GetInputCount();
+    // std::vector<Ort::AllocatedStringPtr> input_names_ptr;
+    // std::vector<const char*> input_node_names;
+    // input_names_ptr.reserve(num_input_nodes);
+    // input_node_names.reserve(num_input_nodes);
+    // std::vector<int64_t> input_node_dims;  // simplify... this model has only 1 input node {1, 3,
+    //                                        // 224, 224}. Otherwise need vector<vector<>>
+
+    // std::cout << "Number of inputs = " << num_input_nodes << std::endl;
+    // Ort::AllocatorWithDefaultOptions allocator;
+    // // iterate over all input nodes
+    // for (size_t i = 0; i < num_input_nodes; i++) {
+    //   // print input node names
+    //   auto input_name = session.GetInputNameAllocated(i, allocator);
+    //   std::cout << "Input " << i << " : name =" << input_name.get() << std::endl;
+    //   input_node_names.push_back(input_name.get());
+    //   input_names_ptr.push_back(std::move(input_name));
+
+    //   // print input node types
+    //   auto type_info = session.GetInputTypeInfo(i);
+    //   auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
+
+    //   ONNXTensorElementDataType type = tensor_info.GetElementType();
+    //   std::cout << "Input " << i << " : type = " << type << std::endl;
+
+    //   // print input shapes/dims
+    //   input_node_dims = tensor_info.GetShape();
+    //   std::cout << "Input " << i << " : num_dims = " << input_node_dims.size() << '\n';
+    //   for (size_t j = 0; j < input_node_dims.size(); j++) {
+    //     std::cout << "Input " << i << " : dim[" << j << "] =" << input_node_dims[j] << '\n';
+    //   }
+    //   std::cout << std::flush;
+    // }
   }
 
   virtual ~MotorModelServo() {}
@@ -78,7 +121,7 @@ class MotorModelServo : public MotorModel {
   sdf::ElementPtr motor_;
   physics::JointPtr joint_;
 
-  std::vector<float> pos_err_hist_ = {0,0,0,0,0,0,0,0};
+  std::vector<float> pos_err_hist_ = {0, 0, 0, 0, 0, 0, 0, 0};
   torch::jit::script::Module policy_;
   at::TensorOptions tensor_options_ = torch::TensorOptions().dtype(torch::kFloat32);
   at::Tensor input_tensor_;
@@ -177,9 +220,7 @@ class MotorModelServo : public MotorModel {
     return wrapped;
   }
 
-  float GetSiesta(){
-    return 0;
-  }
+  float GetSiesta() { return 0; }
 
   void UpdateForcesAndMoments() {
     motor_rot_pos_ = turning_direction_ * joint_->Position(0);
@@ -187,11 +228,12 @@ class MotorModelServo : public MotorModel {
     motor_rot_effort_ = turning_direction_ * joint_->GetForce(0);
 
     // Update position error history
-    pos_err_hist_.push_back(ref_motor_rot_pos_-motor_rot_pos_);
+    pos_err_hist_.push_back(ref_motor_rot_pos_ - motor_rot_pos_);
     pos_err_hist_.erase(pos_err_hist_.begin());
 
     // Prepare input tensor
-    input_tensor_ = torch::from_blob(pos_err_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
+    input_tensor_ =
+        torch::from_blob(pos_err_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
     input_vect_.push_back(input_tensor_);
 
     std::cout << input_vect_ << std::endl;
@@ -199,17 +241,16 @@ class MotorModelServo : public MotorModel {
 
     // Compute forward pass
     torque_ = 0;
-    if(true){
+    if (true) {
       output_tensor_ = policy_.forward(input_vect_).toTensor();
       torque_ = output_tensor_[0].item<float>();
-      printf("Force: %f\n",torque_);
+      printf("Force: %f\n", torque_);
     }
 
     switch (mode_) {
       case (ControlMode::kPosition): {
         if (!std::isnan(ref_motor_rot_pos_)) {
-          joint_controller_->SetForce(joint_->GetScopedName(),
-                           torque_);
+          joint_controller_->SetForce(joint_->GetScopedName(), torque_);
         }
         break;
       }
@@ -230,13 +271,12 @@ class MotorModelServo : public MotorModel {
         }
         break;
       }
-      default: {}
+      default: {
+      }
     }
   }
 
  private:
-
-
 };
 
 }  // namespace gazebo

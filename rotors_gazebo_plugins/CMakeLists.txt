@@ -57,7 +57,9 @@ endif()
 # Add any additional include directories as specified by the calling process (either user or another CMake file).
 # ASL: Doesn't use this, catkin manages the mav_comm dependency
 # PX4: Provides include directory for mav_msgs, so that "mav_msgs/default_topics.h" can be found and used.
-include_directories(${ADDITIONAL_INCLUDE_DIRS})
+include_directories(${ADDITIONAL_INCLUDE_DIRS} "/home/eugenio/.local/include/onnxruntime/include")
+
+# include_directories("/home/eugenio/onnxruntime-linux-x64/include")
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
@@ -560,7 +562,7 @@ install(
 )
 
 
-set(CMAKE_PREFIX_PATH "/root/catkin_ws/src/libtorch;/home/lolo/omav_ws/src/libtorch;/opt/ros/noetic")
+# set(CMAKE_PREFIX_PATH "/eugenio/catkin_ws;/home/eugenio/onnxruntime-linux-x64/lib;/opt/ros/noetic")
 
 find_package(Torch REQUIRED)
 if(Torch_FOUND)
@@ -572,12 +574,23 @@ endif()
 set(CMAKE_BUILD_TYPE Debug)
 #add_definitions(-std=c++11 -fPIC -Wall -Wno-reorder -Wno-unknown-pragmas)
 
+find_package(onnxruntime REQUIRED)
+if(onnxruntime_FOUND)
+message(WARNING "onnxruntime FOUND, building onnxruntime modules.")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${onnxruntime_CXX_FLAGS}")
+else()
+message(WARNING "onnxruntime NOT FOUND, skipping onnxruntime modules.")
+endif()
+
 if(Torch_FOUND)
-target_link_libraries(rotors_gazebo_multirotor_base_plugin "${TORCH_LIBRARIES}") 
+target_link_libraries(rotors_gazebo_multirotor_base_plugin "${TORCH_LIBRARIES}" "${onnxruntime_LIBRARIES}") 
+target_include_directories(rotors_gazebo_multirotor_base_plugin PUBLIC "${onnxruntime_INCLUDE_DIRS}")
 #SET_TARGET_PROPERTIES(rotors_gazebo_multirotor_base_plugin PROPERTIES CXX_STANDARD 14)
-target_link_libraries(rotors_gazebo_motor_model "${TORCH_LIBRARIES}") 
+target_link_libraries(rotors_gazebo_motor_model "${TORCH_LIBRARIES}" "${onnxruntime_LIBRARIES}") 
+target_include_directories(rotors_gazebo_motor_model PUBLIC "${onnxruntime_INCLUDE_DIRS}")
 #SET_TARGET_PROPERTIES(rotors_gazebo_motor_model PROPERTIES CXX_STANDARD 14)
-target_link_libraries(rotors_gazebo_multimotor_plugin "${TORCH_LIBRARIES}") 
+target_link_libraries(rotors_gazebo_multimotor_plugin "${TORCH_LIBRARIES}" "${onnxruntime_LIBRARIES}") 
+target_include_directories(rotors_gazebo_multimotor_plugin PUBLIC "${onnxruntime_INCLUDE_DIRS}")
 #SET_TARGET_PROPERTIES(rotors_gazebo_multimotor_plugin PROPERTIES CXX_STANDARD 14)
 endif()
 
