@@ -55,7 +55,7 @@ class MotorModelServo : public MotorModel {
 
     // Init model and position error history array
     try {
-      policy_ = torch::jit::load("/root/catkin_ws/src/rotors_simulator/rotors_description/models/T_a.pt");
+      policy_ = torch::jit::load("/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/T_a.pt");
     } catch (const c10::Error& e){
       std::cerr << " Error loading the model\n";
     }
@@ -195,11 +195,15 @@ class MotorModelServo : public MotorModel {
     input_vect_.push_back(input_tensor_);
 
     std::cout << input_vect_ << std::endl;
+    std::cout << input_vect_.size() << std::endl;
 
     // Compute forward pass
-    output_tensor_ = policy_.forward(input_vect_).toTensor();
-    torque_ = output_tensor_[0].item<float>();
-    printf("Force: %f\n",torque_);
+    torque_ = 0;
+    if(true){
+      output_tensor_ = policy_.forward(input_vect_).toTensor();
+      torque_ = output_tensor_[0].item<float>();
+      printf("Force: %f\n",torque_);
+    }
 
     switch (mode_) {
       case (ControlMode::kPosition): {

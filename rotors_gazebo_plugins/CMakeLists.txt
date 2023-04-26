@@ -560,7 +560,7 @@ install(
 )
 
 
-set(CMAKE_PREFIX_PATH "/root/catkin_ws/src/libtorch;/opt/ros/noetic")
+set(CMAKE_PREFIX_PATH "/root/catkin_ws/src/libtorch;/home/lolo/omav_ws/src/libtorch;/opt/ros/noetic")
 
 find_package(Torch REQUIRED)
 if(Torch_FOUND)
