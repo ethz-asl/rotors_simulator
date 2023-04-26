@@ -32,6 +32,8 @@
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/motor_model.hpp"
 
+#include <thread>
+
 #define POSITION_HISTORY_LENGTH 8
 
 enum class ControlMode { kVelocity, kPosition, kEffort };
@@ -81,7 +83,7 @@ class MotorModelServo : public MotorModel {
   std::vector<float> pos_err_hist_ = {0,0,0,0,0,0,0,0};
   torch::jit::script::Module policy_;
   at::TensorOptions tensor_options_ = torch::TensorOptions().dtype(torch::kFloat32);
-  at::Tensor input_tensor_;
+  //at::Tensor input_tensor_;
   at::Tensor output_tensor_;
   std::vector<torch::jit::IValue> input_vect_;
 
@@ -191,7 +193,7 @@ class MotorModelServo : public MotorModel {
     pos_err_hist_.erase(pos_err_hist_.begin());
 
     // Prepare input tensor
-    input_tensor_ = torch::from_blob(pos_err_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
+    at::Tensor input_tensor_ = torch::from_blob(pos_err_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
     input_vect_.push_back(input_tensor_);
 
     std::cout << input_vect_ << std::endl;
@@ -199,8 +201,9 @@ class MotorModelServo : public MotorModel {
 
     // Compute forward pass
     torque_ = 0;
-    if(true){
-      output_tensor_ = policy_.forward(input_vect_).toTensor();
+    if(false){
+      auto temp_out = policy_.forward(input_vect_);
+      output_tensor_ = temp_out.toTensor();
       torque_ = output_tensor_[0].item<float>();
       printf("Force: %f\n",torque_);
     }
