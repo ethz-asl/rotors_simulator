@@ -83,7 +83,7 @@ class MotorModelServo : public MotorModel {
   std::vector<float> pos_err_hist_ = {0,0,0,0,0,0,0,0};
   torch::jit::script::Module policy_;
   at::TensorOptions tensor_options_ = torch::TensorOptions().dtype(torch::kFloat32);
-  //at::Tensor input_tensor_;
+  at::Tensor input_tensor_;
   at::Tensor output_tensor_;
   std::vector<torch::jit::IValue> input_vect_;
 
@@ -193,17 +193,17 @@ class MotorModelServo : public MotorModel {
     pos_err_hist_.erase(pos_err_hist_.begin());
 
     // Prepare input tensor
-    at::Tensor input_tensor_ = torch::from_blob(pos_err_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
+    at::Tensor input_tensor_ = torch::from_blob(pos_err_hist_.data(), {1,POSITION_HISTORY_LENGTH}, tensor_options_);
     input_vect_.push_back(input_tensor_);
 
     std::cout << input_vect_ << std::endl;
     std::cout << input_vect_.size() << std::endl;
+    policy_.eval();
 
     // Compute forward pass
     torque_ = 0;
-    if(false){
-      auto temp_out = policy_.forward(input_vect_);
-      output_tensor_ = temp_out.toTensor();
+    if(true){
+      output_tensor_ = policy_.forward(input_vect_).toTensor();
       torque_ = output_tensor_[0].item<float>();
       printf("Force: %f\n",torque_);
     }
