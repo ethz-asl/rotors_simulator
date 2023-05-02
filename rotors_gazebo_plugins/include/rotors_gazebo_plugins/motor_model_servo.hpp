@@ -27,7 +27,6 @@
 #include <gazebo/physics/physics.hh>
 #include <torch/torch.h>
 #include <torch/script.h>
-#include <torchvision/models/vgg.h>
 
 // USER
 #include "rotors_gazebo_plugins/common.h"
@@ -81,8 +80,9 @@ class MotorModelServo : public MotorModel {
   sdf::ElementPtr motor_;
   physics::JointPtr joint_;
 
-  std::vector<float> pos_err_hist_ = {0,0,0,0,0,0,0,0};
+  std::vector<double> pos_err_hist_ = {0,0,0,0,0,0,0,0};
   torch::jit::script::Module policy_;
+  std::vector<torch::jit::IValue> input_vect_;
 
   float torque_;
 
@@ -189,29 +189,31 @@ class MotorModelServo : public MotorModel {
     pos_err_hist_.push_back(ref_motor_rot_pos_-motor_rot_pos_);
     pos_err_hist_.erase(pos_err_hist_.begin());
 
-    // Prepare input tensor
+    // // Prepare input tensor
     at::TensorOptions tensor_options_ = torch::TensorOptions().dtype(torch::kFloat64);
     at::Tensor input_tensor_= torch::from_blob(pos_err_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
-    std::vector<torch::jit::IValue> input_vect_;
+    // at::Tensor input_tensor_= torch::tensor(pos_err_hist_,tensor_options_);
+    // assert(input_tensor_.dtype() == torch::kFloat64);
     input_vect_.clear();
     input_vect_.push_back(input_tensor_);
 
-    std::cout << input_vect_ << std::endl;
+    std::cout << "***\nPos:\n";
+    for (int i = 0; i < pos_err_hist_.size(); i++) {
+      std::cout << pos_err_hist_[i] << "\n";
+    }
+    std::cout << "***\nTensor:\n" << input_tensor_ << std::endl;
+    std::cout << "***\nArr:\n " << input_vect_ << std::endl;
 
     // Compute forward pass
-    // at::Tensor output_tensor_ = policy_.forward(input_vect_).toTensor();
-    // torque_ = output_tensor_[0].item<float>();
-    // printf("Force: %f\n",torque_);
-
-    auto model = vision::models::VGG16();
-    //auto model = vision::models::ResNet18();
-    model->eval();
-    // Create a random input tensor and run it through the model.
-    //auto in = torch::rand({ 1, 3, 10, 10 });
-    auto in = torch::rand({ 10, 3, 224, 224 });
-    auto out = model->forward(in);
-
-    std::cout << out;
+    at::Tensor output_tensor_;
+    try {
+      output_tensor_ = policy_.forward(input_vect_).toTensor();
+    } catch (const c10::Error& e){
+      std::cerr << " Error forward pass\n";
+    }
+    torque_ = 0;
+    torque_ = output_tensor_[0].item<float>();
+    printf("Force: %f\n",torque_);
 
     switch (mode_) {
       case (ControlMode::kPosition): {
