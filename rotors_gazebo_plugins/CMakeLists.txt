@@ -57,9 +57,6 @@ endif()
 # Add any additional include directories as specified by the calling process (either user or another CMake file).
 # ASL: Doesn't use this, catkin manages the mav_comm dependency
 # PX4: Provides include directory for mav_msgs, so that "mav_msgs/default_topics.h" can be found and used.
-include_directories(${ADDITIONAL_INCLUDE_DIRS} "/home/lolo/omav_ws/src/onnxruntime/include")
-
-# include_directories("/home/eugenio/onnxruntime-linux-x64/include")
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
@@ -561,9 +558,15 @@ install(
   LIBRARY DESTINATION ${LIB_DESTINATION}
 )
 
+# include_directories(${ADDITIONAL_INCLUDE_DIRS} "/home/lolo/omav_ws/src/onnxruntime/include")
+# set(CMAKE_PREFIX_PATH "home/lolo/omav_ws/src/onnxruntime;home/lolo/omav_ws/src/onnxruntime/lib;/opt/ros/noetic")
 
-set(CMAKE_PREFIX_PATH "home/lolo/omav_ws/src/onnxruntime:/opt/ros/noetic")
-#set(onnxruntime_DIR "/usr/share/cmake/onnxruntime")
+include_directories(${ADDITIONAL_INCLUDE_DIRS} "/usr/local/include/onnxruntime")
+set(CMAKE_PREFIX_PATH "/usr/local/share/cmake/onnxruntime:/opt/ros/noetic")
+
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};/usr/local/share/cmake/onnxruntime")
+# include(onnxruntimeConfig.cmake)
+# include(onnxruntimeVersion.cmake)
 
 find_package(onnxruntime REQUIRED)
 if(onnxruntime_FOUND)
