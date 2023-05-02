@@ -560,7 +560,7 @@ install(
 )
 
 
-set(CMAKE_PREFIX_PATH "/root/catkin_ws/src/libtorch;/home/lolo/omav_ws/src/libtorch;/opt/ros/noetic")
+set(CMAKE_PREFIX_PATH "/root/catkin_ws/src/libtorch;/home/lolo/omav_ws/src/libtorch;/home/lolo/omav_ws/src/vision;/opt/ros/noetic")
 
 find_package(Torch REQUIRED)
 if(Torch_FOUND)
@@ -569,8 +569,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 else()
 message(WARNING "Torch NOT FOUND, skipping torch modules.")
 endif()
-set(CMAKE_BUILD_TYPE Debug)
 #add_definitions(-std=c++11 -fPIC -Wall -Wno-reorder -Wno-unknown-pragmas)
+
+find_package(TorchVision REQUIRED)
+
+target_link_libraries(rotors_gazebo_multirotor_base_plugin PUBLIC TorchVision::TorchVision)
 
 if(Torch_FOUND)
 target_link_libraries(rotors_gazebo_multirotor_base_plugin "${TORCH_LIBRARIES}") 

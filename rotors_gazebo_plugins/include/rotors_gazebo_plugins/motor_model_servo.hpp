@@ -27,6 +27,7 @@
 #include <gazebo/physics/physics.hh>
 #include <torch/torch.h>
 #include <torch/script.h>
+#include <torchvision/models/vgg.h>
 
 // USER
 #include "rotors_gazebo_plugins/common.h"
@@ -57,7 +58,7 @@ class MotorModelServo : public MotorModel {
 
     // Init model and position error history array
     try {
-      policy_ = torch::jit::load("/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/T_a.pt");
+      policy_ = torch::jit::load("/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/T_a_double.pt");
     } catch (const c10::Error& e){
       std::cerr << " Error loading the model\n";
     }
@@ -82,10 +83,6 @@ class MotorModelServo : public MotorModel {
 
   std::vector<float> pos_err_hist_ = {0,0,0,0,0,0,0,0};
   torch::jit::script::Module policy_;
-  at::TensorOptions tensor_options_ = torch::TensorOptions().dtype(torch::kFloat32);
-  at::Tensor input_tensor_;
-  at::Tensor output_tensor_;
-  std::vector<torch::jit::IValue> input_vect_;
 
   float torque_;
 
@@ -193,20 +190,28 @@ class MotorModelServo : public MotorModel {
     pos_err_hist_.erase(pos_err_hist_.begin());
 
     // Prepare input tensor
-    at::Tensor input_tensor_ = torch::from_blob(pos_err_hist_.data(), {1,POSITION_HISTORY_LENGTH}, tensor_options_);
+    at::TensorOptions tensor_options_ = torch::TensorOptions().dtype(torch::kFloat64);
+    at::Tensor input_tensor_= torch::from_blob(pos_err_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
+    std::vector<torch::jit::IValue> input_vect_;
+    input_vect_.clear();
     input_vect_.push_back(input_tensor_);
 
     std::cout << input_vect_ << std::endl;
-    std::cout << input_vect_.size() << std::endl;
-    policy_.eval();
 
     // Compute forward pass
-    torque_ = 0;
-    if(true){
-      output_tensor_ = policy_.forward(input_vect_).toTensor();
-      torque_ = output_tensor_[0].item<float>();
-      printf("Force: %f\n",torque_);
-    }
+    // at::Tensor output_tensor_ = policy_.forward(input_vect_).toTensor();
+    // torque_ = output_tensor_[0].item<float>();
+    // printf("Force: %f\n",torque_);
+
+    auto model = vision::models::VGG16();
+    //auto model = vision::models::ResNet18();
+    model->eval();
+    // Create a random input tensor and run it through the model.
+    //auto in = torch::rand({ 1, 3, 10, 10 });
+    auto in = torch::rand({ 10, 3, 224, 224 });
+    auto out = model->forward(in);
+
+    std::cout << out;
 
     switch (mode_) {
       case (ControlMode::kPosition): {
