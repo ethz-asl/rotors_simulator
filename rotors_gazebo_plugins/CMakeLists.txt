@@ -578,6 +578,10 @@ endif()
 if(onnxruntime_FOUND)
 target_link_libraries(rotors_gazebo_motor_model "${onnxruntime_LIBRARIES}") 
 SET_TARGET_PROPERTIES(rotors_gazebo_motor_model PROPERTIES CXX_STANDARD 14)
+target_link_libraries(rotors_gazebo_multirotor_base_plugin "${onnxruntime_LIBRARIES}") 
+SET_TARGET_PROPERTIES(rotors_gazebo_multirotor_base_plugin PROPERTIES CXX_STANDARD 14)
+target_link_libraries(rotors_gazebo_multimotor_plugin "${onnxruntime_LIBRARIES}")
+SET_TARGET_PROPERTIES(rotors_gazebo_multimotor_plugin PROPERTIES CXX_STANDARD 14) 
 endif()
 
 #rotors_gazebo_multirotor_base_plugin

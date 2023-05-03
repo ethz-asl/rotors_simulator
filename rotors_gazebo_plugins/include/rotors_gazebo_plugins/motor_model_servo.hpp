@@ -32,6 +32,7 @@
 #include "rotors_gazebo_plugins/motor_model.hpp"
 
 #define POSITION_HISTORY_LENGTH 8
+#define PRINT_MODEL_INFO false
 
 enum class ControlMode { kVelocity, kPosition, kEffort };
 
@@ -71,6 +72,9 @@ class MotorModelServo : public MotorModel {
   sdf::ElementPtr motor_;
   physics::JointPtr joint_;
 
+
+  static Ort::Env env;
+  Ort::AllocatorWithDefaultOptions allocator;
   Ort::Session *session;
   std::vector<float> pos_err_hist_ = {0, 0, 0, 0, 0, 0, 0, 0};
   std::vector<int64_t> input_node_dims;
@@ -169,58 +173,56 @@ class MotorModelServo : public MotorModel {
   }
 
   void InitialiseSiestaModel() { 
-      // Load model
-      Ort::Env env;
-      const char* model_path = "/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/T_a.onnx";
-      Ort::SessionOptions session_options;
-      session_options.SetIntraOpNumThreads(1);
-      session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
-      Ort::Session session_tmp(env, model_path, session_options);
-      session = &session_tmp;
+    // Load model
+    const char* model_path = "/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/T_a.onnx";
+    Ort::SessionOptions session_options;
+    session_options.SetIntraOpNumThreads(1);
+    session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
+    session = new Ort::Session(env, model_path, session_options);
 
-      Ort::AllocatorWithDefaultOptions allocator;
+    // Input nodes
+    const size_t num_input_nodes = session->GetInputCount();
+    std::vector<Ort::AllocatedStringPtr> input_names_ptr;
+    std::vector<const char*> input_node_names;
+    input_names_ptr.reserve(num_input_nodes);
+    input_node_names.reserve(num_input_nodes);
+    std::cout << "Number of inputs = " << num_input_nodes << std::endl;
+    for (size_t i = 0; i < num_input_nodes; i++) {
+      // print input node names
+      auto input_name = session->GetInputNameAllocated(i, allocator);
+      input_node_names.push_back(input_name.get());
+      input_names_ptr.push_back(std::move(input_name));
 
-      // Input nodes
-      const size_t num_input_nodes = session->GetInputCount();
-      std::vector<Ort::AllocatedStringPtr> input_names_ptr;
-      std::vector<const char*> input_node_names;
-      input_names_ptr.reserve(num_input_nodes);
-      input_node_names.reserve(num_input_nodes);
-      std::cout << "Number of inputs = " << num_input_nodes << std::endl;
-      for (size_t i = 0; i < num_input_nodes; i++) {
-        // print input node names
-        auto input_name = session->GetInputNameAllocated(i, allocator);
+      // print input node types
+      auto type_info = session->GetInputTypeInfo(i);
+      auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
+      ONNXTensorElementDataType type = tensor_info.GetElementType();
+
+      // print input shapes/dims
+      input_node_dims = tensor_info.GetShape();
+
+      if(PRINT_MODEL_INFO){
         std::cout << "Input " << i << " : name =" << input_name.get() << std::endl;
-        input_node_names.push_back(input_name.get());
-        input_names_ptr.push_back(std::move(input_name));
-
-        // print input node types
-        auto type_info = session->GetInputTypeInfo(i);
-        auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
-        ONNXTensorElementDataType type = tensor_info.GetElementType();
         std::cout << "Input " << i << " : type = " << type << std::endl;
-
-        // print input shapes/dims
-        input_node_dims = tensor_info.GetShape();
         std::cout << "Input " << i << " : num_dims = " << input_node_dims.size() << '\n';
         for (size_t j = 0; j < input_node_dims.size(); j++) {
           std::cout << "Input " << i << " : dim[" << j << "] =" << input_node_dims[j] << '\n';
         }
-        std::cout << std::flush;
       }
+      std::cout << std::flush;
+    }
 
-      // Output nodes
-      const size_t num_output_nodes = session->GetOutputCount();
-      std::vector<Ort::AllocatedStringPtr> output_names_ptr;
-      std::vector<const char*> output_node_names;
-      output_names_ptr.reserve(num_output_nodes);
-      output_node_names.reserve(num_output_nodes);
-      std::vector<int64_t> output_node_dims;
-      std::cout << "Number of outputs = " << num_output_nodes << std::endl;
-      for (size_t i = 0; i < num_output_nodes; i++) {
+    // Output nodes
+    const size_t num_output_nodes = session->GetOutputCount();
+    std::vector<Ort::AllocatedStringPtr> output_names_ptr;
+    std::vector<const char*> output_node_names;
+    output_names_ptr.reserve(num_output_nodes);
+    output_node_names.reserve(num_output_nodes);
+    std::vector<int64_t> output_node_dims;
+    std::cout << "Number of outputs = " << num_output_nodes << std::endl;
+    for (size_t i = 0; i < num_output_nodes; i++) {
         // print output node names
         auto output_name = session->GetOutputNameAllocated(i, allocator);
-        std::cout << "Outnput " << i << " : name =" << output_name.get() << std::endl;
         output_node_names.push_back(output_name.get());
         output_names_ptr.push_back(std::move(output_name));
 
@@ -228,17 +230,22 @@ class MotorModelServo : public MotorModel {
         auto type_info = session->GetOutputTypeInfo(i);
         auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
         ONNXTensorElementDataType type = tensor_info.GetElementType();
-        std::cout << "Output " << i << " : type = " << type << std::endl;
 
         // print input shapes/dims
         output_node_dims = tensor_info.GetShape();
-        std::cout << "Output " << i << " : num_dims = " << output_node_dims.size() << '\n';
-        for (size_t j = 0; j < input_node_dims.size(); j++) {
-          std::cout << "Output " << i << " : dim[" << j << "] =" << output_node_dims[j] << '\n';
+
+        if(PRINT_MODEL_INFO){
+          std::cout << "Outnput " << i << " : name =" << output_name.get() << std::endl;
+          std::cout << "Output " << i << " : type = " << type << std::endl;
+          std::cout << "Output " << i << " : num_dims = " << output_node_dims.size() << '\n';
+          for (size_t j = 0; j < input_node_dims.size(); j++) {
+            std::cout << "Output " << i << " : dim[" << j << "] =" << output_node_dims[j] << '\n';
+          }
         }
         std::cout << std::flush;
       }
-  
+    
+    std::cout << "Model loaded ok" << std::endl;
   }
 
   void UpdateForcesAndMoments() {
@@ -263,14 +270,17 @@ class MotorModelServo : public MotorModel {
                                                         input_tensor_size, 
                                                         input_node_dims.data(), 
                                                         1);
+    assert(input_tensor.IsTensor());
+
+    float* input_arr = input_tensor.GetTensorMutableData<float>();
+    std::cout << "Input tensor:" << std::endl;
+    for(size_t i=0; i<POSITION_HISTORY_LENGTH; i++){
+      std::cout << input_arr[i] << std::endl;
+    }
 
     // Compute forward pass
     torque_ = 0;
-    auto output_tensors = session->Run(Ort::RunOptions{nullptr}, 
-                                  input_node_names.data(), 
-                                  &input_tensor, 
-                                  1, 
-                                  output_node_names.data(), 1);
+    auto output_tensors = session->Run(Ort::RunOptions{nullptr}, input_node_names.data(), &input_tensor, 1, output_node_names.data(), 1);
     float* output_arr = output_tensors.front().GetTensorMutableData<float>();
     torque_ = output_arr[0];
     printf("Force: %f\n", torque_);
