@@ -27,6 +27,7 @@
 #include <gazebo/physics/physics.hh>
 #include <torch/torch.h>
 #include <torch/script.h>
+#include <torch/csrc/jit/passes/tensorexpr_fuser.h>
 
 // USER
 #include "rotors_gazebo_plugins/common.h"
@@ -35,6 +36,7 @@
 #include <thread>
 
 #define POSITION_HISTORY_LENGTH 8
+
 
 enum class ControlMode { kVelocity, kPosition, kEffort };
 
@@ -62,6 +64,8 @@ class MotorModelServo : public MotorModel {
       std::cerr << " Error loading the model\n";
     }
     std::cout << "model loaded ok\n";
+    // No idea what this does, but it crashes without it
+    torch::jit::setTensorExprFuserEnabled(false);
   }
 
   virtual ~MotorModelServo() {}
@@ -83,7 +87,6 @@ class MotorModelServo : public MotorModel {
   std::vector<double> pos_err_hist_ = {0,0,0,0,0,0,0,0};
   torch::jit::script::Module policy_;
   std::vector<torch::jit::IValue> input_vect_;
-
   float torque_;
 
   void InitializeParams() {
@@ -186,34 +189,21 @@ class MotorModelServo : public MotorModel {
     motor_rot_effort_ = turning_direction_ * joint_->GetForce(0);
 
     // Update position error history
-    pos_err_hist_.push_back(ref_motor_rot_pos_-motor_rot_pos_);
-    pos_err_hist_.erase(pos_err_hist_.begin());
+    pos_err_hist_.insert(pos_err_hist_.begin(),ref_motor_rot_pos_-motor_rot_pos_);
+    pos_err_hist_.pop_back();
 
     // // Prepare input tensor
     at::TensorOptions tensor_options_ = torch::TensorOptions().dtype(torch::kFloat64);
     at::Tensor input_tensor_= torch::from_blob(pos_err_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
-    // at::Tensor input_tensor_= torch::tensor(pos_err_hist_,tensor_options_);
-    // assert(input_tensor_.dtype() == torch::kFloat64);
     input_vect_.clear();
     input_vect_.push_back(input_tensor_);
-
-    std::cout << "***\nPos:\n";
-    for (int i = 0; i < pos_err_hist_.size(); i++) {
-      std::cout << pos_err_hist_[i] << "\n";
-    }
-    std::cout << "***\nTensor:\n" << input_tensor_ << std::endl;
-    std::cout << "***\nArr:\n " << input_vect_ << std::endl;
+    // std::cout << "***\nArr:\n " << input_vect_ << std::endl;
 
     // Compute forward pass
     at::Tensor output_tensor_;
-    try {
-      output_tensor_ = policy_.forward(input_vect_).toTensor();
-    } catch (const c10::Error& e){
-      std::cerr << " Error forward pass\n";
-    }
-    torque_ = 0;
+    output_tensor_ = policy_.forward(input_vect_).toTensor();
     torque_ = output_tensor_[0].item<float>();
-    printf("Force: %f\n",torque_);
+    //printf("Force: %f\n",torque_);
 
     switch (mode_) {
       case (ControlMode::kPosition): {
