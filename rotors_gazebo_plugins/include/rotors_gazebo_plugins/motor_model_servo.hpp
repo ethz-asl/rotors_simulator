@@ -33,10 +33,7 @@
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/motor_model.hpp"
 
-#include <thread>
-
 #define POSITION_HISTORY_LENGTH 8
-
 
 enum class ControlMode { kVelocity, kPosition, kEffort };
 
@@ -59,7 +56,7 @@ class MotorModelServo : public MotorModel {
 
     // Init model and position error history array
     try {
-      policy_ = torch::jit::load("/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/T_a_double.pt");
+      policy_ = torch::jit::load("/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/T_a.pt");
     } catch (const c10::Error& e){
       std::cerr << " Error loading the model\n";
     }
@@ -188,6 +185,7 @@ class MotorModelServo : public MotorModel {
     motor_rot_vel_ = turning_direction_ * joint_->GetVelocity(0);
     motor_rot_effort_ = turning_direction_ * joint_->GetForce(0);
 
+
     // Update position error history
     pos_err_hist_.insert(pos_err_hist_.begin(),ref_motor_rot_pos_-motor_rot_pos_);
     pos_err_hist_.pop_back();
@@ -204,6 +202,8 @@ class MotorModelServo : public MotorModel {
     output_tensor_ = policy_.forward(input_vect_).toTensor();
     torque_ = output_tensor_[0].item<float>();
     //printf("Force: %f\n",torque_);
+
+    //std::cout << "Time: " << ros::Time::now() << std::endl;
 
     switch (mode_) {
       case (ControlMode::kPosition): {
