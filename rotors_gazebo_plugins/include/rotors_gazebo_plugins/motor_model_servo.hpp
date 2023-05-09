@@ -195,13 +195,13 @@ class MotorModelServo : public MotorModel {
     at::Tensor input_tensor_= torch::from_blob(pos_err_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
     input_vect_.clear();
     input_vect_.push_back(input_tensor_);
-    // std::cout << "***\nArr:\n " << input_vect_ << std::endl;
+    //std::cout << "***\nArr:\n " << input_vect_ << std::endl;
 
     // Compute forward pass
     at::Tensor output_tensor_;
     output_tensor_ = policy_.forward(input_vect_).toTensor();
     torque_ = output_tensor_[0].item<float>();
-    //printf("Force: %f\n",torque_);
+    //printf("Torque: %f\n",torque_);
 
     //std::cout << "Time: " << ros::Time::now() << std::endl;
 
