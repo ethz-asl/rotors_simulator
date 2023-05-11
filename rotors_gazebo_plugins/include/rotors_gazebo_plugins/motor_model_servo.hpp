@@ -176,10 +176,6 @@ class MotorModelServo : public MotorModel {
     return wrapped;
   }
 
-  float GetSiesta(){
-    return 0;
-  }
-
   void UpdateForcesAndMoments() {
     motor_rot_pos_ = turning_direction_ * joint_->Position(0);
     motor_rot_vel_ = turning_direction_ * joint_->GetVelocity(0);
