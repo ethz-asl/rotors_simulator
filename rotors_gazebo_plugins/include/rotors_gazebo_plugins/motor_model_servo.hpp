@@ -81,7 +81,7 @@ class MotorModelServo : public MotorModel {
   sdf::ElementPtr motor_;
   physics::JointPtr joint_;
 
-  std::vector<double> pos_err_hist_ = {0,0,0,0,0,0,0,0};
+  std::vector<double> pos_err_hist_ = std::vector<double>(POSITION_HISTORY_LENGTH, 0.0);
   torch::jit::script::Module policy_;
   std::vector<torch::jit::IValue> input_vect_;
   float torque_;
