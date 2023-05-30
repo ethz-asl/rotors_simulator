@@ -569,7 +569,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 else()
 message(WARNING "Torch NOT FOUND, skipping torch modules.")
 endif()
-#add_definitions(-std=c++11 -fPIC -Wall -Wno-reorder -Wno-unknown-pragmas)
+add_definitions(-std=c++17 -fPIC -Wall -Wno-reorder -Wno-unknown-pragmas)
 
 if(Torch_FOUND)
 target_link_libraries(rotors_gazebo_multirotor_base_plugin "${TORCH_LIBRARIES}") 
