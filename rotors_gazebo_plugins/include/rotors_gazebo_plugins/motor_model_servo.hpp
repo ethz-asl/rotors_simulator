@@ -54,15 +54,29 @@ class MotorModelServo : public MotorModel {
     joint_ = _model->GetJoint(motor_->GetElement("jointName")->Get<std::string>());
     InitializeParams();
 
+    // Check models in directory
+    char dir_str[100] = "/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/";
+    DIR *dir_ptr;
+    struct dirent *diread;
+    std::vector<char *> filenames;
+    if ((dir_ptr = opendir(dir_str)) != nullptr) {
+      while ((diread = readdir(dir_ptr)) != nullptr) {
+        if(strcmp(".",diread->d_name) && strcmp("..",diread->d_name)) {
+          filenames.push_back(diread->d_name);
+        }
+      }
+      closedir(dir_ptr);
+    }
+    std::cout << "Opening: " << filenames[0] << std::endl;
+    strcat(dir_str,filenames[0]);
+    
     // Init model and position error history array
     try {
-      policy_ = torch::jit::load("/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/T_a.pt");
+      policy_ = torch::jit::load(dir_str);
     } catch (const c10::Error& e){
       std::cerr << " Error loading the model\n";
     }
-    std::cout << "model loaded ok\n";
-    // No idea what this does, but it crashes without it
-    torch::jit::setTensorExprFuserEnabled(false);
+    torch::jit::setTensorExprFuserEnabled(false); // No idea what this does, but it crashes without it
   }
 
   virtual ~MotorModelServo() {}
@@ -82,6 +96,7 @@ class MotorModelServo : public MotorModel {
   physics::JointPtr joint_;
 
   std::vector<double> pos_err_hist_ = std::vector<double>(POSITION_HISTORY_LENGTH, 0.0);
+  std::vector<double> pos_hist_ = std::vector<double>(POSITION_HISTORY_LENGTH, 0.0);
   torch::jit::script::Module policy_;
   std::vector<torch::jit::IValue> input_vect_;
   float torque_;
@@ -181,25 +196,25 @@ class MotorModelServo : public MotorModel {
     motor_rot_vel_ = turning_direction_ * joint_->GetVelocity(0);
     motor_rot_effort_ = turning_direction_ * joint_->GetForce(0);
 
-
     // Update position error history
-    pos_err_hist_.insert(pos_err_hist_.begin(),ref_motor_rot_pos_-motor_rot_pos_);
-    pos_err_hist_.pop_back();
+    // pos_err_hist_.insert(pos_err_hist_.begin(),ref_motor_rot_pos_-motor_rot_pos_);
+    // pos_err_hist_.pop_back();
 
-    // // Prepare input tensor
+    // Update position history
+    pos_hist_.insert(pos_hist_.begin(),motor_rot_pos_);
+    pos_hist_.pop_back();
+    pos_hist_.back() = ref_motor_rot_pos_-motor_rot_pos_;
+
+    // Prepare input tensor
     at::TensorOptions tensor_options_ = torch::TensorOptions().dtype(torch::kFloat64);
-    at::Tensor input_tensor_= torch::from_blob(pos_err_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
+    at::Tensor input_tensor_= torch::from_blob(pos_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
     input_vect_.clear();
     input_vect_.push_back(input_tensor_);
-    //std::cout << "***\nArr:\n " << input_vect_ << std::endl;
 
     // Compute forward pass
     at::Tensor output_tensor_;
     output_tensor_ = policy_.forward(input_vect_).toTensor();
     torque_ = output_tensor_[0].item<float>();
-    //printf("Torque: %f\n",torque_);
-
-    //std::cout << "Time: " << ros::Time::now() << std::endl;
 
     switch (mode_) {
       case (ControlMode::kPosition): {
