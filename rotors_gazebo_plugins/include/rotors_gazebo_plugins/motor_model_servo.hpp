@@ -55,28 +55,13 @@ class MotorModelServo : public MotorModel {
     InitializeParams();
 
     // Check models in directory
-    char dir_str[100] = "/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/servo_model.pt";
-    // DIR *dir_ptr;
-    // struct dirent *diread;
-    // std::vector<char *> filenames;
-    // if ((dir_ptr = opendir(dir_str)) != nullptr) {
-    //   while ((diread = readdir(dir_ptr)) != nullptr) {
-    //     if(strcmp(".",diread->d_name) && strcmp("..",diread->d_name)) {
-    //       filenames.push_back(diread->d_name);
-    //     }
-    //   }
-    //   closedir(dir_ptr);
+    // char dir_str[100] = "/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/servo_model.pt";
+    // try {
+    //   policy_ = torch::jit::load(dir_str);
+    // } catch (const c10::Error& e){
+    //   std::cerr << " Error loading the model\n";
     // }
-    // std::cout << "Opening: " << filenames[0] << std::endl;
-    // strcat(dir_str,filenames[0]);
-    
-    // Init model and position error history array
-    try {
-      policy_ = torch::jit::load(dir_str);
-    } catch (const c10::Error& e){
-      std::cerr << " Error loading the model\n";
-    }
-    torch::jit::setTensorExprFuserEnabled(false); // No idea what this does, but it crashes without it
+    // torch::jit::setTensorExprFuserEnabled(false); // No idea what this does, but it crashes without it
   }
 
   virtual ~MotorModelServo() {}
@@ -95,11 +80,11 @@ class MotorModelServo : public MotorModel {
   sdf::ElementPtr motor_;
   physics::JointPtr joint_;
 
-  std::vector<double> pos_err_hist_ = std::vector<double>(POSITION_HISTORY_LENGTH, 0.0);
-  std::vector<double> pos_hist_ = std::vector<double>(POSITION_HISTORY_LENGTH, 0.0);
-  torch::jit::script::Module policy_;
-  std::vector<torch::jit::IValue> input_vect_;
-  float torque_;
+  // std::vector<double> pos_err_hist_ = std::vector<double>(POSITION_HISTORY_LENGTH, 0.0);
+  // std::vector<double> pos_hist_ = std::vector<double>(POSITION_HISTORY_LENGTH, 0.0);
+  // torch::jit::script::Module policy_;
+  // std::vector<torch::jit::IValue> input_vect_;
+  // float torque_;
 
   void InitializeParams() {
     // Check motor type.
@@ -201,28 +186,28 @@ class MotorModelServo : public MotorModel {
     // pos_err_hist_.pop_back();
 
     // Update position history
-    pos_hist_.insert(pos_hist_.begin(),motor_rot_pos_);
-    pos_hist_.pop_back();
-    pos_hist_.back() = ref_motor_rot_pos_-motor_rot_pos_;
+    // pos_hist_.insert(pos_hist_.begin(),motor_rot_pos_);
+    // pos_hist_.pop_back();
+    // pos_hist_.back() = ref_motor_rot_pos_-motor_rot_pos_;
 
     // Prepare input tensor
-    at::TensorOptions tensor_options_ = torch::TensorOptions().dtype(torch::kFloat64);
-    at::Tensor input_tensor_= torch::from_blob(pos_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
-    input_vect_.clear();
-    input_vect_.push_back(input_tensor_);
+    // at::TensorOptions tensor_options_ = torch::TensorOptions().dtype(torch::kFloat64);
+    // at::Tensor input_tensor_= torch::from_blob(pos_hist_.data(), {POSITION_HISTORY_LENGTH}, tensor_options_);
+    // input_vect_.clear();
+    // input_vect_.push_back(input_tensor_);
 
     // Compute forward pass
-    at::Tensor output_tensor_;
-    output_tensor_ = policy_.forward(input_vect_).toTensor();
-    torque_ = output_tensor_[0].item<float>();
+    // at::Tensor output_tensor_;
+    // output_tensor_ = policy_.forward(input_vect_).toTensor();
+    // torque_ = output_tensor_[0].item<float>();
 
     switch (mode_) {
       case (ControlMode::kPosition): {
         if (!std::isnan(ref_motor_rot_pos_)) {
-          joint_controller_->SetForce(joint_->GetScopedName(), torque_);
+          // joint_controller_->SetForce(joint_->GetScopedName(), torque_);
 
-          // joint_controller_->SetPositionTarget(joint_->GetScopedName(), turning_direction_ * ref_motor_rot_pos_);
-          // joint_controller_->Update();
+          joint_controller_->SetPositionTarget(joint_->GetScopedName(), turning_direction_ * ref_motor_rot_pos_);
+          joint_controller_->Update();
         }
         break;
       }

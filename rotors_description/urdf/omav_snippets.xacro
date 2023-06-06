@@ -106,8 +106,7 @@
     <joint name="${robot_namespace}/tilt_unit_${motor_number}_revolutejoint" type="continuous">
       <xacro:insert_block name="origin" />
       <axis xyz="1 0 0" />
-      <!--dynamics damping="0.035" friction="0" /-->
-      <dynamics damping="0.0" friction="0" />
+      <dynamics damping="0.035" friction="0" />
       <parent link="${parent}" />
       <child link="${namespace}/tilt_unit_${motor_number}" />
     </joint>
