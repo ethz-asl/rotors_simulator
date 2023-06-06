@@ -55,20 +55,20 @@ class MotorModelServo : public MotorModel {
     InitializeParams();
 
     // Check models in directory
-    char dir_str[100] = "/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/";
-    DIR *dir_ptr;
-    struct dirent *diread;
-    std::vector<char *> filenames;
-    if ((dir_ptr = opendir(dir_str)) != nullptr) {
-      while ((diread = readdir(dir_ptr)) != nullptr) {
-        if(strcmp(".",diread->d_name) && strcmp("..",diread->d_name)) {
-          filenames.push_back(diread->d_name);
-        }
-      }
-      closedir(dir_ptr);
-    }
-    std::cout << "Opening: " << filenames[0] << std::endl;
-    strcat(dir_str,filenames[0]);
+    char dir_str[100] = "/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/servo_model.pt";
+    // DIR *dir_ptr;
+    // struct dirent *diread;
+    // std::vector<char *> filenames;
+    // if ((dir_ptr = opendir(dir_str)) != nullptr) {
+    //   while ((diread = readdir(dir_ptr)) != nullptr) {
+    //     if(strcmp(".",diread->d_name) && strcmp("..",diread->d_name)) {
+    //       filenames.push_back(diread->d_name);
+    //     }
+    //   }
+    //   closedir(dir_ptr);
+    // }
+    // std::cout << "Opening: " << filenames[0] << std::endl;
+    // strcat(dir_str,filenames[0]);
     
     // Init model and position error history array
     try {
