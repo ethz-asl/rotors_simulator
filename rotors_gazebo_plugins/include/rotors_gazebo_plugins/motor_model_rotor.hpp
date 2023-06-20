@@ -25,10 +25,15 @@
 #include <Eigen/Core>
 #include <boost/bind.hpp>
 #include <gazebo/physics/physics.hh>
+#include <torch/torch.h>
+#include <torch/script.h>
+#include <torch/csrc/jit/passes/tensorexpr_fuser.h>
 
 // USER
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/motor_model.hpp"
+
+#define VELOCITY_HISTORY_LENGTH 8
 
 namespace gazebo {
 
@@ -58,6 +63,15 @@ class MotorModelRotor : public MotorModel {
     joint_ = _model->GetJoint(motor_->GetElement("jointName")->Get<std::string>());
     link_ = _model->GetLink(motor_->GetElement("linkName")->Get<std::string>());
     InitializeParams();
+
+    // Check models in directory
+    char dir_str[100] = "/home/lolo/omav_ws/src/rotors_simulator/rotors_description/models/rotor_model.pt";
+    try {
+      policy_ = torch::jit::load(dir_str);
+    } catch (const c10::Error& e){
+      std::cerr << " Error loading the model\n";
+    }
+    torch::jit::setTensorExprFuserEnabled(false); // No idea what this does, but it crashes without it
   }
 
   virtual ~MotorModelRotor() {}
@@ -86,6 +100,12 @@ class MotorModelRotor : public MotorModel {
   sdf::ElementPtr motor_;
   physics::JointPtr joint_;
   physics::LinkPtr link_;
+
+  std::vector<double> vel_hist_ = std::vector<double>(VELOCITY_HISTORY_LENGTH, 0.0);
+  torch::jit::script::Module policy_;
+  std::vector<torch::jit::IValue> input_vect_;
+  float next_motor_rot_vel_;
+
 
   void InitializeParams() {
     // Check spin direction.
@@ -187,11 +207,36 @@ class MotorModelRotor : public MotorModel {
     if (!std::isnan(ref_motor_rot_vel_)) {
       ref_motor_rot_vel = rotor_velocity_filter_->updateFilter(ref_motor_rot_vel_, sampling_time_);
     }
-
     // Make sure max force is set, as it may be reset to 0 by a world reset any
     // time. (This cannot be done during Reset() because the change will be
     // undone by the Joint's reset function afterwards.)
     joint_->SetVelocity(0, turning_direction_ * ref_motor_rot_vel / rotor_velocity_slowdown_sim_);
+
+    // Update velocity history
+    // vel_hist_.insert(vel_hist_.begin(),motor_rot_vel_);
+    // vel_hist_.pop_back();
+    // vel_hist_.insert(vel_hist_.begin(),ref_motor_rot_vel_);
+
+    // Prepare input tensor
+    // at::TensorOptions tensor_options_ = torch::TensorOptions().dtype(torch::kFloat64);
+    // at::Tensor input_tensor_= torch::from_blob(vel_hist_.data(), {VELOCITY_HISTORY_LENGTH+1}, tensor_options_);
+    // input_vect_.clear();
+    // input_vect_.push_back(input_tensor_);
+
+    // Compute forward pass
+    // at::Tensor output_tensor_;
+    // output_tensor_ = policy_.forward(input_vect_).toTensor();
+    // next_motor_rot_vel_ = output_tensor_[0].item<float>() + motor_rot_vel_;
+
+    // if(ref_motor_rot_vel_ > 10){
+    //   std::cout << vel_hist_ << std::endl;
+    //   std::cout << output_tensor_[0].item<float>() << std::endl;
+    // }
+
+    // vel_hist_.erase(vel_hist_.begin());
+
+    // joint_->SetVelocity(0, turning_direction_ * next_motor_rot_vel_ / rotor_velocity_slowdown_sim_);
+
   }
 };
 
