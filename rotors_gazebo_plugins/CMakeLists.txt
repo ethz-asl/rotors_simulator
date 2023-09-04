@@ -91,7 +91,7 @@ else()
 endif()
 
 # Specify C++11 standard
-add_definitions(-std=c++11)
+add_definitions(-std=c++17)
 
 # Provides a compiler flag notifying the preprocessor about
 # the MAVLink Interface plugin build status
