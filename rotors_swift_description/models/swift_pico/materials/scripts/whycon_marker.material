@@ -1,0 +1,15 @@
+material whycon_marker/Diffuse
+{
+  receive_shadows off
+  technique
+  {
+    pass
+    {
+      whycon_unit
+      {
+        whycon_marker.png
+      }
+    }
+  }
+}
+

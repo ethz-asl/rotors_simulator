@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<robot name="swift_pico2" xmlns:xacro="http://ros.org/wiki/xacro">
+	<material name="Black">
+		<color rgba="0.0 0.0 0.0 1.0"/>
+	</material>
+	<material name="Red">
+		<color rgba="0.8 0.0 0.0 1.0"/>
+	</material>
+	<material name="Green">
+		<color rgba="0.0 0.8 0.0 1.0"/>
+	</material>
+	<material name="White">
+		<color rgba="1.0 1.0 1.0 1.0"/>
+	</material>
+	<material name="Blue">
+		<color rgba="0.0 0.0 0.8 1.0"/>
+	</material>
+	
+	--&gt;
+	<!-- <xacro:include filename="$(find rotors_description)/urdf/materials.urdf.xacro"/> -->
+	<xacro:macro name="whycon_marker" params="namespace marker_width marker_radius marker">
+		<joint name="${marker}_joint" type="fixed">
+			<origin xyz="0.04 0 0.06" rpy="0 0 0"/>
+
+			<parent link="${namespace}/base_link"/>
+			<child link="${marker}_link"/>
+		</joint>
+		<link name="${marker}_link">
+
+				<visual name='Whycon_Marker'>
+					<origin xyz="-.043 0 0.0005" rpy="0 0 0"/>
+					<geometry>
+						<mesh filename="package://rotors_description/models/whycon_marker/meshes/whycon_marker.dae"/>
+					</geometry>
+				</visual>
+			</link>
+		</xacro:macro>
+	</robot>

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>rotors_swift_gazebo</name>
+  <version>0.0.0</version>
+  <description>Contains launch files for the ros_gz_swift_pico project</description>
+  <maintainer email="shakthimagenderan@gmail.com">shakthi magenderan</maintainer>
+  <license>MIT</license>
+  <author>Shakthi Magender</author>
+
+  <depend>ros_gz</depend>
+  <depend>sdformat_urdf</depend>
+  <depend>joint_state_publisher_gui</depend>
+
+  <depend>rotors_swift_description</depend>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

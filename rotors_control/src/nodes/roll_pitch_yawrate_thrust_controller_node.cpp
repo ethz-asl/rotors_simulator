@@ -18,94 +18,83 @@
  * limitations under the License.
  */
 
-#include "roll_pitch_yawrate_thrust_controller_node.h"
+#include "roll_pitch_yawrate_thrust_controller_node.hpp"
 
-#include "rotors_control/parameters_ros.h"
+#include "rotors_control/parameters_ros.hpp"
 
 namespace rotors_control {
 
-RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustControllerNode() {
-  InitializeParams();
+    RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustControllerNode() : Node("roll_pitch_yawrate_thrust_controller_node"), node_handle(std::shared_ptr<RollPitchYawrateThrustControllerNode>(this, [](auto *) {})) {
 
-  ros::NodeHandle nh;
+        InitializeParams();
 
-  cmd_roll_pitch_yawrate_thrust_sub_ = nh.subscribe(kDefaultCommandRollPitchYawrateThrustTopic, 1,
-                                     &RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustCallback, this);
-  odometry_sub_ = nh.subscribe(kDefaultOdometryTopic, 1,
-                               &RollPitchYawrateThrustControllerNode::OdometryCallback, this);
+        cmd_roll_pitch_yawrate_thrust_sub_= this->create_subscription<mav_msgs::msg::RollPitchYawrateThrust>(kDefaultCommandRollPitchYawrateThrustTopic, 1, std::bind(&RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustCallback, this, std::placeholders::_1));
+        odometry_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(kDefaultOdometryTopic, 1, std::bind(&RollPitchYawrateThrustControllerNode::OdometryCallback, this, std::placeholders::_1));
 
-  motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(
-      kDefaultCommandMotorSpeedTopic, 1);
-}
+        motor_velocity_reference_pub_ = this->create_publisher<actuator_msgs::msg::Actuators>(kDefaultCommandMotorSpeedTopic, 1);
+    }
 
-RollPitchYawrateThrustControllerNode::~RollPitchYawrateThrustControllerNode() { }
+    RollPitchYawrateThrustControllerNode::~RollPitchYawrateThrustControllerNode() {}
 
-void RollPitchYawrateThrustControllerNode::InitializeParams() {
-  ros::NodeHandle pnh("~");
+    void RollPitchYawrateThrustControllerNode::InitializeParams() {
 
-  // Read parameters from rosparam.
-  GetRosParameter(pnh, "attitude_gain/x",
-                  roll_pitch_yawrate_thrust_controller_.controller_parameters_.attitude_gain_.x(),
-                  &roll_pitch_yawrate_thrust_controller_.controller_parameters_.attitude_gain_.x());
-  GetRosParameter(pnh, "attitude_gain/y",
-                  roll_pitch_yawrate_thrust_controller_.controller_parameters_.attitude_gain_.y(),
-                  &roll_pitch_yawrate_thrust_controller_.controller_parameters_.attitude_gain_.y());
-  GetRosParameter(pnh, "attitude_gain/z",
-                  roll_pitch_yawrate_thrust_controller_.controller_parameters_.attitude_gain_.z(),
-                  &roll_pitch_yawrate_thrust_controller_.controller_parameters_.attitude_gain_.z());
-  GetRosParameter(pnh, "angular_rate_gain/x",
-                  roll_pitch_yawrate_thrust_controller_.controller_parameters_.angular_rate_gain_.x(),
-                  &roll_pitch_yawrate_thrust_controller_.controller_parameters_.angular_rate_gain_.x());
-  GetRosParameter(pnh, "angular_rate_gain/y",
-                  roll_pitch_yawrate_thrust_controller_.controller_parameters_.angular_rate_gain_.y(),
-                  &roll_pitch_yawrate_thrust_controller_.controller_parameters_.angular_rate_gain_.y());
-  GetRosParameter(pnh, "angular_rate_gain/z",
-                  roll_pitch_yawrate_thrust_controller_.controller_parameters_.angular_rate_gain_.z(),
-                  &roll_pitch_yawrate_thrust_controller_.controller_parameters_.angular_rate_gain_.z());
-  GetVehicleParameters(pnh, &roll_pitch_yawrate_thrust_controller_.vehicle_parameters_);
-  roll_pitch_yawrate_thrust_controller_.InitializeParameters();
-}
-void RollPitchYawrateThrustControllerNode::Publish() {
-}
+        GetRosParameter(node_handle, "attitude_gain/x",
+                        roll_pitch_yawrate_thrust_controller_.controller_parameters_.attitude_gain_.x(),
+                        &roll_pitch_yawrate_thrust_controller_.controller_parameters_.attitude_gain_.x());
+        GetRosParameter(node_handle, "attitude_gain/y",
+                        roll_pitch_yawrate_thrust_controller_.controller_parameters_.attitude_gain_.y(),
+                        &roll_pitch_yawrate_thrust_controller_.controller_parameters_.attitude_gain_.y());
+        GetRosParameter(node_handle, "attitude_gain/z",
+                        roll_pitch_yawrate_thrust_controller_.controller_parameters_.attitude_gain_.z(),
+                        &roll_pitch_yawrate_thrust_controller_.controller_parameters_.attitude_gain_.z());
+        GetRosParameter(node_handle, "angular_rate_gain/x",
+                        roll_pitch_yawrate_thrust_controller_.controller_parameters_.angular_rate_gain_.x(),
+                        &roll_pitch_yawrate_thrust_controller_.controller_parameters_.angular_rate_gain_.x());
+        GetRosParameter(node_handle, "angular_rate_gain/y",
+                        roll_pitch_yawrate_thrust_controller_.controller_parameters_.angular_rate_gain_.y(),
+                        &roll_pitch_yawrate_thrust_controller_.controller_parameters_.angular_rate_gain_.y());
+        GetRosParameter(node_handle, "angular_rate_gain/z",
+                        roll_pitch_yawrate_thrust_controller_.controller_parameters_.angular_rate_gain_.z(),
+                        &roll_pitch_yawrate_thrust_controller_.controller_parameters_.angular_rate_gain_.z());
+        GetVehicleParameters(node_handle, &roll_pitch_yawrate_thrust_controller_.vehicle_parameters_);
+        roll_pitch_yawrate_thrust_controller_.InitializeParameters();
+    }
 
-void RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustCallback(
-    const mav_msgs::RollPitchYawrateThrustConstPtr& roll_pitch_yawrate_thrust_reference_msg) {
-  mav_msgs::EigenRollPitchYawrateThrust roll_pitch_yawrate_thrust;
-  mav_msgs::eigenRollPitchYawrateThrustFromMsg(*roll_pitch_yawrate_thrust_reference_msg, &roll_pitch_yawrate_thrust);
-  roll_pitch_yawrate_thrust_controller_.SetRollPitchYawrateThrust(roll_pitch_yawrate_thrust);
-}
+    void RollPitchYawrateThrustControllerNode::Publish() {}
 
+    void RollPitchYawrateThrustControllerNode::RollPitchYawrateThrustCallback(const mav_msgs::msg::RollPitchYawrateThrust::ConstSharedPtr & roll_pitch_yawrate_thrust_reference_msg)
+    {
+        mav_msgs::EigenRollPitchYawrateThrust roll_pitch_yawrate_thrust;
+        mav_msgs::eigenRollPitchYawrateThrustFromMsg(*roll_pitch_yawrate_thrust_reference_msg, &roll_pitch_yawrate_thrust);
+        roll_pitch_yawrate_thrust_controller_.SetRollPitchYawrateThrust(roll_pitch_yawrate_thrust);
+    }
 
-void RollPitchYawrateThrustControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg) {
+    void RollPitchYawrateThrustControllerNode::OdometryCallback(const nav_msgs::msg::Odometry::ConstSharedPtr & odometry_msg)
+    {
+        RCLCPP_INFO_ONCE(this->get_logger(), "RollPitchYawrateThrustController got first odometry message.");
 
-  ROS_INFO_ONCE("RollPitchYawrateThrustController got first odometry message.");
+        EigenOdometry odometry;
+        eigenOdometryFromMsg(odometry_msg, &odometry);
+        roll_pitch_yawrate_thrust_controller_.SetOdometry(odometry);
 
-  EigenOdometry odometry;
-  eigenOdometryFromMsg(odometry_msg, &odometry);
-  roll_pitch_yawrate_thrust_controller_.SetOdometry(odometry);
+        Eigen::VectorXd ref_rotor_velocities;
+        roll_pitch_yawrate_thrust_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
-  Eigen::VectorXd ref_rotor_velocities;
-  roll_pitch_yawrate_thrust_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
+        actuator_msgs::msg::Actuators::SharedPtr actuator_msg(new actuator_msgs::msg::Actuators);
 
-  // Todo(ffurrer): Do this in the conversions header.
-  mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
+        actuator_msg->velocity.clear();
+        for (int i = 0; i < ref_rotor_velocities.size(); i++)
+            actuator_msg->velocity.push_back(ref_rotor_velocities[i]);
+        actuator_msg->header.stamp = odometry_msg->header.stamp;
 
-  actuator_msg->angular_velocities.clear();
-  for (int i = 0; i < ref_rotor_velocities.size(); i++)
-    actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
-  actuator_msg->header.stamp = odometry_msg->header.stamp;
+        motor_velocity_reference_pub_->publish(*actuator_msg);  //check
 
-  motor_velocity_reference_pub_.publish(actuator_msg);
-}
-
+    }
 }
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "roll_pitch_yawrate_thrust_controller_node");
-
-  rotors_control::RollPitchYawrateThrustControllerNode roll_pitch_yawrate_thrust_controller_node;
-
-  ros::spin();
-
-  return 0;
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<rotors_control::RollPitchYawrateThrustControllerNode>());
+    rclcpp::shutdown();
+    return 0;
 }

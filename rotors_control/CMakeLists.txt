@@ -1,69 +1,83 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.8)
 project(rotors_control)
 
-add_definitions(-std=c++11)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
-find_package(catkin REQUIRED COMPONENTS
-  geometry_msgs
-  mav_msgs
-  nav_msgs
-  roscpp
-  sensor_msgs
-  cmake_modules
-)
-
+# find dependencies
+find_package(ament_cmake REQUIRED)
+ 
 find_package(Eigen3 REQUIRED)
+find_package(mav_msgs REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(actuator_msgs REQUIRED)
 
-catkin_package(
-  INCLUDE_DIRS include ${Eigen3_INCLUDE_DIRS}
-  LIBRARIES lee_position_controller roll_pitch_yawrate_thrust_controller
-  CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs
-  DEPENDS Eigen3
-)
 
 include_directories(
   include
-  ${catkin_INCLUDE_DIRS}
+  ${rotors_control_INCLUDE_DIRS}
+  ${mav_msgs_INCLUDE_DIRS}
   ${Eigen3_INCLUDE_DIRS}
+  ${rclcpp_INCLUDE_DIRS}
+  ${rcl_INCLUDE_DIRS}
 )
 
-add_library(lee_position_controller
-  src/library/lee_position_controller.cpp
-)
-
-add_library(roll_pitch_yawrate_thrust_controller
-  src/library/roll_pitch_yawrate_thrust_controller.cpp
-)
-
-target_link_libraries(lee_position_controller ${catkin_LIBRARIES})
-add_dependencies(lee_position_controller ${catkin_EXPORTED_TARGETS})
-
-target_link_libraries(roll_pitch_yawrate_thrust_controller ${catkin_LIBRARIES})
-add_dependencies(roll_pitch_yawrate_thrust_controller ${catkin_EXPORTED_TARGETS})
-
-add_executable(lee_position_controller_node src/nodes/lee_position_controller_node.cpp)
-add_dependencies(lee_position_controller_node ${catkin_EXPORTED_TARGETS})
-target_link_libraries(lee_position_controller_node
-  lee_position_controller ${catkin_LIBRARIES})
+add_library(roll_pitch_yawrate_thrust_controller src/library/roll_pitch_yawrate_thrust_controller.cpp)
 
 add_executable(roll_pitch_yawrate_thrust_controller_node
-  src/nodes/roll_pitch_yawrate_thrust_controller_node.cpp)
-add_dependencies(roll_pitch_yawrate_thrust_controller_node ${catkin_EXPORTED_TARGETS})
-target_link_libraries(roll_pitch_yawrate_thrust_controller_node
-  roll_pitch_yawrate_thrust_controller ${catkin_LIBRARIES})
+src/nodes/roll_pitch_yawrate_thrust_controller_node.cpp)
 
-install(TARGETS lee_position_controller roll_pitch_yawrate_thrust_controller
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+ament_target_dependencies(roll_pitch_yawrate_thrust_controller_node 
+rclcpp
+geometry_msgs
+Eigen3
+mav_msgs
+nav_msgs
+geometry_msgs
+std_msgs
+actuator_msgs
 )
 
-install(TARGETS lee_position_controller_node roll_pitch_yawrate_thrust_controller_node
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+target_link_libraries(roll_pitch_yawrate_thrust_controller_node roll_pitch_yawrate_thrust_controller)
+
+install(TARGETS
+  roll_pitch_yawrate_thrust_controller
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+install(TARGETS roll_pitch_yawrate_thrust_controller_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  # the following line skips the linter which checks for copyrights
+  # comment the line when a copyright and license is added to all source files
+  set(ament_cmake_copyright_FOUND TRUE)
+  # the following line skips cpplint (only works in a git repo)
+  # comment the line when this package is in a git repo and when
+  # a copyright and license is added to all source files
+  set(ament_cmake_cpplint_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+ament_export_include_directories(include) 
+ament_export_libraries(
+  roll_pitch_yawrate_thrust_controller
 )
 
 install(
   DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.h"
+  DESTINATION include/${PROJECT_NAME}
+  FILES_MATCHING PATTERN "*.hpp"
 )
+
+ament_package()

@@ -1,8 +1,1 @@
-.DS_Store
-.cproject
-.project
-.settings
-*.pyc
-*~
-*/models/iris/*.sdf
-*.user
+.vscode/

@@ -1,6 +1,0 @@
-syntax = "proto2";
-package gz_mav_msgs;
-
-message CommandMotorSpeed {
-  repeated float motor_speed = 1 [packed=true];
-}

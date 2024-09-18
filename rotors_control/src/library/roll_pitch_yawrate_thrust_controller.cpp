@@ -17,8 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "rotors_control/roll_pitch_yawrate_thrust_controller.h"
+#include <std_msgs/msg/float64.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <builtin_interfaces/msg/detail/time__struct.hpp>
+#include "rotors_control/roll_pitch_yawrate_thrust_controller.hpp"
 
 namespace rotors_control {
 
